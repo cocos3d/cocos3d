@@ -60,7 +60,7 @@
 }
 
 +(id) actionWithDuration: (ccTime) t differenceVector: (CC3Vector) aVector {
-	return [[[self alloc] initWithDuration: t differenceVector: aVector] autorelease];
+	return [[self alloc] initWithDuration: t differenceVector: aVector];
 }
 
 -(id) copyWithZone: (NSZone*) zone {
@@ -192,7 +192,7 @@
 }
 
 +(id) actionWithDuration: (ccTime) t rotateByAngle: (GLfloat) anAngle {
-	return [[[self alloc] initWithDuration: t rotateByAngle: anAngle] autorelease];
+	return [[self alloc] initWithDuration: t rotateByAngle: anAngle];
 }
 
 -(id) initWithDuration: (ccTime) t rotateByAngle: (GLfloat) anAngle aroundAxis: (CC3Vector) anAxis {
@@ -204,7 +204,7 @@
 }
 
 +(id) actionWithDuration: (ccTime) t rotateByAngle: (GLfloat) anAngle aroundAxis: (CC3Vector) anAxis {
-	return [[[self alloc] initWithDuration: t rotateByAngle: anAngle aroundAxis: anAxis] autorelease];
+	return [[self alloc] initWithDuration: t rotateByAngle: anAngle aroundAxis: anAxis];
 }
 
 -(id) copyWithZone: (NSZone*) zone {
@@ -254,7 +254,7 @@
 }
 
 +(id) actionWithDuration: (ccTime) t endVector: (CC3Vector) aVector {
-	return [[[self alloc] initWithDuration: t endVector: aVector] autorelease];
+	return [[self alloc] initWithDuration: t endVector: aVector];
 }
 
 -(id) copyWithZone: (NSZone*) zone {
@@ -370,7 +370,7 @@
 }
 
 +(id) actionWithDuration: (ccTime) t rotateToAngle: (GLfloat) anAngle {
-	return [[[self alloc] initWithDuration: t rotateToAngle: anAngle] autorelease];
+	return [[self alloc] initWithDuration: t rotateToAngle: anAngle];
 }
 
 -(id) copyWithZone: (NSZone*) zone {
@@ -463,7 +463,7 @@
 }
 
 +(id) actionWithDuration: (ccTime) t moveBy: (GLfloat) aDistance {
-	return [[(CC3MoveDirectionallyBy*)[self alloc] initWithDuration: t moveBy: aDistance] autorelease];
+	return [(CC3MoveDirectionallyBy*)[self alloc] initWithDuration: t moveBy: aDistance];
 }
 
 -(id) copyWithZone: (NSZone*) zone {
@@ -472,9 +472,9 @@
 }
 
 -(id) reverse {
-	return [[(CC3MoveDirectionallyBy*)[[self class] alloc]
+	return [(CC3MoveDirectionallyBy*)[[self class] alloc]
 					initWithDuration: self.duration
-					moveBy: -_distance] autorelease];
+					moveBy: -_distance];
 }
 
 -(void) startWithTarget:(CC3Node*) aTarget {
@@ -567,7 +567,7 @@
 }
 
 +(id) actionWithDuration:(ccTime) t colorTo: (ccColor4F) aColor {
-	return [[[self alloc] initWithDuration: t colorTo: aColor] autorelease];
+	return [[self alloc] initWithDuration: t colorTo: aColor];
 }
 
 -(id) copyWithZone: (NSZone*) zone {
@@ -654,7 +654,7 @@
 }
 
 +(id) actionWithDuration: (ccTime) t onTrack: (GLuint) trackID {
-	return [[[self alloc] initWithDuration: t onTrack: trackID] autorelease];
+	return [[self alloc] initWithDuration: t onTrack: trackID];
 }
 
 +(id) actionWithDuration: (ccTime) t limitFrom: (GLfloat) startOfRange to: (GLfloat) endOfRange {
@@ -704,7 +704,7 @@
 }
 
 +(id) actionWithDuration: (ccTime) t onTrack: (GLuint) trackID blendingWeight: (GLfloat) blendingWeight {
-	return [[[self alloc] initWithDuration: t onTrack: trackID blendingWeight: blendingWeight] autorelease];
+	return [[self alloc] initWithDuration: t onTrack: trackID blendingWeight: blendingWeight];
 }
 
 -(void) startWithTarget: (CC3Node*) aTarget {
@@ -763,10 +763,10 @@
 			   fromTrack: (GLuint) fromTrackID
 				 toTrack: (GLuint) toTrackID
 	  withBlendingWeight: (GLfloat) toBlendingWeight {
-	return [[[self alloc] initWithDuration: t
+	return [[self alloc] initWithDuration: t
 								 fromTrack: fromTrackID
 								   toTrack: toTrackID
-						withBlendingWeight: toBlendingWeight] autorelease];
+						withBlendingWeight: toBlendingWeight];
 }
 
 -(void) startWithTarget: (CC3Node*) aTarget {
@@ -813,7 +813,7 @@
 }
 
 +(id) actionOnTrack: (GLuint) trackID blendingWeight: (GLfloat) blendingWeight {
-	return [[[self alloc] initOnTrack: trackID blendingWeight: blendingWeight] autorelease];
+	return [[self alloc] initOnTrack: trackID blendingWeight: blendingWeight];
 }
 
 -(void) update: (ccTime) t {
@@ -837,7 +837,7 @@
 	return self;
 }
 
-+(id) actionOnTrack: (GLuint) trackID { return [[[self alloc] initOnTrack: trackID] autorelease]; }
++(id) actionOnTrack: (GLuint) trackID { return [[self alloc] initOnTrack: trackID]; }
 
 -(void) update: (ccTime) t { [self.targetCC3Node enableAllAnimationOnTrack: _trackID]; }
 
@@ -858,7 +858,7 @@
 	return self;
 }
 
-+(id) actionOnTrack: (GLuint) trackID { return [[[self alloc] initOnTrack: trackID] autorelease]; }
++(id) actionOnTrack: (GLuint) trackID { return [[self alloc] initOnTrack: trackID]; }
 
 -(void) update: (ccTime) t { [self.targetCC3Node disableAllAnimationOnTrack: _trackID]; }
 
@@ -884,7 +884,7 @@
 +(id) actionWithAction: (CCActionInterval*) action
 			 limitFrom: (GLfloat) startOfRange
 					to: (GLfloat) endOfRange {
-	return [[[self alloc] initWithAction: action limitFrom: startOfRange to: endOfRange] autorelease];
+	return [[self alloc] initWithAction: action limitFrom: startOfRange to: endOfRange];
 }
 
 -(void) update: (ccTime) t { [self.inner update: (_rangeStart + (_rangeSpan * t))]; }

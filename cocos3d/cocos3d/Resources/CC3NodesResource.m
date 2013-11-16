@@ -35,11 +35,6 @@
 
 @synthesize nodes=_nodes, expectsVerticallyFlippedTextures=_expectsVerticallyFlippedTextures;
 
--(void) dealloc {
-	[_nodes release];
-	[super dealloc];
-}
-
 -(CC3Node*) getNodeMatching: (CC3Node*) node {
 	NSString* nodeName = node.name;
 	for (CC3Node* rezNode in self.nodes) {
@@ -54,7 +49,7 @@
 
 -(id) init {
 	if ( (self = [super init]) ) {
-		_nodes = [[CCArray array] retain];
+		_nodes = [CCArray array];
 		_expectsVerticallyFlippedTextures = self.class.defaultExpectsVerticallyFlippedTextures;
 	}
 	return self;

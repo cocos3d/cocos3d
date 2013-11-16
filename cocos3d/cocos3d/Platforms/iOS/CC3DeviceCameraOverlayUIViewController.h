@@ -129,7 +129,7 @@
  * Returns the view being used to display the device camera behind the 3D scene, lazily
  * creating if if necessary, or returns nil if the device does not support a camera.
  */
-@property(nonatomic, readonly) CC3AVCameraView* deviceCameraView;
+@property(nonatomic, strong, readonly) CC3AVCameraView* deviceCameraView;
 
 @end
 
@@ -141,7 +141,7 @@
 @interface CC3AVCameraView : UIView
 
 /** The underlying layer cast as a AVCaptureVideoPreviewLayer. */
-@property(nonatomic, readonly, retain) AVCaptureVideoPreviewLayer* layer;
+@property(nonatomic, strong, readonly) AVCaptureVideoPreviewLayer* layer;
 @end
 
 #else	// If no AV, fall back to CC3UIViewController

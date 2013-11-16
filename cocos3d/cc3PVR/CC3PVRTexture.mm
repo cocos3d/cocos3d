@@ -130,7 +130,6 @@
 												&pvrHeader) == PVR_SUCCESS;
 		if ( !wasLoaded ) {
 			LogError(@"Could not load texture %@.", absFilePath);
-			[self release];
 			return nil;
 		}
 		_size = CC3IntSizeMake(pvrHeader.u32Width, pvrHeader.u32Height);
@@ -147,7 +146,6 @@
 
 -(id) initFromFile: (NSString*) aFilePath {
 	LogError(@"Could not load texture %@ because PVR files are not supported on this platform.", aFilePath);
-	[self release];
 	return nil;
 }
 

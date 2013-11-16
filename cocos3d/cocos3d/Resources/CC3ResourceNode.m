@@ -34,11 +34,6 @@
 
 @implementation CC3ResourceNode
 
--(void) dealloc {
-	[_resource release];
-	[super dealloc];
-}
-
 -(Class) resourceClass {
 	CC3Assert(NO, @"No resource class has been established for this %@ class. Create a subclass and override the resourceClass method.", [self class]);
 	return [CC3NodesResource class];
@@ -58,8 +53,7 @@
 
 -(void) setResource: (CC3NodesResource*) aResource {
 	if (aResource == _resource) return;
-	[_resource release];
-	_resource = [aResource retain];
+	_resource = aResource;
 	if (!_name) { self.name = _resource.name; }
 	[self addResourceNodes];
 }
@@ -81,7 +75,7 @@
 }
 
 +(id) nodeFromFile: (NSString*) aFilepath {
-	return [[[self alloc] initFromFile: aFilepath] autorelease];
+	return [[self alloc] initFromFile: aFilepath];
 }
 
 -(id) initFromFile: (NSString*) aFilepath expectsVerticallyFlippedTextures: (BOOL) flipped {
@@ -92,7 +86,7 @@
 }
 
 +(id) nodeFromFile: (NSString*) aFilepath expectsVerticallyFlippedTextures: (BOOL) flipped {
-	return [[[self alloc] initFromFile: aFilepath expectsVerticallyFlippedTextures: flipped] autorelease];
+	return [[self alloc] initFromFile: aFilepath expectsVerticallyFlippedTextures: flipped];
 }
 
 -(id) initWithName: (NSString*) aName fromFile: (NSString*) aFilepath {
@@ -103,17 +97,14 @@
 }
 
 +(id) nodeWithName: (NSString*) aName fromFile: (NSString*) aFilepath {
-	return [[[self alloc] initWithName: aName fromFile: aFilepath] autorelease];
+	return [[self alloc] initWithName: aName fromFile: aFilepath];
 }
 
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
-// The encapsulated resource instance is not copied, but is retaind and shared between instances.
 -(void) populateFrom: (CC3ResourceNode*) another {
 	[super populateFrom: another];
 	
-	[_resource release];
-	_resource = [another.resource retain];		// retained
+	// The resource is not copied, but is shared between instances.
+	_resource = another.resource;
 }
 
 

@@ -135,7 +135,7 @@
  *
  * This property returns the CC3ShaderProgram class. Subclasses may override.
  */
-@property(nonatomic, readonly) Class programClass;
+@property(nonatomic, strong, readonly) Class programClass;
 
 @end
 

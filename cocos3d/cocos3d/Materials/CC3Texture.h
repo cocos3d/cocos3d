@@ -234,7 +234,7 @@
  * make use of this property. When making use of texture units, be sure to instantiate
  * an instance of a subclass that supports texture units, such as CC3TextureUnitTexture.
  */
-@property(nonatomic, retain) CC3TextureUnit* textureUnit;
+@property(nonatomic, strong) CC3TextureUnit* textureUnit;
 
 /**
  * The direction, in local node coordinates, of the light source that is to interact
@@ -271,7 +271,7 @@
  * This property provides polymorphic compatibility with CC3Texture subclasses, notably
  * CC3TextureUnitTexture, that contain another, underlying texture.
  */
-@property(nonatomic, retain, readonly) CC3Texture* texture;
+@property(nonatomic, strong, readonly) CC3Texture* texture;
 
 /**
  * Returns a CCTexture2D based on the this CC3Texture.
@@ -1508,7 +1508,7 @@
  *
  * This property is populated automatically during instance creation and loading.
  */
-@property(nonatomic, retain, readonly) CC3Texture* texture;
+@property(nonatomic, strong, readonly) CC3Texture* texture;
 
 /**
  * The texture environment settings that are applied to the texture unit that draws this
@@ -1527,7 +1527,7 @@
  * CC3ConfigurableTextureUnit provides complete flexibility in setting texture environment
  * settings.
  */
-@property(nonatomic, retain) CC3TextureUnit* textureUnit;
+@property(nonatomic, strong) CC3TextureUnit* textureUnit;
 
 
 #pragma mark Allocation and Initialization

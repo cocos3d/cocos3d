@@ -58,12 +58,6 @@
 
 @implementation CC3OpenGLProgPipeline
 
--(void) dealloc {
-	[_shaderProgramPrewarmer release];
-	[value_GL_SHADING_LANGUAGE_VERSION release];
-	[super dealloc];
-}
-
 #pragma mark Vertex attribute arrays
 
 /** Only need to bind vertex indices. All vertex attributes are bound when program is bound. */
@@ -185,9 +179,7 @@
 -(CC3ShaderProgramPrewarmer*) shaderProgramPrewarmer { return _shaderProgramPrewarmer; }
 
 -(void) setShaderProgramPrewarmer: (CC3ShaderProgramPrewarmer*) shaderProgramPrewarmer {
-	if (shaderProgramPrewarmer == _shaderProgramPrewarmer) return;
-	[_shaderProgramPrewarmer release];
-	_shaderProgramPrewarmer = [shaderProgramPrewarmer retain];
+	_shaderProgramPrewarmer = shaderProgramPrewarmer;
 }
 
 -(CC3ShaderProgram*) pureColorProgram { return CC3ShaderProgram.programMatcher.pureColorProgram; }
@@ -383,7 +375,7 @@
 	value_GL_MAX_VERTEX_ATTRIBS = [self getInteger: GL_MAX_VERTEX_ATTRIBS];
 	LogInfoIfPrimary(@"Maximum vertex attributes: %u", value_GL_MAX_VERTEX_ATTRIBS);
 
-	value_GL_SHADING_LANGUAGE_VERSION = [[self getString: GL_SHADING_LANGUAGE_VERSION] retain];
+	value_GL_SHADING_LANGUAGE_VERSION = [self getString: GL_SHADING_LANGUAGE_VERSION];
 	LogInfoIfPrimary(@"GLSL version: %@", value_GL_SHADING_LANGUAGE_VERSION);
 	
 	value_GL_MAX_CLIP_PLANES = kCC3MaxGLSLClipPlanes;
@@ -436,8 +428,7 @@
 	_location = glGetAttribLocation(_program.programID, cName);
 	LogGLErrorTrace(@"glGetAttribLocation(%u, \"%s\")", _program.programID, cName);
 
-	[_name release];
-	_name = [[NSString stringWithUTF8String: cName] retain];	// retained
+	_name = [NSString stringWithUTF8String: cName];
 }
 
 @end
@@ -460,8 +451,7 @@
 	_location = glGetUniformLocation(_program.programID, cName);
 	LogGLErrorTrace(@"glGetUniformLocation(%u, \"%s\")", _program.programID, cName);
 	
-	[_name release];
-	_name = [[NSString stringWithUTF8String: cName] retain];	// retained
+	_name = [NSString stringWithUTF8String: cName];
 }
 
 /** Set the value of this uniform in the GL engine, based on the content type. */

@@ -65,16 +65,8 @@
 -(void) dealloc {
 	self.target = nil;							// Removes myself as listener
 	[self removeAllChildren];
-	_parent = nil;								// not retained
-	[_globalTransformMatrix release];
-	[_globalTransformMatrixInverted release];
-	[_globalRotationMatrix release];
-	[_rotator release];
-	[_boundingVolume release];
-	[_animationStates release];
 	[self notifyDestructionListeners];			// Must do before releasing listeners.
 	[_transformListeners releaseAsUnretained];	// Clears without releasing each element.
-	[super dealloc];
 }
 
 // If tracking target, set the location anyway
@@ -970,14 +962,14 @@
 	return self;
 }
 
-+(id) node { return [[[self alloc] init] autorelease]; }
++(id) node { return [[self alloc] init]; }
 
-+(id) nodeWithTag: (GLuint) aTag { return [[[self alloc] initWithTag: aTag] autorelease]; }
++(id) nodeWithTag: (GLuint) aTag { return [[self alloc] initWithTag: aTag]; }
 
-+(id) nodeWithName: (NSString*) aName { return [[[self alloc] initWithName: aName] autorelease]; }
++(id) nodeWithName: (NSString*) aName { return [[self alloc] initWithName: aName]; }
 
 +(id) nodeWithTag: (GLuint) aTag withName: (NSString*) aName {
-	return [[[self alloc] initWithTag: aTag withName: aName] autorelease];
+	return [[self alloc] initWithTag: aTag withName: aName];
 }
 
 // Protected properties for copying
@@ -1015,10 +1007,8 @@
 	_scale = another.scale;
 	_isTransformDirty = another.isTransformDirty;
 
-	[_rotator release];
 	_rotator = [another.rotator copy];						// retained
 	
-	[_boundingVolume release];
 	_boundingVolume = [another.boundingVolume copy];		// retained
 	_boundingVolume.node = self;
 	_boundingVolumePadding = another.boundingVolumePadding;
@@ -1066,13 +1056,8 @@
  */
 -(void) copyChildrenFrom: (CC3Node*) another {
 	CCArray* otherKids = another.children;
-	for (CC3Node* otherKid in otherKids) {
-		if (otherKid.shouldIncludeInDeepCopy) {
-			CC3Node* myKid = [otherKid copy];
-			[self addChild: myKid];
-			[myKid release];
-		}
-	}
+	for (CC3Node* otherKid in otherKids)
+		if (otherKid.shouldIncludeInDeepCopy) [self addChild: [otherKid copy]];
 }
 
 // Implementations to keep compiler happy so this method can be included in interface for documentation.
@@ -1239,7 +1224,7 @@ static GLuint lastAssignedNodeTag;
 -(void) addTransformListener: (id<CC3NodeTransformListenerProtocol>) aListener {
 	if (!aListener) return;
 	
-	if( !_transformListeners ) _transformListeners = [[CCArray array] retain];
+	if( !_transformListeners ) _transformListeners = [CCArray array];
 	
 	if ( ![_transformListeners containsObject: aListener] ) {
 		[_transformListeners addUnretainedObject: aListener];
@@ -1294,13 +1279,12 @@ static GLuint lastAssignedNodeTag;
 -(CC3Matrix*) globalTransformMatrix { return _globalTransformMatrix; }
 
 -(void) setGlobalTransformMatrix: (CC3Matrix*) aMatrix {
-	if (_globalTransformMatrix != aMatrix) {
-		[_globalTransformMatrix release];
-		_globalTransformMatrix = [aMatrix retain];
-		[self markGlobalRotationDirty];
-		[self transformMatrixChanged];
-		[self notifyTransformListeners];
-	}
+	if (_globalTransformMatrix == aMatrix) return;
+
+	_globalTransformMatrix = aMatrix;
+	[self markGlobalRotationDirty];
+	[self transformMatrixChanged];
+	[self notifyTransformListeners];
 }
 
 // Deprecated
@@ -1535,7 +1519,7 @@ static GLuint lastAssignedNodeTag;
  */
 -(CC3Matrix*) globalTransformMatrixInverted {
 	if (!_globalTransformMatrixInverted) {
-		_globalTransformMatrixInverted = [[CC3AffineMatrix matrix] retain];
+		_globalTransformMatrixInverted = [CC3AffineMatrix matrix];
 		_isTransformInvertedDirty = YES;
 	}
 	if (_isTransformInvertedDirty) {
@@ -1565,7 +1549,7 @@ static GLuint lastAssignedNodeTag;
  */
 -(CC3Matrix*) globalRotationMatrix {
 	if (!_globalRotationMatrix) {
-		_globalRotationMatrix = [[CC3LinearMatrix matrix] retain];
+		_globalRotationMatrix = [CC3LinearMatrix matrix];
 		_isGlobalRotationDirty = YES;
 	}
 	if (_isGlobalRotationDirty) {
@@ -1583,8 +1567,7 @@ static GLuint lastAssignedNodeTag;
 	if (aBoundingVolume == _boundingVolume) return;
 	
 	aBoundingVolume.shouldIgnoreRayIntersection = _boundingVolume.shouldIgnoreRayIntersection;
-	[_boundingVolume release];
-	_boundingVolume = [aBoundingVolume retain];
+	_boundingVolume = aBoundingVolume;
 	
 	// If the bounding volume has not been assigned to a node yet, this node will be the primary
 	// node of the bounding volume. Otherwise, this node is a secondary node, is tracking the
@@ -1712,7 +1695,7 @@ static GLuint lastAssignedNodeTag;
 	aNode.shouldStopActionsWhenRemoved = origCleanupFlag;
 	
 	// Lazily create the children array if needed
-	if(!_children) _children = [[CCArray array] retain];
+	if(!_children) _children = [CCArray array];
 	
 	[_children addObject: aNode];
 	aNode.parent = self;
@@ -1793,41 +1776,62 @@ static GLuint lastAssignedNodeTag;
  * child has just been removed.
  */
 -(void) removeChild: (CC3Node*) aNode {
-	if (_children && aNode) {
-		NSUInteger indx = [_children indexOfObjectIdenticalTo: aNode];
-		if (indx != NSNotFound) {
+	if ( !_children || !aNode ) return;
 
-			// If the children collection is the only thing referencing the child node, the
-			// child node will be deallocated as soon as it is removed, and will be invalid
-			// when passed to the didRemoveDescendant: method, or to other activities that
-			// it may be subject to in the processing loop. To avoid problems, retain it for
-			// the duration of this processing loop, so that it will still be valid until
-			// we're done with it.
-			[[aNode retain] autorelease];
+	NSUInteger indx = [_children indexOfObjectIdenticalTo: aNode];
+	if (indx == NSNotFound) return;
 
-			aNode.parent = nil;
-			[_children removeObjectAtIndex: indx];
-			if (_children.count == 0) {
-				[_children release];
-				_children = nil;
-			}
-			[aNode wasRemoved];						// Invoke before didRemoveDesc notification
-			[self didRemoveDescendant: aNode];
-		}
-		LogTrace(@"After removing %@, %@ now has children: %@", aNode, self, _children);
-		
-		// If the last child has been removed, and this instance should autoremove when
-		// that occurs, remove this node from the hierarchy as well. This must be performed
-		// after everything else is done, particularly only after the didRemoveDescendant:
-		// has been invoked so that that notification can propagate up the node hierarchy.
-		if (!_children && _shouldAutoremoveWhenEmpty) [self remove];
-	}
+	aNode.parent = nil;
+	[_children removeObjectAtIndex: indx];
+	if (_children.count == 0) _children = nil;
+
+	[aNode wasRemoved];						// Invoke before didRemoveDesc notification
+	[self didRemoveDescendant: aNode];
+
+	LogTrace(@"After removing %@, %@ now has children: %@", aNode, self, _children);
+	
+	// If the last child has been removed, and this instance should autoremove when
+	// that occurs, remove this node from the hierarchy as well. This must be performed
+	// after everything else is done, particularly only after the didRemoveDescendant:
+	// has been invoked so that that notification can propagate up the node hierarchy.
+	if (!_children && _shouldAutoremoveWhenEmpty) [self remove];
 }
+
+//-(void) removeChild: (CC3Node*) aNode {
+//	if (_children && aNode) {
+//		NSUInteger indx = [_children indexOfObjectIdenticalTo: aNode];
+//		if (indx != NSNotFound) {
+//			
+//			// If the children collection is the only thing referencing the child node, the
+//			// child node will be deallocated as soon as it is removed, and will be invalid
+//			// when passed to the didRemoveDescendant: method, or to other activities that
+//			// it may be subject to in the processing loop. To avoid problems, retain it for
+//			// the duration of this processing loop, so that it will still be valid until
+//			// we're done with it.
+//			[[aNode retain] autorelease];
+//			
+//			aNode.parent = nil;
+//			[_children removeObjectAtIndex: indx];
+//			if (_children.count == 0) {
+//				[_children release];
+//				_children = nil;
+//			}
+//			[aNode wasRemoved];						// Invoke before didRemoveDesc notification
+//			[self didRemoveDescendant: aNode];
+//		}
+//		LogTrace(@"After removing %@, %@ now has children: %@", aNode, self, _children);
+//		
+//		// If the last child has been removed, and this instance should autoremove when
+//		// that occurs, remove this node from the hierarchy as well. This must be performed
+//		// after everything else is done, particularly only after the didRemoveDescendant:
+//		// has been invoked so that that notification can propagate up the node hierarchy.
+//		if (!_children && _shouldAutoremoveWhenEmpty) [self remove];
+//	}
+//}
 
 -(void) removeAllChildren {
 	CCArray* myKids = [_children copy];
 	for (CC3Node* child in myKids) [self removeChild: child];
-	[myKids release];
 }
 
 -(void) remove { [_parent removeChild: self]; }
@@ -2072,10 +2076,7 @@ static GLuint lastAssignedNodeTag;
 
 -(void) removeAnimationState: (CC3NodeAnimationState*) animationState {
 	[_animationStates removeObject: animationState];
-	if (_animationStates.count == 0) {		// if now empty, remove the array
-		[_animationStates release];			// retained
-		_animationStates = nil;
-	}
+	if (_animationStates.count == 0) _animationStates = nil;
 }
 
 -(CC3NodeAnimationState*) animationState { return [self getAnimationStateOnTrack: 0]; }

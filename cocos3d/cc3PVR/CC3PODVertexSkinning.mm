@@ -140,7 +140,7 @@
 +(id) skinSectionFromBatchAtIndex: (GLint) aBatchIndex
 					 fromSPODMesh: (PODStructPtr) aSPODMesh
 						  forNode: (CC3SkinMeshNode*) aNode {
-	return [[[self alloc] initFromBatchAtIndex: aBatchIndex fromSPODMesh: aSPODMesh forNode: aNode] autorelease];
+	return [[self alloc] initFromBatchAtIndex: aBatchIndex fromSPODMesh: aSPODMesh forNode: aNode];
 
 }
 

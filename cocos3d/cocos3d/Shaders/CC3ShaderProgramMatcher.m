@@ -40,12 +40,6 @@
 
 @synthesize semanticDelegate=_semanticDelegate;
 
--(void) dealloc {
-	[_semanticDelegate release];
-	[_pureColorProgram release];
-	[super dealloc];
-}
-
 -(Class) programClass { return [CC3ShaderProgram class]; }
 
 -(CC3ShaderProgram*) programForMeshNode: (CC3MeshNode*) aMeshNode {
@@ -112,8 +106,8 @@
  */
 -(CC3ShaderProgram*) pureColorProgram {
 	if ( !_pureColorProgram )
-		_pureColorProgram = [[self programFromVertexShaderFile: @"CC3PureColor.vsh"
-										 andFragmentShaderFile: @"CC3PureColor.fsh"] retain];
+		_pureColorProgram = [self programFromVertexShaderFile: @"CC3PureColor.vsh"
+										 andFragmentShaderFile: @"CC3PureColor.fsh"];
 	return _pureColorProgram;
 }
 

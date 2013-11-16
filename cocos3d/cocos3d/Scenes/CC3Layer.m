@@ -47,21 +47,18 @@
 	// not retained and setting to nil causes deprecation warning.
 	self.cc3Scene = nil;			// Close, remove & release the scene
 	[self cc3RemoveAllGestureRecognizers];
-	[_cc3GestureRecognizers release];
-    [super dealloc];
 }
 
  -(void) setCc3Scene: (CC3Scene*) aScene {
-	 if (aScene != _cc3Scene) {
-		 [self closeCC3Scene];						// Close the old scene.
-		 [_cc3Scene wasRemoved];					// Stop actions in old scene (if shouldStopActionsWhenRemoved set).
-		 _cc3Scene.cc3Layer = nil;					// Detach this layer from old scene.
-		 [_cc3Scene autorelease];					// Release old scene if it's not assigned to another layer first
+	 if (aScene == _cc3Scene) return;
 
-		 _cc3Scene = [aScene retain];				// Retain the new scene.
-		 _cc3Scene.cc3Layer = self;					// Point the scene back here
-		 if (self.isRunning) [self openCC3Scene];	// If already running, open the new scene right away
-	 }
+	 [self closeCC3Scene];						// Close the old scene.
+	 [_cc3Scene wasRemoved];					// Stop actions in old scene (if shouldStopActionsWhenRemoved set).
+	 _cc3Scene.cc3Layer = nil;					// Detach this layer from old scene.
+
+	 _cc3Scene = aScene;
+	 _cc3Scene.cc3Layer = self;					// Point the scene back here
+	 if (self.isRunning) [self openCC3Scene];	// If already running, open the new scene right away
 }
 
 
@@ -153,7 +150,7 @@
 
 // Lazily initialized
 -(CCArray*) cc3GestureRecognizers {
-	if ( !_cc3GestureRecognizers ) _cc3GestureRecognizers = [[CCArray array] retain];
+	if ( !_cc3GestureRecognizers ) _cc3GestureRecognizers = [CCArray array];
 	return _cc3GestureRecognizers;
 }
 

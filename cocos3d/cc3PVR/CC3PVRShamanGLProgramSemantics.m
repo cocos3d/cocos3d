@@ -85,7 +85,7 @@ NSString* NSStringFromCC3PVRShamanSemantic(CC3PVRShamanSemantic semantic) {
 			vp = visitor.camera.viewport;
 			[uniform setPoint: ccp(vp.w, vp.h)];
 			return YES;
-		case kCC3PVRShamanSemanticViewportClipping:
+		case kCC3PVRShamanSemanticViewportClipping: {
 			// Applies the field of view angle to the narrower aspect.
 			vp = visitor.camera.viewport;
 			GLfloat aspect = (GLfloat) vp.w / (GLfloat) vp.h;
@@ -100,7 +100,7 @@ NSString* NSStringFromCC3PVRShamanSemantic(CC3PVRShamanSemantic semantic) {
 			}
 			[uniform setVector4: CC3Vector4Make(cam.nearClippingDistance, cam.farClippingDistance, fovWidth, fovHeight)];
 			return YES;
-			
+		}
 		default: return NO;
 	}
 }

@@ -92,7 +92,7 @@
 }
 
 +(id) actionWithDuration: (ccTime) dur sizeTo: (CGSize) endSize {
-	return [[[self alloc] initWithDuration: dur sizeTo: endSize] autorelease];
+	return [[self alloc] initWithDuration: dur sizeTo: endSize];
 }
 
 -(id) copyWithZone: (NSZone*) zone {
@@ -423,7 +423,7 @@
     if (!FPSLabel_) {
 		CCTexture2DPixelFormat currentFormat = [CCTexture2D defaultAlphaPixelFormat];
 		[CCTexture2D setDefaultAlphaPixelFormat:kCCTexture2DPixelFormat_RGBA4444];
-		FPSLabel_ = [[CCLabelAtlas labelWithString:@"00.0" charMapFile:@"fps_images_1.png" itemWidth:16 itemHeight:24 startCharMap:'.'] retain];
+		FPSLabel_ = [CCLabelAtlas labelWithString:@"00.0" charMapFile:@"fps_images_1.png" itemWidth:16 itemHeight:24 startCharMap:'.'];
 		[CCTexture2D setDefaultAlphaPixelFormat:currentFormat];
 	}
 #endif	// CC_DIRECTOR_FAST_FPS
@@ -503,13 +503,13 @@
 	[self removeObject: anObject];
 }
 
--(void) fastReplaceObjectAtIndex: (NSUInteger) index withObject: (id) anObject {
-	CC3Assert(index < data->num, @"Invalid index. Out of bounds");
-
-	id oldObj = data->arr[index];
-	data->arr[index] = [anObject retain];
-	[oldObj release];						// Release after in case new is same as old
-}
+//-(void) fastReplaceObjectAtIndex: (NSUInteger) index withObject: (id) anObject {
+//	CC3Assert(index < data->num, @"Invalid index. Out of bounds");
+//
+//	id oldObj = data->arr[index];
+//	data->arr[index] = anObject;
+//							// Release after in case new is same as old
+//}
 
 -(BOOL) setCapacity: (NSUInteger) newCapacity {
 	if (data->max == newCapacity) return NO;
@@ -523,7 +523,7 @@
 
 	// Returned newArrs will be non-zero on successful allocation,
 	// but will be zero on either successful deallocation or on failed allocation
-	id* newArr = realloc( data->arr, (newCapacity * sizeof(id)) );
+	void* newArr = realloc( data->arr, (newCapacity * sizeof(id)) );
 
 	// If we wanted to allocate, but it failed, log an error and return without changing anything.
 	if ( (newCapacity != 0) && !newArr ) {
@@ -532,7 +532,7 @@
 	}
 	
 	// Otherwise, set the new array pointer and size.
-	data->arr = newArr;
+	data->arr = (__strong id*)newArr;
 	data->max = newCapacity;
 	LogTrace(@"Changed %@ to a capcity of %u elements", [self class], newCapacity);
 	return YES;
@@ -551,36 +551,25 @@
 	return self;
 }
 
-+(id) arrayWithZeroCapacity { return [[[self alloc] initWithZeroCapacity] autorelease]; }
++(id) arrayWithZeroCapacity { return [[self alloc] initWithZeroCapacity]; }
 
 
 #pragma mark Support for unretained objects
 
-- (void) addUnretainedObject: (id) anObject {
-	ccCArrayAppendValueWithResize(data, anObject);
-}
+- (void) addUnretainedObject: (id) anObject { ccCArrayAppendValueWithResize(data, anObject); }
 
 - (void) insertUnretainedObject: (id) anObject atIndex: (NSUInteger) index {
 	ccCArrayEnsureExtraCapacity(data, 1);
 	ccCArrayInsertValueAtIndex(data, anObject, index);
 }
 
-- (void) removeUnretainedObjectIdenticalTo: (id) anObject {
-	ccCArrayRemoveValue(data, anObject);
-}
+- (void) removeUnretainedObjectIdenticalTo: (id) anObject { ccCArrayRemoveValue(data, anObject); }
 
-- (void) removeUnretainedObjectAtIndex: (NSUInteger) index {
-	ccCArrayRemoveValueAtIndex(data, index);
-}
+- (void) removeUnretainedObjectAtIndex: (NSUInteger) index { ccCArrayRemoveValueAtIndex(data, index); }
 
-- (void) removeAllObjectsAsUnretained {
-	ccCArrayRemoveAllValues(data);
-}
+- (void) removeAllObjectsAsUnretained { ccCArrayRemoveAllValues(data); }
 
--(void) releaseAsUnretained {
-	[self removeAllObjectsAsUnretained];
-	[self release];
-}
+-(void) releaseAsUnretained { [self removeAllObjectsAsUnretained]; }
 
 - (NSString*) fullDescription {
 	NSMutableString *desc = [NSMutableString stringWithFormat:@"%@ (", [self class]];

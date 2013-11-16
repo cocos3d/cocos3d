@@ -44,13 +44,6 @@
 @synthesize shaderContext=_shaderContext;
 @synthesize shouldBlendAtFullOpacity=_shouldBlendAtFullOpacity;
 
--(void) dealloc {
-	[_texture release];
-	[_textureOverlays release];
-	[_shaderContext release];
-	[super dealloc];
-}
-
 -(NSString*) nameSuffix { return @"Material"; }
 
 // Clamp to allowed range
@@ -220,8 +213,7 @@ static ccBlendFunc _defaultBlendFunc = {GL_ONE, GL_ZERO};
 
 -(void) setTexture: (CC3Texture*) aTexture {
 	if (aTexture == _texture) return;
-	[_texture release];
-	_texture = [aTexture retain];
+	_texture = aTexture;
 	[self texturesHaveChanged];
 }
 
@@ -232,7 +224,7 @@ static ccBlendFunc _defaultBlendFunc = {GL_ONE, GL_ZERO};
 		self.texture = aTexture;
 	} else {
 		CC3Assert(aTexture, @"%@ cannot add a nil overlay texture", self);
-		if(!_textureOverlays) _textureOverlays = [[CCArray array] retain];
+		if(!_textureOverlays) _textureOverlays = [CCArray array];
 
 		GLuint maxTexUnits = CC3OpenGL.sharedGL.maxNumberOfTextureUnits;
 		if (self.textureCount < maxTexUnits) {
@@ -254,10 +246,7 @@ static ccBlendFunc _defaultBlendFunc = {GL_ONE, GL_ZERO};
 		if (_textureOverlays && aTexture) {
 			[_textureOverlays removeObjectIdenticalTo: aTexture];
 			[self texturesHaveChanged];
-			if (_textureOverlays.count == 0) {
-				[_textureOverlays release];
-				_textureOverlays = nil;
-			}
+			if (_textureOverlays.count == 0) _textureOverlays = nil;
 		}
 	}
 }
@@ -287,7 +276,7 @@ static ccBlendFunc _defaultBlendFunc = {GL_ONE, GL_ZERO};
 		self.texture = aTexture;
 	} else if (texUnit < self.textureCount) {
 		CC3Assert(aTexture, @"%@ cannot set an overlay texture to nil", self);
-		[_textureOverlays fastReplaceObjectAtIndex: (texUnit - 1) withObject: aTexture];
+		[_textureOverlays replaceObjectAtIndex: (texUnit - 1) withObject: aTexture];
 		[self texturesHaveChanged];
 	} else {
 		[self addTexture: aTexture];
@@ -389,14 +378,14 @@ static ccBlendFunc _defaultBlendFunc = {GL_ONE, GL_ZERO};
 	return self;
 }
 
-+(id) material { return [[[self alloc] init] autorelease]; }
++(id) material { return [[self alloc] init]; }
 
-+(id) materialWithTag: (GLuint) aTag { return [[[self alloc] initWithTag: aTag] autorelease]; }
++(id) materialWithTag: (GLuint) aTag { return [[self alloc] initWithTag: aTag]; }
 
-+(id) materialWithName: (NSString*) aName { return [[[self alloc] initWithName: aName] autorelease]; }
++(id) materialWithName: (NSString*) aName { return [[self alloc] initWithName: aName]; }
 
 +(id) materialWithTag: (GLuint) aTag withName: (NSString*) aName {
-	return [[[self alloc] initWithTag: aTag withName: aName] autorelease];
+	return [[self alloc] initWithTag: aTag withName: aName];
 }
 
 +(id) shiny {
@@ -433,8 +422,7 @@ static ccBlendFunc _defaultBlendFunc = {GL_ONE, GL_ZERO};
 	
 	self.shaderContext = another.shaderContext;		// retained
 	
-	[_texture release];
-	_texture = [another.texture retain];			// retained - don't want to trigger texturesHaveChanged
+	_texture = another.texture;			// retained - don't want to trigger texturesHaveChanged
 	
 	// Remove any existing overlays and add the overlays from the other material.
 	[_textureOverlays removeAllObjects];

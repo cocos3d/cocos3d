@@ -53,11 +53,6 @@
 @synthesize hasInfiniteDepthOfField=_hasInfiniteDepthOfField, isOpen=_isOpen;
 @synthesize shouldClipToViewport=_shouldClipToViewport;
 
--(void) dealloc {
-	[_frustum release];
-	[super dealloc];
-}
-
 -(BOOL) isCamera { return YES; }
 
 /** Overridden to return NO so that the forwardDirection aligns with the negative-Z-axis. */
@@ -71,8 +66,7 @@
 /** Establish backpointer from frustum. */
 -(void) setFrustum: (CC3Frustum*) frustum {
 	if (frustum == _frustum) return;
-	[_frustum release];
-	_frustum = [frustum retain];
+	_frustum = frustum;
 	_frustum.camera = self;
 }
 
@@ -882,13 +876,6 @@
 @synthesize top=_top, bottom=_bottom, left=_left, right=_right, near=_near, far=_far;
 @synthesize camera=_camera, isUsingParallelProjection=_isUsingParallelProjection;
 
--(void) dealloc {
-	[_finiteProjectionMatrix release];
-	[_infiniteProjectionMatrix release];
-	_camera = nil;			// not retained
-	[super dealloc];
-}
-
 -(void) setTop: (GLfloat) aValue {
 	_top = aValue;
 	[self markProjectionDirty];
@@ -968,7 +955,7 @@
 	return self;
 }
 
-+(id) frustum { return [[[self alloc] init] autorelease]; }
++(id) frustum { return [[self alloc] init]; }
 
 // Protected properties for copying
 -(BOOL) isInfiniteProjectionDirty { return _isInfiniteProjectionDirty; }

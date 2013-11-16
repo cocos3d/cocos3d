@@ -105,14 +105,14 @@
  * This property is only valid during the traversal, and will be nil both before
  * and after the visit: method is invoked.
  */
-@property(nonatomic, readonly) CC3Node* startingNode;
+@property(nonatomic, strong, readonly) CC3Node* startingNode;
 
 /**
  * Returns the CC3Scene.
  *
  * This is a convenience property that returns the scene property of the startingNode property.
  */
-@property(nonatomic, readonly) CC3Scene* scene;
+@property(nonatomic, strong, readonly) CC3Scene* scene;
 
 /**
  * The camera that is viewing the 3D scene.
@@ -122,7 +122,7 @@
  *
  * The value of this property is not cleared at the end of the visitation run.
  */
-@property(nonatomic, retain) CC3Camera* camera;
+@property(nonatomic, strong) CC3Camera* camera;
 
 /**
  * The default camera to use when visiting a node assembly.
@@ -130,7 +130,7 @@
  * This implementation returns the activeCamera property of the starting node.
  * Subclasses may override.
  */
-@property(nonatomic, readonly) CC3Camera* defaultCamera;
+@property(nonatomic, strong, readonly) CC3Camera* defaultCamera;
 
 /**
  * The CC3Node that is currently being visited.
@@ -138,7 +138,7 @@
  * This property is only valid during the traversal of the node returned by this property,
  * and will be nil both before and after the visit: method is invoked on the node.
  */
-@property(nonatomic, readonly) CC3Node* currentNode;
+@property(nonatomic, strong, readonly) CC3Node* currentNode;
 
 /**
  * Returns the mesh node that is currently being visited.
@@ -150,7 +150,7 @@
  * This property is only valid during the traversal of the node returned by this property,
  * and will be nil both before and after the visit: method is invoked on that node.
  */
-@property(nonatomic, readonly) CC3MeshNode* currentMeshNode;
+@property(nonatomic, strong, readonly) CC3MeshNode* currentMeshNode;
 
 /**
  * Returns the mesh of the mesh node that is currently being visited.
@@ -160,7 +160,7 @@
  * This property is only valid during the traversal of the node returned by this property,
  * and will be nil both before and after the visit: method is invoked on the node.
  */
-@property(nonatomic, readonly) CC3Mesh* currentMesh;
+@property(nonatomic, strong, readonly) CC3Mesh* currentMesh;
 
 /**
  * Returns the material of the mesh node that is currently being visited, or returns nil
@@ -171,7 +171,7 @@
  * This property is only valid during the traversal of the node returned by the currentMeshNode
  * property, and will be nil both before and after the visit: method is invoked on that node.
  */
-@property(nonatomic, readonly) CC3Material* currentMaterial;
+@property(nonatomic, strong, readonly) CC3Material* currentMaterial;
 
 /**
  * Returns the texture unit at the specified index from the mesh node that is currently being
@@ -203,7 +203,7 @@
  * This is extracted from the startingNode, and may be nil if that node
  * is not collecting statistics.
  */
-@property(nonatomic, readonly) CC3PerformanceStatistics* performanceStatistics;
+@property(nonatomic, strong, readonly) CC3PerformanceStatistics* performanceStatistics;
 
 
 #pragma mark Allocation and initialization
@@ -415,7 +415,7 @@
  *
  * If not set directly, this is lazily initialized to the CC3OpenGL.sharedGL singleton.
  */
-@property(nonatomic, retain) CC3OpenGL* gl;
+@property(nonatomic, strong) CC3OpenGL* gl;
 
 /**
  * The index of the current texture unit being drawn.
@@ -519,7 +519,7 @@
  * this visitor can be used to render multiple node assemblies and complete multiple drawing
  * passes without having to set the surface each time.
  */
-@property(nonatomic, retain) id<CC3RenderSurface> renderSurface;
+@property(nonatomic, strong) id<CC3RenderSurface> renderSurface;
 
 /**
  * Template property that returns the initial value of the renderSurface property.
@@ -529,7 +529,7 @@
  *
  * Subclasses may override to return a different surface.
  */
-@property(nonatomic, readonly) id<CC3RenderSurface> defaultRenderSurface;
+@property(nonatomic, strong, readonly) id<CC3RenderSurface> defaultRenderSurface;
 
 /**
  * During the drawing of nodes that use vertex skinning, this property holds the skin
@@ -538,14 +538,14 @@
  * The value of this property is set by the skin section itself and is only valid
  * during the drawing of that skin section.
  */
-@property(nonatomic, assign) CC3SkinSection* currentSkinSection;
+@property(nonatomic, strong) CC3SkinSection* currentSkinSection;
 
 /**
  * The currently active shader program.
  *
  * This property is set automatically by the program when it binds to the GL engine.
  */
-@property(nonatomic, assign) CC3ShaderProgram* currentShaderProgram;
+@property(nonatomic, strong) CC3ShaderProgram* currentShaderProgram;
 
 /**
  * The current color used during drawing if no materials or lighting are engaged.
@@ -649,7 +649,7 @@
 }
 
 /** The node that was most recently picked. */
-@property(nonatomic, readonly) CC3Node* pickedNode;
+@property(nonatomic, strong, readonly) CC3Node* pickedNode;
 
 @end
 
@@ -666,7 +666,7 @@
 }
 
 /** The punctured node. */
-@property(nonatomic, retain, readonly) CC3Node* node;
+@property(nonatomic, strong, readonly) CC3Node* node;
 
 /** The location of the puncture, in the local coordinate system of the punctured node. */
 @property(nonatomic, readonly) CC3Vector punctureLocation;
@@ -777,7 +777,7 @@
  * The result will not include any node that does not have a bounding volume,
  * or whose shouldIgnoreRayIntersection property is set to YES.
  */
-@property(nonatomic, readonly) CC3Node* closestPuncturedNode;
+@property(nonatomic, strong, readonly) CC3Node* closestPuncturedNode;
 
 /**
  * Returns the location of the puncture on the node returned by the

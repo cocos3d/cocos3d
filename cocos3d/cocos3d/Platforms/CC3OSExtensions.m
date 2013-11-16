@@ -37,10 +37,10 @@
 
 @implementation NSObject (CC3)
 
--(id) autoreleasedCopy { return [[self copy] autorelease]; }
+-(id) autoreleasedCopy { return [self copy]; }
 
 // Deprecated
--(id) copyAutoreleased { return [[self copy] autorelease]; }
+-(id) copyAutoreleased { return [self copy]; }
 
 -(NSString*) fullDescription { return [self description]; }
 

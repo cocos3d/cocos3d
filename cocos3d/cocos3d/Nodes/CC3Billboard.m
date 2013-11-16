@@ -56,7 +56,6 @@
 
 -(void) dealloc {
 	self.billboard = nil;		// Use setter to cleanup and release the 2D billboard.
-	[super dealloc];
 }
 
 -(BOOL) isBillboard { return YES; }
@@ -67,10 +66,9 @@
 	// Old 2D billboard
 	[_billboard onExit];				// Turn off running state and pause activity.
 	[_billboard cleanup];				// Detach billboard from scheduler and actions.
-	[_billboard release];
 
 	// New 2D billboard
-	_billboard = [aCCNode retain];
+	_billboard = aCCNode;
 	_billboard.visible = self.visible;
 	// Retrieve the blend function from the 2D node and align this 3D node's material with it.
 	if ([_billboard conformsToProtocol: @protocol(CCBlendProtocol)]) {
@@ -240,7 +238,7 @@
 }
 
 +(id) nodeWithBillboard: (CCNode*) a2DNode {
-	return [[[self alloc] initWithBillboard: a2DNode] autorelease];
+	return [[self alloc] initWithBillboard: a2DNode];
 }
 
 -(id) initWithName: (NSString*) aName withBillboard: (CCNode*) a2DNode {
@@ -251,7 +249,7 @@
 }
 
 +(id) nodeWithName: (NSString*) aName withBillboard: (CCNode*) a2DNode {
-	return [[[self alloc] initWithName: aName withBillboard: a2DNode] autorelease];
+	return [[self alloc] initWithName: aName withBillboard: a2DNode];
 }
 
 // Protected properties for copying
@@ -268,7 +266,6 @@
 	// because the position and scale of the CCNode will be set by multiple CC3Billboards,
 	// and the last one to do so is where the CCNode will be drawn (but over and over,
 	// once per CC3Billboard that references it).
-	[_billboard release];
 	CCNode* bb = another.billboard;
 	if ([bb conformsToProtocol: @protocol(NSCopying)])
 		_billboard = [bb copy];				// retained

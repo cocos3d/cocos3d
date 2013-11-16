@@ -43,7 +43,6 @@
 
 -(void) dealloc {
 	[self deleteTaskQueue];
-	[super dealloc];
 }
 
 
@@ -109,7 +108,7 @@
 	return self;
 }
 
-+(id) backgrounder { return [[[self alloc] init] autorelease]; }
++(id) backgrounder { return [[self alloc] init]; }
 
 @end
 
@@ -119,11 +118,6 @@
 @implementation CC3GLBackgrounder : CC3Backgrounder
 
 @synthesize glContext=_glContext;
-
--(void) dealloc {
-	[_glContext release];
-	[super dealloc];
-}
 
 
 #pragma mark Backgrounding tasks
@@ -141,13 +135,13 @@
 
 -(id) initWithGLContext: (CC3GLContext*) glContext {
 	if ( (self = [super init]) ) {
-		_glContext = [glContext retain];
+		_glContext = glContext;
 	}
 	return self;
 }
 
 +(id) backgrounderWithGLContext: (CC3GLContext*) glContext {
-	return [[[self alloc] initWithGLContext: glContext] autorelease];
+	return [[self alloc] initWithGLContext: glContext];
 }
 
 @end

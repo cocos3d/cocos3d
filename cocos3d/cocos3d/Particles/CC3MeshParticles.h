@@ -223,24 +223,20 @@
  * This property must be set prior to this emitter emitting any particles. It is possible to
  * change the value of this property during emission.
  */
-@property(nonatomic, retain) CC3Mesh* particleTemplateMesh;
+@property(nonatomic, strong) CC3Mesh* particleTemplateMesh;
 
 /**
- * A write-only property that configures this emitter to emit particles as defined by the
- * specified template mesh node.
+ * Configures this emitter to emit particles as defined by the specified template mesh node.
  *
- * This is a convenience write-only property method that simply sets the particleTemplateMesh
- * and material properties (including the texture) of this emitter from the corresponding mesh
- * and material properties of the specified mesh node.
+ * This is a convenience method that simply sets the particleTemplateMesh and material 
+ * properties of this emitter (including the texture) from the corresponding properties
+ * of the specified mesh node.
  *
- * When these properties are set, the template mesh is simply retained, but the template material
- * is copied, so that the material of the emitter can be configured independently from that of
- * the template mesh node.
- *
- * Since this property is a convenience property for setting other properties, this is a
- * write-only property. Reading this property always returns nil.
+ * When these properties are set, the template mesh is simply retained, but the template 
+ * material is copied, so that the material of the emitter can be configured independently
+ * from that of the template mesh node.
  */
-@property(nonatomic, assign) CC3MeshNode* particleTemplate;
+-(void) setParticleTemplate: (CC3MeshNode*) aParticleTemplate;
 
 /**
  * Template method that sets the templateMesh property of the specified particle.
@@ -407,7 +403,7 @@
  *
  * For CC3MeshParticle, the emitter must be of type CC3MeshParticleEmitter.
  */
-@property(nonatomic, assign) CC3MeshParticleEmitter* emitter;
+@property(nonatomic, unsafe_unretained) CC3MeshParticleEmitter* emitter;
 
 /**
  * Returns the rotator that manages the local rotation of this particle.
@@ -422,7 +418,7 @@
  * accessed or changed, this property will return a CC3DirectionalRotator. The creation
  * of the type of rotator required to support the various rotations is automatic.
  */
-@property(nonatomic, retain) CC3Rotator* rotator;
+@property(nonatomic, strong) CC3Rotator* rotator;
 
 
 #pragma mark Transformation properties

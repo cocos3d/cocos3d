@@ -330,7 +330,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
  *
  * Typically this is the name of the variable as declared in the GLSL program source code.
  */
-@property(nonatomic, retain) NSString* name;
+@property(nonatomic, strong) NSString* name;
 
 /**
  * A symbolic constant indicating the semantic meaning of this variable. See the description

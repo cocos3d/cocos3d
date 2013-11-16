@@ -46,9 +46,6 @@
 -(void) dealloc {
 	[self purgeCharDefDictionary];
 	[self purgeKerningDictionary];
-	[_characterSet release];
-	[_atlasName release];
-	[super dealloc];
 }
 
 -(void) purgeCharDefDictionary {
@@ -96,11 +93,8 @@
 		_kerningDictionary = NULL;
 		_charDefDictionary = NULL;
 		NSString *validChars = [self parseConfigFile: fontFile];
-		if( !validChars ) {
-			[self release];
-			return nil;
-		}
-		_characterSet = [[NSCharacterSet characterSetWithCharactersInString: validChars] retain];
+		if( !validChars ) return nil;
+		_characterSet = [NSCharacterSet characterSetWithCharactersInString: validChars];
 	}
 	return self;
 }
@@ -111,13 +105,12 @@ static NSMutableDictionary* _fontConfigurations = nil;
 	CC3BitmapFontConfiguration *fontConfig = nil;
 	
 	if( _fontConfigurations == nil )
-		_fontConfigurations = [[NSMutableDictionary dictionaryWithCapacity: 4] retain];
+		_fontConfigurations = [NSMutableDictionary dictionaryWithCapacity: 4];
 	
 	fontConfig = [_fontConfigurations objectForKey: fontFile];
 	if(!fontConfig) {
 		fontConfig = [[self alloc] initFromFontFile: fontFile];
 		if (fontConfig) [_fontConfigurations setObject: fontConfig forKey: fontFile];
-		[fontConfig release];
 	}
 	return fontConfig;
 }
@@ -158,7 +151,6 @@ static NSMutableDictionary* _fontConfigurations = nil;
 		else if([line hasPrefix:@"page"]) [self parseImageFileName: line fntFile: fontFile];
 		else if([line hasPrefix:@"chars count"]) {}
 	}
-	[lines release];	// Finished with lines so release it
 	
 	return validCharsString;
 }
@@ -326,7 +318,7 @@ static NSMutableDictionary* _fontConfigurations = nil;
     
 	// Supports subdirectories
 	NSString *dir = [fontFile stringByDeletingLastPathComponent];
-	_atlasName = [[dir stringByAppendingPathComponent: propertyValue] retain];	// retained
+	_atlasName = [dir stringByAppendingPathComponent: propertyValue];	// retained
 }
 
 @end
@@ -376,13 +368,6 @@ static NSMutableDictionary* _fontConfigurations = nil;
 
 @implementation CC3BitmapLabelNode
 
--(void) dealloc {
-	[_labelString release];
-	[_fontFileName release];
-	[_fontConfig release];
-	[super dealloc];
-}
-
 -(GLfloat) lineHeight { return _lineHeight ? _lineHeight : _fontConfig.commonHeight; }
 
 -(void) setLineHeight: (GLfloat) lineHt {
@@ -396,8 +381,7 @@ static NSMutableDictionary* _fontConfigurations = nil;
 
 -(void) setLabelString: (NSString*) aString {
 	if ( ![aString isEqualToString: _labelString] ) {
-		[_labelString release];
-		_labelString = [aString retain];
+		_labelString = aString;
 		[self populateLabelMesh];
 	}
 }
@@ -406,12 +390,8 @@ static NSMutableDictionary* _fontConfigurations = nil;
 
 -(void) setFontFileName: (NSString*) aFileName {
 	if ( ![aFileName isEqualToString: _fontFileName] ) {
-		[_fontFileName release];
-		_fontFileName = [aFileName retain];
-
-		[_fontConfig release];
-		_fontConfig = [[CC3BitmapFontConfiguration configurationFromFontFile: _fontFileName] retain];
-
+		_fontFileName = aFileName;
+		_fontConfig = [CC3BitmapFontConfiguration configurationFromFontFile: _fontFileName];
 		[self populateLabelMesh];
 	}
 }

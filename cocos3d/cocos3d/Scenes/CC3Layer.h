@@ -142,7 +142,7 @@
  * Returns a collection of iOS UIGestureRecognizers that were added using the 
  * cc3AddGestureRecognizer: method. This property is only available under iOS.
  */
-@property(nonatomic, readonly) CCArray* cc3GestureRecognizers;
+@property(nonatomic, strong, readonly) CCArray* cc3GestureRecognizers;
 
 /**
  * Adds the specified iOS gesture recognizer to the UIView that is displaying this
@@ -299,7 +299,7 @@
  * open method on the new scene to ensure that the transforms are up to date before the
  * next frame is rendered.
  */
-@property(nonatomic, retain) CC3Scene* cc3Scene;	
+@property(nonatomic, strong) CC3Scene* cc3Scene;	
 
 /**
  * Indicates whether this layer should update the 3D viewport on each rendering frame.

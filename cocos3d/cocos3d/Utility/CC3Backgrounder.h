@@ -112,7 +112,7 @@
  *
  * The initial value is set during instance initialization.
  */
-@property(nonatomic, retain) CC3GLContext* glContext;
+@property(nonatomic, strong) CC3GLContext* glContext;
 
 
 #pragma mark Allocation and initialization

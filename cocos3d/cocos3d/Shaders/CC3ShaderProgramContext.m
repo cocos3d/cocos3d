@@ -40,19 +40,11 @@
 @synthesize shouldEnforceCustomOverrides=_shouldEnforceCustomOverrides;
 @synthesize shouldEnforceVertexAttributes=_shouldEnforceVertexAttributes;
 
--(void) dealloc {
-	[_program release];
-	[_uniforms release];
-	[_uniformsByName release];
-	[super dealloc];
-}
-
 -(CC3ShaderProgram*) program { return _program; }
 
 -(void) setProgram:(CC3ShaderProgram*) program {
 	if (program == _program) return;
-	[_program release];
-	_program = [program retain];
+	_program = program;
 	[self removeAllOverrides];
 }
 
@@ -89,7 +81,6 @@
 	CC3GLSLUniform* newUniform = [uniform copyAsClass: CC3GLSLUniformOverride.class];
 	[_uniformsByName setObject: newUniform forKey: newUniform.name];
 	[_uniforms addObject: newUniform];
-	[newUniform release];
 	return newUniform;
 }
 
@@ -102,9 +93,7 @@
 }
 
 -(void) removeAllOverrides {
-	[_uniformsByName release];
 	_uniformsByName = nil;
-	[_uniforms release];
 	_uniforms = nil;
 }
 
@@ -147,7 +136,7 @@
 }
 
 +(id) contextForProgram: (CC3ShaderProgram*) program {
-	return [[[self alloc] initForProgram: program] autorelease];
+	return [[self alloc] initForProgram: program];
 }
 
 -(NSString*) description {

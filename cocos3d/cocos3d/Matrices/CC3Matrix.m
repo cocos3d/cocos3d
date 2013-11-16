@@ -76,12 +76,12 @@
 	return self;
 }
 
-+(id) matrix { return [[[self alloc] init] autorelease]; }
++(id) matrix { return [[self alloc] init]; }
 
 +(id) matrixByMultiplying: (CC3Matrix*) mL by: (CC3Matrix*) mR {
 	CC3Matrix* m = [mL copy];
 	[m multiplyBy: mR];
-	return [m autorelease];
+	return m;
 }
 
 -(id) copyWithZone: (NSZone*) zone {

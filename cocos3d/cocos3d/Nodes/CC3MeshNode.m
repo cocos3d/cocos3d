@@ -53,12 +53,6 @@
 @synthesize mesh=_mesh, material=_material, pureColor=_pureColor, lineWidth=_lineWidth;
 @synthesize shouldSmoothLines=_shouldSmoothLines, lineSmoothingHint=_lineSmoothingHint;
 
--(void) dealloc {
-	[_mesh release];
-	[_material release];
-	[super dealloc];
-}
-
 -(void) setName: (NSString*) aName {
 	super.name = aName;
 	[_mesh deriveNameFrom: self];
@@ -68,8 +62,7 @@
 // Sets the name of the mesh if needed and marks the bounding volume as dirty.
 -(void) setMesh:(CC3Mesh *) aMesh {
 	if (aMesh == _mesh) return;
-	[_mesh release];
-	_mesh = [aMesh retain];
+	_mesh = aMesh;
 	[_mesh deriveNameFrom: self];
 
 	if ( !_mesh.hasVertexNormals ) _material.shouldUseLighting = NO;	// Only if material exists
@@ -98,8 +91,7 @@
  * texture in the material.
  */
 -(void) setMaterial: (CC3Material*) aMaterial {
-	[_material autorelease];
-	_material = [aMaterial retain];
+	_material = aMaterial;
 	[_material deriveNameFrom: self];
 
 	if ( !_mesh.hasVertexNormals ) _material.shouldUseLighting = NO;
@@ -507,9 +499,7 @@
 	
 	// Don't use setters, to avoid side effects, including to bounding volume and tex coords.
 	// Both this node and the other node will share the mesh.
-	[_mesh release];
-	_mesh = [another.mesh retain];			// retained but not copied
-	[_material release];
+	_mesh = another.mesh;			// retained but not copied
 	_material = [another.material copy];	// retained
 	
 	_pureColor = another.pureColor;

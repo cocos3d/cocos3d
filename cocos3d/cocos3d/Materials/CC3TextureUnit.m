@@ -146,7 +146,7 @@
 	return self;
 }
 
-+(id) textureUnit { return [[[self alloc] init] autorelease]; }
++(id) textureUnit { return [[self alloc] init]; }
 
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.

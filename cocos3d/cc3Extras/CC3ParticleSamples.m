@@ -94,8 +94,6 @@ static inline CGSize CC3DispersionAngleFromShape(CGSize anAspect) {
 
 -(void) dealloc {
 	self.nozzle = nil;			// Setter clears listener and releases nozzle
-	[_nozzleMatrix release];
-	[super dealloc];
 }
 
 -(void) setEmitter: (CC3ParticleEmitter*) anEmitter {
@@ -110,9 +108,8 @@ static inline CGSize CC3DispersionAngleFromShape(CGSize anAspect) {
 	
 	[_nozzle removeTransformListener: self];
 	if (_nozzle.parent == _emitter) [_nozzle remove];
-	[_nozzle release];
 
-	_nozzle = [aNode retain];
+	_nozzle = aNode;
 	[_nozzle addTransformListener: self];
 	[self checkNozzleParent];
 }

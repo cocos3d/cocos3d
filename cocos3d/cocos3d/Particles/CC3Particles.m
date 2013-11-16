@@ -54,13 +54,6 @@
 @synthesize shouldUpdateParticlesBeforeTransform=_shouldUpdateParticlesBeforeTransform;
 @synthesize shouldUpdateParticlesAfterTransform=_shouldUpdateParticlesAfterTransform;
 
--(void) dealloc {
-	[_particles release];
-	[_particleNavigator release];
-	_particleClass = nil;		// not retained
-	[super dealloc];
-}
-
 -(Protocol*) requiredParticleProtocol { return @protocol(CC3ParticleProtocol); }
 
 -(Class) particleClass { return _particleClass; }
@@ -79,15 +72,14 @@
 -(CC3ParticleNavigator*) particleNavigator { return _particleNavigator; }
 
 -(void) setParticleNavigator: (CC3ParticleNavigator*) aNavigator {
+	if (aNavigator == _particleNavigator) return;
+
 	CC3Assert(!_particleClass || !aNavigator || [_particleClass conformsToProtocol: aNavigator.requiredParticleProtocol],
 			  @"%@ does not conform to the %@ protocol. All particles configured by %@ must conform to that protocol.", _particleClass,
 			  [NSString stringWithUTF8String: protocol_getName(aNavigator.requiredParticleProtocol)], aNavigator);
-	if (aNavigator != _particleNavigator) {
-		_particleNavigator.emitter = nil;
-		[_particleNavigator release];
-		_particleNavigator = [aNavigator retain];
-		_particleNavigator.emitter = self;
-	}
+	_particleNavigator.emitter = nil;
+	_particleNavigator = aNavigator;
+	_particleNavigator.emitter = self;
 }
 
 -(BOOL) isFull { return (_particleCount == _maximumParticleCapacity); }
@@ -120,7 +112,7 @@
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		_particles = [[CCArray arrayWithZeroCapacity] retain];	// Grows dynamically
+		_particles = [CCArray arrayWithZeroCapacity];	// Grows dynamically
 		_particleNavigator = nil;
 		_maximumParticleCapacity = kCC3ParticlesNoMax;
 		_particleCapacityExpansionIncrement = 100;
@@ -477,11 +469,6 @@
 
 @synthesize emitter=_emitter;
 
--(void) dealloc {
-	_emitter = nil;			// not retained
-	[super dealloc];
-}
-
 -(Protocol*) requiredParticleProtocol { return @protocol(CC3ParticleProtocol); }
 
 -(void) initializeParticle: (id<CC3ParticleProtocol>) aParticle {}
@@ -496,7 +483,7 @@
 	return self;
 }
 
-+(id) navigator { return [[[self alloc] init] autorelease]; }
++(id) navigator { return [[self alloc] init]; }
 
 -(id) copyWithZone: (NSZone*) zone {
 	CC3ParticleNavigator* aCopy = [[[self class] allocWithZone: zone] init];
@@ -832,11 +819,6 @@
 
 @synthesize emitter=_emitter;
 
--(void) dealloc {
-	_emitter = nil;			// not retained
-	[super dealloc];
-}
-
 // Alloc iVar in subclases to consolidate storage
 -(BOOL) isAlive {
 	CC3Assert(NO, @"%@ does not implement the isAlive property", self);
@@ -928,7 +910,7 @@
 	return self;
 }
 
-+(id) particle { return [[[self alloc] init] autorelease]; }
++(id) particle { return [[self alloc] init]; }
 
 -(id) copyWithZone: (NSZone*) zone {
 	CC3ParticleBase* aCopy = [[[self class] allocWithZone: zone] init];

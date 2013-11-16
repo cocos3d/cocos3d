@@ -125,10 +125,10 @@
  * of this node is set to NO, and if the mesh does not have texture coordinates, the texture
  * property of this node is set to nil.
  */
-@property(nonatomic, retain) CC3Mesh* mesh;
+@property(nonatomic, strong) CC3Mesh* mesh;
 
 /** @deprecated CC3MeshModel renamed to CC3Mesh. Use mesh property instead. */
-@property(nonatomic, retain) CC3Mesh* meshModel DEPRECATED_ATTRIBUTE;
+@property(nonatomic, strong) CC3Mesh* meshModel DEPRECATED_ATTRIBUTE;
 
 /**
  * If a mesh does not yet exist, this method invokes the makeMesh method to create
@@ -185,7 +185,7 @@
  * The material will automatically be created if either the isOpaque or
  * shouldUseLighting property is set, but not if they are simply read.
  */
-@property(nonatomic, retain) CC3Material* material;
+@property(nonatomic, strong) CC3Material* material;
 
 /**
  * The pure, solid color used to paint the mesh if no material is established for this node.
@@ -484,7 +484,7 @@
  * of the mesh are automatically adjusted to correctly display the texture, taking
  * into consideration POT padding and vertical orientation.
  */
-@property(nonatomic, retain) CC3Texture* texture;
+@property(nonatomic, strong) CC3Texture* texture;
 
 /**
  * In most situations, the material will use a single CC3Texture in the texture property.

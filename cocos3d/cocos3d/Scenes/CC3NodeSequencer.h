@@ -173,7 +173,7 @@
  * The evaluator that determines whether a node should be added to this sequencer.
  * If no evaluator is attached to this sequencer, no nodes will be added.
  */
-@property(nonatomic, retain) CC3NodeEvaluator* evaluator;
+@property(nonatomic, strong) CC3NodeEvaluator* evaluator;
 
 /**
  * Returns an array of the nodes that have been added to this sequencer,
@@ -182,7 +182,7 @@
  * The returned array is a copy of the any internal arrays.
  * Changing the contents will not change the internal node seqeunce.
  */
-@property(nonatomic, readonly) CCArray* nodes;
+@property(nonatomic, strong, readonly) CCArray* nodes;
 
 /**
  * Indicates that the sequencer will run the algorithm to relocate misplaced nodes
@@ -347,7 +347,7 @@
 }
 
 /** The array of child sequencers. */
-@property(nonatomic, readonly) CCArray* sequencers;
+@property(nonatomic, strong, readonly) CCArray* sequencers;
 
 /** Adds the specified sequencer as a child sequencer. */
 -(void) addSequencer: (CC3NodeSequencer*) aNodeSequencer;
@@ -565,7 +565,7 @@
  * The CC3Scene instance. The sequencer may use aspects of the scene when
  * performing sequencing operations with a node.
  */
-@property(nonatomic, assign) CC3Scene* scene;
+@property(nonatomic, strong) CC3Scene* scene;
 
 /** Initializes this instance with the specified CC3Scene. */
 -(id) initWithScene: (CC3Scene*) aCC3Scene;
@@ -574,7 +574,7 @@
 +(id) visitorWithScene: (CC3Scene*) aCC3Scene;
 
 /** @deprecated Renamed to scene. */
-@property(nonatomic, assign) CC3Scene* world DEPRECATED_ATTRIBUTE;
+@property(nonatomic, strong) CC3Scene* world DEPRECATED_ATTRIBUTE;
 
 /** @deprecated Renamed to initWithScene:. */
 -(id) initWithWorld: (CC3Scene*) aCC3Scene DEPRECATED_ATTRIBUTE;
@@ -591,7 +591,7 @@
  *
  * The returned array may be nil.
  */
-@property(nonatomic, readonly) CCArray* misplacedNodes;
+@property(nonatomic, strong, readonly) CCArray* misplacedNodes;
 
 /** Adds the specified node to the array of nodes held in the misplacedNodes property */
 -(void) addMisplacedNode: (CC3Node*) aNode;

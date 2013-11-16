@@ -43,10 +43,6 @@
 @synthesize nodesDrawn=_nodesDrawn, nodesVisitedForDrawing=_nodesVisitedForDrawing;
 @synthesize drawingCallsMade=_drawingCallsMade, facesPresented=_facesPresented;
 
--(void) dealloc {
-	[super dealloc];
-}
-
 
 #pragma mark Accumulated update statistics
 
@@ -137,7 +133,7 @@
 }
 
 +(id) statistics {
-	return [[[self alloc] init] autorelease];
+	return [[self alloc] init];
 }
 
 -(void) reset {

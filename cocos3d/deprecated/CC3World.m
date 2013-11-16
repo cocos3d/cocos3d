@@ -43,7 +43,7 @@
 #pragma mark Deprecated CC3World
 @implementation CC3World
 
-+(id) world { return [[self new] autorelease]; }
++(id) world { return [self new]; }
 
 // Delegate to legacy in case it has been overridden.
 -(void) initializeScene { [(id<CC3WorldDeprecated>)self initializeWorld]; }

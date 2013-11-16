@@ -1059,7 +1059,7 @@ typedef struct {
 #pragma mark GL Extensions
 
 /** Returns an array containing the names of the GL extensions supported by the platform. */
-@property(nonatomic, readonly) NSArray* extensions;
+@property(nonatomic, strong, readonly) NSArray* extensions;
 
 /**
  * Returns whether this platform supports the GL extension with the specified name, which
@@ -1078,7 +1078,7 @@ typedef struct {
 #pragma mark Shaders
 
 /** Returns a shader program suitable for painting mesh nodes in a solid color. */
-@property(nonatomic, retain, readonly) CC3ShaderProgram* pureColorProgram;
+@property(nonatomic, strong, readonly) CC3ShaderProgram* pureColorProgram;
 
 /** Returns the shader program to use to draw the specified mesh node. */
 -(CC3ShaderProgram*) programForMeshNode: (CC3MeshNode*) aMeshNode;
@@ -1152,7 +1152,7 @@ typedef struct {
  * This prewarmer can be used to force that first draw call to be made immediately,
  * and to an off-screen surface, so it won't be visible.
  */
-@property(nonatomic, retain) CC3ShaderProgramPrewarmer* shaderProgramPrewarmer;
+@property(nonatomic, strong) CC3ShaderProgramPrewarmer* shaderProgramPrewarmer;
 
 /** Returns whether the specified shader was successfully linked. */
 -(BOOL) getShaderProgramWasLinked: (GLuint) programID;

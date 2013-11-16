@@ -39,9 +39,7 @@ static GLint instanceCount = 0;
 
 -(void) dealloc {
 	[self releaseUserData];
-	[_name release];
 	instanceCount--;
-	[super dealloc];
 }
 
 -(BOOL) deriveNameFrom: (CC3Identifiable*) another {

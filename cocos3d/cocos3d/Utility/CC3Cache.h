@@ -44,7 +44,7 @@
 @protocol CC3Cacheable <NSObject>
 
 /** A unique name to be used by the cache to store and retrieve this object. */
-@property(nonatomic, readonly) NSString* name;
+@property(nonatomic, strong, readonly) NSString* name;
 
 @end
 
@@ -118,7 +118,7 @@
 -(void) enumerateObjectsUsingBlock: (void (^) (id<CC3Cacheable> obj, BOOL* stop)) block;
 
 /** A descriptive name of the type of object being cached. */
-@property(nonatomic, readonly) NSString* typeName;
+@property(nonatomic, strong, readonly) NSString* typeName;
 
 /** 
  * Indicates whether this cache holds weak references to the objects within.
@@ -181,12 +181,10 @@
  *
  * Implements the CC3Cacheable protocol. The wrapped object is returned in the cachedObject property.
  */
-@interface CC3CacheableWrapper : NSObject {
-	id<CC3Cacheable> _cachedObject;
-}
+@interface CC3CacheableWrapper : NSObject
 
 /** Returns the object that has been cached. */
-@property(nonatomic, readonly) id<CC3Cacheable> cachedObject;
+@property(nonatomic, strong, readonly) id<CC3Cacheable> cachedObject;
 
 
 #pragma mark Allocation and initialization
@@ -207,7 +205,9 @@
  * to be cached, without retaining that object. This permits the object to be deallocated
  * once it has been released from all retained references outside the cache.
  */
-@interface CC3WeakCacheableWrapper : CC3CacheableWrapper
+@interface CC3WeakCacheableWrapper : CC3CacheableWrapper {
+	id<CC3Cacheable> __unsafe_unretained _cachedObject;
+}
 @end
 
 
@@ -217,6 +217,8 @@
  * An instance of CC3StrongCacheableWrapper is used within a cache to hold an object that is
  * to be retained when cached, so that it cannot be deallocated until removed from this cache.
  */
-@interface CC3StrongCacheableWrapper : CC3CacheableWrapper
+@interface CC3StrongCacheableWrapper : CC3CacheableWrapper {
+	id<CC3Cacheable> _cachedObject;
+}
 @end
 

@@ -109,7 +109,7 @@
  * property from the resourceClass property requires the creation of a subclass
  * of CC3ResourceNode that defines the appropriate resourceClass value.
  */
-@property(nonatomic, retain) CC3NodesResource* resource;
+@property(nonatomic, strong) CC3NodesResource* resource;
 
 /**
  * Returns the class of the CC3NodesResource instance used to load 3D data files.

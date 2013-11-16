@@ -39,11 +39,6 @@
 
 @synthesize fileVersion=_fileVersion, allNodes=_allNodes, ambientLight=_ambientLight;
 
--(void) dealloc {
-	[_allNodes release];
-	[super dealloc];
-}
-
 -(CC3CALNode*) getNodeWithCALIndex: (GLint) calIndex {
 	for (CC3CALNode* calNode in _allNodes) if (calNode.calIndex == calIndex) return calNode;
 	return nil;
@@ -54,7 +49,7 @@
 
 -(id) init {
 	if ( (self = [super init]) ) {
-		_allNodes = [[CCArray array] retain];
+		_allNodes = [CCArray array];
 		_fileVersion = -1;
 		_nodeCount = 0;
 		_ambientLight = kCCC4FBlack;

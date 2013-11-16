@@ -58,12 +58,6 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 @synthesize type=_type, size=_size, semantic=_semantic, semanticIndex=_semanticIndex;
 @synthesize scope=_scope, isGLStateKnown=_isGLStateKnown;
 
--(void) dealloc {
-	_program = nil;			// not retained
-	[_name release];
-	[super dealloc];
-}
-
 -(GLuint) typeStorageElementCount {
 	switch (_type) {	// 17
 			
@@ -121,7 +115,7 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 }
 
 +(id) variableInProgram: (CC3ShaderProgram*) program atIndex: (GLuint) index {
-	return [[[self alloc] initInProgram: program atIndex: index] autorelease];
+	return [[self alloc] initInProgram: program atIndex: index];
 }
 
 -(id) copyWithZone: (NSZone*) zone { return [self copyWithZone: zone asClass: self.class]; }
@@ -136,8 +130,7 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 
 -(void) populateFrom: (CC3GLSLVariable*) another {
 	// _program & _index set during init
-	[_name release];
-	_name = [another.name retain];
+	_name = another.name;
 
 	_location = another.location;
 	_type = another.type;
@@ -170,8 +163,7 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 	if (( [_name characterAtIndex: subStartIdx] == '[' ) &&
 		( [_name characterAtIndex: (subStartIdx + 1)] == '0' )) {
 		NSString* name = [_name substringToIndex: subStartIdx];
-		[_name release];
-		[_name = name retain];		// retained
+		_name = name;		// retained
 	} else {
 		// We have a non-zero subscript. This variable is redundant to the zero-subscript
 		// variable, so mark it as such, but don't remove the subscript from the name.
@@ -218,7 +210,6 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 -(void) dealloc {
 	free(_varValue);
 	free(_glVarValue);
-	[super dealloc];
 }
 
 -(GLenum) type { return super.type; }	// Keep compiler happy

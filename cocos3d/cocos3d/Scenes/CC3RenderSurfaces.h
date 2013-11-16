@@ -474,7 +474,7 @@
  * verticalWrappingFunction properties of the texture will be set to GL_CLAMP_TO_EDGE,
  * as required when using a texture as a rendering target.
  */
-@property(nonatomic, retain) CC3Texture* texture;
+@property(nonatomic, strong) CC3Texture* texture;
 
 /** 
  * The target face within the texture into which rendering is to occur.
@@ -586,7 +586,7 @@
  * To save memory, attachments can be shared between surfaces of the same size, if the contents
  * of the attachment are only required for the duration of the rendering to each surface.
  */
-@property(nonatomic, retain) id<CC3FramebufferAttachment> colorAttachment;
+@property(nonatomic, strong) id<CC3FramebufferAttachment> colorAttachment;
 
 /**
  * The attachment to which depth data is rendered.
@@ -606,7 +606,7 @@
  * instance, the same depth attachment might be used when rendering to several different color
  * attachments on different surfaces.
  */
-@property(nonatomic, retain) id<CC3FramebufferAttachment> depthAttachment;
+@property(nonatomic, strong) id<CC3FramebufferAttachment> depthAttachment;
 
 /**
  * The attachment to which stencil data is rendered.
@@ -621,7 +621,7 @@
  * To save memory, attachments can be shared between surfaces of the same size, if the contents
  * of the attachment are only required for the duration of the rendering to each surface.
  */
-@property(nonatomic, retain) id<CC3FramebufferAttachment> stencilAttachment;
+@property(nonatomic, strong) id<CC3FramebufferAttachment> stencilAttachment;
 
 /**
  * If color content is being rendered to a texture, this property can be used to access
@@ -641,7 +641,7 @@
  * To save memory, textures can be shared between surfaces of the same size, if the contents
  * of the texture are only required for the duration of the rendering to each surface.
  */
-@property(nonatomic, retain) CC3Texture* colorTexture;
+@property(nonatomic, strong) CC3Texture* colorTexture;
 
 /**
  * If depth content is being rendered to a texture, this property can be used to access
@@ -662,7 +662,7 @@
  * To save memory, textures can be shared between surfaces of the same size, if the contents
  * of the texture are only required for the duration of the rendering to each surface.
  */
-@property(nonatomic, retain) CC3Texture* depthTexture;
+@property(nonatomic, strong) CC3Texture* depthTexture;
 
 /** 
  * The size of this framebuffer surface in pixels.
@@ -850,7 +850,7 @@
 -(void) generateSnapshotOfScene: (CC3Scene*) scene fromGlobalLocation: (CC3Vector) location;
 
 /** Returns the surface to which the environment will be rendered. */
-@property(nonatomic, retain, readonly) CC3GLFramebuffer* renderSurface;
+@property(nonatomic, strong, readonly) CC3GLFramebuffer* renderSurface;
 
 
 #pragma mark Allocation and initialization
@@ -935,17 +935,17 @@
 }
 
 /** The GL view whose surface is being managed by this instance. */
-@property(nonatomic, assign, readonly) CC3GLView* view;
+@property(nonatomic, strong, readonly) CC3GLView* view;
 
 /** The on-screen surface attached to the underlying core animation layer. */
-@property(nonatomic, retain) CC3GLFramebuffer* viewSurface;
+@property(nonatomic, strong) CC3GLFramebuffer* viewSurface;
 
 /**
  * The surface used for off-screen multisample rendering.
  *
  * The value of this property may be nil if multisampleing is not in use.
  */
-@property(nonatomic, retain) CC3GLFramebuffer* multisampleSurface;
+@property(nonatomic, strong) CC3GLFramebuffer* multisampleSurface;
 
 /**
  * The surface to which rendering should be directed.
@@ -953,7 +953,7 @@
  * If multisampling is in use, this property returns the framebuffer in the multisampleSurface
  * property, otherwise it returns the framebuffer in the viewSurface property.
  */
-@property(nonatomic, readonly) CC3GLFramebuffer* renderingSurface;
+@property(nonatomic, strong, readonly) CC3GLFramebuffer* renderingSurface;
 
 /**
  * The surface to which rendering for picking should be directed.
@@ -964,7 +964,7 @@
  *
  * Lazy initialization is used in case touch picking is never actually used by the app.
  */
-@property(nonatomic, retain) CC3GLFramebuffer* pickingSurface;
+@property(nonatomic, strong) CC3GLFramebuffer* pickingSurface;
 
 /**
  * Returns whether a dedicated surface should be created by the pickingSurface property.
@@ -1037,7 +1037,7 @@
 @property(nonatomic, readonly) GLenum depthTexelType;
 
 /** The renderbuffer that is the colorAttachment to the framebuffer in the viewSurface property. */
-@property(nonatomic, readonly) CC3GLRenderbuffer* viewColorBuffer;
+@property(nonatomic, strong, readonly) CC3GLRenderbuffer* viewColorBuffer;
 
 /** 
  * Returns the number of samples used to define each pixel.
@@ -1076,7 +1076,7 @@
  *
  * If not set beforehand, the instance in this property is lazily created.
  */
-@property(nonatomic, retain) CC3GLBackgrounder* backgrounder;
+@property(nonatomic, strong) CC3GLBackgrounder* backgrounder;
 
 
 #pragma mark Resizing surfaces

@@ -287,7 +287,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
 #pragma mark Vertex arrays
 
 /** The vertex array instance managing the positional content for the vertices. */
-@property(nonatomic, retain) CC3VertexLocations* vertexLocations;
+@property(nonatomic, strong) CC3VertexLocations* vertexLocations;
 
 /** Returns whether this mesh contains content for vertex locations. */
 @property(nonatomic, readonly) BOOL hasVertexLocations;
@@ -297,7 +297,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  *
  * Setting this property is optional. Not all meshes require normals.
  */
-@property(nonatomic, retain) CC3VertexNormals* vertexNormals;
+@property(nonatomic, strong) CC3VertexNormals* vertexNormals;
 
 /** Returns whether this mesh contains content for vertex normals. */
 @property(nonatomic, readonly) BOOL hasVertexNormals;
@@ -310,7 +310,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  *
  * Setting this property is optional. Not all meshes require tangents.
  */
-@property(nonatomic, retain) CC3VertexTangents* vertexTangents;
+@property(nonatomic, strong) CC3VertexTangents* vertexTangents;
 
 /** Returns whether this mesh contains content for vertex tangents. */
 @property(nonatomic, readonly) BOOL hasVertexTangents;
@@ -320,7 +320,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  *
  * Setting this property is optional. Not all meshes require bitangents.
  */
-@property(nonatomic, retain) CC3VertexTangents* vertexBitangents;
+@property(nonatomic, strong) CC3VertexTangents* vertexBitangents;
 
 /** Returns whether this mesh contains content for vertex bitangents. */
 @property(nonatomic, readonly) BOOL hasVertexBitangents;
@@ -330,7 +330,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  *
  * Setting this property is optional. Many meshes do not require per-vertex coloring.
  */
-@property(nonatomic, retain) CC3VertexColors* vertexColors;
+@property(nonatomic, strong) CC3VertexColors* vertexColors;
 
 /** Returns whether this mesh contains content for vertex colors.  */
 @property(nonatomic, readonly) BOOL hasVertexColors;
@@ -357,7 +357,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * properties must be the same, and must not be larger than the maximum number of available vertex
  * units for the platform, which can be retreived from CC3OpenGL.sharedGL.maxNumberOfVertexUnits.
  */
-@property(nonatomic,retain) CC3VertexMatrixIndices* vertexMatrixIndices;
+@property(nonatomic,strong) CC3VertexMatrixIndices* vertexMatrixIndices;
 
 /** Indicates whether this mesh contains content for vertex matrix indices. */
 @property(nonatomic, readonly) BOOL hasVertexMatrixIndices;
@@ -373,7 +373,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * properties must be the same, and must not be larger than the maximum number of available vertex
  * units for the platform, which can be retreived from CC3OpenGL.sharedGL.maxNumberOfVertexUnits.
  */
-@property(nonatomic,retain) CC3VertexWeights* vertexWeights;
+@property(nonatomic,strong) CC3VertexWeights* vertexWeights;
 
 /** Indicates whether this mesh contains content for vertex weights. */
 @property(nonatomic, readonly) BOOL hasVertexWeights;
@@ -384,7 +384,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * Setting this property is optional. It is used for point particle systems, and even then,
  * particle systems often do not require individual sizing for each particle.
  */
-@property(nonatomic, retain) CC3VertexPointSizes* vertexPointSizes;
+@property(nonatomic, strong) CC3VertexPointSizes* vertexPointSizes;
 
 /** Indicates whether this mesh contains content for vertex point sizes. */
 @property(nonatomic, readonly) BOOL hasVertexPointSizes;
@@ -395,7 +395,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * Setting this property is optional. If vertex index data is not provided, the vertices
  * will be drawn in linear order as they appear in the vertexLocations property.
  */
-@property(nonatomic, retain) CC3VertexIndices* vertexIndices;
+@property(nonatomic, strong) CC3VertexIndices* vertexIndices;
 
 /** Returns whether this mesh uses index vertices. */
 @property(nonatomic, readonly) BOOL hasVertexIndices;
@@ -412,7 +412,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * will be placed in this property. This can simplify configurations in that all
  * texture coordinate arrays can be treated the same.
  */
-@property(nonatomic, retain) CC3VertexTextureCoordinates* vertexTextureCoordinates;
+@property(nonatomic, strong) CC3VertexTextureCoordinates* vertexTextureCoordinates;
 
 /**
  * Returns the number of texture coordinate arrays used by this mesh, regardless of whether
@@ -1429,7 +1429,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * will share a reference to the same face array instance. If you need to create separate
  * copies of the faces array when copying a mesh, you must explicitly create a copy.
  */
-@property(nonatomic, retain) CC3FaceArray* faces;
+@property(nonatomic, strong) CC3FaceArray* faces;
 
 /**
  * Indicates whether information about the faces of this mesh should be cached.
@@ -2491,7 +2491,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * a face normal or plane is explicitly requested.
  */
 @interface CC3FaceArray : CC3Identifiable {
-	CC3Mesh* _mesh;
+	CC3Mesh* __unsafe_unretained _mesh;
 	CC3FaceIndices* _indices;
 	CC3Vector* _centers;
 	CC3Vector* _normals;
@@ -2516,7 +2516,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * Setting this property will cause the centers, normals, planes and neighbours
  * properties to be deallocated and then re-built on the next access.
  */
-@property(nonatomic, assign) CC3Mesh* mesh;
+@property(nonatomic, unsafe_unretained) CC3Mesh* mesh;
 
 /**
  * Indicates the number of faces in this array, as retrieved from the mesh.

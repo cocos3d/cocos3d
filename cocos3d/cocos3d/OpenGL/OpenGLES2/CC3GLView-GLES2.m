@@ -64,11 +64,6 @@
 
 @synthesize surfaceManager=_surfaceManager;
 
--(void) dealloc {
-	[_surfaceManager release];
-	[super dealloc];
-}
-
 -(CAEAGLLayer*) layer { return (CAEAGLLayer*)super.layer; }
 
 -(GLenum) colorFormat { return [self convertPixelFormat: CC2_PIXEL_FORMAT]; }
@@ -91,7 +86,6 @@
 	CC2_CONTEXT = [[EAGLContext alloc] initWithAPI: kEAGLRenderingAPIOpenGLES2 sharegroup: sharegroup];
 	if ( !CC2_CONTEXT || ![EAGLContext setCurrentContext: CC2_CONTEXT] ) {
 		CC3Assert(NO, @"Could not create EAGLContext. OpenGL ES 2.0 is required.");
-		[self release];
 		return NO;
 	}
 	

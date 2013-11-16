@@ -37,11 +37,6 @@
 
 @implementation CC3ControllableLayer
 
--(void) dealloc {
-	_controller = nil;		// delegate - not retained
-    [super dealloc];
-}
-
 // Override to store the controller in the unretained iVar
 -(CC3ViewController*) controller { return _controller; }
 -(void) setController: (CC3ViewController*) aController { _controller = aController; }
@@ -62,7 +57,7 @@
 }
 
 +(id) layerWithController: (CC3ViewController*) controller {
-	return [[[self alloc] initWithController: controller] autorelease];
+	return [[self alloc] initWithController: controller];
 }
 
 -(NSString*) description { return [NSString stringWithFormat: @"%@", [self class]]; }
@@ -96,7 +91,7 @@
 -(BOOL) alignContentSizeWithDeviceOrientation { return NO; }
 -(void) setAlignContentSizeWithDeviceOrientation: (BOOL) alignContentSizeWithDeviceOrientation {}
 -(id) initWithColor: (ccColor4B) color { return [self init]; }
-+(id) layerWithColor: (ccColor4B) color { return [[[self alloc] init] autorelease]; }
++(id) layerWithColor: (ccColor4B) color { return [[self alloc] init]; }
 -(void) initInitialState {}
 -(BOOL) isColored { return NO; }
 

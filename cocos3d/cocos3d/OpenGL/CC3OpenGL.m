@@ -44,14 +44,9 @@
 @synthesize isPrimaryContext=_isPrimaryContext;
 
 -(void) dealloc {
-	[_extensions release];
-	[value_GL_VENDOR release];
-	[value_GL_RENDERER release];
-	[value_GL_VERSION release];
 	free(vertexAttributes);
 	free(value_GL_TEXTURE_BINDING_2D);
 	free(value_GL_TEXTURE_BINDING_CUBE_MAP);
-	[super dealloc];
 }
 
 
@@ -898,11 +893,11 @@
 
 -(NSArray*) extensions {
 	if ( !_extensions )
-		_extensions = [[[[[self getString: GL_EXTENSIONS]
+		_extensions = [[[[self getString: GL_EXTENSIONS]
 						  componentsSeparatedByCharactersInSet:
 						  [NSCharacterSet whitespaceCharacterSet]]
 						 filteredArrayUsingPredicate: [NSPredicate predicateWithFormat: @"length > 0"]]
-						sortedArrayUsingSelector: @selector(caseInsensitiveCompare:)] retain];
+						sortedArrayUsingSelector: @selector(caseInsensitiveCompare:)];
 	return _extensions;
 }
 
@@ -1037,13 +1032,13 @@
 
 /** Template method to retrieve the GL platform limits. */
 -(void) initPlatformLimits {
-	value_GL_VENDOR = [[self getString: GL_VENDOR] retain];
+	value_GL_VENDOR = [self getString: GL_VENDOR];
 	LogInfoIfPrimary(@"GL vendor: %@", value_GL_VENDOR);
 
-	value_GL_RENDERER = [[self getString: GL_RENDERER] retain];
+	value_GL_RENDERER = [self getString: GL_RENDERER];
 	LogInfoIfPrimary(@"GL engine: %@", value_GL_RENDERER);
 	
-	value_GL_VERSION = [[self getString: GL_VERSION] retain];
+	value_GL_VERSION = [self getString: GL_VERSION];
 	LogInfoIfPrimary(@"GL version: %@", value_GL_VERSION);
 	
 	value_GL_MAX_TEXTURE_SIZE = [self getInteger: GL_MAX_TEXTURE_SIZE];

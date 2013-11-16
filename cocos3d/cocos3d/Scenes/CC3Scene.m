@@ -70,27 +70,11 @@
  * Make sure they are all made nil in addition to being released here!
  */
 -(void) dealloc {
-	_cc3Layer = nil;						// Not retained
 	self.drawingSequencer = nil;			// Use setter to release and make nil
 	self.activeCamera = nil;				// Use setter to release and make nil
-	self.touchedNodePicker = nil;			// Use setter to release and make nil
-	self.viewDrawingVisitor = nil;			// Use setter to release and make nil
-	self.envMapDrawingVisitor = nil;		// Use setter to release and make nil
-	self.shadowVisitor = nil;				// Use setter to release and make nil
-	self.updateVisitor = nil;				// Use setter to release and make nil
-	self.transformVisitor = nil;			// Use setter to release and make nil
-	self.drawingSequenceVisitor = nil;		// Use setter to release and make nil
 	self.fog = nil;							// Use setter to stop any actions
 	self.backdrop = nil;					// Use setter to stop any actions
-	self.viewSurfaceManager = nil;			// Use setter to release and make nil
-	[_targettingNodes release];
-	_targettingNodes = nil;
-	[_lights release];
-	_lights = nil;
-	[_billboards release];
-	_billboards = nil;
 	
-    [super dealloc];
 }
 
 -(BOOL) isScene { return YES; }
@@ -102,9 +86,8 @@
 -(void) setActiveCamera: (CC3Camera*) aCamera {
 	if (aCamera == _activeCamera) return;
 	CC3Camera* oldCam = _activeCamera;
-	_activeCamera = [aCamera retain];
+	_activeCamera = aCamera;
 	[self activeCameraChangedFrom: oldCam];
-	[oldCam release];
 }
 
 /** The active camera has changed. Update whoever cares. */
@@ -141,16 +124,14 @@
 -(void) setBackdrop: (CC3MeshNode*) backdrop {
 	if (backdrop == _backdrop) return;
 	[_backdrop stopAllActions];		// Ensure all actions stopped before releasing
-	[_backdrop release];
-	_backdrop = [backdrop retain];
+	_backdrop = backdrop;
 	_backdrop.parent = self;
 }
 
 -(void) setFog: (CC3Fog*) fog {
 	if (fog == _fog) return;
 	[_fog stopAllActions];		// Ensure all actions stopped before releasing
-	[_fog release];
-	_fog = [fog retain];
+	_fog = fog;
 }
 
 // Deprecated
@@ -180,9 +161,9 @@
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		_targettingNodes = [[CCArray array] retain];
-		_lights = [[CCArray array] retain];
-		_billboards = [[CCArray array] retain];
+		_targettingNodes = [CCArray array];
+		_lights = [CCArray array];
+		_billboards = [CCArray array];
 		self.touchedNodePicker = [CC3TouchedNodePicker pickerOnScene: self];
 		self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirst];
 		self.viewDrawingVisitor = [[self viewDrawVisitorClass] visitor];
@@ -214,7 +195,7 @@
 // Default does nothing. Subclasses will customize.
 -(void) initializeScene {}
 
-+(id) scene { return [[self new] autorelease]; }
++(id) scene { return [self new]; }
 
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
@@ -225,10 +206,8 @@
 	// plus activeCamera will be populated as children are added.
 	// No need to configure node picker.
 	
-	[_drawingSequencer release];
 	_drawingSequencer = [another.drawingSequencer copy];						// retained
 	
-	[_performanceStatistics release];
 	_performanceStatistics = [another.performanceStatistics copy];				// retained
 
 	// Env map visitor is created lazily
@@ -555,8 +534,7 @@
 -(void) setDrawingSequencer:(CC3NodeSequencer*) aNodeSequencer {
 	if (aNodeSequencer == _drawingSequencer) return;
 	
-	[_drawingSequencer release];
-	_drawingSequencer = [aNodeSequencer retain];
+	_drawingSequencer = aNodeSequencer;
 	
 	if (_drawingSequencer) {
 		CCArray* allNodes = [self flatten];
@@ -728,13 +706,6 @@
 
 @synthesize pickVisitor=_pickVisitor, touchPoint=_touchPoint;
 
--(void) dealloc {
-	[_pickVisitor release];
-	_scene = nil;			// not retained
-	_pickedNode = nil;		// not retained
-	[super dealloc];
-}
-
 
 #pragma mark Allocation and initialization
 
@@ -754,7 +725,7 @@
 }
 
 +(id) pickerOnScene: (CC3Scene*) aCC3Scene {
-	return [[[self alloc] initOnScene: aCC3Scene] autorelease];
+	return [[self alloc] initOnScene: aCC3Scene];
 }
 
 

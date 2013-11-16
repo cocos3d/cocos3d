@@ -74,7 +74,6 @@
 	[self deleteGLBuffer];
 	self.allocatedVertexCapacity = 0;
 //	[_vertexContent release];
-	[super dealloc];
 }
 
 -(GLvoid*) vertices { return _vertices; }
@@ -186,14 +185,14 @@
 	return self;
 }
 
-+(id) vertexArray { return [[[self alloc] init] autorelease]; }
++(id) vertexArray { return [[self alloc] init]; }
 
-+(id) vertexArrayWithTag: (GLuint) aTag { return [[[self alloc] initWithTag: aTag] autorelease]; }
++(id) vertexArrayWithTag: (GLuint) aTag { return [[self alloc] initWithTag: aTag]; }
 
-+(id) vertexArrayWithName: (NSString*) aName { return [[[self alloc] initWithName: aName] autorelease]; }
++(id) vertexArrayWithName: (NSString*) aName { return [[self alloc] initWithName: aName]; }
 
 +(id) vertexArrayWithTag: (GLuint) aTag withName: (NSString*) aName {
-	return [[[self alloc] initWithTag: aTag withName: aName] autorelease];
+	return [[self alloc] initWithTag: aTag withName: aName];
 }
 
 -(GLvoid*) interleaveWith: (CC3VertexArray*) otherVtxArray usingOffset: (GLuint) elemOffset {
@@ -529,7 +528,6 @@ static GLuint lastAssignedVertexArrayTag;
 
 -(void) dealloc {
 	[self deallocateStripLengths];
-	[super dealloc];
 }
 
 // Deprecated

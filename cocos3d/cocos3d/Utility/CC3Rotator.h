@@ -105,7 +105,7 @@ typedef enum {
  *
  * This base class always returns nil. Subclasses that support changing rotation will override.
  */
-@property(nonatomic, retain, readonly) CC3Matrix* rotationMatrix;
+@property(nonatomic, strong, readonly) CC3Matrix* rotationMatrix;
 
 /**
  * The rotational orientation of the node in 3D space, relative to the parent of the
@@ -150,7 +150,7 @@ typedef enum {
  *
  * Always returns nil. Subclasses that support target tracking will override.
  */
-@property(nonatomic, assign, readonly) CC3Node* target;
+@property(nonatomic, strong, readonly) CC3Node* target;
 
 /**
  * Indicates whether the node should track the node set in the target
@@ -267,7 +267,7 @@ typedef enum {
  * The rotation matrix for each instance is local to the node and does not include rotational
  * information about the node's ancestors.
  */
-@property(nonatomic, retain, readwrite) CC3Matrix* rotationMatrix;
+@property(nonatomic, strong, readwrite) CC3Matrix* rotationMatrix;
 
 /**
  * The rotational orientation of the node in 3D space, relative to the parent of the
@@ -596,7 +596,7 @@ typedef enum {
  * The target is not retained. If you destroy the target node, you must remove
  * it as the target of this rotator.
  */
-@property(nonatomic, assign, readwrite) CC3Node* target;
+@property(nonatomic, strong, readwrite) CC3Node* target;
 
 /**
  * Indicates whether the node should track the node set in the target property

@@ -96,7 +96,7 @@ extern "C" {
 }
 
 +(id) nodeAtIndex: (GLint) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
-	return [[[self alloc] initAtIndex: aPODIndex fromPODResource: aPODRez] autorelease];
+	return [[self alloc] initAtIndex: aPODIndex fromPODResource: aPODRez];
 }
 
 -(PODStructPtr) nodePODStructAtIndex: (uint) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
@@ -130,7 +130,6 @@ extern "C" {
 	free(_animatedQuaternionsIndices);
 	free(_animatedScales);
 	free(_animatedScaleIndices);
-	[super dealloc];
 }
 
 // For each type of animation content, this instance assumes responsiblity for managing
@@ -169,7 +168,7 @@ extern "C" {
 }
 
 +(id) animationFromSPODNode: (PODStructPtr) pSPODNode withFrameCount: (GLuint) numFrames {
-	return [[[self alloc] initFromSPODNode: pSPODNode withFrameCount: numFrames] autorelease];
+	return [[self alloc] initFromSPODNode: pSPODNode withFrameCount: numFrames];
 }
 
 +(BOOL) sPODNodeDoesContainAnimation: (PODStructPtr) pSPODNode {

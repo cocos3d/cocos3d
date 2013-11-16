@@ -59,7 +59,7 @@
 }
 
 /** The underlying view rendering surface. */
-@property(nonatomic, retain, readonly) CC3GLViewSurfaceManager* surfaceManager;
+@property(nonatomic, strong, readonly) CC3GLViewSurfaceManager* surfaceManager;
 
 /** Returns the GL color format of the pixels. */
 @property(nonatomic, readonly) GLenum colorFormat;
@@ -84,7 +84,7 @@
 @property(nonatomic, readonly) GLuint pixelSamples;
 
 /** The OpenGL context used by this view. */
-@property(nonatomic,readonly) NSOpenGLContext *context;
+@property(nonatomic, strong, readonly) NSOpenGLContext *context;
 
 /** Compatibility with iOS view signature. This implementation does nothing under OSX. */
 -(void) addGestureRecognizer: (UIGestureRecognizer*) gesture;

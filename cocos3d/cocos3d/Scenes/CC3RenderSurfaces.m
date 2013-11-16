@@ -47,7 +47,6 @@
 
 -(void) dealloc {
 	[self deleteGLRenderbuffer];
-	[super dealloc];
 }
 
 -(GLuint) renderbufferID {
@@ -100,7 +99,7 @@
 	return self;
 }
 
-+(id) renderbuffer { return [[[self alloc] init] autorelease]; }
++(id) renderbuffer { return [[self alloc] init]; }
 
 -(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format {
 	if ( (self = [self initWithPixelFormat: format]) ) {
@@ -110,7 +109,7 @@
 }
 
 +(id) renderbufferWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format {
-	return [[((CC3GLRenderbuffer*)[self alloc]) initWithSize: size andPixelFormat: format] autorelease];
+	return [((CC3GLRenderbuffer*)[self alloc]) initWithSize: size andPixelFormat: format];
 }
 
 -(id) initWithPixelFormat: (GLenum) format {
@@ -118,7 +117,7 @@
 }
 
 +(id) renderbufferWithPixelFormat: (GLenum) format {
-	return [[[self alloc] initWithPixelFormat: format] autorelease];
+	return [[self alloc] initWithPixelFormat: format];
 }
 
 -(id) initWithPixelFormat: (GLenum) format andPixelSamples: (GLuint) samples {
@@ -130,7 +129,7 @@
 }
 
 +(id) renderbufferWithPixelFormat: (GLenum) format andPixelSamples: (GLuint) samples {
-	return [[[self alloc] initWithPixelFormat: format andPixelSamples: samples] autorelease];
+	return [[self alloc] initWithPixelFormat: format andPixelSamples: samples];
 }
 
 -(NSString*) description { return [NSString stringWithFormat: @"%@ %u", self.class, _rbID]; }
@@ -198,17 +197,11 @@
 
 @synthesize face=_face, mipmapLevel=_mipmapLevel;
 
--(void) dealloc {
-	[_texture release];
-	[super dealloc];
-}
-
 -(CC3Texture*) texture { return _texture; }
 
 -(void) setTexture: (CC3Texture*) texture {
 	if (texture == _texture) return;
-	[_texture release];
-	_texture = [texture retain];
+	_texture = texture;
 	_texture.horizontalWrappingFunction = GL_CLAMP_TO_EDGE;
 	_texture.verticalWrappingFunction = GL_CLAMP_TO_EDGE;
 }
@@ -244,14 +237,14 @@
 
 -(id) init { return [self initWithTexture: nil]; }
 
-+(id) attachment { return [[[self alloc] init] autorelease]; }
++(id) attachment { return [[self alloc] init]; }
 
 -(id) initWithTexture: (CC3Texture*) texture {
 	return [self initWithTexture: texture usingFace: texture.initialAttachmentFace];
 }
 
 +(id) attachmentWithTexture: (CC3Texture*) texture {
-	return [[((CC3TextureFramebufferAttachment*)[self alloc]) initWithTexture: texture] autorelease];
+	return [((CC3TextureFramebufferAttachment*)[self alloc]) initWithTexture: texture];
 }
 
 -(id) initWithTexture: (CC3Texture*) texture usingFace: (GLenum) face {
@@ -259,7 +252,7 @@
 }
 
 +(id) attachmentWithTexture: (CC3Texture*) texture usingFace: (GLenum) face {
-	return [[[self alloc] initWithTexture: texture usingFace: face ] autorelease];
+	return [[self alloc] initWithTexture: texture usingFace: face ];
 }
 
 -(id) initWithTexture: (CC3Texture*) texture usingFace: (GLenum) face andLevel: (GLint) mipmapLevel {
@@ -272,7 +265,7 @@
 }
 
 +(id) attachmentWithTexture: (CC3Texture*) texture usingFace: (GLenum) face andLevel: (GLint) mipmapLevel {
-	return [[[self alloc] initWithTexture: texture usingFace: face andLevel: mipmapLevel] autorelease];
+	return [[self alloc] initWithTexture: texture usingFace: face andLevel: mipmapLevel];
 }
 
 -(NSString*) description { return [NSString stringWithFormat: @"%@ on %@", self.class, _texture]; }
@@ -287,7 +280,6 @@
 
 -(void) dealloc {
 	[self deleteGLFramebuffer];
-	[super dealloc];
 }
 
 -(GLuint) framebufferID {
@@ -308,8 +300,7 @@
 	if (_colorAttachment == colorAttachment) return;
 	[self ensureSizeOfAttachment: colorAttachment];
 	[_colorAttachment unbindFromFramebuffer: self.framebufferID asAttachment: GL_COLOR_ATTACHMENT0];
-	[_colorAttachment release];
-	_colorAttachment = [colorAttachment retain];
+	_colorAttachment = colorAttachment;
 	[_colorAttachment bindToFramebuffer: self.framebufferID asAttachment: GL_COLOR_ATTACHMENT0];
 }
 
@@ -319,8 +310,7 @@
 	if (_depthAttachment == depthAttachment) return;
 	[self ensureSizeOfAttachment: depthAttachment];
 	[_depthAttachment unbindFromFramebuffer: self.framebufferID asAttachment: GL_DEPTH_ATTACHMENT];
-	[_depthAttachment release];
-	_depthAttachment = [depthAttachment retain];
+	_depthAttachment = depthAttachment;
 	[_depthAttachment bindToFramebuffer: self.framebufferID asAttachment: GL_DEPTH_ATTACHMENT];
 
 	if ( CC3DepthFormatIncludesStencil(_depthAttachment.pixelFormat) )
@@ -333,8 +323,7 @@
 	if (_stencilAttachment == stencilAttachment) return;
 	[self ensureSizeOfAttachment: stencilAttachment];
 	[_stencilAttachment unbindFromFramebuffer: self.framebufferID asAttachment: GL_STENCIL_ATTACHMENT];
-	[_stencilAttachment release];
-	_stencilAttachment = [stencilAttachment retain];
+	_stencilAttachment = stencilAttachment;
 	[_stencilAttachment bindToFramebuffer: self.framebufferID asAttachment: GL_STENCIL_ATTACHMENT];
 }
 
@@ -480,10 +469,10 @@
 	return self;
 }
 
-+(id) surface { return [[[self alloc] init] autorelease]; }
++(id) surface { return [[self alloc] init]; }
 
 +(id) surfaceWithSize: (CC3IntSize) size {
-	return [[((CC3GLFramebuffer*)[self alloc]) initWithSize: size] autorelease];
+	return [((CC3GLFramebuffer*)[self alloc]) initWithSize: size];
 }
 
 -(NSString*) description { return [NSString stringWithFormat: @"%@ %u", self.class, _fbID]; }
@@ -555,11 +544,6 @@
 
 @synthesize renderSurface=_renderSurface;
 @synthesize numberOfFacesPerSnapshot=_numberOfFacesPerSnapshot;
-
--(void) dealloc {
-	[_renderSurface release];
-	[super dealloc];
-}
 
 
 #pragma mark Drawing
@@ -740,7 +724,7 @@
 }
 
 +(id) textureCubeWithDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment {
-	return [[[self alloc] initCubeWithDepthAttachment: depthAttachment] autorelease];
+	return [[self alloc] initCubeWithDepthAttachment: depthAttachment];
 }
 
 -(id) initCubeWithColorPixelFormat: (GLenum) colorFormat
@@ -761,9 +745,9 @@
 +(id) textureCubeWithColorPixelFormat: (GLenum) colorFormat
 					andColorPixelType: (GLenum) colorType
 				   andDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment {
-	return [[[self alloc] initCubeWithColorPixelFormat: colorFormat
+	return [[self alloc] initCubeWithColorPixelFormat: colorFormat
 									 andColorPixelType: colorType
-									andDepthAttachment: depthAttachment] autorelease];
+									andDepthAttachment: depthAttachment];
 }
 
 @end
@@ -776,23 +760,12 @@
 
 @synthesize view=_view, backgrounder=_backgrounder;
 
--(void) dealloc {
-	_view = nil;						// not retained
-	[_viewSurface release];
-	[_multisampleSurface release];
-	[_pickingSurface release];
-	[_resizeableSurfaces release];
-	[_backgrounder release];
-	[super dealloc];
-}
-
 -(CC3GLFramebuffer*) viewSurface { return _viewSurface; }
 
 -(void) setViewSurface: (CC3GLFramebuffer*) surface {
 	if (surface == _viewSurface) return;
 	[self removeSurface: _viewSurface];
-	[_viewSurface release];
-	_viewSurface = [surface retain];
+	_viewSurface = surface;
 	[self addSurface: surface];
 }
 
@@ -801,8 +774,7 @@
 -(void) setMultisampleSurface: (CC3GLFramebuffer*) surface {
 	if (surface == _multisampleSurface) return;
 	[self removeSurface: _multisampleSurface];
-	[_multisampleSurface release];
-	_multisampleSurface = [surface retain];
+	_multisampleSurface = surface;
 	[self addSurface: surface];
 }
 
@@ -848,8 +820,7 @@
 -(void) setPickingSurface: (CC3GLFramebuffer*) surface {
 	if (surface == _pickingSurface) return;
 	[self removeSurface: _pickingSurface];
-	[_pickingSurface release];
-	_pickingSurface = [surface retain];
+	_pickingSurface = surface;
 	[self addSurface: surface];
 }
 
@@ -929,7 +900,6 @@
 		[self resizeAttachment: surface.stencilAttachment to: size ifNotIn: resizedAttachments];
 		[surface validate];
 	}
-	[resizedAttachments release];
 
 	// After validating each surface, ensure we leave the rendering surface active for cocos2d
 	[self.renderingSurface activate];

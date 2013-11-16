@@ -55,11 +55,6 @@
 
 @synthesize surfaceManager=_surfaceManager;
 
--(void) dealloc {
-	[_surfaceManager release];
-	[super dealloc];
-}
-
 -(CAEAGLLayer*) layer { return (CAEAGLLayer*)super.layer; }
 
 -(GLenum) colorFormat { return [self convertPixelFormat: CC2_PIXEL_FORMAT]; }
@@ -82,7 +77,6 @@
 	CC2_CONTEXT = [[EAGLContext alloc] initWithAPI: kEAGLRenderingAPIOpenGLES1 sharegroup: sharegroup];
 	if ( !CC2_CONTEXT || ![EAGLContext setCurrentContext: CC2_CONTEXT] ) {
 		CC3Assert(NO, @"Could not create EAGLContext.");
-		[self release];
 		return NO;
 	}
 	
@@ -113,55 +107,6 @@
 	[director reshapeProjection: CC2_SIZE];		// Issue #914 #924
 	[director drawScene];						// avoid flicker
 }
-
-//-(void) layoutSubviews {
-//	CC3OpenGL* gl = CC3OpenGL.sharedGL;
-//	
-//	// Bind the renderbuffer that is the color attachment of the view and resize it from the layer
-//	[gl bindRenderbuffer: _surfaceManager.viewColorBuffer.renderbufferID];
-//	if( ![CC2_CONTEXT renderbufferStorage: GL_RENDERBUFFER fromDrawable: self.layer] ) {
-//		LogError(@"Failed to allocate renderbuffer storage in GL context.");
-//		return;
-//	}
-//	
-//	// Resize all surfaces in the surface manager to the new view size.
-//	CC3IntSize size = CC3IntSizeFromCGSize(self.bounds.size);
-//	[_surfaceManager resizeTo: size];
-//	
-//	// Update the CCDirector with the new view size
-//	CC2_SIZE = CGSizeFromCC3IntSize(size);
-//	CCDirector *director = [CCDirector sharedDirector];
-//	[director reshapeProjection: CC2_SIZE];		// Issue #914 #924
-//	[director drawScene];						// avoid flicker
-//	
-//}
-
-//-(void) layoutSubviews {
-//	CC3IntSize size;
-//	CC3OpenGL* gl = CC3OpenGL.sharedGL;
-//	
-//	// Bind the renderbuffer that is the color attachment of the view and resize it from the layer
-//	[gl bindRenderbuffer: _surfaceManager.viewColorBuffer.renderbufferID];
-//	if( ![CC2_CONTEXT renderbufferStorage: GL_RENDERBUFFER fromDrawable: self.layer] ) {
-//		LogError(@"Failed to allocate renderbuffer storage in GL context.");
-//		return;
-//	}
-//	
-//	// Retrieve the new size of the renderbuffer from the GL engine
-//	// and resize all surfaces in the surface manager to that new size.
-//	size.width = [gl getRenderbufferParameterInteger: GL_RENDERBUFFER_WIDTH];
-//	size.height = [gl getRenderbufferParameterInteger: GL_RENDERBUFFER_HEIGHT];
-//	LogTrace(@"View resizing to %@", NSStringFromCC3IntSize(size));
-//	
-//	[_surfaceManager resizeTo: size];
-//	
-//	// Update the CCDirector with the new view size
-//	CC2_SIZE = CGSizeFromCC3IntSize(size);
-//	CCDirector *director = [CCDirector sharedDirector];
-//	[director reshapeProjection: CC2_SIZE];		// Issue #914 #924
-//	[director drawScene];						// avoid flicker
-//	
-//}
 
 -(void) swapBuffers {
 	[_surfaceManager resolveMultisampling];

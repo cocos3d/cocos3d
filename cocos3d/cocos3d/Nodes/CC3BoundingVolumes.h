@@ -415,7 +415,7 @@
  * method on a common ancestor node of all the affected skin mesh nodes.
  */
 @interface CC3NodeBoundingVolume : CC3BoundingVolume {
-	CC3Node* _node;
+	CC3Node* __unsafe_unretained _node;
 	CC3Vector _centerOfGeometry;
 	CC3Vector _globalCenterOfGeometry;
 	BOOL _shouldBuildFromMesh : 1;
@@ -425,7 +425,7 @@
 }
 
 /** The node whose boundary this instance is keeping track of. */
-@property(nonatomic, assign) CC3Node* node;
+@property(nonatomic, unsafe_unretained) CC3Node* node;
 
 /** 
  * Indicates whether this instance should build its bounds from the vertex locations within
@@ -936,7 +936,7 @@ DEPRECATED_ATTRIBUTE
  * When testing for instersection, the contained bounding volumes will be traversed
  * in the order they appear in this array.
  */
-@property(nonatomic, readonly) CCArray* boundingVolumes;
+@property(nonatomic, strong, readonly) CCArray* boundingVolumes;
 
 /** Adds the specified bounding volume to the end of the array of contained bounding volumes. */
 -(void) addBoundingVolume: (CC3NodeBoundingVolume*) aBoundingVolume;
@@ -1066,10 +1066,10 @@ DEPRECATED_ATTRIBUTE
 @interface CC3NodeSphereThenBoxBoundingVolume : CC3NodeTighteningBoundingVolumeSequence
 
 /** The spherical bounding volume that is tested first. */
-@property(nonatomic, readonly) CC3NodeSphericalBoundingVolume* sphericalBoundingVolume;
+@property(nonatomic, strong, readonly) CC3NodeSphericalBoundingVolume* sphericalBoundingVolume;
 
 /** The box bounding volume that is tested only if the test against the spherical bounding volume passes. */
-@property(nonatomic, readonly) CC3NodeBoxBoundingVolume* boxBoundingVolume;
+@property(nonatomic, strong, readonly) CC3NodeBoxBoundingVolume* boxBoundingVolume;
 
 /**
  * Allocates and initializes an autoreleased instance containing a standard

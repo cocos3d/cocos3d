@@ -217,7 +217,7 @@ CC3_POP_NOSELECTOR
 	return self;
 }
 
-+(id) controller { return [[[self alloc] init] autorelease]; }
++(id) controller { return [[self alloc] init]; }
 
 -(NSString*) description { return [NSString stringWithFormat: @"%@", self.class]; }
 

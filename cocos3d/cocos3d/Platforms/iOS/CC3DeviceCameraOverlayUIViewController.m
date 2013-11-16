@@ -47,11 +47,6 @@
 
 @implementation CC3DeviceCameraOverlayUIViewController
 
--(void) dealloc {
-	[_deviceCameraView release];
-    [super dealloc];
-}
-
 -(BOOL) isOverlayingDeviceCamera { return _isOverlayingDeviceCamera; }
 
 -(void) setIsOverlayingDeviceCamera: (BOOL) aBool {
@@ -107,7 +102,7 @@
 	if ( !_deviceCameraView && self.isDeviceCameraAvailable ) {
 		AVCaptureDevice* camDevice = [AVCaptureDevice defaultDeviceWithMediaType: AVMediaTypeVideo];
 		AVCaptureInput* avInput = [AVCaptureDeviceInput deviceInputWithDevice: camDevice error: nil];
-		AVCaptureSession* avSession = [[[AVCaptureSession alloc] init] autorelease];
+		AVCaptureSession* avSession = [[AVCaptureSession alloc] init];
 		[avSession addInput: avInput];
 		
 		_deviceCameraView = [[CC3AVCameraView alloc] initWithFrame: self.view.frame];
@@ -129,16 +124,13 @@
 	return self;
 }
 
-+(id) controller { return [[[self alloc] init] autorelease]; }
++(id) controller { return [[self alloc] init]; }
 
 -(void) didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
 	
 	// If overlay view exists, and we're not currently overlaying the device camera, release it
-	if( !self.isOverlayingDeviceCamera ) {
-		[_deviceCameraView release];
-		_deviceCameraView = nil;
-	}
+	if( !self.isOverlayingDeviceCamera ) _deviceCameraView = nil;
 }
 
 @end

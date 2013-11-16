@@ -222,11 +222,6 @@
 
 @synthesize particleTemplateMeshes=_particleTemplateMeshes;
 
--(void) dealloc {
-	[_particleTemplateMeshes release];
-	[super dealloc];
-}
-
 -(void) addParticleTemplateMesh: (CC3Mesh*) aVtxArrayMesh {
 	[_particleTemplateMeshes addObject: aVtxArrayMesh];
 	LogTrace(@"%@ added particle template mesh %@ with %i vertices and %i vertex indices",
@@ -253,7 +248,7 @@
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		_particleTemplateMeshes = [[CCArray array] retain];
+		_particleTemplateMeshes = [CCArray array];
 	}
 	return self;
 }

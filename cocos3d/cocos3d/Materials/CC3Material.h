@@ -583,7 +583,7 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
  *
  * This property is used only when running under OpenGL ES 2.
  */
-@property(nonatomic, retain) CC3ShaderProgramContext* shaderContext;
+@property(nonatomic, strong) CC3ShaderProgramContext* shaderContext;
 
 /**
  * The GLSL program (vertex & fragment shaders) used to decorate this material.
@@ -597,7 +597,7 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
  *
  * This property is used only when running under OpenGL ES 2.
  */
-@property(nonatomic, retain) CC3ShaderProgram* shaderProgram;
+@property(nonatomic, strong) CC3ShaderProgram* shaderProgram;
 
 
 #pragma mark Textures
@@ -630,7 +630,7 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
  * usable area of the textures. See the notes for the same property on CC3MeshNode
  * for more information.
  */
-@property(nonatomic, retain) CC3Texture* texture;
+@property(nonatomic, strong) CC3Texture* texture;
 
 /**
  * In most situations, the material will use a single CC3Texture in the texture property.
@@ -734,7 +734,7 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
  *
  * This is a convenience property that returns the first cube-map texture that was added.
  */
-@property(nonatomic, readonly) CC3Texture* textureCube;
+@property(nonatomic, strong, readonly) CC3Texture* textureCube;
 
 /** 
  * Returns whether this material contains a texture that is a six-sided cube-map texture.

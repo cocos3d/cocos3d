@@ -416,7 +416,7 @@ static const GLuint kCC3ParticlesNoMax = UINT_MAX;
  * implements the protocols specified by the requiredParticleProtocol property of both this
  * emitter and the particle navigator
  */
-@property(nonatomic, assign) Class particleClass;
+@property(nonatomic, strong) Class particleClass;
 
 /**
  * The protocol required for particles emitted by this emitter.
@@ -437,7 +437,7 @@ static const GLuint kCC3ParticlesNoMax = UINT_MAX;
  * To encompass both requirements, you should create another custom protocol that wraps
  * (conforms to) both of those protocols, and assign it to this requiredParticleProtocol property.
  */
-@property(nonatomic, readonly) Protocol* requiredParticleProtocol;
+@property(nonatomic, strong, readonly) Protocol* requiredParticleProtocol;
 
 /**
  * For particles that follow a planned life-cycle and trajectory, the particle navigator configures that
@@ -459,7 +459,7 @@ static const GLuint kCC3ParticlesNoMax = UINT_MAX;
  * The initial value of this property is nil, indicating that the particles will not be
  * configured with a life-cycle and trajectory by a navigator.
  */
-@property(nonatomic, retain) CC3ParticleNavigator* particleNavigator;
+@property(nonatomic, strong) CC3ParticleNavigator* particleNavigator;
 
 /**
  * Indicates the length of time that the emitter will emit particles.
@@ -846,7 +846,7 @@ static const GLuint kCC3ParticlesNoMax = UINT_MAX;
  *
  * The application must not change the contents of this array directly.
  */
-@property(nonatomic, readonly) CCArray* particles;
+@property(nonatomic, strong, readonly) CCArray* particles;
 
 /**
  * The number of particles that are currently alive and being displayed by this emitter. The value of
@@ -944,7 +944,7 @@ static const GLuint kCC3ParticlesNoMax = UINT_MAX;
  * particles must support in order to be prepared by this navigator during initialization.
  */
 @interface CC3ParticleNavigator : NSObject <NSCopying> {
-	CC3ParticleEmitter* _emitter;
+	CC3ParticleEmitter* __unsafe_unretained _emitter;
 }
 
 /**
@@ -953,7 +953,7 @@ static const GLuint kCC3ParticlesNoMax = UINT_MAX;
  * This property is set automatically when the navigator is attached to the emitter.
  * Usually the application never needs to set this property directly.
  */
-@property(nonatomic, assign) CC3ParticleEmitter* emitter;
+@property(nonatomic, unsafe_unretained) CC3ParticleEmitter* emitter;
 
 /**
  * The protocol required by this particle navigator on the particles, in order for this navigator
@@ -975,7 +975,7 @@ static const GLuint kCC3ParticlesNoMax = UINT_MAX;
  * To encompass both requirements, you should create another custom protocol that wraps
  * (conforms to) both of those protocols, and assign it to this requiredParticleProtocol property.
  */
-@property(nonatomic, readonly) Protocol* requiredParticleProtocol;
+@property(nonatomic, strong, readonly) Protocol* requiredParticleProtocol;
 
 /**
  * Template method that initializes the particle. For particles that follow a planned life-cycle
@@ -1110,7 +1110,7 @@ static const GLuint kCC3ParticlesNoMax = UINT_MAX;
  * CC3ParticleProtocol protocol.
  */
 @interface CC3ParticleBase : NSObject <CC3ParticleProtocol, CCRGBAProtocol, NSCopying> {
-	CC3ParticleEmitter* _emitter;
+	CC3ParticleEmitter* __unsafe_unretained _emitter;
 }
 
 /**

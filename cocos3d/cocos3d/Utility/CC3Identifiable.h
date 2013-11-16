@@ -69,7 +69,7 @@
  * Some subclasses are designed so that their instances can be cached. For instances of those
  * subclasses, the name is required, and must be unique.
  */
-@property(nonatomic, retain) NSString* name;
+@property(nonatomic, strong) NSString* name;
 
 /**
  * If this instance does not already have a name, it is derived from the name of the specified
@@ -110,7 +110,7 @@
  * override this property to return a useful identifiable name suffix. A subclass can return
  * nil from this property to indicate that automatic naming should not be performed.
  */
-@property(nonatomic, readonly) NSString* nameSuffix;
+@property(nonatomic, strong, readonly) NSString* nameSuffix;
 
 
 #pragma mark User data

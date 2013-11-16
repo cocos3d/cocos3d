@@ -74,7 +74,7 @@ static ccTime _interpolationEpsilon = 0.1f;
 }
 
 +(id) animationWithFrameCount: (GLuint) numFrames {
-	return [[[self alloc] initWithFrameCount: numFrames] autorelease];
+	return [[self alloc] initWithFrameCount: numFrames];
 }
 
 -(NSString*) description {
@@ -235,7 +235,6 @@ static ccTime _interpolationEpsilon = 0.1f;
 	[self deallocateLocations];
 	[self deallocateQuaternions];
 	[self deallocateScales];
-	[super dealloc];
 }
 
 -(BOOL) isAnimatingLocation { return _animatedLocations != NULL; }
@@ -401,11 +400,6 @@ static ccTime _interpolationEpsilon = 0.1f;
 
 @synthesize baseAnimation=_baseAnimation, startTime=_startTime, endTime=_endTime;
 
--(void) dealloc {
-	[_baseAnimation release];
-	[super dealloc];
-}
-
 -(GLuint) frameCount { return _baseAnimation.frameCount; }
 
 -(BOOL) shouldInterpolate { return _baseAnimation.shouldInterpolate; }
@@ -445,13 +439,13 @@ static ccTime _interpolationEpsilon = 0.1f;
 }
 
 +(id) animationOnAnimation: (CC3NodeAnimation*) baseAnimation {
-	return [[[self alloc] initOnAnimation: baseAnimation] autorelease];
+	return [[self alloc] initOnAnimation: baseAnimation];
 }
 
 -(id) initOnAnimation: (CC3NodeAnimation*) baseAnimation from: (ccTime) startTime to: (ccTime) endTime {
 	CC3Assert(baseAnimation, @"%@ cannot be initialized without a base animation", self);
 	if ( (self = [super initWithFrameCount: 0]) ) {
-		_baseAnimation = [baseAnimation retain];
+		_baseAnimation = baseAnimation;
 		_startTime = startTime;
 		_endTime = endTime;
 	}
@@ -459,7 +453,7 @@ static ccTime _interpolationEpsilon = 0.1f;
 }
 
 +(id) animationOnAnimation: (CC3NodeAnimation*) baseAnimation from: (ccTime) startTime to: (ccTime) endTime {
-	return [[[self alloc] initOnAnimation: baseAnimation from: startTime to: endTime] autorelease];
+	return [[self alloc] initOnAnimation: baseAnimation from: startTime to: endTime];
 }
 
 -(id) initOnAnimation: (CC3NodeAnimation*) baseAnimation
@@ -475,9 +469,9 @@ static ccTime _interpolationEpsilon = 0.1f;
 +(id) animationOnAnimation: (CC3NodeAnimation*) baseAnimation
 				 fromFrame: (GLuint) startFrameIndex
 				   toFrame: (GLuint) endFrameIndex {
-	return [[[self alloc] initOnAnimation: baseAnimation
+	return [[self alloc] initOnAnimation: baseAnimation
 								fromFrame: startFrameIndex
-								  toFrame: endFrameIndex] autorelease];
+								  toFrame: endFrameIndex];
 }
 
 -(NSString*) description {
@@ -523,12 +517,6 @@ static ccTime _interpolationEpsilon = 0.1f;
 @synthesize isLocationAnimationEnabled=_isLocationAnimationEnabled;
 @synthesize isQuaternionAnimationEnabled=_isQuaternionAnimationEnabled;
 @synthesize isScaleAnimationEnabled=_isScaleAnimationEnabled;
-
--(void) dealloc {
-	_node = nil;			// not retained
-	[_animation release];
-	[super dealloc];
-}
 
 -(BOOL) isEnabled { return _isEnabled; }
 
@@ -606,7 +594,7 @@ static ccTime _interpolationEpsilon = 0.1f;
 	CC3Assert(node, @"%@ must be created with a valid node.", [self class]);
 	if ( (self = [super init]) ) {
 		_node = node;						// not retained
-		_animation = [animation retain];
+		_animation = animation;
 		_trackID = trackID;
 		_blendingWeight = 1.0f;
 		_animationTime = 0.0f;
@@ -623,7 +611,7 @@ static ccTime _interpolationEpsilon = 0.1f;
 }
 
 +(id) animationStateWithAnimation: (CC3NodeAnimation*) animation onTrack: (GLuint) trackID forNode: (CC3Node*) node {
-	return [[[self alloc] initWithAnimation: animation onTrack: trackID forNode: node] autorelease];
+	return [[self alloc] initWithAnimation: animation onTrack: trackID forNode: node];
 }
 
 static GLuint _lastTrackID = 0;

@@ -61,13 +61,13 @@
 +(CC3ModelSampleFactory*) factory;
 
 /** An instance of a teapot mesh that includes a texture coordinate map. */
-@property(nonatomic, readonly) CC3Mesh* texturedTeapotMesh;
+@property(nonatomic, strong, readonly) CC3Mesh* texturedTeapotMesh;
 
 /** An instance of a teapot mesh that will be covered in a single color. */
-@property(nonatomic, readonly) CC3Mesh* unicoloredTeapotMesh;
+@property(nonatomic, strong, readonly) CC3Mesh* unicoloredTeapotMesh;
 
 /** An instance of a teapot mesh that includes a vertex color array. */
-@property(nonatomic, readonly) CC3Mesh* multicoloredTeapotMesh;
+@property(nonatomic, strong, readonly) CC3Mesh* multicoloredTeapotMesh;
 
 #pragma mark Factory methods
 

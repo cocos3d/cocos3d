@@ -48,8 +48,6 @@
 -(void) dealloc {
 	[self remove];		// remove this instance from the cache
 	[self deleteGLShader];
-	[_shaderPreamble release];
-	[super dealloc];
 }
 
 -(GLuint) shaderID {
@@ -81,7 +79,6 @@
 	[sources addObject: preambleSrc];
 	[sources addObject: glslSource];
 	[CC3OpenGL.sharedGL compileShader: self.shaderID fromSourceCodeStrings: sources];
-	[sources release];
 
 	CC3Assert([CC3OpenGL.sharedGL getShaderWasCompiled: self.shaderID],
 			  @"%@ failed to compile because:\n%@", self,
@@ -126,7 +123,7 @@
 	
 	shader = [[self alloc] initFromSourceCodeFile: aFilePath];
 	[self addShader: shader];
-	return [shader autorelease];
+	return shader;
 }
 
 -(NSString*) glslSourceFromFile: (NSString*) aFilePath {
@@ -169,7 +166,7 @@ static GLuint _lastAssignedShaderTag = 0;
 static CC3Cache* _shaderCache = nil;
 
 +(void) ensureCache {
-	if ( !_shaderCache ) _shaderCache = [[CC3Cache weakCacheForType: @"shader"] retain];	// retained
+	if ( !_shaderCache ) _shaderCache = [CC3Cache weakCacheForType: @"shader"];	// retained
 }
 
 +(void) addShader: (CC3Shader*) shader {
@@ -238,11 +235,6 @@ static CC3Cache* _shaderCache = nil;
 	self.vertexShader = nil;		// use setter to detach shader from program
 	self.fragmentShader = nil;		// use setter to detach shader from program
 	[self deleteGLProgram];
-	[_uniformsSceneScope release];
-	[_uniformsNodeScope release];
-	[_uniformsDrawScope release];
-	[_attributes release];
-	[super dealloc];
 }
 
 -(GLuint) programID {
@@ -261,8 +253,7 @@ static CC3Cache* _shaderCache = nil;
 	if (vertexShader == _vertexShader) return;
 	
 	[self detachShader: _vertexShader];
-	[_vertexShader release];
-	_vertexShader = [vertexShader retain];
+	_vertexShader = vertexShader;
 	[self attachShader: _vertexShader];
 }
 
@@ -272,8 +263,7 @@ static CC3Cache* _shaderCache = nil;
 	if (fragmentShader == _fragmentShader) return;
 	
 	[self detachShader: _fragmentShader];
-	[_fragmentShader release];
-	_fragmentShader = [fragmentShader retain];
+	_fragmentShader = fragmentShader;
 	[self attachShader: _fragmentShader];
 }
 
@@ -617,7 +607,7 @@ static CC3Cache* _shaderCache = nil;
 									withVertexShader: vertexShader
 								   andFragmentShader: fragmentShader];
 	[self addProgram: program];
-	return [program autorelease];
+	return program;
 }
 
 -(id) initWithSemanticDelegate: (id<CC3ShaderProgramSemanticsDelegate>) semanticDelegate
@@ -672,7 +662,7 @@ static GLuint _lastAssignedProgramTag = 0;
 static CC3Cache* _programCache = nil;
 
 +(void) ensureCache {
-	if ( !_programCache ) _programCache = [[CC3Cache weakCacheForType: @"shader program"] retain];	// retained
+	if ( !_programCache ) _programCache = [CC3Cache weakCacheForType: @"shader program"];	// retained
 }
 
 +(void) addProgram: (CC3ShaderProgram*) program {
@@ -730,9 +720,7 @@ static id<CC3ShaderProgramMatcher> _programMatcher = nil;
 }
 
 +(void) setProgramMatcher: (id<CC3ShaderProgramMatcher>) programMatcher {
-	id old = _programMatcher;
-	_programMatcher = [programMatcher retain];
-	[old release];
+	_programMatcher = programMatcher;
 }
 
 @end
@@ -798,7 +786,7 @@ static id<CC3ShaderProgramMatcher> _programMatcher = nil;
 
 #pragma mark Allocation and initialization
 
-+(id) prewarmerWithName: (NSString*) name { return [[[self alloc] initWithName: name] autorelease]; }
++(id) prewarmerWithName: (NSString*) name { return [[self alloc] initWithName: name]; }
 
 @end
 

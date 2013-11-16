@@ -88,7 +88,7 @@ static GLfloat shininessExpansionFactor = 128.0f;
 }
 
 +(id) materialAtIndex: (GLint) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
-	return [[[self alloc] initAtIndex: aPODIndex fromPODResource: aPODRez] autorelease];
+	return [[self alloc] initAtIndex: aPODIndex fromPODResource: aPODRez];
 }
 
 -(void) populateFrom: (CC3PODMaterial*) another {

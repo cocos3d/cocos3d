@@ -407,7 +407,7 @@
 }
 
 /** The CC3NodeAnimation containing the underlying animation data. */
-@property(nonatomic, retain, readonly) CC3NodeAnimation* baseAnimation;
+@property(nonatomic, strong, readonly) CC3NodeAnimation* baseAnimation;
 
 /**
  * The time within the underlying animation data that corresponds to the first frame of animation
@@ -537,7 +537,7 @@
  * on a particular track, and keeps track of the animation state on behalf of the node.
  */
 @interface CC3NodeAnimationState : NSObject {
-	CC3Node* _node;
+	CC3Node* __unsafe_unretained _node;
 	CC3NodeAnimation* _animation;
 	ccTime _animationTime;
 	CC3Vector _location;
@@ -552,10 +552,10 @@
 }
 
 /** The node whose animation state is being tracked by this instance.  */
-@property (nonatomic, assign, readonly) CC3Node* node;
+@property (nonatomic, unsafe_unretained, readonly) CC3Node* node;
 
 /** The animation whose state is being tracked by this instance. */
-@property (nonatomic, retain, readonly) CC3NodeAnimation* animation;
+@property (nonatomic, strong, readonly) CC3NodeAnimation* animation;
 
 /** The animation track on which the animation runs. */
 @property (nonatomic, assign, readonly) GLuint trackID;

@@ -59,7 +59,6 @@
 -(void) dealloc {
 	[_light removeShadow: self];		// Will also set light to nil
 	LogTrace(@"Removed %@ from %@ leaving %i shadows", self, _light, _light.shadows.count);
-	[super dealloc];
 }
 
 -(BOOL) isShadowVolume { return YES; }

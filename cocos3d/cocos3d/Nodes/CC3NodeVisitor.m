@@ -57,14 +57,6 @@
 @synthesize currentNode=_currentNode, startingNode=_startingNode;
 @synthesize shouldVisitChildren=_shouldVisitChildren, camera=_camera;
 
--(void) dealloc {
-	_currentNode = nil;				// not retained
-	_startingNode = nil;			// not retained
-	[_camera release];
-	[_pendingRemovals release];
-	[super dealloc];
-}
-
 -(CC3PerformanceStatistics*) performanceStatistics { return _startingNode.performanceStatistics; }
 
 -(CC3Camera*) camera {
@@ -169,7 +161,7 @@
 -(void) close { [self processRemovals]; }
 
 -(void) requestRemovalOf: (CC3Node*) aNode {
-	if (!_pendingRemovals) _pendingRemovals = [[CCArray array] retain];
+	if (!_pendingRemovals) _pendingRemovals = [CCArray array];
 	[_pendingRemovals addObject: aNode];
 }
 
@@ -215,7 +207,7 @@
 	return self;
 }
 
-+(id) visitor { return [[[self alloc] init] autorelease]; }
++(id) visitor { return [[self alloc] init]; }
 
 -(NSString*) description { return [NSString stringWithFormat: @"%@", [self class]]; }
 
@@ -397,18 +389,6 @@
 @synthesize currentTextureUnitIndex=_currentTextureUnitIndex, textureUnitCount=_textureUnitCount;
 @synthesize currentColor=_currentColor;
 
--(void) dealloc {
-	[_gl release];
-	[_renderSurface release];
-	[_boneMatricesGlobal release];
-	[_boneMatricesEyeSpace release];
-	[_boneMatricesModelSpace release];
-	_drawingSequencer = nil;		// not retained
-	_currentSkinSection = nil;		// not retained
-	_currentShaderProgram = nil;	// not retained
-	[super dealloc];
-}
-
 -(CC3OpenGL*) gl {
 	if ( !_gl) self.gl = CC3OpenGL.sharedGL;
 	return _gl;
@@ -423,8 +403,7 @@
 
 -(void) setRenderSurface: (id<CC3RenderSurface>) renderSurface {
 	if (renderSurface == _renderSurface) return;
-	[_renderSurface release];
-	_renderSurface = [renderSurface retain];
+	_renderSurface = renderSurface;
 	[self alignCameraViewport];
 }
 
@@ -721,11 +700,6 @@
 
 @synthesize pickedNode=_pickedNode;
 
--(void) dealloc {
-	[_pickedNode release];
-	[super dealloc];
-}
-
 /** Overridden to initially set the shouldDecorateNode to NO. */
 -(id) init {
 	if ( (self = [super init]) ) {
@@ -737,10 +711,7 @@
 /** Clears the render surface and the pickedNode property. */
 -(void) open {
 	[super open];
-	
 	[self.renderSurface clearColorAndDepthContent];
-
-	[_pickedNode release];
 	_pickedNode = nil;
 }
 
@@ -758,7 +729,7 @@
 	[self.renderSurface readColorContentFrom: CC3ViewportMake(touchPoint.x, touchPoint.y, 1, 1) into: &pixColor];
 	
 	// Fetch the node whose tags is mapped from the pixel color
-	_pickedNode = [[self.scene getNodeTagged: [self tagFromColor: pixColor]] retain];
+	_pickedNode = [self.scene getNodeTagged: [self tagFromColor: pixColor]];
 
 	LogTrace(@"%@ picked %@ from color %@ at position %@", self, _pickedNode,
 			 NSStringFromCCC4B(pixColor), NSStringFromCC3IntPoint(touchPoint));
@@ -831,17 +802,12 @@
 @synthesize node=_node, sqGlobalPunctureDistance=_sqGlobalPunctureDistance;
 @synthesize punctureLocation=_punctureLocation, globalPunctureLocation=_globalPunctureLocation;
 
--(void) dealloc {
-	[_node release];
-	[super dealloc];
-}
-
 
 #pragma mark Allocation and initialization
 
 -(id) initOnNode: (CC3Node*) aNode fromRay: (CC3Ray) aRay {
 	if ( (self = [super init]) ) {
-		_node = [aNode retain];
+		_node = aNode;
 		_punctureLocation = [aNode locationOfGlobalRayIntesection: aRay];
 		_globalPunctureLocation = [aNode.globalTransformMatrix transformLocation: _punctureLocation];
 		_sqGlobalPunctureDistance = CC3VectorDistanceSquared(_globalPunctureLocation, aRay.startLocation);
@@ -850,7 +816,7 @@
 }
 
 +(id) punctureOnNode: (CC3Node*) aNode fromRay: (CC3Ray) aRay {
-	return [[[self alloc] initOnNode: aNode fromRay: aRay] autorelease];
+	return [[self alloc] initOnNode: aNode fromRay: aRay];
 }
 
 @end
@@ -863,11 +829,6 @@
 
 @synthesize ray=_ray, shouldPunctureFromInside=_shouldPunctureFromInside;
 @synthesize shouldPunctureInvisibleNodes=_shouldPunctureInvisibleNodes;
-
--(void) dealloc {
-	[_nodePunctures release];
-	[super dealloc];
-}
 
 -(CC3NodePuncture*) nodePunctureAt:  (NSUInteger) index {
 	return (CC3NodePuncture*)[_nodePunctures objectAtIndex: index];
@@ -938,13 +899,13 @@
 -(id) initWithRay: (CC3Ray) aRay {
 	if ( (self = [super init]) ) {
 		_ray = aRay;
-		_nodePunctures = [[CCArray array] retain];
+		_nodePunctures = [CCArray array];
 		_shouldPunctureFromInside = NO;
 		_shouldPunctureInvisibleNodes = NO;
 	}
 	return self;
 }
 
-+(id) visitorWithRay: (CC3Ray) aRay { return [[[self alloc] initWithRay: aRay] autorelease]; }
++(id) visitorWithRay: (CC3Ray) aRay { return [[self alloc] initWithRay: aRay]; }
 
 @end

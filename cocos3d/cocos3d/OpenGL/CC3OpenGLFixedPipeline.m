@@ -49,7 +49,6 @@
 -(void) dealloc {
 	free(values_GL_TEXTURE_ENV_MODE);
 	free(values_GL_TEXTURE_ENV_COLOR);
-	[super dealloc];
 }
 
 

@@ -43,7 +43,7 @@
 
 -(BOOL) evaluate: (CC3Node*) aNode { return NO; }
 
-+(id) evaluator { return [[[self alloc] init] autorelease]; }
++(id) evaluator { return [[self alloc] init]; }
 
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
@@ -130,11 +130,6 @@
 
 @synthesize evaluator=_evaluator, allowSequenceUpdates=_allowSequenceUpdates;
 
--(void) dealloc {
-	[_evaluator release];
-	[super dealloc];
-}
-
 -(CCArray*) nodes { return [CCArray array]; }
 
 -(BOOL) shouldUseOnlyForwardDistance { return NO; }
@@ -146,7 +141,7 @@
 
 -(id) init { return [self initWithEvaluator: nil]; }
 
-+(id) sequencer { return [[[self alloc] init] autorelease]; }
++(id) sequencer { return [[self alloc] init]; }
 
 -(id) initWithEvaluator: (CC3NodeEvaluator*) anEvaluator {
 	if ( (self = [super init]) ) {
@@ -157,7 +152,7 @@
 }
 
 +(id) sequencerWithEvaluator: (CC3NodeEvaluator*) anEvaluator {
-	return [[[self alloc] initWithEvaluator: anEvaluator] autorelease];
+	return [[self alloc] initWithEvaluator: anEvaluator];
 }
 
 
@@ -216,14 +211,9 @@
 
 @synthesize sequencers=_sequencers;
 
--(void) dealloc {
-	[_sequencers release];
-	[super dealloc];
-}
-
 -(id) initWithEvaluator: (CC3NodeEvaluator*) anEvaluator {
 	if ( (self = [super initWithEvaluator: anEvaluator]) ) {
-		_sequencers = [[CCArray array] retain];
+		_sequencers = [CCArray array];
 	}
 	return self;
 }
@@ -324,14 +314,13 @@
 
 -(void) dealloc {
 	[_nodes releaseAsUnretained];		// Clears without releasing each element.
-	[super dealloc];
 }
 
 -(CCArray*) nodes { return [CCArray arrayWithArray: _nodes]; }
 
 -(id) initWithEvaluator: (CC3NodeEvaluator*) anEvaluator {
 	if ( (self = [super initWithEvaluator: anEvaluator]) ) {
-		_nodes = [[CCArray array] retain];
+		_nodes = [CCArray array];
 	}
 	return self;
 }
@@ -584,22 +573,20 @@
 
 -(void) dealloc {
 	[_misplacedNodes releaseAsUnretained];		// Clears without releasing each element.
-	_scene = nil;								// not retained
-	[super dealloc];
 }
 
 -(id) init { return [self initWithScene: nil]; }
 
 -(id) initWithScene: (CC3Scene*) aCC3Scene {
 	if ( (self = [super init]) ) {
-		_scene = aCC3Scene;			// not retained
-		_misplacedNodes = [[CCArray array] retain];
+		_scene = aCC3Scene;
+		_misplacedNodes = [CCArray array];
 	}
 	return self;
 }
 
 +(id) visitorWithScene: (CC3Scene*) aCC3Scene {
-	return [[[self alloc] initWithScene: aCC3Scene] autorelease];
+	return [[self alloc] initWithScene: aCC3Scene];
 }
 
 -(BOOL) hasMisplacedNodes { return (_misplacedNodes.count > 0); }

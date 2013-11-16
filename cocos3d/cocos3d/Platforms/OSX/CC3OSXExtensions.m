@@ -45,8 +45,8 @@
 }
 
 -(CC3GLContext*) asSharedContext {
-	return [[[self.class alloc] initWithFormat: ((CCGLView*)self.view).pixelFormat
-								 shareContext: self] autorelease];
+	return [[self.class alloc] initWithFormat: ((CCGLView*)self.view).pixelFormat
+								 shareContext: self];
 }
 
 @end

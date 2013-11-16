@@ -138,7 +138,7 @@
  * of the view itself. Prior to the view being established, reading this property returns the value to
  * which it has been set. The initial value of this property is kEAGLColorFormatRGBA8.
  */
-@property(nonatomic, retain) NSString* viewColorFormat;
+@property(nonatomic, strong) NSString* viewColorFormat;
 
 /**
  * Indicates the depth format of the view.

@@ -38,11 +38,6 @@
 
 @synthesize isReady=_isReady;
 
--(void) dealloc {
-	[_data release];
-	[super dealloc];
-}
-
 -(NSUInteger) elementSize { return MAX(_elementSize, 1); }
 
 -(void) setElementSize: (NSUInteger) elementSize {
@@ -85,7 +80,7 @@
 }
 
 +(id) dataArrayWithElementSize: (NSUInteger) elementSize {
-	return [[[self alloc] initWithElementSize: elementSize] autorelease];
+	return [[self alloc] initWithElementSize: elementSize];
 }
 
 @end

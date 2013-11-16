@@ -67,7 +67,7 @@
  *
  * Setting this property will redefine the variables that can be retrieved via the uniform... methods.
  */
-@property(nonatomic, retain) CC3ShaderProgram* program;
+@property(nonatomic, strong) CC3ShaderProgram* program;
 
 /**
  * Indicates whether this context should ensure that all uniforms with an unknown semantic

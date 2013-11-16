@@ -90,7 +90,7 @@
 	return self;
 }
 
-+(id) boundingVolume { return [[[self alloc] init] autorelease]; }
++(id) boundingVolume { return [[self alloc] init]; }
 
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
@@ -435,11 +435,6 @@
 @implementation CC3NodeBoundingVolume
 
 @synthesize shouldMaximize=_shouldMaximize;
-
--(void) dealloc {
-	_node = nil;			// not retained
-	[super dealloc];
-}
 
 -(CC3Node*) node { return _node; }
 
@@ -908,7 +903,7 @@
 }
 
 +(id) boundingVolumeFromSphere: (CC3Sphere) sphere {
-	return [[[self alloc] initFromSphere: sphere] autorelease];
+	return [[self alloc] initFromSphere: sphere];
 }
 
 @end
@@ -1078,7 +1073,7 @@
 }
 
 +(id) boundingVolumeFromBox: (CC3Box) box {
-	return [[[self alloc] initFromBox: box] autorelease]; }
+	return [[self alloc] initFromBox: box]; }
 
 @end
 
@@ -1093,11 +1088,6 @@
 @implementation CC3NodeTighteningBoundingVolumeSequence
 
 @synthesize boundingVolumes=_boundingVolumes;
-
--(void) dealloc {
-	[_boundingVolumes release];
-	[super dealloc];
-}
 
 -(void) setShouldMaximize: (BOOL) shouldMax {
 	_shouldMaximize = shouldMax;
@@ -1117,7 +1107,7 @@
 
 -(id) init {
 	if ( (self = [super init]) ) {
-		_boundingVolumes = [[CCArray array] retain];
+		_boundingVolumes = [CCArray array];
 	}
 	return self;
 }

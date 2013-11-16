@@ -91,22 +91,6 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 
 @synthesize faces=_faces, capacityExpansionFactor=_capacityExpansionFactor;
 
--(void) dealloc {
-	[_faces release];
-	[_vertexLocations release];
-	[_vertexNormals release];
-	[_vertexTangents release];
-	[_vertexBitangents release];
-	[_vertexColors release];
-	[_vertexTextureCoordinates release];
-	[_vertexMatrixIndices release];
-	[_vertexWeights release];
-	[_vertexPointSizes release];
-	[_vertexIndices release];
-	[_overlayTextureCoordinates release];
-	[super dealloc];
-}
-
 -(void) setName: (NSString*) aName {
 	super.name = aName;
 	[_vertexLocations deriveNameFrom: self];
@@ -132,8 +116,7 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 -(CC3VertexLocations*) vertexLocations { return _vertexLocations; }
 
 -(void) setVertexLocations: (CC3VertexLocations*) vtxLocs {
-	[_vertexLocations autorelease];
-	_vertexLocations = [vtxLocs retain];
+	_vertexLocations = vtxLocs;
 	[_vertexLocations deriveNameFrom: self];
 }
 
@@ -142,8 +125,7 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 -(CC3VertexNormals*) vertexNormals { return _vertexNormals; }
 
 -(void) setVertexNormals: (CC3VertexNormals*) vtxNorms {
-	[_vertexNormals autorelease];
-	_vertexNormals = [vtxNorms retain];
+	_vertexNormals = vtxNorms;
 	[_vertexNormals deriveNameFrom: self];
 }
 
@@ -154,8 +136,7 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 -(CC3VertexTangents*) vertexTangents { return _vertexTangents; }
 
 -(void) setVertexTangents: (CC3VertexTangents*) vtxTans {
-	[_vertexTangents autorelease];
-	_vertexTangents = [vtxTans retain];
+	_vertexTangents = vtxTans;
 	[_vertexTangents deriveNameFrom: self];
 }
 
@@ -164,8 +145,7 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 -(CC3VertexTangents*) vertexBitangents { return _vertexBitangents; }
 
 -(void) setVertexBitangents: (CC3VertexTangents*) vtxBitans {
-	[_vertexBitangents autorelease];
-	_vertexBitangents = [vtxBitans retain];
+	_vertexBitangents = vtxBitans;
 	[_vertexBitangents deriveNameFrom: self usingSuffix: @"Bitangents"];
 	_vertexBitangents.semantic = kCC3SemanticVertexBitangent;
 }
@@ -175,8 +155,7 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 -(CC3VertexColors*) vertexColors { return _vertexColors; }
 
 -(void) setVertexColors: (CC3VertexColors*) vtxCols {
-	[_vertexColors autorelease];
-	_vertexColors = [vtxCols retain];
+	_vertexColors = vtxCols;
 	[_vertexColors deriveNameFrom: self];
 }
 
@@ -187,8 +166,7 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 -(CC3VertexMatrixIndices*) vertexMatrixIndices { return _vertexMatrixIndices; }
 
 -(void) setVertexMatrixIndices: (CC3VertexMatrixIndices*) vtxMtxInd {
-	[_vertexMatrixIndices autorelease];
-	_vertexMatrixIndices = [vtxMtxInd retain];
+	_vertexMatrixIndices = vtxMtxInd;
 	[_vertexMatrixIndices deriveNameFrom: self];
 }
 
@@ -197,8 +175,7 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 -(CC3VertexWeights*) vertexWeights { return _vertexWeights; }
 
 -(void) setVertexWeights: (CC3VertexWeights*) vtxWgts {
-	[_vertexWeights autorelease];
-	_vertexWeights = [vtxWgts retain];
+	_vertexWeights = vtxWgts;
 	[_vertexWeights deriveNameFrom: self];
 }
 
@@ -207,8 +184,7 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 -(CC3VertexPointSizes*) vertexPointSizes { return _vertexPointSizes; }
 
 -(void) setVertexPointSizes: (CC3VertexPointSizes*) vtxSizes {
-	[_vertexPointSizes autorelease];
-	_vertexPointSizes = [vtxSizes retain];
+	_vertexPointSizes = vtxSizes;
 	[_vertexPointSizes deriveNameFrom: self];
 }
 
@@ -217,8 +193,7 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 -(CC3VertexIndices*) vertexIndices { return _vertexIndices; }
 
 -(void) setVertexIndices: (CC3VertexIndices*) vtxInd {
-	[_vertexIndices autorelease];
-	_vertexIndices = [vtxInd retain];
+	_vertexIndices = vtxInd;
 	[_vertexIndices deriveNameFrom: self];
 }
 
@@ -227,8 +202,7 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 -(CC3VertexTextureCoordinates*) vertexTextureCoordinates { return _vertexTextureCoordinates; }
 
 -(void) setVertexTextureCoordinates: (CC3VertexTextureCoordinates*) vtxTexCoords {
-	[_vertexTextureCoordinates autorelease];
-	_vertexTextureCoordinates = [vtxTexCoords retain];
+	_vertexTextureCoordinates = vtxTexCoords;
 	[_vertexTextureCoordinates deriveNameFrom: self];
 }
 
@@ -252,9 +226,7 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 	} else {
 		// Add subsequent texture coordinate arrays to the array of overlayTextureCoordinates,
 		// creating it first if necessary
-		if(!_overlayTextureCoordinates) {
-			_overlayTextureCoordinates = [[CCArray array] retain];
-		}
+		if( !_overlayTextureCoordinates )	_overlayTextureCoordinates = [CCArray array];
 		[_overlayTextureCoordinates addObject: vtxTexCoords];
 		[vtxTexCoords deriveNameFrom: self];
 	}
@@ -271,10 +243,7 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 		// and remove the overlay array if it is now empty
 		if (_overlayTextureCoordinates && aTexCoord) {
 			[_overlayTextureCoordinates removeObjectIdenticalTo: aTexCoord];
-			if (_overlayTextureCoordinates.count == 0) {
-				[_overlayTextureCoordinates release];
-				_overlayTextureCoordinates = nil;
-			}
+			if (_overlayTextureCoordinates.count == 0) _overlayTextureCoordinates = nil;
 		}
 	}
 }
@@ -285,10 +254,7 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 	
 	// Remove the overlay texture coordinates
 	CCArray* myOTCs = [_overlayTextureCoordinates copy];
-	for (CC3VertexTextureCoordinates* otc in myOTCs) {
-		[self removeTextureCoordinates: otc];
-	}
-	[myOTCs release];
+	for (CC3VertexTextureCoordinates* otc in myOTCs) [self removeTextureCoordinates: otc];
 }
 
 -(CC3VertexTextureCoordinates*) getTextureCoordinatesNamed: (NSString*) aName {
@@ -331,7 +297,7 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 	if (texUnit == 0) {
 		self.vertexTextureCoordinates = aTexCoords;
 	} else if (texUnit < self.textureCoordinatesArrayCount) {
-		[_overlayTextureCoordinates fastReplaceObjectAtIndex: (texUnit - 1) withObject: aTexCoords];
+		[_overlayTextureCoordinates replaceObjectAtIndex: (texUnit - 1) withObject: aTexCoords];
 	} else {
 		[self addTextureCoordinates: aTexCoords];
 	}
@@ -848,9 +814,7 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 }
 
 -(void) setFaces: (CC3FaceArray*) aFaceArray {
-	id old = _faces;
-	_faces = [aFaceArray retain];
-	[old release];
+	_faces = aFaceArray;
 	_faces.mesh = self;
 }
 
@@ -1469,14 +1433,14 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 	_capacityExpansionFactor = another.capacityExpansionFactor;
 }
 
-+(id) mesh { return [[[self alloc] init] autorelease]; }
++(id) mesh { return [[self alloc] init]; }
 
-+(id) meshWithTag: (GLuint) aTag { return [[[self alloc] initWithTag: aTag] autorelease]; }
++(id) meshWithTag: (GLuint) aTag { return [[self alloc] initWithTag: aTag]; }
 
-+(id) meshWithName: (NSString*) aName { return [[[self alloc] initWithName: aName] autorelease]; }
++(id) meshWithName: (NSString*) aName { return [[self alloc] initWithName: aName]; }
 
 +(id) meshWithTag: (GLuint) aTag withName: (NSString*) aName {
-	return [[[self alloc] initWithTag: aTag withName: aName] autorelease];
+	return [[self alloc] initWithTag: aTag withName: aName];
 }
 
 
@@ -1507,7 +1471,6 @@ static GLuint lastAssignedMeshTag;
 	[self deallocateNormals];
 	[self deallocatePlanes];
 	[self deallocateNeighbours];
-	[super dealloc];
 }
 
 /**
@@ -1564,14 +1527,14 @@ static GLuint lastAssignedMeshTag;
 	return self;
 }
 
-+(id) faceArray { return [[[self alloc] init] autorelease]; }
++(id) faceArray { return [[self alloc] init]; }
 
-+(id) faceArrayWithTag: (GLuint) aTag { return [[[self alloc] initWithTag: aTag] autorelease]; }
++(id) faceArrayWithTag: (GLuint) aTag { return [[self alloc] initWithTag: aTag]; }
 
-+(id) faceArrayWithName: (NSString*) aName { return [[[self alloc] initWithName: aName] autorelease]; }
++(id) faceArrayWithName: (NSString*) aName { return [[self alloc] initWithName: aName]; }
 
 +(id) faceArrayWithTag: (GLuint) aTag withName: (NSString*) aName {
-	return [[[self alloc] initWithTag: aTag withName: aName] autorelease];
+	return [[self alloc] initWithTag: aTag withName: aName];
 }
 
 // Phantom properties used during copying

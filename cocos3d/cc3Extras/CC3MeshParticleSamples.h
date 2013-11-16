@@ -163,7 +163,7 @@
  * See the notes for the CC3MeshParticleProtocol templateMesh and CC3MeshParticleEmitter
  * particleTemplateMesh for more information.
  */
-@property(nonatomic, retain, readonly) CCArray* particleTemplateMeshes;
+@property(nonatomic, strong, readonly) CCArray* particleTemplateMeshes;
 
 /**
  * Adds the specified mesh to the collection of meshes in the particleTemplateMeshes property.

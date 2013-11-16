@@ -30,14 +30,18 @@
 #import "CC3NSViewController.h"
 
 @interface CC3DemoMashUpAppDelegate : NSObject <NSApplicationDelegate> {
-	NSWindow* __weak _window;
-	CC3GLView* __weak _glView;
+	NSWindow* _window;
+	CC3GLView* _glView;
 	CC3NSViewController* _viewController;
 }
 
-@property (weak) IBOutlet NSWindow* window;
-@property (weak) IBOutlet CC3GLView* glView;
+/** The window in which the app is displayed. */
+@property (strong) IBOutlet NSWindow* window;
 
-- (IBAction)toggleFullScreen:(id)sender;
+/** The view in which the 3D scene is displayed. */
+@property (strong) IBOutlet CC3GLView* glView;
+
+/** Toggles the screen between standard and full-screen. */
+-(IBAction) toggleFullScreen: (id) sender;
 
 @end

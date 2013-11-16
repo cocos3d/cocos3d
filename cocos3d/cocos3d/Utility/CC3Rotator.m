@@ -66,7 +66,7 @@
 
 #pragma mark Allocation and initialization
 
-+(id) rotator { return [[[self alloc] init] autorelease]; }
++(id) rotator { return [[self alloc] init]; }
 
 -(id) copyWithZone: (NSZone*) zone {
 	CC3Rotator* aCopy = [[[self class] allocWithZone: zone] init];
@@ -100,11 +100,6 @@
 @end
 
 @implementation CC3MutableRotator
-
--(void) dealloc {
-	[_rotationMatrix release];
-	[super dealloc];
-}
 
 -(BOOL) isMutable { return YES; }
 
@@ -190,8 +185,7 @@
 
 -(void) setRotationMatrix:(CC3Matrix*) aMatrix {
 	if (aMatrix == _rotationMatrix) return;
-	[_rotationMatrix release];
-	_rotationMatrix = [aMatrix retain];
+	_rotationMatrix = aMatrix;
 	_rotationType = kCC3RotationTypeUnknown;
 	_isRotationDirty = NO;
 }
@@ -241,7 +235,7 @@ static GLubyte _autoOrthonormalizeCount = 0;
 }
 
 +(id) rotatorOnRotationMatrix: (CC3Matrix*) aMatrix {
-	return [[[self alloc] initOnRotationMatrix: aMatrix] autorelease];
+	return [[self alloc] initOnRotationMatrix: aMatrix];
 }
 
 -(id) copyWithZone: (NSZone*) zone {
@@ -419,11 +413,6 @@ static GLubyte _autoOrthonormalizeCount = 0;
 @end
 
 @implementation CC3TargettingRotator
-
--(void) dealloc {
-	_target = nil;			// not retained
-	[super dealloc];
-}
 
 -(BOOL) isTrackingForBumpMapping { return _isTrackingForBumpMapping; }
 

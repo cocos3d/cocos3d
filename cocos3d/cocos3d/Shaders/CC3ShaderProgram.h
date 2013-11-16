@@ -94,7 +94,7 @@
  * If you change this property, you should concatenate the value of the defaultShaderPreamble to
  * the additional preamble content that you require.
  */
-@property(nonatomic, retain) NSString* shaderPreamble;
+@property(nonatomic, strong) NSString* shaderPreamble;
 
 /**
  * Returns a string containing GLSL source code to be used as a default preamble for the
@@ -111,7 +111,7 @@
  * Subclasses may override this property to return additional shader preamble content, such
  * as standard define statements, etc.
  */
-@property(nonatomic, readonly) NSString* defaultShaderPreamble;
+@property(nonatomic, strong, readonly) NSString* defaultShaderPreamble;
 
 
 #pragma mark Allocation and initialization
@@ -360,7 +360,7 @@
  * you must invoke the link method, and optionally, the prewarm method, once both shaders
  * have been set via this property and the fragmentShader property.
  */
-@property(nonatomic, retain) CC3VertexShader* vertexShader;
+@property(nonatomic, strong) CC3VertexShader* vertexShader;
 
 /**
  * The fragment shader used by this program.
@@ -369,7 +369,7 @@
  * you must invoke the link method, and optionally, the prewarm method, once both shaders
  * have been set via this property and the vertexShader property.
  */
-@property(nonatomic, retain) CC3FragmentShader* fragmentShader;
+@property(nonatomic, strong) CC3FragmentShader* fragmentShader;
 
 /**
  * On each render loop, this CC3ShaderProgram delegates to this object to populate
@@ -377,7 +377,7 @@
  *
  * This property must be set prior to the program being compiled.
  */
-@property(nonatomic, retain) id<CC3ShaderProgramSemanticsDelegate> semanticDelegate;
+@property(nonatomic, strong) id<CC3ShaderProgramSemanticsDelegate> semanticDelegate;
 
 /** Returns the length of the largest uniform name in this program. */
 @property(nonatomic, readonly) GLint maxUniformNameLength;
@@ -389,7 +389,7 @@
 @property(nonatomic, readonly) GLuint uniformCount;
 
 /** Returns a read-only array of the GLSL uniforms declared and used by this shader program. */
-@property(nonatomic, readonly) CCArray* uniforms;
+@property(nonatomic, strong, readonly) CCArray* uniforms;
 
 /** Returns the number of memory storage elements consumed by the uniform variables used by this program. */
 @property(nonatomic, readonly) GLuint uniformStorageElementCount;
@@ -940,7 +940,7 @@
  * If not set directly, this property will be initialized to a minimal off-screen surface that
  * contains only a color buffer, with no depth buffer.
  */
-@property(nonatomic, retain) id<CC3RenderSurface> prewarmingSurface;
+@property(nonatomic, strong) id<CC3RenderSurface> prewarmingSurface;
 
 /** 
  * The mesh node that is rendered to the prewarmingSurface in order to pre-warm a shader program.
@@ -948,14 +948,14 @@
  * If not set directly, this property will be lazily initialized to a minimal mesh consisting
  * of a single triangular face containing only location content in the verticies.
  */
-@property(nonatomic, retain) CC3MeshNode* prewarmingMeshNode;
+@property(nonatomic, strong) CC3MeshNode* prewarmingMeshNode;
 
 /** 
  * The drawing visitor used to render the prewarmingMeshNode to the prewarmingSurface.
  *
  * If not set directly, this property will be lazily initialized to a a basic drawing visitor.
  */
-@property(nonatomic, retain) CC3NodeDrawingVisitor* drawingVisitor;
+@property(nonatomic, strong) CC3NodeDrawingVisitor* drawingVisitor;
 
 /** Pre-warms the specified shader program by rendering the prewarmingMeshNode to the prewarmingSurface. */
 -(void) prewarmShaderProgram: (CC3ShaderProgram*) program;

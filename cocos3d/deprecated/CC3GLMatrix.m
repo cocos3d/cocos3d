@@ -60,7 +60,7 @@
 	return self;
 }
 
-+(id) matrix { return [[[self alloc] init] autorelease]; }
++(id) matrix { return [[self alloc] init]; }
 
 -(id) initIdentity {
 	if( (self = [self initParent]) ) {
@@ -69,7 +69,7 @@
 	return self;
 }
 
-+(id) identity { return [[[self alloc] initIdentity] autorelease]; }
++(id) identity { return [[self alloc] initIdentity]; }
 
 -(id) initFromGLMatrix: (GLfloat*) aGLMtx {
 	if( (self = [self initParent]) ) {
@@ -79,7 +79,7 @@
 }
 
 +(id) matrixFromGLMatrix: (GLfloat*) aGLMtx {
-	return [[[self alloc] initFromGLMatrix: aGLMtx] autorelease];
+	return [[self alloc] initFromGLMatrix: aGLMtx];
 }
 
 -(id) initWithFirstElement: (GLfloat) e00 remainingElements: (va_list) args {
@@ -123,7 +123,7 @@
 }
 
 +(id) matrixOnGLMatrix: (GLfloat*) aGLMtx {
-	return [[[self alloc] initOnGLMatrix: aGLMtx] autorelease];
+	return [[self alloc] initOnGLMatrix: aGLMtx];
 }
 
 @end
@@ -154,7 +154,6 @@
 
 // Instantiate the appropriate concrete cluster class.
 -(id) init {
-	[self release];
 	return [[CC3GLArrayMatrix alloc] init];
 }
 
@@ -163,7 +162,6 @@
 
 // Instantiate the appropriate concrete cluster class.
 -(id) initIdentity {
-	[self release];
 	return [[CC3GLArrayMatrix alloc] initIdentity];
 }
 
@@ -174,7 +172,6 @@
 
 // Instantiate the appropriate concrete cluster class.
 -(id) initFromGLMatrix: (GLfloat*) aGLMtx {
-	[self release];
 	return [[CC3GLArrayMatrix alloc] initFromGLMatrix: aGLMtx];
 }
 
@@ -191,7 +188,6 @@
 
 // Instantiate the appropriate concrete cluster class.
 -(id) initWithFirstElement: (GLfloat) e00 remainingElements: (va_list) args {
-	[self release];
 	return [[CC3GLArrayMatrix alloc] initWithFirstElement: e00 remainingElements: args];
 }
 
@@ -210,12 +206,11 @@
 	va_start(args, e00);
 	CC3GLMatrixDeprecated* mtx = [[CC3GLArrayMatrix alloc] initWithFirstElement: e00 remainingElements: args];
 	va_end(args);
-	return [mtx autorelease];
+	return mtx;
 }
 
 // Instantiate the appropriate concrete cluster class.
 -(id) initOnGLMatrix: (GLfloat*) aGLMtx {
-	[self release];
 	return [[CC3GLPointerMatrix alloc] initOnGLMatrix: aGLMtx];
 }
 
@@ -225,7 +220,7 @@
 }
 
 - (id) copyWithZone: (NSZone*) zone {
-	return [[CC3GLArrayMatrix matrixFromGLMatrix: self.glMatrix] retain];
+	return [CC3GLArrayMatrix matrixFromGLMatrix: self.glMatrix];
 }
 
 -(NSString*) description {

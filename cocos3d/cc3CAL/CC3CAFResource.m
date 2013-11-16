@@ -89,7 +89,7 @@ static BOOL _defaultShouldSwapYZ = YES;
 	
 	rez = [[self alloc] initFromFile: cafFilePath linkedToCSFFile: csfFilePath];
 	[self addResource: rez];
-	return [rez autorelease];
+	return rez;
 }
 
 

@@ -50,24 +50,21 @@ extern "C" {
 	SPODMesh* psm = (SPODMesh*)aSPODMesh;
 	if ( (self = [super init]) ) {
 		GLint elemSize = pcd->n;
-		LogRez(@"\t%@ %@ from: %@", (elemSize ? @"Creating" : @"Skipping"), [self class], NSStringFromCPODData(pcd));
-		if (elemSize) {
-			self.elementType = GLElementTypeFromEPVRTDataType(pcd->eType);
-			self.shouldNormalizeContent = CC3ShouldNormalizeEPVRTDataType(pcd->eType);
-			self.elementSize = elemSize;
-			self.vertexStride = pcd->nStride;
-			self.vertexCount = psm->nNumVertex;
-			[self setElementsFromCPODData: pcd fromSPODMesh: psm];
-		} else {
-			[self release];
-			return nil;
-		}
+		LogRez(@"\t%@ %@ from: %@", ((elemSize == 0) ? @"Creating" : @"Skipping"), [self class], NSStringFromCPODData(pcd));
+		if (elemSize == 0) return nil;
+			
+		self.elementType = GLElementTypeFromEPVRTDataType(pcd->eType);
+		self.shouldNormalizeContent = CC3ShouldNormalizeEPVRTDataType(pcd->eType);
+		self.elementSize = elemSize;
+		self.vertexStride = pcd->nStride;
+		self.vertexCount = psm->nNumVertex;
+		[self setElementsFromCPODData: pcd fromSPODMesh: psm];
 	}
 	return self;
 }
 
 +(id) arrayFromCPODData: (PODClassPtr) aCPODData fromSPODMesh: (PODStructPtr) aSPODMesh {
-	return [[[self alloc] initFromCPODData: aCPODData fromSPODMesh: aSPODMesh] autorelease];
+	return [[self alloc] initFromCPODData: aCPODData fromSPODMesh: aSPODMesh];
 }
 
 /** Template method extracts the vertex data from the specified SPODMesh and CPODData structures.  */
@@ -145,16 +142,14 @@ extern "C" {
 
 -(id) initFromSPODMesh: (PODStructPtr) aSPODMesh forTextureUnit: (GLuint) texUnit {
 	SPODMesh* psm = (SPODMesh*)aSPODMesh;
-	if (texUnit < psm->nNumUVW) {
+	if (texUnit < psm->nNumUVW)
 		return [self initFromCPODData: &psm->psUVW[texUnit] fromSPODMesh: aSPODMesh];
-	} else {
-		[self release];
+	else
 		return nil;
-	}
 }
 
 +(id) arrayFromSPODMesh: (PODStructPtr) aSPODMesh forTextureUnit: (GLuint) texUnit {
-	return [[[self alloc] initFromSPODMesh: aSPODMesh forTextureUnit: texUnit] autorelease];
+	return [[self alloc] initFromSPODMesh: aSPODMesh forTextureUnit: texUnit];
 }
 
 @end

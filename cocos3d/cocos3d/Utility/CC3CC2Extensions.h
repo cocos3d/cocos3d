@@ -512,7 +512,7 @@ enum {
  * This performs a simple replacement, which is faster than the implementation
  * of the replaceObjectAtIndex: method, which adds and then removes.
  */
--(void) fastReplaceObjectAtIndex: (NSUInteger) index withObject: (id) anObject;
+//-(void) fastReplaceObjectAtIndex: (NSUInteger) index withObject: (id) anObject;
 
 /**
  * Expands or shrinks the array to the specified capacity.

@@ -163,7 +163,7 @@ static const CC3VertexContent kCC3PointParticleContentSize DEPRECATED_ATTRIBUTE 
 }
 
 /** @deprecated Use the mesh property. */
-@property(nonatomic, readonly) CC3PointParticleMesh* particleMesh DEPRECATED_ATTRIBUTE;
+@property(nonatomic, strong, readonly) CC3PointParticleMesh* particleMesh DEPRECATED_ATTRIBUTE;
 
 /** @deprecated Replaced by the more generic vertexContentTypes. */
 @property(nonatomic, readonly) CC3VertexContent particleContentTypes DEPRECATED_ATTRIBUTE;
@@ -403,7 +403,7 @@ static const CC3VertexContent kCC3PointParticleContentSize DEPRECATED_ATTRIBUTE 
  *
  * For CC3PointParticle, the emitter must be of type CC3PointParticleEmitter.
  */
-@property(nonatomic, assign) CC3PointParticleEmitter* emitter;
+@property(nonatomic, unsafe_unretained) CC3PointParticleEmitter* emitter;
 
 /**
  * If this particle has vertex normal content, (which can be checked with the hasNormal property),

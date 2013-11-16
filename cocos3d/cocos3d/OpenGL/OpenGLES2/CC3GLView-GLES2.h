@@ -60,10 +60,10 @@
 }
 
 /** This class requires a layer of type CAEAGLLayer. */
-@property(nonatomic, readonly, retain) CAEAGLLayer* layer;
+@property(nonatomic, strong, readonly) CAEAGLLayer* layer;
 
 /** The underlying view rendering surface. */
-@property(nonatomic, retain, readonly) CC3GLViewSurfaceManager* surfaceManager;
+@property(nonatomic, strong, readonly) CC3GLViewSurfaceManager* surfaceManager;
 
 /** Returns the GL color format of the pixels. */
 @property(nonatomic, readonly) GLenum colorFormat;

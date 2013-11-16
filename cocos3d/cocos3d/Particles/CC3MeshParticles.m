@@ -79,11 +79,6 @@
 @synthesize isParticleTransformDirty=_isParticleTransformDirty;
 @synthesize shouldTransformUnseenParticles=_shouldTransformUnseenParticles;
 
--(void) dealloc {
-	[_particleTemplateMesh release];
-	[super dealloc];
-}
-
 -(Protocol*) requiredParticleProtocol { return @protocol(CC3MeshParticleProtocol); }
 
 -(CC3Mesh*) particleTemplateMesh { return _particleTemplateMesh; }
@@ -91,8 +86,7 @@
 -(void) setParticleTemplateMesh: (CC3Mesh*) aMesh {
 	if (aMesh == _particleTemplateMesh) return;
 	
-	[_particleTemplateMesh release];
-	_particleTemplateMesh = [aMesh retain];
+	_particleTemplateMesh = aMesh;
 
 	// Add vertex content if not already set, and align the drawing mode
 	if (self.vertexContentTypes == kCC3VertexContentNone)
@@ -352,12 +346,6 @@
 
 @synthesize isTransformDirty=_isTransformDirty, rotator=_rotator;
 @synthesize templateMesh=_templateMesh, isColorDirty=_isColorDirty;
-
--(void) dealloc {
-	[_rotator release];
-	[_templateMesh release];
-	[super dealloc];
-}
 
 -(CC3MeshParticleEmitter*) emitter { return (CC3MeshParticleEmitter*)_emitter; }
 

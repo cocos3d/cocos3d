@@ -38,11 +38,6 @@
 
 @synthesize controlledNode=_controlledNode;
 
--(void) dealloc {
-	[_controlledNode release];
-    [super dealloc];
-}
-
 -(BOOL) isOverlayingDeviceCamera { return NO; }
 
 -(void) setIsOverlayingDeviceCamera: (BOOL) isOverlayingDeviceCamera {}
@@ -58,9 +53,7 @@
 
 -(void) setControlledNode: (CCNode*) aNode {
 	if (aNode == _controlledNode) return;
-	
-	[_controlledNode release];
-	_controlledNode = [aNode retain];
+	_controlledNode = aNode;
 	aNode.controller = self;
 }
 

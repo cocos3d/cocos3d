@@ -166,7 +166,7 @@ NSString* NSStringFromUIDeviceOrientation(UIDeviceOrientation deviceOrientation)
 +(void) clearCurrentContext { self.currentContext = nil; }
 
 -(CC3GLContext*) asSharedContext {
-	return [[[self.class alloc] initWithAPI: self.API sharegroup: self.sharegroup] autorelease];
+	return [[self.class alloc] initWithAPI: self.API sharegroup: self.sharegroup];
 }
 
 @end

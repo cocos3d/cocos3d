@@ -113,7 +113,7 @@
 @property(nonatomic, readonly) BOOL isBillboard;
 
 /** The 2D artifact that this node will display. This can be any CCNode subclass. */
-@property(nonatomic, retain) CCNode* billboard;
+@property(nonatomic, strong) CCNode* billboard;
 
 /**
  * Indicates whether this instance should be drawn in 2D as an overlay on top of
@@ -447,7 +447,7 @@
 #pragma mark Bounding volumes
 
 /** The bounding volume of this node must be an instance of CC3NodeBoundingArea or one of its subclasses. */
-@property(nonatomic, retain) CC3NodeBoundingArea* boundingVolume;
+@property(nonatomic, strong) CC3NodeBoundingArea* boundingVolume;
 
 
 #pragma mark Allocation and initialization

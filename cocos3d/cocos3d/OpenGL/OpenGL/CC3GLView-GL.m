@@ -42,11 +42,6 @@
 @synthesize surfaceManager=_surfaceManager;
 @synthesize colorFormat=_colorFormat, depthFormat=_depthFormat;
 
--(void) dealloc {
-	[_surfaceManager release];
-	[super dealloc];
-}
-
 -(GLuint) requestedSamples { return 1; }
 
 -(GLuint) pixelSamples { return _surfaceManager.pixelSamples; }

@@ -40,10 +40,7 @@
 @synthesize isWeak=_isWeak, typeName=_typeName;
 
 -(void) dealloc {
-	[_objectsByName release];
-	[_typeName release];
 	[self deleteLock];
-	[super dealloc];
 }
 
 -(void) addObject: (id<CC3Cacheable>) obj {
@@ -97,7 +94,6 @@
 		if ( [obj isKindOfClass: type] ) [_objectsByName removeObjectForKey: key];
 	}];
 	[self unlock];
-	[cacheCopy release];
 }
 
 -(void) enumerateObjectsUsingBlock: (void (^) (id<CC3Cacheable> obj, BOOL* stop)) block {
@@ -134,11 +130,11 @@
 }
 
 +(id) weakCacheForType: (NSString*) typeName {
-	return [[[self alloc] initAsWeakCache: YES forType: typeName] autorelease];
+	return [[self alloc] initAsWeakCache: YES forType: typeName];
 }
 
 +(id) strongCacheForType: (NSString*) typeName {
-	return [[[self alloc] initAsWeakCache: NO forType: typeName] autorelease];
+	return [[self alloc] initAsWeakCache: NO forType: typeName];
 }
 
 @end
@@ -148,7 +144,7 @@
 
 @implementation CC3CacheableWrapper
 
--(id<CC3Cacheable>) cachedObject { return _cachedObject; }
+-(id<CC3Cacheable>) cachedObject { return nil; }
 
 
 #pragma mark Allocation and initialization
@@ -157,7 +153,7 @@
 -(id) initWith: (id<CC3Cacheable>) cachedObject { return [self init]; }
 
 +(id) wrapperWith: (id<CC3Cacheable>) cachedObject {
-	return [[[self alloc] initWith: cachedObject] autorelease];
+	return [[self alloc] initWith: cachedObject];
 }
 
 @end
@@ -167,14 +163,11 @@
 
 @implementation CC3WeakCacheableWrapper
 
--(void) dealloc {
-	_cachedObject = nil;	// not retained
-	[super dealloc];
-}
+-(id<CC3Cacheable>) cachedObject { return _cachedObject; }
 
 -(id) initWith: (id<CC3Cacheable>) cachedObject {
 	if ( (self = [super init]) ) {
-		_cachedObject = cachedObject;	// not retained
+		_cachedObject = cachedObject;
 	}
 	return self;
 }
@@ -186,14 +179,11 @@
 
 @implementation CC3StrongCacheableWrapper
 
--(void) dealloc {
-	[_cachedObject release];
-	[super dealloc];
-}
+-(id<CC3Cacheable>) cachedObject { return _cachedObject; }
 
 -(id) initWith: (id<CC3Cacheable>) cachedObject {
 	if ( (self = [super init]) ) {
-		_cachedObject = [cachedObject retain];
+		_cachedObject = cachedObject;
 	}
 	return self;
 }

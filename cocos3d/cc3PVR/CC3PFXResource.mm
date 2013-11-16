@@ -43,13 +43,6 @@ extern "C" {
 
 @synthesize semanticDelegateClass=_semanticDelegateClass;
 
--(void) dealloc {
-	[_effectsByName release];
-	[_texturesByName release];
-	_semanticDelegateClass = nil;		// not retained
-	[super dealloc];
-}
-
 
 #pragma mark Populating materials
 
@@ -165,7 +158,6 @@ extern "C" {
 																	fromPFXParser: pfxParser
 																	inPFXResource: self];
 		[_effectsByName setObject: effect forKey: effect.name];
-		[effect release];
 	}
 }
 
@@ -214,14 +206,6 @@ static Class _defaultSemanticDelegateClass = nil;
 
 @synthesize name=_name, shaderProgram=_shaderProgram, textures=_textures, variables=_variables;
 
--(void) dealloc {
-	[_name release];
-	[_shaderProgram release];
-	[_textures release];
-	[_variables release];
-	[super dealloc];
-}
-
 
 #pragma mark Populating materials
 
@@ -262,7 +246,7 @@ static Class _defaultSemanticDelegateClass = nil;
 	if ( (self = [self init]) ) {
 		CPVRTPFXParser* pfxParser = (CPVRTPFXParser*)pCPVRTPFXParser;
 		SPVRTPFXParserEffect* pfxEffect = (SPVRTPFXParserEffect*)pSPVRTPFXParserEffect;
-		_name = [[NSString stringWithUTF8String: pfxEffect->Name.c_str()] retain];	// retained
+		_name = [NSString stringWithUTF8String: pfxEffect->Name.c_str()];	// retained
 		[self initTexturesForPFXEffect: pfxEffect fromPFXParser: pfxParser inPFXResource: pfxRez];
 		[self initVariablesForPFXEffect: pfxEffect fromPFXParser: pfxParser inPFXResource: pfxRez];
 		[self initShaderProgramForPFXEffect: pfxEffect fromPFXParser: pfxParser inPFXResource: pfxRez];
@@ -292,7 +276,6 @@ static Class _defaultSemanticDelegateClass = nil;
 			effectTex.name = texName;
 			effectTex.textureUnitIndex = tuIdx;
 			[_textures addObject: effectTex];
-			[effectTex release];
 		} else {
 			LogError(@"%@ could not find texture named %@ in %@", self, texName, pfxRez);
 		}
@@ -317,7 +300,6 @@ static Class _defaultSemanticDelegateClass = nil;
 		varConfig.pfxSemanticName = [NSString stringWithUTF8String: pfxVariables[varIdx].pszValue];
 		varConfig.semanticIndex = pfxVariables[varIdx].nIdx;
 		[_variables addObject: varConfig];
-		[varConfig release];
 	}
 }
 
@@ -360,7 +342,7 @@ static Class _defaultSemanticDelegateClass = nil;
 									inPFXResource: (CC3PFXResource*) pfxRez {
 	CC3PFXGLProgramSemantics* semanticDelegate = [pfxRez.semanticDelegateClass new];
 	[semanticDelegate populateWithVariableNameMappingsFromPFXEffect: self];
-	return [semanticDelegate autorelease];
+	return semanticDelegate;
 }
 
 /** Returns the PFX vertex shader that was assigned the specified name in the PFX resource file. */
@@ -403,12 +385,6 @@ static Class _defaultSemanticDelegateClass = nil;
 
 @synthesize texture=_texture, name=_name, textureUnitIndex=_textureUnitIndex;
 
--(void) dealloc {
-	[_texture release];
-	[_name release];
-	[super dealloc];
-}
-
 @end
 
 
@@ -418,11 +394,6 @@ static Class _defaultSemanticDelegateClass = nil;
 @implementation CC3PFXGLSLVariableConfiguration
 
 @synthesize pfxSemanticName=_pfxSemanticName;
-
--(void) dealloc {
-	[_pfxSemanticName release];
-	[super dealloc];
-}
 
 -(id) init {
 	if ( (self = [super init]) ) {
@@ -560,7 +531,7 @@ static Class _defaultSemanticDelegateClass = nil;
 	
 	// Add the shader to the shader cache and return it.
 	[self addShader: shader];
-	return [shader autorelease];
+	return shader;
 }
 
 @end

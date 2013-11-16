@@ -229,11 +229,6 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 
 @synthesize name=_name, semantic=_semantic, semanticIndex=_semanticIndex;
 
--(void) dealloc {
-	[_name release];
-	[super dealloc];
-}
-
 -(id) init {
 	if ( (self = [super init]) ) {
 		_name = nil;
@@ -251,7 +246,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 
 @implementation CC3ShaderProgramSemanticsBase
 
-+(id) semanticsDelegate { return [[[self alloc] init] autorelease]; }
++(id) semanticsDelegate { return [[self alloc] init]; }
 
 -(NSString*) nameOfSemantic: (GLenum) semantic { return NSStringFromCC3Semantic(semantic); }
 
@@ -662,7 +657,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			[uniform setVector: [visitor.currentMeshNode.globalTransformMatrixInverted
 								 transformLocation: visitor.camera.globalLocation]];
 			return YES;
-		case kCC3SemanticCameraFrustum:
+		case kCC3SemanticCameraFrustum: {
 			// Applies the field of view angle to the narrower aspect.
 			vp = visitor.camera.viewport;
 			GLfloat aspect = (GLfloat) vp.w / (GLfloat) vp.h;
@@ -677,6 +672,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			}
 			[uniform setVector4: CC3Vector4Make(fovWidth, fovHeight, cam.nearClippingDistance, cam.farClippingDistance)];
 			return YES;
+		}
 		case kCC3SemanticViewport:
 			vp = visitor.camera.viewport;
 			[uniform setIntVector4: CC3IntVector4Make(vp.x, vp.y, vp.w, vp.h)];
@@ -1012,7 +1008,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 				[uniform setInteger: (isCTU ? ctu.alphaOperand2 :  GL_SRC_ALPHA) at: i];
 			}
 			return YES;
-
+			
 #pragma mark Setting model semantics
 		// MODEL ----------------
 		case kCC3SemanticCenterOfGeometry:
@@ -1116,11 +1112,6 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 
 @implementation CC3ShaderProgramSemanticsByVarName
 
--(void) dealloc {
-	[_varConfigsByName release];
-	[super dealloc];
-}
-
 
 #pragma mark Allocation and initialization
 
@@ -1159,7 +1150,6 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	varConfig.semantic = semantic;
 	varConfig.semanticIndex = semanticIndex;
 	[self addVariableConfiguration: varConfig];
-	[varConfig release];
 }
 
 -(void) mapVarName: (NSString*) name toSemantic: (GLenum) semantic {

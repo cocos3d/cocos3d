@@ -82,7 +82,7 @@
 }
 
 +(id) meshAtIndex: (GLint) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
-	return [[[self alloc] initAtIndex: aPODIndex fromPODResource: aPODRez] autorelease];
+	return [[self alloc] initAtIndex: aPODIndex fromPODResource: aPODRez];
 }
 
 @end

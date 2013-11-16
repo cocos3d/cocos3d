@@ -199,7 +199,7 @@
 }
 
 /** The collection of CC3SkinSections that are managed by this node. */
-@property(nonatomic,retain, readonly) CCArray* skinSections;
+@property(nonatomic,strong, readonly) CCArray* skinSections;
 
 /**
  * Returns the cached rest pose matrix, relative to the soft-body ancestor node.
@@ -208,7 +208,7 @@
  *
  * The value of this property is set when the bindRestPose method is invoked.
  */
-@property(nonatomic, retain, readonly) CC3Matrix* restPoseTransformMatrix;
+@property(nonatomic, strong, readonly) CC3Matrix* restPoseTransformMatrix;
 
 /**
  * Returns the skin section that deforms the specified vertex.
@@ -326,7 +326,7 @@
  * The array returned by this property is created anew for each read. Do not add or remove
  * bones from the returned array directly. To add a bone, use the addBone: method.
  */
-@property(nonatomic, retain, readonly) CCArray* bones;
+@property(nonatomic, strong, readonly) CCArray* bones;
 
 /** Returns the bone node at the specified index. */
 -(CC3Bone*) boneAt: (GLuint) boneIdx;
@@ -547,7 +547,7 @@
  *
  * The value of this property is set when the bindRestPose method is invoked.
  */
-@property(nonatomic, retain, readonly) CC3Matrix* restPoseInvertedMatrix;
+@property(nonatomic, strong, readonly) CC3Matrix* restPoseInvertedMatrix;
 
 /**
  * Applies the changes to the current transform of this bone, relative to the
@@ -588,8 +588,8 @@
  * whenever the transform of either the bone or the skin mesh node changes.
  */
 @interface CC3SkinnedBone : NSObject <CC3NodeTransformListenerProtocol> {
-	CC3Bone* _bone;
-	CC3SkinMeshNode* _skinNode;
+	CC3Bone* __unsafe_unretained _bone;
+	CC3SkinMeshNode* __unsafe_unretained _skinNode;
 	CC3Matrix* _drawTransformMatrix;
 	CC3Matrix* _skinTransformMatrix;
 	BOOL _isDrawTransformDirty : 1;
@@ -597,10 +597,10 @@
 }
 
 /** Returns the bone whose transforms are being tracked. */
-@property(nonatomic, assign, readonly) CC3Bone* bone;
+@property(nonatomic, unsafe_unretained, readonly) CC3Bone* bone;
 
 /** Returns the skin mesh node whose transforms are being tracked. */
-@property(nonatomic, assign, readonly) CC3SkinMeshNode* skinNode;
+@property(nonatomic, unsafe_unretained, readonly) CC3SkinMeshNode* skinNode;
 
 /**
  * Returns the transform matrix used to draw the deformed nodes during mesh rendering.
@@ -612,7 +612,7 @@
  * This occurs automatically when either the bone or the skin mesh node being
  * tracked by this instance is transformed.
  */
-@property(nonatomic, retain, readonly) CC3Matrix* drawTransformMatrix;
+@property(nonatomic, strong, readonly) CC3Matrix* drawTransformMatrix;
 
 /**
  * Returns the transform matrix used to deform vertex locations when retrieved from
@@ -627,7 +627,7 @@
  * This occurs automatically when either the bone or the skin mesh node being
  * tracked by this instance is transformed.
  */
-@property(nonatomic, retain, readonly) CC3Matrix* skinTransformMatrix;
+@property(nonatomic, strong, readonly) CC3Matrix* skinTransformMatrix;
 
 /**
  * Marks the transform matrices as dirty.
@@ -667,7 +667,7 @@
  * so that the faces can be rebuilt if the skin mesh node or any of the bones move.
  */
 @interface CC3DeformedFaceArray : CC3FaceArray {
-	CC3SkinMeshNode* _node;
+	CC3SkinMeshNode* __unsafe_unretained _node;
 	CC3Vector* _deformedVertexLocations;
 	BOOL _deformedVertexLocationsAreRetained : 1;
 	BOOL _deformedVertexLocationsAreDirty : 1;
@@ -680,7 +680,7 @@
  * deformedVertexLocations, centers, normals, planes and neighbours properties
  * to be deallocated and then re-built on the next access.
  */
-@property(nonatomic, assign) CC3SkinMeshNode* node;
+@property(nonatomic, unsafe_unretained) CC3SkinMeshNode* node;
 
 /**
  * Indicates the number of vertices in the deformedVertexLocations array,
@@ -1022,10 +1022,10 @@ DEPRECATED_ATTRIBUTE
 @interface CC3SkinMesh : CC3Mesh
 
 /** @deprecated Renamed to vertexMatrixIndices. */
-@property(nonatomic,retain) CC3VertexMatrixIndices* boneMatrixIndices DEPRECATED_ATTRIBUTE;
+@property(nonatomic,strong) CC3VertexMatrixIndices* boneMatrixIndices DEPRECATED_ATTRIBUTE;
 
 /** @deprecated Renamed to vertexWeights. */
-@property(nonatomic,retain) CC3VertexWeights* boneWeights DEPRECATED_ATTRIBUTE;
+@property(nonatomic,strong) CC3VertexWeights* boneWeights DEPRECATED_ATTRIBUTE;
 
 /** @deprecated Renamed to vertexWeightForVertexUnit:at: */
 -(GLfloat) weightForVertexUnit: (GLuint) vertexUnit at: (GLuint) index DEPRECATED_ATTRIBUTE;

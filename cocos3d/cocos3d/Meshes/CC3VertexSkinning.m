@@ -86,13 +86,6 @@
 
 @synthesize skinSections=_skinSections, restPoseTransformMatrix=_restPoseTransformMatrix;
 
--(void) dealloc {
-	[_skinSections release];
-	[_restPoseTransformMatrix release];
-	[_deformedFaces release];
-	[super dealloc];
-}
-
 -(CC3SkinSection*) skinSectionForVertexIndexAt: (GLint) index {
 	for (CC3SkinSection* skinSctn in _skinSections)
 		if ( [skinSctn containsVertexIndex: index] ) return skinSctn;
@@ -120,9 +113,7 @@
 }
 
 -(void) setDeformedFaces: (CC3DeformedFaceArray*) aFaceArray {
-	id old = _deformedFaces;
-	_deformedFaces = [aFaceArray retain];
-	[old release];
+	_deformedFaces = aFaceArray;
 	_deformedFaces.node = self;
 }
 
@@ -151,7 +142,7 @@
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		_skinSections = [[CCArray array] retain];
+		_skinSections = [CCArray array];
 		_restPoseTransformMatrix = [CC3AffineMatrix new];
 		_deformedFaces = nil;
 	}
@@ -171,7 +162,7 @@
 	[_skinSections removeAllObjects];
 	CCArray* otherSkinSections = another.skinSections;
 	for (CC3SkinSection* ss in otherSkinSections)
-		[_skinSections addObject: [[ss copyForNode: self] autorelease]];		// retained in array
+		[_skinSections addObject: [ss copyForNode: self]];		// retained in array
 }
 
 -(void) reattachBonesFrom: (CC3Node*) aNode {
@@ -289,12 +280,6 @@
 
 @synthesize vertexStart=_vertexStart, vertexCount=_vertexCount;
 
--(void) dealloc {
-	[_skinnedBones release];
-	_node = nil;				// not retained
-	[super dealloc];
-}
-
 -(GLuint) boneCount { return (GLuint)_skinnedBones.count; }
 
 -(CCArray*) bones {
@@ -358,7 +343,7 @@
 -(id) initForNode: (CC3SkinMeshNode*) aNode {
 	if ( (self = [super init]) ) {
 		_node = aNode;							// not retained
-		_skinnedBones = [[CCArray array] retain];
+		_skinnedBones = [CCArray array];
 		_vertexStart = 0;
 		_vertexCount = 0;
 	}
@@ -366,7 +351,7 @@
 }
 
 +(id) skinSectionForNode: (CC3SkinMeshNode*) aNode {
-	return [[[self alloc] initForNode: aNode] autorelease];
+	return [[self alloc] initForNode: aNode];
 }
 
 // Extract the old bones into an array, and for each, look for the
@@ -443,11 +428,6 @@
 
 @synthesize restPoseInvertedMatrix=_restPoseInvertedMatrix;
 
--(void) dealloc {
-	[_restPoseInvertedMatrix release];
-	[super dealloc];
-}
-
 -(BOOL) hasSoftBodyContent  { return YES; }
 
 #pragma mark Allocation and initialization
@@ -499,14 +479,7 @@
 
 -(void) dealloc {
 	[_skinNode removeTransformListener: self];
-	_skinNode = nil;		// Weak reference
-
 	[_bone removeTransformListener: self];
-	_bone = nil;			// Weak reference
-
-	[_drawTransformMatrix release];
-	[_skinTransformMatrix release];
-	[super dealloc];
 }
 
 -(void) markTransformDirty {
@@ -567,7 +540,7 @@
  * applies the specified bone to the specified mesh node.
  */
 +(id) skinnedBoneWithSkin: (CC3SkinMeshNode*) aNode onBone: (CC3Bone*) aBone {
-	return [[[self alloc] initWithSkin: aNode onBone: aBone] autorelease];
+	return [[self alloc] initWithSkin: aNode onBone: aBone];
 }
 
 /** Either the bone or skin node were transformed. Mark the transforms of this skinned bone dirty. */
@@ -598,7 +571,6 @@
 -(void) dealloc {
 	self.node = nil;		// Will clear this object as a listener to the existing node.
 	[self deallocateDeformedVertexLocations];
-	[super dealloc];
 }
 
 /**

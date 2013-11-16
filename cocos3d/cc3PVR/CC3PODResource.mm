@@ -60,13 +60,7 @@ static const id placeHolder = [NSObject new];
 @synthesize animationFrameCount=_animationFrameCount, animationFrameRate=_animationFrameRate;
 
 -(void) dealloc {
-	[_allNodes release];
-	[_meshes release];
-	[_materials release];
-	[_textures release];
 	[self deleteCPVRTModelPOD];
-	_pfxResourceClass = nil;		// not retained
-	[super dealloc];
 }
 
 -(CPVRTModelPOD*) pvrtModelImpl { return (CPVRTModelPOD*)_pvrtModel; }
@@ -93,10 +87,10 @@ static Class _defaultPFXResourceClass = nil;
 -(id) init {
 	if ( (self = [super init]) ) {
 		_pvrtModel = NULL;
-		_allNodes = [[CCArray array] retain];
-		_meshes = [[CCArray array] retain];
-		_materials = [[CCArray array] retain];
-		_textures = [[CCArray array] retain];
+		_allNodes = [CCArray array];
+		_meshes = [CCArray array];
+		_materials = [CCArray array];
+		_textures = [CCArray array];
 		_textureParameters = [CC3Texture defaultTextureParameters];
 		_pfxResourceClass = [[self class] defaultPFXResourceClass];
 		_shouldAutoBuild = YES;

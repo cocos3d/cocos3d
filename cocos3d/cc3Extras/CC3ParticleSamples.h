@@ -229,7 +229,7 @@
  *
  * You can also set the nozzle to any other CC3Node instance in the scene by setting this property. 
  */
-@property(nonatomic, retain) CC3Node* nozzle;
+@property(nonatomic, strong) CC3Node* nozzle;
 
 /**
  * Indicates the angle of dispersion of the spray from the nozzle. This is specified as both a
@@ -334,7 +334,7 @@
  * during each update by combining the globalTransformMatrix of the nozzle and the globalTransformMatrixInverted
  * of the emitter.
  */
-@property(nonatomic, retain, readonly) CC3Matrix* nozzleMatrix;
+@property(nonatomic, strong, readonly) CC3Matrix* nozzleMatrix;
 
 @end
 

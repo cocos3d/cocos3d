@@ -39,8 +39,6 @@
 
 -(void) dealloc {
 	[self remove];		// remove this instance from the cache
-	[_directory release];
-	[super dealloc];
 }
 
 -(BOOL) loadFromFile: (NSString*) aFilePath {
@@ -91,14 +89,11 @@
 	return self;
 }
 
-+(id) resource { return [[[self alloc] init] autorelease]; }
++(id) resource { return [[self alloc] init]; }
 
 -(id) initFromFile: (NSString*) aFilePath {
 	if ( (self = [self init]) ) {		// Use self so subclasses will init properly
-		if ( ![self loadFromFile: aFilePath] ) {
-			[self release];
-			return nil;
-		}
+		if ( ![self loadFromFile: aFilePath] ) return nil;
 	}
 	return self;
 }
@@ -109,7 +104,7 @@
 
 	rez = [[self alloc] initFromFile: aFilePath];
 	[self addResource: rez];
-	return [rez autorelease];
+	return rez;
 }
 
 +(NSString*) resourceNameFromFilePath: (NSString*) aFilePath { return aFilePath.lastPathComponent; }
@@ -128,7 +123,7 @@
 static CC3Cache* _resourceCache = nil;
 
 +(void) ensureCache {
-	if ( !_resourceCache ) _resourceCache = [[CC3Cache weakCacheForType: @"resource"] retain];	// retained
+	if ( !_resourceCache ) _resourceCache = [CC3Cache weakCacheForType: @"resource"];	// retained
 }
 
 +(void) addResource: (CC3Resource*) resource {

@@ -432,10 +432,10 @@ static const ccColor4F kCC3ParticleFadeOut = { kCC3ParticleConstantComponent,
 @interface CC3PointParticleHoseEmitterDeprecated : CC3MortalPointParticleEmitterDeprecated {}
 
 /** @deprecated This property is now on the contained CC3HoseParticleNavigator. */
-@property(nonatomic, retain) CC3Node* nozzle;
+@property(nonatomic, strong) CC3Node* nozzle;
 
 /** @deprecated This property is now on the contained CC3HoseParticleNavigator. */
-@property(nonatomic, readonly) CC3Matrix* nozzleMatrix;
+@property(nonatomic, strong, readonly) CC3Matrix* nozzleMatrix;
 
 /** @deprecated This property is now on the contained CC3HoseParticleNavigator. */
 @property(nonatomic, assign) CGSize dispersionAngle;

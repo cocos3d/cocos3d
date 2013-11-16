@@ -36,11 +36,6 @@
 
 @synthesize data=_data, isBigEndian=_isBigEndian, wasReadBeyondEOF=_wasReadBeyondEOF;
 
--(void) dealloc {
-	[_data release];
-	[super dealloc];
-}
-
 
 #pragma mark Allocation and initialization
 
@@ -51,7 +46,7 @@
 
 -(id) initOnData: (NSData*) data {
 	if ( (self = [super init]) ) {
-		_data = [data retain];
+		_data = data;
 		_readRange = NSMakeRange(0, 0);
 		_isBigEndian = NO;
 		_wasReadBeyondEOF = NO;
@@ -59,7 +54,7 @@
 	return self;
 }
 
-+(id) readerOnData: (NSData*) data { return [[[self alloc] initOnData: data] autorelease]; }
++(id) readerOnData: (NSData*) data { return [[self alloc] initOnData: data]; }
 
 -(NSUInteger) position { return _readRange.location; }
 
