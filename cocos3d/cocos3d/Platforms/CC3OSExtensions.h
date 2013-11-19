@@ -45,20 +45,17 @@
 @interface NSObject (CC3)
 
 /**
- * Convenience method to automatically autorelease when copying objects.
- * Invokes the copy method to create a copy of this instance, autoreleases it, and returns it.
- */
--(id) autoreleasedCopy;
-
-/** @deprecated Renamed to autoreleasedCopy to satisfy naming paradigm for copy... methods. */
--(id) copyAutoreleased DEPRECATED_ATTRIBUTE;
-
-/**
  * Returns a string containing a more complete description of this object.
  *
  * This implementation simply invokes the description method. Subclasses with more
  * substantial content can override to provide much more information.
  */
 -(NSString*) fullDescription;
+
+/** @deprecated Not required with ARC. */
+-(id) autoreleasedCopy DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Renamed to autoreleasedCopy to satisfy naming paradigm for copy... methods. */
+-(id) copyAutoreleased DEPRECATED_ATTRIBUTE;
 
 @end

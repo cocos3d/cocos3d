@@ -1426,7 +1426,7 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 	CCArray* otherOTCs = another.overlayTextureCoordinates;
 	if (otherOTCs)
 		for (CC3VertexTextureCoordinates* otc in otherOTCs)
-			[self addTextureCoordinates: [otc autoreleasedCopy]];		// retained by collection
+			[self addTextureCoordinates: [otc copy]];
 	
 	self.vertexIndices = another.vertexIndices;							// retained but not copied
 	_shouldInterleaveVertices = another.shouldInterleaveVertices;

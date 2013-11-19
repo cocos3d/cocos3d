@@ -2911,7 +2911,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// We copy it so we can mofify it.
 	// Remove the camera and light that it includes, and since the billboard
 	// 2D CCNode can't easily be copied, we'll remove the billboard as well.
-	CC3Node* robotTemplate = [[self getNodeNamed: kPODRobotRezNodeName] autoreleasedCopy];
+	CC3Node* robotTemplate = [[self getNodeNamed: kPODRobotRezNodeName] copy];
 	[[robotTemplate getNodeNamed: kPODLightName] remove];
 	[[robotTemplate getNodeNamed: kPODCameraName] remove];
 	[[robotTemplate getNodeNamed: kBillboardName] remove];
@@ -2933,7 +2933,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 /** Create a landing craft and populate it with an army of teapots. */
 -(void) invadeWithTeapotArmy {
 	// First create a template node by copying the POD resource node.
-	CC3Node* teapotTemplate = [[self getNodeNamed: kTeapotWhiteName] autoreleasedCopy];
+	CC3Node* teapotTemplate = [[self getNodeNamed: kTeapotWhiteName] copy];
 	teapotTemplate.uniformScale *= 3.0;
 
 	[self invadeWithArmyOf: teapotTemplate];

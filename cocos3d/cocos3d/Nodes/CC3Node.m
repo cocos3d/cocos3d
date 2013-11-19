@@ -1245,7 +1245,7 @@ static GLuint lastAssignedNodeTag;
 }
 
 -(void) removeAllTransformListeners {
-	CCArray* myListeners = [_transformListeners autoreleasedCopy];
+	CCArray* myListeners = [_transformListeners copy];
 	for(id<CC3NodeTransformListenerProtocol> aListener in myListeners)
 		[self removeTransformListener: aListener];
 }

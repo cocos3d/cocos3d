@@ -167,7 +167,7 @@
 
 -(id) copyWithZone: (NSZone*) zone {
 	CC3NodeSequencer* aCopy = [[[self class] allocWithZone: zone]
-									initWithEvaluator: [_evaluator autoreleasedCopy]];
+									initWithEvaluator: [_evaluator copy]];
 	[aCopy populateFrom: self];
 	return aCopy;
 }
@@ -225,7 +225,7 @@
 
 	CCArray* otherChildren = another.sequencers;
 	for (CC3NodeSequencer* otherChild in otherChildren)
-		[self addSequencer: [otherChild autoreleasedCopy]];
+		[self addSequencer: [otherChild copy]];
 }
 
 -(void) addSequencer: (CC3NodeSequencer*) aNodeSequencer {

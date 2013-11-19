@@ -309,7 +309,7 @@
 	TileScene* scene = [TileScene scene];		// A new scene
 	
 	// Add the backdrop to the scene.
-	scene.backdrop = [_backdropTemplate autoreleasedCopy];
+	scene.backdrop = [_backdropTemplate copy];
 	
 	// Choose either to display a random model in each tile, or the same model
 	// in each tile by uncommenting one of these lines and commenting out the other.

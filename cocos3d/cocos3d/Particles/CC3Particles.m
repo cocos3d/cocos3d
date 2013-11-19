@@ -135,9 +135,9 @@
 -(void) populateFrom: (CC3ParticleEmitter*) another {
 	[super populateFrom: another];
 
-	self.mesh = nil;										// Emitters can't share meshes
-	self.vertexContentTypes = another.vertexContentTypes;	// Use setter to establish a new mesh
-	self.particleNavigator = [another.particleNavigator autoreleasedCopy];	// Use setter to retain & link back
+	self.mesh = nil;											// Emitters can't share meshes
+	self.vertexContentTypes = another.vertexContentTypes;		// Use setter to establish a new mesh
+	self.particleNavigator = [another.particleNavigator copy];	// Use setter to retain & link back
 	
 	_maximumParticleCapacity = another.maximumParticleCapacity;
 	_particleCapacityExpansionIncrement = another.particleCapacityExpansionIncrement;

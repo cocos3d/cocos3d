@@ -432,7 +432,7 @@
 -(CC3Scene*) makeHUDScene {
 	CC3Scene* hudScene = [HUDScene nodeWithName: @"HUDScene"];
 	
-	CC3Node* globe = [[self.cc3Scene getNodeNamed: kGlobeName] autoreleasedCopy];
+	CC3Node* globe = [[self.cc3Scene getNodeNamed: kGlobeName] copy];
 	globe.location = kCC3VectorZero;
 	globe.rotation = kCC3VectorZero;
 	[globe runAction: [CCRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0

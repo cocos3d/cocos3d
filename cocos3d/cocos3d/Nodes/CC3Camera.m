@@ -185,7 +185,7 @@
 -(void) populateFrom: (CC3Camera*) another {
 	[super populateFrom: another];
 	
-	self.frustum = [another.rawFrustum autoreleasedCopy];	// retained
+	self.frustum = [another.rawFrustum copy];
 
 	_fieldOfView = another.fieldOfView;
 	_fieldOfViewOrientation = another.fieldOfViewOrientation;

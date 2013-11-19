@@ -165,7 +165,7 @@
 }
 
 -(void) cc3RemoveAllGestureRecognizers {
-	CCArray* myGRs = [_cc3GestureRecognizers autoreleasedCopy];
+	CCArray* myGRs = [_cc3GestureRecognizers copy];
 	for (UIGestureRecognizer* gr in myGRs) [self cc3RemoveGestureRecognizer: gr];
 }
 

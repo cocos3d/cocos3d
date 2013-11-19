@@ -102,7 +102,7 @@
 
 -(void) setParticleTemplate: (CC3MeshNode*) aParticleTemplate {
 	self.particleTemplateMesh = aParticleTemplate.mesh;
-	self.material = [aParticleTemplate.material autoreleasedCopy];
+	self.material = [aParticleTemplate.material copy];
 }
 
 
@@ -826,8 +826,8 @@
 
 -(void) populateFrom: (CC3MeshParticle*) another {
 	[super populateFrom: another];
-	self.rotator = [another.rotator autoreleasedCopy];
-	_templateMesh = another.templateMesh;	// not retained
+	self.rotator = [another.rotator copy];
+	_templateMesh = another.templateMesh;
 	_location = another.location;
 	_firstVertexOffset = another.firstVertexOffset;
 	_firstVertexIndexOffset = another.firstVertexIndexOffset;

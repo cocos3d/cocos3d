@@ -229,7 +229,7 @@
 			
 			// Don't drop invaders into the central area where the main robot is.
 			if (fabsf(xLoc) > 100.0f || fabsf(zLoc) > 100.0f) {
-				CC3Node* invader = [templateNode autoreleasedCopy];
+				CC3Node* invader = [templateNode copy];
 				invader.location = cc3v(xLoc, kDropHeight, zLoc);
 				
 				// If the invader has an animation, run its animation, otherwise rotate

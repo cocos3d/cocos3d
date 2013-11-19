@@ -107,14 +107,14 @@
 
 	// For any targetting nodes that were targetted to the old camera,
 	// set the target to the new camera.
-	CCArray* targNodes = [_targettingNodes autoreleasedCopy];
+	CCArray* targNodes = [_targettingNodes copy];
 	for (CC3Node* tn in targNodes)
 		// If the node should always target the camera, or if the target
 		// is already the old camera, set its target to the new camera.
 		if (tn.shouldAutotargetCamera || (oldCam && (tn.target == oldCam))) tn.target = newCam;
 	
 	// Move other non-target camera listeners (eg- shadow casting volumes) over
-	CCArray* camListeners = [oldCam.transformListeners autoreleasedCopy];
+	CCArray* camListeners = [oldCam.transformListeners copy];
 	for(id<CC3NodeTransformListenerProtocol> aListener in camListeners) {
 		[oldCam removeTransformListener: aListener];
 		[newCam addTransformListener: aListener];
@@ -218,8 +218,8 @@
 	self.drawingSequenceVisitor = [[another.drawingSequenceVisitor class] visitorWithScene: self];	// retained
 	self.touchedNodePicker = [[another.touchedNodePicker class] pickerOnScene: self];		// retained
 
-	self.backdrop = [another.backdrop autoreleasedCopy];
-	self.fog = [another.fog autoreleasedCopy];
+	self.backdrop = [another.backdrop copy];
+	self.fog = [another.fog copy];
 	
 	_ambientLight = another.ambientLight;
 	_minUpdateInterval = another.minUpdateInterval;

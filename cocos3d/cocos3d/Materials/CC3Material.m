@@ -257,7 +257,7 @@ static ccBlendFunc _defaultBlendFunc = {GL_ONE, GL_ZERO};
 
 	// Remove the overlay textures
 	if (_textureOverlays) {
-		CCArray* myOTs = [_textureOverlays autoreleasedCopy];
+		CCArray* myOTs = [_textureOverlays copy];
 		for (CC3Texture* ot in myOTs) [self removeTexture: ot];
 	}
 }

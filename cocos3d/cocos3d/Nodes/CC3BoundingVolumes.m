@@ -1117,7 +1117,7 @@
 -(void) populateFrom: (CC3NodeTighteningBoundingVolumeSequence*) another {
 	[super populateFrom: another];
 	for(CC3NodeBoundingVolume* bv in another.boundingVolumes)
-		[_boundingVolumes addObject: [bv autoreleasedCopy]];		// retained through collection
+		[_boundingVolumes addObject: [bv copy]];
 }
 
 -(void) addBoundingVolume: (CC3NodeBoundingVolume*) aBoundingVolume {
