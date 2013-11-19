@@ -932,6 +932,7 @@
 	CC3GLFramebuffer* _multisampleSurface;
 	CC3GLFramebuffer* _pickingSurface;
 	CC3GLBackgrounder* _backgrounder;
+	BOOL _shouldUseDedicatedPickingSurface : 1;
 }
 
 /** The GL view whose surface is being managed by this instance. */
@@ -969,16 +970,24 @@
 /**
  * Returns whether a dedicated surface should be created by the pickingSurface property.
  *
- * For economy, if the viewSurface is readable, it is used as the picking surface. However,
- * if multi-sampling is being used, pixel position cannot be determined precisely. And in
- * some platforms, the viewSurface may not be directly readable.
+ * If this property returns NO, the pickingSurface property will return the surface in
+ * the viewSurface property. However, if this property returns YES, the pickingSufrace
+ * property will return a dedicated surface created just for picking.
  *
- * In those situations, a separate dedicated picking surface is required, and this propety
- * will return YES, and the pickingSurface property will create and use a dedicated surface.
- * Otherwise, this property will return NO, and the pickingSurface property will use the
- * surface in the viewSurface property for picking.
+ * For economy, if multisampling is not active and the viewSurface is readable, the 
+ * viewSurface can also be used as the picking surface. For that reason, if both of those
+ * conditions hold, and this property has not been set to YES directly, this property will
+ * return NO. Otherwise, this property will return YES.
+ *
+ * You can force the use of a dedicated picking surface, even if multisampling is not in
+ * use and the viewSurface is readable, by directly setting this property to YES. There
+ * are situations where this may be preferrable, such as if there is no backdrop, and
+ * some of the objects contain transparency. In that situation, using the viewSurface
+ * for both view rendering and node picking rendering may result in unwanted visual
+ * artifacts on the transparent nodes during node picking resulting from touch events.
+ * To avoid these artifacts, you can set this property to YES.
  */
-@property(nonatomic, readonly) BOOL shouldUseDedicatedPickingSurface;
+@property(nonatomic, assign) BOOL shouldUseDedicatedPickingSurface;
 
 /** The size of the rendering surface in pixels. */
 @property(nonatomic, readonly) CC3IntSize size;

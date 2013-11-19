@@ -759,6 +759,7 @@
 @implementation CC3GLViewSurfaceManager
 
 @synthesize view=_view, backgrounder=_backgrounder;
+@synthesize shouldUseDedicatedPickingSurface=__shouldUseDedicatedPickingSurface;
 
 -(CC3GLFramebuffer*) viewSurface { return _viewSurface; }
 
@@ -801,7 +802,7 @@
 				pickSurf.depthAttachment = [CC3GLRenderbuffer renderbufferWithPixelFormat: depthFormat];
 			}
 
-			LogTrace(@"Creating picking surface of size %@ with %@ color format %@ and depth format %@.",
+			LogInfo(@"Creating picking surface of size %@ with %@ color format %@ and depth format %@.",
 					 NSStringFromCC3IntSize(pickSurf.size),
 					 (_viewSurface.isColorContentReadable ? @"existing" : @"new"),
 					 NSStringFromGLEnum(pickSurf.colorAttachment.pixelFormat),
@@ -810,7 +811,7 @@
 			if ( [pickSurf validate] ) self.pickingSurface = pickSurf;
 			
 		} else {
-			LogTrace(@"Reusing view surface as picking surface.");
+			LogInfo(@"Reusing view surface as picking surface.");
 			self.pickingSurface = self.viewSurface;		// Use the viewSurface
 		}
 	}
@@ -824,8 +825,18 @@
 	[self addSurface: surface];
 }
 
+-(void) resetPickingSurface { self.pickingSurface = nil; }
+
 -(BOOL) shouldUseDedicatedPickingSurface {
-	return !(_viewSurface.isColorContentReadable && (_multisampleSurface == nil));
+	return (_shouldUseDedicatedPickingSurface ||
+			_multisampleSurface ||
+			!_viewSurface.isColorContentReadable);
+}
+
+-(void) setShouldUseDedicatedPickingSurface: (BOOL) shouldUseDedicatedPickingSurface {
+	if (_shouldUseDedicatedPickingSurface == shouldUseDedicatedPickingSurface) return;
+	_shouldUseDedicatedPickingSurface = shouldUseDedicatedPickingSurface;
+	[self resetPickingSurface];
 }
 
 -(CC3GLRenderbuffer*) viewColorBuffer { return (CC3GLRenderbuffer*)_viewSurface.colorAttachment; }
