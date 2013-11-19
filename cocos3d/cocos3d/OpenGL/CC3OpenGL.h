@@ -85,7 +85,7 @@ typedef struct {
 	NSString* value_GL_VENDOR;
 	NSString* value_GL_RENDERER;
 	NSString* value_GL_VERSION;
-	NSArray* _extensions;
+	NSSet* _extensions;
 	
 	CC3VertexAttr* vertexAttributes;
 	GLuint value_MaxVertexAttribsUsed;
@@ -1058,19 +1058,23 @@ typedef struct {
 
 #pragma mark GL Extensions
 
-/** Returns an array containing the names of the GL extensions supported by the platform. */
-@property(nonatomic, strong, readonly) NSArray* extensions;
+/** Returns a collection of names of the GL extensions supported by the platform. */
+@property(nonatomic, strong, readonly) NSSet* extensions;
 
 /**
  * Returns whether this platform supports the GL extension with the specified name, which
- * should be a string beginning with "GL_", and finishing with the name of the GL extension,
- * as registered with the OpenGL standards bodies, or as specified by the GPU driver 
- * manufacturer (eg. @"GL_OES_packed_depth_stencil").
+ * should be the name of the GL extension, as registered with the OpenGL standards bodies,
+ * or as specified by the GPU driver manufacturer. 
  *
- * This method involves string comparisons in the internal collection of extension names.
- * You should not use this test in time-critical code. If you need to frequently test for the
- * presence of an extension (for example, within the render loop), you should invoke this method
- * once at the beginning of your app, and cache the resulting boolean value elsewhere in your code.
+ * You may specify the name either with or without a "GL_" prefix 
+ * (eg. both @"OES_packed_depth_stencil" and @"GL_OES_packed_depth_stencil" will work if
+ * that extension is supported).
+ *
+ * This method checks the extensions collection for the presence of the specified name.
+ * Although this is an optimized hash test, you should generally not use this test in 
+ * time-critical code. If you need to frequently test for the presence of an extension
+ * (for example, within the render loop), you should invoke this method once at the 
+ * beginning of your app, and cache the resulting boolean value elsewhere in your code.
  */
 -(BOOL) supportsExtension: (NSString*) extensionName;
 

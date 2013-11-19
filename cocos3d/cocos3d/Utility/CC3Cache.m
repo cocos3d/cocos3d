@@ -121,7 +121,7 @@
 
 -(id) initAsWeakCache: (BOOL) isWeak forType: (NSString*) typeName {
 	if ( (self = [super init]) ) {
-		_objectsByName = [NSMutableDictionary new];		// retained
+		_objectsByName = [NSMutableDictionary new];
 		_isWeak = isWeak;
 		_typeName = typeName;
 		[self initLock];
@@ -150,7 +150,7 @@
 #pragma mark Allocation and initialization
 
 // Ignores the object to be cached. Subclasses will determine how to store it.
--(id) initWith: (id<CC3Cacheable>) cachedObject { return [self init]; }
+-(id) initWith: (id<CC3Cacheable>) cachedObject { return [super init]; }
 
 +(id) wrapperWith: (id<CC3Cacheable>) cachedObject {
 	return [[self alloc] initWith: cachedObject];

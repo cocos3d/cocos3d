@@ -887,22 +887,43 @@
 
 #pragma mark GL Extensions
 
-// Dummy implementation to keep compiler happy with @selector(caseInsensitiveCompare:)
-// in implementation of extensions property.
--(NSComparisonResult) caseInsensitiveCompare: (NSString*) string { return NSOrderedSame; }
+/** Returns the specified extension name, stripped of any optional GL_ prefix. */
+-(NSString*) trimExtensionName: (NSString*) extensionName {
+	NSString* extPfx = @"GL_";
+	return ([extensionName hasPrefix: extPfx]
+			? [extensionName substringFromIndex: extPfx.length]
+			: extensionName);
+}
 
--(NSArray*) extensions {
-	if ( !_extensions )
-		_extensions = [[[[self getString: GL_EXTENSIONS]
-						  componentsSeparatedByCharactersInSet:
-						  [NSCharacterSet whitespaceCharacterSet]]
-						 filteredArrayUsingPredicate: [NSPredicate predicateWithFormat: @"length > 0"]]
-						sortedArrayUsingSelector: @selector(caseInsensitiveCompare:)];
+-(NSSet*) extensions {
+	if ( !_extensions ) {
+		NSMutableSet* trimmedExts = [NSMutableSet set];
+		NSArray* rawExts = [[self getString: GL_EXTENSIONS]
+							componentsSeparatedByCharactersInSet:
+							[NSCharacterSet whitespaceCharacterSet]];
+		for (NSString* extName in rawExts) [trimmedExts addObject: [self trimExtensionName: extName]];
+		_extensions = [trimmedExts filteredSetUsingPredicate: [NSPredicate predicateWithFormat: @"length > 0"]];
+	}
 	return _extensions;
 }
 
 -(BOOL) supportsExtension: (NSString*) extensionName {
-	return [_extensions containsObject: extensionName];
+	return [_extensions containsObject: [self trimExtensionName: extensionName]];
+}
+
+// Dummy implementation to keep compiler happy with @selector(caseInsensitiveCompare:)
+// in implementation of extensionsDescription property.
+-(NSComparisonResult) caseInsensitiveCompare: (NSString*) string { return NSOrderedSame; }
+
+/** Returns a description of the available extensions. */
+-(NSString*) extensionsDescription {
+	NSMutableString* desc = [NSMutableString stringWithCapacity: 1000];
+	NSSortDescriptor* sorter = [NSSortDescriptor sortDescriptorWithKey: @"description"
+															 ascending: YES
+															  selector: @selector(caseInsensitiveCompare:)];
+	NSArray* sorted = [self.extensions sortedArrayUsingDescriptors: [NSArray arrayWithObject: sorter]];
+	for (NSString* ext in sorted) [desc appendFormat: @"\n\t%@", ext];
+	return desc;
 }
 
 
@@ -1068,13 +1089,6 @@
 /** Performs any required initialization for GL extensions supported by this platform. */
 -(void) initExtensions {
 	LogInfoIfPrimary(@"GL extensions supported by this platform: %@", self.extensionsDescription);
-}
-
-/** Returns a description of the available extensions. */
--(NSString*) extensionsDescription {
-	NSMutableString* desc = [NSMutableString stringWithCapacity: 1000];
-	for (NSString* ext in self.extensions) [desc appendFormat: @"\n\t%@", ext];
-	return desc;
 }
 
 /** Returns the appropriate class cluster subclass instance. */
