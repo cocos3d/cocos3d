@@ -3,21 +3,40 @@
 <plist version="1.0">
 <dict>
 	<key>Identifier</key>
-	<string>org.cocos3d.cocos3d2TemplateiOS</string>
+	<string>org.cocos3d.cocos3dAppOGLES2</string>
 	<key>Description</key>
-	<string>A simple cocos3d &quot;hello, world&quot; application using OpenGL ES 2.0 on an iOS device. You can use this as the starting point for any cocos3d application that uses OpenGL ES 2.0 on an iOS device. This template requires that cocos2d 2.x is installed.</string>
+	<string>A simple cocos3d &quot;hello, world&quot; application using OpenGL ES 2.0 on an iOS or Android device. You can use this as the starting point for any cocos3d application that uses OpenGL ES 2.0 on an iOS or Android device. This template requires that cocos2d 2.x is installed.</string>
 	<key>Kind</key>
 	<string>Xcode.Xcode3.ProjectTemplateUnitKind</string>
 	<key>Concrete</key>
 	<true/>
+	<key>SortOrder</key>
+	<integer>2</integer>
 	<key>Ancestors</key>
 	<array>
-		<string>com.cocos2d-v2.cocos2dlib</string>
-		<string>com.cocos2d-v2.cocosdenshionlib</string>
-		<string>com.cocos2d-v2.kazmathlib</string>
-		<string>org.cocos3d.cocos3dLib</string>
-		<string>org.cocos3d.cocos3dBase</string>
+		<string>org.cocos3d.cocos3dAppBase</string>
 		<string>org.cocos3d.cocos3dBaseIOS</string>
+	</array>
+	<key>Components</key>
+	<array>
+		<dict>
+			<key>Identifier</key>
+			<string>org.cocos3d.cocos2d-v2iOSStatLib</string>
+			<key>Name</key>
+			<string>cocos2d</string>
+		</dict>
+	</array>
+	<key>Targets</key>
+	<array>
+		<dict>
+			<key>SharedSettings</key>
+			<dict>
+				<key>INFOPLIST_FILE</key>
+				<string>___PACKAGENAME___/Resources/Info.plist</string>
+				<key>HEADER_SEARCH_PATHS</key>
+				<string>cocos2d/libs/kazmath/include</string>
+			</dict>
+		</dict>
 	</array>
 	<key>Definitions</key>
 	<dict>
@@ -41,46 +60,6 @@
 			<key>Path</key>
 			<string>Classes/___PROJECTNAMEASIDENTIFIER___AppDelegate.m</string>
 		</dict>
-		<key>Classes/___PROJECTNAMEASIDENTIFIER___Layer.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>Classes</string>
-			</array>
-			<key>Path</key>
-			<string>Classes/___PROJECTNAMEASIDENTIFIER___Layer.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>Classes/___PROJECTNAMEASIDENTIFIER___Layer.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>Classes</string>
-			</array>
-			<key>Path</key>
-			<string>Classes/___PROJECTNAMEASIDENTIFIER___Layer.m</string>
-		</dict>
-		<key>Classes/___PROJECTNAMEASIDENTIFIER___Scene.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>Classes</string>
-			</array>
-			<key>Path</key>
-			<string>Classes/___PROJECTNAMEASIDENTIFIER___Scene.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>Classes/___PROJECTNAMEASIDENTIFIER___Scene.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>Classes</string>
-			</array>
-			<key>Path</key>
-			<string>Classes/___PROJECTNAMEASIDENTIFIER___Scene.m</string>
-		</dict>
 		<key>main.m</key>
 		<dict>
 			<key>Group</key>
@@ -88,14 +67,16 @@
 			<key>Path</key>
 			<string>main.m</string>
 		</dict>
-		<key>Resources/hello-world.pod</key>
+		<key>Resources/Info.plist</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>Resources</string>
 			</array>
 			<key>Path</key>
-			<string>Resources/hello-world.pod</string>
+			<string>Resources/Info.plist</string>
+			<key>TargetIndices</key>
+			<array/>
 		</dict>
 		<key>Resources/fps_images.png</key>
 		<dict>
@@ -136,14 +117,10 @@
 	</dict>
 	<key>Nodes</key>
 	<array>
-		<string>main.m</string>
 		<string>Classes/___PROJECTNAMEASIDENTIFIER___AppDelegate.h</string>
 		<string>Classes/___PROJECTNAMEASIDENTIFIER___AppDelegate.m</string>
-		<string>Classes/___PROJECTNAMEASIDENTIFIER___Layer.h</string>
-		<string>Classes/___PROJECTNAMEASIDENTIFIER___Layer.m</string>
-		<string>Classes/___PROJECTNAMEASIDENTIFIER___Scene.h</string>
-		<string>Classes/___PROJECTNAMEASIDENTIFIER___Scene.m</string>
-		<string>Resources/hello-world.pod</string>
+		<string>main.m</string>
+		<string>Resources/Info.plist</string>
 		<string>Resources/fps_images.png</string>
 		<string>Resources/fps_images-hd.png</string>
 		<string>Resources/fps_images-ipadhd.png</string>

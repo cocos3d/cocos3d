@@ -16,10 +16,6 @@
 
 @implementation ___PROJECTNAMEASIDENTIFIER___Scene
 
--(void) dealloc {
-	[super dealloc];
-}
-
 /**
  * Constructs the 3D scene prior to the scene being displayed.
  *
@@ -91,7 +87,6 @@
 	
 	// Create OpenGL buffers for the vertex arrays to keep things fast and efficient, and to
 	// save memory, release the vertex content in main memory because it is now redundant.
-	// Be sure to do this after 
 	[self createGLBuffers];
 	[self releaseRedundantContent];
 
@@ -251,7 +246,7 @@
  * does not need to take care of any of this set-up and tear-down.
  *
  * This implementation simply invokes the default parent behaviour, which turns on the lighting
- * contained within the scene, and performs a single rendering pass of the nodes in the scene
+ * contained within the scene, and performs a single rendering pass of the nodes in the scene 
  * by invoking the visit: method on the specified visitor, with this scene as the argument.
  * Review the source code of the CC3Scene drawSceneContentWithVisitor: to understand the
  * implementation details, and as a starting point for customization.

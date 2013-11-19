@@ -32,8 +32,6 @@ echo 'cocos3d installer'
 COCOS3D_TEMPLATE_4_DIR='cocos3d'
 BASE_TEMPLATE_4_DIR="$HOME/Library/Developer/Xcode/Templates"
 
-force=
-
 usage() {
 cat << EOF
 Installs or updates cocos3d Xcode templates and links cocos2d libraries
@@ -49,16 +47,12 @@ for the following directories within that specified directory:
     external/kazmath		(cocos2d 2.x only)
  
 OPTIONS:
-   -f	force existing template directories to be ovewritten
    -h	this help
 EOF
 }
 
 while getopts "fh2:" OPTION; do
 	case "$OPTION" in
-		f)
-			force=1
-			;;
 		h)
 			usage
 			exit 0
@@ -93,21 +87,14 @@ copy_files(){
 }
 
 check_dst_dir(){
-	rm_dst_dir
-	echo ...creating destination directory: $DST_DIR
-	mkdir -p "$DST_DIR"
+	if [[ ! -d $DST_DIR ]];  then
+		echo ...creating destination directory: $DST_DIR
+		mkdir -p "$DST_DIR"
+	fi
 }
 
 rm_dst_dir(){
-	if [[ -d $DST_DIR ]];  then
-		if [[ $force ]]; then
-		echo "...removing old template: ${DST_DIR}"
-		rm -rf "$DST_DIR"
-	else
-		echo "Template ${DST_DIR} already installed. To force a re-install use the '-f' parameter"
-	exit 1
-	fi
-fi
+	rm -rf "$DST_DIR"
 }
 
 print_template_banner(){
@@ -118,20 +105,42 @@ print_template_banner(){
 }
 
 # Copies Xcode project-based templates
-copy_xc4_project_templates(){
+copy_xc_project_templates() {
+
+	print_template_banner "Installing cocos3d Xcode template"
+
 	TEMPLATE_DIR="${BASE_TEMPLATE_4_DIR}/${COCOS3D_TEMPLATE_4_DIR}/"
 
-# If the cocos3d template directory does not exist, create it.
-	if [[ ! -d "$TEMPLATE_DIR" ]]; then
-		echo '...creating Xcode cocos3d template folder'
-		echo ''
-		mkdir -p "$TEMPLATE_DIR"
-	fi
+# Delete the existing cocos3d template directory, and recreate it
+	DST_DIR="$TEMPLATE_DIR"
+	rm_dst_dir
 
-	print_template_banner "Installing Xcode 4 cocos3d iOS template"
+# Copy cocos2d-v1 iOS static library project settings
+	TEMPLATE="cocos2d iOS Static Library"
+	DST_DIR="$TEMPLATE_DIR""cocos2d-v1 iOS Static Library.xctemplate"
+	check_dst_dir
+	echo ...copying $TEMPLATE template files
+	copy_files "Templates/Xcode/$TEMPLATE.xctemplate/" "$DST_DIR"
 
-# Remove any pre-cocos3d-2.0 templates
-	rm -rf "$TEMPLATE_DIR""cocos3d Application.xctemplate"
+	mv "$DST_DIR/TemplateInfo1.plist" "$DST_DIR/TemplateInfo.plist"
+	rm "$DST_DIR/TemplateInfo2.plist"
+
+# Copy cocos2d-v2 iOS static library project settings
+	TEMPLATE="cocos2d iOS Static Library"
+	DST_DIR="$TEMPLATE_DIR""cocos2d-v2 iOS Static Library.xctemplate"
+	check_dst_dir
+	echo ...copying $TEMPLATE template files
+	copy_files "Templates/Xcode/$TEMPLATE.xctemplate/" "$DST_DIR"
+
+	mv "$DST_DIR/TemplateInfo2.plist" "$DST_DIR/TemplateInfo.plist"
+	rm "$DST_DIR/TemplateInfo1.plist"
+
+# Copy cocos2d OSX static library project settings
+	TEMPLATE="cocos2d OSX Static Library"
+	DST_DIR="$TEMPLATE_DIR""$TEMPLATE.xctemplate"
+	check_dst_dir
+	echo ...copying $TEMPLATE template files
+	copy_files "Templates/Xcode/$TEMPLATE.xctemplate/" "$DST_DIR"
 
 # Copy cocos3d library files references
 	TEMPLATE="cocos3d-lib"
@@ -163,19 +172,25 @@ copy_xc4_project_templates(){
 
 # Copy base cocos3d OSX project settings
 	TEMPLATE="cocos3d-base-osx"
-
-# Also remove any older Mac named templates
-	DST_DIR="$TEMPLATE_DIR""cocos3d-base-mac.xctemplate"
-	rm_dst_dir
-
 	DST_DIR="$TEMPLATE_DIR""$TEMPLATE.xctemplate"
 	check_dst_dir
 	echo ...copying $TEMPLATE template files
 	copy_files "Templates/Xcode/$TEMPLATE.xctemplate/" "$DST_DIR"
 
+# Copy application base cocos3d project settings
+	TEMPLATE="cocos3d-app-base"
+	DST_DIR="$TEMPLATE_DIR""$TEMPLATE.xctemplate"
+	check_dst_dir
+	echo ...copying $TEMPLATE template files
+	copy_files "Templates/Xcode/$TEMPLATE.xctemplate/" "$DST_DIR"
+
+	DST_DIR="$DST_DIR""/Resources"
+	check_dst_dir
+	copy_files "Models/Hello World/hello-world.pod" "$DST_DIR"
+
 # Copy OpenGL ES 1 Template
 	TEMPLATE="cocos3d iOS Application"
-	DST_DIR="$TEMPLATE_DIR""cocos3d1 iOS Application.xctemplate"
+	DST_DIR="$TEMPLATE_DIR""cocos3d OpenGL ES 1.1 Application.xctemplate"
 	check_dst_dir
 	echo ...copying $TEMPLATE template files for use with OpenGL ES 1.1
 	copy_files "Templates/Xcode/$TEMPLATE.xctemplate/" "$DST_DIR"
@@ -183,14 +198,16 @@ copy_xc4_project_templates(){
 	mv "$DST_DIR/TemplateInfo1.plist" "$DST_DIR/TemplateInfo.plist"
 	rm "$DST_DIR/TemplateInfo2.plist"
 
+	mv "$DST_DIR/Apportable/configuration1.json" "$DST_DIR/Apportable/configuration.json"
+	rm "$DST_DIR/Apportable/configuration2.json"
+
 	DST_DIR="$DST_DIR""/Resources"
 	check_dst_dir
-	copy_files "Models/Hello World/hello-world.pod" "$DST_DIR"
 	copy_files "Projects/Common/Resources/fps_images_1.png" "$DST_DIR"
 
 # Copy OpenGL ES 2 Template
 	TEMPLATE="cocos3d iOS Application"
-	DST_DIR="$TEMPLATE_DIR""cocos3d2 iOS Application.xctemplate"
+	DST_DIR="$TEMPLATE_DIR""cocos3d OpenGL ES 2.0 Application.xctemplate"
 	check_dst_dir
 	echo ...copying $TEMPLATE template files for use with OpenGL ES 2.0
 	copy_files "Templates/Xcode/$TEMPLATE.xctemplate/" "$DST_DIR"
@@ -198,67 +215,33 @@ copy_xc4_project_templates(){
 	mv "$DST_DIR/TemplateInfo2.plist" "$DST_DIR/TemplateInfo.plist"
 	rm "$DST_DIR/TemplateInfo1.plist"
 
+	mv "$DST_DIR/Apportable/configuration2.json" "$DST_DIR/Apportable/configuration.json"
+	rm "$DST_DIR/Apportable/configuration1.json"
+
 	DST_DIR="$DST_DIR""/Resources"
 	check_dst_dir
-	copy_files "Models/Hello World/hello-world.pod" "$DST_DIR"
 	copy_files "Projects/Common/Resources/fps_images.png" "$DST_DIR"
 	copy_files "Projects/Common/Resources/fps_images-hd.png" "$DST_DIR"
 	copy_files "Projects/Common/Resources/fps_images-ipadhd.png" "$DST_DIR"
 
-# Remove old OpenGL OSX Template (cocos2d 1.x)
-	TEMPLATE="cocos3d OSX Application"
-
-	# Also remove any older Mac named templates
-	DST_DIR="$TEMPLATE_DIR""cocos3d1 Mac Application.xctemplate"
-	rm_dst_dir
-
-	DST_DIR="$TEMPLATE_DIR""cocos3d1 OSX Application.xctemplate"
-	rm_dst_dir
-
-#	TEMPLATE="cocos3d OSX Application"
-#
-#	# Also remove any older Mac named templates
-#	DST_DIR="$TEMPLATE_DIR""cocos3d1 Mac Application.xctemplate"
-#	rm_dst_dir
-#
-#	DST_DIR="$TEMPLATE_DIR""cocos3d1 OSX Application.xctemplate"
-#	check_dst_dir
-#	echo ...copying $TEMPLATE template files for use with OpenGL under OSX and cocos2d 1.x
-#	copy_files "Templates/Xcode/$TEMPLATE.xctemplate/" "$DST_DIR"
-#
-#	mv "$DST_DIR/TemplateInfo1.plist" "$DST_DIR/TemplateInfo.plist"
-#	rm "$DST_DIR/TemplateInfo2.plist"
-#
-#	DST_DIR="$DST_DIR""/Resources"
-#	check_dst_dir
-#	copy_files "Models/Hello World/hello-world.pod" "$DST_DIR"
-
 # Copy OpenGL OSX Template (cocos2d 2.x)
 	TEMPLATE="cocos3d OSX Application"
 
-	# Also remove any older Mac named templates
-	DST_DIR="$TEMPLATE_DIR""cocos3d2 Mac Application.xctemplate"
-	rm_dst_dir
-
-	DST_DIR="$TEMPLATE_DIR""cocos3d2 OSX Application.xctemplate"
+	DST_DIR="$TEMPLATE_DIR""cocos3d OpenGL Application.xctemplate"
 	check_dst_dir
 	echo ...copying $TEMPLATE template files for use with OpenGL under OSX and cocos2d 2.x
 	copy_files "Templates/Xcode/$TEMPLATE.xctemplate/" "$DST_DIR"
 
-	mv "$DST_DIR/TemplateInfo2.plist" "$DST_DIR/TemplateInfo.plist"
-	rm "$DST_DIR/TemplateInfo1.plist"
-
 	DST_DIR="$DST_DIR""/Resources"
 	check_dst_dir
-	copy_files "Models/Hello World/hello-world.pod" "$DST_DIR"
 	copy_files "Projects/Common/Resources/fps_images.png" "$DST_DIR"
 
-	echo done!
+	echo Done!
 }
 
 # If it exists, creates a symbolic link inside the dest directory $2 to the source directory $1
 # The third arg is just a description that is echoed
-link_dir(){
+link_dir() {
 if [[ -d "$1" ]]; then
 	echo "...linking $3"
 	ln -s "$1" "$2"
@@ -292,5 +275,5 @@ link_cocos2d_libs(){
 
 link_cocos2d_libs
 
-copy_xc4_project_templates
+copy_xc_project_templates
 

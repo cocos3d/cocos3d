@@ -12,10 +12,6 @@
 
 @implementation ___PROJECTNAMEASIDENTIFIER___Layer
 
--(void) dealloc {
-    [super dealloc];
-}
-
 /**
  * Override to set up your 2D controls and other initial state, and to initialize update processing.
  *

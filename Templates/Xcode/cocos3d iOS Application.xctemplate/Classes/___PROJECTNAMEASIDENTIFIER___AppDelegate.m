@@ -15,12 +15,6 @@
 
 @implementation ___PROJECTNAMEASIDENTIFIER___AppDelegate
 
--(void) dealloc {
-	[_window release];
-	[_viewController release];
-	[super dealloc];
-}
-
 #if CC3_CC2_1
 /**
  * In cocos2d 1.x, the view controller and CCDirector are different objects.

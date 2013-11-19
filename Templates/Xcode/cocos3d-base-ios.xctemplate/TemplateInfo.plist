@@ -95,15 +95,6 @@
 	</array>
 	<key>Definitions</key>
 	<dict>
-		<key>Resources/Info.plist</key>
-		<dict>
-			<key>Group</key>
-			<string>Resources</string>
-			<key>Path</key>
-			<string>Resources/Info.plist</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
 		<key>Resources/Icon-29.png</key>
 		<dict>
 			<key>Group</key>
@@ -287,7 +278,6 @@
 	</dict>
 	<key>Nodes</key>
 	<array>
-		<string>Resources/Info.plist</string>
 		<string>Resources/Icon-29.png</string>
 		<string>Resources/Icon-29@2x.png</string>
 		<string>Resources/Icon-40.png</string>

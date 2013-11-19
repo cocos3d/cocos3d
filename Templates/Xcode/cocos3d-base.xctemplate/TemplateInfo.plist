@@ -2,8 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>Description</key>
-	<string>Standard cocos3d project settings.</string>
 	<key>Identifier</key>
 	<string>org.cocos3d.cocos3dBase</string>
 	<key>Kind</key>
@@ -69,68 +67,12 @@
 	</array>
 	<key>Project</key>
 	<dict>
-		<key>SharedSettings</key>
-		<dict>
-			<key>GCC_C_LANGUAGE_STANDARD</key>
-			<string>gnu99</string>
-			<key>CLANG_WARN_BOOL_CONVERSION</key>
-			<string>YES</string>
-			<key>CLANG_WARN_CONSTANT_CONVERSION</key>
-			<string>YES</string>
-			<key>CLANG_WARN_EMPTY_BODY</key>
-			<string>YES</string>
-			<key>CLANG_WARN_INT_CONVERSION</key>
-			<string>YES</string>
-			<key>GCC_WARN_ABOUT_RETURN_TYPE</key>
-			<string>YES</string>
-			<key>GCC_WARN_UNINITIALIZED_AUTOS</key>
-			<string>YES</string>
-			<key>GCC_WARN_UNUSED_FUNCTION</key>
-			<string>YES</string>
-			<key>GCC_WARN_UNUSED_VARIABLE</key>
-			<string>YES</string>
-			<key>CLANG_WARN_OBJC_ROOT_CLASS</key>
-			<string>YES</string>
-			<key>CLANG_WARN__DUPLICATE_METHOD_MATCH</key>
-			<string>YES</string>
-			<key>GCC_WARN_64_TO_32_BIT_CONVERSION</key>
-			<string>YES</string>
-			<key>OTHER_LDFLAGS</key>
-			<array>
-				<string>-ObjC</string>
-				<string>-lz</string>
-				<string>-lstdc++</string>
-			</array>
-			<key>ALWAYS_SEARCH_USER_PATHS</key>
-			<string>NO</string>
-		</dict>
 		<key>Configurations</key>
 		<dict>
 			<key>Debug</key>
-			<dict>
-				<key>GCC_OPTIMIZATION_LEVEL</key>
-				<string>0</string>
-				<key>ONLY_ACTIVE_ARCH</key>
-				<string>YES</string>
-				<key>GCC_PREPROCESSOR_DEFINITIONS</key>
-				<array>
-					<string>DEBUG=1</string>
-					<string>COCOS2D_DEBUG=1</string>
-					<string>LOGGING_ENABLED=1</string>
-					<string>LOGGING_LEVEL_TRACE=0</string>
-					<string>LOGGING_REZLOAD=1</string>
-					<string>GL_ERROR_LOGGING_ENABLED=1</string>
-					<string>GL_ERROR_TRACING_ENABLED=0</string>
-					<string>GL_ERROR_ASSERTION_ENABLED=0</string>
-				</array>
-			</dict>
+			<dict/>
 			<key>Release</key>
-			<dict>
-				<key>VALIDATE_PRODUCT</key>
-				<string>YES</string>
-				<key>ENABLE_NS_ASSERTIONS</key>
-				<string>NO</string>
-			</dict>
+			<dict/>
 		</dict>
 	</dict>
 	<key>Targets</key>
@@ -138,8 +80,6 @@
 		<dict>
 			<key>Name</key>
 			<string>___PACKAGENAME___</string>
-			<key>ProductType</key>
-			<string>com.apple.product-type.application</string>
 			<key>BuildPhases</key>
 			<array>
 				<dict>
@@ -159,24 +99,70 @@
 			<dict>
 				<key>PRODUCT_NAME</key>
 				<string>$(TARGET_NAME)</string>
-				<key>INFOPLIST_FILE</key>
-				<string>___PACKAGENAME___/Resources/Info.plist</string>
+				<key>CLANG_ENABLE_OBJC_ARC</key>
+				<string>YES</string>
+				<key>CLANG_WARN_OBJC_EXPLICIT_OWNERSHIP_TYPE</key>
+				<string>YES</string>
+				<key>CLANG_WARN_OBJC_RECEIVER_WEAK</key>
+				<string>YES</string>
+				<key>CLANG_WARN_OBJC_REPEATED_USE_OF_WEAK</key>
+				<string>YES</string>
+				<key>GCC_C_LANGUAGE_STANDARD</key>
+				<string>gnu99</string>
+				<key>CLANG_WARN_BOOL_CONVERSION</key>
+				<string>YES</string>
+				<key>CLANG_WARN_CONSTANT_CONVERSION</key>
+				<string>YES</string>
+				<key>CLANG_WARN_EMPTY_BODY</key>
+				<string>YES</string>
+				<key>CLANG_WARN_INT_CONVERSION</key>
+				<string>YES</string>
+				<key>GCC_WARN_ABOUT_RETURN_TYPE</key>
+				<string>YES</string>
+				<key>GCC_WARN_UNINITIALIZED_AUTOS</key>
+				<string>YES</string>
+				<key>GCC_WARN_UNUSED_FUNCTION</key>
+				<string>YES</string>
+				<key>GCC_WARN_UNUSED_VARIABLE</key>
+				<string>YES</string>
+				<key>CLANG_WARN_OBJC_ROOT_CLASS</key>
+				<string>YES</string>
+				<key>CLANG_WARN__DUPLICATE_METHOD_MATCH</key>
+				<string>YES</string>
+				<key>GCC_WARN_64_TO_32_BIT_CONVERSION</key>
+				<string>YES</string>
+				<key>ALWAYS_SEARCH_USER_PATHS</key>
+				<string>NO</string>
+			</dict>
+			<key>Configurations</key>
+			<dict>
+				<key>Debug</key>
+				<dict>
+					<key>GCC_OPTIMIZATION_LEVEL</key>
+					<string>0</string>
+					<key>ONLY_ACTIVE_ARCH</key>
+					<string>YES</string>
+					<key>GCC_PREPROCESSOR_DEFINITIONS</key>
+					<array>
+						<string>DEBUG=1</string>
+						<string>COCOS2D_DEBUG=1</string>
+						<string>LOGGING_ENABLED=1</string>
+						<string>LOGGING_LEVEL_TRACE=0</string>
+						<string>LOGGING_REZLOAD=1</string>
+						<string>GL_ERROR_LOGGING_ENABLED=1</string>
+						<string>GL_ERROR_TRACING_ENABLED=0</string>
+						<string>GL_ERROR_ASSERTION_ENABLED=0</string>
+					</array>
+				</dict>
+				<key>Release</key>
+				<dict>
+					<key>VALIDATE_PRODUCT</key>
+					<string>YES</string>
+					<key>ENABLE_NS_ASSERTIONS</key>
+					<string>NO</string>
+				</dict>
 			</dict>
 		</dict>
-	</array>
-	<key>Definitions</key>
-	<dict>
-		<key>README!</key>
-		<dict>
-			<key>Path</key>
-			<string>README!.txt</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-	</dict>
-	<key>Nodes</key>
-	<array>
-		<string>README!</string>
 	</array>
 </dict>
 </plist>

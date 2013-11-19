@@ -63,8 +63,7 @@
     //   "write_external_storage"
     //   "write_settings"
     //   "xperia"
-    "FEATURES": ["opengles2","landscape"],
-//	"FEATURES": ["landscape"],				// If using OpenGLES 1.1
+	"FEATURES": ["landscape"],				// If using OpenGLES 1.1
 
     // Preferred way of handling URLs in the code.
     // Leave it null for most cases.
