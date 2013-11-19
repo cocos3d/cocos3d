@@ -868,12 +868,19 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			return YES;
 
 		case kCC3SemanticTexture2DCount:
+			mat = visitor.currentMaterial;
+			tuCnt = visitor.textureUnitCount;
+			// Count just the textures whose sampler semantic is of the correct type
+			for (GLuint tuIdx = 0; tuIdx < tuCnt; tuIdx++)
+				if ( [mat textureForTextureUnit: tuIdx].samplerSemantic == kCC3SemanticTexture2DSampler ) texCnt++;
+			[uniform setInteger: texCnt];
+			return YES;
 		case kCC3SemanticTextureCubeCount:
 			mat = visitor.currentMaterial;
 			tuCnt = visitor.textureUnitCount;
 			// Count just the textures whose sampler semantic is of the correct type
 			for (GLuint tuIdx = 0; tuIdx < tuCnt; tuIdx++)
-				if ( [mat textureForTextureUnit: tuIdx].samplerSemantic == semantic ) texCnt++;
+				if ( [mat textureForTextureUnit: tuIdx].samplerSemantic == kCC3SemanticTextureCubeSampler ) texCnt++;
 			[uniform setInteger: texCnt];
 			return YES;
 

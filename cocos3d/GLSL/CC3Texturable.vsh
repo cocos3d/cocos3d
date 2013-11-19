@@ -31,7 +31,7 @@
  * This vertex shader provides a general shader for covering a mesh with a material.
  *
  * This shader supports the following features:
- *   - Up to two textures (more can be added by increasing MAX_TEXTURES, v_texCoord[] & a_cc3TexCoord1. See below).
+ *   - Up to two textures (more can be added by increasing MAX_TEXTURES, v_texCoord[] & a_cc3TexCoordN. See below).
  *   - Realistic interaction with up to four lights (more can be added by increasing MAX_LIGHTS below).
  *   - Positional, directional, or spot lighting with attenuation.
  *   - Vertex skinning (bone rigged characters).
