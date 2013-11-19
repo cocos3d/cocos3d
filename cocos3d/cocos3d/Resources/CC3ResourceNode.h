@@ -98,8 +98,7 @@
  * If this node has not yet been assigned a name, it will be set to the name
  * of the resource when this property is set.
  *
- * If the resource has not already been loaded when it is set here, it may
- * be loaded using the loadFromFile: methods of this resource node instance.
+ * The userData property of this node will be set to the userData property of the resource.
  * 
  * For subclasses of CC3ResourceNode that override the resourceClass property,
  * if this resource property is not explicitly set, it is lazily created, as an

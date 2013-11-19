@@ -165,16 +165,12 @@
 
 @implementation CC3Node (TilesUserData)
 
--(BOOL) shouldColorTile { return self.userData ? *((BOOL*)self.userData) : NO; }
+-(void) initUserData { self.userData = [NSNumber numberWithBool: NO]; }
 
--(void) setShouldColorTile: (BOOL) shouldColor {
-	// If needed, allocate space for the user data and assign it to the userData property.
-	if ( !self.userData ) self.userData = malloc(sizeof(BOOL));
-	*((BOOL*)self.userData) = shouldColor;
-}
+-(BOOL) shouldColorTile { return ((NSNumber*)self.userData).boolValue; }
 
-// Copy the shouldColorTile property from the original instance.
-// This property is held in memory tracked by the userData property.
+-(void) setShouldColorTile: (BOOL) shouldColor { self.userData = [NSNumber numberWithBool: shouldColor]; }
+
 -(void) copyUserDataFrom:(CC3Node *)another {
 	self.shouldColorTile = another.shouldColorTile;
 }

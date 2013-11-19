@@ -55,6 +55,7 @@
 	if (aResource == _resource) return;
 	_resource = aResource;
 	if (!_name) { self.name = _resource.name; }
+	self.userData = _resource.userData;
 	[self addResourceNodes];
 }
 

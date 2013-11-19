@@ -34,10 +34,7 @@
 
 #pragma mark CC3DataArray
 
-/** 
- * CC3DataArray extends NSMutableData to add behaviour for managing data as an array of
- * structure elements. 
- */
+/** CC3DataArray manages data as an array of structure elements. */
 @interface CC3DataArray : NSObject {
 	NSMutableData* _data;
 	NSUInteger _elementSize;

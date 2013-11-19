@@ -186,28 +186,6 @@
 
 
 #pragma mark -
-#pragma mark CC3Node extension for user data
-
-/**
- * Demonstrates the initialization and disposal of application-specific userData by adding custom
- * extension categories to subclasses of CC3Identifiable (nodes, materials, meshes, textures, etc).
- */
-@implementation CC3Node (MashUpUserData)
-
-// Change the LogTrace to LogDebug to see when userData would be initialized for each node
--(void) initUserData {
-	LogTrace(@"%@ initializing userData reference.", self);
-}
-
-// Change the LogTrace to LogDebug and then click the invade button when running the app.
--(void) releaseUserData {
-	LogTrace(@"%@ disposing of userData.", self);
-}
-
-@end
-
-
-#pragma mark -
 #pragma mark LandingCraft
 
 @implementation LandingCraft

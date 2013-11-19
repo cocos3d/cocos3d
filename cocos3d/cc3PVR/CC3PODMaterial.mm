@@ -83,6 +83,12 @@ static GLfloat shininessExpansionFactor = 128.0f;
 									   fromEffectNamed: [NSString stringWithUTF8String: psm->pszEffectName]
 									 inPFXResourceFile: [NSString stringWithUTF8String: psm->pszEffectFile]];
 		}
+		
+		// Assign any user data and take ownership of managing its memory
+		if (psm->pUserData && psm->nUserDataSize > 0) {
+			self.userData = [NSData dataWithBytesNoCopy: psm->pUserData length: psm->nUserDataSize];
+			psm->pUserData = NULL;		// Clear reference so SPODNode won't try to free it.
+		}
 	}
 	return self;
 }

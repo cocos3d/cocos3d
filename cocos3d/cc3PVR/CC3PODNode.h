@@ -37,16 +37,14 @@
 /**
  * A CC3Node extracted from a POD file.
  *
- * This is a concrete implementation of the CC3Node category PVRPOD. 
- * You should use this class instead of instantiating CC3Node directly
- * when using POD-based nodes, since the CC3Node PVRPOD category itself
- * cannot implement the added internal state.
+ * This is a concrete implementation of the CC3Node category PVRPOD.  You should use this
+ * class instead of instantiating CC3Node directly when using POD-based nodes, since the
+ * CC3Node PVRPOD category itself cannot implement the added internal state.
  */
 @interface CC3PODNode : CC3Node {
 	GLint _podIndex;
 	GLint _podContentIndex;
 	GLint _podParentIndex;
-	GLuint _podUserDataSize;
 }
 
 @end

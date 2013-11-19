@@ -1383,10 +1383,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	_floatingHead.diffuseColor = kCCC4FWhite;
 	_floatingHead.ambientColor = kCCC4FGray;
 	
-	// Demonstrate the use of shared application-specific data attached to a node.
-	// We use the sharedUserData property because we don't want the static string to be
-	// deallocated when the floating head node is deallocated.
-	_floatingHead.sharedUserData = (__bridge GLvoid *)(kDontPokeMe);
+	// Demonstrate the use of application-specific data attached to a node in the userData property.
+	_floatingHead.userData = kDontPokeMe;
 	
 	// The floating head normal texture was created in a left-handed coordinate
 	// system (eg- DirectX). OpenGL uses a right-handed coordinate system.
@@ -3539,7 +3537,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	[_floatingHead clearShaderProgram];
 	
 	// Demonstrate the use of application-specific data attached to a node, by logging the data.
-	if (_floatingHead.userData) LogInfo(@"%@ says '%@'", _floatingHead, _floatingHead.sharedUserData);
+	if (_floatingHead.userData) LogInfo(@"%@ says '%@'", _floatingHead, _floatingHead.userData);
 }
 
 /**

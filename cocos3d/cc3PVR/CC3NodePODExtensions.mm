@@ -59,11 +59,9 @@ extern "C" {
 // Subclasses must override to use instance variable.
 -(void) setPodTargetIndex: (GLint) aPODIndex {}
 
-// Subclasses must override to use instance variable.
--(GLuint) podUserDataSize { return 0; }
+-(GLuint) podUserDataSize { return (GLuint)((NSData*)self.userData).length; }
 
-// Subclasses must override to use instance variable.
--(void) setPodUserDataSize: (GLuint) podUserDataSize { CC3AssertUnimplemented(@"setPodUserDataSize:"); }
+-(void) setPodUserDataSize: (GLuint) podUserDataSize {}
 
 -(BOOL) isBasePODNode { return self.podParentIndex < 0; }
 
@@ -88,9 +86,10 @@ extern "C" {
 														 withFrameCount: aPODRez.animationFrameCount];
 		
 		// Assign any user data and take ownership of managing its memory
-		self.podUserDataSize = psn->nUserDataSize;
-		self.userData = psn->pUserData;
-		psn->pUserData = NULL;		// Clear reference so SPODNode won't try to free it.
+		if (psn->pUserData && psn->nUserDataSize > 0) {
+			self.userData = [NSData dataWithBytesNoCopy: psn->pUserData length: psn->nUserDataSize];
+			psn->pUserData = NULL;		// Clear reference so SPODNode won't try to free it.
+		}
 	}
 	return self; 
 }

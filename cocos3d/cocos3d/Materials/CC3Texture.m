@@ -1150,14 +1150,11 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 	return [[self alloc] initCubeWithSize: size andPixelFormat: format andPixelType: type];
 }
 
-
 /** Don't invoke super, because normal textures are not copyable */
 -(void) populateFrom: (CC3TextureUnitTexture*) another {
-	[self copyUserDataFrom: another];	// From CC3Identifiable
-	
-	_texture = another.texture;		// retained & shared across copies
-	
-	_textureUnit = [another.textureUnit copy];	// retained
+	[self copyUserDataFrom: another];			// From CC3Identifiable
+	_texture = another.texture;					// Shared across copies
+	_textureUnit = [another.textureUnit copy];
 }
 
 -(NSString*) fullDescription {

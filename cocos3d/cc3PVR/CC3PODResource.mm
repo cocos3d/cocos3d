@@ -232,6 +232,12 @@ static Class _defaultPFXResourceClass = nil;
 
 	_animationFrameCount = pod->nNumFrame;
 	_animationFrameRate = pod->nFPS;
+	
+	// Assign any user data and take ownership of managing its memory
+	if (pod->pUserData && pod->nUserDataSize > 0) {
+		self.userData = [NSData dataWithBytesNoCopy: pod->pUserData length: pod->nUserDataSize];
+		pod->pUserData = NULL;		// Clear reference so SPODNode won't try to free it.
+	}
 }
 
 -(NSString*) fullDescription {

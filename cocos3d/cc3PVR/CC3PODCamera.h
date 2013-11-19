@@ -47,7 +47,6 @@
 	GLint _podContentIndex;
 	GLint _podParentIndex;
 	GLint _podTargetIndex;
-	GLuint _podUserDataSize;
 }
 
 @end

@@ -46,10 +46,6 @@
 
 -(void) setPodParentIndex: (GLint) aPODIndex { _podParentIndex = aPODIndex; }
 
--(GLuint) podUserDataSize { return _podUserDataSize; }
-
--(void) setPodUserDataSize: (GLuint) podUserDataSize { _podUserDataSize = podUserDataSize; }
-
 -(void) populateFrom: (CC3PODNode*) another {
 	[super populateFrom: another];
 

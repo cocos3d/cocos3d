@@ -52,10 +52,6 @@
 
 -(void) setPodTargetIndex: (GLint) aPODIndex { _podTargetIndex = aPODIndex; }
 
--(GLuint) podUserDataSize { return _podUserDataSize; }
-
--(void) setPodUserDataSize: (GLuint) podUserDataSize { _podUserDataSize = podUserDataSize; }
-
 -(id) initAtIndex: (GLint) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
 
 	// Adjust the quaternions to compensate for different camera orientation axis in the exporter.

@@ -400,8 +400,6 @@ including experimenting with:
 - disabling animation for a particular node, in this case the camera and light
 - invading with an army of teapots instead of robots
 - ignore lighting conditions when drawing a node to draw in pure colors and textures
-- initializing and disposing of users data by adding initUserData and releaseUserData method 
-  extension categories.
 - displaying descriptive text and wireframe bounding boxes on every node
 - displaying a dynamic bounding box on a 3D particle emitter.
 - making use of a fixed bounding volume for the 3D particle emitter to improve performance.

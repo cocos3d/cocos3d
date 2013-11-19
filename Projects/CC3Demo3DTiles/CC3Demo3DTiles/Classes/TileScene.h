@@ -39,17 +39,16 @@
  * To simplify using this scene with different main objects, the camera automatically
  * focuses on and frames the main object when the scene first opens up.
  *
- * Each TileScene supports touch events. The main node can be rotated by dragging
- * a finger across the tile. In addition, when the finger is lifted, if it is
- * touching the main node when released, the main node will briefly glow. This
- * demonstrates the ability to select nodes from touches across multiple 3D scenes.
+ * Each TileScene supports touch events. The main node can be rotated by dragging a finger
+ * across the tile. In addition, when the finger is lifted, if it is touching the main node
+ * when released, the main node will briefly glow. This demonstrates the ability to select
+ * nodes from touches across multiple 3D scenes.
  *
- * In addition, some nodes should be colored and others not. This is enabled by
- * adding a new property to CC3Node through an extention category. This extension
- * property makes use of the userData property available to all subclasses of
- * CC3Identifiable. This demonstrates the use of the userData property to avoid
- * having to create customized subclasses of CC3Node to add state data to 3D
- * artifacts.
+ * In addition, some nodes should be colored and others not. This is enabled by adding a new
+ * property to CC3Node through an extention category. This extension property makes use of 
+ * the userData property available to all subclasses of CC3Identifiable. This demonstrates
+ * the use of the userData property to avoid having to create customized subclasses of CC3Node
+ * to add state data to 3D components.
  */
 @interface TileScene : CC3Scene {
     CC3Node* _mainNode;
@@ -63,16 +62,16 @@
 
 
 /**
- * Adds an extension category to CC3Node to add a property that indicates whether this node should
- * be colored. The value of this property is held in memory pointed to by the userData property.
+ * Adds an extension category to CC3Node to add a property that indicates whether this node
+ * should be colored. The value of this property is held in an NSNumber instance held in the
+ * userData property.
  */
 @interface CC3Node (TilesUserData)
 
 /** 
  * Indicates whether this node should be colored when it is added to the tile.
  *
- * The value of this property is held in a memory space allocated by the setter method of
- * this property, if needed.
+ * The value of this property is held in an NSNumber instance held in the userData property.
  */
 @property(nonatomic, assign) BOOL shouldColorTile;
 

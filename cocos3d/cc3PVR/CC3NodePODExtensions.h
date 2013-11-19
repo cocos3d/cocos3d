@@ -76,12 +76,8 @@
  */
 @property(nonatomic, assign) GLint podTargetIndex;
 
-/** 
- * The size, in bytes, of the data held in the userData property, inherited from
- * CC3Identifiable, as loaded from the POD file. This property is not updated
- * automatically if you set or change the userData property directly.
- */
-@property(nonatomic, assign) GLuint podUserDataSize;
+/** @deprecated The user data loaded from the POD file is now held in the userData property as an NSData instance. */
+@property(nonatomic, assign) GLuint podUserDataSize DEPRECATED_ATTRIBUTE;
 
 /** Indicates whether this POD is a base node, meaning that it has no parent. */
 @property(nonatomic, readonly) BOOL isBasePODNode;
