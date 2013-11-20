@@ -44,12 +44,16 @@
 	return nil;
 }
 
+-(void) addNode: (CC3Node*) node { [_nodes addObject: node]; }
+
+-(void) removeNode: (CC3Node*) node { [_nodes removeObjectIdenticalTo: node]; }
+
 
 #pragma mark Allocation and initialization
 
 -(id) init {
 	if ( (self = [super init]) ) {
-		_nodes = [CCArray array];
+		_nodes = [NSMutableArray array];
 		_expectsVerticallyFlippedTextures = self.class.defaultExpectsVerticallyFlippedTextures;
 	}
 	return self;

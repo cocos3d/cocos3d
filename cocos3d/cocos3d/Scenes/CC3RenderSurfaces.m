@@ -904,7 +904,7 @@
 	
 	// Resize all attachments on registered surfaces, except the viewSurface color buffer,
 	// which was resized above, and validate each surface.
-	CCArray* resizedAttachments = [CCArray new];
+	NSMutableArray* resizedAttachments = [NSMutableArray array];
 	for (id<CC3RenderSurface> surface in _resizeableSurfaces) {
 		[self resizeAttachment: surface.colorAttachment to: size ifNotIn: resizedAttachments];
 		[self resizeAttachment: surface.depthAttachment to: size ifNotIn: resizedAttachments];
@@ -918,7 +918,7 @@
 
 -(void) resizeAttachment: (id<CC3RenderSurfaceAttachment>) attachment
 					  to: (CC3IntSize) size
-				 ifNotIn: (CCArray*) alreadyResized {
+				 ifNotIn: (NSMutableArray*) alreadyResized {
 	if ( !attachment || [alreadyResized containsObject: attachment] ) return;
 	[attachment resizeTo: size];
 	[alreadyResized addObject: attachment];
@@ -955,7 +955,7 @@
 
 -(id) init {
     if ( (self = [super init]) ) {
-		_resizeableSurfaces = [CCArray new];		// retained
+		_resizeableSurfaces = [NSMutableArray array];
 	}
     return self;
 }

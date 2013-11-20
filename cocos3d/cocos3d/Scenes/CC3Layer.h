@@ -131,7 +131,7 @@
  */
 @interface CC3Layer : CC3ControllableLayer {
 	CC3Scene* _cc3Scene;
-	CCArray* _cc3GestureRecognizers;
+	NSMutableArray* _cc3GestureRecognizers;
 	BOOL _shouldAlwaysUpdateViewport : 1;
 }
 
@@ -142,7 +142,7 @@
  * Returns a collection of iOS UIGestureRecognizers that were added using the 
  * cc3AddGestureRecognizer: method. This property is only available under iOS.
  */
-@property(nonatomic, strong, readonly) CCArray* cc3GestureRecognizers;
+@property(nonatomic, strong, readonly) NSArray* cc3GestureRecognizers;
 
 /**
  * Adds the specified iOS gesture recognizer to the UIView that is displaying this

@@ -59,3 +59,19 @@
 -(id) copyAutoreleased DEPRECATED_ATTRIBUTE;
 
 @end
+
+
+#pragma mark -
+#pragma mark NSArray extensions
+
+/** Extension category to support cocos3d functionality. */
+@interface NSArray (CC3)
+
+/**
+ * Returns a string containing a more complete description of this object.
+ *
+ * The returned string includes a description of each element, each on a separate line.
+ */
+-(NSString*) fullDescription;
+
+@end

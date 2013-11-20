@@ -88,7 +88,7 @@
  * retrieves the CC3Bone node at each index in the specified node array, and
  * adds that bone node to this skin section using the addBone: method.
  */
--(void) linkToPODNodes: (CCArray*) nodeArray;
+-(void) linkToPODNodes: (NSArray*) nodeArray;
 
 @end
 

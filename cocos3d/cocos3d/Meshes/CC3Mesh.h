@@ -274,7 +274,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
 	CC3VertexTangents* _vertexBitangents;
 	CC3VertexColors* _vertexColors;
 	CC3VertexTextureCoordinates* _vertexTextureCoordinates;
-	CCArray* _overlayTextureCoordinates;
+	NSMutableArray* _overlayTextureCoordinates;
 	CC3VertexMatrixIndices* _vertexMatrixIndices;
 	CC3VertexWeights* _vertexWeights;
 	CC3VertexPointSizes* _vertexPointSizes;

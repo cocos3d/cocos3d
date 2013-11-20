@@ -60,7 +60,7 @@
 @interface CC3NodeVisitor : NSObject {
 	CC3Node* _startingNode;
 	CC3Node* _currentNode;
-	CCArray* _pendingRemovals;
+	NSMutableArray* _pendingRemovals;
 	CC3Camera* _camera;
 	BOOL _shouldVisitChildren : 1;
 }
@@ -726,7 +726,7 @@
  * over and over, through different invocations of the visit: method.
  */
 @interface CC3NodePuncturingVisitor : CC3NodeVisitor {
-	CCArray* _nodePunctures;
+	NSMutableArray* _nodePunctures;
 	CC3Ray _ray;
 	BOOL _shouldPunctureFromInside : 1;
 	BOOL _shouldPunctureInvisibleNodes : 1;

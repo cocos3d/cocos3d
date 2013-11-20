@@ -144,7 +144,7 @@
  * assigned to the particleTemplateMesh property.
  */
  @interface CC3MultiTemplateMeshParticleEmitter : CC3MeshParticleEmitter {
-	CCArray* _particleTemplateMeshes;
+	NSMutableArray* _particleTemplateMeshes;
 }
 
 /**
@@ -163,7 +163,7 @@
  * See the notes for the CC3MeshParticleProtocol templateMesh and CC3MeshParticleEmitter
  * particleTemplateMesh for more information.
  */
-@property(nonatomic, strong, readonly) CCArray* particleTemplateMeshes;
+@property(nonatomic, strong, readonly) NSArray* particleTemplateMeshes;
 
 /**
  * Adds the specified mesh to the collection of meshes in the particleTemplateMeshes property.

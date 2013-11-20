@@ -927,7 +927,7 @@ DEPRECATED_ATTRIBUTE
  * bounding-box bounding volume, or even a full mesh-based bounding volume.
  */
 @interface CC3NodeTighteningBoundingVolumeSequence : CC3NodeBoundingVolume {
-	CCArray* _boundingVolumes;
+	NSMutableArray* _boundingVolumes;
 }
 
 /**
@@ -936,7 +936,7 @@ DEPRECATED_ATTRIBUTE
  * When testing for instersection, the contained bounding volumes will be traversed
  * in the order they appear in this array.
  */
-@property(nonatomic, strong, readonly) CCArray* boundingVolumes;
+@property(nonatomic, strong, readonly) NSArray* boundingVolumes;
 
 /** Adds the specified bounding volume to the end of the array of contained bounding volumes. */
 -(void) addBoundingVolume: (CC3NodeBoundingVolume*) aBoundingVolume;

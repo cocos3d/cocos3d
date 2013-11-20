@@ -93,10 +93,10 @@
  */
 @interface CC3PODResource : CC3NodesResource {
 	PODClassPtr _pvrtModel;
-	CCArray* _allNodes;
-	CCArray* _meshes;
-	CCArray* _materials;
-	CCArray* _textures;
+	NSMutableArray* _allNodes;
+	NSMutableArray* _meshes;
+	NSMutableArray* _materials;
+	NSMutableArray* _textures;
 	Class _pfxResourceClass;
 	ccTexParams _textureParameters;
 	ccColor4F _ambientLight;
@@ -127,7 +127,7 @@
  * A collection of all of the nodes extracted from the POD file.
  * This is the equivalent of flattening the nodes array.
  */
-@property(nonatomic, strong, readonly) CCArray* allNodes;
+@property(nonatomic, strong, readonly) NSArray* allNodes;
 
 /**
  * The number of mesh nodes in the POD file.
@@ -162,7 +162,7 @@
 @property(nonatomic, readonly) uint meshCount;
 
 /** A collection of the CC3Meshs extracted from  the POD file. */
-@property(nonatomic, strong, readonly) CCArray* meshes;
+@property(nonatomic, strong, readonly) NSArray* meshes;
 
 /**
  * The number of materials in the POD file.
@@ -173,7 +173,7 @@
 @property(nonatomic, readonly) uint materialCount;
 
 /** A collection of the CC3Materials extracted from  the POD file. */
-@property(nonatomic, strong, readonly) CCArray* materials;
+@property(nonatomic, strong, readonly) NSArray* materials;
 
 /**
  * The number of textures in the POD file.
@@ -184,7 +184,7 @@
 @property(nonatomic, readonly) uint textureCount;
 
 /** A collection of the CC3Textures extracted from  the POD file. */
-@property(nonatomic, strong, readonly) CCArray* textures;
+@property(nonatomic, strong, readonly) NSArray* textures;
 
 /** @deprecated Use the CC3Texture class-side property defaultTextureParameters instead. */
 @property(nonatomic, assign) ccTexParams textureParameters DEPRECATED_ATTRIBUTE;

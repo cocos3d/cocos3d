@@ -380,9 +380,10 @@ static const GLuint kCC3ParticlesNoMax = UINT_MAX;
  * emitter node, and is deallocated automatically when the emitter is released.
  */
 @interface CC3ParticleEmitter : CC3MeshNode {
-	CCArray* _particles;
+	NSMutableArray* _particles;
 	CC3ParticleNavigator* _particleNavigator;
 	Class _particleClass;
+	GLuint _currentParticleCapacity;
 	GLuint _maximumParticleCapacity;
 	GLuint _particleCapacityExpansionIncrement;
 	GLuint _particleCount;
@@ -846,7 +847,7 @@ static const GLuint kCC3ParticlesNoMax = UINT_MAX;
  *
  * The application must not change the contents of this array directly.
  */
-@property(nonatomic, strong, readonly) CCArray* particles;
+@property(nonatomic, strong, readonly) NSArray* particles;
 
 /**
  * The number of particles that are currently alive and being displayed by this emitter. The value of

@@ -49,7 +49,7 @@
 
 -(id) init {
 	if ( (self = [super init]) ) {
-		_allNodes = [CCArray array];
+		_allNodes = [NSMutableArray array];
 		_fileVersion = -1;
 		_nodeCount = 0;
 		_ambientLight = kCCC4FBlack;
@@ -229,7 +229,7 @@
 	LogRez(@"Building %@", self);
 	for (CC3CALNode* aNode in _allNodes) {
 		[aNode linkToCALNodes: _allNodes];
-		if (aNode.isBaseCALNode) [self.nodes addObject: aNode];
+		if (aNode.isBaseCALNode) [self addNode: aNode];
 	}
 	[self logBuild];
 }

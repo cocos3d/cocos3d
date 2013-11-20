@@ -248,7 +248,7 @@
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		_particleTemplateMeshes = [CCArray array];
+		_particleTemplateMeshes = [NSMutableArray array];
 	}
 	return self;
 }

@@ -225,15 +225,15 @@ typedef enum {
  * debugging rendering problems.
  */
 @interface CC3Node : CC3Identifiable <CCRGBAProtocol, CCBlendProtocol, CC3NodeTransformListenerProtocol> {
-	CCArray* _children;
+	NSMutableArray* _children;
 	CC3Node* __unsafe_unretained _parent;
 	CC3Matrix* _globalTransformMatrix;
 	CC3Matrix* _globalTransformMatrixInverted;
-	CCArray* _transformListeners;
+	NSMutableArray* _transformListeners;
 	CC3Matrix* _globalRotationMatrix;
 	CC3Rotator* _rotator;
 	CC3NodeBoundingVolume* _boundingVolume;
-	CCArray* _animationStates;
+	NSMutableArray* _animationStates;
 	CC3Vector _location;
 	CC3Vector _projectedLocation;
 	CC3Vector _scale;
@@ -2406,7 +2406,7 @@ typedef enum {
  * copied. If you copy a node and want its listeners to also listen to the copied node,
  * you must deliberately add them to the new node.
  */
-@property(nonatomic, strong, readonly) CCArray* transformListeners;
+@property(nonatomic, strong, readonly) NSArray* transformListeners;
 
 /**
  * Indicates that the specified listener object wishes to be notified whenever
@@ -2846,7 +2846,7 @@ typedef enum {
  * To change the contents of this array, use the addChild: and removeChild:
  * methods of this class. Do not manipulate the contents of this array directly.
  */
-@property(nonatomic, strong, readonly) CCArray* children;
+@property(nonatomic, strong, readonly) NSArray* children;
 
 /**
  * The parent node of this node, in a node structural hierarchy.
@@ -3087,13 +3087,13 @@ typedef enum {
  * Returns an autoreleased array containing this node and all its descendants.
  * This is done by invoking flattenInto: with a newly-created array, and returning the array. 
  */
--(CCArray*) flatten;
+-(NSArray*) flatten;
 
 /**
  * Adds this node to the specified array, and then invokes this method on each child node.
  * The effect is to populate the array with this node and all its descendants.
  */
--(void) flattenInto: (CCArray*) anArray;
+-(void) flattenInto: (NSMutableArray*) anArray;
 
 /**
  * Wraps this node in a new autoreleased instance of CC3Node, and returns the new
@@ -4469,7 +4469,7 @@ typedef enum {
  * Returns an array of all the direction marker child nodes that were previously added
  * using the addDirectionMarkerColored:inDirection: and addDirectionMarker methods.
  */
-@property(nonatomic, strong, readonly) CCArray* directionMarkers;
+@property(nonatomic, strong, readonly) NSArray* directionMarkers;
 
 /**
  * Returns the color that direction marker lines will be drawn in when created

@@ -46,3 +46,20 @@
 @end
 
 
+#pragma mark -
+#pragma mark NSArray extensions
+
+@implementation NSArray (CC3)
+
+-(NSString*) fullDescription {
+	NSUInteger elemCnt = self.count;
+	NSMutableString *desc = [NSMutableString stringWithFormat:@"%@ (", [self class]];
+	if (elemCnt > 0) [desc appendFormat: @"\n\t[%i]: %@", 0, [self objectAtIndex: 0]];
+	for (NSUInteger i = 1; i < elemCnt; i++) [desc appendFormat: @"\n\t[%lu]: %@", (unsigned long)i, [self objectAtIndex: i]];
+	[desc appendString:@")"];
+	return desc;
+}
+
+@end
+
+

@@ -258,7 +258,7 @@ static Class _defaultSemanticDelegateClass = nil;
 -(void) initTexturesForPFXEffect: (SPVRTPFXParserEffect*) pfxEffect
 				   fromPFXParser: (CPVRTPFXParser*) pfxParser
 				   inPFXResource: (CC3PFXResource*) pfxRez  {
-	_textures = [CCArray new];	// retained
+	_textures = [NSMutableArray array];
 	
 	CPVRTArray<SPVRTPFXParserEffectTexture> effectTextures = pfxEffect->Textures;
 	GLuint texCount = effectTextures.GetSize();
@@ -286,7 +286,7 @@ static Class _defaultSemanticDelegateClass = nil;
 -(void) initVariablesForPFXEffect: (SPVRTPFXParserEffect*) pfxEffect
 					fromPFXParser: (CPVRTPFXParser*) pfxParser
 					inPFXResource: (CC3PFXResource*) pfxRez  {
-	_variables = [CCArray new];		// retained
+	_variables = [NSMutableArray array];
 	[self addVariablesFrom: pfxEffect->Attributes];
 	[self addVariablesFrom: pfxEffect->Uniforms];
 }

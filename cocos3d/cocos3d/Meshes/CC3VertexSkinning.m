@@ -142,7 +142,7 @@
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		_skinSections = [CCArray array];
+		_skinSections = [NSMutableArray array];
 		_restPoseTransformMatrix = [CC3AffineMatrix new];
 		_deformedFaces = nil;
 	}
@@ -160,7 +160,7 @@
 	[_restPoseTransformMatrix populateFrom: another.restPoseTransformMatrix];
 
 	[_skinSections removeAllObjects];
-	CCArray* otherSkinSections = another.skinSections;
+	NSArray* otherSkinSections = another.skinSections;
 	for (CC3SkinSection* ss in otherSkinSections)
 		[_skinSections addObject: [ss copyForNode: self]];		// retained in array
 }
@@ -282,8 +282,8 @@
 
 -(GLuint) boneCount { return (GLuint)_skinnedBones.count; }
 
--(CCArray*) bones {
-	CCArray* bones = [CCArray array];
+-(NSArray*) bones {
+	NSMutableArray* bones = [NSMutableArray array];
 	for (CC3SkinnedBone* sb in _skinnedBones) [bones addObject: sb.bone];
 	return bones;
 }
@@ -343,7 +343,7 @@
 -(id) initForNode: (CC3SkinMeshNode*) aNode {
 	if ( (self = [super init]) ) {
 		_node = aNode;							// not retained
-		_skinnedBones = [CCArray array];
+		_skinnedBones = [NSMutableArray array];
 		_vertexStart = 0;
 		_vertexCount = 0;
 	}
@@ -357,7 +357,7 @@
 // Extract the old bones into an array, and for each, look for the
 // bone with the same name as a descendant of the specified node.
 -(void) reattachBonesFrom: (CC3Node*) aNode {
-	CCArray* oldBones = self.bones;
+	NSArray* oldBones = self.bones;
 	[_skinnedBones removeAllObjects];
 	for (CC3Bone* ob in oldBones) [self addBone: (CC3Bone*)[aNode getNodeNamed: ob.name]];
 }
@@ -369,7 +369,7 @@
 
 	// Each bone is retained but not copied, and will be swapped for copied bones via reattachBonesFrom:
 	[_skinnedBones removeAllObjects];
-	CCArray* otherBones = another.bones;
+	NSArray* otherBones = another.bones;
 	for (CC3Bone* bone in otherBones) [self addBone: bone];
 }
 

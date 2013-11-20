@@ -52,7 +52,6 @@
 #import "CC3Math.h"
 #import "CC3Logging.h"
 #import "ccTypes.h"
-#import "CCArray.h"
 #import <CoreGraphics/CGColor.h>
 
 /**

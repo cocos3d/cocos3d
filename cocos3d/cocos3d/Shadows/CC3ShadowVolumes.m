@@ -867,8 +867,8 @@
 	for (CC3Node* child in _children) [child addShadowVolumesForLight: aLight];
 }
 
--(CCArray*) shadowVolumes {
-	CCArray* svs = [CCArray array];
+-(NSArray*) shadowVolumes {
+	NSMutableArray* svs = [NSMutableArray array];
 	for (CC3Node* child in _children) if (child.isShadowVolume) [svs addObject: child];
 	return svs;
 }

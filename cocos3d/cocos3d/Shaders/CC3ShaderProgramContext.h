@@ -56,7 +56,7 @@
 */
 @interface CC3ShaderProgramContext : NSObject {
 	CC3ShaderProgram* _program;
-	CCArray* _uniforms;
+	NSMutableArray* _uniforms;
 	NSMutableDictionary* _uniformsByName;
 	BOOL _shouldEnforceCustomOverrides : 1;
 	BOOL _shouldEnforceVertexAttributes : 1;

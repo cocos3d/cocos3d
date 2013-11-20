@@ -130,7 +130,7 @@
 
 @synthesize evaluator=_evaluator, allowSequenceUpdates=_allowSequenceUpdates;
 
--(CCArray*) nodes { return [CCArray array]; }
+-(NSArray*) nodes { return [NSArray array]; }
 
 -(BOOL) shouldUseOnlyForwardDistance { return NO; }
 
@@ -213,7 +213,7 @@
 
 -(id) initWithEvaluator: (CC3NodeEvaluator*) anEvaluator {
 	if ( (self = [super initWithEvaluator: anEvaluator]) ) {
-		_sequencers = [CCArray array];
+		_sequencers = [NSMutableArray array];
 	}
 	return self;
 }
@@ -223,7 +223,7 @@
 -(void) populateFrom: (CC3BTreeNodeSequencer*) another {
 	[super populateFrom: another];
 
-	CCArray* otherChildren = another.sequencers;
+	NSArray* otherChildren = another.sequencers;
 	for (CC3NodeSequencer* otherChild in otherChildren)
 		[self addSequencer: [otherChild copy]];
 }
@@ -259,8 +259,8 @@
 }
 
 /** Concatenates the nodes from the contained sequencers into one array. */
--(CCArray*) nodes {
-	CCArray* nodes = [CCArray array];
+-(NSArray*) nodes {
+	NSMutableArray* nodes = [NSMutableArray array];
 	for (CC3NodeSequencer* s in _sequencers) [nodes addObjectsFromArray: s.nodes];
 	return nodes;
 }
@@ -312,15 +312,11 @@
 
 @implementation CC3NodeArraySequencer
 
--(void) dealloc {
-	[_nodes releaseAsUnretained];		// Clears without releasing each element.
-}
-
--(CCArray*) nodes { return [CCArray arrayWithArray: _nodes]; }
+-(NSArray*) nodes { return [NSArray arrayWithArray: _nodes]; }
 
 -(id) initWithEvaluator: (CC3NodeEvaluator*) anEvaluator {
 	if ( (self = [super initWithEvaluator: anEvaluator]) ) {
-		_nodes = [CCArray array];
+		_nodes = [NSMutableArray array];
 	}
 	return self;
 }
@@ -342,11 +338,11 @@
 								between: leftNode
 									and: rightNode
 							withVisitor: visitor] ) {
-				[_nodes insertUnretainedObject: aNode atIndex: i];
+				[_nodes insertObject: aNode atIndex: i];
 				return YES;
 			}
 		}
-		[_nodes addUnretainedObject: aNode];
+		[_nodes addObject: aNode];
 		return YES;
 	}
 	return NO;
@@ -362,7 +358,7 @@
 -(BOOL) remove: (CC3Node*) aNode withVisitor: (CC3NodeSequencerVisitor*) visitor {
 	NSUInteger nodeIndex = [_nodes indexOfObjectIdenticalTo: aNode];
 	if (nodeIndex != NSNotFound) {
-		[_nodes removeUnretainedObjectAtIndex: nodeIndex];
+		[_nodes removeObjectAtIndex: nodeIndex];
 		return YES;
 	}
 	return NO;
@@ -571,16 +567,12 @@
 
 @synthesize scene=_scene, misplacedNodes=_misplacedNodes;
 
--(void) dealloc {
-	[_misplacedNodes releaseAsUnretained];		// Clears without releasing each element.
-}
-
 -(id) init { return [self initWithScene: nil]; }
 
 -(id) initWithScene: (CC3Scene*) aCC3Scene {
 	if ( (self = [super init]) ) {
 		_scene = aCC3Scene;
-		_misplacedNodes = [CCArray array];
+		_misplacedNodes = [NSMutableArray array];
 	}
 	return self;
 }
@@ -591,9 +583,9 @@
 
 -(BOOL) hasMisplacedNodes { return (_misplacedNodes.count > 0); }
 
--(void) addMisplacedNode: (CC3Node*) aNode { [_misplacedNodes addUnretainedObject: aNode]; }
+-(void) addMisplacedNode: (CC3Node*) aNode { [_misplacedNodes addObject: aNode]; }
 
--(void) clearMisplacedNodes { [_misplacedNodes removeAllObjectsAsUnretained]; }
+-(void) clearMisplacedNodes { [_misplacedNodes removeAllObjects]; }
 
 // Deprecated
 -(CC3Scene*) world { return _scene; }

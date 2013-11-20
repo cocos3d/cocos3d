@@ -106,7 +106,7 @@
  * This implementation attaches this node to its parent as identified by the
  * podParentIndex property. Subclasses may override to perform other linking.
  */
--(void) linkToPODNodes: (CCArray*) nodeArray;
+-(void) linkToPODNodes: (NSArray*) nodeArray;
 
 @end
 

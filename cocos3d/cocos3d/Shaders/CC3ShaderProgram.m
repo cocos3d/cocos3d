@@ -282,8 +282,8 @@ static CC3Cache* _shaderCache = nil;
 	return (GLuint)(_uniformsSceneScope.count + _uniformsNodeScope.count + _uniformsDrawScope.count);
 }
 
--(CCArray*) uniforms {
-	CCArray* uniforms = [CCArray arrayWithCapacity: self.uniformCount];
+-(NSArray*) uniforms {
+	NSMutableArray* uniforms = [NSMutableArray arrayWithCapacity: self.uniformCount];
 	[uniforms addObjectsFromArray: _uniformsSceneScope];
 	[uniforms addObjectsFromArray: _uniformsNodeScope];
 	[uniforms addObjectsFromArray: _uniformsDrawScope];
@@ -390,13 +390,11 @@ static CC3Cache* _shaderCache = nil;
 	};
 	
 	// Include the full description of each attribute, sorted by name.
-	vars = [self.attributes getNSArray];
-	vars = [vars sortedArrayUsingComparator: varSorter];
+	vars = [self.attributes sortedArrayUsingComparator: varSorter];
 	for (CC3GLSLVariable* var in vars) LogRez(@"%@", var.fullDescription);
 	
 	// Include the full description of each uniform, sorted by name.
-	vars = [self.uniforms getNSArray];
-	vars = [vars sortedArrayUsingComparator: varSorter];
+	vars = [self.uniforms sortedArrayUsingComparator: varSorter];
 	for (CC3GLSLVariable* var in vars) LogRez(@"%@", var.fullDescription);
 #endif	// LOGGING_REZLOAD
 }
@@ -517,7 +515,7 @@ static CC3Cache* _shaderCache = nil;
 	[self populateUniforms: _uniformsDrawScope withVisitor: visitor];
 }
 
--(void) populateUniforms: (CCArray*) uniforms withVisitor: (CC3NodeDrawingVisitor*) visitor {
+-(void) populateUniforms: (NSArray*) uniforms withVisitor: (CC3NodeDrawingVisitor*) visitor {
 	CC3ShaderProgramContext* progCtx = visitor.currentMaterial.shaderContext;
 	for (CC3GLSLUniform* var in uniforms) {
 		if ([progCtx populateUniform: var withVisitor: visitor] ||
@@ -538,10 +536,10 @@ static CC3Cache* _shaderCache = nil;
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	CC3Assert(aName, @"%@ cannot be created without a name", [self class]);
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		_uniformsSceneScope = [CCArray new];	// retained
-		_uniformsNodeScope = [CCArray new];		// retained
-		_uniformsDrawScope = [CCArray new];		// retained
-		_attributes = [CCArray new];			// retained
+		_uniformsSceneScope = [NSMutableArray array];
+		_uniformsNodeScope = [NSMutableArray array];
+		_uniformsDrawScope = [NSMutableArray array];
+		_attributes = [NSMutableArray array];
 		_vertexShader = nil;
 		_fragmentShader = nil;
 		_maxUniformNameLength = 0;

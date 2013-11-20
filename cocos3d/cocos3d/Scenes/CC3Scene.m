@@ -107,14 +107,14 @@
 
 	// For any targetting nodes that were targetted to the old camera,
 	// set the target to the new camera.
-	CCArray* targNodes = [_targettingNodes copy];
+	NSArray* targNodes = [_targettingNodes copy];
 	for (CC3Node* tn in targNodes)
 		// If the node should always target the camera, or if the target
 		// is already the old camera, set its target to the new camera.
 		if (tn.shouldAutotargetCamera || (oldCam && (tn.target == oldCam))) tn.target = newCam;
 	
 	// Move other non-target camera listeners (eg- shadow casting volumes) over
-	CCArray* camListeners = [oldCam.transformListeners copy];
+	NSArray* camListeners = [oldCam.transformListeners copy];
 	for(id<CC3NodeTransformListenerProtocol> aListener in camListeners) {
 		[oldCam removeTransformListener: aListener];
 		[newCam addTransformListener: aListener];
@@ -161,9 +161,9 @@
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		_targettingNodes = [CCArray array];
-		_lights = [CCArray array];
-		_billboards = [CCArray array];
+		_targettingNodes = [NSMutableArray array];
+		_lights = [NSMutableArray array];
+		_billboards = [NSMutableArray array];
 		self.touchedNodePicker = [CC3TouchedNodePicker pickerOnScene: self];
 		self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirst];
 		self.viewDrawingVisitor = [[self viewDrawVisitorClass] visitor];
@@ -537,7 +537,7 @@
 	_drawingSequencer = aNodeSequencer;
 	
 	if (_drawingSequencer) {
-		CCArray* allNodes = [self flatten];
+		NSArray* allNodes = [self flatten];
 		for (CC3Node* aNode in allNodes)
 			[_drawingSequencer add: aNode withVisitor: _drawingSequenceVisitor];
 	}
@@ -578,7 +578,7 @@
 	
 	// Collect all the nodes being added, including all descendants,
 	// and see if they require special treatment
-	CCArray* allAdded = [aNode flatten];
+	NSArray* allAdded = [aNode flatten];
 	for (CC3Node* addedNode in allAdded) {
 	
 		// Attempt to add the node to the draw sequence sorter.
@@ -615,7 +615,7 @@
 	
 	// Collect all the nodes being removed, including all descendants,
 	// and see if they require special treatment
-	CCArray* allRemoved = [aNode flatten];
+	NSArray* allRemoved = [aNode flatten];
 	for (CC3Node* removedNode in allRemoved) {
 		
 		// Attempt to remove the node to the draw sequence sorter.

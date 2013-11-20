@@ -186,7 +186,7 @@ static BOOL _defaultShouldSwapYZ = YES;
 	CC3CALNode* calNode = [CC3CALNode node];
 	calNode.calIndex = calNodeIdx;
 	calNode.animation = anim;
-	[self.nodes addObject: calNode];
+	[self addNode: calNode];
 
 	return YES;
 }

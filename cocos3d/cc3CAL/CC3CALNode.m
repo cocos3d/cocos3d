@@ -41,7 +41,7 @@
 
 -(BOOL) isBaseCALNode { return self.calParentIndex < 0; }
 
--(void) linkToCALNodes: (CCArray*) nodeArray {
+-(void) linkToCALNodes: (NSArray*) nodeArray {
 	if ( !self.isBaseCALNode ) {
 		LogTrace(@"Linking %@ with parent index %i", self, self.calParentIndex);
 		CC3Node* parentNode = [nodeArray objectAtIndex: (GLuint)self.calParentIndex];

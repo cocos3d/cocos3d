@@ -66,7 +66,6 @@
 	self.target = nil;							// Removes myself as listener
 	[self removeAllChildren];
 	[self notifyDestructionListeners];			// Must do before releasing listeners.
-	[_transformListeners releaseAsUnretained];	// Clears without releasing each element.
 }
 
 // If tracking target, set the location anyway
@@ -976,7 +975,7 @@
 -(BOOL) rawVisible { return _visible; }
 
 // Protected property for copying
--(CCArray*) animationStates { return _animationStates; }
+-(NSArray*) animationStates { return _animationStates; }
 
 /**
  * Populates this instance with content copied from the specified other node.
@@ -1055,7 +1054,7 @@
  * (which were possibly added during instantiation init).
  */
 -(void) copyChildrenFrom: (CC3Node*) another {
-	CCArray* otherKids = another.children;
+	NSArray* otherKids = another.children;
 	for (CC3Node* otherKid in otherKids)
 		if (otherKid.shouldIncludeInDeepCopy) [self addChild: [otherKid copy]];
 }
@@ -1224,10 +1223,10 @@ static GLuint lastAssignedNodeTag;
 -(void) addTransformListener: (id<CC3NodeTransformListenerProtocol>) aListener {
 	if (!aListener) return;
 	
-	if( !_transformListeners ) _transformListeners = [CCArray array];
+	if( !_transformListeners ) _transformListeners = [NSMutableArray array];
 	
 	if ( ![_transformListeners containsObject: aListener] ) {
-		[_transformListeners addUnretainedObject: aListener];
+		[_transformListeners addObject: aListener];
 		
 		// If the transform has already been calculated, notify immediately.
 		if ( !self.isTransformDirty ) [aListener nodeWasTransformed: self];
@@ -1237,15 +1236,12 @@ static GLuint lastAssignedNodeTag;
 -(void) removeTransformListener: (id<CC3NodeTransformListenerProtocol>) aListener {
 	if (!aListener) return;
 
-	[_transformListeners removeUnretainedObjectIdenticalTo: aListener];
-	if (_transformListeners && _transformListeners.count == 0) {
-		[_transformListeners releaseAsUnretained];
-		_transformListeners = nil;
-	}
+	[_transformListeners removeObjectIdenticalTo: aListener];
+	if (_transformListeners && _transformListeners.count == 0) _transformListeners = nil;
 }
 
 -(void) removeAllTransformListeners {
-	CCArray* myListeners = [_transformListeners copy];
+	NSArray* myListeners = [_transformListeners copy];
 	for(id<CC3NodeTransformListenerProtocol> aListener in myListeners)
 		[self removeTransformListener: aListener];
 }
@@ -1695,7 +1691,7 @@ static GLuint lastAssignedNodeTag;
 	aNode.shouldStopActionsWhenRemoved = origCleanupFlag;
 	
 	// Lazily create the children array if needed
-	if(!_children) _children = [CCArray array];
+	if(!_children) _children = [NSMutableArray array];
 	
 	[_children addObject: aNode];
 	aNode.parent = self;
@@ -1797,40 +1793,8 @@ static GLuint lastAssignedNodeTag;
 	if (!_children && _shouldAutoremoveWhenEmpty) [self remove];
 }
 
-//-(void) removeChild: (CC3Node*) aNode {
-//	if (_children && aNode) {
-//		NSUInteger indx = [_children indexOfObjectIdenticalTo: aNode];
-//		if (indx != NSNotFound) {
-//			
-//			// If the children collection is the only thing referencing the child node, the
-//			// child node will be deallocated as soon as it is removed, and will be invalid
-//			// when passed to the didRemoveDescendant: method, or to other activities that
-//			// it may be subject to in the processing loop. To avoid problems, retain it for
-//			// the duration of this processing loop, so that it will still be valid until
-//			// we're done with it.
-//			[[aNode retain] autorelease];
-//			
-//			aNode.parent = nil;
-//			[_children removeObjectAtIndex: indx];
-//			if (_children.count == 0) {
-//				[_children release];
-//				_children = nil;
-//			}
-//			[aNode wasRemoved];						// Invoke before didRemoveDesc notification
-//			[self didRemoveDescendant: aNode];
-//		}
-//		LogTrace(@"After removing %@, %@ now has children: %@", aNode, self, _children);
-//		
-//		// If the last child has been removed, and this instance should autoremove when
-//		// that occurs, remove this node from the hierarchy as well. This must be performed
-//		// after everything else is done, particularly only after the didRemoveDescendant:
-//		// has been invoked so that that notification can propagate up the node hierarchy.
-//		if (!_children && _shouldAutoremoveWhenEmpty) [self remove];
-//	}
-//}
-
 -(void) removeAllChildren {
-	CCArray* myKids = [_children copy];
+	NSArray* myKids = [_children copy];
 	for (CC3Node* child in myKids) [self removeChild: child];
 }
 
@@ -1902,13 +1866,13 @@ static GLuint lastAssignedNodeTag;
 	return nil;
 }
 
--(CCArray*) flatten {
-	CCArray* allNodes = [CCArray array];
+-(NSArray*) flatten {
+	NSMutableArray* allNodes = [NSMutableArray array];
 	[self flattenInto: allNodes];
 	return allNodes;
 }
 
--(void) flattenInto: (CCArray*) anArray {
+-(void) flattenInto: (NSMutableArray*) anArray {
 	[anArray addObject: self];
 	for (CC3Node* child in _children) [child flattenInto: anArray];
 }
@@ -2069,7 +2033,7 @@ static GLuint lastAssignedNodeTag;
 	CC3NodeAnimationState* currAnim = [self getAnimationStateOnTrack: animationState.trackID];
 	if ( !animationState || animationState == currAnim ) return;	// leave if not changing
 	
-	if ( !_animationStates ) _animationStates = [CCArray new];		// ensure array exists - retained
+	if ( !_animationStates ) _animationStates = [NSMutableArray array];		// ensure array exists
 	[_animationStates removeObject: currAnim];						// remove existing
 	[_animationStates addObject: animationState];					// add to array
 }
@@ -2599,16 +2563,15 @@ static ccColor4F wireframeBoxColor = { 1.0, 1.0, 0.0, 1.0 };	// kCCC4FYellow
 }
 
 -(void) removeAllDirectionMarkers {
-	CCArray* dirMks = self.directionMarkers;
+	NSArray* dirMks = self.directionMarkers;
 	for (CC3Node* dm in dirMks) [dm remove];
 	for (CC3Node* child in _children) [child removeAllDirectionMarkers];
 }
 
--(CCArray*) directionMarkers {
-	CCArray* dirMks = [CCArray array];
+-(NSArray*) directionMarkers {
+	NSMutableArray* dirMks = [NSMutableArray array];
 	for (CC3Node* child in _children)
-		if ( [child isKindOfClass: [CC3DirectionMarkerNode class]] )
-			[dirMks addObject: child];
+		if ( [child isKindOfClass: [CC3DirectionMarkerNode class]] ) [dirMks addObject: child];
 	return dirMks;
 }
 

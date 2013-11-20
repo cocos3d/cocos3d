@@ -340,10 +340,10 @@
 	CC3VertexShader* _vertexShader;
 	CC3FragmentShader* _fragmentShader;
 	id<CC3ShaderProgramSemanticsDelegate> _semanticDelegate;
-	CCArray* _uniformsSceneScope;
-	CCArray* _uniformsNodeScope;
-	CCArray* _uniformsDrawScope;
-	CCArray* _attributes;
+	NSMutableArray* _uniformsSceneScope;
+	NSMutableArray* _uniformsNodeScope;
+	NSMutableArray* _uniformsDrawScope;
+	NSMutableArray* _attributes;
 	GLint _maxUniformNameLength;
 	GLint _maxAttributeNameLength;
 	GLuint _programID;
@@ -389,7 +389,7 @@
 @property(nonatomic, readonly) GLuint uniformCount;
 
 /** Returns a read-only array of the GLSL uniforms declared and used by this shader program. */
-@property(nonatomic, strong, readonly) CCArray* uniforms;
+@property(nonatomic, strong, readonly) NSArray* uniforms;
 
 /** Returns the number of memory storage elements consumed by the uniform variables used by this program. */
 @property(nonatomic, readonly) GLuint uniformStorageElementCount;
@@ -416,7 +416,7 @@
 @property(nonatomic, readonly) GLuint attributeCount;
 
 /** Returns a read-only array of the GLSL attributes declared and used by this shader program. */
-@property(nonatomic, readonly) CCArray* attributes;
+@property(nonatomic, readonly) NSArray* attributes;
 
 /** 
  * Returns the vertex attribute with the specified semantic and index,

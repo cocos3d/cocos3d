@@ -182,7 +182,7 @@
  * The returned array is a copy of the any internal arrays.
  * Changing the contents will not change the internal node seqeunce.
  */
-@property(nonatomic, strong, readonly) CCArray* nodes;
+@property(nonatomic, strong, readonly) NSArray* nodes;
 
 /**
  * Indicates that the sequencer will run the algorithm to relocate misplaced nodes
@@ -343,11 +343,11 @@
  * Reading that property returns YES if any child sequencer returns YES, otherwise it returns NO.
  */
 @interface CC3BTreeNodeSequencer : CC3NodeSequencer {
-	CCArray* _sequencers;
+	NSMutableArray* _sequencers;
 }
 
 /** The array of child sequencers. */
-@property(nonatomic, strong, readonly) CCArray* sequencers;
+@property(nonatomic, strong, readonly) NSArray* sequencers;
 
 /** Adds the specified sequencer as a child sequencer. */
 -(void) addSequencer: (CC3NodeSequencer*) aNodeSequencer;
@@ -408,7 +408,7 @@
  * The contents of the nodes array are not copied when this sequencer is copied.
  */
 @interface CC3NodeArraySequencer : CC3NodeSequencer {
-	CCArray* _nodes;
+	NSMutableArray* _nodes;
 }
 
 /**
@@ -558,7 +558,7 @@
  */
 @interface CC3NodeSequencerVisitor : NSObject {
 	CC3Scene* _scene;
-	CCArray* _misplacedNodes;
+	NSMutableArray* _misplacedNodes;
 }
 
 /**
@@ -591,7 +591,7 @@
  *
  * The returned array may be nil.
  */
-@property(nonatomic, strong, readonly) CCArray* misplacedNodes;
+@property(nonatomic, strong, readonly) NSArray* misplacedNodes;
 
 /** Adds the specified node to the array of nodes held in the misplacedNodes property */
 -(void) addMisplacedNode: (CC3Node*) aNode;

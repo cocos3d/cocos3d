@@ -279,7 +279,7 @@ static const GLfloat kCC3DefaultShadowVolumeVertexOffsetFactor = 0.001f;
  * and does not recurse below this level. As such, this method only has meaning
  * when invoked on a mesh node.
  */
-@property(nonatomic, readonly) CCArray* shadowVolumes;
+@property(nonatomic, readonly) NSArray* shadowVolumes;
 
 /**
  * Returns the shadow volume that was added to this node for the specified light,

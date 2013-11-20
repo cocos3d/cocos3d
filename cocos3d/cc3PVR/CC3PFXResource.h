@@ -110,8 +110,8 @@
 @interface CC3PFXEffect : NSObject {
 	NSString* _name;
 	CC3ShaderProgram* _shaderProgram;
-	CCArray* _textures;
-	CCArray* _variables;
+	NSMutableArray* _textures;
+	NSMutableArray* _variables;
 }
 
 /** Returns the name of this effect. */
@@ -124,13 +124,13 @@
  * The textures used in this effect. Each element of this array is an instance of CC3PFXEffectTexture
  * that contains the texture and the index of the texture unit to which the texture should be applied.
  */
-@property(nonatomic, strong, readonly) CCArray* textures;
+@property(nonatomic, strong, readonly) NSArray* textures;
 
 /**
  * This array contains a configuration spec for each attribute and uniform variable used in
  * the shaders. Each element of this array is an instance of CC3PFXGLSLVariableConfiguration.
  */
-@property(nonatomic, strong, readonly) CCArray* variables;
+@property(nonatomic, strong, readonly) NSArray* variables;
 
 /**
  * Initializes this instance from the specified SPVRTPFXParserEffect C++ class, retrieved

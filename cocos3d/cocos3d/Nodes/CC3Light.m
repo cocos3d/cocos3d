@@ -355,7 +355,7 @@
 -(void) addShadowNow: (id<CC3ShadowProtocol>) aShadowNode {
 	CC3Assert(aShadowNode, @"Shadow cannot be nil");		// Don't add if child is nil
 	
-	if(!_shadows) _shadows = [CCArray array];
+	if(!_shadows) _shadows = [NSMutableArray array];
 	[_shadows addObject: aShadowNode];
 	aShadowNode.light = self;
 
@@ -542,7 +542,7 @@
  * shadow nodes from this scene, which also removes the shadows array.
  */
 -(void) cleanupShadows {
-	CCArray* myShadows = [_shadows copy];
+	NSArray* myShadows = [_shadows copy];
 	for (CC3Node* sv in myShadows) [sv remove];
 }
 

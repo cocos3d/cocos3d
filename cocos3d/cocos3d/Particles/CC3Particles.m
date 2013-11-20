@@ -47,6 +47,7 @@
 @implementation CC3ParticleEmitter
 
 @synthesize particles=_particles, particleCount=_particleCount;
+@synthesize currentParticleCapacity=_currentParticleCapacity;
 @synthesize maximumParticleCapacity=_maximumParticleCapacity;
 @synthesize particleCapacityExpansionIncrement=_particleCapacityExpansionIncrement;
 @synthesize emissionDuration=_emissionDuration, emissionInterval=_emissionInterval;
@@ -108,11 +109,9 @@
 
 #pragma mark Allocation and initialization
 
--(GLuint) currentParticleCapacity { return (GLuint)_particles.capacity; }
-
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		_particles = [CCArray arrayWithZeroCapacity];	// Grows dynamically
+		_particles = [NSMutableArray array];
 		_particleNavigator = nil;
 		_maximumParticleCapacity = kCC3ParticlesNoMax;
 		_particleCapacityExpansionIncrement = 100;
@@ -279,11 +278,13 @@
 /** Ensures space has been allocated for the specified particle. */
 -(BOOL) ensureParticleCapacityFor: (id<CC3ParticleProtocol>) aParticle {
 	if (aParticle.emitter == self) return YES;			// Reusing a particle so we're good
-	
-	GLuint currCap = self.currentParticleCapacity;
-	if (_particleCount == currCap) {
-		GLuint newCap = MIN(currCap + self.particleCapacityExpansionIncrement, self.maximumParticleCapacity);
-		return [_particles setCapacity: newCap];
+
+	// If we are at current capacity, see if we can expand
+	if (_particleCount == _currentParticleCapacity) {
+		GLuint origCap = _currentParticleCapacity;
+		_currentParticleCapacity = MIN(_currentParticleCapacity + _particleCapacityExpansionIncrement,
+									   _maximumParticleCapacity);
+		return (_currentParticleCapacity > origCap);	// Return if current capacity actually was increased
 	}
 	return YES;
 }
@@ -296,11 +297,7 @@
 -(void) addNewParticle: (id<CC3ParticleProtocol>) aParticle {
 	if (aParticle.emitter == self) return;			// Reusing a particle so we're good
 
-	// Avoid expanding unless necessary, by removing an expired particle if we're at capacity. This allows
-	// us to efficiently reuse expired particles, while allowing new particles to be injected from outside.
-	if (_particles.count == _particles.capacity && _particleCount < _particles.count) [_particles removeLastObject];
 	[_particles insertObject: aParticle atIndex: _particleCount];
-	
 	aParticle.emitter = self;
 }
 

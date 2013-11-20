@@ -224,7 +224,7 @@ static ccBlendFunc _defaultBlendFunc = {GL_ONE, GL_ZERO};
 		self.texture = aTexture;
 	} else {
 		CC3Assert(aTexture, @"%@ cannot add a nil overlay texture", self);
-		if(!_textureOverlays) _textureOverlays = [CCArray array];
+		if(!_textureOverlays) _textureOverlays = [NSMutableArray array];
 
 		GLuint maxTexUnits = CC3OpenGL.sharedGL.maxNumberOfTextureUnits;
 		if (self.textureCount < maxTexUnits) {
@@ -257,7 +257,7 @@ static ccBlendFunc _defaultBlendFunc = {GL_ONE, GL_ZERO};
 
 	// Remove the overlay textures
 	if (_textureOverlays) {
-		CCArray* myOTs = [_textureOverlays copy];
+		NSArray* myOTs = [_textureOverlays copy];
 		for (CC3Texture* ot in myOTs) [self removeTexture: ot];
 	}
 }
@@ -402,7 +402,7 @@ static ccBlendFunc _defaultBlendFunc = {GL_ONE, GL_ZERO};
 }
 
 // Protected properties for copying
--(CCArray*) textureOverlays { return _textureOverlays; }
+-(NSArray*) textureOverlays { return _textureOverlays; }
 
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
@@ -426,7 +426,7 @@ static ccBlendFunc _defaultBlendFunc = {GL_ONE, GL_ZERO};
 	
 	// Remove any existing overlays and add the overlays from the other material.
 	[_textureOverlays removeAllObjects];
-	CCArray* otherOTs = another.textureOverlays;
+	NSArray* otherOTs = another.textureOverlays;
 	for (CC3Texture* ot in otherOTs) [self addTexture: ot];	// retained by collection
 }
 

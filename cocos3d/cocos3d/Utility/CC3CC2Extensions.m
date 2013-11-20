@@ -198,9 +198,8 @@
 		[self cc3ContainsTouchPoint: viewPoint] ) return YES;
 	
 	CCArray* myKids = self.children;
-	for (CCNode* child in myKids) {
+	for (CCNode* child in myKids)
 		if ( [child cc3WillConsumeTouchEventAt: viewPoint] ) return YES;
-	}
 
 	LogTrace(@"%@ will NOT consume event at %@", [self class], NSStringFromCGPoint(viewPoint));
 
@@ -281,9 +280,8 @@
 
 -(BOOL) cc3ContainsTouchPoint: (CGPoint) viewPoint {
 	CCArray* myKids = self.children;
-	for (CCNode* child in myKids) {
+	for (CCNode* child in myKids)
 		if ( [child cc3ContainsTouchPoint: viewPoint] ) return YES;
-	}
 	return NO;
 }
 
@@ -490,100 +488,100 @@
 @end
 
 
-#pragma mark -
-#pragma mark CCArray extension
-
-@implementation CCArray (CC3)
-
--(NSUInteger) indexOfObjectIdenticalTo: (id) anObject {
-	return [self indexOfObject: anObject];
-}
-
--(void) removeObjectIdenticalTo: (id) anObject {
-	[self removeObject: anObject];
-}
-
-//-(void) fastReplaceObjectAtIndex: (NSUInteger) index withObject: (id) anObject {
-//	CC3Assert(index < data->num, @"Invalid index. Out of bounds");
+//#pragma mark -
+//#pragma mark CCArray extension
 //
-//	id oldObj = data->arr[index];
-//	data->arr[index] = anObject;
-//							// Release after in case new is same as old
+//@implementation CCArray (CC3)
+//
+//-(NSUInteger) indexOfObjectIdenticalTo: (id) anObject {
+//	return [self indexOfObject: anObject];
 //}
-
--(BOOL) setCapacity: (NSUInteger) newCapacity {
-	if (data->max == newCapacity) return NO;
-
-	// Release any current elements that are beyond the new capacity.
-	if (self.count > 0) {	// Reqd so count - 1 can't be done on NSUInteger of zero
-		for (NSUInteger i = self.count - 1; i >= newCapacity; i--) {
-			[self removeObjectAtIndex: i];
-		}
-	}
-
-	// Returned newArrs will be non-zero on successful allocation,
-	// but will be zero on either successful deallocation or on failed allocation
-	void* newArr = realloc( data->arr, (newCapacity * sizeof(id)) );
-
-	// If we wanted to allocate, but it failed, log an error and return without changing anything.
-	if ( (newCapacity != 0) && !newArr ) {
-		LogError(@"Could not change %@ to a capacity of %lu elements", self, (unsigned long)newCapacity);
-		return NO;
-	}
-	
-	// Otherwise, set the new array pointer and size.
-	data->arr = (__strong id*)newArr;
-	data->max = newCapacity;
-	LogTrace(@"Changed %@ to a capcity of %u elements", [self class], newCapacity);
-	return YES;
-}
-
-
-#pragma mark Allocation and initialization
-
-- (id) initWithZeroCapacity {
-	if ( (self = [super init]) ) {
-		data = (ccArray*)malloc( sizeof(ccArray) );
-		data->num = 0;
-		data->max = 0;
-		data->arr = NULL;
-	}
-	return self;
-}
-
-+(id) arrayWithZeroCapacity { return [[self alloc] initWithZeroCapacity]; }
-
-
-#pragma mark Support for unretained objects
-
-- (void) addUnretainedObject: (id) anObject { ccCArrayAppendValueWithResize(data, anObject); }
-
-- (void) insertUnretainedObject: (id) anObject atIndex: (NSUInteger) index {
-	ccCArrayEnsureExtraCapacity(data, 1);
-	ccCArrayInsertValueAtIndex(data, anObject, index);
-}
-
-- (void) removeUnretainedObjectIdenticalTo: (id) anObject { ccCArrayRemoveValue(data, anObject); }
-
-- (void) removeUnretainedObjectAtIndex: (NSUInteger) index { ccCArrayRemoveValueAtIndex(data, index); }
-
-- (void) removeAllObjectsAsUnretained { ccCArrayRemoveAllValues(data); }
-
--(void) releaseAsUnretained { [self removeAllObjectsAsUnretained]; }
-
-- (NSString*) fullDescription {
-	NSMutableString *desc = [NSMutableString stringWithFormat:@"%@ (", [self class]];
-	if (data->num > 0) {
-		[desc appendFormat:@"\n\t%@", data->arr[0]];
-	}
-	for (NSUInteger i = 1; i < data->num; i++) {
-		[desc appendFormat:@",\n\t%@", data->arr[i]];
-	}
-	[desc appendString:@")"];
-	return desc;
-}
-
-@end
+//
+//-(void) removeObjectIdenticalTo: (id) anObject {
+//	[self removeObject: anObject];
+//}
+//
+////-(void) fastReplaceObjectAtIndex: (NSUInteger) index withObject: (id) anObject {
+////	CC3Assert(index < data->num, @"Invalid index. Out of bounds");
+////
+////	id oldObj = data->arr[index];
+////	data->arr[index] = anObject;
+////							// Release after in case new is same as old
+////}
+//
+//-(BOOL) setCapacity: (NSUInteger) newCapacity {
+//	if (data->max == newCapacity) return NO;
+//
+//	// Release any current elements that are beyond the new capacity.
+//	if (self.count > 0) {	// Reqd so count - 1 can't be done on NSUInteger of zero
+//		for (NSUInteger i = self.count - 1; i >= newCapacity; i--) {
+//			[self removeObjectAtIndex: i];
+//		}
+//	}
+//
+//	// Returned newArrs will be non-zero on successful allocation,
+//	// but will be zero on either successful deallocation or on failed allocation
+//	void* newArr = realloc( data->arr, (newCapacity * sizeof(id)) );
+//
+//	// If we wanted to allocate, but it failed, log an error and return without changing anything.
+//	if ( (newCapacity != 0) && !newArr ) {
+//		LogError(@"Could not change %@ to a capacity of %lu elements", self, (unsigned long)newCapacity);
+//		return NO;
+//	}
+//	
+//	// Otherwise, set the new array pointer and size.
+//	data->arr = (__strong id*)newArr;
+//	data->max = newCapacity;
+//	LogTrace(@"Changed %@ to a capcity of %u elements", [self class], newCapacity);
+//	return YES;
+//}
+//
+//
+//#pragma mark Allocation and initialization
+//
+//- (id) initWithZeroCapacity {
+//	if ( (self = [super init]) ) {
+//		data = (ccArray*)malloc( sizeof(ccArray) );
+//		data->num = 0;
+//		data->max = 0;
+//		data->arr = NULL;
+//	}
+//	return self;
+//}
+//
+//+(id) arrayWithZeroCapacity { return [[self alloc] initWithZeroCapacity]; }
+//
+//
+//#pragma mark Support for unretained objects
+//
+//- (void) addUnretainedObject: (id) anObject { ccCArrayAppendValueWithResize(data, anObject); }
+//
+//- (void) insertUnretainedObject: (id) anObject atIndex: (NSUInteger) index {
+//	ccCArrayEnsureExtraCapacity(data, 1);
+//	ccCArrayInsertValueAtIndex(data, anObject, index);
+//}
+//
+//- (void) removeUnretainedObjectIdenticalTo: (id) anObject { ccCArrayRemoveValue(data, anObject); }
+//
+//- (void) removeUnretainedObjectAtIndex: (NSUInteger) index { ccCArrayRemoveValueAtIndex(data, index); }
+//
+//- (void) removeAllObjectsAsUnretained { ccCArrayRemoveAllValues(data); }
+//
+//-(void) releaseAsUnretained { [self removeAllObjectsAsUnretained]; }
+//
+//- (NSString*) fullDescription {
+//	NSMutableString *desc = [NSMutableString stringWithFormat:@"%@ (", [self class]];
+//	if (data->num > 0) {
+//		[desc appendFormat:@"\n\t%@", data->arr[0]];
+//	}
+//	for (NSUInteger i = 1; i < data->num; i++) {
+//		[desc appendFormat:@",\n\t%@", data->arr[i]];
+//	}
+//	[desc appendString:@")"];
+//	return desc;
+//}
+//
+//@end
 
 
 #pragma mark -

@@ -68,7 +68,7 @@
  * Links this node to its parent by retrieving the node at the position in the array
  * specified by the calParentIndex of this node.
  */
--(void) linkToCALNodes: (CCArray*) nodeArray;
+-(void) linkToCALNodes: (NSArray*) nodeArray;
 
 /**
  * Retrieves the first node found with the specified calIndex, anywhere in the structural hierarchy

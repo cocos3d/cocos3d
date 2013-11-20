@@ -216,6 +216,8 @@ cocos3d 2.0.0 - 2013/09/30
 
 - [API change] Numerous classes, methods, and properties that were previously deprecated in previous 0.x versions of cocos3d have now been removed.
 
+- [API change] Replaced use of CCArray with NSArray.
+
 - CC3DeviceCameraOverlayUIViewController now uses AVFoundation framework instead of UIImagePickerController to display device camera behind 3D scene for Augmented Reality apps.
 
 - CC3PODNode userData and podUserDataSize properties now populated from user data in POD files.

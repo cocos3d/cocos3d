@@ -226,7 +226,7 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 	} else {
 		// Add subsequent texture coordinate arrays to the array of overlayTextureCoordinates,
 		// creating it first if necessary
-		if( !_overlayTextureCoordinates )	_overlayTextureCoordinates = [CCArray array];
+		if( !_overlayTextureCoordinates )	_overlayTextureCoordinates = [NSMutableArray array];
 		[_overlayTextureCoordinates addObject: vtxTexCoords];
 		[vtxTexCoords deriveNameFrom: self];
 	}
@@ -253,7 +253,7 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 	self.vertexTextureCoordinates = nil;
 	
 	// Remove the overlay texture coordinates
-	CCArray* myOTCs = [_overlayTextureCoordinates copy];
+	NSArray* myOTCs = [_overlayTextureCoordinates copy];
 	for (CC3VertexTextureCoordinates* otc in myOTCs) [self removeTextureCoordinates: otc];
 }
 
@@ -1403,7 +1403,7 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 }
 
 // Protected properties for copying
--(CCArray*) overlayTextureCoordinates { return _overlayTextureCoordinates; }
+-(NSArray*) overlayTextureCoordinates { return _overlayTextureCoordinates; }
 
 -(void) populateFrom: (CC3Mesh*) another {
 	[super populateFrom: another];
@@ -1423,7 +1423,7 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 	
 	// Remove any existing overlay textures and add the overlay textures from the other vertex array.
 	[_overlayTextureCoordinates removeAllObjects];
-	CCArray* otherOTCs = another.overlayTextureCoordinates;
+	NSArray* otherOTCs = another.overlayTextureCoordinates;
 	if (otherOTCs)
 		for (CC3VertexTextureCoordinates* otc in otherOTCs)
 			[self addTextureCoordinates: [otc copy]];

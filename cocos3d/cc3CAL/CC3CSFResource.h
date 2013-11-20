@@ -36,7 +36,7 @@
 
 /** CC3CSFResource is a CC3NodesResource that loads a node hierarchy from a Cal3D-compatible CSF file. */
 @interface CC3CSFResource : CC3NodesResource {
-	CCArray* _allNodes;
+	NSMutableArray* _allNodes;
 	int _nodeCount;
 	int _fileVersion;
 	ccColor4F _ambientLight;
@@ -52,7 +52,7 @@
  * A collection of all of the nodes extracted from the CSF file.
  * This is the equivalent of flattening the nodes array.
  */
-@property(nonatomic, strong, readonly) CCArray* allNodes;
+@property(nonatomic, strong, readonly) NSArray* allNodes;
 
 /**
  * Retrieves the first node found with the specified calIndex, anywhere in the nodes contained

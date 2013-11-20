@@ -121,7 +121,7 @@
 -(void) processChildrenOf: (CC3Node*) aNode {
 	CC3Node* currNode = _currentNode;	// Remember current node
 	
-	CCArray* children = aNode.children;
+	NSArray* children = aNode.children;
 	for (CC3Node* child in children) [self visit: child];
 
 	_currentNode = currNode;				// Restore current node
@@ -161,7 +161,7 @@
 -(void) close { [self processRemovals]; }
 
 -(void) requestRemovalOf: (CC3Node*) aNode {
-	if (!_pendingRemovals) _pendingRemovals = [CCArray array];
+	if (!_pendingRemovals) _pendingRemovals = [NSMutableArray array];
 	[_pendingRemovals addObject: aNode];
 }
 
@@ -188,7 +188,7 @@
 -(NSUInteger) lightCount { return self.scene.lights.count; }
 
 -(CC3Light*) lightAt: (GLuint) index {
-	CCArray* lights = self.scene.lights;
+	NSArray* lights = self.scene.lights;
 	if (index < lights.count) return [lights objectAtIndex: index];
 	return nil;
 }
@@ -899,7 +899,7 @@
 -(id) initWithRay: (CC3Ray) aRay {
 	if ( (self = [super init]) ) {
 		_ray = aRay;
-		_nodePunctures = [CCArray array];
+		_nodePunctures = [NSMutableArray array];
 		_shouldPunctureFromInside = NO;
 		_shouldPunctureInvisibleNodes = NO;
 	}

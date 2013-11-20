@@ -83,7 +83,7 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
 	CC3ShadowCastingVolume* _shadowCastingVolume;
 	CC3CameraShadowVolume* _cameraShadowVolume;
 	CC3StencilledShadowPainterNode* _stencilledShadowPainter;
-	CCArray* _shadows;
+	NSMutableArray* _shadows;
 	ccColor4F _ambientColor;
 	ccColor4F _diffuseColor;
 	ccColor4F _specularColor;
@@ -442,7 +442,7 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
  *
  * If this light is casting no shadows, this property will be nil.
  */
-@property(nonatomic, strong, readonly) CCArray* shadows;
+@property(nonatomic, strong, readonly) NSArray* shadows;
 
 /**
  * Adds a shadow to the shadows cast by this light.

@@ -149,13 +149,13 @@
 -(void) update: (ccTime)dt { [_cc3Scene updateScene: dt]; }
 
 // Lazily initialized
--(CCArray*) cc3GestureRecognizers {
-	if ( !_cc3GestureRecognizers ) _cc3GestureRecognizers = [CCArray array];
+-(NSArray*) cc3GestureRecognizers {
+	if ( !_cc3GestureRecognizers ) _cc3GestureRecognizers = [NSMutableArray array];
 	return _cc3GestureRecognizers;
 }
 
 -(void) cc3AddGestureRecognizer: (UIGestureRecognizer*) gesture {
-	[self.cc3GestureRecognizers addObject: gesture];
+	[((NSMutableArray*)self.cc3GestureRecognizers) addObject: gesture];
 	[self.controller.view addGestureRecognizer: gesture];
 }
 
@@ -165,7 +165,7 @@
 }
 
 -(void) cc3RemoveAllGestureRecognizers {
-	CCArray* myGRs = [_cc3GestureRecognizers copy];
+	NSArray* myGRs = [_cc3GestureRecognizers copy];
 	for (UIGestureRecognizer* gr in myGRs) [self cc3RemoveGestureRecognizer: gr];
 }
 

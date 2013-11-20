@@ -75,8 +75,8 @@
 -(CC3GLSLUniform*)	addUniformOverrideFor: (CC3GLSLUniform*) uniform {
 	if( !uniform ) return nil;		// Don't add override for non-existant uniform
 	
-	if ( !_uniforms ) _uniforms = [CCArray new];							// retained
-	if ( !_uniformsByName ) _uniformsByName = [NSMutableDictionary new];	// retained
+	if ( !_uniforms ) _uniforms = [NSMutableArray array];
+	if ( !_uniformsByName ) _uniformsByName = [NSMutableDictionary new];
 
 	CC3GLSLUniform* newUniform = [uniform copyAsClass: CC3GLSLUniformOverride.class];
 	[_uniformsByName setObject: newUniform forKey: newUniform.name];

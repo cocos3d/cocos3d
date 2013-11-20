@@ -87,10 +87,10 @@ static Class _defaultPFXResourceClass = nil;
 -(id) init {
 	if ( (self = [super init]) ) {
 		_pvrtModel = NULL;
-		_allNodes = [CCArray array];
-		_meshes = [CCArray array];
-		_materials = [CCArray array];
-		_textures = [CCArray array];
+		_allNodes = [NSMutableArray array];
+		_meshes = [NSMutableArray array];
+		_materials = [NSMutableArray array];
+		_textures = [NSMutableArray array];
 		_textureParameters = [CC3Texture defaultTextureParameters];
 		_pfxResourceClass = [[self class] defaultPFXResourceClass];
 		_shouldAutoBuild = YES;
@@ -287,7 +287,7 @@ static Class _defaultPFXResourceClass = nil;
 	// Base nodes, which have no parent, form the entries of the nodes array.
 	for (CC3Node* aNode in _allNodes) {
 		[aNode linkToPODNodes: _allNodes];
-		if (aNode.isBasePODNode) [self.nodes addObject: aNode];
+		if (aNode.isBasePODNode) [self addNode: aNode];
 	}
 }
 
@@ -352,8 +352,8 @@ static Class _defaultPFXResourceClass = nil;
 }
 
 -(void) buildSoftBodyNode {
-	CCArray* myNodes = self.nodes;
-	CCArray* softBodyComponents = [CCArray arrayWithCapacity: myNodes.count];
+	NSArray* myNodes = self.nodes;
+	NSMutableArray* softBodyComponents = [NSMutableArray arrayWithCapacity: myNodes.count];
 	for (CC3Node* baseNode in myNodes)
 		if (baseNode.hasSoftBodyContent) [softBodyComponents addObject: baseNode];
 
@@ -362,10 +362,10 @@ static Class _defaultPFXResourceClass = nil;
 		CC3SoftBodyNode* sbn = [CC3SoftBodyNode nodeWithName: sbName];
 		for (CC3Node* sbc in softBodyComponents) {
 			[sbn addChild: sbc];
-			[myNodes removeObjectIdenticalTo: sbc];
+			[self removeNode: sbc];
 		}
 		[sbn bindRestPose];
-		[myNodes addObject: sbn];
+		[self addNode: sbn];
 	}
 }
 

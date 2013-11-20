@@ -167,7 +167,7 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
  */
 @interface CC3Material : CC3Identifiable <CCRGBAProtocol, CCBlendProtocol> {
 	CC3Texture* _texture;
-	CCArray* _textureOverlays;
+	NSMutableArray* _textureOverlays;
 	CC3ShaderProgramContext* _shaderContext;
 	ccColor4F _ambientColor;
 	ccColor4F _diffuseColor;

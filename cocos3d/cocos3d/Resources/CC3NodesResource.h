@@ -94,7 +94,7 @@
  * successful completion of the processFile: method.
  */
 @interface CC3NodesResource : CC3Resource {
-	CCArray* _nodes;
+	NSMutableArray* _nodes;
 	BOOL _expectsVerticallyFlippedTextures : 1;
 }
 
@@ -102,7 +102,7 @@
  * A collection of the root nodes of the node assembly extracted from the file.
  * Each of these nodes will usually contain child nodes.
  */
-@property(nonatomic, strong, readonly) CCArray* nodes;
+@property(nonatomic, strong, readonly) NSArray* nodes;
 
 /**
  * Returns a node from the hierarchy under the nodes in the nodes array, that matches the
@@ -115,6 +115,32 @@
  * efficient searching and matching algorithms.
  */
 -(CC3Node*) getNodeMatching: (CC3Node*) node;
+
+/**
+ * Adds the specified node to the collection of nodes loaded by this resource.
+ *
+ * This method is used by subclasses during loading to add a node to the nodes collection.
+ *
+ * The application may also use this method to add a node manually, if appropriate. However,
+ * be aware that the nodes collection of a resource object is generally only accessed once
+ * to populate the descendants of a CC3ResourceNode that wraps this resource. In most cases,
+ * it may be more appropriate for the application to add any manually-generated nodes to the
+ * CC3ResourceNode, instead of this resource.
+ */
+-(void) addNode: (CC3Node*) node;
+
+/**
+ * Removes the specified node from the collection of nodes loaded by this resource.
+ *
+ * This method is used by subclasses during loading to remove a node from the nodes collection.
+ *
+ * The application may also use this method to remove a node manually, if appropriate. However,
+ * be aware that the nodes collection of a resource object is generally only accessed once
+ * to populate the descendants of a CC3ResourceNode that wraps this resource. In most cases,
+ * it may be more appropriate for the application to remove any unwanted nodes from the
+ * CC3ResourceNode, instead of this resource.
+ */
+-(void) removeNode: (CC3Node*) node;
 
 
 #pragma mark Allocation and initialization

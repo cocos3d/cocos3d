@@ -927,7 +927,7 @@
  */
 @interface CC3GLViewSurfaceManager : NSObject {
 	CC3GLView* _view;
-	CCArray* _resizeableSurfaces;
+	NSMutableArray* _resizeableSurfaces;
 	CC3GLFramebuffer* _viewSurface;
 	CC3GLFramebuffer* _multisampleSurface;
 	CC3GLFramebuffer* _pickingSurface;

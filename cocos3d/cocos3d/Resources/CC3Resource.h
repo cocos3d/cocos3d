@@ -333,7 +333,7 @@
 #pragma mark Deprecated functionality
 
 /** @deprecated Property moved to CC3NodesResource subclass. */
-@property( nonatomic, strong, readonly) CCArray* nodes DEPRECATED_ATTRIBUTE;
+@property( nonatomic, strong, readonly) NSArray* nodes DEPRECATED_ATTRIBUTE;
 
 /** @deprecated Property moved to CC3NodesResource subclass. */
 @property(nonatomic, assign) BOOL expectsVerticallyFlippedTextures DEPRECATED_ATTRIBUTE;

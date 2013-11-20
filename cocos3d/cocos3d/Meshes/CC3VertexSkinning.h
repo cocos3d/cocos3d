@@ -193,13 +193,13 @@
  *     automatically created for all descendant skinned mesh nodes.
  */
 @interface CC3SkinMeshNode : CC3MeshNode {
-	CCArray* _skinSections;
+	NSMutableArray* _skinSections;
 	CC3Matrix* _restPoseTransformMatrix;
 	CC3DeformedFaceArray* _deformedFaces;
 }
 
 /** The collection of CC3SkinSections that are managed by this node. */
-@property(nonatomic,strong, readonly) CCArray* skinSections;
+@property(nonatomic,strong, readonly) NSArray* skinSections;
 
 /**
  * Returns the cached rest pose matrix, relative to the soft-body ancestor node.
@@ -289,7 +289,7 @@
  */
 @interface CC3SkinSection : NSObject <NSCopying> {
 	CC3SkinMeshNode* _node;
-	CCArray* _skinnedBones;
+	NSMutableArray* _skinnedBones;
 	GLint _vertexStart;
 	GLint _vertexCount;
 }
@@ -326,7 +326,7 @@
  * The array returned by this property is created anew for each read. Do not add or remove
  * bones from the returned array directly. To add a bone, use the addBone: method.
  */
-@property(nonatomic, strong, readonly) CCArray* bones;
+@property(nonatomic, strong, readonly) NSArray* bones;
 
 /** Returns the bone node at the specified index. */
 -(CC3Bone*) boneAt: (GLuint) boneIdx;

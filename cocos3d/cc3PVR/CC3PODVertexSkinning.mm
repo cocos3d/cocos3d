@@ -86,7 +86,7 @@
 }
 
 /** Link the nodes in the bone batches. */
--(void) linkToPODNodes: (CCArray*) nodeArray {
+-(void) linkToPODNodes: (NSArray*) nodeArray {
 	[super linkToPODNodes: nodeArray];
 	for (CC3PODSkinSection* skinSctn in _skinSections) [skinSctn linkToPODNodes: nodeArray];
 }
@@ -140,7 +140,7 @@
 
 }
 
--(void) linkToPODNodes: (CCArray*) nodeArray {
+-(void) linkToPODNodes: (NSArray*) nodeArray {
 	for (GLint boneNum = 0; boneNum < _podBoneCount; boneNum++) {
 		GLint boneIndex = _podBoneNodeIndices[boneNum];
 		CC3Bone* boneNode = [nodeArray objectAtIndex: boneIndex];

@@ -1107,7 +1107,7 @@
 
 -(id) init {
 	if ( (self = [super init]) ) {
-		_boundingVolumes = [CCArray array];
+		_boundingVolumes = [NSMutableArray array];
 	}
 	return self;
 }

@@ -102,7 +102,7 @@ extern "C" {
 	return [aPODRez nodePODStructAtIndex: aPODIndex];
 }
 
--(void) linkToPODNodes: (CCArray*) nodeArray {
+-(void) linkToPODNodes: (NSArray*) nodeArray {
 	if (!self.isBasePODNode) {
 		LogTrace(@"Linking %@ with parent index %i", self, self.podParentIndex);
 		CC3Node* parentNode = [nodeArray objectAtIndex: self.podParentIndex];

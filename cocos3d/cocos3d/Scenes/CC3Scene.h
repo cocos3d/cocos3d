@@ -227,9 +227,9 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * property for more information.
  */
 @interface CC3Scene : CC3Node {
-	CCArray* _targettingNodes;
-	CCArray* _lights;
-	CCArray* _billboards;
+	NSMutableArray* _targettingNodes;
+	NSMutableArray* _lights;
+	NSMutableArray* _billboards;
 	CC3Layer* __unsafe_unretained _cc3Layer;
 	CC3Camera* _activeCamera;
 	CC3NodeSequencer* _drawingSequencer;
@@ -310,7 +310,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * node (or the scene itself) using the addChild: method. To remove a light from the scene,
  * invoke the remove method on the light itself, or the removeChild: method on its parent.
  */
-@property(nonatomic, strong, readonly) CCArray* lights;
+@property(nonatomic, strong, readonly) NSArray* lights;
 
 /**
  * To create a backdrop for this scene, set this to a CC3ClipSpaceNode instance, covered
