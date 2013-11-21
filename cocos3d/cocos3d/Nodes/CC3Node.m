@@ -1712,7 +1712,11 @@ static GLuint lastAssignedNodeTag;
  */
 -(void) addChildFromBackgroundThread: (CC3Node*) aNode {
 	[CC3OpenGL.sharedGL finish];
-	dispatch_async(dispatch_get_main_queue(), ^{ [self addChildNow: aNode]; });
+	[CCDirector.sharedDirector.runningThread performBlock: ^{ [self addChildNow: aNode]; } ];
+	
+	// A better design would be to use dispatch queues, but OSX typically
+	// renders using a DisplayLink thread instead of the main thread.
+//	dispatch_async(dispatch_get_main_queue(), ^{ [self addChildNow: aNode]; });
 }
 
 /**

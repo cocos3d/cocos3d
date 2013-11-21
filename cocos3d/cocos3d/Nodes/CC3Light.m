@@ -376,7 +376,11 @@
  */
 -(void) addShadowFromBackgroundThread: (id<CC3ShadowProtocol>) aShadowNode {
 	[CC3OpenGL.sharedGL finish];
-	dispatch_async(dispatch_get_main_queue(), ^{ [self addShadowNow: aShadowNode]; });
+	[CCDirector.sharedDirector.runningThread performBlock: ^{ [self addShadowNow: aShadowNode]; } ];
+	
+	// A better design would be to use dispatch queues, but OSX typically
+	// renders using a DisplayLink thread instead of the main thread.
+//	dispatch_async(dispatch_get_main_queue(), ^{ [self addShadowNow: aShadowNode]; });
 }
 
 -(void) removeShadow: (id<CC3ShadowProtocol>) aShadowNode {
