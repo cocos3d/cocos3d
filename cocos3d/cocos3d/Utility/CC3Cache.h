@@ -59,8 +59,7 @@
  * the same name exists in the cache already. To replace an object in the cache, you must
  * first remove the existing object from the cache.
  *
- * CC3Cache implements the NSLocking protocol, and all access to the contents of the
- * cache is thread-safe.
+ * CC3Cache implements the NSLocking protocol, and all access to the cache contents is thread-safe.
  *
  * Each object may be held either strongly or weakly by this cache, depending on the value
  * of the isWeak property at the time the object was added to the cache.
@@ -123,11 +122,10 @@
 /** 
  * Indicates whether this cache holds weak references to the objects within.
  *
- * If the value of this property is YES, this cache will hold a weak reference to each 
- * object within the cache, and the presence of the object in the cache will not stop 
- * the object from being deallocated. In this case, each object should automatically
- * remove itself from this cache during deallocation, once all external strong references
- * to the object have been released.
+ * If the value of this property is YES, this cache will hold a weak reference to each object
+ * within the cache, and the presence of the object in the cache will not stop the object from
+ * being deallocated. In this case, each object should automatically remove itself from this
+ * cache during deallocation, once all external strong references to the object have been released.
  *
  * This property is set during cache instantiation and initialization, and can be changed
  * at any time, allowing the cache to hold a mix of weakly and strongly cached objects.
@@ -171,54 +169,24 @@
 @end
 
 
-#pragma mark CC3CacheableWrapper
+#pragma mark NSObject extension
 
-/**
- * An instance of CC3CacheableWrapper is used within a cache to hold a cached object.
- *
- * This is an abstract class. Subclasses determine whether an object is to be held strongly
- * or weakly within the cache.
- *
- * Implements the CC3Cacheable protocol. The wrapped object is returned in the cachedObject property.
- */
-@interface CC3CacheableWrapper : NSObject
+/** Extension to support storing in a CC3Cache */
+@interface NSObject (CC3Cache)
 
-/** Returns the object that has been cached. */
-@property(nonatomic, strong, readonly) id<CC3Cacheable> cachedObject;
-
-
-#pragma mark Allocation and initialization
-
-/** Initializes this instance to wrap the specified cacheable object to be cached. */
--(id) initWith: (id<CC3Cacheable>) cachedObject;
-
-/** Allocates and initializes an autoreleased instance to wrap the specified cacheable object to be cached. */
-+(id) wrapperWith: (id<CC3Cacheable>) cachedObject;
+/** Returns the unwrapped cached value. Default implementation simply returns self. */
+-(id) unwrapCacheable;
 
 @end
 
 
-#pragma mark CC3WeakCacheableWrapper
+#pragma mark NSValue extension
 
-/**
- * An instance of CC3WeakCacheableWrapper is used within a cache to hold an object that is 
- * to be cached, without retaining that object. This permits the object to be deallocated
- * once it has been released from all retained references outside the cache.
- */
-@interface CC3WeakCacheableWrapper : CC3CacheableWrapper {
-	id<CC3Cacheable> __unsafe_unretained _cachedObject;
-}
-@end
+/** Extension to support storing in a CC3Cache */
+@interface NSValue (CC3Cache)
 
+/** Returns the weakly cached value by invoking nonretainedObjectValue on this instance. */
+-(id) unwrapCacheable;
 
-#pragma mark CC3StrongCacheableWrapper
-
-/**
- * An instance of CC3StrongCacheableWrapper is used within a cache to hold an object that is
- * to be retained when cached, so that it cannot be deallocated until removed from this cache.
- */
-@interface CC3StrongCacheableWrapper : CC3CacheableWrapper {
-	id<CC3Cacheable> _cachedObject;
-}
 @end
 

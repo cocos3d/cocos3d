@@ -51,11 +51,8 @@
 			  @" cache already contains a %@ named %@. Remove it first before adding another.",
 			  obj, _typeName, _typeName, objName);
 
-	CC3CacheableWrapper* wrap = nil;
-	if (_isWeak)
-		wrap = [CC3WeakCacheableWrapper wrapperWith: obj];
-	else
-		wrap = [CC3StrongCacheableWrapper wrapperWith: obj];
+	// If this is a weak cache, wrap the object in an NSValue weakly.
+	id wrap = _isWeak ? (id)[NSValue valueWithNonretainedObject: obj] : obj;
 
 	[self lock];
 	[_objectsByName setObject: wrap forKey: objName];
@@ -64,10 +61,10 @@
 
 -(id<CC3Cacheable>) getObjectNamed: (NSString*) name {
 	[self lock];
-	CC3CacheableWrapper* wrap = [_objectsByName objectForKey: name];
+	id obj = [_objectsByName objectForKey: name];
 	[self unlock];
 
-	return [wrap cachedObject];
+	return [obj unwrapCacheable];
 }
 
 -(void) removeObject: (id<CC3Cacheable>) obj { [self removeObjectNamed: obj.name]; }
@@ -99,10 +96,11 @@
 -(void) enumerateObjectsUsingBlock: (void (^) (id<CC3Cacheable> obj, BOOL* stop)) block {
 	[self lock];
 	[_objectsByName enumerateKeysAndObjectsUsingBlock: ^(id key, id obj, BOOL* stop) {
-		block([obj cachedObject], stop);
+		block([obj unwrapCacheable], stop);
 	}];
 	[self unlock];
 }
+
 
 #pragma mark NSLocking implementation
 
@@ -140,52 +138,19 @@
 @end
 
 
-#pragma mark CC3CacheableWrapper
+#pragma mark NSObject extension
 
-@implementation CC3CacheableWrapper
+@implementation NSObject (CC3Cache)
 
--(id<CC3Cacheable>) cachedObject { return nil; }
-
-
-#pragma mark Allocation and initialization
-
-// Ignores the object to be cached. Subclasses will determine how to store it.
--(id) initWith: (id<CC3Cacheable>) cachedObject { return [super init]; }
-
-+(id) wrapperWith: (id<CC3Cacheable>) cachedObject {
-	return [[self alloc] initWith: cachedObject];
-}
+-(id) unwrapCacheable { return self; }
 
 @end
 
 
-#pragma mark CC3WeakCacheableWrapper
+#pragma mark NSValue extension
 
-@implementation CC3WeakCacheableWrapper
+@implementation NSValue (CC3Cache)
 
--(id<CC3Cacheable>) cachedObject { return _cachedObject; }
-
--(id) initWith: (id<CC3Cacheable>) cachedObject {
-	if ( (self = [super init]) ) {
-		_cachedObject = cachedObject;
-	}
-	return self;
-}
-
-@end
-
-
-#pragma mark CC3StrongCacheableWrapper
-
-@implementation CC3StrongCacheableWrapper
-
--(id<CC3Cacheable>) cachedObject { return _cachedObject; }
-
--(id) initWith: (id<CC3Cacheable>) cachedObject {
-	if ( (self = [super init]) ) {
-		_cachedObject = cachedObject;
-	}
-	return self;
-}
+-(id) unwrapCacheable { return self.nonretainedObjectValue; }
 
 @end

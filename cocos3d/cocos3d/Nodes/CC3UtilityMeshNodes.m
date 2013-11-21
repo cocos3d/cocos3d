@@ -34,7 +34,7 @@
 
 // Expose CC3Node parent property as writeable, so subclasses can propagate to superclass.
 @interface CC3Node (TemplateMethods)
-@property(nonatomic, assign, readwrite) CC3Node* parent;
+@property(nonatomic, unsafe_unretained, readwrite) CC3Node* parent;
 @end
 
 

@@ -469,7 +469,7 @@ static GLubyte _autoOrthonormalizeCount = 0;
 -(CC3Node*) target { return _target; }
 
 /**
- * Set the new target as weak line and mark if it has changed.
+ * Set the new target as weak reference and mark whether it has changed.
  * Don't mark if not changed, so that a change persists even if the same target is set again.
  */
 -(void) setTarget: (CC3Node*) aNode {

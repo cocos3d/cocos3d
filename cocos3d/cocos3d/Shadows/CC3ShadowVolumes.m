@@ -37,7 +37,7 @@
 @interface CC3Node (TemplateMethods)
 -(void) processUpdateBeforeTransform: (CC3NodeUpdatingVisitor*) visitor;
 -(void) transformMatrixChanged;
-@property(nonatomic, assign, readwrite) CC3Node* parent;
+@property(nonatomic, unsafe_unretained, readwrite) CC3Node* parent;
 @end
 
 @interface CC3MeshNode (TemplateMethods)

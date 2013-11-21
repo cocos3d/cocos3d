@@ -1223,27 +1223,43 @@ static GLuint lastAssignedNodeTag;
 -(void) addTransformListener: (id<CC3NodeTransformListenerProtocol>) aListener {
 	if (!aListener) return;
 	
-	if( !_transformListeners ) _transformListeners = [NSMutableArray array];
+	if( !_transformListeners ) _transformListeners = [NSMutableSet set];
 	
-	if ( ![_transformListeners containsObject: aListener] ) {
-		[_transformListeners addObject: aListener];
+	// Add listener as a weak reference
+	[_transformListeners addObject: [NSValue valueWithNonretainedObject: aListener]];
 		
-		// If the transform has already been calculated, notify immediately.
-		if ( !self.isTransformDirty ) [aListener nodeWasTransformed: self];
-	}
+	// If the transform has already been calculated, notify immediately.
+	if ( !self.isTransformDirty ) [aListener nodeWasTransformed: self];
 }
 
 -(void) removeTransformListener: (id<CC3NodeTransformListenerProtocol>) aListener {
 	if (!aListener) return;
-
-	[_transformListeners removeObjectIdenticalTo: aListener];
+	
+	// Remove listener as a weak reference
+	[_transformListeners removeObject: [NSValue valueWithNonretainedObject: aListener]];
+	
 	if (_transformListeners && _transformListeners.count == 0) _transformListeners = nil;
 }
 
 -(void) removeAllTransformListeners {
-	NSArray* myListeners = [_transformListeners copy];
-	for(id<CC3NodeTransformListenerProtocol> aListener in myListeners)
-		[self removeTransformListener: aListener];
+	NSSet* myListeners = [_transformListeners copy];
+	for(NSValue* aListener in myListeners)
+		[self removeTransformListener: (id<CC3NodeTransformListenerProtocol>)aListener.nonretainedObjectValue];
+}
+
+/** Notify the transform listeners that the node has been transformed. */
+-(void) notifyTransformListeners {
+	LogTrace(@"%@ notifying %i transform listeners", self, _transformListeners.count);
+	for (NSValue* xfmLisnr in _transformListeners)
+		[((id<CC3NodeTransformListenerProtocol>)xfmLisnr.nonretainedObjectValue) nodeWasTransformed: self];
+}
+
+/** Notify the transform listeners that the node has been destroyed. */
+-(void) notifyDestructionListeners {
+	// Log with super description, because all of the subclass info is invalid during destruction.
+	LogTrace(@"%@ notifying %lu listeners of destruction", [super description], (unsigned long)_transformListeners.count);
+	for (NSValue* xfmLisnr in _transformListeners)
+		[((id<CC3NodeTransformListenerProtocol>)xfmLisnr.nonretainedObjectValue) nodeWasDestroyed: self];
 }
 
 -(void) nodeWasTransformed: (CC3Node*) aNode {
@@ -1488,22 +1504,6 @@ static GLuint lastAssignedNodeTag;
 	_isTransformInvertedDirty = YES;
 }
 
-/** Notify the transform listeners that the node has been transformed. */
--(void) notifyTransformListeners {
-	LogTrace(@"%@ notifying %i transform listeners", self, _transformListeners.count);
-	for (id<CC3NodeTransformListenerProtocol> xfmLisnr in _transformListeners) {
-		[xfmLisnr nodeWasTransformed: self];
-	}
-}
-
-/** Notify the transform listeners that the node has been destroyed. */
--(void) notifyDestructionListeners {
-	// Log with super description, because all of the subclass info is invalid.
-	LogTrace(@"%@ notifying %lu listeners of destruction", [super description], (unsigned long)_transformListeners.count);
-	for (id<CC3NodeTransformListenerProtocol> xfmLisnr in _transformListeners)
-		[xfmLisnr nodeWasDestroyed: self];
-}
-
 /** Marks the global rotation as dirty and in need of recalculation. */
 -(void) markGlobalRotationDirty { _isGlobalRotationDirty = YES; }
 
@@ -1712,7 +1712,7 @@ static GLuint lastAssignedNodeTag;
  */
 -(void) addChildFromBackgroundThread: (CC3Node*) aNode {
 	[CC3OpenGL.sharedGL finish];
-	[CCDirector.sharedDirector.runningThread performBlock: ^{ [self addChildNow: aNode]; } ];
+	[CCDirector.sharedDirector.runningThread runBlockAsync: ^{ [self addChildNow: aNode]; } ];
 	
 	// A better design would be to use dispatch queues, but OSX typically
 	// renders using a DisplayLink thread instead of the main thread.

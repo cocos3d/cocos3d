@@ -63,3 +63,27 @@
 @end
 
 
+#pragma mark -
+#pragma mark NSThread extensions
+
+@implementation NSThread (CC3)
+
+-(void) runBlockAsync: (void (^)(void)) block {
+	[self performSelector: @selector(runBlockNow:)
+				 onThread: self
+			   withObject: [block copy]
+			waitUntilDone: NO];
+}
+
+-(void) runBlockSync: (void (^)(void)) block {
+	[self performSelector: @selector(runBlockNow:)
+				 onThread: self
+			   withObject: [block copy]
+			waitUntilDone: YES];
+}
+
+-(void) runBlockNow: (void (^)(void)) block; { block(); }
+
+@end
+
+

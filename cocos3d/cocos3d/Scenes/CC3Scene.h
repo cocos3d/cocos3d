@@ -1194,7 +1194,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  */
 @interface CC3TouchedNodePicker : NSObject {
 	CC3NodePickingVisitor* _pickVisitor;
-	CC3Scene* _scene;
+	CC3Scene* __unsafe_unretained _scene;
 	CC3Node* _pickedNode;
 	uint _touchQueue[kCC3TouchQueueLength];
 	uint _queuedTouchCount;
@@ -1213,12 +1213,6 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 
 /** The most recent touch point in cocos2d coordinates. */
 @property(nonatomic, readonly) CGPoint touchPoint;
-
-/** Initializes this instance on the specified CC3Scene. */
--(id) initOnScene: (CC3Scene*) aCC3Scene;
-
-/** Allocates and initializes an autoreleased instance on the specified CC3Scene. */
-+(id) pickerOnScene: (CC3Scene*) aCC3Scene;
 
 /**
  * Indicates that a node should be picked for the touch event of the specified
@@ -1266,6 +1260,15 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * application never needs to invoke this method directly.
  */
 -(void) dispatchPickedNode;
+
+
+#pragma mark Allocation and initialization
+
+/** Initializes this instance on the specified CC3Scene. */
+-(id) initOnScene: (CC3Scene*) aCC3Scene;
+
+/** Allocates and initializes an autoreleased instance on the specified CC3Scene. */
++(id) pickerOnScene: (CC3Scene*) aCC3Scene;
 
 @end
 

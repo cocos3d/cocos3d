@@ -150,7 +150,7 @@ typedef enum {
  *
  * Always returns nil. Subclasses that support target tracking will override.
  */
-@property(nonatomic, strong, readonly) CC3Node* target;
+@property(nonatomic, unsafe_unretained, readonly) CC3Node* target;
 
 /**
  * Indicates whether the node should track the node set in the target
@@ -547,7 +547,7 @@ typedef enum {
  * as the target node, or the node using this rotator, move.
  */
 @interface CC3TargettingRotator : CC3DirectionalRotator {
-	CC3Node* _target;
+	CC3Node* __unsafe_unretained _target;
 }
 
 /**
@@ -593,10 +593,10 @@ typedef enum {
  * is set to YES, the node will track the target so that it always points to the
  * target, regardless of how the target and this node move through the 3D scene.
  *
- * The target is not retained. If you destroy the target node, you must remove
- * it as the target of this rotator.
+ * The target is held as a weak reference. If you destroy the target node, you must
+ * remove it as the target of this rotator.
  */
-@property(nonatomic, strong, readwrite) CC3Node* target;
+@property(nonatomic, unsafe_unretained, readwrite) CC3Node* target;
 
 /**
  * Indicates whether the node should track the node set in the target property

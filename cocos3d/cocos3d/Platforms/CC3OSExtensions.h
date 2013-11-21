@@ -75,3 +75,29 @@
 -(NSString*) fullDescription;
 
 @end
+
+
+#pragma mark -
+#pragma mark NSThread extensions
+
+@interface NSThread (CC3)
+
+/** 
+ * Dispatches the specified block to the run loop of this thread, without waiting for the
+ * block to be executed.
+ *
+ * This method returns immediately once the specified block is queued for execution on the run
+ * loop of this thread. This method does not wait for the execution of the block to complete.
+ */
+-(void) runBlockAsync: (void (^)(void)) block;
+
+/**
+ * Dispatches the specified block to the run loop of this thread, and waits for the block
+ * to be executed. 
+ *
+ * This method returns only after the the specified block has completed execution. 
+ * The current thread will halt (block) until then.
+ */
+-(void) runBlockSync: (void (^)(void)) block;
+
+@end

@@ -588,7 +588,7 @@
 -(void) clearMisplacedNodes { [_misplacedNodes removeAllObjects]; }
 
 // Deprecated
--(CC3Scene*) world { return _scene; }
+-(CC3Scene*) world { return self.scene; }
 -(void) setWorld: (CC3Scene*) aCC3Scene { self.scene = aCC3Scene; }
 -(id) initWithWorld: (CC3Scene*) aCC3Scene { return [self initWithScene: aCC3Scene]; }
 +(id) visitorWithWorld: (CC3Scene*) aCC3Scene { return [self visitorWithScene: aCC3Scene]; }

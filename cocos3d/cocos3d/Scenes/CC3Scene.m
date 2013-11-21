@@ -47,7 +47,7 @@
 
 @interface CC3Node (TemplateMethods)
 -(id) transformVisitorClass;
-@property(nonatomic, assign, readwrite) CC3Node* parent;	// Backdrop needs to have parent set
+@property(nonatomic, unsafe_unretained, readwrite) CC3Node* parent;	// Backdrop needs to have parent set
 @end
 
 
@@ -707,28 +707,6 @@
 @synthesize pickVisitor=_pickVisitor, touchPoint=_touchPoint;
 
 
-#pragma mark Allocation and initialization
-
--(id) init { return [self initOnScene: nil]; }
-
--(id) initOnScene: (CC3Scene*) aCC3Scene {
-	if ( (self = [super init]) ) {
-		_scene = aCC3Scene;
-		self.pickVisitor = [[_scene pickVisitorClass] visitor];
-		_touchPoint = CGPointZero;
-		_wasTouched = NO;
-		_wasPicked = NO;
-		_pickedNode = nil;
-		_queuedTouchCount = 0;
-	}
-	return self;
-}
-
-+(id) pickerOnScene: (CC3Scene*) aCC3Scene {
-	return [[self alloc] initOnScene: aCC3Scene];
-}
-
-
 #pragma mark Touch handling
 
 -(void) pickNodeFromTouchEvent: (uint) tType at: (CGPoint) tPoint {
@@ -784,6 +762,26 @@
 		_pickedNode = nil;	// Clear the node once it has been dispatched
 	}
 }
+
+
+#pragma mark Allocation and initialization
+
+-(id) init { return [self initOnScene: nil]; }
+
+-(id) initOnScene: (CC3Scene*) aCC3Scene {
+	if ( (self = [super init]) ) {
+		_scene = aCC3Scene;
+		self.pickVisitor = [[_scene pickVisitorClass] visitor];
+		_touchPoint = CGPointZero;
+		_wasTouched = NO;
+		_wasPicked = NO;
+		_pickedNode = nil;
+		_queuedTouchCount = 0;
+	}
+	return self;
+}
+
++(id) pickerOnScene: (CC3Scene*) aCC3Scene { return [[self alloc] initOnScene: aCC3Scene]; }
 
 -(NSString*) description { return [NSString stringWithFormat: @"%@", [self class]]; }
 

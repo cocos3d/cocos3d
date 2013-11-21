@@ -557,7 +557,7 @@
  * using it to visit a sequencer.
  */
 @interface CC3NodeSequencerVisitor : NSObject {
-	CC3Scene* _scene;
+	CC3Scene* __unsafe_unretained _scene;
 	NSMutableArray* _misplacedNodes;
 }
 
@@ -565,7 +565,7 @@
  * The CC3Scene instance. The sequencer may use aspects of the scene when
  * performing sequencing operations with a node.
  */
-@property(nonatomic, strong) CC3Scene* scene;
+@property(nonatomic, unsafe_unretained) CC3Scene* scene;
 
 /** Initializes this instance with the specified CC3Scene. */
 -(id) initWithScene: (CC3Scene*) aCC3Scene;

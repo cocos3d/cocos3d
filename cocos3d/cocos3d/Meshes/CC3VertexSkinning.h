@@ -288,7 +288,7 @@
  * array in the vertexWeights property of the mesh.
  */
 @interface CC3SkinSection : NSObject <NSCopying> {
-	CC3SkinMeshNode* _node;
+	CC3SkinMeshNode* __unsafe_unretained _node;
 	NSMutableArray* _skinnedBones;
 	GLint _vertexStart;
 	GLint _vertexCount;

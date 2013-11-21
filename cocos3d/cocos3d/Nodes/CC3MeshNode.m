@@ -40,7 +40,7 @@
 @interface CC3Node (TemplateMethods)
 -(void) updateBoundingVolume;
 -(void) markBoundingVolumeDirty;
-@property(nonatomic, assign, readwrite) CC3Node* parent;
+@property(nonatomic, unsafe_unretained, readwrite) CC3Node* parent;
 @end
 
 @interface CC3Mesh (TemplateMethods)

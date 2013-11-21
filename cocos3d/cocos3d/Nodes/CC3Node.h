@@ -229,10 +229,10 @@ typedef enum {
 	CC3Node* __unsafe_unretained _parent;
 	CC3Matrix* _globalTransformMatrix;
 	CC3Matrix* _globalTransformMatrixInverted;
-	NSMutableArray* _transformListeners;
 	CC3Matrix* _globalRotationMatrix;
 	CC3Rotator* _rotator;
 	CC3NodeBoundingVolume* _boundingVolume;
+	NSMutableSet* _transformListeners;
 	NSMutableArray* _animationStates;
 	CC3Vector _location;
 	CC3Vector _projectedLocation;
@@ -786,8 +786,12 @@ typedef enum {
  * The target node at which this node is pointed. If the shouldTrackTarget property
  * is set to YES, this node will track the target so that it always points to the
  * target, regardless of how the target and this node move through the 3D scene.
+ *
+ * The reference to the target is weak, allowing the target node to be removed from the scene
+ * if needed. This node will receive a nodeWasDestroyed: reference if the target node is removed
+ * and deallocated. The default implementation of that method is to set this target property to nil.
  */
-@property(nonatomic, strong) CC3Node* target;
+@property(nonatomic, unsafe_unretained) CC3Node* target;
 
 /**
  * Indicates whether this node is tracking the location of a target node.
@@ -2384,7 +2388,7 @@ typedef enum {
 #pragma mark Transformations
 
 /**
- * A list of objects that have requested that they be notified whenever the
+ * A collection of objects that have requested that they be notified whenever the
  * transform of this node has changed.
  *
  * This occurs when one of the transform properties (location, rotation & scale)
@@ -2406,7 +2410,7 @@ typedef enum {
  * copied. If you copy a node and want its listeners to also listen to the copied node,
  * you must deliberately add them to the new node.
  */
-@property(nonatomic, strong, readonly) NSArray* transformListeners;
+@property(nonatomic, strong, readonly) NSSet* transformListeners;
 
 /**
  * Indicates that the specified listener object wishes to be notified whenever
