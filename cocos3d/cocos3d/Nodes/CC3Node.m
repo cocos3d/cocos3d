@@ -954,6 +954,7 @@
 		_cascadeColorEnabled = YES;
 		_cascadeOpacityEnabled = YES;
 		_shouldCastShadows = YES;
+		_isBeingAdded = NO;
 		self.globalTransformMatrix = [CC3AffineMatrix matrix];		// Has side effects...so do last (globalTransformMatrixInverted is built in some subclasses)
 	}
 	return self;
@@ -1655,6 +1656,13 @@ static GLuint lastAssignedNodeTag;
  * avoid the possibility of adding a node in the middle of a render iteration.
  */
 -(void) addChild: (CC3Node*) aNode {
+	
+	// Don't add if child is nil or is already a child of this node
+	CC3Assert(aNode, @"Child node cannot be nil");
+	if(aNode.parent == self) return;
+
+	[aNode markAddBegin];	// Mark that this node is being added
+
 	if ( !CC3OpenGL.sharedGL.isPrimaryContext && self.scene )
 		[self addChildFromBackgroundThread: aNode];
 	else
@@ -1663,23 +1671,17 @@ static GLuint lastAssignedNodeTag;
 
 /** Adds the specified node as a child of this node without queuing. */
 -(void) addChildNow: (CC3Node*) aNode {
-	// Don't add if child is nil or is already a child of this node
-	CC3Assert(aNode, @"Child node cannot be nil");
-	if(aNode.parent == self) return;
 	
-	// Remove node from its existing parent after temporarily clearing the action cleanup flag.
-	BOOL origCleanupFlag = aNode.shouldStopActionsWhenRemoved;
-	aNode.shouldStopActionsWhenRemoved = NO;
-	[aNode remove];
-	aNode.shouldStopActionsWhenRemoved = origCleanupFlag;
-	
-	// Lazily create the children array if needed
+	[aNode remove];		// Remove node from its existing parent
+
+	// Lazily create the children array, if needed, and add the node to it
 	if(!_children) _children = [NSMutableArray array];
-	
 	[_children addObject: aNode];
+
 	aNode.parent = self;
 	aNode.isRunning = self.isRunning;
 	[self didAddDescendant: aNode];
+	[aNode markAddEnd];
 	[aNode wasAdded];
 	LogTrace(@"%@ added to parent %@", aNode, self);
 }
@@ -1749,6 +1751,26 @@ static GLuint lastAssignedNodeTag;
 	[self addChild:aNode];		// Finally, add the child node to this parent
 }
 
+/** 
+ * Marks that this node is being added to a parent.
+ *
+ * Since the add operation can be transferred to another thread, its possible for this node
+ * to be removed from its current parent before being added to another parent. By marking
+ * the add operation as being in progress, the node can avoid standard removal activities
+ * such as stopping all actions.
+ */
+-(void) markAddBegin { _isBeingAdded = YES; }
+
+/**
+ * Marks that the operation of adding this node to a parent has finished.
+ *
+ * Since the add operation can be transferred to another thread, its possible for this node
+ * to be removed from its current parent before being added to another parent. By marking
+ * the add operation as being in progress, the node can avoid standard removal activities
+ * such as stopping all actions.
+ */
+-(void) markAddEnd { _isBeingAdded = NO; }
+
 -(void) wasAdded {}
 
 /**
@@ -1788,7 +1810,7 @@ static GLuint lastAssignedNodeTag;
 -(void) remove { [_parent removeChild: self]; }
 
 -(void) wasRemoved {
-	if (_shouldStopActionsWhenRemoved) [self stopAllActions];
+	if (_shouldStopActionsWhenRemoved && !_isBeingAdded) [self stopAllActions];
 	self.isRunning = NO;
 }
 

@@ -210,6 +210,7 @@ typedef enum {
 	BOOL _isAnimationDirty : 1;
 	BOOL _cascadeColorEnabled : 1;
 	BOOL _cascadeOpacityEnabled : 1;
+	BOOL _isBeingAdded : 1;
 	BOOL _shouldCastShadows : 1;	// Used by subclasses - held here for conciseness
 }
 
@@ -2981,10 +2982,10 @@ typedef enum {
  * set to NO, it is up to you to clean up any running CCActions when you are done with the node.
  * You can do this using either the stopAllActions or cleanupActions method.
  *
- * If the shouldAutoremoveWhenEmpty property is YES, and the last child node is
- * being removed, this node will invoke its own remove method to remove itself from
- * the node hierarchy as well. See the notes for the shouldAutoremoveWhenEmpty
- * property for more info on autoremoving when all child nodes have been removed.
+ * If the shouldAutoremoveWhenEmpty property is YES, and the last child node is removed, this 
+ * node will invoke its own remove method to remove itself from the node hierarchy as well. 
+ * See the notes for the shouldAutoremoveWhenEmpty property for more info on autoremoving when
+ * all child nodes have been removed.
  */
 -(void) removeChild: (CC3Node*) aNode;
 
@@ -3143,15 +3144,9 @@ typedef enum {
  * when this node is removed from its parent. If you have reason to want the actions to be paused but
  * not removed when removing this node from its parent, set this property to NO.
  *
- * One example of such a situation is when you use the addChild: method to move a node from one
- * parent to another. As part of the processing of the addChild: method, if the node already has
- * a parent, it is automatically removed from its current parent. The addChild: method temporarily
- * sets this property to NO so that the actions are not destroyed during the move.
- *
- * If you have some other reason for setting this property to NO, be sure to set it back to YES before
- * this node, or the ancestor node assembly that this node belongs to is removed for good, otherwise
- * this node will continue to be retained by any actions running on this node, and this node will not
- * be deallocated.
+ * If you set this property to NO, be sure to set it back to YES before this node, or the ancestor
+ * node assembly that this node belongs to is removed for good, otherwise this node will continue
+ * to be retained by any actions running on this node, and this node will not be deallocated.
  *
  * Alternately, if you have this property set to NO, you can manually stop and remove all actions
  * using the cleanupActions method.
