@@ -482,6 +482,16 @@ static inline CC3Vector CC3VectorCross(CC3Vector v1, CC3Vector v2) {
 				v1.x * v2.y - v1.y * v2.x);
 }
 
+/** Returns YES if the two vectors are either exactly parallel or exactly antiparallel. */
+static inline BOOL CC3VectorsAreParallel(CC3Vector v1, CC3Vector v2) {
+	return CC3VectorLengthSquared(CC3VectorCross(v1, v2)) == 0.0f;
+}
+
+/** Returns whether the two vectors are exactly perpendicular. */
+static inline BOOL CC3VectorsArePerpendicular(CC3Vector v1, CC3Vector v2) {
+	return CC3VectorDot(v1, v2) == 0.0f;
+}
+
 /**
  * Orthonormalizes the specified array of vectors, using a Gram-Schmidt process,
  * and returns the orthonormal results in the same array.

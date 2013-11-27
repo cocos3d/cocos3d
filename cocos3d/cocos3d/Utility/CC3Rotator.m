@@ -384,6 +384,11 @@ static GLubyte _autoOrthonormalizeCount = 0;
 	if ( !_isRotationDirty ) return;
 	
 	if (_rotationType == kCC3RotationTypeDirection) {
+		CC3Assert( !CC3VectorsAreParallel(self.forwardDirection, self.referenceUpDirection),
+				  @"The forwardDirection %@ cannot be parallel to the referenceUpDirection %@."
+				  @" To use this forwardDirection, you must choose a different referenceUpDirection.",
+				  NSStringFromCC3Vector(self.forwardDirection), NSStringFromCC3Vector(self.referenceUpDirection));
+
 		CC3Vector mtxFwdDir = _shouldReverseForwardDirection
 									? CC3VectorNegate(self.forwardDirection)
 									: self.forwardDirection;
