@@ -232,7 +232,7 @@ typedef enum {
 	CC3Matrix* _globalRotationMatrix;
 	CC3Rotator* _rotator;
 	CC3NodeBoundingVolume* _boundingVolume;
-	NSMutableSet* _transformListeners;
+	NSMutableSet* _transformListenerWrappers;
 	NSMutableArray* _animationStates;
 	CC3Vector _location;
 	CC3Vector _projectedLocation;
@@ -2388,19 +2388,19 @@ typedef enum {
 #pragma mark Transformations
 
 /**
- * A collection of objects that have requested that they be notified whenever the
- * transform of this node has changed.
+ * Returns a copy of the collection of objects that have requested that they be notified 
+ * whenever the transform of this node has changed, which occurs when one of the transform 
+ * properties (location, rotation & scale) of this node, or any of its structural ancestor
+ * nodes, changes.
  *
- * This occurs when one of the transform properties (location, rotation & scale)
- * of this node, or any of its structural ancestor nodes has changed.
+ * Each object in the returned collection implements the CC3NodeTransformListenerProtocol,
+ * and will be sent the nodeWasTransformed: notification message when the transform of this
+ * node changes.
  *
- * Each listener in this list will be sent the nodeWasTransformed: notification
- * message when the globalTransformMatrix of this node is recalculated, or is set directly.
- *
- * Objects can be added to this list by using the addTransformListener: method.
- *
- * This property will be nil if no objects have been added via addTransformListener:
- * method, or if they have all been subsequently removed.
+ * Objects can be added to this collection by using the addTransformListener: method, and
+ * removed using the removeTransformListener: method. This property returns a copy of the
+ * collection stored in this node. You can safely invoke the addTransformListener: or 
+ * removeTransformListener: methods while iterating the returned collection.
  *
  * Transform listeners are not retained. Each listener should know who it has subscribed
  * to, and must remove itself as a listener (using the removeTransformListener: method)

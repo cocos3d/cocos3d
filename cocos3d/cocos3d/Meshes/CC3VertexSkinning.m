@@ -43,10 +43,6 @@
 -(void) transformMatrixChanged;
 @end
 
-@interface CC3MeshNode (TemplateMethods)
--(void) drawMeshWithVisitor: (CC3NodeDrawingVisitor*) visitor;
-@end
-
 @interface CC3Mesh (TemplateMethods)
 -(void) drawVerticesFrom: (GLuint) vertexIndex
 				forCount: (GLuint) vertexCount
@@ -84,7 +80,9 @@
 
 @implementation CC3SkinMeshNode
 
-@synthesize skinSections=_skinSections, restPoseTransformMatrix=_restPoseTransformMatrix;
+@synthesize skinSections=_skinSections;
+@synthesize skeletalTransformMatrix=_skeletalTransformMatrix;
+@synthesize skeletalTransformMatrixInverted=_skeletalTransformMatrixInverted;
 
 -(CC3SkinSection*) skinSectionForVertexIndexAt: (GLint) index {
 	for (CC3SkinSection* skinSctn in _skinSections)
@@ -117,21 +115,13 @@
 	_deformedFaces.node = self;
 }
 
--(CC3Face) deformedFaceAt: (GLuint) faceIndex {
-	return [self.deformedFaces faceAt: faceIndex];
-}
+-(CC3Face) deformedFaceAt: (GLuint) faceIndex { return [self.deformedFaces faceAt: faceIndex]; }
 
--(CC3Vector) deformedFaceCenterAt: (GLuint) faceIndex {
-	return [self.deformedFaces centerAt: faceIndex];
-}
+-(CC3Vector) deformedFaceCenterAt: (GLuint) faceIndex { return [self.deformedFaces centerAt: faceIndex]; }
 
--(CC3Vector) deformedFaceNormalAt: (GLuint) faceIndex {
-	return [self.deformedFaces normalAt: faceIndex];
-}
+-(CC3Vector) deformedFaceNormalAt: (GLuint) faceIndex { return [self.deformedFaces normalAt: faceIndex]; }
 
--(CC3Plane) deformedFacePlaneAt: (GLuint) faceIndex {
-	return [self.deformedFaces planeAt: faceIndex];
-}
+-(CC3Plane) deformedFacePlaneAt: (GLuint) faceIndex { return [self.deformedFaces planeAt: faceIndex]; }
 
 -(CC3Vector) deformedVertexLocationAt: (GLuint) vertexIndex fromFaceAt: (GLuint) faceIndex {
 	return [self.deformedFaces deformedVertexLocationAt: vertexIndex fromFaceAt: faceIndex];
@@ -143,21 +133,19 @@
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
 		_skinSections = [NSMutableArray array];
-		_restPoseTransformMatrix = [CC3AffineMatrix new];
+		_skeletalTransformMatrix = [CC3AffineMatrix new];
+		_skeletalTransformMatrixInverted = [CC3AffineMatrix new];
 		_deformedFaces = nil;
 	}
 	return self;
 }
 
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3SkinMeshNode*) another {
 	[super populateFrom: another];
 
 	// The deformedFaces instance is not copied, since the deformed faces
 	// are different for each mesh node and is created lazily if needed.
-	
-	[_restPoseTransformMatrix populateFrom: another.restPoseTransformMatrix];
+	// The skeletal transform matrices are not copied
 
 	[_skinSections removeAllObjects];
 	NSArray* otherSkinSections = another.skinSections;
@@ -182,21 +170,32 @@
 
 -(void) transformMatrixChanged {
 	[super transformMatrixChanged];
-	[_deformedFaces clearDeformableCaches];		// Avoid creating lazily if not already created.
+
+	[_skeletalTransformMatrix populateFrom: self.globalTransformMatrix];
+	[_skeletalTransformMatrix leftMultiplyBy: self.softBodyNode.globalTransformMatrixInverted];
+	
+	[_skeletalTransformMatrixInverted populateFrom: _skeletalTransformMatrix];
+	[_skeletalTransformMatrixInverted invert];
+	
+	[_deformedFaces clearDeformableCaches];
 }
 
-/** Caches the transform matrix rest pose matrix. */
--(void) cacheRestPoseMatrix { [_restPoseTransformMatrix populateFrom: _globalTransformMatrix]; }
-
--(void) boneWasTransformed: (CC3Bone*) aBone { [self markTransformDirty]; }
+-(void) boneWasTransformed: (CC3Bone*) aBone { [_deformedFaces clearDeformableCaches]; }
 
 
 #pragma mark Drawing
 
-/** Overridden to skip auto-creating a bounding volume. */
--(void) createBoundingVolumes {
-	for (CC3Node* child in _children) [child createBoundingVolumes];
+/**
+ * Returns a spherical bounding volume that will be sized to encompass the vertices of the
+ * skin mesh in its bind pose. A sphere is used because for many bone-rigged characters, 
+ * the bones remain within the sphere determmined by the rest pose.
+ */
+-(CC3NodeBoundingVolume*) defaultBoundingVolume {
+	return [CC3NodeSphericalBoundingVolume boundingVolume];
 }
+
+/** Overridden to skip auto-creating a bounding volume. */
+-(void) createBoundingVolumes { for (CC3Node* child in _children) [child createBoundingVolumes]; }
 
 /** Overridden to auto-create a bounding volume. */
 -(void) createSkinnedBoundingVolumes {
@@ -208,24 +207,6 @@
 -(void) setSkeletalBoundingVolume: (CC3NodeBoundingVolume*) boundingVolume {
 	self.boundingVolume = boundingVolume;
 	super.skeletalBoundingVolume = boundingVolume;
-}
-
-/**
- * Overridden to skip the manipulation of the modelview matrix stack.
- *
- * Vertex skinning does not use the modelview matrix stack. Instead, it uses a palette of
- * matrices that is used to manipulate the vertices of a mesh based on a weighted average
- * of the influence of the position of several bone nodes. This activity is handled through
- * the drawing of the contained mesh.
- *
- * The model transform matrix is not applied to the fixed pipeline matrix stack. However,
- * it is made available to shaders in the programmable pipeline. The shader may then choose
- * to use or ignore it.
- */
--(void) transformAndDrawWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	LogTrace(@"Drawing %@", self);
-	[visitor populateModelMatrixFrom: nil];
-	[visitor draw: self];
 }
 
 /** 
@@ -245,29 +226,6 @@
 		[skinSctn drawVerticesOfMesh: _mesh withVisitor: visitor];
 	
 	[gl enableMatrixPalette: NO];		// We are finished with the matrix pallete so disable it.
-}
-
-
-#pragma mark Deprecated methods
-
-// Deprecated
--(GLfloat) weightForVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
-	return [self vertexWeightForVertexUnit: vertexUnit at: index];
-}
-
-// Deprecated
--(void) setWeight: (GLfloat) aWeight forVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
-	[self setVertexWeight: aWeight forVertexUnit: vertexUnit at: index];
-}
-
-// Deprecated
--(GLuint) matrixIndexForVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
-	return [self vertexMatrixIndexForVertexUnit: vertexUnit at: index];
-}
-
-// Deprecated
--(void) setMatrixIndex: (GLuint) aMatrixIndex forVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
-	[self setVertexMatrixIndex: aMatrixIndex forVertexUnit: vertexUnit at: index];
 }
 
 @end
@@ -300,7 +258,7 @@
 	return (aVertexIndex >= _vertexStart) && (aVertexIndex < _vertexStart + _vertexCount);
 }
 
--(CC3Vector)  deformedVertexLocationAt:  (GLuint) vtxIdx {
+-(CC3Vector) deformedVertexLocationAt:  (GLuint) vtxIdx {
 	CC3Mesh* skinMesh = _node.mesh;
 	
 	// The locations of this vertex before and after deformation.
@@ -320,17 +278,16 @@
 		
 		// Use the bone to deform the vertex, apply the weighting for this bone,
 		// and add to the summed location.
-		CC3Vector boneDefLoc = [skinnedBone.skinTransformMatrix transformLocation: restLoc];
+		CC3Vector boneDefLoc = [skinnedBone.transformMatrix transformLocation: restLoc];
 		CC3Vector wtdBoneDefLoc = CC3VectorScaleUniform(boneDefLoc, vtxWt);
 		defLoc = CC3VectorAdd(defLoc, wtdBoneDefLoc);
 
-		LogTrace(@"%@ vu: %i, bone at %i, weight %.3f transforming vertex at %i: %@ to %@ to wtd: %@ to sum: %@ node rest pose: %@",
-					  self, vuIdx, vtxBoneIdx, vtxWt, vtxIdx,
-					  NSStringFromCC3Vector(restLoc),
-					  NSStringFromCC3Vector(boneDefLoc),
-					  NSStringFromCC3Vector(wtdBoneDefLoc),
-					  NSStringFromCC3Vector(defLoc),
-					  _node.restPoseTransformMatrix);
+		LogTrace(@"%@ vu: %i, bone at %i, weight %.3f transforming vertex at %i: %@ to %@ to wtd: %@ to sum: %@",
+				 self, vuIdx, vtxBoneIdx, vtxWt, vtxIdx,
+				 NSStringFromCC3Vector(restLoc),
+				 NSStringFromCC3Vector(boneDefLoc),
+				 NSStringFromCC3Vector(wtdBoneDefLoc),
+				 NSStringFromCC3Vector(defLoc));
 	}
 	return defLoc;
 }
@@ -405,7 +362,7 @@
 		// only contain the view matrix. All other transforms are captured in the bone matrices.
 		CC3Matrix4x3 mtx;
 		CC3Matrix4x3PopulateFrom4x3(&mtx, visitor.modelViewMatrix);
-		[sb.drawTransformMatrix multiplyIntoCC3Matrix4x3: &mtx];
+		[sb.transformMatrix multiplyIntoCC3Matrix4x3: &mtx];
 		[visitor.gl loadPaletteMatrix: &mtx at: boneNum];
 	}
 #endif	// !CC3_GLSL
@@ -415,7 +372,7 @@
 }
 
 -(CC3Matrix*) getDrawTransformMatrixForBoneAt: (GLuint) boneIdx {
-	return ((CC3SkinnedBone*)[_skinnedBones objectAtIndex: boneIdx]).drawTransformMatrix;
+	return ((CC3SkinnedBone*)[_skinnedBones objectAtIndex: boneIdx]).transformMatrix;
 }
 
 @end
@@ -426,7 +383,8 @@
 
 @implementation CC3Bone
 
-@synthesize restPoseInvertedMatrix=_restPoseInvertedMatrix;
+@synthesize skeletalTransformMatrix=_skeletalTransformMatrix;
+@synthesize restPoseSkeletalTransformMatrixInverted=_restPoseSkeletalTransformMatrixInverted;
 
 -(BOOL) hasSoftBodyContent  { return YES; }
 
@@ -434,37 +392,38 @@
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		_restPoseInvertedMatrix = [CC3AffineMatrix new];
+		_skeletalTransformMatrix = [CC3AffineMatrix new];
+		_restPoseSkeletalTransformMatrixInverted = [CC3AffineMatrix new];
 	}
 	return self;
 }
 
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3Bone*) another {
 	[super populateFrom: another];
 	
-	[_restPoseInvertedMatrix populateFrom: another.restPoseInvertedMatrix];
+	// The skeletal transform matrix is not copied
+	[_restPoseSkeletalTransformMatrixInverted populateFrom: another.restPoseSkeletalTransformMatrixInverted];
 }
 
 
 #pragma mark Transformations
 
--(void) applyPoseTo: (CC3Matrix*) boneMatrix {
-	[boneMatrix populateFrom: self.globalTransformMatrix];
-	[boneMatrix multiplyBy: _restPoseInvertedMatrix];
+-(void) transformMatrixChanged {
+	[super transformMatrixChanged];
+	[_skeletalTransformMatrix populateFrom: self.globalTransformMatrix];
+	[_skeletalTransformMatrix leftMultiplyBy: self.softBodyNode.globalTransformMatrixInverted];
 }
 
 /** Inverts the transform matrix and caches it as the inverted rest pose matrix. */
 -(void) cacheRestPoseMatrix {
-	[_restPoseInvertedMatrix populateFrom: _globalTransformMatrix];
-	[_restPoseInvertedMatrix invert];
+	[_restPoseSkeletalTransformMatrixInverted populateFrom: _skeletalTransformMatrix];
+	[_restPoseSkeletalTransformMatrixInverted invert];
 	LogTrace(@"%@ with global scale %@ and rest pose %@ %@ inverted to %@",
 			 self, NSStringFromCC3Vector(self.globalScale), _globalTransformMatrix,
-			 (_restPoseInvertedMatrix.isRigid ? @"rigidly" : @"adjoint"), _restPoseInvertedMatrix);
+			 (_restPoseSkeletalTransformMatrixInverted.isRigid ? @"rigidly" : @"adjoint"), _restPoseSkeletalTransformMatrixInverted);
 	LogTrace(@"Validating right multiply: %@ \nvalidating left multiply: %@",
-			 [CC3AffineMatrix matrixByMultiplying: _globalTransformMatrix by: _restPoseInvertedMatrix],
-			 [CC3AffineMatrix matrixByMultiplying: _restPoseInvertedMatrix by: _globalTransformMatrix]);
+			 [CC3AffineMatrix matrixByMultiplying: _globalTransformMatrix by: _restPoseSkeletalTransformMatrixInverted],
+			 [CC3AffineMatrix matrixByMultiplying: _restPoseSkeletalTransformMatrixInverted by: _globalTransformMatrix]);
 }
 
 @end
@@ -482,30 +441,17 @@
 	[_bone removeTransformListener: self];
 }
 
--(void) markTransformDirty {
-	_isSkinTransformDirty = YES;
-	_isDrawTransformDirty = YES;
-}
+-(void) markTransformDirty { _isTransformDirty = YES; }
 
--(CC3Matrix*) drawTransformMatrix {
-	if ( !_drawTransformMatrix ) _drawTransformMatrix = [CC3AffineMatrix new];
-	if (_isDrawTransformDirty) {
-		[_bone applyPoseTo: _drawTransformMatrix];
-		[_drawTransformMatrix multiplyBy: _skinNode.restPoseTransformMatrix];
-		_isDrawTransformDirty = NO;
-		_isSkinTransformDirty = YES;
+-(CC3Matrix*) transformMatrix {
+	if (_isTransformDirty) {
+		[_transformMatrix populateFrom: _skinNode.skeletalTransformMatrixInverted];
+		[_transformMatrix multiplyBy: _bone.skeletalTransformMatrix];
+		[_transformMatrix multiplyBy: _bone.restPoseSkeletalTransformMatrixInverted];
+		[_transformMatrix multiplyBy: _skinNode.skeletalTransformMatrix];
+		_isTransformDirty = NO;
 	}
-	return _drawTransformMatrix;
-}
-
--(CC3Matrix*) skinTransformMatrix {
-	if ( !_skinTransformMatrix ) _skinTransformMatrix = [CC3AffineMatrix new];
-	if (_isSkinTransformDirty) {
-		[_skinTransformMatrix populateFrom: self.drawTransformMatrix];
-		[_skinTransformMatrix leftMultiplyBy: _skinNode.globalTransformMatrixInverted];
-		_isSkinTransformDirty = NO;
-	}
-	return _skinTransformMatrix;
+	return _transformMatrix;
 }
 
 -(NSString*) description {
@@ -529,8 +475,7 @@
 		_bone = aBone;
 		[_bone addTransformListener: self];
 
-		_drawTransformMatrix = nil;
-		_skinTransformMatrix = nil;
+		_transformMatrix = [CC3AffineMatrix new];
 	}
 	return self;
 }
@@ -777,8 +722,6 @@
 
 -(CC3Vector) skeletalScale { return _parent ? CC3VectorScale(_parent.skeletalScale, _scale) : _scale; }
 
--(BOOL) isSkeletonRigid { return _globalTransformMatrix.isRigid; }
-
 -(void) bindRestPose { for (CC3Node* child in _children) [child bindRestPose]; }
 
 -(void) reattachBonesFrom: (CC3Node*) aNode { for (CC3Node* child in _children) [child reattachBonesFrom: aNode]; }
@@ -821,31 +764,6 @@
 
 -(CC3Vector) deformedVertexLocationAt: (GLuint) vertexIndex fromFaceAt: (GLuint) faceIndex {
 	return [self vertexLocationAt: vertexIndex];
-}
-
-@end
-
-
-#pragma mark -
-#pragma mark Deprecated CC3SkinMesh
-
-@implementation CC3SkinMesh
-
--(CC3VertexMatrixIndices*) boneMatrixIndices { return self.vertexMatrixIndices; }
--(void) setBoneMatrixIndices: (CC3VertexMatrixIndices*) bmi { self.vertexMatrixIndices = bmi; }
--(CC3VertexWeights*) boneWeights { return self.vertexWeights; }
--(void) setBoneWeights: (CC3VertexWeights*) bw { self.vertexWeights = bw; }
--(GLfloat) weightForVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
-	return [self vertexWeightForVertexUnit: vertexUnit at: index];
-}
--(void) setWeight: (GLfloat) aWeight forVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
-	[self setVertexWeight: aWeight forVertexUnit: vertexUnit at: index];
-}
--(GLuint) matrixIndexForVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
-	return [self vertexMatrixIndexForVertexUnit: vertexUnit at: index];
-}
--(void) setMatrixIndex: (GLuint) aMatrixIndex forVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
-	[self setVertexMatrixIndex: aMatrixIndex forVertexUnit: vertexUnit at: index];
 }
 
 @end

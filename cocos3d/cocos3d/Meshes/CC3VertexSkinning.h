@@ -40,73 +40,70 @@
 #pragma mark CC3SoftBodyNode
 
 /**
- * CC3SoftBodyNode is the primary structural component for a soft-body object that
- * uses vertex skinning to manipulate and draw mesh vertices.
+ * CC3SoftBodyNode is the primary structural component for a soft-body object that uses vertex
+ * skinning to manipulate and draw mesh vertices.
  *
- * Vertex skinning is a feature of OpenGL that allows the vertices of a mesh to be
- * manipulated or deformed using an underlying skeleton of bones. This feature is
- * also sometimes referred to as bone-rigging. This feature is used to create
- * realistic movement in soft-body, flexible meshes, such as characters or textiles.
+ * Vertex skinning is a feature of OpenGL that allows the vertices of a mesh to be manipulated
+ * or deformed using an underlying skeleton of bones. This feature is also sometimes referred
+ * to as bone-rigging. This feature is used to create realistic movement in soft-body, flexible
+ * meshes, such as characters or textiles.
  *
- * A soft-body object consists of two primary components: a skeletal structure, and
- * the skin that covers it. The skeletal structure is constructed from an assembly
- * of CC3Bone instances, and the skin is constructed from one or more CC3SkinMeshNode
- * instances. The CC3SoftBodyNode instance then serves to collect together the bones
- * and skin components, and forms the root of the soft-body object.
+ * A soft-body object consists of two primary components: a skeletal structure, and the skin
+ * that covers it. The skeletal structure is constructed from an assembly of CC3Bone instances,
+ * and the skin is constructed from one or more CC3SkinMeshNode instances. The CC3SoftBodyNode
+ * instance then serves to collect together the bones and skin components, and forms the root
+ * of the soft-body object.
  * 
  * The vertices of the skin mesh forms the skin that surrounds the bones of the skeleton.
- * During movement and drawing, the location and rotation of each bone in the skeleton
- * influences the locations of the skin vertices that are attached to that bone.
- * Some skin vertices, particularly those around joints where two bones meet, can be
- * associated with more than one bone, and in that case, the influence that each bone
- * has on the location of a vertex is determined by a weighting associated with each
- * bone for that vertex.
+ * During movement and drawing, the location and rotation of each bone in the skeleton 
+ * influences the locations of the skin vertices that are attached to that bone. Some skin
+ * vertices, particularly those around joints where two bones meet, can be associated with
+ * more than one bone, and in that case, the influence that each bone has on the location 
+ * of a vertex is determined by a weighting associated with each bone for that vertex.
  *
- * The CC3Bone instances are typically assembled into a structural assembly of bones
- * known as a skeleton. The purpose of this skeletal structure is to allow the bones
- * to move and interact with each other in a hierarchical manner.
+ * The CC3Bone instances are typically assembled into a structural assembly of bones known
+ * as a skeleton. The purpose of this skeletal structure is to allow the bones to move and
+ * interact with each other in a hierarchical manner.
  *
- * A CC3SkinMeshNode instance represents the skin that covers the skeleton, and contains
- * the mesh that makes up the skin. This mesh includes the bone assignments and weights
- * for each vertex, which specifies how the location of each vertex is influenced by the
- * location and orientation of each nearby bone.
+ * A CC3SkinMeshNode instance represents the skin that covers the skeleton, and contains the
+ * mesh that makes up the skin. This mesh includes the bone assignments and weights for each
+ * vertex, which specifies how the location of each vertex is influenced by the location and
+ * orientation of each nearby bone.
  *
- * A single soft-body object may be covered by a single skin mesh, but more complicated
- * objects may be covered by several skin meshes. As such, a single CC3SoftBodyNode
- * instance may contain one or more CC3SkinMeshNode instances.
+ * A single soft-body object may be covered by a single skin mesh, but more complicated objects
+ * may be covered by several skin meshes. As such, a single CC3SoftBodyNode instance may contain
+ * one or more CC3SkinMeshNode instances.
  * 
- * For efficiency and control, each skin mesh is usually broken into sections. These skin
+ * For efficiency and control, each skin mesh is usually broken into sections. These skin 
  * sections are represented by instances of the CC3SkinSection class. A CC3SkinMeshNode
  * typically holds a single mesh and several CC3SkinSection instances to define how that mesh
  * should be divided into sections. Each CC3SkinSection instance contains a range of vertices,
  * and references to the bones in the skeleton that influence the vertices in that range.
  * All of the vertices of a single CC3SkinSection are drawn in a single GL drawing call.
  *
- * Manipulation of the bones in the skeleton will cause the soft-body to move and flex
- * internally. In addition, like any node, a CC3SoftBodyNode can be moved, rotated and
+ * Manipulation of the bones in the skeleton will cause the soft-body to move and flex 
+ * internally. In addition, like any node, a CC3SoftBodyNode can be moved, rotated and 
  * scaled to move, rotate and scale the entire soft-body assembly of skin and bones as
  * a unit. By combining both internal bone animation with movement of the entire
  * CC3SoftBodyNode, you can create realistic movement of your soft-body objects.
  *
- * For example, if your CC3SoftBodyNode represents a character, you could animate the
- * bones in the skeleton within the node to crouch down and then stand up again.
- * During the standing up animation, you could move the entire CC3SoftBodyNode upwards
- * to create a realistic jumping action. Or, you could simply animate the bones in the
- * skeleton through a loop of a step of a walking motion, while at the same time moving
- * the CC3SoftBodyNode forward, making it appear that the character was walking forward.
+ * For example, if your CC3SoftBodyNode represents a character, you could animate the bones
+ * in the skeleton within the node to crouch down and then stand up again. During the standing
+ * up animation, you could move the entire CC3SoftBodyNode upwards to create a realistic jumping
+ * action. Or, you could simply animate the bones in the skeleton through a loop of a step of a
+ * walking motion, while at the same time moving the CC3SoftBodyNode forward, making it appear
+ * that the character was walking forward.
  *
- * The initial assembly of CC3Bone nodes should be arranged into what is termed the
- * "rest pose". This is the alignment of the bones that will fit the undeformed
- * positions of the vertices that make up the skin. In the rest pose, the bones have
- * no deforming effect on the skin vertices.
+ * The initial assembly of CC3Bone nodes should be arranged into what is termed the "rest pose".
+ * This is the alignment of the bones that will fit the undeformed positions of the vertices that
+ * make up the skin. In the rest pose, the bones have no deforming effect on the skin vertices.
  * 
- * Once the initial skeleton has been assembled into the rest pose, you should invoke
+ * Once the initial skeleton has been assembled into the rest pose, you should invoke 
  * the bindRestPose method on the CC3SoftBodyNode instance (or any ancestor node of the
- * CC3SoftBodyNode instance) to cause the bones and skin (CC3Bones & CC3SkinMeshNodes)
- * to cache this pose.
+ * CC3SoftBodyNode instance) to cause the bones to cache this pose.
  * 
- * Subsequent movement of the bones in the skeleton deform the skin vertices relative
- * to this rest pose, affecting the location of the vertices in the mesh.
+ * Subsequent movement of the bones in the skeleton deform the skin vertices relative to this
+ * rest pose, affecting the location of the vertices in the mesh.
  *
  * In almost all soft-body objects, all internal movement of the object is handled via
  * manipulation of the bones. The CC3SkinMeshNodes should not be moved or rotated directly,
@@ -129,29 +126,25 @@
  * CC3SkinMeshNode is a CC3MeshNode specialized to use vertex skinning to draw the contents
  * of its mesh. It is one of the key structural descendant nodes of a CC3SoftBodyNode instance.
  *
- * This CC3MeshNode subclass adds a number of methods for accessing and managing the
- * weights and matrix index data associated with each vertex.
- *
- * In addition, the CC3SkinMeshNode contains a collection of skin sections, in the
- * form of CC3SkinSection instances. Each CC3SkinSection instance relates a section of
- * the mesh, in the form of a range of vertices, to a set of bones in the skeleton.
+ * The CC3SkinMeshNode contains a collection of skin sections, in the form of CC3SkinSection
+ * instances. Each CC3SkinSection instance relates a section of the mesh, in the form of a 
+ * range of vertices, to a set of bones in the skeleton.
  * 
- * Each CC3SkinSection applies the transformations in the referenced bones to the
- * the vertices in the section of the mesh that it controls, and draws that section
- * of the mesh by drawing the vertices within its range in a single GL call.
+ * Each CC3SkinSection applies the transformations in the referenced bones to the the vertices
+ * in the section of the mesh that it controls, and draws that section of the mesh by drawing
+ * the vertices within its range in a single GL call.
  * 
- * After copying a CC3SkinMeshNode, the newly created copy will still be influenced
- * by the original skeleton. The result is that both the original mesh and the copy
- * will move and be deformed in tandem as the skeleton moves.
+ * After copying a CC3SkinMeshNode, the newly created copy will still be influenced by the 
+ * original skeleton. The result is that both the original mesh and the copy will move and 
+ * be deformed in tandem as the skeleton moves.
  *
- * If you are creating a chorus line of dancing characters, this may be the effect
- * you are after. However, if you are creating a squadron of similar, but independently
- * moving characters, each CC3SkinMeshNode copy should be controlled by a separate skeleton.
- * 
- * After creating a copy of the skeleton bone node assembly as well, you can use the
- * reattachBonesFrom: method to attach the skin mesh node to the new skeleton.
+ * If you are creating a chorus line of dancing characters, this may be the effect you are after.
+ * However, if you are creating a squadron of similar, but independently moving, characters, each
+ * CC3SkinMeshNode copy should be controlled by a separate skeleton. To do this, after creating
+ * a copy of the skeleton bone node assembly as well, you can use the reattachBonesFrom: method
+ * to attach the skin mesh node to the new skeleton.
  *
- * When copying a CC3SkinMeshNode as part of copying a CC3SoftBodyNode instance, a copy of
+ * When copying a CC3SkinMeshNode as part of copying a CC3SoftBodyNode instance, a copy of 
  * the skeleton is also created, and the reattachBonesFrom: method is automatically invoked.
  * When copying CC3SoftBodyNode, you do not need to invoke the reattachBonesFrom: method on
  * the new CC3SkinMeshNode directly.
@@ -174,8 +167,19 @@
  *   - You can choose to leave this node with no bounding volume, and allow it to be drawn
  *     on each frame. This may be the easiest approach if performance is not critical.
  *
- *   - Or, manually create a bounding volume of the right size and shape for the movement of
- *     the vertices from the perspective of a root bone of the skeleton. Assign the bounding
+ *   - For a CC3SkinMeshNode, the bounding volume that is created automatically when the
+ *     createBoundingVolume method is invoked forms a sphere around the rest pose of the mesh.
+ *     A spherical bounding volume is used because, for many bone-rigged characters, the bones
+ *     remain within a sphere determmined by the rest pose. If you know that the vertices of 
+ *     the skinned mesh node will not move beyond the static bounding volume defined by the
+ *     vertices in the rest pose, you can invoke the createBoundingVolume method to have a
+ *     spherical bounding volume created automatically from the rest pose of this node. 
+ *     If this is a common requirement, you can also use the createSkinnedBoundingVolumes
+ *     method on any ancestor node to have a spherical bounding volume automatically created
+ *     for each descendant skinned mesh node.
+ *
+ *   - You can manually create a bounding volume of the right size and shape for the movement
+ *     of the vertices from the perspective of a root bone of the skeleton. Assign the bounding
  *     volume to the root bone by using the boundingVolume property on the root bone and,
  *     once it has been assigned a root bone of the skeleton, use the setSkeletalBoundingVolume:
  *     method on an ancestor node of all of the CC3SkinMeshNodes that are to use that bounding
@@ -184,31 +188,16 @@
  *     of the model, or even the CC3ResourceNode above it, if loaded from a file. During
  *     development, you can use the shouldDrawBoundingVolume property to make the bounding
  *     volume visible, to aid in determining and setting the right size and shape for it.
- *
- *   - If you know that the vertices of the skinned mesh node will not move beyond the static
- *     bounding volume defined by the vertices in the rest pose, you can invoke the
- *     createBoundingVolume method to have bounding volume created automatically from the rest
- *     pose of the skinned mesh node. If this is a common requirement, you can also use the
- *     createSkinnedBoundingVolumes methods on any ancestor node to have bounding volumes
- *     automatically created for all descendant skinned mesh nodes.
  */
 @interface CC3SkinMeshNode : CC3MeshNode {
 	NSMutableArray* _skinSections;
-	CC3Matrix* _restPoseTransformMatrix;
+	CC3Matrix* _skeletalTransformMatrix;
+	CC3Matrix* _skeletalTransformMatrixInverted;
 	CC3DeformedFaceArray* _deformedFaces;
 }
 
 /** The collection of CC3SkinSections that are managed by this node. */
 @property(nonatomic,strong, readonly) NSArray* skinSections;
-
-/**
- * Returns the cached rest pose matrix, relative to the soft-body ancestor node.
- * This is the transform matrix of this node when it is in its rest pose, which
- * is the location and rotation that corresponds to the rest pose of the bones.
- *
- * The value of this property is set when the bindRestPose method is invoked.
- */
-@property(nonatomic, strong, readonly) CC3Matrix* restPoseTransformMatrix;
 
 /**
  * Returns the skin section that deforms the specified vertex.
@@ -236,30 +225,22 @@
 #pragma mark Transformations
 
 /**
- * Callback method that will be invoked when the globalTransformMatrix of the specified bone has changed.
- * The transform matrix of this node is marked as dirty, so that the changes are propagated to
- * descendant nodes, such as shadow volumes, and to update the deformedFaces property.
+ * Returns the transform matrix of this skin mesh node, relative to the coordinate system 
+ * of the skeleton that influences the vertices of this mesh node. The root of the skeleton
+ * is the nearest ancestor CC3SoftBodyNode.
+ */
+@property(nonatomic, strong, readonly) CC3Matrix* skeletalTransformMatrix;
+
+/** Returns the inverse of the matrix in the skeletalTransformMatrix property. */
+@property(nonatomic, strong, readonly) CC3Matrix* skeletalTransformMatrixInverted;
+
+/**
+ * Callback method indicating the specified bone has been transformed.
  *
- * This callback is implemented as distinct from the general notification mechanism of the
- * bone because of its importance, and so that this class and its subclasses do not need to
- * distiguish this callback from other notifications that this instance might register for.
+ * This implementation clears the internal mesh faces cache, because the faces of the skinned
+ * mesh are deformed by the movement of the bones that influence this skin mesh node.
  */
 -(void) boneWasTransformed: (CC3Bone*) aBone;
-
-
-#pragma mark Deprecated methods
-
-/** @deprecated Renamed to vertexWeightForVertexUnit:at: */
--(GLfloat) weightForVertexUnit: (GLuint) vertexUnit at: (GLuint) index DEPRECATED_ATTRIBUTE;
-
-/** @deprecated Renamed to setVertexWeight:forVertexUnit:at: */
--(void) setWeight: (GLfloat) aWeight forVertexUnit: (GLuint) vertexUnit at: (GLuint) index DEPRECATED_ATTRIBUTE;
-
-/** @deprecated Renamed to vertexMatrixIndexForVertexUnit:at: */
--(GLuint) matrixIndexForVertexUnit: (GLuint) vertexUnit at: (GLuint) index DEPRECATED_ATTRIBUTE;
-
-/** @deprecated Renamed to setVertexMatrixIndex:forVertexUnit:at: */
--(void) setMatrixIndex: (GLuint) aMatrixIndex forVertexUnit: (GLuint) vertexUnit at: (GLuint) index DEPRECATED_ATTRIBUTE;
 
 @end
 
@@ -275,17 +256,16 @@
  * specified by the vertexStart and vertexCount properties. These properties define the
  * first vertex of the section and the number of vertices in the section, respectively.
  *
- * The skin section also contains a collection of bones that influence the vertices
- * in the skin section. The bones are ordered in that collection such that the index
- * of a bone in the collection corresponds to the index held for a vertex in the
- * vertexMatrixIndices vertex array of the mesh.
+ * The skin section also contains a collection of the bones that influence the vertices in
+ * the skin section. The bones are ordered in that collection such that the index of a bone
+ * in the collection corresponds to the index held for a vertex in the vertexMatrixIndices
+ * vertex array of the mesh.
  *
- * Through the CC3VertexMatrixIndices vertex array in the vertexMatrixIndices property
- * of the mesh, each vertex identifies several distinct indices into the bones
- * collection of this skin section. The transform matrices from those bones are
- * combined in a weighted fashion, and used to transform the location of the vertex.
- * Each vertex defines its own set of weights through the CC3VertexWeights vertex
- * array in the vertexWeights property of the mesh.
+ * Through the CC3VertexMatrixIndices vertex array in the vertexMatrixIndices property of the mesh,
+ * each vertex identifies several distinct indices into the bones collection of this skin section.
+ * The transform matrices from those bones are combined in a weighted fashion, and used to transform
+ * the location of the vertex. Each vertex defines its own set of weights through the CC3VertexWeights
+ * vertex array in the vertexWeights property of the mesh.
  */
 @interface CC3SkinSection : NSObject <NSCopying> {
 	CC3SkinMeshNode* __unsafe_unretained _node;
@@ -298,12 +278,12 @@
 @property(nonatomic, assign, readonly) GLuint boneCount;
 
 /**
- * The collection of bones from the skeleton that influence the mesh vertices that are
- * managed and drawn by this skin section.
+ * The collection of bones from the skeleton that influence the mesh vertices that are managed
+ * and drawn by this skin section.
  * 
- * Each vertex holds a set of indices into this mesh, to identify the bones that
- * contribute to the transforming of that vertex. The contribution that each bone makes
- * is weighted by the corresponding weights held by the vertex.
+ * Each vertex holds a set of indices into this mesh, to identify the bones that contribute to
+ * the transforming of that vertex. The contribution that each bone makes is weighted by the
+ * corresponding weights held by the vertex.
  *
  * Any particular vertex will typically only be directly influenced by two or three bones.
  * The maximum number of bones that any vertex can be directly influenced by is determined
@@ -323,7 +303,7 @@
  * of bones in the collection in this property. This platform limit can be retrieved from
  * the CC3OpenGL.sharedGL.maxNumberOfPaletteMatrices property.
  *
- * The array returned by this property is created anew for each read. Do not add or remove
+ * The array returned by this property is created anew for each access. Do not add or remove
  * bones from the returned array directly. To add a bone, use the addBone: method.
  */
 @property(nonatomic, strong, readonly) NSArray* bones;
@@ -337,7 +317,7 @@
  * This value is an index of vertices, not of the underlying primitives (floats or bytes).
  *
  * For example, if a mesh has ten vertices, the value of this property can be set to
- * some value between zero and ten, even though each of the vertices contains several
+ * some value between zero and nine, even though each of the vertices contains several
  * components of data (locations, normals, texture coordinates, bone indices and bone
  * weights, making the actual array much longer than ten, in terms of primatives or bytes)
  */
@@ -361,15 +341,14 @@
  *
  * See the notes for the bones property for more information about bones.
  *
- * When the vertices are drawn, all of the vertices in this skin section are drawn
- * with a single call to the GL engine. All of the bone transforms that affect any
- * of the vertices being drawn are loaded into the GL engine by this skin section
- * prior to drawing the vertices.
+ * When the vertices are drawn, all of the vertices in this skin section are drawn with a 
+ * single call to the GL engine. All of the bone transforms that affect any of the vertices
+ * being drawn are loaded into the GL engine by this skin section prior to drawing the vertices.
  * 
- * The number of transform matrices that can be simultaneously loaded into the
- * GL engine matrix palette is limited by the platform, and that limit defines the maximum
- * number of bones in the collection in this property. This platform limit can be retrieved
- * from the CC3OpenGL.sharedGL.maxNumberOfPaletteMatrices property.
+ * The number of transform matrices that can be simultaneously loaded into the GL engine 
+ * matrix palette is limited by the platform, and that limit defines the maximum number
+ * of bones in the collection in this property. This platform limit can be retrieved from
+ * the CC3OpenGL.sharedGL.maxNumberOfPaletteMatrices property.
  */
 -(void) addBone: (CC3Bone*) aNode;
 
@@ -388,7 +367,7 @@
  * This implementation retrieves the vertex location from the mesh and transforms
  * it using the matrices and weights defined by the bones in this skin section. 
  */
--(CC3Vector)  deformedVertexLocationAt:  (GLuint) vtxIdx;
+-(CC3Vector) deformedVertexLocationAt:  (GLuint) vtxIdx;
 
 
 #pragma mark Allocation and initialization
@@ -396,10 +375,7 @@
 /** Initializes an instance that will be used by the specified skin mesh node. */
 -(id) initForNode: (CC3SkinMeshNode*) aNode;
 
-/**
- * Allocates and initializes an autoreleased instance that will be used
- * by the specified skin mesh node.
- */
+/** Allocates and initializes an instance that will be used by the specified skin mesh node. */
 +(id) skinSectionForNode: (CC3SkinMeshNode*) aNode;
 
 /** Returns a copy of this skin section, for use by the specified skin mesh node. */
@@ -443,59 +419,13 @@
 /**
  * Draws the mesh vertices of this skin section.
  *
- * Prior to drawing the vertices, this method iterates through the CC3Bones in the bones
- * property, and loads a transform matrix into the GL matrix palette for each bone.
- * During drawing, each vertex is then transformed by a weighted average of the transform
- * matrices that it identifies as influencing its location.
+ * When running under OpenGL ES 1.1, prior to drawing the vertices, this method iterates
+ * through the CC3Bones in the bones property, and loads a transform matrix into the GL
+ * matrix palette for each bone.
  *
- * The actual matrix loaded for each bone is derived from a combination of:
- *   - the modelview matrix of the scene (MV)
- *   - the transform of the bone (B), relative to the scene
- *   - the inverse transform of the rest pose of the bone (Br(-1)), relative to the scene
- *   - the transform of the skin mesh node (M)
- * 
- * as follows, with * representing matrix multiplication:
+ * When running under a programmable rendering pipeline, such as OpenGL ES 2.0 or desktop
+ * OpenGL, the bones transforms are retrieved from the contained bones by the shader program.
  *
- *   MV * B * Br(-1) * M
- * 
- * In practice, to avoid calculating the inverse transform for the rest pose of each bone
- * on every frame render, we can separate the rest pose of the bone and the skin mesh node
- * each into two components: the transform of the CC3SoftBodyNode, relative to the
- * scene, and the transform of the bone and skin mesh node relative to the CC3SoftBodyNode.
- * The above matrix calculation can be expanded and then reduced as follows, with:
- *   - the modelview matrix of the scene (MV)
- *   - the transform of the bone (B)
- *   - the transform of the Soft-body node (SB), and its inverse (SB(-1))
- *   - the transform of the rest pose of the bone relative to the
- *     soft-body node (Brsb), and its inverse (Brsb(-1))
- *   - the transform of the skin mesh node relative to the soft-body node (Msb)
- *
- *   MV * B * Br(-1) * M
- *   MV * B * (SB * Brsb)(-1) * (SB * Msb)
- *   MV * B * Brsb(-1) * SB(-1) * SB * Msb
- *   MV * B * Brsb(-1) * (SB(-1) * SB) * Msb
- *   MV * B * Brsb(-1) * Msb
- *
- * The result is dependent only on the inverted rest pose of the bone relative to
- * the soft-body node, and the skin mesh node, also relative to the soft-body node.
- * In practice, neither of these parameters should change as the character moves.
- *
- * Since the two cached matrices are relative to the soft-body node, we can move the
- * soft-body node around, and transform it, without having to recalculate the inverse
- * rest pose matrix on each movement for each bone. The movement of the soft-body node
- * and the bones are the only factors that need to be rebuilt on each update.
- *
- * We can capture the inverse rest pose transform of the bone relative to the soft-body
- * node once and cache it. If we make the assumption that the transform of the skin mesh
- * node, relative to the soft-body node will not change (a fairly safe assumption since
- * it would affect the alignment of the bones to the mesh vertices), we can determine it
- * once and cache it as well. This caching is handled by the bindRestPose method on the
- * respective CC3Bone and CC3SkinMeshNode nodes.
- *
- * This arrangement also has the benefit of avoiding artifacts that sometimes appear
- * in the matrix inversion of the full bone and skin transforms if the CC3SoftBodyNode
- * is set at rotations of exactly 90 degrees (the cosine of the angle is zero).
- * 
  * This method is invoked automatically when a CC3SkinMeshNode is drawn. Usually, the
  * application never needs to invoke this method directly.
  */
@@ -529,43 +459,34 @@
  * CC3Bones are simply specialized structural nodes, and have no content of their own to
  * draw. However, individual bones are referenced by skin sections of the skin mesh node,
  * and the transform matrices of the bones influence the transformations of the vertices
- * of the skin mesh, as the skeleton moves. The applyPoseTo: method handles applying the
- * transform matrix of the bone to the transform matrix for the skin mesh vertices.
+ * of the skin mesh, as the skeleton moves.
  */
 @interface CC3Bone : CC3Node {
-	CC3Matrix* _restPoseInvertedMatrix;
+	CC3Matrix* _skeletalTransformMatrix;
+	CC3Matrix* _restPoseSkeletalTransformMatrixInverted;
 }
 
-
-#pragma mark Transformations
+/**
+ * Returns the transform matrix of this bone, relative to the coordinate system of the skeleton
+ * of which this bone is a part. The root of the skeleton is the nearest ancestor CC3SoftBodyNode.
+ */
+@property(nonatomic, strong, readonly) CC3Matrix* skeletalTransformMatrix;
 
 /**
- * Returns the cached inverted rest pose matrix. This is the transform matrix of this
- * bone when it is in its rest pose, which is the location and rotation that corresponds
- * to the undeformed skin mesh. Changes to the transform of this bone, relative to the
- * rest pose, will deform the mesh to create soft-body movement of the mesh vertices.
+ * Returns the inverse of the transform matrix of this bone, relative to the coordinate system
+ * of the skeleton of which this bone is a part, that corresponds to the orientation of this
+ * bone when the skeleton is in its rest pose.
  *
- * The value of this property is set when the bindRestPose method is invoked.
+ * The returned matrix is the inverse of the matrix returned by the skeletalTransformMatrix
+ * property, at the point where the skeleton is in its rest pose (before any further transforms
+ * are applied to the bones in the skeleton). The rest pose of the skeleton corresponds to
+ * the undeformed skin mesh. Changes to the transform of this bone, relative to this rest pose,
+ * will deform the mesh to create soft-body movement of the mesh vertices.
+ *
+ * The value of this property is set from the value of the skeletalTransformMatrix whenever the
+ * bindRestPose method is invoked.
  */
-@property(nonatomic, strong, readonly) CC3Matrix* restPoseInvertedMatrix;
-
-/**
- * Applies the changes to the current transform of this bone, relative to the
- * rest pose of this bone, to the specified matrix.
- *
- * The specified bone matrix (BM) is populated from the following components:
- *   - the transform of the bone (B)
- *   - the inverse transform of the rest pose of the bone relative to the
- *     soft-body node (Brsb(-1))
- *
- * as follows:
- *
- *   BM = B * Brsb(-1)
- *
- * The existing contents of the specified boneMatrix are ignored, and it is
- * populated from the above calculation.
- */
--(void) applyPoseTo: (CC3Matrix*) boneMatrix;
+@property(nonatomic, strong, readonly) CC3Matrix* restPoseSkeletalTransformMatrixInverted;
  
 @end
 
@@ -574,26 +495,24 @@
 #pragma mark CC3SkinnedBone
 
 /**
- * CC3SkinnedBone combines the transforms of a bone and a skin mesh node,
- * and applies these transforms to deform the vertices during rendering,
- * or when the deformed location of a vertex is accessed programmatically.
+ * CC3SkinnedBone combines the transforms of a bone and a skin mesh node, and applies these
+ * transforms to deform the vertices during rendering, or when the deformed location of a
+ * vertex is accessed programmatically.
  *
- * An instance keeps track of two related transform matrices, a drawTransformMatrix,
+ * An instance keeps track of two related transform matrices, a transformMatrix,
  * which is used by the GL engine to deform the vertices during drawing, and a
  * skinTransformMatrix, which is used to deform a vertex into the local coordinate
  * system of the skin mesh node, so that it can be used programmatically.
  *
  * The CC3SkinnedBone instance registers as a transform listener with both the bone and the
- * skin mesh node, and lazily recalculates the drawTransformMatrix and skinTransformMatrix
+ * skin mesh node, and lazily recalculates the transformMatrix and skinTransformMatrix
  * whenever the transform of either the bone or the skin mesh node changes.
  */
 @interface CC3SkinnedBone : NSObject <CC3NodeTransformListenerProtocol> {
 	CC3Bone* __unsafe_unretained _bone;
 	CC3SkinMeshNode* __unsafe_unretained _skinNode;
-	CC3Matrix* _drawTransformMatrix;
-	CC3Matrix* _skinTransformMatrix;
-	BOOL _isDrawTransformDirty : 1;
-	BOOL _isSkinTransformDirty : 1;
+	CC3Matrix* _transformMatrix;
+	BOOL _isTransformDirty : 1;
 }
 
 /** Returns the bone whose transforms are being tracked. */
@@ -604,36 +523,45 @@
 
 /**
  * Returns the transform matrix used to draw the deformed nodes during mesh rendering.
- * This transform matrix combines the transform of the bone, the rest pose of the
- * bone, and the rest pose of the skin mesh node.
+ * This transform matrix combines the transform of the bone, the rest pose of the bone,
+ * and the rest pose of the skin mesh node.
  *
- * This transform matrix is lazily recomputed the first time this property is
- * accessed after the transform is marked dirty via the markTransformDirty method.
- * This occurs automatically when either the bone or the skin mesh node being
- * tracked by this instance is transformed.
+ * This transform matrix is lazily recomputed the first time this property is accessed after
+ * the transform is marked dirty via the markTransformDirty method. This occurs automatically
+ * when either the bone or the skin mesh node being tracked by this instance is transformed.
+ *
+ * The matrix in this property (T) is derived from a combination of:
+ *
+ *   - The transform matrix of the skin mesh node, relative to the soft-body node,
+ *     as retrieved by invoking self.skinNode.skeletalTransformMatrix (Ms).
+ *   - The inverse of that matrix, as retrieved by invoking 
+ *     self.skinNode.skeletalTransformMatrixInverted (Ms(-1)).
+ *   - The transform matrix of the bone, relative to the soft-body node,
+ *     as retrieved by invoking self.bone.skeletalTransformMatrix (Bs).
+ *   - The inverse of that matrix, when the skeleton is in its rest pose,
+ *     as retrieved by invoking self.bone.restPoseSkeletalTransformMatrixInverted (Bsrp(-1)).
+ *
+ * as follows, with * representing matrix multiplication:
+ *
+ *   T = Ms(-1) * Bs * Bsrp(-1) * Ms
+ *
+ * Reading this equation right to left, we can see that when used on a vertex in the skin
+ * mesh node, this has the effect of transforming the vertex:
+ *   1) From skin-mesh-space to soft-body-space.
+ *   2) From soft-body-space to the joint-space of the bone in its rest-pose.
+ *   3) From joint-space back to soft-body-space using the transform of the bone in its current pose.
+ *   4) From soft-body-space back to the skin-mesh-space.
+ *
+ * These steps are performed because the soft-body node represents the common root of the
+ * skin mesh nodes and the bones in the skeleton.
  */
-@property(nonatomic, strong, readonly) CC3Matrix* drawTransformMatrix;
+@property(nonatomic, strong, readonly) CC3Matrix* transformMatrix;
 
 /**
- * Returns the transform matrix used to deform vertex locations when retrieved from
- * the mesh for use by the application. This transform matrix combines the transform
- * of the drawTransformMatrix with the inverse transform of the skin mesh node.
+ * Marks the transform matrix as dirty.
  *
- * The transform matrix returned can be applied to a mesh vertex location to determine
- * its location after deformation, in the local coordinate system of the skin mesh node.
- *
- * This transform matrix is lazily recomputed the first time this property is
- * accessed after the transform is marked dirty via the markTransformDirty method.
- * This occurs automatically when either the bone or the skin mesh node being
- * tracked by this instance is transformed.
- */
-@property(nonatomic, strong, readonly) CC3Matrix* skinTransformMatrix;
-
-/**
- * Marks the transform matrices as dirty.
- *
- * Once marked as dirty each of the drawTransformMatrix and skinTransformMatrix matrices
- * will be lazily recalculated the next time its respective property is accessed.
+ * Once marked as dirty, the matrix will be lazily recalculated the next time the 
+ * transformMatrix property is accessed.
  *
  * This method is invoked automatically when the transform of either the bone or the
  * skin mesh node being tracked by this instance is transformed. The application should
@@ -647,10 +575,7 @@
 /** Initializes this instance to apply the specified bone to the specified skin mesh node. */
 -(id) initWithSkin: (CC3SkinMeshNode*) aNode onBone: (CC3Bone*) aBone;
 
-/**
- * Allocates and initializes an autoreleased instance to
- * apply the specified bone to the specified skin mesh node.
- */
+/** Allocates and initializes an instance to apply the specified bone to the specified skin mesh node. */
 +(id) skinnedBoneWithSkin: (CC3SkinMeshNode*) aNode onBone: (CC3Bone*) aBone;
 
 @end
@@ -683,8 +608,7 @@
 @property(nonatomic, unsafe_unretained) CC3SkinMeshNode* node;
 
 /**
- * Indicates the number of vertices in the deformedVertexLocations array,
- * as retrieved from the mesh.
+ * Indicates the number of vertices in the deformedVertexLocations array, as retrieved from the mesh.
  *
  * The value of this property will be zero until either the node or mesh properties are set.
  */
@@ -694,17 +618,16 @@
  * An array containing the vertex locations of the underlying mesh,
  * as deformed by the current position and orientation of the bones.
  *
- * This property will be lazily initialized on the first access after the node
- * property has been set, by an automatic invocation of the populateDeformedVertexLocations
- * method. When created in this manner, the memory allocated to hold the data in
- * the returned array will be managed by this instance.
+ * This property will be lazily initialized on the first access after the node property 
+ * has been set, by an automatic invocation of the populateDeformedVertexLocations method. 
+ * When created in this manner, the memory allocated to hold the data in the returned 
+ * array will be managed by this instance.
  *
- * Alternately, this property may be set directly to an array that was created
- * externally. In this case, the underlying data memory is not managed by this
- * instance, and it is up to the application to manage the allocation and
- * deallocation of the underlying data memory, and to ensure that the array is
- * large enough to contain the number of CC3Vector structures specified by
- * the vertexCount property.
+ * Alternately, this property may be set directly to an array that was created externally. 
+ * In this case, the underlying data memory is not managed by this instance, and it is up 
+ * to the application to manage the allocation and deallocation of the underlying data memory,
+ * and to ensure that the array is large enough to contain the number of CC3Vector structures
+ * specified by the vertexCount property.
  */
 @property(nonatomic, assign) CC3Vector* deformedVertexLocations;
 
@@ -738,25 +661,21 @@
  * This method is invoked automatically by the populateDeformedVertexLocations
  * method. Usually, the application never needs to invoke this method directly.
  *
- * It is safe to invoke this method more than once, but understand that any 
- * previously allocated memory will be safely released prior to the allocation
- * of the new memory. The memory allocated earlier will therefore be lost and
- * should not be referenced.
+ * It is safe to invoke this method more than once, but understand that any  previously 
+ * allocated memory will be safely released prior to the allocation of the new memory. 
+ * The memory allocated earlier will therefore be lost and should not be referenced.
  * 
- * The memory allocated will automatically be released when this instance
- * is deallocated.
+ * The memory allocated will automatically be released when this instance is deallocated.
  */
 -(CC3Vector*) allocateDeformedVertexLocations;
 
 /**
- * Deallocates the underlying memory that was previously allocated with the
- * allocateDeformedVertexLocations method. It is safe to invoke this method
- * more than once, or even if the allocateDeformedVertexLocations method was
- * not previously invoked.
+ * Deallocates the underlying memory that was previously allocated with the 
+ * allocateDeformedVertexLocations method. It is safe to invoke this method more than 
+ * once, or even if the allocateDeformedVertexLocations method was not previously invoked.
  *
- * This method is invoked automatically when allocateDeformedVertexLocations
- * is invoked, and when this instance is deallocated. Usually, the application
- * never needs to invoke this method directly.
+ * This method is invoked automatically when allocateDeformedVertexLocations is invoked, and when
+ * this instance is deallocated. Usually, the application never needs to invoke this method directly.
  */
 -(void) deallocateDeformedVertexLocations;
 
@@ -764,9 +683,8 @@
 -(void) markDeformedVertexLocationsDirty;
 
 /**
- * Clears any caches that contain deformable information.
- *
- * This includes deformed vertices, plus face centers, normals and planes.
+ * Clears any caches that contain deformable information, including deformed vertices, 
+ * plus face centers, normals, and planes.
  */
 -(void) clearDeformableCaches;
 
@@ -809,14 +727,14 @@
  * This method must be invoked once the initial locations and rotations of each bone
  * in the skeletons are set.
  *
- * These initial bone orientations are those that align with the native structure
- * of the vertices in the mesh, and collectively are known as the rest pose of
- * the skeleton. Changes to the transform properties of the individual bone nodes,
- * relative to the rest pose, will deform the mesh from its natural structure.
+ * These initial bone orientations are those that align with the native structure of the 
+ * vertices in the mesh, and collectively are known as the rest pose of the skeleton. 
+ * Changes to the transform properties of the individual bone nodes, relative to the rest
+ * pose, will deform the mesh from its natural structure.
  * 
- * The bone transforms must be calculated locally from the perspective of the
- * CC3SoftBodyNode that contains a skeleton and skin mesh. This method should
- * only be invoked on the CC3SoftBodyNode or a structural ancestor of that node,
+ * The bone transforms must be calculated locally from the perspective of the CC3SoftBodyNode
+ * that contains a skeleton and skin mesh. This method should only be invoked on the 
+ * CC3SoftBodyNode or a structural ancestor of that node,
  * 
  * This implementation simply passes this invocation along to the children of this
  * node. Subclasses contained in the soft-body node will add additional functionality.
@@ -882,11 +800,8 @@
 /** Returns the aggregate scale of this node relative to its closest soft-body ancestor. */
 @property(nonatomic, readonly) CC3Vector skeletalScale;
 
-/** @deprecated The transform matrix now keeps track of whether it is a rigid transform. */
-@property(nonatomic, readonly) BOOL isSkeletonRigid;
-
 /**
- * Invokes the createBoundingVolume on any skinned mesh node descendants.
+ * Invokes the createBoundingVolume method on any skinned mesh node descendants.
  *
  * Skinned mesh nodes are designed to move vertices under the control of external bone nodes.
  * Because of this, the vertices might move well beyond the bounds of a static bounding volume
@@ -944,100 +859,62 @@
 /**
  * Returns the center of the mesh face at the specified index.
  * 
- * If the vertices of this mesh node represent the skin covering the bones of a 
- * soft-body, the returned location takes into consideration the current deformation
- * caused by motion of the bones underlying the this skin mesh. The returned location
- * is the center of the face in its location and orientation after the skin has been
- * deformed by the current position of the underlying bones. Otherwise, this method
- * returns the same value as the faceCenterAt: method.
+ * If the vertices of this mesh node represent the skin covering the bones of a  soft-body, the
+ * returned location takes into consideration the current deformation caused by motion of the 
+ * bones underlying the this skin mesh. The returned location is the center of the face in its 
+ * location and orientation after the skin has been deformed by the current position of the 
+ * underlying bones. Otherwise, this method returns the same value as the faceCenterAt: method.
  *
- * In either case, the returned face center is specified in the local coordinate
- * system of this node.
+ * In either case, the returned face center is specified in the local coordinate system of this node.
  */
 -(CC3Vector) deformedFaceCenterAt: (GLuint) faceIndex;
 
 /**
  * Returns the normal of the mesh face at the specified index.
  * 
- * If the vertices of this mesh node represent the skin covering the bones of a 
- * soft-body, the returned normal takes into consideration the current deformation
- * caused by motion of the bones underlying the this skin mesh. The returned vector
- * is the normal of the face in its orientation after the skin has been deformed
- * by the current position of the underlying bones. Otherwise, this method returns
- * the same value as the faceNormalAt: method.
+ * If the vertices of this mesh node represent the skin covering the bones of a  soft-body, the
+ * returned normal takes into consideration the current deformation caused by motion of the bones
+ * underlying the this skin mesh. The returned vector is the normal of the face in its orientation
+ * after the skin has been deformed by the current position of the underlying bones. Otherwise,
+ * this method returns the same value as the faceNormalAt: method.
  * 
- * In either case, the returned face normal is specified in the local coordinate
- * system of this node.
+ * In either case, the returned face normal is specified in the local coordinate system of this node.
  */
 -(CC3Vector) deformedFaceNormalAt: (GLuint) faceIndex;
 
 /**
  * Returns the plane of the mesh face at the specified index.
  * 
- * If the vertices of this mesh node represent the skin covering the bones of a 
- * soft-body, the returned plane takes into consideration the current deformation
- * caused by motion of the bones underlying the this skin mesh. The returned plane
- * is the plane of the face in its location and orientation after the skin has been
- * deformed by the current position of the underlying bones. Otherwise, this method
- * returns the same value as the facePlaneAt: method.
+ * If the vertices of this mesh node represent the skin covering the bones of a soft-body, the
+ * returned plane takes into consideration the current deformation caused by motion of the bones
+ * underlying the this skin mesh. The returned plane is the plane of the face in its location and
+ * orientation after the skin has been deformed by the current position of the underlying bones. 
+ * Otherwise, this method returns the same value as the facePlaneAt: method.
  * 
- * In either case, the returned face plane is specified in the local coordinate
- * system of this node.
+ * In either case, the returned face plane is specified in the local coordinate system of this node.
  */
 -(CC3Plane) deformedFacePlaneAt: (GLuint) faceIndex;
 
 /**
- * Returns the vertex from the mesh at the specified vtxIndex, that is within the
- * face at the specified faceIndex.
+ * Returns the vertex from the mesh at the specified vtxIndex, that is within the face at 
+ * the specified faceIndex.
  * 
- * If the vertices of this mesh node represent the skin covering the bones of a 
- * soft-body, the returned vertex location takes into consideration the current
- * deformation caused by motion of the bones underlying the this skin mesh.
- * Otherwise, this method returns the same value as the vertexLocationAt: method.
+ * If the vertices of this mesh node represent the skin covering the bones of a soft-body, the
+ * returned vertex location takes into consideration the current deformation caused by motion 
+ * of the bones underlying the this skin mesh. Otherwise, this method returns the same value as
+ * the vertexLocationAt: method.
  *
- * In either case, the returned vertex location is specified in the local coordinate
- * system of this node.
+ * In either case, the returned vertex location is specified in the local coordinate system of this node.
  *
- * The specified faceIndex value refers to the index of the face that contains the
- * vertex. It is required to determine the skin section whose bones are deforming
- * the vertex location at the specified vertex index. The specified faceIndex must
- * be between zero, inclusive, and the value of the faceCount property, exclusive.
+ * The specified faceIndex value refers to the index of the face that contains the vertex. It is
+ * required to determine the skin section whose bones are deforming the vertex location at the
+ * specified vertex index. The specified faceIndex must be between zero, inclusive, and the value
+ * of the faceCount property, exclusive.
  *
- * The specified vtxIndex must be between zero, inclusive, and the value of the
- * vertexCount property, exclusive.
+ * The specified vtxIndex must be between zero, inclusive, and the value of the vertexCount 
+ * property, exclusive.
  */
 -(CC3Vector) deformedVertexLocationAt: (GLuint) vertexIndex fromFaceAt: (GLuint) faceIndex;
-
-@end
-
-
-#pragma mark -
-#pragma mark Deprecated CC3SkinMesh
-
-DEPRECATED_ATTRIBUTE
-/**
- * Deprecated.
- * @deprecated Functionality moved to CC3Mesh.
- */
-@interface CC3SkinMesh : CC3Mesh
-
-/** @deprecated Renamed to vertexMatrixIndices. */
-@property(nonatomic,strong) CC3VertexMatrixIndices* boneMatrixIndices DEPRECATED_ATTRIBUTE;
-
-/** @deprecated Renamed to vertexWeights. */
-@property(nonatomic,strong) CC3VertexWeights* boneWeights DEPRECATED_ATTRIBUTE;
-
-/** @deprecated Renamed to vertexWeightForVertexUnit:at: */
--(GLfloat) weightForVertexUnit: (GLuint) vertexUnit at: (GLuint) index DEPRECATED_ATTRIBUTE;
-
-/** @deprecated Renamed to setVertexWeight:forVertexUnit:at: */
--(void) setWeight: (GLfloat) aWeight forVertexUnit: (GLuint) vertexUnit at: (GLuint) index DEPRECATED_ATTRIBUTE;
-
-/** @deprecated Renamed to setVertexMatrixIndex:forVertexUnit:at: */
--(void) setMatrixIndex: (GLuint) aMatrixIndex forVertexUnit: (GLuint) vertexUnit at: (GLuint) index DEPRECATED_ATTRIBUTE;
-
-/** @deprecated Renamed to vertexMatrixIndexForVertexUnit:at: */
--(GLuint) matrixIndexForVertexUnit: (GLuint) vertexUnit at: (GLuint) index DEPRECATED_ATTRIBUTE;
 
 @end
 

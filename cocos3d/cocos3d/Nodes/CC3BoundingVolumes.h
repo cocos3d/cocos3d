@@ -452,9 +452,8 @@
  * to a value that suits all possible vertex configurations, you can avoid expensive recalculations
  * of the bounding volume as the vertices change.
  *
- * When setting the value of this property on a mesh node directly, be sure to also set the
- * shouldUseFixedBoundingVolume property of the node to YES, to stop automatic recalculation
- * of this bounding volume whenever the underlying mesh vertices change.
+ * Setting the value of this property sets the shouldBuildFromMesh property to NO, so that
+ * the center of geometry will not be overridden if the vertices of the mesh change.
  *
  * The initial value of this property is kCC3VectorZero.
  */
@@ -501,6 +500,17 @@
 
 
 #pragma mark Updating
+
+/** 
+ * Scales the size of this bounding volume by the specified amount, relative to its current size.
+ *
+ * This method also sets the shouldBuildFromMesh property to NO so that the size of this
+ * bounding volume will not change if the underlying mesh vertices change.
+ *
+ * This implementation sets the shouldBuildFromMesh property to NO. Subclasses with actual 
+ * size should override to adjust their size, and then invoke this superclass method.
+ */
+-(void) scaleBy: (GLfloat) scale;
 
 /**
  * Indicates whether this volume needs to be transformed. This is different than
@@ -709,9 +719,8 @@
  * suits all possible vertex configurations, you can avoid expensive recalculations
  * of the bounding volume as the vertices change.
  *
- * When setting the value of this property on a mesh node directly, be sure to also
- * set the shouldUseFixedBoundingVolume property of the node to YES, to stop automatic
- * recalculation of this bounding volume whenever the underlying mesh vertices change.
+ * Setting the value of this property sets the shouldBuildFromMesh property to NO, so that
+ * the radius will not be overridden if the vertices of the mesh change.
  *
  * The initial value of this property is zero.
  */
@@ -862,9 +871,8 @@
  * suits all possible vertex configurations, you can avoid expensive recalculations
  * of the bounding volume as the vertices change.
  *
- * When setting the value of this property on a mesh node directly, be sure to also
- * set the shouldUseFixedBoundingVolume property of the node to YES, to stop automatic
- * recalculation of this bounding volume whenever the underlying mesh vertices change.
+ * Setting the value of this property sets the shouldBuildFromMesh property to NO, so that
+ * the bounding box will not be overridden if the vertices of the mesh change.
  *
  * The initial value of this property is kCC3BoxZero.
  */

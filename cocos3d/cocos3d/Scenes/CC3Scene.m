@@ -114,7 +114,7 @@
 		if (tn.shouldAutotargetCamera || (oldCam && (tn.target == oldCam))) tn.target = newCam;
 	
 	// Move other non-target camera listeners (eg- shadow casting volumes) over
-	NSArray* camListeners = [oldCam.transformListeners copy];
+	NSSet* camListeners = oldCam.transformListeners;
 	for(id<CC3NodeTransformListenerProtocol> aListener in camListeners) {
 		[oldCam removeTransformListener: aListener];
 		[newCam addTransformListener: aListener];

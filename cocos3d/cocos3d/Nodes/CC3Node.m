@@ -53,7 +53,6 @@
 @synthesize rotator=_rotator, location=_location, scale=_scale;
 @synthesize projectedLocation=_projectedLocation, visible=_visible;
 @synthesize boundingVolume=_boundingVolume, boundingVolumePadding=_boundingVolumePadding;
-@synthesize transformListeners=_transformListeners;
 @synthesize shouldInheritTouchability=_shouldInheritTouchability;
 @synthesize shouldAllowTouchableWhenInvisible=_shouldAllowTouchableWhenInvisible;
 @synthesize shouldAutoremoveWhenEmpty=_shouldAutoremoveWhenEmpty;
@@ -932,7 +931,7 @@
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		_transformListeners = nil;
+		_transformListenerWrappers = nil;
 		_globalTransformMatrixInverted = nil;
 		_globalRotationMatrix = nil;
 		self.rotator = [CC3Rotator rotator];
@@ -998,17 +997,17 @@
 
 	[_globalTransformMatrix populateFrom: another.globalTransformMatrix];
 
-	_isTransformInvertedDirty = YES;							// create or rebuild lazily
-	_isGlobalRotationDirty = YES;							// create or rebuild lazily
+	_isTransformInvertedDirty = YES;			// create or rebuild lazily
+	_isGlobalRotationDirty = YES;				// create or rebuild lazily
 	
 	_location = another.location;
 	_projectedLocation = another.projectedLocation;
 	_scale = another.scale;
 	_isTransformDirty = another.isTransformDirty;
 
-	_rotator = [another.rotator copy];						// retained
+	_rotator = [another.rotator copy];
 	
-	_boundingVolume = [another.boundingVolume copy];		// retained
+	_boundingVolume = [another.boundingVolume copy];
 	_boundingVolume.node = self;
 	_boundingVolumePadding = another.boundingVolumePadding;
 	_shouldUseFixedBoundingVolume = another.shouldUseFixedBoundingVolume;
@@ -1220,13 +1219,25 @@ static GLuint lastAssignedNodeTag;
 
 #pragma mark Transformations
 
+/** Utility method to extract and cast a listener from an NSValue that wraps it as an unretained object. */
+-(id<CC3NodeTransformListenerProtocol>) getListenerFrom: (NSValue*) listenerWrapper {
+	return (id<CC3NodeTransformListenerProtocol>)listenerWrapper.nonretainedObjectValue;
+}
+
+-(NSSet*) transformListeners {
+	NSMutableSet* xfmListeners = [NSMutableSet set];
+	for(NSValue* xlWrap in _transformListenerWrappers)
+		[xfmListeners addObject: [self getListenerFrom: xlWrap]];
+	return xfmListeners;
+}
+
 -(void) addTransformListener: (id<CC3NodeTransformListenerProtocol>) aListener {
 	if (!aListener) return;
 	
-	if( !_transformListeners ) _transformListeners = [NSMutableSet set];
+	if( !_transformListenerWrappers ) _transformListenerWrappers = [NSMutableSet set];
 	
 	// Add listener as a weak reference
-	[_transformListeners addObject: [NSValue valueWithNonretainedObject: aListener]];
+	[_transformListenerWrappers addObject: [NSValue valueWithNonretainedObject: aListener]];
 		
 	// If the transform has already been calculated, notify immediately.
 	if ( !self.isTransformDirty ) [aListener nodeWasTransformed: self];
@@ -1236,30 +1247,30 @@ static GLuint lastAssignedNodeTag;
 	if (!aListener) return;
 	
 	// Remove listener as a weak reference
-	[_transformListeners removeObject: [NSValue valueWithNonretainedObject: aListener]];
+	[_transformListenerWrappers removeObject: [NSValue valueWithNonretainedObject: aListener]];
 	
-	if (_transformListeners && _transformListeners.count == 0) _transformListeners = nil;
+	if (_transformListenerWrappers && _transformListenerWrappers.count == 0) _transformListenerWrappers = nil;
 }
 
 -(void) removeAllTransformListeners {
-	NSSet* myListeners = [_transformListeners copy];
-	for(NSValue* aListener in myListeners)
-		[self removeTransformListener: (id<CC3NodeTransformListenerProtocol>)aListener.nonretainedObjectValue];
+	NSSet* myListeners = self.transformListeners;
+	for(NSValue* xlWrap in myListeners)
+		[self removeTransformListener: [self getListenerFrom: xlWrap]];
 }
 
 /** Notify the transform listeners that the node has been transformed. */
 -(void) notifyTransformListeners {
-	LogTrace(@"%@ notifying %i transform listeners", self, _transformListeners.count);
-	for (NSValue* xfmLisnr in _transformListeners)
-		[((id<CC3NodeTransformListenerProtocol>)xfmLisnr.nonretainedObjectValue) nodeWasTransformed: self];
+	LogTrace(@"%@ notifying %i transform listeners", self, _transformListenerWrappers.count);
+	for (NSValue* xlWrap in _transformListenerWrappers)
+		[[self getListenerFrom: xlWrap] nodeWasTransformed: self];
 }
 
 /** Notify the transform listeners that the node has been destroyed. */
 -(void) notifyDestructionListeners {
 	// Log with super description, because all of the subclass info is invalid during destruction.
-	LogTrace(@"%@ notifying %lu listeners of destruction", [super description], (unsigned long)_transformListeners.count);
-	for (NSValue* xfmLisnr in _transformListeners)
-		[((id<CC3NodeTransformListenerProtocol>)xfmLisnr.nonretainedObjectValue) nodeWasDestroyed: self];
+	LogTrace(@"%@ notifying %lu listeners of destruction", [super description], (unsigned long)_transformListenerWrappers.count);
+	for (NSValue* xlWrap in _transformListenerWrappers)
+		[[self getListenerFrom: xlWrap] nodeWasDestroyed: self];
 }
 
 -(void) nodeWasTransformed: (CC3Node*) aNode {

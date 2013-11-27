@@ -237,7 +237,7 @@
 	 forQualifier: (NSString*) qualifier
    floatPrecision: (CC3Vector) precision
 	 logPrecision: (CC3IntVector) logPrecision {
-	LogInfoIfPrimary(@"Range %@ shader %@ float: (min: (+/-)%g, max: (+/-)%g, precision: %g) log2: %@",
+	LogInfoIfPrimary(@"Range of %@ shader %@ float: (min: (+/-)%g, max: (+/-)%g, precision: %g) log2: %@",
 					 ((shaderType == GL_VERTEX_SHADER) ? @"vertex" : @"fragment"),
 					 qualifier, precision.x, precision.y, precision.z,
 					 NSStringFromCC3IntVector(logPrecision));
@@ -247,7 +247,7 @@
 	 forQualifier: (NSString*) qualifier
 	 intPrecision: (CC3Vector) precision
 	 logPrecision: (CC3IntVector) logPrecision {
-	LogInfoIfPrimary(@"Range %@ shader %@ int: (min: %i, max: %i, precision: %i) log2: %@",
+	LogInfoIfPrimary(@"Range of %@ shader %@ int: (min: %i, max: %i, precision: %i) log2: %@",
 					 ((shaderType == GL_VERTEX_SHADER) ? @"vertex" : @"fragment"),
 					 qualifier, (GLint)precision.x, (GLint)precision.y, (GLint)precision.z,
 					 NSStringFromCC3IntVector(logPrecision));

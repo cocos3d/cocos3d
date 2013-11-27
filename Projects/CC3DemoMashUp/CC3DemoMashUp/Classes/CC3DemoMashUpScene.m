@@ -1640,20 +1640,15 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// Because the mallet is a skinned model, it is not automatically assigned a bounding volume,
 	// and will be be drawn even if it is not in front of the camera. We can leave it like this,
 	// however, because the mallet is a complex model and is often out of view of the camera, we
-	// can reduce processing costs by giving it a fixed bounding volume whose size we determine
-	// at development time, and we manually set the bounding volume into the mallet. Define a
-	// fixed bounding volume that includes the full range of the mallet motion during vertex
-	// skinning. In this case, a simple way of determining this is to use the bounding box of
-	// the parent node that includes the anvils, which we can get by logging. The first two
-	// commented lines below were used during development to help determine the size of the
-	// bounding box of the parent node. Finally, we can use the mallet.shouldDrawBoundingVolume
-	// property to visually verify that the bounding volume fits to the mallet node.
-//	mallet.shouldDrawLocalContentWireframeBox = YES;
-//	LogDebug(@"%@ bounding box %@", malletAndAnvils, NSStringFromCC3Box(malletAndAnvils.boundingBox));
-	CC3Box bb = CC3BoxMake(-257.0, -1685.0, -1200.0, 266.0, 0.0, 1200.0);
-	mallet.boundingVolume = [CC3NodeSphereThenBoxBoundingVolume boundingVolumeCircumscribingBox: bb];
-	mallet.shouldUseFixedBoundingVolume = YES;
-//	mallet.shouldDrawBoundingVolume = YES;		// Verify visually and adjust above box accordingly
+	// can reduce processing costs by giving it a fixed bounding volume whose size we determine at
+	// development time. We do this here by letting the mallet determine its own bounding volume,
+	// which will be a spherical bounding volume that encompasses the mesh in its rest pose.
+	// By using the shouldDrawAllBoundingVolumes property, we can check if this bounding volume
+	// is appropriate. It turns out to be a bit too small, so we scale the bounding volume, to
+	// increase its radius, so that it encompasses the mallet regardless of how the mallet is flexed.
+	[mallet createSkinnedBoundingVolumes];
+	[mallet.boundingVolume scaleBy: 1.6f];
+//	malletAndAnvils.shouldDrawAllBoundingVolumes = YES;	// Verify visually and adjust scale accordingly
 
 	malletAndAnvils.touchEnabled = YES;		// make the mallet touchable
 	malletAndAnvils.location = cc3v(300.0, 95.0, 300.0);
@@ -1720,12 +1715,19 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	runner.location = cc3v(0, 0, 1100);
 	runner.rotation = cc3v(0, 90, 0);	// Rotate the entire POD resource so camera rotates as well
 	[runningTrack addChild: runner];
-
-	// Because the runner is a skinned model, it is not automatically assigned a bounding volume,
-	// and will be be drawn even if it is not in front of the camera. We can leave it like this,
-	// however, because the runner is a complex model and is often out of view of the camera,
-	// we can reduce processing costs by giving it a fixed bounding volume whose size we
-	// determine at development time, and we manually set the bounding volume into the runner:
+	
+	// The bones of the runner are fairly self-contained, and do not move beyond the sphere
+	// that encompasses the rest pose of the mesh they are controlling. Because of this, we
+	// can let each skin mesh node in the runner (there are 3 skin meshes) create its own
+	// spherical bounding volume. If the initial bounding volume of any skin mesh node needs
+	// to be adjusted in size, you can retrieve the skin mesh node from the runner model,
+	// retrieve its bounding volume using the boundingVolume property, and scale it using
+	// the scaleBy: method on the bounding volume. If you want to see the bounding volumes,
+	// uncomment the second line below.
+	[runner createSkinnedBoundingVolumes];
+//	runner.shouldDrawAllBoundingVolumes = YES;	// Verify visually
+	
+	// Alternately, we can manually create a more accurate bounding volume manually as follows:
 	//   - Start by extracting the bounding box of the rest pose of the model. Because this is
 	//     happening before the scene has been updated, it is not always safe to invoke the
 	//     boundingBox property at runtime because it can mess with node target alignment.
@@ -1743,17 +1745,17 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	//   - Use CC3BoxTranslate and CC3BoxScale to modify the bounding box
 	//     extracted from the model (or just hardcode a modified bounding box) to position
 	//     and size the bounding volume around the model and verify visually.
-	LogTrace(@"Runner box: %@", NSStringFromCC3Box(runner.boundingBox));	// Extract bounding box
-	CC3Box bb = CC3BoxFromMinMax(cc3v(-76.982, 18.777, -125.259), cc3v(61.138, 268.000, 96.993));
-	bb = CC3BoxTranslateFractionally(bb, cc3v(0.0f, -0.1f, 0.1f));	// Move it if necessary
-	bb = CC3BoxScale(bb, cc3v(1.0f, 1.1f, 1.0f));					// Size it if necessary
-	CC3NodeBoundingVolume* bv = [CC3NodeSphereThenBoxBoundingVolume boundingVolumeCircumscribingBox: bb];
-	CC3Node* skeleton = [runner getNodeNamed: @"D_CharacterControl"];
-	skeleton.boundingVolume = bv;						// BV is controlled by skeleton root
-	skeleton.shouldUseFixedBoundingVolume = YES;		// Don't want the BV to change
-//	skeleton.shouldDrawBoundingVolume = YES;			// Visualize the BV
-//	[skeleton addAxesDirectionMarkers];					// Indicate the orientation
-	runner.skeletalBoundingVolume = bv;					// All skinned mesh nodes in model should use BV
+//	LogTrace(@"Runner box: %@", NSStringFromCC3Box(runner.boundingBox));	// Extract bounding box
+//	CC3Box bb = CC3BoxFromMinMax(cc3v(-76.982, 18.777, -125.259), cc3v(61.138, 268.000, 96.993));
+//	bb = CC3BoxTranslateFractionally(bb, cc3v(0.0f, -0.1f, 0.1f));	// Move it if necessary
+//	bb = CC3BoxScale(bb, cc3v(1.0f, 1.1f, 1.0f));					// Size it if necessary
+//	CC3NodeBoundingVolume* bv = [CC3NodeSphereThenBoxBoundingVolume boundingVolumeCircumscribingBox: bb];
+//	CC3Node* skeleton = [runner getNodeNamed: @"D_CharacterControl"];
+//	skeleton.boundingVolume = bv;						// BV is controlled by skeleton root
+//	skeleton.shouldUseFixedBoundingVolume = YES;		// Don't want the BV to change
+////	skeleton.shouldDrawBoundingVolume = YES;			// Visualize the BV
+////	[skeleton addAxesDirectionMarkers];					// Indicate the orientation
+//	runner.skeletalBoundingVolume = bv;					// All skinned mesh nodes in model should use BV
 
 	// Run, man, run!
 	// The POD node contains animation to move the skinned character through a running stride.
@@ -2378,12 +2380,22 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	_dragon = [dgnRez getNodeNamed: @"Dragon.pod-SoftBody"];
 	_dragon.touchEnabled = YES;
 	
+	// The bones of the dragon are fairly self-contained, and do not move beyond the sphere
+	// that encompasses the mesh rest pose. Because of this, we can let the dragon skin mesh
+	// node create its own spherical bounding volume. We then use that same bounding volume
+	// for the other skinned mesh nodes within the dragon model (ie- the mouth), by using the
+	// setSkeletalBoundingVolume: method on the entire model.
+	// If you want to see this bounding volume, uncomment the third line below.
+	CC3MeshNode* dgnBody = [_dragon getMeshNodeNamed: @"Dragon"];
+	[dgnBody createBoundingVolume];
+//	dgnBody.shouldDrawBoundingVolume = YES;
+	[_dragon setSkeletalBoundingVolume: dgnBody.boundingVolume];
+
 #if !CC3_GLSL
 	// The fixed pipeline of OpenGL ES 1.1 cannot make use of the tangent-space normal
 	// mapping texture that is applied to the dragon, and the result is that the dragon
 	// looks black. Extract the diffuse texture (from texture unit 1), remove all texture,
 	// and set the diffuse texture as the only texture (in texture unit 0).
-	CC3MeshNode* dgnBody = [_dragon getMeshNodeNamed: @"Dragon"];
 	CC3Material* dgnMat = dgnBody.material;
 	CC3Texture* dgnTex = [dgnMat textureForTextureUnit: 1];
 	[dgnMat removeAllTextures];

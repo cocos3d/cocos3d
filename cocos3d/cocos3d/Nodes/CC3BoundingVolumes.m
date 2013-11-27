@@ -92,8 +92,6 @@
 
 +(id) boundingVolume { return [[self alloc] init]; }
 
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3BoundingVolume*) another {
 	_isDirty = another.isDirty;
 	_shouldIgnoreRayIntersection = another.shouldIgnoreRayIntersection;
@@ -103,16 +101,12 @@
 	GLuint pCnt = self.planeCount;
 	CC3Plane* pArray = self.planes;
 	CC3Plane* otherPlanes = another.planes;
-	for (int i = 0; i < pCnt; i++) {
-		pArray[i] = otherPlanes[i];
-	}
+	for (int i = 0; i < pCnt; i++) pArray[i] = otherPlanes[i];
 	
 	GLuint vCnt = self.vertexCount;
 	CC3Vector* vArray = self.vertices;
 	CC3Vector* otherVertices = another.vertices;
-	for (int i = 0; i < vCnt; i++) {
-		vArray[i] = otherVertices[i];
-	}
+	for (int i = 0; i < vCnt; i++) vArray[i] = otherVertices[i];
 }
 
 -(id) copyWithZone: (NSZone*) zone {
@@ -121,9 +115,7 @@
 	return aCopy;
 }
 
--(NSString*) description {
-	return [NSString stringWithFormat: @"%@", self.class];
-}
+-(NSString*) description { return [NSString stringWithFormat: @"%@", self.class]; }
 
 -(NSString*) fullDescription {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 200];
@@ -136,17 +128,15 @@
 -(void) appendPlanesTo: (NSMutableString*) desc {
 	GLuint pCnt = self.planeCount;
 	CC3Plane* pArray = self.planes;
-	for (GLuint pIdx = 0; pIdx < pCnt; pIdx++) {
+	for (GLuint pIdx = 0; pIdx < pCnt; pIdx++)
 		[desc appendFormat: @"\n\tplane: %@", NSStringFromCC3Plane(pArray[pIdx])];
-	}
 }
 
 -(void) appendVerticesTo: (NSMutableString*) desc {
 	GLuint vCnt = self.vertexCount;
 	CC3Vector* vArray = self.vertices;
-	for (GLuint vIdx = 0; vIdx < vCnt; vIdx++) {
+	for (GLuint vIdx = 0; vIdx < vCnt; vIdx++)
 		[desc appendFormat: @"\n\tvertex: %@", NSStringFromCC3Vector(vArray[vIdx])];
-	}
 }
 
 
@@ -451,6 +441,7 @@
 
 -(void) setShouldBuildFromMesh: (BOOL) shouldBuildFromMesh {
 	_shouldBuildFromMesh = shouldBuildFromMesh && ( (_node == nil) || [_node isKindOfClass: [CC3MeshNode class]]);
+	if (_shouldBuildFromMesh) [self markDirty];
 }
 
 -(CC3Vector*) vertices {
@@ -473,6 +464,7 @@
 -(void) setCenterOfGeometry: (CC3Vector) aLocation {
 	_centerOfGeometry = aLocation;
 	_isDirty = NO;
+	_shouldBuildFromMesh = NO;
 	[self markTransformDirty];
 }
 
@@ -506,6 +498,7 @@
 	// Node property is not copied and must be set externally,
 	// because a node can only have one bounding volume.
 
+	_shouldBuildFromMesh = another.shouldBuildFromMesh;
 	_centerOfGeometry = another.centerOfGeometry;
 	_globalCenterOfGeometry = another.globalCenterOfGeometry;
 	_shouldMaximize = another.shouldMaximize;
@@ -525,6 +518,8 @@
 
 
 #pragma mark Updating
+
+-(void) scaleBy: (GLfloat) scale { _shouldBuildFromMesh = NO; }
 
 -(BOOL) isTransformDirty { return _isTransformDirty; }
 
@@ -674,7 +669,9 @@
 @implementation CC3NodeCenterOfGeometryBoundingVolume
 
 -(void) buildVolume {
-	if (_shouldBuildFromMesh) _centerOfGeometry = self.vertexLocations.centerOfGeometry;
+	if ( !(_node && _shouldBuildFromMesh) ) return;
+	
+	_centerOfGeometry = self.vertexLocations.centerOfGeometry;
 }
 
 #pragma mark Intersection testing
@@ -746,7 +743,7 @@
  * and the sphere that previously encompassed all the vertices, otherwise, uses the new sphere.
  */
 -(void) buildVolume {
-	if ( !_shouldBuildFromMesh ) return;
+	if ( !(_node && _shouldBuildFromMesh) ) return;
 	
 	CC3VertexLocations* vtxLocs = self.vertexLocations;
 	CC3Vector newCOG = vtxLocs.centerOfGeometry;
@@ -771,6 +768,7 @@
 -(void) setRadius: (GLfloat) aRadius {
 	_radius = aRadius;
 	_isDirty = NO;
+	_shouldBuildFromMesh = NO;
 	[self markTransformDirty];
 }
 
@@ -779,12 +777,15 @@
 	return _globalRadius;
 }
 
+-(void) scaleBy: (GLfloat) scale {
+	self.radius = self.radius * scale;
+	[super scaleBy: scale];
+}
+
 -(CC3Sphere) sphere { return CC3SphereMake(self.centerOfGeometry, self.radius); }
 
 -(CC3Sphere) globalSphere { return CC3SphereMake(self.globalCenterOfGeometry, self.globalRadius); }
 
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3NodeSphericalBoundingVolume*) another {
 	[super populateFrom: another];
 
@@ -921,7 +922,7 @@
  * uses the new bounding box.
  */
 -(void) buildVolume {
-	if ( !_shouldBuildFromMesh ) return;
+	if ( !(_node && _shouldBuildFromMesh) ) return;
 
 	CC3Box newBB = ((CC3MeshNode*)self.node).localContentBoundingBox;	// Includes possible padding
 	_boundingBox = _shouldMaximize ? CC3BoxUnion(newBB, _boundingBox) : newBB;
@@ -936,7 +937,13 @@
 -(void) setBoundingBox: (CC3Box) aBoundingBox {
 	_boundingBox = aBoundingBox;
 	_isDirty = NO;
+	_shouldBuildFromMesh = NO;
 	[self markTransformDirty];
+}
+
+-(void) scaleBy: (GLfloat) scale {
+	self.boundingBox = CC3BoxScaleUniform(self.boundingBox, scale);
+	[super scaleBy: scale];
 }
 
 -(CC3Plane*) planes {
@@ -1103,6 +1110,11 @@
 -(void) setCenterOfGeometry: (CC3Vector) aLocation {
 	[super setCenterOfGeometry: aLocation];
 	for (CC3NodeBoundingVolume* bv in _boundingVolumes) bv.centerOfGeometry = aLocation;
+}
+
+-(void) scaleBy: (GLfloat) scale {
+	for (CC3NodeBoundingVolume* bv in _boundingVolumes) [bv scaleBy: scale];
+	[super scaleBy: scale];
 }
 
 -(id) init {
