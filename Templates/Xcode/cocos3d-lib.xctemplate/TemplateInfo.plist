@@ -1649,6 +1649,30 @@
 			<key>Path</key>
 			<string>cocos3d/cocos3d/Nodes/CC3Light.m</string>
 		</dict>
+		<key>cocos3d/cocos3d/Nodes/CC3LocalContentNode.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Nodes</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Nodes/CC3LocalContentNode.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cocos3d/Nodes/CC3LocalContentNode.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Nodes</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Nodes/CC3LocalContentNode.m</string>
+		</dict>
 		<key>cocos3d/cocos3d/Nodes/CC3MeshNode.h</key>
 		<dict>
 			<key>Group</key>
@@ -1696,6 +1720,30 @@
 			</array>
 			<key>Path</key>
 			<string>cocos3d/cocos3d/Nodes/CC3Node.m</string>
+		</dict>
+		<key>cocos3d/cocos3d/Nodes/CC3NodeListeners.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Nodes</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Nodes/CC3NodeListeners.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cocos3d/Nodes/CC3NodeListeners.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Nodes</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Nodes/CC3NodeListeners.m</string>
 		</dict>
 		<key>cocos3d/cocos3d/Nodes/CC3NodeVisitor.h</key>
 		<dict>
@@ -3529,10 +3577,14 @@
 		<string>cocos3d/cocos3d/Nodes/CC3Camera.m</string>
 		<string>cocos3d/cocos3d/Nodes/CC3Light.h</string>
 		<string>cocos3d/cocos3d/Nodes/CC3Light.m</string>
+		<string>cocos3d/cocos3d/Nodes/CC3LocalContentNode.h</string>
+		<string>cocos3d/cocos3d/Nodes/CC3LocalContentNode.m</string>
 		<string>cocos3d/cocos3d/Nodes/CC3MeshNode.h</string>
 		<string>cocos3d/cocos3d/Nodes/CC3MeshNode.m</string>
 		<string>cocos3d/cocos3d/Nodes/CC3Node.h</string>
 		<string>cocos3d/cocos3d/Nodes/CC3Node.m</string>
+		<string>cocos3d/cocos3d/Nodes/CC3NodeListeners.h</string>
+		<string>cocos3d/cocos3d/Nodes/CC3NodeListeners.m</string>
 		<string>cocos3d/cocos3d/Nodes/CC3NodeVisitor.h</string>
 		<string>cocos3d/cocos3d/Nodes/CC3NodeVisitor.m</string>
 		<string>cocos3d/cocos3d/Nodes/CC3ParametricMeshNodes.h</string>

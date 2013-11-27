@@ -29,7 +29,7 @@
 
 /** @file */	// Doxygen marker
 
-#import "CC3Node.h"
+#import "CC3LocalContentNode.h"
 #import "CC3Mesh.h"
 #import "CC3Material.h"
 

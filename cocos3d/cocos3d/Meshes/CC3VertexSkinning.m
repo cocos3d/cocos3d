@@ -308,7 +308,7 @@
 }
 
 +(id) skinSectionForNode: (CC3SkinMeshNode*) aNode {
-	return [[self alloc] initForNode: aNode];
+	return [((CC3SkinSection*)[self alloc]) initForNode: aNode];
 }
 
 // Extract the old bones into an array, and for each, look for the
@@ -335,7 +335,7 @@
 -(id) copyForNode: (CC3SkinMeshNode*) aNode { return [self copyForNode: aNode withZone: nil]; }
 
 -(id) copyForNode: (CC3SkinMeshNode*) aNode withZone: (NSZone*) zone {
-	CC3SkinSection* aCopy = [[[self class] allocWithZone: zone] initForNode: aNode];
+	CC3SkinSection* aCopy = [((CC3SkinSection*)[[self class] allocWithZone: zone]) initForNode: aNode];
 	[aCopy populateFrom: self];
 	return aCopy;
 }
