@@ -67,10 +67,8 @@ precision mediump float;
 
 //-------------- UNIFORMS ----------------------
 
-uniform mat4		u_cc3MatrixViewInv;				/**< Inverse of camera view matrix. */
-uniform highp mat4	u_cc3MatrixModelView;			/**< Current modelview matrix. */
-uniform mat3		u_cc3MatrixModelViewInvTran;	/**< Inverse-transpose of current modelview rotation matrix. */
-uniform highp mat4	u_cc3MatrixProj;				/**< Projection matrix. */
+uniform highp mat4	u_cc3MatrixModel;				/**< Current model-to-world matrix. */
+uniform highp mat4	u_cc3MatrixModelViewProj;		/**< Current model-view-projection matrix. */
 
 uniform lowp vec4	u_cc3Color;						/**< Color when lighting & materials are not in use. */
 uniform lowp vec4	u_cc3MaterialAmbientColor;		/**< Ambient color of the material. */
@@ -79,22 +77,24 @@ uniform lowp vec4	u_cc3MaterialSpecularColor;		/**< Specular color of the materi
 uniform lowp vec4	u_cc3MaterialEmissionColor;		/**< Emission color of the material. */
 uniform float		u_cc3MaterialShininess;			/**< Shininess of the material. */
 
+uniform highp vec3	u_cc3CameraPositionModel;		/**< Location of the camera in local coordinates of model (not camera). */
+
 uniform bool		u_cc3LightIsUsingLighting;						/**< Indicates whether any lighting is enabled */
 uniform lowp vec4	u_cc3LightSceneAmbientLightColor;				/**< Ambient light color of the scene. */
 uniform bool		u_cc3LightIsLightEnabled[MAX_LIGHTS];			/**< Indicates whether each light is enabled. */
-uniform vec4		u_cc3LightPositionEyeSpace[MAX_LIGHTS];			/**< Position or normalized direction in eye space of each light. */
-uniform vec4		u_cc3LightPositionModel[MAX_LIGHTS];			/**< Position or normalized direction in the local coords of the model of each light. */
+uniform highp vec4	u_cc3LightPositionModel[MAX_LIGHTS];			/**< Position or normalized direction in the local coords of the model of each light. */
 uniform lowp vec4	u_cc3LightAmbientColor[MAX_LIGHTS];				/**< Ambient color of each light. */
 uniform lowp vec4	u_cc3LightDiffuseColor[MAX_LIGHTS];				/**< Diffuse color of each light. */
 uniform lowp vec4	u_cc3LightSpecularColor[MAX_LIGHTS];			/**< Specular color of each light. */
 uniform vec3		u_cc3LightAttenuation[MAX_LIGHTS];				/**< Coefficients of the attenuation equation of each light. */
-uniform vec3		u_cc3LightSpotDirectionEyeSpace[MAX_LIGHTS];	/**< Direction of spotlight in eye space of each light. */
+uniform highp vec3	u_cc3LightSpotDirectionModel[MAX_LIGHTS];		/**< Direction of each spotlight in local coordinates of the model (not light). */
+//uniform highp vec3	u_cc3LightSpotDirectionEyeSpace[MAX_LIGHTS];	/**< Direction of spotlight in eye space of each light. */
 uniform float		u_cc3LightSpotExponent[MAX_LIGHTS];				/**< Directional attenuation factor, if spotlight, of each light. */
 uniform float		u_cc3LightSpotCutoffAngleCosine[MAX_LIGHTS];	/**< Cosine of spotlight cutoff angle of each light. */
 
-uniform lowp int	u_cc3BonesPerVertex;									/**< Number of bones influencing each vertex. */
-uniform highp mat4	u_cc3BoneMatricesEyeSpace[MAX_BONES_PER_BATCH];			/**< Array of bone matrices in the current mesh skin section in eye space. */
-uniform mat3		u_cc3BoneMatricesInvTranEyeSpace[MAX_BONES_PER_BATCH];	/**< Array of inverse-transposes of the bone matrices in the current mesh skin section in eye space. */
+uniform lowp int	u_cc3BonesPerVertex;								/**< Number of bones influencing each vertex. */
+uniform highp mat4	u_cc3BoneMatricesModel[MAX_BONES_PER_BATCH];		/**< Array of bone matrices in the current mesh skin section in model space. */
+uniform mat3		u_cc3BoneMatricesInvTranModel[MAX_BONES_PER_BATCH];	/**< Array of inverse-transposes of the bone matrices in the current mesh skin section in model space. */
 
 uniform bool		u_cc3VertexHasTangent;				/**< Whether the vertex tangent is available. */
 uniform bool		u_cc3VertexHasColor;				/**< Whether the vertex color is available. */
@@ -130,48 +130,41 @@ const vec3 kAttenuationNone = vec3(1.0, 0.0, 0.0);
 const vec3 kHalfPlaneOffset = vec3(0.0, 0.0, 1.0);
 
 //-------------- LOCAL VARIABLES ----------------------
-highp vec4	vtxPosEye;			/**< The vertex position in eye coordinates. High prec to match vertex attribute. */
-vec3		vtxNormEye;			/**< The vertex normal in eye coordinates. */
+highp vec4	vtxPos;				/**< The vertex position. High prec to match vertex attribute. */
+vec3		vtxNorm;			/**< The vertex normal. */
 lowp vec4	matColorAmbient;	/**< Ambient color of material...from either material or vertex colors. */
 lowp vec4	matColorDiffuse;	/**< Diffuse color of material...from either material or vertex colors. */
 
 //-------------- FUNCTIONS ----------------------
 
-/** 
- * Transforms the vertex position and normal to eye space. Sets the vtxPosEye and vtxNormEye
- * variables. This function takes into consideration vertex skinning, if it is specified.
- */
-void vertexToEyeSpace() {
+/** If this model has bones, transforms the vertex position and normal with the bones. */
+void skinVertex() {
 	if (u_cc3BonesPerVertex == 0) {		// No vertex skinning
-
-		vtxPosEye = u_cc3MatrixModelView * a_cc3Position;
-		vtxNormEye = u_cc3MatrixModelViewInvTran * a_cc3Normal;
-
+		vtxPos = a_cc3Position;
+		vtxNorm = a_cc3Normal;
 	} else {			// Mesh is bone-rigged for vertex skinning
-
 		// Copies of the indices and weights attibutes so they can be swizzled.
 		mediump ivec4 boneIndices = ivec4(a_cc3BoneIndices);
 		mediump vec4 boneWeights = a_cc3BoneWeights;
 
-		vtxPosEye = kVec4Zero;					// Start at zero to accumulate weighted values
-		vtxNormEye = kVec3Zero;
+		vtxPos = kVec4Zero;					// Start at zero to accumulate weighted values
+		vtxNorm = kVec3Zero;
 		for (lowp int i = 0; i < 4; ++i) {		// Max 4 bones per vertex
 			if (i < u_cc3BonesPerVertex) {
 				// Add position and normal contribution from this bone
-				vtxPosEye += u_cc3BoneMatricesEyeSpace[boneIndices.x] * a_cc3Position * boneWeights.x;
-				vtxNormEye += u_cc3BoneMatricesInvTranEyeSpace[boneIndices.x] * a_cc3Normal * boneWeights.x;
+				vtxPos += u_cc3BoneMatricesModel[boneIndices.x] * a_cc3Position * boneWeights.x;
+				vtxNorm += u_cc3BoneMatricesInvTranModel[boneIndices.x] * a_cc3Normal * boneWeights.x;
 				
 				// Swizzle the vector components to the next vertex bone index
 				boneIndices = boneIndices.yzwx;
 				boneWeights = boneWeights.yzwx;
 			}
 		}
+		if (u_cc3VertexShouldNormalizeNormal)
+			vtxNorm = normalize(vtxNorm);
+		else if (u_cc3VertexShouldRescaleNormal)
+			vtxNorm = normalize(vtxNorm);	// TODO - rescale without having to normalize
 	}
-
-	if (u_cc3VertexShouldNormalizeNormal)
-		vtxNormEye = normalize(vtxNormEye);
-	else if (u_cc3VertexShouldRescaleNormal)
-		vtxNormEye = normalize(vtxNormEye);	// TODO - rescale without having to normalize
 }
 
 /**
@@ -184,13 +177,13 @@ void vertexToEyeSpace() {
 highp vec4 illuminationFrom(int ltIdx) {
 
 	// Position vector from light. Use high precision for accuracy.
-	highp vec3 ltPos = u_cc3LightPositionEyeSpace[ltIdx].xyz;
+	highp vec3 ltPos = u_cc3LightPositionModel[ltIdx].xyz;
 
 	// Directional light. Position is expected to be a normalized direction!
-	if (u_cc3LightPositionEyeSpace[ltIdx].w == 0.0) return highp vec4(ltPos, 1.0);
+	if (u_cc3LightPositionModel[ltIdx].w == 0.0) return highp vec4(ltPos, 1.0);
 	
 	// Positional light. Find the directional vector from vertex to light, but don't normalize yet.
-	ltPos -= vtxPosEye.xyz;
+	ltPos -= vtxPos.xyz;
 	highp float intensity = 1.0;
 	
 	// Calculate intensity due to distance attenuation (must be performed in high precision)
@@ -206,11 +199,12 @@ highp vec4 illuminationFrom(int ltIdx) {
 	// Determine intensity due to spotlight component
 	highp float spotCutoffCos = u_cc3LightSpotCutoffAngleCosine[ltIdx];
 	if (spotCutoffCos >= 0.0) {
-		highp vec3 spotDirEye = u_cc3LightSpotDirectionEyeSpace[ltIdx];
-		highp float cosEyeDir = -dot(ltPos, spotDirEye);
-		if (cosEyeDir >= spotCutoffCos){
+		highp vec3 spotDir = u_cc3LightSpotDirectionModel[ltIdx];
+//		highp vec3 spotDirEye = u_cc3LightSpotDirectionEyeSpace[ltIdx];
+		highp float cosDir = -dot(ltPos, spotDir);
+		if (cosDir >= spotCutoffCos){
 			highp float spotExp = u_cc3LightSpotExponent[ltIdx];
-			intensity *= pow(cosEyeDir, spotExp);
+			intensity *= pow(cosDir, spotExp);
 		} else {
 			intensity = 0.0;
 		}
@@ -254,8 +248,8 @@ void illuminateVertex() {
 	for (int ltIdx = 0; ltIdx < MAX_LIGHTS; ltIdx++) {
 		if (u_cc3LightIsLightEnabled[ltIdx]) {
 			highp vec4 illum = illuminationFrom(ltIdx);
-			if (u_cc3VertexShouldDrawFrontFaces) v_color += illuminateWith(illum, ltIdx, vtxNormEye);
-			if (u_cc3VertexShouldDrawBackFaces) v_colorBack += illuminateWith(illum, ltIdx, -vtxNormEye);
+			if (u_cc3VertexShouldDrawFrontFaces) v_color += illuminateWith(illum, ltIdx, vtxNorm);
+			if (u_cc3VertexShouldDrawBackFaces) v_colorBack += illuminateWith(illum, ltIdx, -vtxNorm);
 		}
 	}
 }
@@ -271,7 +265,7 @@ vec3 bumpMapDirectionForLight(int ltIdx) {
 	// Get the light direction in model space. If the light is positional
 	// calculate the normalized direction from the light and vertex positions.
 	vec3 ltDir = u_cc3LightPositionModel[ltIdx].xyz;
-	if (u_cc3LightPositionModel[ltIdx].w != 0.0) ltDir = normalize(ltDir - a_cc3Position.xyz);
+	if (u_cc3LightPositionModel[ltIdx].w != 0.0) ltDir = normalize(ltDir - vtxPos.xyz);
 	
 	// Create a matrix that transforms from model space to tangent space, and transform light direction.
 	vec3 bitangent = cross(a_cc3Normal, a_cc3Tangent);
@@ -281,17 +275,24 @@ vec3 bumpMapDirectionForLight(int ltIdx) {
 	return ltDir;
 }
 
+/** 
+ * For environmental mapping reflection effect, reflects the camera direction into a global-coordinate
+ * reflection vector, v_reflectDirGlobal that can be used in a cube-map texture sampler.
+ */
+void reflectVertex() {
+	vec3 camDir = vtxPos.xyz - u_cc3CameraPositionModel;
+	v_reflectDirGlobal = (u_cc3MatrixModel * vec4(reflect(camDir, vtxNorm), 0.0)).xyz;
+}
+
+
 //-------------- ENTRY POINT ----------------------
 void main() {
 
-	// Transform vertex position and normal to eye space, in vtxPosEye and vtxNormEye, respectively.
-	vertexToEyeSpace();
+	skinVertex();	// If model has bones, transform vertex position & normal into vtxPos & vtxNorm, respectively
 	
-	// Distance from vertex to eye. Used for fog effect.
-	v_distEye = length(vtxPosEye.xyz);
-	
-	// Environmental mapping reflection vector, transformed to global coordinates
-	v_reflectDirGlobal = (u_cc3MatrixViewInv * vec4(reflect(vtxPosEye.xyz, vtxNormEye), 0.0)).xyz;
+	v_distEye = length(vtxPos.xyz);	// Distance from vertex to eye. Used for fog effect.
+
+	reflectVertex();	// Populate v_reflectDirGlobal for reflective environmental mapping
 	
 	// Determine the color of the vertex by applying material & lighting, or using a pure color
 	if (u_cc3LightIsUsingLighting) {
@@ -324,6 +325,6 @@ void main() {
 //	v_texCoord[2] = a_cc3TexCoord2;		// Uncomment if MAX_TEXTURES increased
 //	v_texCoord[3] = a_cc3TexCoord3;		// Uncomment if MAX_TEXTURES increased
 	
-	gl_Position = u_cc3MatrixProj * vtxPosEye;
+	gl_Position = u_cc3MatrixModelViewProj * vtxPos;
 }
 

@@ -596,9 +596,17 @@
 
 		// Draw the scene to the texture face
 		[scene drawSceneContentForEnvironmentMapWithVisitor: envMapVisitor];
+
+//		[self paintFace];		// Uncomment to identify the faces
 	}
 }
 
+/** 
+ * Paints the entire face a solid color. Each face will have a ditinct color,
+ * as determined by the faceColor method.
+ *
+ * This can be useful during testing to diagnose which face is which.
+ */
 -(void) paintFace {
 	CC3IntSize faceSize = _renderSurface.size;
 	GLuint pixCnt = faceSize.width * faceSize.height;
@@ -609,20 +617,21 @@
 						   withContent: canvas];
 }
 
+/** Returns the color to paint the current face, using the diagnostic paintFace method. */
 -(ccColor4B) faceColor {
 	switch (_currentFace) {
 		case GL_TEXTURE_CUBE_MAP_POSITIVE_X:
 			return CCC4BFromCCC4F(kCCC4FRed);
 		case GL_TEXTURE_CUBE_MAP_NEGATIVE_X:
-			return CCC4BFromCCC4F(kCCC4FRed);
+			return CCC4BFromCCC4F(kCCC4FCyan);
 		case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
 			return CCC4BFromCCC4F(kCCC4FGreen);
 		case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y:
-			return CCC4BFromCCC4F(kCCC4FGreen);
+			return CCC4BFromCCC4F(kCCC4FMagenta);
 		case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
 			return CCC4BFromCCC4F(kCCC4FBlue);
 		case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
-			return CCC4BFromCCC4F(kCCC4FBlue);
+			return CCC4BFromCCC4F(kCCC4FYellow);
 		default:
 			break;
 	}

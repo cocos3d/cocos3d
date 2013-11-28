@@ -432,10 +432,14 @@
 -(void) drawVerticesOfMesh: (CC3Mesh*) mesh withVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /**
- * Returns the matrix used to transform the bone at the specified index within this skin
- * section into global coordinates.
+ * Returns the transform matrix used by the bone at the specified index to influence the 
+ * vertices of the mesh in this skin section. 
+ *
+ * The returned matrix transforms the vertices within the coordinate system of the skin mesh node.
+ *
+ * See the notes of the transformMatrix property of the CC3SkinnedBone class for more details.
  */
--(CC3Matrix*) getDrawTransformMatrixForBoneAt: (GLuint) boneIdx;
+-(CC3Matrix*) transformMatrixForBoneAt: (GLuint) boneIdx;
 
 @end
 
@@ -522,7 +526,7 @@
 @property(nonatomic, unsafe_unretained, readonly) CC3SkinMeshNode* skinNode;
 
 /**
- * Returns the transform matrix used to draw the deformed nodes during mesh rendering.
+ * Returns the transform matrix used to draw the deformed vertices during mesh rendering.
  * This transform matrix combines the transform of the bone, the rest pose of the bone,
  * and the rest pose of the skin mesh node.
  *

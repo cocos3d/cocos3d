@@ -96,9 +96,9 @@ typedef enum {
 	kCC3SemanticViewMatrixInv,					/**< (mat4) Inverse of camera view matrix. */
 	kCC3SemanticViewMatrixInvTran,				/**< (mat3) Inverse-transpose of camera view matrix. */
 
-	kCC3SemanticModelViewMatrix,				/**< (mat4) Current modelview matrix. */
-	kCC3SemanticModelViewMatrixInv,				/**< (mat4) Inverse of current modelview matrix. */
-	kCC3SemanticModelViewMatrixInvTran,			/**< (mat3) Inverse-transpose of current modelview matrix. */
+	kCC3SemanticModelViewMatrix,				/**< (mat4) Current model-view matrix. */
+	kCC3SemanticModelViewMatrixInv,				/**< (mat4) Inverse of current model-view matrix. */
+	kCC3SemanticModelViewMatrixInvTran,			/**< (mat3) Inverse-transpose of current model-view matrix. */
 
 	kCC3SemanticProjMatrix,						/**< (mat4) Camera projection matrix. */
 	kCC3SemanticProjMatrixInv,					/**< (mat4) Inverse of camera projection matrix. */
@@ -108,9 +108,9 @@ typedef enum {
 	kCC3SemanticViewProjMatrixInv,				/**< (mat4) Inverse of camera view and projection matrix. */
 	kCC3SemanticViewProjMatrixInvTran,			/**< (mat3) Inverse-transpose of camera view and projection matrix. */
 
-	kCC3SemanticModelViewProjMatrix,			/**< (mat4) Current modelview-projection matrix. */
-	kCC3SemanticModelViewProjMatrixInv,			/**< (mat4) Inverse of current modelview-projection matrix. */
-	kCC3SemanticModelViewProjMatrixInvTran,		/**< (mat3) Inverse-transpose of current modelview-projection matrix. */
+	kCC3SemanticModelViewProjMatrix,			/**< (mat4) Current model-view-projection matrix. */
+	kCC3SemanticModelViewProjMatrixInv,			/**< (mat4) Inverse of current model-view-projection matrix. */
+	kCC3SemanticModelViewProjMatrixInvTran,		/**< (mat3) Inverse-transpose of current model-view-projection matrix. */
 	
 	// BONE SKINNING ----------------
 	kCC3SemanticBonesPerVertex,					/**< (int) Number of bones influencing each vertex (ie- number of weights/matrices specified on each vertex) */

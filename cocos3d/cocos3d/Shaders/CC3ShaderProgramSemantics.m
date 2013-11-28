@@ -1216,9 +1216,9 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVarName: @"u_cc3MatrixViewInv" toSemantic: kCC3SemanticViewMatrixInv];								/**< (mat4) Inverse of camera view matrix. */
 	[self mapVarName: @"u_cc3MatrixViewInvTran" toSemantic: kCC3SemanticViewMatrixInvTran];						/**< (mat3) Inverse-transpose of camera view matrix. */
 	
-	[self mapVarName: @"u_cc3MatrixModelView" toSemantic: kCC3SemanticModelViewMatrix];							/**< (mat4) Current modelview matrix. */
-	[self mapVarName: @"u_cc3MatrixModelViewInv" toSemantic: kCC3SemanticModelViewMatrixInv];					/**< (mat4) Inverse of current modelview matrix. */
-	[self mapVarName: @"u_cc3MatrixModelViewInvTran" toSemantic: kCC3SemanticModelViewMatrixInvTran];			/**< (mat3) Inverse-transpose of current modelview matrix. */
+	[self mapVarName: @"u_cc3MatrixModelView" toSemantic: kCC3SemanticModelViewMatrix];							/**< (mat4) Current model-view matrix. */
+	[self mapVarName: @"u_cc3MatrixModelViewInv" toSemantic: kCC3SemanticModelViewMatrixInv];					/**< (mat4) Inverse of current model-view matrix. */
+	[self mapVarName: @"u_cc3MatrixModelViewInvTran" toSemantic: kCC3SemanticModelViewMatrixInvTran];			/**< (mat3) Inverse-transpose of current model-view matrix. */
 	
 	[self mapVarName: @"u_cc3MatrixProj" toSemantic: kCC3SemanticProjMatrix];									/**< (mat4) Camera projection matrix. */
 	[self mapVarName: @"u_cc3MatrixProjInv" toSemantic: kCC3SemanticProjMatrixInv];								/**< (mat4) Inverse of camera projection matrix. */
@@ -1228,9 +1228,9 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVarName: @"u_cc3MatrixViewProjInv" toSemantic: kCC3SemanticViewProjMatrixInv];						/**< (mat4) Inverse of camera view and projection matrix. */
 	[self mapVarName: @"u_cc3MatrixViewProjInvTran" toSemantic: kCC3SemanticViewProjMatrixInvTran];				/**< (mat3) Inverse-transpose of camera view and projection matrix. */
 	
-	[self mapVarName: @"u_cc3MatrixModelViewProj" toSemantic: kCC3SemanticModelViewProjMatrix];					/**< (mat4) Current modelview-projection matrix. */
-	[self mapVarName: @"u_cc3MatrixModelViewProjInv" toSemantic: kCC3SemanticModelViewProjMatrixInv];			/**< (mat4) Inverse of current modelview-projection matrix. */
-	[self mapVarName: @"u_cc3MatrixModelViewProjInvTran" toSemantic: kCC3SemanticModelViewProjMatrixInvTran];	/**< (mat3) Inverse-transpose of current modelview-projection matrix. */
+	[self mapVarName: @"u_cc3MatrixModelViewProj" toSemantic: kCC3SemanticModelViewProjMatrix];					/**< (mat4) Current model-view-projection matrix. */
+	[self mapVarName: @"u_cc3MatrixModelViewProjInv" toSemantic: kCC3SemanticModelViewProjMatrixInv];			/**< (mat4) Inverse of current model-view-projection matrix. */
+	[self mapVarName: @"u_cc3MatrixModelViewProjInvTran" toSemantic: kCC3SemanticModelViewProjMatrixInvTran];	/**< (mat3) Inverse-transpose of current model-view-projection matrix. */
 	
 	// BONE SKINNING ----------------
 	[self mapVarName: @"u_cc3BonesPerVertex" toSemantic: kCC3SemanticBonesPerVertex];							/**< (int) Number of bones influencing each vertex (ie- number of weights/matrices specified on each vertex) */
@@ -1410,9 +1410,9 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVarName: @"u_cc3Matrices.viewInv" toSemantic: kCC3SemanticViewMatrixInv];							/**< (mat4) Inverse of camera view matrix. */
 	[self mapVarName: @"u_cc3Matrices.viewInvTran" toSemantic: kCC3SemanticViewMatrixInvTran];					/**< (mat3) Inverse-transpose of camera view matrix. */
 	
-	[self mapVarName: @"u_cc3Matrices.modelView" toSemantic: kCC3SemanticModelViewMatrix];						/**< (mat4) Current modelview matrix. */
-	[self mapVarName: @"u_cc3Matrices.modelViewInv" toSemantic: kCC3SemanticModelViewMatrixInv];				/**< (mat4) Inverse of current modelview matrix. */
-	[self mapVarName: @"u_cc3Matrices.modelViewInvTran" toSemantic: kCC3SemanticModelViewMatrixInvTran];		/**< (mat3) Inverse-transpose of current modelview matrix. */
+	[self mapVarName: @"u_cc3Matrices.modelView" toSemantic: kCC3SemanticModelViewMatrix];						/**< (mat4) Current model-view matrix. */
+	[self mapVarName: @"u_cc3Matrices.modelViewInv" toSemantic: kCC3SemanticModelViewMatrixInv];				/**< (mat4) Inverse of current model-view matrix. */
+	[self mapVarName: @"u_cc3Matrices.modelViewInvTran" toSemantic: kCC3SemanticModelViewMatrixInvTran];		/**< (mat3) Inverse-transpose of current model-view matrix. */
 	
 	[self mapVarName: @"u_cc3Matrices.proj" toSemantic: kCC3SemanticProjMatrix];								/**< (mat4) Camera projection matrix. */
 	[self mapVarName: @"u_cc3Matrices.projInv" toSemantic: kCC3SemanticProjMatrixInv];							/**< (mat4) Inverse of camera projection matrix. */
@@ -1422,9 +1422,9 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVarName: @"u_cc3Matrices.viewProjInv" toSemantic: kCC3SemanticViewProjMatrixInv];					/**< (mat4) Inverse of camera view and projection matrix. */
 	[self mapVarName: @"u_cc3Matrices.viewProjInvTran" toSemantic: kCC3SemanticViewProjMatrixInvTran];			/**< (mat3) Inverse-transpose of camera view and projection matrix. */
 	
-	[self mapVarName: @"u_cc3Matrices.modelViewProj" toSemantic: kCC3SemanticModelViewProjMatrix];				/**< (mat4) Current modelview-projection matrix. */
-	[self mapVarName: @"u_cc3Matrices.modelViewProjInv" toSemantic: kCC3SemanticModelViewProjMatrixInv];		/**< (mat4) Inverse of current modelview-projection matrix. */
-	[self mapVarName: @"u_cc3Matrices.modelViewProjInvTran" toSemantic: kCC3SemanticModelViewProjMatrixInvTran];/**< (mat3) Inverse-transpose of current modelview-projection matrix. */
+	[self mapVarName: @"u_cc3Matrices.modelViewProj" toSemantic: kCC3SemanticModelViewProjMatrix];				/**< (mat4) Current model-view-projection matrix. */
+	[self mapVarName: @"u_cc3Matrices.modelViewProjInv" toSemantic: kCC3SemanticModelViewProjMatrixInv];		/**< (mat4) Inverse of current model-view-projection matrix. */
+	[self mapVarName: @"u_cc3Matrices.modelViewProjInvTran" toSemantic: kCC3SemanticModelViewProjMatrixInvTran];/**< (mat3) Inverse-transpose of current model-view-projection matrix. */
 	
 	// SKINNING ----------------
 	[self mapVarName: @"u_cc3Bones.bonesPerVertex" toSemantic: kCC3SemanticBonesPerVertex];							/**< (int) Number of bones influencing each vertex (ie- number of weights/matrices specified on each vertex) */
@@ -1573,9 +1573,9 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVarName: @"u_cc3MtxViewInv" toSemantic: kCC3SemanticViewMatrixInv];						/**< (mat4) Inverse of camera view matrix. */
 	[self mapVarName: @"u_cc3MtxViewInvTran" toSemantic: kCC3SemanticViewMatrixInvTran];				/**< (mat3) Inverse-transpose of camera view matrix. */
 	
-	[self mapVarName: @"u_cc3MtxModelView" toSemantic: kCC3SemanticModelViewMatrix];					/**< (mat4) Current modelview matrix. */
-	[self mapVarName: @"u_cc3MtxModelViewInv" toSemantic: kCC3SemanticModelViewMatrixInv];				/**< (mat4) Inverse of current modelview matrix. */
-	[self mapVarName: @"u_cc3MtxModelViewInvTran" toSemantic: kCC3SemanticModelViewMatrixInvTran];		/**< (mat3) Inverse-transpose of current modelview matrix. */
+	[self mapVarName: @"u_cc3MtxModelView" toSemantic: kCC3SemanticModelViewMatrix];					/**< (mat4) Current model-view matrix. */
+	[self mapVarName: @"u_cc3MtxModelViewInv" toSemantic: kCC3SemanticModelViewMatrixInv];				/**< (mat4) Inverse of current model-view matrix. */
+	[self mapVarName: @"u_cc3MtxModelViewInvTran" toSemantic: kCC3SemanticModelViewMatrixInvTran];		/**< (mat3) Inverse-transpose of current model-view matrix. */
 	
 	[self mapVarName: @"u_cc3MtxProj" toSemantic: kCC3SemanticProjMatrix];								/**< (mat4) Camera projection matrix. */
 	[self mapVarName: @"u_cc3MtxProjInv" toSemantic: kCC3SemanticProjMatrixInv];						/**< (mat4) Inverse of camera projection matrix. */
@@ -1585,9 +1585,9 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVarName: @"u_cc3MtxViewProjInv" toSemantic: kCC3SemanticViewProjMatrixInv];				/**< (mat4) Inverse of camera view and projection matrix. */
 	[self mapVarName: @"u_cc3MtxViewProjInvTran" toSemantic: kCC3SemanticViewProjMatrixInvTran];		/**< (mat3) Inverse-transpose of camera view and projection matrix. */
 	
-	[self mapVarName: @"u_cc3MtxModelViewProj" toSemantic: kCC3SemanticModelViewProjMatrix];			/**< (mat4) Current modelview-projection matrix. */
-	[self mapVarName: @"u_cc3MtxModelViewProjInv" toSemantic: kCC3SemanticModelViewProjMatrixInv];		/**< (mat4) Inverse of current modelview-projection matrix. */
-	[self mapVarName: @"u_cc3MtxModelViewProjInvTran" toSemantic: kCC3SemanticModelViewProjMatrixInvTran];	/**< (mat3) Inverse-transpose of current modelview-projection matrix. */
+	[self mapVarName: @"u_cc3MtxModelViewProj" toSemantic: kCC3SemanticModelViewProjMatrix];			/**< (mat4) Current model-view-projection matrix. */
+	[self mapVarName: @"u_cc3MtxModelViewProjInv" toSemantic: kCC3SemanticModelViewProjMatrixInv];		/**< (mat4) Inverse of current model-view-projection matrix. */
+	[self mapVarName: @"u_cc3MtxModelViewProjInvTran" toSemantic: kCC3SemanticModelViewProjMatrixInvTran];	/**< (mat3) Inverse-transpose of current model-view-projection matrix. */
 	
 	// CAMERA -----------------
 	[self mapVarName: @"u_cc3Camera.positionGlobal" toSemantic: kCC3SemanticCameraLocationGlobal];		/**< (vec3) Location of the camera in global coordinates. */

@@ -371,7 +371,7 @@
 	[mesh drawVerticesFrom: _vertexStart forCount: _vertexCount withVisitor: visitor];
 }
 
--(CC3Matrix*) getDrawTransformMatrixForBoneAt: (GLuint) boneIdx {
+-(CC3Matrix*) transformMatrixForBoneAt: (GLuint) boneIdx {
 	return ((CC3SkinnedBone*)[_skinnedBones objectAtIndex: boneIdx]).transformMatrix;
 }
 

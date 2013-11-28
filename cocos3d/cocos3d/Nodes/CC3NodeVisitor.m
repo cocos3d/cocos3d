@@ -641,7 +641,7 @@
 	GLuint boneCnt = skin.boneCount;
 	[boneMatrices ensureElementCapacity: boneCnt];
 	for (GLuint boneIdx = 0; boneIdx < boneCnt; boneIdx++) {
-		CC3Matrix* boneMtx = [skin getDrawTransformMatrixForBoneAt: boneIdx];
+		CC3Matrix* boneMtx = [skin transformMatrixForBoneAt: boneIdx];
 		CC3Matrix4x3* pBoneSpaceMtx = [boneMatrices elementAt: boneIdx];
 		if (spaceMatrix) {
 			// Use the space matrix to transform the bone matrix.
