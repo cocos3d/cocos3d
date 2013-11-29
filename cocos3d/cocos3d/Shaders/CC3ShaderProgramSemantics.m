@@ -664,10 +664,10 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			CC3Camera* cam = visitor.camera;
 			GLfloat fovWidth, fovHeight;
 			if (aspect >= 1.0f) {			// Landscape
-				fovHeight = DegreesToRadians(cam.effectiveFieldOfView);
+				fovHeight = CC3DegToRad(cam.effectiveFieldOfView);
 				fovWidth = fovHeight * aspect;
 			} else {						// Portrait
-				fovWidth = DegreesToRadians(cam.effectiveFieldOfView);
+				fovWidth = CC3DegToRad(cam.effectiveFieldOfView);
 				fovHeight = fovWidth / aspect;
 			}
 			[uniform setVector4: CC3Vector4Make(fovWidth, fovHeight, cam.nearClippingDistance, cam.farClippingDistance)];
@@ -831,7 +831,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		case kCC3SemanticLightSpotCutoffAngleCosine:
 			for (GLuint i = 0; i < uniformSize; i++) {
 				CC3Light* light = [visitor lightAt: (semanticIndex + i)];
-				[uniform setFloat: cosf(DegreesToRadians(light.spotCutoffAngle)) at: i];
+				[uniform setFloat: cosf(CC3DegToRad(light.spotCutoffAngle)) at: i];
 			}
 			return YES;
 			

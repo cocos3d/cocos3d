@@ -36,26 +36,6 @@
 
 #pragma mark Basic math support
 
-#define kCC3OneThird			0.33333333333333333333f
-#define kCC3OneOver255			0.00392156862745098f
-#define kCC3Sqrt3				1.732050807568877f			/* sqrt(3) */
-#define kCC3CircleDegrees		360.0f
-#define kCC3SemiCircleDegrees	180.0f
-#define kCC3Pi					M_PI
-#define kCC3TwoPi				(2.0 * kCC3Pi)
-
-#define kCC3MaxGLint			INT_MAX
-#define kCC3MaxGLuint			UINT_MAX
-#define kCC3MaxGLushort			0xFFFF
-#define kCC3MaxGLubyte			0xFF
-#define kCC3MaxGLfloat			CGFLOAT_MAX
-
-/** Conversion between degrees and radians. */
-#define DegreesToRadiansFactor  0.0174532925199433f			// PI / 180
-#define RadiansToDegreesFactor  57.29577951308232f			// 180 / PI
-#define DegreesToRadians(D) ((D) * DegreesToRadiansFactor)
-#define RadiansToDegrees(R) ((R) * RadiansToDegreesFactor)
-
 /** Returns -1, 0 or +1 if the arguement is negative, zero or positive respectively. */
 #ifndef SIGN
 #define SIGN(A)	({							\
@@ -74,14 +54,6 @@
 })
 #endif
 
-/** Returns a weighted average of the two values, where weight is between zero and one, inclusive. */
-#ifndef CC3WAVG
-#define CC3WAVG(val1, val2, weight) ({						\
-	__typeof__(val1) __v1 = (val1);							\
-	__v1 + (((val2) - __v1) * CLAMP((weight), 0.0, 1.0));	\
-})
-#endif
-
 /**
  * Returns the logical exclusive-OR of the specified two expressions.
  *
@@ -92,6 +64,32 @@
 #ifndef XOR
 #define XOR(exp1, exp2) ((exp1) ? !(exp2) : (exp2))
 #endif
+
+#define kCC3OneThird			0.33333333333333333333f
+#define kCC3OneOver255			0.00392156862745098f
+#define kCC3Sqrt3				1.732050807568877f			// sqrt(3)
+#define kCC3CircleDegrees		360.0f
+#define kCC3SemiCircleDegrees	180.0f
+#define kCC3Pi					M_PI
+#define kCC3TwoPi				(2.0 * kCC3Pi)
+
+#define kCC3MaxGLint			INT_MAX
+#define kCC3MaxGLuint			UINT_MAX
+#define kCC3MaxGLushort			0xFFFF
+#define kCC3MaxGLubyte			0xFF
+#define kCC3MaxGLfloat			CGFLOAT_MAX
+
+/** Conversion between degrees and radians. */
+#define kCC3DegToRadFactor		0.0174532925199433f			// PI / 180
+#define kCC3RadToDegFactor		57.29577951308232f			// 180 / PI
+#define CC3DegToRad(D)			((D) * kCC3DegToRadFactor)
+#define CC3RadToDeg(R)			((R) * kCC3RadToDegFactor)
+
+/** Returns a weighted average of the two values, where weight is between zero and one, inclusive. */
+#define CC3WeightedAverage(val1, val2, weight) ({			\
+	__typeof__(val1) __v1 = (val1);							\
+	__v1 + (((val2) - __v1) * CLAMP((weight), 0.0, 1.0));	\
+})
 
 /** Returns the positive or negative modulo remainder of value divided by period. */
 #define CC3Cyclic(value, period) (fmodf((value), (period)))

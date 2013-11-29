@@ -276,13 +276,13 @@
 	switch (_fieldOfViewOrientation) {
 		
 		case CC3FieldOfViewOrientationVertical:
-			top = tanf(DegreesToRadians(halfFOV));
+			top = tanf(CC3DegToRad(halfFOV));
 			right = top * aspect;
 			orientationCorrection = 1.0f / aspect;
 			break;
 
 		case CC3FieldOfViewOrientationDiagonal:
-			diag = tanf(DegreesToRadians(halfFOV));
+			diag = tanf(CC3DegToRad(halfFOV));
 			top = diag / sqrtf((aspect * aspect) + 1.0f);
 			right = top * aspect;
 			orientationCorrection = 1.0f;
@@ -290,7 +290,7 @@
 		
 		case CC3FieldOfViewOrientationHorizontal:
 		default:
-			right = tanf(DegreesToRadians(halfFOV));
+			right = tanf(CC3DegToRad(halfFOV));
 			top = right / aspect;
 			orientationCorrection = aspect;
 			break;
@@ -1000,10 +1000,10 @@
 
 	// Apply the field of view angle to the narrower aspect.
 	if (aspect >= 1.0f) {			// Landscape
-		topClip = nearClip * tanf(DegreesToRadians(halfFOV));
+		topClip = nearClip * tanf(CC3DegToRad(halfFOV));
 		rightClip = topClip * aspect;
 	} else {						// Portrait
-		rightClip = nearClip * tanf(DegreesToRadians(halfFOV));
+		rightClip = nearClip * tanf(CC3DegToRad(halfFOV));
 		topClip = rightClip / aspect;
 	}
 

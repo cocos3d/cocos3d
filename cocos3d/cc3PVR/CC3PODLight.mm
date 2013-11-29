@@ -79,7 +79,7 @@ extern "C" {
 					break;
 				case ePODSpot:
 					self.isDirectionalOnly = NO;
-					self.spotCutoffAngle = RadiansToDegrees(psl->fFalloffAngle);
+					self.spotCutoffAngle = CC3RadToDeg(psl->fFalloffAngle);
 					self.spotExponent = psl->fFalloffExponent;
 					break;
 				default:

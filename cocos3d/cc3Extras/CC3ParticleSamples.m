@@ -71,14 +71,14 @@
 
 /** Converts the angular components of the specified dispersion into tangents. */
 static inline CGSize CC3ShapeFromDispersionAngle(CGSize anAngle) {
-	return CGSizeMake(tanf(DegreesToRadians(anAngle.width / 2.0)),
-					  tanf(DegreesToRadians(anAngle.height / 2.0)));
+	return CGSizeMake(tanf(CC3DegToRad(anAngle.width / 2.0)),
+					  tanf(CC3DegToRad(anAngle.height / 2.0)));
 }
 
 /** Converts the tangential components of the specified aspect into dispersion angles. */
 static inline CGSize CC3DispersionAngleFromShape(CGSize anAspect) {
-	return CGSizeMake(RadiansToDegrees(2.0 * atanf(anAspect.width)),
-					  RadiansToDegrees(2.0 * atanf(anAspect.height)));
+	return CGSizeMake(CC3RadToDeg(2.0 * atanf(anAspect.width)),
+					  CC3RadToDeg(2.0 * atanf(anAspect.height)));
 }
 
 @interface CC3HoseParticleNavigator (TemplateMethods)

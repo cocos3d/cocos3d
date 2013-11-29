@@ -92,10 +92,10 @@ NSString* NSStringFromCC3PVRShamanSemantic(CC3PVRShamanSemantic semantic) {
 			CC3Camera* cam = visitor.camera;
 			GLfloat fovWidth, fovHeight;
 			if (aspect >= 1.0f) {			// Landscape
-				fovHeight = DegreesToRadians(cam.effectiveFieldOfView);
+				fovHeight = CC3DegToRad(cam.effectiveFieldOfView);
 				fovWidth = fovHeight * aspect;
 			} else {						// Portrait
-				fovWidth = DegreesToRadians(cam.effectiveFieldOfView);
+				fovWidth = CC3DegToRad(cam.effectiveFieldOfView);
 				fovHeight = fovWidth / aspect;
 			}
 			[uniform setVector4: CC3Vector4Make(cam.nearClippingDistance, cam.farClippingDistance, fovWidth, fovHeight)];

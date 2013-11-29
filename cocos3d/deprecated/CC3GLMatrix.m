@@ -711,7 +711,7 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 		radY = -atan2f(-aGLMatrix[4], aGLMatrix[0]);
 		radZ = 0.0;
 	}	
-	return cc3v(RadiansToDegrees(radX), RadiansToDegrees(radY), RadiansToDegrees(radZ));
+	return cc3v(CC3RadToDeg(radX), CC3RadToDeg(radY), CC3RadToDeg(radZ));
 }
 
 // Assumes ZYX euler order
@@ -747,7 +747,7 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 		radZ = -atan2f(-aGLMatrix[9], aGLMatrix[5]);
 		radX = 0.0;
 	}	
-	return cc3v(RadiansToDegrees(radX), RadiansToDegrees(radY), RadiansToDegrees(radZ));
+	return cc3v(CC3RadToDeg(radX), CC3RadToDeg(radY), CC3RadToDeg(radZ));
 }
 
 /**

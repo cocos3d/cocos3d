@@ -67,7 +67,7 @@
 			SPODCamera* psc = (SPODCamera*)[aPODRez cameraPODStructAtIndex: self.podContentIndex];
 			LogRez(@"Setting %@ parameters from %@", [self class], NSStringFromSPODCamera(psc));
 			self.podTargetIndex = psc->nIdxTarget;
-			self.fieldOfView = RadiansToDegrees(psc->fFOV);
+			self.fieldOfView = CC3RadToDeg(psc->fFOV);
 			self.fieldOfViewOrientation = CC3FieldOfViewOrientationHorizontal;
 			self.nearClippingDistance = psc->fNear;
 			self.farClippingDistance = psc->fFar;

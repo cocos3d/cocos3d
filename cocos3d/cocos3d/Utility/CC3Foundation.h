@@ -904,7 +904,7 @@ static inline CC3Quaternion CC3QuaternionFromAxisAngle(CC3Vector4 axisAngle) {
 	// the rotation angle (negated for right-handed coordinate system), then:
 	// q = ( sin(ra/2)*rx, sin(ra/2)*ry, sin(ra/2)*rz, cos(ra/2) )
 	
-	GLfloat halfAngle = -DegreesToRadians(axisAngle.w) / 2.0f;		// negate for RH system
+	GLfloat halfAngle = -CC3DegToRad(axisAngle.w) / 2.0f;		// negate for RH system
 	CC3Vector axis = CC3VectorNormalize(axisAngle.v);
 	return CC3Vector4FromCC3Vector(CC3VectorScaleUniform(axis, sinf(halfAngle)), cosf(halfAngle));
 }
@@ -923,7 +923,7 @@ static inline CC3Vector4 CC3AxisAngleFromQuaternion(CC3Quaternion quaternion) {
 	
 	CC3Vector4 q = CC3Vector4Normalize(quaternion);
 	GLfloat halfAngle = -acosf(q.w);						// Negate to preserve orientation
-	GLfloat angle = -RadiansToDegrees(halfAngle) * 2.0f;		// Negate for RH system
+	GLfloat angle = -CC3RadToDeg(halfAngle) * 2.0f;		// Negate for RH system
 	
 	// If angle is zero, rotation axis is undefined. Use zero vector.
 	CC3Vector axis;
@@ -1413,8 +1413,8 @@ static inline CC3AngularVector CC3AngularVectorMake(GLfloat heading, GLfloat inc
 static inline CC3AngularVector CC3AngularVectorFromVector(CC3Vector aCoord) {
 	CC3AngularVector av;
 	av.radius = CC3VectorLength(aCoord);
-	av.inclination = av.radius ? RadiansToDegrees(asinf(aCoord.y / av.radius)) : 0.0f;
-	av.heading = RadiansToDegrees(atan2f(aCoord.x, -aCoord.z));
+	av.inclination = av.radius ? CC3RadToDeg(asinf(aCoord.y / av.radius)) : 0.0f;
+	av.heading = CC3RadToDeg(atan2f(aCoord.x, -aCoord.z));
 	return av;
 }
 
@@ -1427,7 +1427,7 @@ static inline CC3Vector CC3VectorFromAngularVector(CC3AngularVector av) {
 	CC3Vector unitDir;
 	
 	// First, incline up the Y-axis from the negative Z-axis.
-	GLfloat radInclination = DegreesToRadians(av.inclination);
+	GLfloat radInclination = CC3DegToRad(av.inclination);
 	unitDir.y = sinf(radInclination);
 	GLfloat xzLen = cosf(radInclination);
 	
@@ -1435,7 +1435,7 @@ static inline CC3Vector CC3VectorFromAngularVector(CC3AngularVector av) {
 	// vector into the X-Z plane is the length of the projection onto the negative Z-axis after
 	// the initial inclination. Use this length as the basis for calculating the X & Z CC3Vectors.
 	// The result is a unit direction vector projected into all three axes.
-	GLfloat radHeading = DegreesToRadians(av.heading);
+	GLfloat radHeading = CC3DegToRad(av.heading);
 	unitDir.x = xzLen * sinf(radHeading);
 	unitDir.z = -xzLen * cosf(radHeading);
 	return CC3VectorScaleUniform(unitDir, av.radius);
@@ -2201,10 +2201,10 @@ static inline ccColor4F CCC4FModulate(ccColor4F rgba, ccColor4F modulation) {
  * the base color unchanged. A value of one will result in the blend being the same as the blend color.
  */
 static inline ccColor4F CCC4FBlend(ccColor4F baseColor, ccColor4F blendColor, GLfloat blendWeight) {
-	return ccc4f(CC3WAVG(baseColor.r, blendColor.r, blendWeight),
-				 CC3WAVG(baseColor.g, blendColor.g, blendWeight),
-				 CC3WAVG(baseColor.b, blendColor.b, blendWeight),
-				 CC3WAVG(baseColor.a, blendColor.a, blendWeight));
+	return ccc4f(CC3WeightedAverage(baseColor.r, blendColor.r, blendWeight),
+				 CC3WeightedAverage(baseColor.g, blendColor.g, blendWeight),
+				 CC3WeightedAverage(baseColor.b, blendColor.b, blendWeight),
+				 CC3WeightedAverage(baseColor.a, blendColor.a, blendWeight));
 }
 
 /**
@@ -2301,9 +2301,9 @@ static inline ccColor3B CCC3BFromCCC4B(ccColor4B color) { return *(ccColor3B*)&c
  * the base color unchanged. A value of one will result in the blend being the same as the blend color.
  */
 static inline ccColor3B CCC3BBlend(ccColor3B baseColor, ccColor3B blendColor, GLfloat blendWeight) {
-	return ccc3(CC3WAVG(baseColor.r, blendColor.r, blendWeight),
-				CC3WAVG(baseColor.g, blendColor.g, blendWeight),
-				CC3WAVG(baseColor.b, blendColor.b, blendWeight));
+	return ccc3(CC3WeightedAverage(baseColor.r, blendColor.r, blendWeight),
+				CC3WeightedAverage(baseColor.g, blendColor.g, blendWeight),
+				CC3WeightedAverage(baseColor.b, blendColor.b, blendWeight));
 }
 
 

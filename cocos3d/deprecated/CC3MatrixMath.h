@@ -53,7 +53,7 @@ static inline void CC3KMMat4RotationYXZ(GLfloat* m, CC3Vector aRotation) {
 	 
      where cA = cos(A), sA = sin(A) for A = x,y,z
  */
-	CC3Vector rotRads = CC3VectorScaleUniform(aRotation, DegreesToRadiansFactor);
+	CC3Vector rotRads = CC3VectorScaleUniform(aRotation, kCC3DegToRadFactor);
 	
 	GLfloat cx = cosf(rotRads.x);
 	GLfloat sx = sinf(rotRads.x);
@@ -97,7 +97,7 @@ static inline void CC3KMMat4RotationZYX(GLfloat* m, CC3Vector aRotation) {
 	 
      where cA = cos(A), sA = sin(A) for A = x,y,z
  */
-	CC3Vector rotRads = CC3VectorScaleUniform(aRotation, DegreesToRadiansFactor);
+	CC3Vector rotRads = CC3VectorScaleUniform(aRotation, kCC3DegToRadFactor);
 	
 	GLfloat cx = cosf(rotRads.x);
 	GLfloat sx = sinf(rotRads.x);
@@ -135,7 +135,7 @@ static inline void CC3KMMat4RotationX(GLfloat* m, const GLfloat degrees) {
      |  0  sin(A)  cos(A)  0 |
      |  0  0       0       1 |
  */
-	GLfloat radians = DegreesToRadians(degrees);
+	GLfloat radians = CC3DegToRad(degrees);
 	GLfloat c = cosf(radians);
 	GLfloat s = sinf(radians);
 	
@@ -168,7 +168,7 @@ static inline void CC3KMMat4RotationY(GLfloat* m, const GLfloat degrees) {
      | -sin(A)  0   cos(A)  0 |
      |  0       0   0       1 |
  */
-	GLfloat radians = DegreesToRadians(degrees);
+	GLfloat radians = CC3DegToRad(degrees);
 	GLfloat c = cosf(radians);
 	GLfloat s = sinf(radians);
 	
@@ -201,7 +201,7 @@ static inline void CC3KMMat4RotationZ(GLfloat* m, const GLfloat degrees) {
      |  0        0        1   0 |
      |  0        0        0   1 |
  */
-	GLfloat radians = DegreesToRadians(degrees);
+	GLfloat radians = CC3DegToRad(degrees);
 	GLfloat c = cosf(radians);
 	GLfloat s = sinf(radians);
 	
