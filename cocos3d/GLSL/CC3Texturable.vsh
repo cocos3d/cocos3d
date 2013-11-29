@@ -34,7 +34,8 @@
  *   - Up to two textures (more can be added by increasing MAX_TEXTURES, v_texCoord[] & a_cc3TexCoordN. See below).
  *   - Realistic interaction with up to four lights (more can be added by increasing MAX_LIGHTS below).
  *   - Positional, directional, or spot lighting with attenuation.
- *   - Vertex skinning (bone rigged characters).
+ *   - Vertex skinning (bone rigged characters) using bone matrices to handle both rigid
+ *     and non-rigid skeletons.
  *   - Tangent-space or object-space bump-mapping.
  *   - Environmental reflection mapping using a cube-mapped texture (in addition to the 2 visible textures).
  *   - Fog effects.
@@ -88,7 +89,6 @@ uniform lowp vec4	u_cc3LightDiffuseColor[MAX_LIGHTS];				/**< Diffuse color of e
 uniform lowp vec4	u_cc3LightSpecularColor[MAX_LIGHTS];			/**< Specular color of each light. */
 uniform vec3		u_cc3LightAttenuation[MAX_LIGHTS];				/**< Coefficients of the attenuation equation of each light. */
 uniform highp vec3	u_cc3LightSpotDirectionModel[MAX_LIGHTS];		/**< Direction of each spotlight in local coordinates of the model (not light). */
-//uniform highp vec3	u_cc3LightSpotDirectionEyeSpace[MAX_LIGHTS];	/**< Direction of spotlight in eye space of each light. */
 uniform float		u_cc3LightSpotExponent[MAX_LIGHTS];				/**< Directional attenuation factor, if spotlight, of each light. */
 uniform float		u_cc3LightSpotCutoffAngleCosine[MAX_LIGHTS];	/**< Cosine of spotlight cutoff angle of each light. */
 
@@ -147,7 +147,7 @@ void skinVertex() {
 		mediump ivec4 boneIndices = ivec4(a_cc3BoneIndices);
 		mediump vec4 boneWeights = a_cc3BoneWeights;
 
-		vtxPos = kVec4Zero;					// Start at zero to accumulate weighted values
+		vtxPos = kVec4Zero;						// Start at zero to accumulate weighted values
 		vtxNorm = kVec3Zero;
 		for (lowp int i = 0; i < 4; ++i) {		// Max 4 bones per vertex
 			if (i < u_cc3BonesPerVertex) {
@@ -200,7 +200,6 @@ highp vec4 illuminationFrom(int ltIdx) {
 	highp float spotCutoffCos = u_cc3LightSpotCutoffAngleCosine[ltIdx];
 	if (spotCutoffCos >= 0.0) {
 		highp vec3 spotDir = u_cc3LightSpotDirectionModel[ltIdx];
-//		highp vec3 spotDirEye = u_cc3LightSpotDirectionEyeSpace[ltIdx];
 		highp float cosDir = -dot(ltPos, spotDir);
 		if (cosDir >= spotCutoffCos){
 			highp float spotExp = u_cc3LightSpotExponent[ltIdx];

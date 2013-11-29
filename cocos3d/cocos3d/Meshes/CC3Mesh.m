@@ -895,7 +895,7 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 			// and check that it is not behind the start of the ray.
 			CC3Vector4 loc4 = CC3RayIntersectionWithPlane(aRay, hit->facePlane);
 			if (acceptBehind || loc4.w >= 0.0f) {
-				hit->location = CC3VectorFromTruncatedCC3Vector4(loc4);
+				hit->location = loc4.v;
 				hit->distance = loc4.w;
 				hit->barycentricLocation = CC3FaceBarycentricWeights(hit->face, hit->location);
 				if ( CC3BarycentricWeightsAreInsideTriangle(hit->barycentricLocation) ) hitIdx++;

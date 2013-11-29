@@ -261,7 +261,7 @@
 
 -(void) setGlobalLightPosition: (CC3Vector4) aPosition {
 	CC3Vector4 localLtPos = [self.globalTransformMatrixInverted transformHomogeneousVector: aPosition];
-	self.ensureMaterial.lightDirection = CC3VectorFromTruncatedCC3Vector4(localLtPos);
+	self.ensureMaterial.lightDirection = localLtPos.v;
 	[super setGlobalLightPosition: aPosition];
 }
 

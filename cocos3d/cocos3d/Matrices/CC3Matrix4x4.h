@@ -320,7 +320,7 @@ void CC3Matrix4x4PopulateInfiniteOrthoFrustum(CC3Matrix4x4* mtx,
  * The first column of the matrix has an index of one.
  */
 static inline CC3Vector CC3VectorFromCC3Matrix4x4Col(const CC3Matrix4x4* mtx, NSUInteger colIdx) {
-	return CC3VectorFromTruncatedCC3Vector4(mtx->columns[--colIdx]);	// Convert to zero-based.
+	return mtx->columns[--colIdx].v;		// Convert to zero-based.
 }
 
 /**
@@ -405,22 +405,22 @@ static inline CC3Quaternion CC3Matrix4x4ExtractQuaternion(const CC3Matrix4x4* mt
 
 /** Extracts and returns the 'forward' direction vector from the rotation component of the specified matrix. */
 static inline CC3Vector CC3Matrix4x4ExtractForwardDirection(const CC3Matrix4x4* mtx) {
-	return CC3VectorNegate(CC3VectorFromTruncatedCC3Vector4(mtx->col3));
+	return CC3VectorNegate(mtx->col3.v);
 }
 
 /** Extracts and returns the 'up' direction vector from the rotation component of the specified matrix. */
 static inline CC3Vector CC3Matrix4x4ExtractUpDirection(const CC3Matrix4x4* mtx) {
-	return CC3VectorFromTruncatedCC3Vector4(mtx->col2);
+	return mtx->col2.v;
 }
 
 /** Extracts and returns the 'right' direction vector from the rotation component of the specified matrix. */
 static inline CC3Vector CC3Matrix4x4ExtractRightDirection(const CC3Matrix4x4* mtx) {
-	return CC3VectorFromTruncatedCC3Vector4(mtx->col1);
+	return mtx->col1.v;
 }
 
 /** Extracts and returns the translation vector from the specified matrix. */
 static inline CC3Vector CC3Matrix4x4ExtractTranslation(const CC3Matrix4x4* mtx) {
-	return CC3VectorFromTruncatedCC3Vector4(mtx->col4);
+	return mtx->col4.v;
 }
 
 

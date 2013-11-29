@@ -1733,7 +1733,7 @@ static GLuint lastAssignedNodeTag;
 	[self.globalTransformMatrixInverted populateCC3Matrix4x3: &g2LMtx];
 	[aNode.globalTransformMatrix multiplyIntoCC3Matrix4x3: &g2LMtx];
 	CC3Vector4 nodeLoc4 = CC3Matrix4x3TransformCC3Vector4(&g2LMtx, kCC3Vector4ZeroLocation);
-	aNode.location = CC3VectorFromTruncatedCC3Vector4(nodeLoc4);
+	aNode.location = nodeLoc4.v;
 	
 	// Localize the child node's rotation by finding the right rotation matrix. For rotation, we use
 	// the globalRotationMatrix, which is free of scale and translation content. Otherwise it would

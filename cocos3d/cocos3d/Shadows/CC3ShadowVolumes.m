@@ -252,7 +252,7 @@
  */
 -(CC3Vector4) shadowVolumeVertexOffsetForLightAt: (CC3Vector4) localLightPos {
 	CC3Vector scLoc = self.shadowCaster.localContentCenterOfGeometry;
-	CC3Vector lgtLoc = CC3VectorFromTruncatedCC3Vector4(localLightPos);
+	CC3Vector lgtLoc = localLightPos.v;
 	CC3Vector camLoc = [self.shadowCaster.globalTransformMatrixInverted
 							transformLocation: self.activeCamera.globalLocation];	
 

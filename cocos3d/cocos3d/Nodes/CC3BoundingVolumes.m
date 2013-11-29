@@ -211,7 +211,7 @@
 	// If ray is pointed away from, or is parallel to the plane, it won't puncture it.
 	if (pLoc4.w < 0.0f || CC3Vector4IsNull(pLoc4)) return NO;
 
-	CC3Vector punctureLoc = CC3VectorFromTruncatedCC3Vector4(pLoc4);
+	CC3Vector punctureLoc = pLoc4.v;
 	GLuint pCnt = self.planeCount;
 	for (GLuint pIdx = 0; pIdx < pCnt; pIdx++) {
 		if ( (pIdx != planeIndex) &&

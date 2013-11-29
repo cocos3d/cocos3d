@@ -441,6 +441,10 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 							andFragmentShaderFile: @"CC3ClipSpaceNoTexture.fsh"];
 	[CC3ShaderProgram programFromVertexShaderFile: @"CC3Texturable.vsh"
 							andFragmentShaderFile: @"CC3BumpMapTangentSpace.fsh"];
+	[CC3ShaderProgram programFromVertexShaderFile: @"CC3TexturableRigidBones.vsh"
+							andFragmentShaderFile: @"CC3SingleTexture.fsh"];
+	[CC3ShaderProgram programFromVertexShaderFile: @"CC3TexturableRigidBones.vsh"
+							andFragmentShaderFile: @"CC3BumpMapTangentSpace.fsh"];
 
 	// Now pre-load shader programs that originate in PFX resources
 	CC3Resource.isPreloading = YES;
@@ -1654,6 +1658,13 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	malletAndAnvils.location = cc3v(300.0, 95.0, 300.0);
 	malletAndAnvils.rotation = cc3v(0.0, -45.0, 0.0);
 	malletAndAnvils.uniformScale = 0.15;
+
+#if CC3_GLSL
+	// The bones in the mallet are rigid (no scale applied), so we can use the shader that
+	// is optimized for that. Many more active bones are possible with a rigid skeleton.
+	malletAndAnvils.shaderProgram = [CC3ShaderProgram programFromVertexShaderFile: @"CC3TexturableRigidBones.vsh"
+															andFragmentShaderFile: @"CC3SingleTexture.fsh"];
+#endif
 	
 	CCActionInterval* hammering = [CC3Animate actionWithDuration: 3.0];
 	[malletAndAnvils runAction: [CCRepeatForever actionWithAction: hammering]];
@@ -2390,6 +2401,13 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	[dgnBody createBoundingVolume];
 //	dgnBody.shouldDrawBoundingVolume = YES;
 	[_dragon setSkeletalBoundingVolume: dgnBody.boundingVolume];
+	
+#if CC3_GLSL
+	// The bones in the dragon are rigid (no scale applied), so we can use the shader that
+	// is optimized for that. Many more active bones are possible with a rigid skeleton.
+	dgnBody.shaderProgram = [CC3ShaderProgram programFromVertexShaderFile: @"CC3TexturableRigidBones.vsh"
+													andFragmentShaderFile: @"CC3BumpMapTangentSpace.fsh"];
+#endif
 
 #if !CC3_GLSL
 	// The fixed pipeline of OpenGL ES 1.1 cannot make use of the tangent-space normal
@@ -3427,7 +3445,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 		CC3MeshNode* tp = [[CC3ModelSampleFactory factory] makeUniColoredTeapotNamed: kTeapotOrangeName
 																		   withColor: kCCC4FOrange];
 		tp.uniformScale = 200.0;
-		tp.location = CC3VectorFromTruncatedCC3Vector4(touchLoc);
+		tp.location = touchLoc.v;
 		
 		[self addExplosionTo: tp];	// For effect, add an explosion as the teapot is placed
 		

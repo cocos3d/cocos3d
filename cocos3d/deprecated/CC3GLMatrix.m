@@ -1251,13 +1251,11 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 }
 
 +(CC3Vector) transformLocation: (CC3Vector) aLocation withMatrix: (GLfloat*) aGLMatrix {
-	return CC3VectorFromTruncatedCC3Vector4([self transformHomogeneousVector: CC3Vector4FromLocation(aLocation)
-																  withMatrix: aGLMatrix]);
+	return [self transformHomogeneousVector: CC3Vector4FromLocation(aLocation) withMatrix: aGLMatrix].v;
 }
 
 +(CC3Vector) transformDirection: (CC3Vector) aDirection withMatrix: (GLfloat*) aGLMatrix {
-	return CC3VectorFromTruncatedCC3Vector4([self transformHomogeneousVector: CC3Vector4FromDirection(aDirection)
-																  withMatrix: aGLMatrix]);
+	return [self transformHomogeneousVector: CC3Vector4FromDirection(aDirection) withMatrix: aGLMatrix].v;
 }
 
 +(CC3Vector4) transformHomogeneousVector: (CC3Vector4) aVector withMatrix: (GLfloat*) aGLMatrix {

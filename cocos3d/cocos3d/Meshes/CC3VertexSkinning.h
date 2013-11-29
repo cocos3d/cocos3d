@@ -274,6 +274,9 @@
 	GLint _vertexCount;
 }
 
+/** Returns whether this skin section contains bones. */
+@property(nonatomic, readonly) BOOL hasSkeleton;
+
 /** Returns the number of bones in this skin section. */
 @property(nonatomic, assign, readonly) GLuint boneCount;
 
@@ -831,6 +834,17 @@
 
 /** CC3MeshNode extension to define polymorphic methods to support vertex skinning. */
 @interface CC3MeshNode (Skinning)
+
+/**
+ * Returns whether the vertices of this mesh node are influenced by a skeleton of bones.
+ *
+ * Vertex skinning (also known as bone-rigging) is a technique of manipulating, or deforming,
+ * the vertices of a mesh through the movement of a skeleton of bones.
+ *
+ * This implementation returns NO. Subclasses that support vertex skinning (notably the CC3SkinMeshNode
+ * subclass) will return YES if the vertices are influenced by a skeleton of bone nodes.
+ */
+@property(nonatomic, readonly) BOOL hasSkeleton;
 
 
 #pragma mark Faces

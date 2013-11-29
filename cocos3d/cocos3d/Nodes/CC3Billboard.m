@@ -731,7 +731,7 @@ static GLfloat deviceScaleFactor = 0.0f;
 	BOOL intersects = CGRectContainsPoint([self billboardBoundingRect], ccp(pLoc4.x, pLoc4.y));
 
 	// Return the 3D puncture location, or null if the ray did not intersect the boundary rectangle
-	return intersects ? CC3VectorFromTruncatedCC3Vector4(pLoc4) : kCC3VectorNull;
+	return intersects ? pLoc4.v : kCC3VectorNull;
 }
 
 -(NSString*) fullDescription {

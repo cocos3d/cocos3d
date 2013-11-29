@@ -111,7 +111,7 @@
 
 -(CC3Vector) rotation {
 	return (_rotationType == kCC3RotationTypeEuler)
-				? CC3VectorFromTruncatedCC3Vector4(_rotationVector)
+				? _rotationVector.v
 				: [self.rotationMatrix extractRotation];
 }
 
@@ -158,7 +158,7 @@
 				: CC3AxisAngleFromQuaternion(self.quaternion);
 }
 
--(CC3Vector) rotationAxis { return CC3VectorFromTruncatedCC3Vector4(self.rotationAxisAngle); }
+-(CC3Vector) rotationAxis { return self.rotationAxisAngle.v; }
 
 -(void) setRotationAxis: (CC3Vector) aDirection {
 	_rotationVector = CC3Vector4FromCC3Vector(aDirection, self.rotationAngle);
@@ -321,7 +321,7 @@ static GLubyte _autoOrthonormalizeCount = 0;
 
 -(CC3Vector) forwardDirection {
 	if (_rotationType == kCC3RotationTypeDirection) {
-		return CC3VectorFromTruncatedCC3Vector4(_rotationVector);
+		return _rotationVector.v;
 	} else {
 		CC3Vector mtxFwdDir = [self.rotationMatrix extractForwardDirection];
 		return _shouldReverseForwardDirection ? CC3VectorNegate(mtxFwdDir) : mtxFwdDir;
@@ -442,9 +442,7 @@ static GLubyte _autoOrthonormalizeCount = 0;
 -(BOOL) isTargettable { return YES; }
 
 -(CC3Vector) targetLocation {
-	return (_rotationType == kCC3RotationTypeLocation)
-				? CC3VectorFromTruncatedCC3Vector4(_rotationVector)
-				: kCC3VectorNull;
+	return (_rotationType == kCC3RotationTypeLocation) ? _rotationVector.v : kCC3VectorNull;
 }
 
 -(void) setTargetLocation: (CC3Vector) aLocation {

@@ -106,8 +106,7 @@ CC3Vector4 CC3RayIntersectionWithBoxSide(CC3Ray aRay, CC3Box bb, CC3Vector sideN
 	
 	// If the side intersection location is not within
 	// the bounding box, return the previous intersection.
-	CC3Vector edgeHit3d = CC3VectorFromTruncatedCC3Vector4(sideHit);
-	if ( !CC3BoxContainsLocation(bb, edgeHit3d) ) return prevHit;
+	if ( !CC3BoxContainsLocation(bb, sideHit.v) ) return prevHit;
 	
 	// If the ray distance to this side is less than the previous intersection,
 	// return this intersection, otherwise return the previous intersection.
@@ -123,10 +122,12 @@ CC3Vector  CC3RayIntersectionWithBox(CC3Ray aRay, CC3Box bb) {
 	closestHit = CC3RayIntersectionWithBoxSide(aRay, bb, kCC3VectorUnitYNegative, closestHit);
 	closestHit = CC3RayIntersectionWithBoxSide(aRay, bb, kCC3VectorUnitZPositive, closestHit);
 	closestHit = CC3RayIntersectionWithBoxSide(aRay, bb, kCC3VectorUnitZNegative, closestHit);
-	return CC3VectorFromTruncatedCC3Vector4(closestHit);	
+	return closestHit.v;
 }
 
 // Deprecated functions
+CC3Vector CC3VectorFromTruncatedCC3Vector4(CC3Vector4 v) { return v.v; }
+CC3Vector CC3VectorFromQuaternion(CC3Quaternion q) { return q.v; }
 NSString* NSStringFromCC3BoundingBox(CC3Box bb) { return NSStringFromCC3Box(bb); }
 CC3Box CC3BoundingBoxFromMinMax(CC3Vector minVtx, CC3Vector maxVtx) { return CC3BoxFromMinMax(minVtx, maxVtx); }
 CC3Box CC3BoundingBoxMake(GLfloat minX, GLfloat minY, GLfloat minZ, GLfloat maxX, GLfloat maxY, GLfloat maxZ) { return CC3BoxMake(minX, minY, minZ, maxX, maxY, maxZ); }

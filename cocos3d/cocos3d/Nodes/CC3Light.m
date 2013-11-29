@@ -636,7 +636,7 @@ static GLuint lightPoolStartIndex = 0;
  * This could be a location or direction, depending on whether the
  * 4D homogeneous location has a definite location, or is directional.
  */
--(CC3Vector) lightPosition { return CC3VectorFromTruncatedCC3Vector4(_light.globalHomogeneousPosition); }
+-(CC3Vector) lightPosition { return _light.globalHomogeneousPosition.v; }
 
 
 #pragma mark Allocation and initialization

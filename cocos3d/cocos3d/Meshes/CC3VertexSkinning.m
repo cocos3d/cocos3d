@@ -85,14 +85,19 @@
 @synthesize skeletalTransformMatrixInverted=_skeletalTransformMatrixInverted;
 
 -(CC3SkinSection*) skinSectionForVertexIndexAt: (GLint) index {
-	for (CC3SkinSection* skinSctn in _skinSections)
-		if ( [skinSctn containsVertexIndex: index] ) return skinSctn;
+	for (CC3SkinSection* ss in _skinSections) if ( [ss containsVertexIndex: index] ) return ss;
 	return nil;
 }
 
 -(CC3SkinSection*) skinSectionForFaceIndex: (GLint) faceIndex {
 	return [self skinSectionForVertexIndexAt: [self vertexIndexCountFromFaceCount: faceIndex]];
 }
+
+-(BOOL) hasSkeleton {
+	for (CC3SkinSection* ss in _skinSections) if (ss.hasSkeleton) return YES;
+	return NO;
+}
+
 
 
 #pragma mark Faces
@@ -237,6 +242,8 @@
 @implementation CC3SkinSection
 
 @synthesize vertexStart=_vertexStart, vertexCount=_vertexCount;
+
+-(BOOL) hasSkeleton { return self.boneCount > 0; }
 
 -(GLuint) boneCount { return (GLuint)_skinnedBones.count; }
 
@@ -750,6 +757,8 @@
 #pragma mark CC3MeshNode skinning extensions
 
 @implementation CC3MeshNode (Skinning)
+
+-(BOOL) hasSkeleton { return NO; }
 
 
 #pragma mark Faces
