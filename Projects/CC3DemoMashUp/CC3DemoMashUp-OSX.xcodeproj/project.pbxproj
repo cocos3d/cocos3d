@@ -286,6 +286,7 @@
 		A9FF6E0B170DF27D00FC35C8 /* Head_diffuse.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Head_diffuse.png; path = ../Common/Resources/Head_diffuse.png; sourceTree = "<group>"; };
 		A9FF6E0E170DF69E00FC35C8 /* Stamp-nm.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Stamp-nm.png"; path = "../Common/Resources/Stamp-nm.png"; sourceTree = "<group>"; };
 		A9FF6E1C170E0C3B00FC35C8 /* Head_diffuse.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; name = Head_diffuse.bmp; path = ../Common/Resources/Head_diffuse.bmp; sourceTree = "<group>"; };
+		F4333251184C3D8A0017F347 /* CC3DemoMashUp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = CC3DemoMashUp.entitlements; path = CC3DemoMashUp/CC3DemoMashUp.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -336,6 +337,7 @@
 		A96E0CC1170DC8060044CA2A = {
 			isa = PBXGroup;
 			children = (
+				F4333251184C3D8A0017F347 /* CC3DemoMashUp.entitlements */,
 				A97430EF170DD7BF001FD5A2 /* Classes */,
 				A9742D9B170DD713001FD5A2 /* Resources */,
 				A9A453EC1832D555008D1F4B /* GLSL */,
@@ -590,6 +592,15 @@
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 0500;
+				TargetAttributes = {
+					A96E0CC9170DC8060044CA2A = {
+						SystemCapabilities = {
+							com.apple.Sandbox = {
+								enabled = 1;
+							};
+						};
+					};
+				};
 			};
 			buildConfigurationList = A96E0CC5170DC8060044CA2A /* Build configuration list for PBXProject "CC3DemoMashUp-OSX" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -892,6 +903,8 @@
 		A96E0FE9170DC8100044CA2A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = CC3DemoMashUp/CC3DemoMashUp.entitlements;
+				CODE_SIGN_IDENTITY = "-";
 				INFOPLIST_FILE = "CC3DemoMashUp/OSX Support/Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -900,6 +913,8 @@
 		A96E0FEA170DC8100044CA2A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = CC3DemoMashUp/CC3DemoMashUp.entitlements;
+				CODE_SIGN_IDENTITY = "-";
 				INFOPLIST_FILE = "CC3DemoMashUp/OSX Support/Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
