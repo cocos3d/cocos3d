@@ -55,7 +55,7 @@ uniform float		u_cc3PointMinimumSize;		/**< Minimum size to which points will be
 uniform float		u_cc3PointMaximumSize;		/**< Maximum size to which points will be allowed to grow. */
 uniform vec3		u_cc3PointSizeAttenuation;	/**< Coefficients of the size attenuation equation. */
 
-uniform lowp int	u_cc3BonesPerVertex;							/**< Number of bones influencing each vertex. */
+uniform lowp int	u_cc3VertexBoneCount;							/**< Number of bones influencing each vertex. */
 uniform highp mat4	u_cc3BoneMatricesEyeSpace[MAX_BONES_PER_BATCH];	/**< Array of bone matrices in the current mesh skin section in eye space. */
 
 //-------------- VERTEX ATTRIBUTES ----------------------
@@ -78,7 +78,7 @@ highp vec4	vtxPosEye;		/**< The position of the vertex, in eye coordinates. High
  * This function takes into consideration vertex skinning, if it is specified.
  */
 void vertexToEyeSpace() {
-	if (u_cc3BonesPerVertex == 0) {		// No vertex skinning
+	if (u_cc3VertexBoneCount == 0) {		// No vertex skinning
 		vtxPosEye = u_cc3MatrixModelView * a_cc3Position;
 	} else {			// Mesh is bone-rigged for vertex skinning
 		
@@ -88,7 +88,7 @@ void vertexToEyeSpace() {
 		
 		vtxPosEye = kVec4Zero;					// Start at zero to accumulate weighted values
 		for (lowp int i = 0; i < 4; ++i) {		// Max 4 bones per vertex
-			if (i < u_cc3BonesPerVertex) {
+			if (i < u_cc3VertexBoneCount) {
 				// Add position and normal contribution from this bone
 				vtxPosEye += u_cc3BoneMatricesEyeSpace[boneIndices.x] * a_cc3Position * boneWeights.x;
 				

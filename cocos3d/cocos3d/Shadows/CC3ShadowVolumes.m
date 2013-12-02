@@ -1087,8 +1087,8 @@
 	[super addShadowVolumesForLight: aLight];
 	
 	// Retain data required to build shadow volume mesh
-	[self retainVertexMatrixIndices];
-	[self retainVertexWeights];
+	[self retainVertexBoneIndices];
+	[self retainVertexBoneWeights];
 }
 
 @end

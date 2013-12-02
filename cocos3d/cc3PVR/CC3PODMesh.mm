@@ -48,8 +48,8 @@
 		self.vertexTangents = [CC3VertexTangents arrayFromCPODData: &psm->sTangents fromSPODMesh: psm];
 		self.vertexBitangents = [CC3VertexTangents arrayFromCPODData: &psm->sBinormals fromSPODMesh: psm];
 		self.vertexColors = [CC3VertexColors arrayFromCPODData: &psm->sVtxColours fromSPODMesh: psm];
-		self.vertexWeights = [CC3VertexWeights arrayFromCPODData: &psm->sBoneWeight fromSPODMesh: psm];
-		self.vertexMatrixIndices = [CC3VertexMatrixIndices arrayFromCPODData: &psm->sBoneIdx fromSPODMesh: psm];
+		self.vertexBoneWeights = [CC3VertexBoneWeights arrayFromCPODData: &psm->sBoneWeight fromSPODMesh: psm];
+		self.vertexBoneIndices = [CC3VertexBoneIndices arrayFromCPODData: &psm->sBoneIdx fromSPODMesh: psm];
 		
 		for (GLuint i = 0; i < psm->nNumUVW; i++) {
 			CC3VertexTextureCoordinates* texCoords;

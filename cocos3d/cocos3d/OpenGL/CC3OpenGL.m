@@ -841,7 +841,9 @@
 
 -(GLuint) maxNumberOfVertexAttributes { return value_GL_MAX_VERTEX_ATTRIBS; }
 
--(GLuint) maxNumberOfVertexUnits { return value_GL_MAX_VERTEX_UNITS; }
+-(GLuint) maxNumberOfBoneInfluencesPerVertex { return valueMaxBoneInfluencesPerVertex; }
+	
+-(GLuint) maxNumberOfVertexUnits { return self.maxNumberOfBoneInfluencesPerVertex; }
 
 -(GLuint) maxNumberOfPixelSamples { return value_GL_MAX_SAMPLES; }
 

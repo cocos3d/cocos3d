@@ -70,14 +70,14 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 		[desc appendFormat: @"PointSize"];
 		first = NO;
 	}
-	if (vtxContent & kCC3VertexContentWeights) {
+	if (vtxContent & kCC3VertexContentBoneWeights) {
 		[desc appendFormat: @"%@", first ? @" (" : @" + "];
-		[desc appendFormat: @"Weights"];
+		[desc appendFormat: @"BoneWeights"];
 		first = NO;
 	}
-	if (vtxContent & kCC3VertexContentMatrixIndices) {
+	if (vtxContent & kCC3VertexContentBoneIndices) {
 		[desc appendFormat: @"%@", first ? @" (" : @" + "];
-		[desc appendFormat: @"MatrixIndices"];
+		[desc appendFormat: @"BoneIndices"];
 		first = NO;
 	}
 	[desc appendFormat: @"%@", first ? @"(None)" : @")"];
@@ -99,8 +99,8 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 	[_vertexBitangents deriveNameFrom: self];
 	[_vertexColors deriveNameFrom: self];
 	[_vertexTextureCoordinates deriveNameFrom: self];
-	[_vertexMatrixIndices deriveNameFrom: self];
-	[_vertexWeights deriveNameFrom: self];
+	[_vertexBoneIndices deriveNameFrom: self];
+	[_vertexBoneWeights deriveNameFrom: self];
 	[_vertexPointSizes deriveNameFrom: self];
 	[_vertexIndices deriveNameFrom: self];
 	for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) {
@@ -163,23 +163,23 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 
 -(GLenum) vertexColorType { return _vertexColors ? _vertexColors.elementType : GL_FALSE; }
 
--(CC3VertexMatrixIndices*) vertexMatrixIndices { return _vertexMatrixIndices; }
+-(CC3VertexBoneIndices*) vertexBoneIndices { return _vertexBoneIndices; }
 
--(void) setVertexMatrixIndices: (CC3VertexMatrixIndices*) vtxMtxInd {
-	_vertexMatrixIndices = vtxMtxInd;
-	[_vertexMatrixIndices deriveNameFrom: self];
+-(void) setVertexBoneIndices: (CC3VertexBoneIndices*) vertexBoneIndices {
+	_vertexBoneIndices = vertexBoneIndices;
+	[_vertexBoneIndices deriveNameFrom: self];
 }
 
--(BOOL) hasVertexMatrixIndices { return (_vertexMatrixIndices != nil); }
+-(BOOL) hasVertexBoneIndices { return (_vertexBoneIndices != nil); }
 
--(CC3VertexWeights*) vertexWeights { return _vertexWeights; }
+-(CC3VertexBoneWeights*) vertexBoneWeights { return _vertexBoneWeights; }
 
--(void) setVertexWeights: (CC3VertexWeights*) vtxWgts {
-	_vertexWeights = vtxWgts;
-	[_vertexWeights deriveNameFrom: self];
+-(void) setVertexBoneWeights: (CC3VertexBoneWeights*) vertexBoneWeights {
+	_vertexBoneWeights = vertexBoneWeights;
+	[_vertexBoneWeights deriveNameFrom: self];
 }
 
--(BOOL) hasVertexWeights { return (_vertexWeights != nil); }
+-(BOOL) hasVertexBoneWeights { return (_vertexBoneWeights != nil); }
 
 -(CC3VertexPointSizes*) vertexPointSizes { return _vertexPointSizes; }
 
@@ -310,8 +310,8 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 		case kCC3SemanticVertexTangent: return self.vertexTangents;
 		case kCC3SemanticVertexBitangent: return self.vertexBitangents;
 		case kCC3SemanticVertexColor: return self.vertexColors;
-		case kCC3SemanticVertexWeights: return self.vertexWeights;
-		case kCC3SemanticVertexMatrixIndices: return self.vertexMatrixIndices;
+		case kCC3SemanticVertexBoneWeights: return self.vertexBoneWeights;
+		case kCC3SemanticVertexBoneIndices: return self.vertexBoneIndices;
 		case kCC3SemanticVertexPointSize: return self.vertexPointSizes;
 		case kCC3SemanticVertexTexture: return [self textureCoordinatesForTextureUnit: semanticIndex];
 		default: return nil;
@@ -337,8 +337,8 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 	if (self.hasVertexBitangents) vtxContent |= kCC3VertexContentBitangent;
 	if (self.hasVertexColors) vtxContent |= kCC3VertexContentColor;
 	if (self.hasVertexTextureCoordinates) vtxContent |= kCC3VertexContentTextureCoordinates;
-	if (self.hasVertexWeights) vtxContent |= kCC3VertexContentWeights;
-	if (self.hasVertexMatrixIndices) vtxContent |= kCC3VertexContentMatrixIndices;
+	if (self.hasVertexBoneWeights) vtxContent |= kCC3VertexContentBoneWeights;
+	if (self.hasVertexBoneIndices) vtxContent |= kCC3VertexContentBoneIndices;
 	if (self.hasVertexPointSizes) vtxContent |= kCC3VertexContentPointSize;
 	return vtxContent;
 }
@@ -393,17 +393,17 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 	}
 	
 	// Weights
-	if (vtxContentTypes & kCC3VertexContentWeights) {
-		if (!_vertexWeights) self.vertexWeights = [CC3VertexWeights vertexArray];
+	if (vtxContentTypes & kCC3VertexContentBoneWeights) {
+		if (!_vertexBoneWeights) self.vertexBoneWeights = [CC3VertexBoneWeights vertexArray];
 	} else {
-		self.vertexWeights = nil;
+		self.vertexBoneWeights = nil;
 	}
 	
 	// Matrix indices
-	if (vtxContentTypes & kCC3VertexContentMatrixIndices) {
-		if (!_vertexMatrixIndices) self.vertexMatrixIndices = [CC3VertexMatrixIndices vertexArray];
+	if (vtxContentTypes & kCC3VertexContentBoneIndices) {
+		if (!_vertexBoneIndices) self.vertexBoneIndices = [CC3VertexBoneIndices vertexArray];
 	} else {
-		self.vertexMatrixIndices = nil;
+		self.vertexBoneIndices = nil;
 	}
 	
 	// Point sizes
@@ -422,8 +422,8 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 	if (_vertexTangents) stride += _vertexTangents.elementLength;
 	if (_vertexBitangents) stride += _vertexBitangents.elementLength;
 	if (_vertexColors) stride += _vertexColors.elementLength;
-	if (_vertexMatrixIndices) stride += _vertexMatrixIndices.elementLength;
-	if (_vertexWeights) stride += _vertexWeights.elementLength;
+	if (_vertexBoneIndices) stride += _vertexBoneIndices.elementLength;
+	if (_vertexBoneWeights) stride += _vertexBoneWeights.elementLength;
 	if (_vertexPointSizes) stride += _vertexPointSizes.elementLength;
 	if (_vertexTextureCoordinates) stride += _vertexTextureCoordinates.elementLength;
 	for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) stride += otc.elementLength;
@@ -438,8 +438,8 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 	_vertexTangents.vertexStride = vtxStride;
 	_vertexBitangents.vertexStride = vtxStride;
 	_vertexColors.vertexStride = vtxStride;
-	_vertexMatrixIndices.vertexStride = vtxStride;
-	_vertexWeights.vertexStride = vtxStride;
+	_vertexBoneIndices.vertexStride = vtxStride;
+	_vertexBoneWeights.vertexStride = vtxStride;
 	_vertexPointSizes.vertexStride = vtxStride;
 	_vertexTextureCoordinates.vertexStride = vtxStride;
 	for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) otc.vertexStride = vtxStride;
@@ -476,13 +476,13 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 		if (_shouldInterleaveVertices) otc.elementOffset = stride;
 		stride += otc.elementLength;
 	}
-	if (_vertexWeights) {
-		if (_shouldInterleaveVertices) _vertexWeights.elementOffset = stride;
-		stride += _vertexWeights.elementLength;
+	if (_vertexBoneWeights) {
+		if (_shouldInterleaveVertices) _vertexBoneWeights.elementOffset = stride;
+		stride += _vertexBoneWeights.elementLength;
 	}
-	if (_vertexMatrixIndices) {
-		if (_shouldInterleaveVertices) _vertexMatrixIndices.elementOffset = stride;
-		stride += _vertexMatrixIndices.elementLength;
+	if (_vertexBoneIndices) {
+		if (_shouldInterleaveVertices) _vertexBoneIndices.elementOffset = stride;
+		stride += _vertexBoneIndices.elementLength;
 	}
 	if (_vertexPointSizes) {
 		if (_shouldInterleaveVertices) _vertexPointSizes.elementOffset = stride;
@@ -503,8 +503,8 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 		[_vertexTangents interleaveWith: _vertexLocations];
 		[_vertexBitangents interleaveWith: _vertexLocations];
 		[_vertexColors interleaveWith: _vertexLocations];
-		[_vertexMatrixIndices interleaveWith: _vertexLocations];
-		[_vertexWeights interleaveWith: _vertexLocations];
+		[_vertexBoneIndices interleaveWith: _vertexLocations];
+		[_vertexBoneWeights interleaveWith: _vertexLocations];
 		[_vertexPointSizes interleaveWith: _vertexLocations];
 		[_vertexTextureCoordinates interleaveWith: _vertexLocations];
 		for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) {
@@ -515,8 +515,8 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 		_vertexTangents.allocatedVertexCapacity = vtxCount;
 		_vertexBitangents.allocatedVertexCapacity = vtxCount;
 		_vertexColors.allocatedVertexCapacity = vtxCount;
-		_vertexMatrixIndices.allocatedVertexCapacity = vtxCount;
-		_vertexWeights.allocatedVertexCapacity = vtxCount;
+		_vertexBoneIndices.allocatedVertexCapacity = vtxCount;
+		_vertexBoneWeights.allocatedVertexCapacity = vtxCount;
 		_vertexPointSizes.allocatedVertexCapacity = vtxCount;
 		_vertexTextureCoordinates.allocatedVertexCapacity = vtxCount;
 		for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) {
@@ -554,8 +554,8 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 		[_vertexTangents copyVertices: vtxCount from: srcIdx to: dstIdx];
 		[_vertexBitangents copyVertices: vtxCount from: srcIdx to: dstIdx];
 		[_vertexColors copyVertices: vtxCount from: srcIdx to: dstIdx];
-		[_vertexMatrixIndices copyVertices: vtxCount from: srcIdx to: dstIdx];
-		[_vertexWeights copyVertices: vtxCount from: srcIdx to: dstIdx];
+		[_vertexBoneIndices copyVertices: vtxCount from: srcIdx to: dstIdx];
+		[_vertexBoneWeights copyVertices: vtxCount from: srcIdx to: dstIdx];
 		[_vertexPointSizes copyVertices: vtxCount from: srcIdx to: dstIdx];
 		[_vertexTextureCoordinates copyVertices: vtxCount from: srcIdx to: dstIdx];
 		for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) {
@@ -592,8 +592,8 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 	if (self.hasVertexTangents) [self setVertexTangent: [srcMesh vertexTangentAt: srcIdx] at: dstIdx];
 	if (self.hasVertexBitangents) [self setVertexBitangent: [srcMesh vertexBitangentAt: srcIdx] at: dstIdx];
 	if (self.hasVertexColors) [self setVertexColor4F: [srcMesh vertexColor4FAt: srcIdx] at: dstIdx];
-	if (self.hasVertexWeights) [self setVertexWeights: [srcMesh vertexWeightsAt: srcIdx] at: dstIdx];
-	if (self.hasVertexMatrixIndices) [self setVertexMatrixIndices: [srcMesh vertexMatrixIndicesAt: srcIdx] at: dstIdx];
+	if (self.hasVertexBoneWeights) [self setVertexBoneWeights: [srcMesh vertexBoneWeightsAt: srcIdx] at: dstIdx];
+	if (self.hasVertexBoneIndices) [self setVertexBoneIndices: [srcMesh vertexBoneIndicesAt: srcIdx] at: dstIdx];
 	if (self.hasVertexPointSizes) [self setVertexPointSize: [srcMesh vertexPointSizeAt: srcIdx] at: dstIdx];
 	GLuint tcCount = self.textureCoordinatesArrayCount;
 	for (GLuint i = 0; i < tcCount; i++) {
@@ -652,8 +652,8 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 	_vertexTangents.vertexCount = vCount;
 	_vertexBitangents.vertexCount = vCount;
 	_vertexColors.vertexCount = vCount;
-	_vertexMatrixIndices.vertexCount = vCount;
-	_vertexWeights.vertexCount = vCount;
+	_vertexBoneIndices.vertexCount = vCount;
+	_vertexBoneWeights.vertexCount = vCount;
 	_vertexPointSizes.vertexCount = vCount;
 	_vertexTextureCoordinates.vertexCount = vCount;
 	for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) {
@@ -720,41 +720,41 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 	[_vertexColors setColor4B: aColor at: index];
 }
 
--(GLuint) vertexUnitCount { return _vertexWeights ? _vertexWeights.elementSize : 0; }
+-(GLuint) vertexBoneCount { return _vertexBoneWeights ? _vertexBoneWeights.elementSize : 0; }
 
--(GLfloat) vertexWeightForVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
-	return _vertexWeights ? [_vertexWeights weightForVertexUnit: vertexUnit at: index] : 0.0f;
+-(GLfloat) vertexWeightForBoneInfluence: (GLuint) influenceIndex at: (GLuint) vtxIndex {
+	return _vertexBoneWeights ? [_vertexBoneWeights weightForBoneInfluence: influenceIndex at: vtxIndex] : 0.0f;
 }
 
--(void) setVertexWeight: (GLfloat) aWeight forVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
-	[_vertexWeights setWeight: aWeight forVertexUnit: vertexUnit at: index];
+-(void) setVertexWeight: (GLfloat) weight forBoneInfluence: (GLuint) influenceIndex at: (GLuint) vtxIndex {
+	[_vertexBoneWeights setWeight: weight forBoneInfluence: influenceIndex at: vtxIndex];
 }
 
--(GLfloat*) vertexWeightsAt: (GLuint) index {
-	return _vertexWeights ? [_vertexWeights weightsAt: index] : NULL;
+-(GLfloat*) vertexBoneWeightsAt: (GLuint) vtxIndex {
+	return _vertexBoneWeights ? [_vertexBoneWeights boneWeightsAt: vtxIndex] : NULL;
 }
 
--(void) setVertexWeights: (GLfloat*) weights at: (GLuint) index {
-	[_vertexWeights setWeights: weights at: index];
+-(void) setVertexBoneWeights: (GLfloat*) weights at: (GLuint) vtxIndex {
+	[_vertexBoneWeights setBoneWeights: weights at: vtxIndex];
 }
 
--(GLuint) vertexMatrixIndexForVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
-	return _vertexMatrixIndices ? [_vertexMatrixIndices matrixIndexForVertexUnit: vertexUnit at: index] : 0;
+-(GLuint) vertexBoneIndexForBoneInfluence: (GLuint) influenceIndex at: (GLuint) vtxIndex {
+	return _vertexBoneIndices ? [_vertexBoneIndices boneIndexForBoneInfluence: influenceIndex at: vtxIndex] : 0;
 }
 
--(void) setVertexMatrixIndex: (GLuint) aMatrixIndex forVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
-	[_vertexMatrixIndices setMatrixIndex: aMatrixIndex forVertexUnit: vertexUnit at: index];
+-(void) setVertexBoneIndex: (GLuint) boneIndex forBoneInfluence: (GLuint) influenceIndex at: (GLuint) vtxIndex {
+	[_vertexBoneIndices setBoneIndex: boneIndex forBoneInfluence: influenceIndex at: vtxIndex];
 }
 
--(GLvoid*) vertexMatrixIndicesAt: (GLuint) index {
-	return _vertexMatrixIndices ? [_vertexMatrixIndices matrixIndicesAt: index] : NULL;
+-(GLvoid*) vertexBoneIndicesAt: (GLuint) vtxIndex {
+	return _vertexBoneIndices ? [_vertexBoneIndices boneIndicesAt: vtxIndex] : NULL;
 }
 
--(void) setVertexMatrixIndices: (GLvoid*) mtxIndices at: (GLuint) index {
-	[_vertexMatrixIndices setMatrixIndices: mtxIndices at: index];
+-(void) setVertexBoneIndices: (GLvoid*) boneIndices at: (GLuint) vtxIndex {
+	[_vertexBoneIndices setBoneIndices: boneIndices at: vtxIndex];
 }
 
--(GLenum) matrixIndexType { return _vertexMatrixIndices.elementType; }
+-(GLenum) vertexBoneIndexType { return _vertexBoneIndices.elementType; }
 
 -(GLfloat) vertexPointSizeAt: (GLuint) vtxIndex {
 	return _vertexPointSizes ? [_vertexPointSizes pointSizeAt: vtxIndex] : 0.0f;
@@ -925,8 +925,8 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 		_vertexTangents.bufferID = commonBufferId;
 		_vertexBitangents.bufferID = commonBufferId;
 		_vertexColors.bufferID = commonBufferId;
-		_vertexMatrixIndices.bufferID = commonBufferId;
-		_vertexWeights.bufferID = commonBufferId;
+		_vertexBoneIndices.bufferID = commonBufferId;
+		_vertexBoneWeights.bufferID = commonBufferId;
 		_vertexPointSizes.bufferID = _vertexLocations.bufferID;
 		_vertexTextureCoordinates.bufferID = commonBufferId;
 		for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) otc.bufferID = commonBufferId;
@@ -935,8 +935,8 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 		[_vertexTangents createGLBuffer];
 		[_vertexBitangents createGLBuffer];
 		[_vertexColors createGLBuffer];
-		[_vertexMatrixIndices createGLBuffer];
-		[_vertexWeights createGLBuffer];
+		[_vertexBoneIndices createGLBuffer];
+		[_vertexBoneWeights createGLBuffer];
 		[_vertexPointSizes createGLBuffer];
 		[_vertexTextureCoordinates createGLBuffer];
 		for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) [otc createGLBuffer];
@@ -950,8 +950,8 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 	[_vertexTangents deleteGLBuffer];
 	[_vertexBitangents deleteGLBuffer];
 	[_vertexColors deleteGLBuffer];
-	[_vertexMatrixIndices deleteGLBuffer];
-	[_vertexWeights deleteGLBuffer];
+	[_vertexBoneIndices deleteGLBuffer];
+	[_vertexBoneWeights deleteGLBuffer];
 	[_vertexPointSizes deleteGLBuffer];
 	[_vertexTextureCoordinates deleteGLBuffer];
 	for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) [otc deleteGLBuffer];
@@ -964,8 +964,8 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 	if (_vertexTangents && _vertexTangents.isUsingGLBuffer) return YES;
 	if (_vertexBitangents && _vertexBitangents.isUsingGLBuffer) return YES;
 	if (_vertexColors && _vertexColors.isUsingGLBuffer) return YES;
-	if (_vertexMatrixIndices && _vertexMatrixIndices.isUsingGLBuffer) return YES;
-	if (_vertexWeights && _vertexWeights.isUsingGLBuffer) return YES;
+	if (_vertexBoneIndices && _vertexBoneIndices.isUsingGLBuffer) return YES;
+	if (_vertexBoneWeights && _vertexBoneWeights.isUsingGLBuffer) return YES;
 	if (_vertexPointSizes && _vertexPointSizes.isUsingGLBuffer) return YES;
 	if (_vertexTextureCoordinates && _vertexTextureCoordinates.isUsingGLBuffer) return YES;
 	for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) if (otc.isUsingGLBuffer) return YES;
@@ -978,8 +978,8 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 	[_vertexTangents releaseRedundantContent];
 	[_vertexBitangents releaseRedundantContent];
 	[_vertexColors releaseRedundantContent];
-	[_vertexMatrixIndices releaseRedundantContent];
-	[_vertexWeights releaseRedundantContent];
+	[_vertexBoneIndices releaseRedundantContent];
+	[_vertexBoneWeights releaseRedundantContent];
 	[_vertexPointSizes releaseRedundantContent];
 	[_vertexTextureCoordinates releaseRedundantContent];
 	for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) [otc releaseRedundantContent];
@@ -995,8 +995,8 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 	[self retainVertexTangents];
 	[self retainVertexBitangents];
 	[self retainVertexColors];
-	[self retainVertexMatrixIndices];
-	[self retainVertexWeights];
+	[self retainVertexBoneIndices];
+	[self retainVertexBoneWeights];
 	[self retainVertexPointSizes];
 	[self retainVertexTextureCoordinates];
 }
@@ -1031,18 +1031,18 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 	_vertexColors.shouldReleaseRedundantContent = NO;
 }
 
--(void) retainVertexMatrixIndices {
-	if ( !self.hasVertexMatrixIndices ) return;
+-(void) retainVertexBoneWeights {
+	if ( !self.hasVertexBoneWeights ) return;
 	
 	if (_shouldInterleaveVertices) [self retainVertexLocations];
-	_vertexMatrixIndices.shouldReleaseRedundantContent = NO;
+	_vertexBoneWeights.shouldReleaseRedundantContent = NO;
 }
 
--(void) retainVertexWeights {
-	if ( !self.hasVertexWeights ) return;
+-(void) retainVertexBoneIndices {
+	if ( !self.hasVertexBoneIndices ) return;
 	
 	if (_shouldInterleaveVertices) [self retainVertexLocations];
-	_vertexWeights.shouldReleaseRedundantContent = NO;
+	_vertexBoneIndices.shouldReleaseRedundantContent = NO;
 }
 
 -(void) retainVertexPointSizes {
@@ -1069,8 +1069,8 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 	[self doNotBufferVertexTangents];
 	[self doNotBufferVertexBitangents];
 	[self doNotBufferVertexColors];
-	[self doNotBufferVertexMatrixIndices];
-	[self doNotBufferVertexWeights];
+	[self doNotBufferVertexBoneIndices];
+	[self doNotBufferVertexBoneWeights];
 	[self doNotBufferVertexPointSizes];
 	[self doNotBufferVertexTextureCoordinates];
 }
@@ -1097,14 +1097,14 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 	_vertexColors.shouldAllowVertexBuffering = NO;
 }
 
--(void) doNotBufferVertexMatrixIndices {
+-(void) doNotBufferVertexBoneWeights {
 	if (_shouldInterleaveVertices) [self doNotBufferVertexLocations];
-	_vertexMatrixIndices.shouldAllowVertexBuffering = NO;
+	_vertexBoneWeights.shouldAllowVertexBuffering = NO;
 }
 
--(void) doNotBufferVertexWeights {
+-(void) doNotBufferVertexBoneIndices {
 	if (_shouldInterleaveVertices) [self doNotBufferVertexLocations];
-	_vertexWeights.shouldAllowVertexBuffering = NO;
+	_vertexBoneIndices.shouldAllowVertexBuffering = NO;
 }
 
 -(void) doNotBufferVertexPointSizes {
@@ -1132,8 +1132,8 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 		[_vertexTangents updateGLBufferStartingAt: offsetIndex forLength: vertexCount];
 		[_vertexBitangents updateGLBufferStartingAt: offsetIndex forLength: vertexCount];
 		[_vertexColors updateGLBufferStartingAt: offsetIndex forLength: vertexCount];
-		[_vertexMatrixIndices updateGLBufferStartingAt: offsetIndex forLength: vertexCount];
-		[_vertexWeights updateGLBufferStartingAt: offsetIndex forLength: vertexCount];
+		[_vertexBoneIndices updateGLBufferStartingAt: offsetIndex forLength: vertexCount];
+		[_vertexBoneWeights updateGLBufferStartingAt: offsetIndex forLength: vertexCount];
 		[_vertexPointSizes updateGLBufferStartingAt: offsetIndex forLength: vertexCount];
 		[_vertexTextureCoordinates updateGLBufferStartingAt: offsetIndex forLength: vertexCount];
 		for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) {
@@ -1154,9 +1154,9 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 
 -(void) updateVertexColorsGLBuffer { [_vertexColors updateGLBuffer]; }
 
--(void) updateVertexWeightsGLBuffer { [_vertexWeights updateGLBuffer]; }
+-(void) updateVertexBoneWeightsGLBuffer { [_vertexBoneWeights updateGLBuffer]; }
 
--(void) updateVertexMatrixIndicesGLBuffer { [_vertexMatrixIndices updateGLBuffer]; }
+-(void) updateVertexBoneIndicesGLBuffer { [_vertexBoneIndices updateGLBuffer]; }
 
 -(void) updateVertexTextureCoordinatesGLBuffer {
 	[self updateVertexTextureCoordinatesGLBufferForTextureUnit: 0];
@@ -1391,8 +1391,8 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 		_vertexTangents = nil;
 		_vertexBitangents = nil;
 		_vertexColors = nil;
-		_vertexMatrixIndices = nil;
-		_vertexWeights = nil;
+		_vertexBoneIndices = nil;
+		_vertexBoneWeights = nil;
 		_vertexPointSizes = nil;
 		_vertexTextureCoordinates = nil;
 		_overlayTextureCoordinates = nil;
@@ -1408,18 +1408,18 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 -(void) populateFrom: (CC3Mesh*) another {
 	[super populateFrom: another];
 	
-	self.faces = another.faces;											// retained but not copied
+	self.faces = another.faces;
 	
 	// Share vertex arrays between copies
-	self.vertexLocations = another.vertexLocations;						// retained but not copied
-	self.vertexNormals = another.vertexNormals;							// retained but not copied
-	self.vertexTangents = another.vertexTangents;						// retained but not copied
-	self.vertexBitangents = another.vertexBitangents;					// retained but not copied
-	self.vertexColors = another.vertexColors;							// retained but not copied
-	self.vertexMatrixIndices = another.vertexMatrixIndices;				// retained but not copied
-	self.vertexWeights = another.vertexWeights;							// retained but not copied
-	self.vertexPointSizes = another.vertexPointSizes;					// retained but not copied
-	self.vertexTextureCoordinates = another.vertexTextureCoordinates;	// retained but not copied
+	self.vertexLocations = another.vertexLocations;
+	self.vertexNormals = another.vertexNormals;
+	self.vertexTangents = another.vertexTangents;
+	self.vertexBitangents = another.vertexBitangents;
+	self.vertexColors = another.vertexColors;
+	self.vertexBoneIndices = another.vertexBoneIndices;
+	self.vertexBoneWeights = another.vertexBoneWeights;
+	self.vertexPointSizes = another.vertexPointSizes;
+	self.vertexTextureCoordinates = another.vertexTextureCoordinates;
 	
 	// Remove any existing overlay textures and add the overlay textures from the other vertex array.
 	[_overlayTextureCoordinates removeAllObjects];
@@ -1428,7 +1428,7 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 		for (CC3VertexTextureCoordinates* otc in otherOTCs)
 			[self addTextureCoordinates: [otc copy]];
 	
-	self.vertexIndices = another.vertexIndices;							// retained but not copied
+	self.vertexIndices = another.vertexIndices;
 	_shouldInterleaveVertices = another.shouldInterleaveVertices;
 	_capacityExpansionFactor = another.capacityExpansionFactor;
 }
@@ -1453,6 +1453,65 @@ static GLuint lastAssignedMeshTag;
 -(GLuint) nextTag { return ++lastAssignedMeshTag; }
 
 +(void) resetTagAllocation { lastAssignedMeshTag = 0; }
+
+
+#pragma mark Deprecated methods
+
+-(CC3VertexBoneIndices*) vertexMatrixIndices { return self.vertexBoneIndices; }
+
+-(void) setVertexMatrixIndices: (CC3VertexBoneIndices*) vtxMtxInd { self.vertexBoneIndices = vtxMtxInd; }
+
+-(BOOL) hasVertexMatrixIndices { return self.hasVertexBoneIndices; }
+
+-(CC3VertexBoneWeights*) vertexWeights { return self.vertexBoneWeights; }
+
+-(void) setVertexWeights: (CC3VertexBoneWeights*) vtxWgts { self.vertexBoneWeights = vtxWgts; }
+
+-(BOOL) hasVertexWeights { return self.hasVertexBoneWeights; }
+
+-(GLuint) vertexUnitCount { return self.vertexBoneCount; }
+
+-(GLfloat) vertexWeightForVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
+	return [self vertexWeightForBoneInfluence: vertexUnit at: index];
+}
+
+-(void) setVertexWeight: (GLfloat) aWeight forVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
+	[self setVertexWeight: aWeight forBoneInfluence: vertexUnit at: index];
+}
+
+-(GLfloat*) vertexWeightsAt: (GLuint) index { return [self vertexBoneWeightsAt: index]; }
+
+-(void) setVertexWeights: (GLfloat*) weights at: (GLuint) index {
+	[self setVertexBoneWeights: weights at: index];
+}
+
+-(GLuint) vertexMatrixIndexForVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
+	return [self vertexBoneIndexForBoneInfluence: vertexUnit at: index];
+}
+
+-(void) setVertexMatrixIndex: (GLuint) aMatrixIndex forVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
+	[self setVertexBoneIndex: aMatrixIndex forBoneInfluence: vertexUnit at: index];
+}
+
+-(GLvoid*) vertexMatrixIndicesAt: (GLuint) index { return [self vertexBoneIndicesAt: index]; }
+
+-(void) setVertexMatrixIndices: (GLvoid*) mtxIndices at: (GLuint) index {
+	[self setVertexBoneIndices: mtxIndices at: index];
+}
+
+-(GLenum) matrixIndexType { return self.vertexBoneIndexType; }
+
+-(void) updateVertexWeightsGLBuffer { [self updateVertexBoneWeightsGLBuffer]; }
+
+-(void) updateVertexMatrixIndicesGLBuffer { [self updateVertexBoneIndicesGLBuffer]; }
+
+-(void) retainVertexWeights { [self retainVertexBoneWeights]; }
+
+-(void) retainVertexMatrixIndices { [self retainVertexBoneIndices]; }
+
+-(void) doNotBufferVertexWeights { [self doNotBufferVertexBoneWeights]; }
+
+-(void) doNotBufferVertexMatrixIndices { [self doNotBufferVertexBoneIndices]; }
 
 @end
 

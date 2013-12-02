@@ -566,14 +566,14 @@
 	[super retainVertexColors];
 }
 
--(void) retainVertexMatrixIndices {
-	[_mesh retainVertexMatrixIndices];
-	[super retainVertexMatrixIndices];
+-(void) retainVertexBoneIndices {
+	[_mesh retainVertexBoneIndices];
+	[super retainVertexBoneIndices];
 }
 
--(void) retainVertexWeights {
-	[_mesh retainVertexWeights];
-	[super retainVertexWeights];
+-(void) retainVertexBoneWeights {
+	[_mesh retainVertexBoneWeights];
+	[super retainVertexBoneWeights];
 }
 
 -(void) retainVertexTextureCoordinates {
@@ -616,14 +616,14 @@
 	[super doNotBufferVertexColors];
 }
 
--(void) doNotBufferVertexMatrixIndices {
-	[_mesh doNotBufferVertexMatrixIndices];
-	[super doNotBufferVertexMatrixIndices];
+-(void) doNotBufferVertexBoneIndices {
+	[_mesh doNotBufferVertexBoneIndices];
+	[super doNotBufferVertexBoneIndices];
 }
 
--(void) doNotBufferVertexWeights {
-	[_mesh doNotBufferVertexWeights];
-	[super doNotBufferVertexWeights];
+-(void) doNotBufferVertexBoneWeights {
+	[_mesh doNotBufferVertexBoneWeights];
+	[super doNotBufferVertexBoneWeights];
 }
 
 -(void) doNotBufferVertexTextureCoordinates {
@@ -956,41 +956,39 @@
 	[_mesh setVertexColor4B: aColor at: index];
 }
 
--(GLuint) vertexUnitCount { return _mesh ? _mesh.vertexUnitCount : 0; }
+-(GLuint) vertexBoneCount { return _mesh ? _mesh.vertexBoneCount : 0; }
 
--(GLfloat) vertexWeightForVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
-	return _mesh ? [_mesh vertexWeightForVertexUnit: vertexUnit at: index] : 0.0f;
+-(GLfloat) vertexWeightForBoneInfluence: (GLuint) influenceIndex at: (GLuint) vtxIndex {
+	return _mesh ? [_mesh vertexWeightForBoneInfluence: influenceIndex at: vtxIndex] : 0.0f;
 }
 
--(void) setVertexWeight: (GLfloat) aWeight forVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
-	[_mesh setVertexWeight: aWeight forVertexUnit: vertexUnit at: index];
+-(void) setVertexWeight: (GLfloat) weight forBoneInfluence: (GLuint) influenceIndex at: (GLuint) vtxIndex {
+	[_mesh setVertexWeight: weight forBoneInfluence: influenceIndex at: vtxIndex];
 }
 
--(GLfloat*) vertexWeightsAt: (GLuint) index { return _mesh ? [_mesh vertexWeightsAt: index] : NULL; }
+-(GLfloat*) vertexBoneWeightsAt: (GLuint) vtxIndex { return _mesh ? [_mesh vertexBoneWeightsAt: vtxIndex] : NULL; }
 
--(void) setVertexWeights: (GLfloat*) weights at: (GLuint) index {
-	[_mesh setVertexWeights: weights at: index];
+-(void) setVertexBoneWeights: (GLfloat*) weights at: (GLuint) vtxIndex {
+	[_mesh setVertexBoneWeights: weights at: vtxIndex];
 }
 
--(GLuint) vertexMatrixIndexForVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
-	return _mesh ? [_mesh vertexMatrixIndexForVertexUnit: vertexUnit at: index] : 0;
+-(GLuint) vertexBoneIndexForBoneInfluence: (GLuint) influenceIndex at: (GLuint) vtxIndex {
+	return _mesh ? [_mesh vertexBoneIndexForBoneInfluence: influenceIndex at: vtxIndex] : 0;
 }
 
--(void) setVertexMatrixIndex: (GLuint) aMatrixIndex
-			   forVertexUnit: (GLuint) vertexUnit
-						  at: (GLuint) index {
-	[_mesh setVertexMatrixIndex: aMatrixIndex forVertexUnit: vertexUnit at: index];
+-(void) setVertexBoneIndex: (GLuint) boneIndex forBoneInfluence: (GLuint) influenceIndex at: (GLuint) vtxIndex {
+	[_mesh setVertexBoneIndex: boneIndex forBoneInfluence: influenceIndex at: vtxIndex];
 }
 
--(GLvoid*) vertexMatrixIndicesAt: (GLuint) index {
-	return _mesh ? [_mesh vertexMatrixIndicesAt: index] : NULL;
+-(GLvoid*) vertexBoneIndicesAt: (GLuint) vtxIndex {
+	return _mesh ? [_mesh vertexBoneIndicesAt: vtxIndex] : NULL;
 }
 
--(void) setVertexMatrixIndices: (GLvoid*) mtxIndices at: (GLuint) index {
-	[_mesh setVertexMatrixIndices: mtxIndices at: index];
+-(void) setVertexBoneIndices: (GLvoid*) boneIndices at: (GLuint) vtxIndex {
+	[_mesh setVertexBoneIndices: boneIndices at: vtxIndex];
 }
 
--(GLenum) matrixIndexType { return _mesh.matrixIndexType; }
+-(GLenum) vertexBoneIndexType { return _mesh.vertexBoneIndexType; }
 
 -(ccTex2F) vertexTexCoord2FForTextureUnit: (GLuint) texUnit at: (GLuint) index {
 	return _mesh ? [_mesh vertexTexCoord2FForTextureUnit: texUnit at: index] : (ccTex2F){ 0.0, 0.0 };
@@ -1034,9 +1032,9 @@
 
 -(void) updateVertexColorsGLBuffer { [_mesh updateVertexColorsGLBuffer]; }
 
--(void) updateVertexMatrixIndicesGLBuffer { [_mesh updateVertexMatrixIndicesGLBuffer]; }
+-(void) updateVertexBoneWeightsGLBuffer { [_mesh updateVertexBoneWeightsGLBuffer]; }
 
--(void) updateVertexWeightsGLBuffer { [_mesh updateVertexWeightsGLBuffer]; }
+-(void) updateVertexBoneIndicesGLBuffer { [_mesh updateVertexBoneIndicesGLBuffer]; }
 
 -(void) updateVertexTextureCoordinatesGLBufferForTextureUnit: (GLuint) texUnit {
 	[_mesh updateVertexTextureCoordinatesGLBufferForTextureUnit: texUnit];
@@ -1143,6 +1141,46 @@ globalIntersections: (CC3MeshIntersection*) intersections
 
 	return hitCount;
 }
+
+-(GLuint) vertexUnitCount { return self.vertexBoneCount; }
+
+-(GLfloat) vertexWeightForVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
+	return _mesh ? [_mesh vertexWeightForVertexUnit: vertexUnit at: index] : 0.0f;
+}
+
+-(void) setVertexWeight: (GLfloat) aWeight forVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
+	[_mesh setVertexWeight: aWeight forVertexUnit: vertexUnit at: index];
+}
+
+-(GLfloat*) vertexWeightsAt: (GLuint) index { return _mesh ? [_mesh vertexWeightsAt: index] : NULL; }
+
+-(void) setVertexWeights: (GLfloat*) weights at: (GLuint) index {
+	[_mesh setVertexWeights: weights at: index];
+}
+
+-(GLuint) vertexMatrixIndexForVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
+	return _mesh ? [_mesh vertexMatrixIndexForVertexUnit: vertexUnit at: index] : 0;
+}
+
+-(void) setVertexMatrixIndex: (GLuint) aMatrixIndex
+			   forVertexUnit: (GLuint) vertexUnit
+						  at: (GLuint) index {
+	[_mesh setVertexMatrixIndex: aMatrixIndex forVertexUnit: vertexUnit at: index];
+}
+
+-(GLvoid*) vertexMatrixIndicesAt: (GLuint) index {
+	return _mesh ? [_mesh vertexMatrixIndicesAt: index] : NULL;
+}
+
+-(void) setVertexMatrixIndices: (GLvoid*) mtxIndices at: (GLuint) index {
+	[_mesh setVertexMatrixIndices: mtxIndices at: index];
+}
+
+-(GLenum) matrixIndexType { return _mesh.matrixIndexType; }
+
+-(void) updateVertexWeightsGLBuffer { [self updateVertexBoneWeightsGLBuffer]; }
+
+-(void) updateVertexMatrixIndicesGLBuffer { [self updateVertexBoneIndicesGLBuffer]; }
 
 @end
 

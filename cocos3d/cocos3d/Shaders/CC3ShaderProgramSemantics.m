@@ -53,8 +53,8 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		case kCC3SemanticVertexBitangent: return @"kCC3SemanticVertexBitangent";
 		case kCC3SemanticVertexColor: return @"kCC3SemanticVertexColor";
 		case kCC3SemanticVertexPointSize: return @"kCC3SemanticVertexPointSize";
-		case kCC3SemanticVertexWeights: return @"kCC3SemanticVertexWeights";
-		case kCC3SemanticVertexMatrixIndices: return @"kCC3SemanticVertexMatrixIndices";
+		case kCC3SemanticVertexBoneWeights: return @"kCC3SemanticVertexBoneWeights";
+		case kCC3SemanticVertexBoneIndices: return @"kCC3SemanticVertexBoneIndices";
 		case kCC3SemanticVertexTexture: return @"kCC3SemanticVertexTexture";
 			
 		case kCC3SemanticHasVertexNormal: return @"kCC3SemanticHasVertexNormal";
@@ -172,8 +172,8 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		case kCC3SemanticBoundingRadius: return @"kCC3SemanticBoundingRadius";
 			
 		// BONE SKINNING
-		case kCC3SemanticBonesPerVertex: return @"kCC3SemanticBonesPerVertex";
-		case kCC3SemanticBoneCount: return @"kCC3SemanticBoneCount";
+		case kCC3SemanticVertexBoneCount: return @"kCC3SemanticVertexBoneCount";
+		case kCC3SemanticMeshBoneCount: return @"kCC3SemanticMeshBoneCount";
 
 		// BONE SKINNING MATRICES
 		case kCC3SemanticBoneMatricesGlobal: return @"kCC3SemanticBoneMatricesGlobal";
@@ -266,7 +266,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		case kCC3SemanticDrawCountCurrentFrame:
 		case kCC3SemanticRandomNumber:
 
-		case kCC3SemanticBoneCount:
+		case kCC3SemanticMeshBoneCount:
 
 		case kCC3SemanticBoneMatricesGlobal:
 		case kCC3SemanticBoneMatricesInvTranGlobal:
@@ -391,10 +391,10 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			[uniform setBoolean: visitor.currentMesh.hasVertexColors];
 			return YES;
 		case kCC3SemanticHasVertexWeight:
-			[uniform setBoolean: visitor.currentMesh.hasVertexWeights];
+			[uniform setBoolean: visitor.currentMesh.hasVertexBoneWeights];
 			return YES;
 		case kCC3SemanticHasVertexMatrixIndex:
-			[uniform setBoolean: visitor.currentMesh.hasVertexMatrixIndices];
+			[uniform setBoolean: visitor.currentMesh.hasVertexBoneIndices];
 			return YES;
 		case kCC3SemanticHasVertexTextureCoordinate:
 			[uniform setBoolean: visitor.currentMesh.hasVertexTextureCoordinates];
@@ -526,10 +526,10 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			
 #pragma mark Setting skinning semantics
 		// BONE SKINNING ----------------
-		case kCC3SemanticBonesPerVertex:
-			[uniform setInteger: visitor.currentMeshNode.vertexUnitCount];
+		case kCC3SemanticVertexBoneCount:
+			[uniform setInteger: visitor.currentMeshNode.vertexBoneCount];
 			return YES;
-		case kCC3SemanticBoneCount:
+		case kCC3SemanticMeshBoneCount:
 			[uniform setInteger: visitor.currentSkinSection.boneCount];
 			return YES;
 
@@ -1179,8 +1179,8 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVarName: @"a_cc3Tangent" toSemantic: kCC3SemanticVertexTangent];				/**< Vertex tangent. */
 	[self mapVarName: @"a_cc3Bitangent" toSemantic: kCC3SemanticVertexBitangent];			/**< Vertex bitangent (aka binormal). */
 	[self mapVarName: @"a_cc3Color" toSemantic: kCC3SemanticVertexColor];					/**< Vertex color. */
-	[self mapVarName: @"a_cc3BoneWeights" toSemantic: kCC3SemanticVertexWeights];			/**< Vertex skinning bone weights (up to 4). */
-	[self mapVarName: @"a_cc3BoneIndices" toSemantic: kCC3SemanticVertexMatrixIndices];		/**< Vertex skinning bone matrix indices (up to 4). */
+	[self mapVarName: @"a_cc3BoneWeights" toSemantic: kCC3SemanticVertexBoneWeights];			/**< Vertex skinning bone weights (up to 4). */
+	[self mapVarName: @"a_cc3BoneIndices" toSemantic: kCC3SemanticVertexBoneIndices];		/**< Vertex skinning bone matrix indices (up to 4). */
 	[self mapVarName: @"a_cc3PointSize" toSemantic: kCC3SemanticVertexPointSize];			/**< Vertex point size. */
 	
 	// If only one texture coordinate attribute is used, the index suffix ("a_cc3TexCoordN") is optional.
@@ -1233,28 +1233,27 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVarName: @"u_cc3MatrixModelViewProjInvTran" toSemantic: kCC3SemanticModelViewProjMatrixInvTran];	/**< (mat3) Inverse-transpose of current model-view-projection matrix. */
 	
 	// BONE SKINNING ----------------
-	[self mapVarName: @"u_cc3BonesPerVertex" toSemantic: kCC3SemanticBonesPerVertex];							/**< (int) Number of bones influencing each vertex (ie- number of weights/matrices specified on each vertex) */
-	[self mapVarName: @"u_cc3BoneCount" toSemantic: kCC3SemanticBoneCount];										/**< (int) Length of the bone arrays for the current skin section. */
+	[self mapVarName: @"u_cc3VertexBoneCount" toSemantic: kCC3SemanticVertexBoneCount];							/**< (int) Number of bones influencing each vertex (ie- number of bone-weights & bone-indices specified on each vertex) */
+	[self mapVarName: @"u_cc3MeshBoneCount" toSemantic: kCC3SemanticMeshBoneCount];								/**< (int) Number of bones that are being used by the current skin section. */
 
 	// BONE SKINNING MATRICES ----------------
-	[self mapVarName: @"u_cc3BoneMatrixCount" toSemantic: kCC3SemanticBoneCount];								/**< (int) @deprecated Replaced with u_cc3BoneCount. */
-	[self mapVarName: @"u_cc3BoneMatricesGlobal" toSemantic: kCC3SemanticBoneMatricesGlobal];					/**< (mat4[]) Array of bone matrices in the current mesh skin section in global coordinates (length of array is specified by u_cc3BoneCount). */
-	[self mapVarName: @"u_cc3BoneMatricesInvTranGlobal" toSemantic: kCC3SemanticBoneMatricesInvTranGlobal];		/**< (mat3[]) Array of inverse-transposes of the bone matrices in the current mesh skin section in global coordinates (length of array is specified by u_cc3BoneCount). */
-	[self mapVarName: @"u_cc3BoneMatricesEyeSpace" toSemantic: kCC3SemanticBoneMatricesEyeSpace];				/**< (mat4[]) Array of bone matrices in the current mesh skin section in eye space (length of array is specified by u_cc3BoneCount). */
-	[self mapVarName: @"u_cc3BoneMatricesInvTranEyeSpace" toSemantic: kCC3SemanticBoneMatricesInvTranEyeSpace];	/**< (mat3[]) Array of inverse-transposes of the bone matrices in the current mesh skin section in eye space (length of array is specified by u_cc3BoneCount). */
-	[self mapVarName: @"u_cc3BoneMatricesModel" toSemantic: kCC3SemanticBoneMatricesModelSpace];				/**< (mat4[]) Array of bone matrices in the current mesh skin section in model space (length of array is specified by u_cc3BoneCount). */
-	[self mapVarName: @"u_cc3BoneMatricesInvTranModel" toSemantic: kCC3SemanticBoneMatricesInvTranModelSpace];	/**< (mat3[]) Array of inverse-transposes of the bone matrices in the current mesh skin section in model space (length of array is specified by u_cc3BoneCount). */
+	[self mapVarName: @"u_cc3BoneMatricesGlobal" toSemantic: kCC3SemanticBoneMatricesGlobal];					/**< (mat4[]) Array of bone matrices in the current mesh skin section in global coordinates (length of array is specified by u_cc3MeshBoneCount). */
+	[self mapVarName: @"u_cc3BoneMatricesInvTranGlobal" toSemantic: kCC3SemanticBoneMatricesInvTranGlobal];		/**< (mat3[]) Array of inverse-transposes of the bone matrices in the current mesh skin section in global coordinates (length of array is specified by u_cc3MeshBoneCount). */
+	[self mapVarName: @"u_cc3BoneMatricesEyeSpace" toSemantic: kCC3SemanticBoneMatricesEyeSpace];				/**< (mat4[]) Array of bone matrices in the current mesh skin section in eye space (length of array is specified by u_cc3MeshBoneCount). */
+	[self mapVarName: @"u_cc3BoneMatricesInvTranEyeSpace" toSemantic: kCC3SemanticBoneMatricesInvTranEyeSpace];	/**< (mat3[]) Array of inverse-transposes of the bone matrices in the current mesh skin section in eye space (length of array is specified by u_cc3MeshBoneCount). */
+	[self mapVarName: @"u_cc3BoneMatricesModel" toSemantic: kCC3SemanticBoneMatricesModelSpace];				/**< (mat4[]) Array of bone matrices in the current mesh skin section in model space (length of array is specified by u_cc3MeshBoneCount). */
+	[self mapVarName: @"u_cc3BoneMatricesInvTranModel" toSemantic: kCC3SemanticBoneMatricesInvTranModelSpace];	/**< (mat3[]) Array of inverse-transposes of the bone matrices in the current mesh skin section in model space (length of array is specified by u_cc3MeshBoneCount). */
 
 	// BONE SKINNING DISCRETE TRANSFORMS
-	[self mapVarName: @"u_cc3BoneQuaternionsGlobal" toSemantic: kCC3SemanticBoneQuaternionsGlobal];				/**< (vec4[]) Array of bone quaternions in the current mesh skin section in global coordinates (length of array is specified by u_cc3BoneCount). */
-	[self mapVarName: @"u_cc3BoneTranslationsGlobal" toSemantic: kCC3SemanticBoneTranslationsGlobal];			/**< (vec3[]) Array of bone translations in the current mesh skin section in global coordinates (length of array is specified by u_cc3BoneCount). */
-	[self mapVarName: @"u_cc3BoneScalesGlobal" toSemantic: kCC3SemanticBoneScalesGlobal];						/**< (vec3[]) Array of bone scales in the current mesh skin section in global coordinates (length of array is specified by u_cc3BoneCount). */
-	[self mapVarName: @"u_cc3BoneQuaternionsEyeSpace" toSemantic: kCC3SemanticBoneQuaternionsEyeSpace];			/**< (vec4[]) Array of bone quaternions in the current mesh skin section in eye space (length of array is specified by u_cc3BoneCount). */
-	[self mapVarName: @"u_cc3BoneTranslationsEyeSpace" toSemantic: kCC3SemanticBoneTranslationsEyeSpace];		/**< (vec3[]) Array of bone translations in the current mesh skin section in eye space (length of array is specified by u_cc3BoneCount). */
-	[self mapVarName: @"u_cc3BoneScalesEyeSpace" toSemantic: kCC3SemanticBoneScalesEyeSpace];					/**< (vec3[]) Array of bone scales in the current mesh skin section in eye space (length of array is specified by u_cc3BoneCount). */
-	[self mapVarName: @"u_cc3BoneQuaternionsModelSpace" toSemantic: kCC3SemanticBoneQuaternionsModelSpace];		/**< (vec4[]) Array of bone quaternions in the current mesh skin section in model space (length of array is specified by u_cc3BoneCount). */
-	[self mapVarName: @"u_cc3BoneTranslationsModelSpace" toSemantic: kCC3SemanticBoneTranslationsModelSpace];	/**< (vec3[]) Array of bone translations in the current mesh skin section in model space (length of array is specified by u_cc3BoneCount). */
-	[self mapVarName: @"u_cc3BoneScalesModelSpace" toSemantic: kCC3SemanticBoneScalesModelSpace];				/**< (vec3[]) Array of bone scales in the current mesh skin section in model space (length of array is specified by u_cc3BoneCount). */
+	[self mapVarName: @"u_cc3BoneQuaternionsGlobal" toSemantic: kCC3SemanticBoneQuaternionsGlobal];				/**< (vec4[]) Array of bone quaternions in the current mesh skin section in global coordinates (length of array is specified by u_cc3MeshBoneCount). */
+	[self mapVarName: @"u_cc3BoneTranslationsGlobal" toSemantic: kCC3SemanticBoneTranslationsGlobal];			/**< (vec3[]) Array of bone translations in the current mesh skin section in global coordinates (length of array is specified by u_cc3MeshBoneCount). */
+	[self mapVarName: @"u_cc3BoneScalesGlobal" toSemantic: kCC3SemanticBoneScalesGlobal];						/**< (vec3[]) Array of bone scales in the current mesh skin section in global coordinates (length of array is specified by u_cc3MeshBoneCount). */
+	[self mapVarName: @"u_cc3BoneQuaternionsEyeSpace" toSemantic: kCC3SemanticBoneQuaternionsEyeSpace];			/**< (vec4[]) Array of bone quaternions in the current mesh skin section in eye space (length of array is specified by u_cc3MeshBoneCount). */
+	[self mapVarName: @"u_cc3BoneTranslationsEyeSpace" toSemantic: kCC3SemanticBoneTranslationsEyeSpace];		/**< (vec3[]) Array of bone translations in the current mesh skin section in eye space (length of array is specified by u_cc3MeshBoneCount). */
+	[self mapVarName: @"u_cc3BoneScalesEyeSpace" toSemantic: kCC3SemanticBoneScalesEyeSpace];					/**< (vec3[]) Array of bone scales in the current mesh skin section in eye space (length of array is specified by u_cc3MeshBoneCount). */
+	[self mapVarName: @"u_cc3BoneQuaternionsModelSpace" toSemantic: kCC3SemanticBoneQuaternionsModelSpace];		/**< (vec4[]) Array of bone quaternions in the current mesh skin section in model space (length of array is specified by u_cc3MeshBoneCount). */
+	[self mapVarName: @"u_cc3BoneTranslationsModelSpace" toSemantic: kCC3SemanticBoneTranslationsModelSpace];	/**< (vec3[]) Array of bone translations in the current mesh skin section in model space (length of array is specified by u_cc3MeshBoneCount). */
+	[self mapVarName: @"u_cc3BoneScalesModelSpace" toSemantic: kCC3SemanticBoneScalesModelSpace];				/**< (vec3[]) Array of bone scales in the current mesh skin section in model space (length of array is specified by u_cc3MeshBoneCount). */
 	
 	// CAMERA -----------------
 	[self mapVarName: @"u_cc3CameraPositionGlobal" toSemantic: kCC3SemanticCameraLocationGlobal];		/**< (vec3) Location of the camera in global coordinates. */
@@ -1355,15 +1354,18 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVarName: @"u_cc3SceneTimeCos" toSemantic: kCC3SemanticSceneTimeCosine];	/**< (vec4) Cosine of the scene time (cos(T), cos(T/2), cos(T/4), cos(T/8)). */
 	[self mapVarName: @"u_cc3SceneTimeTan" toSemantic: kCC3SemanticSceneTimeTangent];	/**< (vec4) Tangent of the scene time (tan(T), tan(T/2), tan(T/4), tan(T/8)). */
 
-	[self mapVarName: @"u_cc3AppTime" toSemantic: kCC3SemanticSceneTime];				/**< @deprecated Use u_cc3SceneTime instead. */
-	[self mapVarName: @"u_cc3AppTimeSine" toSemantic: kCC3SemanticSceneTimeSine];		/**< @deprecated Use u_cc3SceneTimeSin instead. */
-	[self mapVarName: @"u_cc3AppTimeCosine" toSemantic: kCC3SemanticSceneTimeCosine];	/**< @deprecated Use u_cc3SceneTimeCos instead. */
-	[self mapVarName: @"u_cc3AppTimeTangent" toSemantic: kCC3SemanticSceneTimeTangent];	/**< @deprecated Use u_cc3SceneTimeTan instead. */
-
 	// MISC ENVIRONMENT --------
 	[self mapVarName: @"u_cc3DrawCount" toSemantic: kCC3SemanticDrawCountCurrentFrame];		/**< (int) The number of draw calls so far in this frame. */
 	[self mapVarName: @"u_cc3Random" toSemantic: kCC3SemanticRandomNumber];					/**< (float) A random number between 0 and 1. */
 
+	// DEPRECATED ------------------
+	[self mapVarName: @"u_cc3BonesPerVertex" toSemantic: kCC3SemanticVertexBoneCount];	/**< @deprecated Replaced with u_cc3VertexBoneCount. */
+	[self mapVarName: @"u_cc3BoneCount" toSemantic: kCC3SemanticMeshBoneCount];			/**< @deprecated Replaced with u_cc3MeshBoneCount. */
+	[self mapVarName: @"u_cc3BoneMatrixCount" toSemantic: kCC3SemanticMeshBoneCount];	/**< @deprecated Replaced with u_cc3MeshBoneCount. */
+	[self mapVarName: @"u_cc3AppTime" toSemantic: kCC3SemanticSceneTime];				/**< @deprecated Use u_cc3SceneTime instead. */
+	[self mapVarName: @"u_cc3AppTimeSine" toSemantic: kCC3SemanticSceneTimeSine];		/**< @deprecated Use u_cc3SceneTimeSin instead. */
+	[self mapVarName: @"u_cc3AppTimeCosine" toSemantic: kCC3SemanticSceneTimeCosine];	/**< @deprecated Use u_cc3SceneTimeCos instead. */
+	[self mapVarName: @"u_cc3AppTimeTangent" toSemantic: kCC3SemanticSceneTimeTangent];	/**< @deprecated Use u_cc3SceneTimeTan instead. */
 }
 
 -(void) populateWithStructuredVariableNameMappings {
@@ -1374,8 +1376,8 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVarName: @"a_cc3Tangent" toSemantic: kCC3SemanticVertexTangent];				/**< Vertex tangent. */
 	[self mapVarName: @"a_cc3Bitangent" toSemantic: kCC3SemanticVertexBitangent];			/**< Vertex bitangent (aka binormal). */
 	[self mapVarName: @"a_cc3Color" toSemantic: kCC3SemanticVertexColor];					/**< Vertex color. */
-	[self mapVarName: @"a_cc3BoneWeights" toSemantic: kCC3SemanticVertexWeights];			/**< Vertex skinning bone weights (up to 4). */
-	[self mapVarName: @"a_cc3BoneIndices" toSemantic: kCC3SemanticVertexMatrixIndices];		/**< Vertex skinning bone matrix indices (up to 4). */
+	[self mapVarName: @"a_cc3BoneWeights" toSemantic: kCC3SemanticVertexBoneWeights];			/**< Vertex skinning bone weights (up to 4). */
+	[self mapVarName: @"a_cc3BoneIndices" toSemantic: kCC3SemanticVertexBoneIndices];		/**< Vertex skinning bone matrix indices (up to 4). */
 	[self mapVarName: @"a_cc3PointSize" toSemantic: kCC3SemanticVertexPointSize];			/**< Vertex point size. */
 	
 	// If only one texture coordinate attribute is used, the index suffix ("a_cc3TexCoordN") is optional.
@@ -1427,8 +1429,8 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVarName: @"u_cc3Matrices.modelViewProjInvTran" toSemantic: kCC3SemanticModelViewProjMatrixInvTran];/**< (mat3) Inverse-transpose of current model-view-projection matrix. */
 	
 	// SKINNING ----------------
-	[self mapVarName: @"u_cc3Bones.bonesPerVertex" toSemantic: kCC3SemanticBonesPerVertex];							/**< (int) Number of bones influencing each vertex (ie- number of weights/matrices specified on each vertex) */
-	[self mapVarName: @"u_cc3Bones.matrixCount" toSemantic: kCC3SemanticBoneCount];							/**< (int) Number of matrices in the matrix arrays in this structure. */
+	[self mapVarName: @"u_cc3Bones.bonesPerVertex" toSemantic: kCC3SemanticVertexBoneCount];							/**< (int) Number of bones influencing each vertex (ie- number of weights/matrices specified on each vertex) */
+	[self mapVarName: @"u_cc3Bones.matrixCount" toSemantic: kCC3SemanticMeshBoneCount];							/**< (int) Number of matrices in the matrix arrays in this structure. */
 	[self mapVarName: @"u_cc3Bones.matricesEyeSpace" toSemantic: kCC3SemanticBoneMatricesEyeSpace];					/**< (mat4[]) Array of bone matrices in the current mesh skin section in eye space. */
 	[self mapVarName: @"u_cc3Bones.matricesInvTranEyeSpace" toSemantic: kCC3SemanticBoneMatricesInvTranEyeSpace];	/**< (mat3[]) Array of inverse-transposes of the bone matrices in the current mesh skin section in eye space. */
 	[self mapVarName: @"u_cc3Bones.matricesGlobal" toSemantic: kCC3SemanticBoneMatricesGlobal];						/**< (mat4[]) Array of bone matrices in the current mesh skin section in global coordinates. */
@@ -1537,8 +1539,8 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVarName: @"a_cc3Tangent" toSemantic: kCC3SemanticVertexTangent];				/**< Vertex tangent. */
 	[self mapVarName: @"a_cc3Bitangent" toSemantic: kCC3SemanticVertexBitangent];			/**< Vertex bitangent (aka binormal). */
 	[self mapVarName: @"a_cc3Color" toSemantic: kCC3SemanticVertexColor];					/**< Vertex color. */
-	[self mapVarName: @"a_cc3BoneWeights" toSemantic: kCC3SemanticVertexWeights];			/**< Vertex skinning bone weights (up to 4). */
-	[self mapVarName: @"a_cc3BoneIndices" toSemantic: kCC3SemanticVertexMatrixIndices];		/**< Vertex skinning bone matrix indices (up to 4). */
+	[self mapVarName: @"a_cc3BoneWeights" toSemantic: kCC3SemanticVertexBoneWeights];			/**< Vertex skinning bone weights (up to 4). */
+	[self mapVarName: @"a_cc3BoneIndices" toSemantic: kCC3SemanticVertexBoneIndices];		/**< Vertex skinning bone matrix indices (up to 4). */
 	[self mapVarName: @"a_cc3PointSize" toSemantic: kCC3SemanticVertexPointSize];			/**< Vertex point size. */
 	
 	// If only one texture coordinate attribute is used, the index suffix ("a_cc3TexCoordN") is optional.
@@ -1685,8 +1687,8 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVarName: @"u_cc3Model.animationFraction" toSemantic: kCC3SemanticAnimationFraction];	/**< (float) Fraction of the model's animation that has been viewed (range 0-1). */
 	
 	// SKINNING ----------------
-	[self mapVarName: @"u_cc3BonesPerVertex" toSemantic: kCC3SemanticBonesPerVertex];							/**< (int) Number of bones influencing each vertex (ie- number of weights/matrices specified on each vertex) */
-	[self mapVarName: @"u_cc3BoneMatrixCount" toSemantic: kCC3SemanticBoneCount];							/**< (int) Length of the u_cc3BoneMatricesEyeSpace and u_cc3BoneMatricesInvTranEyeSpace arrays. */
+	[self mapVarName: @"u_cc3BonesPerVertex" toSemantic: kCC3SemanticVertexBoneCount];							/**< (int) Number of bones influencing each vertex (ie- number of weights/matrices specified on each vertex) */
+	[self mapVarName: @"u_cc3BoneMatrixCount" toSemantic: kCC3SemanticMeshBoneCount];							/**< (int) Length of the u_cc3BoneMatricesEyeSpace and u_cc3BoneMatricesInvTranEyeSpace arrays. */
 	[self mapVarName: @"u_cc3BoneMatricesEyeSpace" toSemantic: kCC3SemanticBoneMatricesEyeSpace];				/**< (mat4[]) Array of bone matrices in the current mesh skin section in eye space. */
 	[self mapVarName: @"u_cc3BoneMatricesInvTranEyeSpace" toSemantic: kCC3SemanticBoneMatricesInvTranEyeSpace];	/**< (mat3[]) Array of inverse-transposes of the bone matrices in the current mesh skin section  in eye space. */
 	[self mapVarName: @"u_cc3BoneMatricesGlobal" toSemantic: kCC3SemanticBoneMatricesGlobal];					/**< (mat4[]) Array of bone matrices in the current mesh skin section in global coordinates. */

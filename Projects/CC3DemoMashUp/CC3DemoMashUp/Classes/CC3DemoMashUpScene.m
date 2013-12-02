@@ -592,8 +592,8 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// If we had added the shadow volumes before here, we wouldn't have to retain this data.
 	[aNode retainVertexLocations];
 	[aNode retainVertexIndices];
-	[aNode retainVertexWeights];
-	[aNode retainVertexMatrixIndices];
+	[aNode retainVertexBoneWeights];
+	[aNode retainVertexBoneIndices];
 	[aNode createGLBuffers];
 	[aNode releaseRedundantContent];
 	

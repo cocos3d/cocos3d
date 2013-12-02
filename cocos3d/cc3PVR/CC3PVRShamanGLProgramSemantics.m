@@ -133,8 +133,8 @@ static NSMutableDictionary* _semanticsByPVRShamanSemanticName = nil;
 	[self addSemantic: kCC3SemanticVertexBitangent forPVRShamanSemanticName: @"BINORMAL"];
 	[self addSemantic: kCC3SemanticVertexTexture forPVRShamanSemanticName: @"UV"];
 	[self addSemantic: kCC3SemanticVertexColor forPVRShamanSemanticName: @"VERTEXCOLOR"];
-	[self addSemantic: kCC3SemanticVertexMatrixIndices forPVRShamanSemanticName: @"BONEINDEX"];
-	[self addSemantic: kCC3SemanticVertexWeights forPVRShamanSemanticName: @"BONEWEIGHT"];
+	[self addSemantic: kCC3SemanticVertexBoneIndices forPVRShamanSemanticName: @"BONEINDEX"];
+	[self addSemantic: kCC3SemanticVertexBoneWeights forPVRShamanSemanticName: @"BONEWEIGHT"];
 
 	[self addSemantic: kCC3SemanticModelMatrix forPVRShamanSemanticName: @"WORLD"];
 	[self addSemantic: kCC3SemanticModelMatrixInv forPVRShamanSemanticName: @"WORLDI"];
@@ -172,7 +172,7 @@ static NSMutableDictionary* _semanticsByPVRShamanSemanticName = nil;
 	[self addSemantic: kCC3SemanticMaterialColorDiffuse forPVRShamanSemanticName: @"MATERIALCOLORDIFFUSE"];
 	[self addSemantic: kCC3SemanticMaterialColorSpecular forPVRShamanSemanticName: @"MATERIALCOLORSPECULAR"];
 	
-	[self addSemantic: kCC3SemanticBonesPerVertex forPVRShamanSemanticName: @"BONECOUNT"];
+	[self addSemantic: kCC3SemanticVertexBoneCount forPVRShamanSemanticName: @"BONECOUNT"];
 	[self addSemantic: kCC3SemanticBoneMatricesGlobal forPVRShamanSemanticName: @"BONEMATRIXARRAY"];
 	[self addSemantic: kCC3SemanticBoneMatricesInvTranGlobal forPVRShamanSemanticName: @"BONEMATRIXARRAYIT"];
 	

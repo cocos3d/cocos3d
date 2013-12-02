@@ -25,32 +25,4 @@
    <FileRef
       location = "group:LICENSE">
    </FileRef>
-   <Group
-      location = "group:../ProjectDocs/WorkspaceDocs"
-      name = "WorkspaceDocs">
-      <FileRef
-         location = "group:Apple GL extensions.txt">
-      </FileRef>
-      <FileRef
-         location = "group:Apportable porting restrictions.txt">
-      </FileRef>
-      <FileRef
-         location = "group:Cal3D File Formats - orig.txt">
-      </FileRef>
-      <FileRef
-         location = "group:cocos3d Enhancements.txt">
-      </FileRef>
-      <FileRef
-         location = "group:Git Commit Message.txt">
-      </FileRef>
-      <FileRef
-         location = "group:ScratchPad.txt">
-      </FileRef>
-      <FileRef
-         location = "group:ScratchPad2.txt">
-      </FileRef>
-      <FileRef
-         location = "group:Xcode Standard File Types mods.txt">
-      </FileRef>
-   </Group>
 </Workspace>

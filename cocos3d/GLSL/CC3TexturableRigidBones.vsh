@@ -92,9 +92,9 @@ uniform highp vec3	u_cc3LightSpotDirectionModel[MAX_LIGHTS];		/**< Direction of 
 uniform float		u_cc3LightSpotExponent[MAX_LIGHTS];				/**< Directional attenuation factor, if spotlight, of each light. */
 uniform float		u_cc3LightSpotCutoffAngleCosine[MAX_LIGHTS];	/**< Cosine of spotlight cutoff angle of each light. */
 
-uniform lowp int	u_cc3BonesPerVertex;									/**< Number of bones influencing each vertex. */
-uniform highp vec4	u_cc3BoneQuaternionsModelSpace[MAX_BONES_PER_BATCH];	/**< Array of bone quaternions in the current mesh skin section in model space (length of array is specified by u_cc3BoneCount). */
-uniform highp vec3	u_cc3BoneTranslationsModelSpace[MAX_BONES_PER_BATCH];	/**< Array of bone translations in the current mesh skin section in model space (length of array is specified by u_cc3BoneCount). */
+uniform lowp int	u_cc3VertexBoneCount;									/**< Number of bones influencing each vertex. */
+uniform highp vec4	u_cc3BoneQuaternionsModelSpace[MAX_BONES_PER_BATCH];	/**< Array of bone quaternions in the current mesh skin section in model space (length of array is specified by u_cc3MeshBoneCount). */
+uniform highp vec3	u_cc3BoneTranslationsModelSpace[MAX_BONES_PER_BATCH];	/**< Array of bone translations in the current mesh skin section in model space (length of array is specified by u_cc3MeshBoneCount). */
 
 uniform bool		u_cc3VertexHasTangent;				/**< Whether the vertex tangent is available. */
 uniform bool		u_cc3VertexHasColor;				/**< Whether the vertex color is available. */
@@ -162,7 +162,7 @@ highp vec3 rotateWithQuaternion(highp vec3 v, highp vec4 q) {
 
 /** If this model has bones, transforms the vertex position and normal with the bones. */
 void skinVertex() {
-	if (u_cc3BonesPerVertex == 0) {		// No vertex skinning
+	if (u_cc3VertexBoneCount == 0) {		// No vertex skinning
 		vtxPos = a_cc3Position;
 		vtxNorm = a_cc3Normal;
 	} else {			// Mesh is bone-rigged for vertex skinning
@@ -173,7 +173,7 @@ void skinVertex() {
 		vtxPos = kVec4ZeroLoc;					// Start at zero to accumulate weighted values
 		vtxNorm = kVec3Zero;
 		for (lowp int i = 0; i < 4; ++i) {		// Max 4 bones per vertex
-			if (i < u_cc3BonesPerVertex) {
+			if (i < u_cc3VertexBoneCount) {
 				
 				// Get the bone rotation quaternion and translation
 				highp vec4 q = u_cc3BoneQuaternionsModelSpace[boneIndices.x];

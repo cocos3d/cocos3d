@@ -1804,8 +1804,8 @@ typedef enum {
  *   - retainVertexBitangents
  *   - retainVertexColors
  *   - retainVertexTextureCoordinates
- *   - retainVertexMatrixIndices
- *   - retainVertexWeights
+ *   - retainVertexBoneWeights
+ *   - retainVertexBoneIndices
  *   - retainVertexPointSizes
  *   - retainVertexIndices
  *
@@ -1904,26 +1904,26 @@ typedef enum {
 -(void) retainVertexColors;
 
 /**
- * Convenience method to cause the vertex matrix index content of this node and all descendant
- * nodes to be retained in application memory when releaseRedundantContent is invoked, even if
- * it has been buffered to a GL VBO.
- *
- * Only the vertex matrix index will be retained. Any other vertex content, such as locations,
- * or texture coordinates, that has been buffered to GL VBO's, will be released from
- * application memory when releaseRedundantContent is invoked.
- */
--(void) retainVertexMatrixIndices;
-
-/**
- * Convenience method to cause the vertex weight content of this node and all descendant
+ * Convenience method to cause the vertex bone weight content of this node and all descendant
  * nodes  to be retained in application memory when releaseRedundantContent is invoked,
  * even if it has been buffered to a GL VBO.
  *
- * Only the vertex weight will be retained. Any other vertex content, such as locations,
+ * Only the vertex bone weight will be retained. Any other vertex content, such as locations,
  * or texture coordinates, that has been buffered to GL VBO's, will be released from
  * application memory when releaseRedundantContent is invoked.
  */
--(void) retainVertexWeights;
+-(void) retainVertexBoneWeights;
+
+/**
+ * Convenience method to cause the vertex bone index content of this node and all descendant
+ * nodes to be retained in application memory when releaseRedundantContent is invoked, even if
+ * it has been buffered to a GL VBO.
+ *
+ * Only the vertex bone index will be retained. Any other vertex content, such as locations,
+ * or texture coordinates, that has been buffered to GL VBO's, will be released from
+ * application memory when releaseRedundantContent is invoked.
+ */
+-(void) retainVertexBoneIndices;
 
 /**
  * Convenience method to cause the vertex point size content to be retained in application
@@ -2058,34 +2058,34 @@ typedef enum {
 -(void) doNotBufferVertexColors;
 
 /**
- * Convenience method to cause the vertex matrix index content of this node and all
- * descendant nodes to be skipped when createGLBuffers is invoked. The vertex content
- * is not buffered to a GL VBO, is retained in application memory, and is submitted
- * to the GL engine on each frame render.
- *
- * Only the vertex matrix index will not be buffered to a GL VBO. Any other vertex content,
- * such as locations, or texture coordinates, will be buffered to a GL VBO when
- * createGLBuffers is invoked.
- *
- * This method causes the vertex content to be retained in application memory, so, if you have
- * invoked this method, you do NOT also need to invoke the retainVertexMatrixIndices method.
- */
--(void) doNotBufferVertexMatrixIndices;
-
-/**
- * Convenience method to cause the vertex weight content of this node and all descendant
+ * Convenience method to cause the vertex bone weight content of this node and all descendant
  * nodes to be skipped when createGLBuffers is invoked. The vertex content is not buffered
  * to a GL VBO, is retained in application memory, and is submitted to the GL engine on
  * each frame render.
  *
- * Only the vertex weight will not be buffered to a GL VBO. Any other vertex content, such
+ * Only the vertex bone weights will not be buffered to a GL VBO. Any other vertex content, such
  * as locations, or texture coordinates, will be buffered to a GL VBO when createGLBuffers
  * is invoked.
  *
  * This method causes the vertex content to be retained in application memory, so, if you have
- * invoked this method, you do NOT also need to invoke the retainVertexWeights method.
+ * invoked this method, you do NOT also need to invoke the retainVertexBoneWeights method.
  */
--(void) doNotBufferVertexWeights;
+-(void) doNotBufferVertexBoneWeights;
+
+/**
+ * Convenience method to cause the vertex bone index content of this node and all
+ * descendant nodes to be skipped when createGLBuffers is invoked. The vertex content
+ * is not buffered to a GL VBO, is retained in application memory, and is submitted
+ * to the GL engine on each frame render.
+ *
+ * Only the vertex bone indices will not be buffered to a GL VBO. Any other vertex content,
+ * such as locations, or texture coordinates, will be buffered to a GL VBO when
+ * createGLBuffers is invoked.
+ *
+ * This method causes the vertex content to be retained in application memory, so, if you have
+ * invoked this method, you do NOT also need to invoke the retainVertexBoneIndices method.
+ */
+-(void) doNotBufferVertexBoneIndices;
 
 /**
  * Convenience method to cause the vertex point size content to be skipped when createGLBuffers
@@ -2132,6 +2132,18 @@ typedef enum {
  * retainVertexColors method.
  */
 -(void) doNotBufferVertexIndices;
+
+/** *@deprecated Renamed to retainVertexBoneWeights. */
+-(void) retainVertexWeights DEPRECATED_ATTRIBUTE;
+
+/** *@deprecated Renamed to retainVertexBoneIndices. */
+-(void) retainVertexMatrixIndices DEPRECATED_ATTRIBUTE;
+
+/** *@deprecated Renamed to doNotBufferVertexBoneWeights. */
+-(void) doNotBufferVertexWeights DEPRECATED_ATTRIBUTE;
+
+/** *@deprecated Renamed to doNotBufferVertexBoneIndices. */
+-(void) doNotBufferVertexMatrixIndices DEPRECATED_ATTRIBUTE;
 
 
 #pragma mark Texture and normal alignment

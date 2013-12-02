@@ -92,7 +92,7 @@ uniform highp vec3	u_cc3LightSpotDirectionModel[MAX_LIGHTS];		/**< Direction of 
 uniform float		u_cc3LightSpotExponent[MAX_LIGHTS];				/**< Directional attenuation factor, if spotlight, of each light. */
 uniform float		u_cc3LightSpotCutoffAngleCosine[MAX_LIGHTS];	/**< Cosine of spotlight cutoff angle of each light. */
 
-uniform lowp int	u_cc3BonesPerVertex;								/**< Number of bones influencing each vertex. */
+uniform lowp int	u_cc3VertexBoneCount;								/**< Number of bones influencing each vertex. */
 uniform highp mat4	u_cc3BoneMatricesModel[MAX_BONES_PER_BATCH];		/**< Array of bone matrices in the current mesh skin section in model space. */
 uniform mat3		u_cc3BoneMatricesInvTranModel[MAX_BONES_PER_BATCH];	/**< Array of inverse-transposes of the bone matrices in the current mesh skin section in model space. */
 
@@ -139,7 +139,7 @@ lowp vec4	matColorDiffuse;	/**< Diffuse color of material...from either material
 
 /** If this model has bones, transforms the vertex position and normal with the bones. */
 void skinVertex() {
-	if (u_cc3BonesPerVertex == 0) {		// No vertex skinning
+	if (u_cc3VertexBoneCount == 0) {		// No vertex skinning
 		vtxPos = a_cc3Position;
 		vtxNorm = a_cc3Normal;
 	} else {			// Mesh is bone-rigged for vertex skinning
@@ -150,7 +150,7 @@ void skinVertex() {
 		vtxPos = kVec4Zero;						// Start at zero to accumulate weighted values
 		vtxNorm = kVec3Zero;
 		for (lowp int i = 0; i < 4; ++i) {		// Max 4 bones per vertex
-			if (i < u_cc3BonesPerVertex) {
+			if (i < u_cc3VertexBoneCount) {
 				// Add position and normal contribution from this bone
 				vtxPos += u_cc3BoneMatricesModel[boneIndices.x] * a_cc3Position * boneWeights.x;
 				vtxNorm += u_cc3BoneMatricesInvTranModel[boneIndices.x] * a_cc3Normal * boneWeights.x;

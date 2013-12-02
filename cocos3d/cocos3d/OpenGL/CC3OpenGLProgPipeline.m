@@ -386,7 +386,7 @@
 	
 	value_GL_MAX_SAMPLES = 1;				// Assume no multi-sampling support
 	
-	value_GL_MAX_VERTEX_UNITS = kCC3MaxGLSLVertexUnits;
+	valueMaxBoneInfluencesPerVertex = kCC3MaxGLSLBoneInfluencesPerVertex;
 }
 
 // Start with at least the cocos2d attributes so they can be enabled and disabled

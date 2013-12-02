@@ -864,8 +864,8 @@
  *   - kCC3VertexContentBitangent
  *   - kCC3VertexContentColor
  *   - kCC3VertexContentTextureCoordinates
- *   - kCC3VertexContentWeights
- *   - kCC3VertexContentMatrixIndices
+ *   - kCC3VertexContentBoneWeights
+ *   - kCC3VertexContentBoneIndices
  *   - kCC3VertexContentPointSize
  *
  * To indicate that this mesh should contain particular vertex content, construct a
@@ -1251,193 +1251,182 @@
 -(void) setVertexColor4B: (ccColor4B) aColor at: (GLuint) index;
 
 /**
- * Returns the number of vertex units used by this mesh. This value indicates the number of
- * bones that influence each vertex, and corresponds to the number of weights and matrix
- * indices attached to each vertex.
+ * Returns the number of bones that influence each vertex in this mesh. This value defines
+ * the number of bone weights and bone indices that are attached to each vertex.
  */
-@property(nonatomic, readonly) GLuint vertexUnitCount;
+@property(nonatomic, readonly) GLuint vertexBoneCount;
 
 /**
- * Returns the weight element, for the specified vertex unit, at the specified index in
- * the underlying vertex content.
+ * Returns the weight value, for the specified influence index within the vertex, for the
+ * vertex at the specified index within the underlying vertex content.
  *
- * The index refers to vertices, not bytes. The implementation takes into consideration
- * the vertexStride and elementOffset properties to access the correct element.
+ * The weight indicates how much a particular bone influences the movement of the particular
+ * vertex. Several weights are stored for each vertex, one for each bone that influences the
+ * movement of that vertex. The specified influenceIndex parameter must be between zero, and
+ * the vertexBoneCount property (inclusive/exclusive respectively).
  *
- * Several weights are stored for each vertex, one per vertex unit, corresponding to
- * one for each bone that influences the location of the vertex. The specified vertexUnit
- * parameter must be between zero inclusive, and the vertexUnitCount property, exclusive.
+ * The vertex index refers to vertices, not bytes. The implementation takes into consideration
+ * whether the vertex content is interleaved to access the correct vertex content component.
  *
  * If the releaseRedundantContent method has been invoked and the underlying
  * vertex content has been released, this method will raise an assertion exception.
  */
--(GLfloat) vertexWeightForVertexUnit: (GLuint) vertexUnit at: (GLuint) index;
+-(GLfloat) vertexWeightForBoneInfluence: (GLuint) influenceIndex at: (GLuint) vtxIndex;
 
 /**
- * Sets the weight element, for the specified vertex unit, at the specified index in
- * the underlying vertex content, to the specified value.
+ * Sets the weight value, for the specified influence index within the vertex, for the
+ * vertex at the specified index within the underlying vertex content.
  *
- * The index refers to vertices, not bytes. The implementation takes into consideration
- * the vertexStride and elementOffset properties to access the correct element.
+ * The weight indicates how much a particular bone influences the movement of the particular
+ * vertex. Several weights are stored for each vertex, one for each bone that influences the
+ * movement of that vertex. The specified influenceIndex parameter must be between zero, and
+ * the vertexBoneCount property (inclusive/exclusive respectively).
  *
- * Several weights are stored for each vertex, one per vertex unit, corresponding to
- * one for each bone that influences the location of the vertex. The specified vertexUnit
- * parameter must be between zero inclusive, and the vertexUnitCount property, exclusive.
+ * The vertex index refers to vertices, not bytes. The implementation takes into consideration
+ * whether the vertex content is interleaved to access the correct vertex content component.
  *
- * When all vertex changes have been made, be sure to invoke the
- * updateVertexWeightsGLBuffer method to ensure that the GL VBO that
- * holds the vertex content is updated.
+ * When all vertex changes have been made, be sure to invoke the updateVertexBoneWeightsGLBuffer
+ * method to ensure that the GL VBO that holds the vertex content is updated.
  *
  * If the releaseRedundantContent method has been invoked and the underlying
  * vertex content has been released, this method will raise an assertion exception.
  */
--(void) setVertexWeight: (GLfloat) aWeight forVertexUnit: (GLuint) vertexUnit at: (GLuint) index;
+-(void) setVertexWeight: (GLfloat) weight forBoneInfluence: (GLuint) influenceIndex at: (GLuint) vtxIndex;
 
 /**
- * Returns a pointer to an array of the weight elements at the specified vertex
- * index in the underlying vertex content.
+ * Returns the weights of all of the bones that influence the movement of the vertex at the
+ * specified index within the underlying vertex content.
  *
- * Several weights are stored for each vertex, one per vertex unit, corresponding
- * to one for each bone that influences the location of the vertex. The number of
- * elements in the returned array is the same for all vertices in this mesh, and
- * can be retrieved from the vertexUnitCount property.
+ * Several weights are stored for each vertex, one for each bone that influences the movement
+ * of the vertex. The number of elements in the returned array is the same for each vertex
+ * in this vertex array, as defined by the vertexBoneCount property.
  *
- * The index refers to vertices, not bytes. The implementation takes into consideration
- * the vertexStride and elementOffset properties to access the correct elements.
+ * The vertex index refers to vertices, not bytes. The implementation takes into consideration
+ * whether the vertex content is interleaved to access the correct vertex content component.
  *
  * If the releaseRedundantContent method has been invoked and the underlying
  * vertex content has been released, this method will raise an assertion exception.
  */
--(GLfloat*) vertexWeightsAt: (GLuint) index;
+-(GLfloat*) vertexBoneWeightsAt: (GLuint) vtxIndex;
 
 /**
- * Sets the weight elements at the specified vertex index in the underlying vertex content,
- * to the values in the specified array.
+ * Sets the weights of all of the bones that influence the movement of the vertex at the
+ * specified index within the underlying vertex content.
  *
- * The index refers to vertices, not bytes. The implementation takes into consideration
- * the vertexStride and elementOffset properties to access the correct element.
+ * Several weights are stored for each vertex, one for each bone that influences the movement
+ * of the vertex. The number of elements in the specified input array must therefore be at
+ * least as large as the value of the vertexBoneCount property.
  *
- * Several weights are stored for each vertex, one per vertex unit, corresponding
- * to one for each bone that influences the location of the vertex. The number of
- * weight elements is the same for all vertices in this mesh, and can be retrieved
- * from the vertexUnitCount property. The number of elements in the specified input
- * array must therefore be at least as large as the value of the vertexUnitCount property.
+ * The vertex index refers to vertices, not bytes. The implementation takes into consideration
+ * whether the vertex content is interleaved to access the correct vertex content component.
  *
- * When all vertex changes have been made, be sure to invoke the
- * updateVertexWeightsGLBuffer method to ensure that the GL VBO that
- * holds the vertex content is updated.
+ * When all vertex changes have been made, be sure to invoke the updateVertexBoneWeightsGLBuffer
+ * method to ensure that the GL VBO that holds the vertex content is updated.
  *
  * If the releaseRedundantContent method has been invoked and the underlying
  * vertex content has been released, this method will raise an assertion exception.
  */
--(void) setVertexWeights: (GLfloat*) weights at: (GLuint) index;
+-(void) setVertexBoneWeights: (GLfloat*) weights at: (GLuint) vtxIndex;
 
 /**
- * Returns the matrix index element, for the specified vertex unit, at the specified
- * index in the underlying vertex content.
+ * Returns the index of the bone, that provides the influence at the specified influence index
+ * within a vertex, for the vertex at the specified index within the underlying vertex content.
  *
- * Several matrix indices are stored for each vertex, one per vertex unit, corresponding
- * to one for each bone that influences the location of the vertex. The specified vertexUnit
- * parameter must be between zero inclusive, and the vertexUnitCount property, exclusive.
+ * The bone index indicates which bone provides the particular influence for the movement of
+ * the particular vertex. Several bone indices are stored for each vertex, one for each bone
+ * that influences the movement of that vertex. The specified influenceIndex parameter must
+ * be between zero, and the vertexBoneCount property (inclusive/exclusive respectively).
  *
- * The index refers to vertices, not bytes. The implementation takes into consideration
- * the vertexStride and elementOffset properties to access the correct element.
+ * The vertex index refers to vertices, not bytes. The implementation takes into consideration
+ * whether the vertex content is interleaved to access the correct vertex content component.
  *
  * If the releaseRedundantContent method has been invoked and the underlying
  * vertex content has been released, this method will raise an assertion exception.
  */
--(GLuint) vertexMatrixIndexForVertexUnit: (GLuint) vertexUnit at: (GLuint) index;
+-(GLuint) vertexBoneIndexForBoneInfluence: (GLuint) influenceIndex at: (GLuint) vtxIndex;
 
 /**
- * Sets the matrix index element, for the specified vertex unit, at the specified index
- * in the underlying vertex content, to the specified value.
+ * Sets the index of the bone, that provides the influence at the specified influence index
+ * within a vertex, for the vertex at the specified index within the underlying vertex content.
  *
- * Several matrix indices are stored for each vertex, one per vertex unit, corresponding
- * to one for each bone that influences the location of the vertex. The specified vertexUnit
- * parameter must be between zero inclusive, and the vertexUnitCount property, exclusive.
+ * The bone index indicates which bone provides the particular influence for the movement of
+ * the particular vertex. Several bone indices are stored for each vertex, one for each bone
+ * that influences the movement of that vertex. The specified influenceIndex parameter must
+ * be between zero, and the vertexBoneCount property (inclusive/exclusive respectively).
  *
- * The index refers to vertices, not bytes. The implementation takes into consideration
- * the vertexStride and elementOffset properties to access the correct element.
+ * The vertex index refers to vertices, not bytes. The implementation takes into consideration
+ * whether the vertex content is interleaved to access the correct vertex content component.
  *
- * When all vertex changes have been made, be sure to invoke the
- * updateVertexMatrixIndicesGLBuffer method to ensure that the GL VBO that
- * holds the vertex content is updated.
+ * When all vertex changes have been made, be sure to invoke the updateVertexBoneIndicesGLBuffer
+ * method to ensure that the GL VBO that holds the vertex content is updated.
  *
  * If the releaseRedundantContent method has been invoked and the underlying
  * vertex content has been released, this method will raise an assertion exception.
  */
--(void) setVertexMatrixIndex: (GLuint) aMatrixIndex
-			   forVertexUnit: (GLuint) vertexUnit
-						  at: (GLuint) index;
+-(void) setVertexBoneIndex: (GLuint) boneIndex forBoneInfluence: (GLuint) influenceIndex at: (GLuint) vtxIndex;
 
 /**
- * Returns a pointer to an array of the matrix indices at the specified vertex
- * index in the underlying vertex content.
+ * Returns the indices of all of the bones that influence the movement of the vertex at the
+ * specified index within the underlying vertex content.
  *
- * Several matrix index values are stored for each vertex, one per vertex unit,
- * corresponding to one for each bone that influences the location of the vertex.
- * The number of elements in the returned array is the same for all vertices in
- * this mesh, and can be retrieved from the vertexUnitCount property.
+ * Several indices are stored for each vertex, one for each bone that influences the movement
+ * of the vertex. The number of elements in the returned array is the same for each vertex
+ * in this vertex array, as defined by the vertexBoneCount property.
  *
- * The matrix indices can be stored in this mesh as either type GLushort or type
- * GLubyte. The returned array will be of the type of index stored by this vertex
- * array, and it is up to the application to know which type will be returned,
- * and cast the returned array accordingly. The type can be determined by the
- * matrixIndexType property of this mesh, which will return one of GL_UNSIGNED_SHORT
- * or GL_UNSIGNED_BYTE, respectively.
+ * The bone indices can be stored in each vertex as either type GLushort or type GLubyte.
+ * The returned array will be of the type of index stored by the verties in this mesh, and it
+ * is up to the application to know which type will be returned, and cast the returned array
+ * accordingly. The type can be determined by the vertexBoneIndexType property of this mesh,
+ * which will return one of GL_UNSIGNED_SHORT or GL_UNSIGNED_BYTE, respectively.
  *
- * To avoid checking the matrixIndexType property altogether, you can use the
- * vertexMatrixIndexForVertexUnit:at: method, which retrieves the matrix index
- * values one at a time, and automatically converts the stored type to GLushort.
- *
- * The index refers to vertices, not bytes. The implementation takes into consideration
- * the vertexStride and elementOffset properties to access the correct elements.
+ * The vertex index refers to vertices, not bytes. The implementation takes into consideration
+ * whether the vertex content is interleaved to access the correct vertex content component.
  *
  * If the releaseRedundantContent method has been invoked and the underlying
  * vertex content has been released, this method will raise an assertion exception.
  */
--(GLvoid*) vertexMatrixIndicesAt: (GLuint) index;
+-(GLvoid*) vertexBoneIndicesAt: (GLuint) vtxIndex;
 
 /**
- * Sets the matrix index elements at the specified vertex index in the underlying
- * vertex content, to the values in the specified array.
+ * Sets the indices of all of the bones that influence the movement of the vertex at the
+ * specified index within the underlying vertex content.
  *
- * Several matrix index values are stored for each vertex, one per vertex unit,
- * corresponding to one for each bone that influences the location of the vertex.
- * The number of elements is the same for all vertices in this mesh, and can be
- * retrieved from the vertexUnitCount property. The number of elements in the specified input
- * array must therefore be at least as large as the value of the vertexUnitCount property.
+ * Several indices are stored for each vertex, one for each bone that influences the movement
+ * of the vertex. The number of elements in the specified input array must therefore be at
+ * least as large as the value of the vertexBoneCount property.
  *
- * The matrix indices can be stored in this mesh as either type GLushort or type GLubyte.
- * The specified array must be of the type of index stored by this mesh, and it is up to
- * the application to know which type is required, and provide that type of array accordingly.
- * The type can be determined by the matrixIndexType property of this mesh, which will return
- * one of GL_UNSIGNED_SHORT or GL_UNSIGNED_BYTE, respectively.
+ * The bone indices can be stored in each vertx as either type GLushort or type GLubyte.
+ * The specified array must be of the type of index stored by the verties in this mesh, and
+ * it is up to the application to know which type is required, and provide that type of array
+ * accordingly. The type can be determined by the vertexBoneIndexType property of this mesh,
+ * which will return one of GL_UNSIGNED_SHORT or GL_UNSIGNED_BYTE, respectively.
  *
- * To avoid checking the matrixIndexType property altogether, you can use the
- * setVertexMatrixIndex:forVertexUnit:at: method, which sets the matrix index values
- * one at a time, and automatically converts the input type to the correct stored type.
+ * To avoid checking the elementType altogether, you can use the setVertxBoneIndex:forBoneInfluence:at:
+ * method, which sets the bone index values one at a time, and automatically converts the input type to
+ * the correct stored type.
  *
- * The index refers to vertices, not bytes. The implementation takes into consideration
- * the vertexStride and elementOffset properties to access the correct element.
+ * The vertex index refers to vertices, not bytes. The implementation takes into consideration
+ * whether the vertex content is interleaved to access the correct vertex content component.
  *
- * When all vertex changes have been made, be sure to invoke the
- * updateVertexMatrixIndicesGLBuffer method to ensure that the GL VBO that
- * holds the vertex content is updated.
+ * When all vertex changes have been made, be sure to invoke the updateVertexBoneIndicesGLBuffer
+ * method to ensure that the GL VBO that holds the vertex content is updated.
  *
  * If the releaseRedundantContent method has been invoked and the underlying
  * vertex content has been released, this method will raise an assertion exception.
  */
--(void) setVertexMatrixIndices: (GLvoid*) mtxIndices at: (GLuint) index;
+-(void) setVertexBoneIndices: (GLvoid*) boneIndices at: (GLuint) vtxIndex;
 
 /**
- * Returns the type of data stored for each bone matrix index.
+ * Returns the type of data element used to store each bone index.
  *
- * The value returned by this property will be either GL_UNSIGNED_SHORT or
- * GL_UNSIGNED_BYTE, corresponding to each matrix index being stored in either
- * a type GLushort or type GLubyte, respectively.
+ * The value returned by this property will be either GL_UNSIGNED_SHORT or GL_UNSIGNED_BYTE,
+ * corresponding to each bone index being stored in either a type GLushort or type GLubyte,
+ * respectively.
+ *
+ * You can use the value of this property to determine how to cast the data arrays used by
+ * the vertexBoneIndicesAt: and setVertexBoneIndices:at: methods.
  */
-@property(nonatomic, readonly) GLenum matrixIndexType;
+@property(nonatomic, readonly) GLenum vertexBoneIndexType;
 
 /**
  * Returns the texture coordinate element at the specified index from the vertex content
@@ -1548,11 +1537,11 @@
 /** Updates the GL engine buffer with the vertex color content in this mesh. */
 -(void) updateVertexColorsGLBuffer;
 
-/** Updates the GL engine buffer with the vertex weight content in this mesh. */
--(void) updateVertexMatrixIndicesGLBuffer;
+/** Updates the GL engine buffer with the vertex bone weight content in this mesh. */
+-(void) updateVertexBoneWeightsGLBuffer;
 
-/** Updates the GL engine buffer with the vertex weight content in this mesh. */
--(void) updateVertexWeightsGLBuffer;
+/** Updates the GL engine buffer with the vertex bone indices content in this mesh. */
+-(void) updateVertexBoneIndicesGLBuffer;
 
 /**
  * Updates the GL engine buffer with the vertex texture coord content from the
@@ -1807,6 +1796,47 @@ globalIntersections: (CC3MeshIntersection*) intersections
  * of this node. Usually, the application never needs to invoke this method directly.
  */
 -(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+
+
+#pragma mark Deprecated methods
+
+/** *@deprecated Renamed to vertexBoneCount. */
+@property(nonatomic, readonly) GLuint vertexUnitCount DEPRECATED_ATTRIBUTE;
+
+/** *@deprecated Renamed to vertexWeightForBoneInfluence:at:. */
+-(GLfloat) vertexWeightForVertexUnit: (GLuint) vertexUnit at: (GLuint) index DEPRECATED_ATTRIBUTE;
+
+/** *@deprecated Renamed to setVertexWeight:forBoneInfluence:at:. */
+-(void) setVertexWeight: (GLfloat) aWeight forVertexUnit: (GLuint) vertexUnit at: (GLuint) index DEPRECATED_ATTRIBUTE;
+
+/** *@deprecated Renamed to vertexBoneWeightsAt:. */
+-(GLfloat*) vertexWeightsAt: (GLuint) index DEPRECATED_ATTRIBUTE;
+
+/** *@deprecated Renamed to setVertexBoneWeights:at:. */
+-(void) setVertexWeights: (GLfloat*) weights at: (GLuint) index DEPRECATED_ATTRIBUTE;
+
+/** *@deprecated Renamed to vertexBoneIndexForBoneInfluence:at:. */
+-(GLuint) vertexMatrixIndexForVertexUnit: (GLuint) vertexUnit at: (GLuint) index DEPRECATED_ATTRIBUTE;
+
+/** *@deprecated Renamed to setVertexBoneIndex:forBoneInfluence:at:. */
+-(void) setVertexMatrixIndex: (GLuint) aMatrixIndex
+			   forVertexUnit: (GLuint) vertexUnit
+						  at: (GLuint) index DEPRECATED_ATTRIBUTE;
+
+/** *@deprecated Renamed to vertexBoneIndicesAt:. */
+-(GLvoid*) vertexMatrixIndicesAt: (GLuint) index DEPRECATED_ATTRIBUTE;
+
+/** *@deprecated Renamed to setVertexBoneIndices:at:. */
+-(void) setVertexMatrixIndices: (GLvoid*) mtxIndices at: (GLuint) index DEPRECATED_ATTRIBUTE;
+
+/** *@deprecated Renamed to vertexBoneIndexType. */
+@property(nonatomic, readonly) GLenum matrixIndexType DEPRECATED_ATTRIBUTE;
+
+/** *@deprecated Renamed to updateVertexBoneWeightsGLBuffer. */
+-(void) updateVertexWeightsGLBuffer DEPRECATED_ATTRIBUTE;
+
+/** *@deprecated Renamed to updateVertexBoneIndicesGLBuffer. */
+-(void) updateVertexMatrixIndicesGLBuffer DEPRECATED_ATTRIBUTE;
 
 @end
 

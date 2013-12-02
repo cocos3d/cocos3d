@@ -1602,26 +1602,41 @@ static BOOL defaultExpectsVerticallyFlippedTextures = NO;
 
 
 #pragma mark -
-#pragma mark CC3VertexWeights
+#pragma mark CC3VertexBoneWeights
 
-@implementation CC3VertexWeights
+@implementation CC3VertexBoneWeights
 
--(GLfloat*) weightsAt: (GLuint) index { return (GLfloat*)[self addressOfElement: index]; }
+-(GLfloat) weightForBoneInfluence: (GLuint) influenceIndex at: (GLuint) vtxIndex {
+	return [self boneWeightsAt: vtxIndex][influenceIndex];
+}
+
+-(void) setWeight: (GLfloat) weight forBoneInfluence: (GLuint) influenceIndex at: (GLuint) vtxIndex {
+	[self boneWeightsAt: vtxIndex][influenceIndex] = weight;
+}
+
+-(GLfloat*) boneWeightsAt: (GLuint) vtxIndex { return (GLfloat*)[self addressOfElement: vtxIndex]; }
+
+-(void) setBoneWeights: (GLfloat*) weights at: (GLuint) vtxIndex {
+	GLfloat* vtxWeights = [self boneWeightsAt: vtxIndex];
+	GLint numWts = self.elementSize;
+	for (int i = 0; i < numWts; i++) vtxWeights[i] = weights[i];
+}
+
+
+#pragma mark Deprecated methods
+
+-(GLfloat*) weightsAt: (GLuint) index { return [self boneWeightsAt: index]; }
 
 -(void) setWeights: (GLfloat*) weights at: (GLuint) index {
-	GLfloat* vertexWeights = [self weightsAt: index];
-	GLint numWts = self.elementSize;
-	for (int i = 0; i < numWts; i++) {
-		vertexWeights[i] = weights[i];
-	}
+	[self setBoneWeights: weights at: index];
 }
 
 -(GLfloat) weightForVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
-	return [self weightsAt: index][vertexUnit];
+	return [self weightForBoneInfluence: vertexUnit at: index];
 }
 
 -(void) setWeight: (GLfloat) aWeight forVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
-	[self weightsAt: index][vertexUnit] = aWeight;
+	[self setWeight: aWeight forBoneInfluence: vertexUnit at: index];
 }
 
 
@@ -1637,51 +1652,64 @@ static BOOL defaultExpectsVerticallyFlippedTextures = NO;
 	return self;
 }
 
-+(GLenum) defaultSemantic { return kCC3SemanticVertexWeights; }
++(GLenum) defaultSemantic { return kCC3SemanticVertexBoneWeights; }
 
 @end
 
 
 #pragma mark -
-#pragma mark CC3VertexMatrixIndices
+#pragma mark CC3VertexBoneIndices
 
-@implementation CC3VertexMatrixIndices
+@implementation CC3VertexBoneIndices
 
--(GLvoid*) matrixIndicesAt: (GLuint) index { return [self addressOfElement: index]; }
+-(GLuint) boneIndexForBoneInfluence: (GLuint) influenceIndex at: (GLuint) vtxIndex {
+	if (_elementType == GL_UNSIGNED_BYTE) {
+		GLubyte* boneIndices = (GLubyte*)[self addressOfElement: vtxIndex];
+		return boneIndices[influenceIndex];
+	} else {
+		GLushort* boneIndices = (GLushort*)[self addressOfElement: vtxIndex];
+		return boneIndices[influenceIndex];
+	}
+}
 
--(void) setMatrixIndices: (GLvoid*) mtxIndices at: (GLuint) index {
+-(void) setBoneIndex: (GLuint) boneIndex forBoneInfluence: (GLuint) influenceIndex at: (GLuint) vtxIndex {
+	if (_elementType == GL_UNSIGNED_BYTE) {
+		GLubyte* boneIndices = (GLubyte*)[self addressOfElement: vtxIndex];
+		boneIndices[influenceIndex] = boneIndex;
+	} else {
+		GLushort* boneIndices = (GLushort*)[self addressOfElement: vtxIndex];
+		boneIndices[influenceIndex] = boneIndex;
+	}
+}
+
+-(GLvoid*) boneIndicesAt: (GLuint) vtxIndex { return [self addressOfElement: vtxIndex]; }
+
+-(void) setBoneIndices: (GLvoid*) boneIndices at: (GLuint) vtxIndex {
 	GLint numMtx = self.elementSize;
 	if (_elementType == GL_UNSIGNED_BYTE) {
-		GLubyte* vertexMatrices = (GLubyte*)[self addressOfElement: index];
-		for (int i = 0; i < numMtx; i++) {
-			vertexMatrices[i] = ((GLubyte*)mtxIndices)[i];
-		}
+		GLubyte* vtxBoneIndices = (GLubyte*)[self addressOfElement: vtxIndex];
+		for (int i = 0; i < numMtx; i++) vtxBoneIndices[i] = ((GLubyte*)boneIndices)[i];
 	} else {
-		GLushort* vertexMatrices = (GLushort*)[self addressOfElement: index];
-		for (int i = 0; i < numMtx; i++) {
-			vertexMatrices[i] = ((GLushort*)mtxIndices)[i];
-		}
+		GLushort* vtxBoneIndices = (GLushort*)[self addressOfElement: vtxIndex];
+		for (int i = 0; i < numMtx; i++) vtxBoneIndices[i] = ((GLushort*)boneIndices)[i];
 	}
+}
+
+
+#pragma mark Deprecated methods
+
+-(GLvoid*) matrixIndicesAt: (GLuint) index { return [self boneIndicesAt: index]; }
+
+-(void) setMatrixIndices: (GLvoid*) mtxIndices at: (GLuint) index {
+	[self setBoneIndices: mtxIndices at: index];
 }
 
 -(GLuint) matrixIndexForVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
-	if (_elementType == GL_UNSIGNED_BYTE) {
-		GLubyte* vertexMatrices = (GLubyte*)[self addressOfElement: index];
-		return vertexMatrices[vertexUnit];
-	} else {
-		GLushort* vertexMatrices = (GLushort*)[self addressOfElement: index];
-		return vertexMatrices[vertexUnit];
-	}
+	return [self boneIndexForBoneInfluence: vertexUnit at: index];
 }
 
 -(void) setMatrixIndex: (GLuint) aMatrixIndex forVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
-	if (_elementType == GL_UNSIGNED_BYTE) {
-		GLubyte* vertexMatrices = (GLubyte*)[self addressOfElement: index];
-		vertexMatrices[vertexUnit] = aMatrixIndex;
-	} else {
-		GLushort* vertexMatrices = (GLushort*)[self addressOfElement: index];
-		vertexMatrices[vertexUnit] = aMatrixIndex;
-	}
+	[self setBoneIndex: aMatrixIndex forBoneInfluence: vertexUnit at: index];
 }
 
 
@@ -1697,6 +1725,6 @@ static BOOL defaultExpectsVerticallyFlippedTextures = NO;
 	return self;
 }
 
-+(GLenum) defaultSemantic { return kCC3SemanticVertexMatrixIndices; }
++(GLenum) defaultSemantic { return kCC3SemanticVertexBoneIndices; }
 
 @end

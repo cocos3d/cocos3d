@@ -67,11 +67,11 @@
 	if (vaIdx < 0) return;
 	CC3VertexAttr* vaPtr = &vertexAttributes[vaIdx];
 	switch (vaPtr->semantic) {
-		case kCC3SemanticVertexWeights:
+		case kCC3SemanticVertexBoneWeights:
 			glWeightPointerOES(vaPtr->elementSize, vaPtr->elementType, vaPtr->vertexStride, vaPtr->vertices);
 			LogGLErrorTrace(@"glWeightPointerOES(%i, %@, %i, %p)", vaPtr->elementSize, NSStringFromGLEnum(vaPtr->elementType), vaPtr->vertexStride, vaPtr->vertices);
 			break;
-		case kCC3SemanticVertexMatrixIndices:
+		case kCC3SemanticVertexBoneIndices:
 			glMatrixIndexPointerOES(vaPtr->elementSize, vaPtr->elementType, vaPtr->vertexStride, vaPtr->vertices);
 			LogGLErrorTrace(@"glMatrixIndexPointerOES(%i, %@, %i, %p)", vaPtr->elementSize, NSStringFromGLEnum(vaPtr->elementType), vaPtr->vertexStride, vaPtr->vertices);
 			break;
@@ -209,8 +209,8 @@
 	value_GL_MAX_PALETTE_MATRICES = [self getInteger: GL_MAX_PALETTE_MATRICES_OES];
 	LogInfoIfPrimary(@"Maximum palette matrices (max bones per mesh): %u", value_GL_MAX_PALETTE_MATRICES);
 	
-	value_GL_MAX_VERTEX_UNITS = [self getInteger: GL_MAX_VERTEX_UNITS_OES];
-	LogInfoIfPrimary(@"Available anti-aliasing samples: %u", value_GL_MAX_VERTEX_UNITS);
+	valueMaxBoneInfluencesPerVertex = [self getInteger: GL_MAX_VERTEX_UNITS_OES];
+	LogInfoIfPrimary(@"Available anti-aliasing samples: %u", valueMaxBoneInfluencesPerVertex);
 }
 
 /** Initialize the vertex attributes that are not texture coordinates. */
@@ -219,11 +219,11 @@
 	
 	GLuint vaIdx = value_GL_MAX_VERTEX_ATTRIBS;
 	
-	vertexAttributes[vaIdx].semantic = kCC3SemanticVertexWeights;
+	vertexAttributes[vaIdx].semantic = kCC3SemanticVertexBoneWeights;
 	vertexAttributes[vaIdx].glName = GL_WEIGHT_ARRAY_OES;
 	vaIdx++;
 	
-	vertexAttributes[vaIdx].semantic = kCC3SemanticVertexMatrixIndices;
+	vertexAttributes[vaIdx].semantic = kCC3SemanticVertexBoneIndices;
 	vertexAttributes[vaIdx].glName = GL_MATRIX_INDEX_ARRAY_OES;
 	vaIdx++;
 	

@@ -261,7 +261,7 @@
  * in the collection corresponds to the index held for a vertex in the vertexMatrixIndices
  * vertex array of the mesh.
  *
- * Through the CC3VertexMatrixIndices vertex array in the vertexMatrixIndices property of the mesh,
+ * Through the CC3VertexBoneIndices vertex array in the vertexMatrixIndices property of the mesh,
  * each vertex identifies several distinct indices into the bones collection of this skin section.
  * The transform matrices from those bones are combined in a weighted fashion, and used to transform
  * the location of the vertex. Each vertex defines its own set of weights through the CC3VertexWeights
@@ -289,10 +289,10 @@
  * corresponding weights held by the vertex.
  *
  * Any particular vertex will typically only be directly influenced by two or three bones.
- * The maximum number of bones that any vertex can be directly influenced by is determined
- * by the number of vertex units supported by the platform. This limit can be retreived
- * from the CC3OpenGL.sharedGL.maxNumberOfVertexUnits property.
- * 
+ * Under OpenGL ES 1.1, the maximum number of bones that any vertex can be directly influenced
+ * by is determined by the maximum number of available bone influences allowed by the platform.
+ * This limit can be retreived from the CC3OpenGL.sharedGL.maxNumberOfBoneInfluencesPerVertex property.
+ *
  * Because different vertices of the skin section may be influenced by different combinations
  * of bones, the number of bones in the collection in this property will generally be larger
  * than the number of bones used per vertex.
@@ -301,10 +301,10 @@
  * a single call to the GL engine. All of the bone transforms that affect any of the vertices
  * being drawn are loaded into the GL engine by this skin section prior to drawing the vertices.
  * 
- * The number of transform matrices that can be simultaneously loaded into the GL engine
- * matrix palette is limited by the platform, and that limit defines the maximum number
- * of bones in the collection in this property. This platform limit can be retrieved from
- * the CC3OpenGL.sharedGL.maxNumberOfPaletteMatrices property.
+ * Under OpenGL ES 1.1, the number of transform matrices that can be simultaneously loaded 
+ * into the GL engine matrix palette is limited by the platform, and that limit defines the
+ * maximum number of bones in the collection in this property. This platform limit can be
+ * retrieved from the CC3OpenGL.sharedGL.maxNumberOfPaletteMatrices property.
  *
  * The array returned by this property is created anew for each access. Do not add or remove
  * bones from the returned array directly. To add a bone, use the addBone: method.
@@ -348,10 +348,10 @@
  * single call to the GL engine. All of the bone transforms that affect any of the vertices
  * being drawn are loaded into the GL engine by this skin section prior to drawing the vertices.
  * 
- * The number of transform matrices that can be simultaneously loaded into the GL engine 
- * matrix palette is limited by the platform, and that limit defines the maximum number
- * of bones in the collection in this property. This platform limit can be retrieved from
- * the CC3OpenGL.sharedGL.maxNumberOfPaletteMatrices property.
+ * Under OpenGL ES 1.1, the number of transform matrices that can be simultaneously loaded
+ * into the GL engine matrix palette is limited by the platform, and that limit defines the
+ * maximum number of bones in the collection in this property. This platform limit can be
+ * retrieved from the CC3OpenGL.sharedGL.maxNumberOfPaletteMatrices property.
  */
 -(void) addBone: (CC3Bone*) aNode;
 

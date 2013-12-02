@@ -274,13 +274,13 @@
 	CC3Vector defLoc = kCC3VectorZero;
 	
 	// Calc the weighted sum of the deformation contributed by each bone to this vertex.
-	// Iterate through the vertex units associated with this vertex.
-	GLuint vuCnt = skinMesh.vertexUnitCount;
+	// Iterate through the bones associated with this vertex.
+	GLuint vuCnt = skinMesh.vertexBoneCount;
 	for (GLuint vuIdx = 0; vuIdx < vuCnt; vuIdx++) {
 		
 		// Get a bone and its weighting for this vertex.
-		GLfloat vtxWt = [skinMesh vertexWeightForVertexUnit: vuIdx at: vtxIdx];
-		GLuint vtxBoneIdx = [skinMesh vertexMatrixIndexForVertexUnit: vuIdx at: vtxIdx];
+		GLfloat vtxWt = [skinMesh vertexWeightForBoneInfluence: vuIdx at: vtxIdx];
+		GLuint vtxBoneIdx = [skinMesh vertexBoneIndexForBoneInfluence: vuIdx at: vtxIdx];
 		CC3SkinnedBone* skinnedBone = ((CC3SkinnedBone*)[_skinnedBones objectAtIndex: vtxBoneIdx]);
 		
 		// Use the bone to deform the vertex, apply the weighting for this bone,

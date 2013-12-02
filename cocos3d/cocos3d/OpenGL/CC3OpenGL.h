@@ -130,7 +130,7 @@ typedef struct {
 	GLint value_GL_MAX_SAMPLES;
 	GLint value_GL_MAX_TEXTURE_UNITS;
 	GLint value_GL_MAX_VERTEX_ATTRIBS;
-	GLint value_GL_MAX_VERTEX_UNITS;
+	GLint valueMaxBoneInfluencesPerVertex;
 	GLint value_GL_MAX_TEXTURE_SIZE;
 	GLint value_GL_MAX_CUBE_MAP_TEXTURE_SIZE;
 	GLint value_GL_MAX_RENDERBUFFER_SIZE;
@@ -896,16 +896,10 @@ typedef struct {
 /** Returns the current value in the GL engine of the specified string parameter. */
 -(NSString*) getString: (GLenum) param;
 
-/** 
- * Returns the maximum number of lights supported by the platform,
- * or zero if the platform does not impose a limit.
- */
+/** Returns the maximum number of lights supported by the platform. */
 @property(nonatomic, readonly) GLuint maxNumberOfLights;
 
-/**
- * Returns the maximum number of clip planes supported by the platform,
- * or zero if the platform does not impose a limit.
- */
+/** Returns the maximum number of clip planes supported by the platform. */
 @property(nonatomic, readonly) GLuint maxNumberOfClipPlanes;
 
 /**
@@ -930,7 +924,10 @@ typedef struct {
  * Returns the maximum number of vertex skinning bone influences per vertex
  * supported by the platform, or zero if the platform does not impose a limit.
  */
-@property(nonatomic, readonly) GLuint maxNumberOfVertexUnits;
+@property(nonatomic, readonly) GLuint maxNumberOfBoneInfluencesPerVertex;
+
+/** @deprecated Renamed to maxNumberOfBoneInfluencesPerVertex. */
+@property(nonatomic, readonly) GLuint maxNumberOfVertexUnits DEPRECATED_ATTRIBUTE;
 
 /**
  * Returns the maximum number of pixel samples supported by the platform,

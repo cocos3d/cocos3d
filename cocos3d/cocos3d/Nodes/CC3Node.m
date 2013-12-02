@@ -1082,10 +1082,10 @@
 -(void) retainVertexBitangents { for (CC3Node* child in _children) [child retainVertexBitangents]; }
 
 -(void) retainVertexColors { for (CC3Node* child in _children) [child retainVertexColors]; }
-	
--(void) retainVertexMatrixIndices { for (CC3Node* child in _children) [child retainVertexMatrixIndices]; }
 
--(void) retainVertexWeights { for (CC3Node* child in _children) [child retainVertexWeights]; }
+-(void) retainVertexBoneWeights { for (CC3Node* child in _children) [child retainVertexBoneWeights]; }
+
+-(void) retainVertexBoneIndices { for (CC3Node* child in _children) [child retainVertexBoneIndices]; }
 
 -(void) retainVertexPointSizes { for (CC3Node* child in _children) [child retainVertexPointSizes]; }
 
@@ -1105,15 +1105,23 @@
 
 -(void) doNotBufferVertexColors { for (CC3Node* child in _children) [child doNotBufferVertexColors]; }
 
--(void) doNotBufferVertexMatrixIndices { for (CC3Node* child in _children) [child doNotBufferVertexMatrixIndices]; }
+-(void) doNotBufferVertexBoneWeights { for (CC3Node* child in _children) [child doNotBufferVertexBoneWeights]; }
 
--(void) doNotBufferVertexWeights { for (CC3Node* child in _children) [child doNotBufferVertexWeights]; }
+-(void) doNotBufferVertexBoneIndices { for (CC3Node* child in _children) [child doNotBufferVertexBoneIndices]; }
 
 -(void) doNotBufferVertexPointSizes { for (CC3Node* child in _children) [child doNotBufferVertexPointSizes]; }
 
 -(void) doNotBufferVertexTextureCoordinates { for (CC3Node* child in _children) [child doNotBufferVertexTextureCoordinates]; }
 
 -(void) doNotBufferVertexIndices { for (CC3Node* child in _children) [child doNotBufferVertexIndices]; }
+
+-(void) retainVertexWeights { [self retainVertexBoneWeights]; }
+
+-(void) retainVertexMatrixIndices { [self retainVertexBoneIndices]; }
+
+-(void) doNotBufferVertexWeights { [self doNotBufferVertexBoneWeights]; }
+
+-(void) doNotBufferVertexMatrixIndices { [self doNotBufferVertexBoneIndices]; }
 
 
 #pragma mark Texture and normal alignment

@@ -83,8 +83,8 @@
 	[self clearUnboundVertexAttributes];
 	
 	[self bindVertexArray: mesh.vertexLocations withVisitor: visitor];
-	[self bindVertexArray: mesh.vertexMatrixIndices withVisitor: visitor];
-	[self bindVertexArray: mesh.vertexWeights withVisitor: visitor];
+	[self bindVertexArray: mesh.vertexBoneIndices withVisitor: visitor];
+	[self bindVertexArray: mesh.vertexBoneWeights withVisitor: visitor];
 	[self bindVertexArray: mesh.vertexPointSizes withVisitor: visitor];
 	[self bindVertexArray: mesh.vertexIndices withVisitor: visitor];
 	
@@ -603,11 +603,11 @@
 	value_GL_MAX_LIGHTS = [self getInteger: GL_MAX_LIGHTS];
 	LogInfoIfPrimary(@"Maximum lights: %u", value_GL_MAX_LIGHTS);
 
-	value_GL_MAX_PALETTE_MATRICES = 0;		// Assume no bone skinning support
+	value_GL_MAX_PALETTE_MATRICES = 0;
 	
-	value_GL_MAX_VERTEX_UNITS = 0;			// Assume no bone skinning support
+	valueMaxBoneInfluencesPerVertex = 0;
 	
-	value_GL_MAX_SAMPLES = 1;				// Assume no multi-sampling support
+	value_GL_MAX_SAMPLES = 1;
 }
 
 /**
