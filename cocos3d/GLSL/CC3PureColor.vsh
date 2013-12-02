@@ -60,8 +60,8 @@ uniform highp mat4	u_cc3BoneMatricesEyeSpace[MAX_BONES_PER_BATCH];	/**< Array of
 
 //-------------- VERTEX ATTRIBUTES ----------------------
 attribute highp vec4	a_cc3Position;		/**< Vertex position. */
-attribute vec4			a_cc3BoneWeights;	/**< Vertex skinning bone weights (up to 4). */
-attribute vec4			a_cc3BoneIndices;	/**< Vertex skinning bone matrix indices (up to 4). */
+attribute vec4			a_cc3BoneWeights;	/**< Vertex skinning bone weights (each an array of length specified by u_cc3VertexBoneCount). */
+attribute vec4			a_cc3BoneIndices;	/**< Vertex skinning bone indices (each an array of length specified by u_cc3VertexBoneCount). */
 attribute float			a_cc3PointSize;		/**< Vertex point size. */
 
 //-------------- CONSTANTS ----------------------

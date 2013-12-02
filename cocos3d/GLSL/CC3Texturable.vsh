@@ -59,10 +59,11 @@
  * CC3ShaderProgramSemanticsByVarName instance.
  */
 
-// Increase these if more textures, lights, or bones per skin section are required.
+// Increase these if more textures, lights, bones per skin section, or bone per vertex are required.
 #define MAX_TEXTURES			2
 #define MAX_LIGHTS				4
 #define MAX_BONES_PER_BATCH		12
+#define MAX_BONES_PER_VERTEX	4
 
 precision mediump float;
 
@@ -108,8 +109,8 @@ attribute highp vec4	a_cc3Position;		/**< Vertex position. */
 attribute vec3			a_cc3Normal;		/**< Vertex normal. */
 attribute vec3			a_cc3Tangent;		/**< Vertex tangent. */
 attribute vec4			a_cc3Color;			/**< Vertex color. */
-attribute vec4			a_cc3BoneWeights;	/**< Vertex skinning bone weights (up to 4). */
-attribute vec4			a_cc3BoneIndices;	/**< Vertex skinning bone matrix indices (up to 4). */
+attribute vec4			a_cc3BoneWeights;	/**< Vertex skinning bone weights (each an array of length specified by u_cc3VertexBoneCount). */
+attribute vec4			a_cc3BoneIndices;	/**< Vertex skinning bone indices (each an array of length specified by u_cc3VertexBoneCount). */
 attribute vec2			a_cc3TexCoord0;		/**< Vertex texture coordinate for texture unit 0. */
 attribute vec2			a_cc3TexCoord1;		/**< Vertex texture coordinate for texture unit 1. */
 attribute vec2			a_cc3TexCoord2;		/**< Vertex texture coordinate for texture unit 2. */
@@ -142,22 +143,21 @@ void skinVertex() {
 	if (u_cc3VertexBoneCount == 0) {		// No vertex skinning
 		vtxPos = a_cc3Position;
 		vtxNorm = a_cc3Normal;
-	} else {			// Mesh is bone-rigged for vertex skinning
-		// Copies of the indices and weights attibutes so they can be swizzled.
-		mediump ivec4 boneIndices = ivec4(a_cc3BoneIndices);
-		mediump vec4 boneWeights = a_cc3BoneWeights;
-
-		vtxPos = kVec4Zero;						// Start at zero to accumulate weighted values
+	} else {								// Mesh is bone-rigged for vertex skinning
+		vtxPos = kVec4Zero;					// Start at zero to accumulate weighted values
 		vtxNorm = kVec3Zero;
-		for (lowp int i = 0; i < 4; ++i) {		// Max 4 bones per vertex
+		for (lowp int i = 0; i < MAX_BONES_PER_VERTEX; ++i) {
 			if (i < u_cc3VertexBoneCount) {
-				// Add position and normal contribution from this bone
-				vtxPos += u_cc3BoneMatricesModel[boneIndices.x] * a_cc3Position * boneWeights.x;
-				vtxNorm += u_cc3BoneMatricesInvTranModel[boneIndices.x] * a_cc3Normal * boneWeights.x;
-				
-				// Swizzle the vector components to the next vertex bone index
-				boneIndices = boneIndices.yzwx;
-				boneWeights = boneWeights.yzwx;
+
+				// Get the index and weight of this bone
+				int boneIdx = int(a_cc3BoneIndices[i]);
+				float boneWeight = a_cc3BoneWeights[i];
+
+				// Rotate and translate the vertex position and add its weighted contribution.
+				vtxPos += u_cc3BoneMatricesModel[boneIdx] * a_cc3Position * boneWeight;
+
+				// Rotate the vertex normal and add its weighted contribution.
+				vtxNorm += u_cc3BoneMatricesInvTranModel[boneIdx] * a_cc3Normal * boneWeight;
 			}
 		}
 		if (u_cc3VertexShouldNormalizeNormal)
