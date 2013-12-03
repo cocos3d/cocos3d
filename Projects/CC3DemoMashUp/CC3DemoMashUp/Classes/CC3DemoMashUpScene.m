@@ -429,8 +429,6 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 							andFragmentShaderFile: @"CC3SingleTexture.fsh"];
 	[CC3ShaderProgram programFromVertexShaderFile: @"BumpMap.vsh"
 							andFragmentShaderFile: @"BumpMap.fsh"];
-	[CC3ShaderProgram programFromVertexShaderFile: @"CC3PureColor.vsh"
-							andFragmentShaderFile: @"CC3PureColor.fsh"];
 	[CC3ShaderProgram programFromVertexShaderFile: @"CC3Texturable.vsh"
 							andFragmentShaderFile: @"CC3SingleTextureReflect.fsh"];
 	[CC3ShaderProgram programFromVertexShaderFile: @"CC3Texturable.vsh"

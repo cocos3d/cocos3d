@@ -56,6 +56,7 @@
 */
 @interface CC3ShaderProgramContext : NSObject {
 	CC3ShaderProgram* _program;
+	CC3ShaderProgram* _pureColorProgram;
 	NSMutableArray* _uniforms;
 	NSMutableDictionary* _uniformsByName;
 	BOOL _shouldEnforceCustomOverrides : 1;
@@ -65,9 +66,23 @@
 /**
  * Returns the program for which this instance is providing a context.
  *
- * Setting this property will redefine the variables that can be retrieved via the uniform... methods.
+ * Setting this property will redefine the variables that can be retrieved via the
+ * uniform... methods, and will clear the pureColorProgram so that a new pureColorProgram
+ * will be matched to the new program on next access.
  */
 @property(nonatomic, strong) CC3ShaderProgram* program;
+
+/** 
+ * Returns the program to use to render this node in a pure color, such as used when rendering
+ * the node during paint-basede node picking as a result of a touch event.
+ *
+ * If this property is not set directly, it will be set automatically on first access, by
+ * retrieving the picking program that matches the shader program in the program property.
+ * This will usually be a program that has the same vertex shader as the shader program in
+ * the program property, but has a fragment shader that paints in a single color. By using
+ * the same vertex shader, the vertices are guaranteed to be rendered in the same locations.
+ */
+@property(nonatomic, strong) CC3ShaderProgram* pureColorProgram;
 
 /**
  * Indicates whether this context should ensure that all uniforms with an unknown semantic

@@ -34,6 +34,7 @@
  * This vertex shader can be paired with the following fragment shaders:
  *   - CC3ClipSpaceSingleTexture.fsh
  *   - CC3ClipSpaceNoTexture.fsh
+ *   - CC3PureColor.fsh (for node picking from touches)
  *
  * The semantics of the variables in this shader can be mapped using a
  * CC3ShaderProgramSemanticsByVarName instance.
@@ -43,12 +44,12 @@ precision mediump float;
 
 //-------------- UNIFORMS ----------------------
 
-uniform vec4	u_cc3Color;					/**< Color when lighting & materials are not in use. */
-uniform bool	u_cc3VertexHasColor;		/**< Whether the vertex color is available. */
+uniform lowp vec4		u_cc3Color;					/**< Color when lighting & materials are not in use. */
+uniform bool			u_cc3VertexHasColor;		/**< Whether the vertex color is available. */
 
 //-------------- VERTEX ATTRIBUTES ----------------------
 attribute highp vec4	a_cc3Position;		/**< Vertex position. */
-attribute vec4			a_cc3Color;			/**< Vertex color. */
+attribute lowp vec4		a_cc3Color;			/**< Vertex color. */
 attribute vec2			a_cc3TexCoord;		/**< Vertex texture coordinate. */
 
 //-------------- VARYING VARIABLE OUTPUTS ----------------------

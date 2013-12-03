@@ -30,6 +30,7 @@
  */
 
 #import "CC3ShaderProgramContext.h"
+#import "CC3ShaderProgramMatcher.h"
 
 
 #pragma mark -
@@ -45,7 +46,19 @@
 -(void) setProgram:(CC3ShaderProgram*) program {
 	if (program == _program) return;
 	_program = program;
+	_pureColorProgram = nil;
 	[self removeAllOverrides];
+}
+
+-(CC3ShaderProgram*) pureColorProgram {
+	if ( !_pureColorProgram )
+		self.pureColorProgram = [CC3ShaderProgram.programMatcher pureColorProgramMatching: self.program];
+	return _pureColorProgram;
+}
+
+-(void) setPureColorProgram:(CC3ShaderProgram*) program {
+	if (program == _pureColorProgram) return;
+	_pureColorProgram = program;
 }
 
 
@@ -102,9 +115,10 @@
 
 // Match based on location
 -(BOOL) populateUniform: (CC3GLSLUniform*) uniform withVisitor: (CC3NodeDrawingVisitor*) visitor {
-	// If the program is not the same, don't look up the override.
-	// This can occur when drawing with a different program, such as during node picking.
-	if (uniform.program != _program) return NO;
+	
+	// If the program is not the mine, don't look up the override.
+	CC3ShaderProgram* uProg = uniform.program;
+	if ( !(uProg == _program || uProg == _pureColorProgram) ) return NO;
 
 	// Find the matching uniform override by comparing locations
 	// and set the value of the incoming uniform from it

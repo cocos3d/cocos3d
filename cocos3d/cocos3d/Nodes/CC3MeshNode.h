@@ -287,7 +287,7 @@
 @property(nonatomic, assign) GLfloat reflectivity;
 
 /**
- * Selects an appropriate shader program for this mesh node.
+ * Selects an appropriate shader program for this mesh node, and returns that program.
  *
  * When running under a programmable rendering pipeline, such as OpenGL ES 2.0 or OpenGL,
  * all mesh nodes require a shader program to be assigned. This can be done directly using
@@ -315,7 +315,7 @@
  * This method differs from the selectShaderPrograms method in that this method does not
  * propagate to any descendant nodes.
  */
--(void) selectShaderProgram;
+-(CC3ShaderProgram*) selectShaderProgram;
 
 /**
  * Clears the shader program from this mesh node, allowing a new shader to be selected, either

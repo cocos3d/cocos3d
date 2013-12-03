@@ -781,6 +781,11 @@
  * This cache is a weak cache, meaning that it does not hold strong references to the programs
  * that are added to it. As a result, the specified program will automatically be deallocated
  * and removed from this cache once all external strong references to it have been released.
+ *
+ * If the value of the shouldAutomaticallyAddMatchingPureColorPrograms is set to YES, this
+ * method will ensure that a matching pure-color program is added to the cache for each regular
+ * program that is added. The pureColorProgramMatching: method, of the program matcher found in
+ * the class-side programMatcher property, is used to create the matching pure-color program.
  */
 +(void) addProgram: (CC3ShaderProgram*) program;
 
@@ -804,6 +809,34 @@
  * programs in the cache.
  */
 +(void) removeAllPrograms;
+
+/**
+ * Returns whether this shader program cache should automatically add a matching pure-color
+ * shader program for each normal shader program that is added to this cache.
+ *
+ * If this property is set to YES, the addProgram method will ensure that a matching pure-color
+ * shader program is added for each normal shader program that is added using that method.
+ *
+ * The initial value of this property is YES, ensuring that a matching pure-color program will
+ * be added for each normal shader program that is added. Pure-color shader programs are used
+ * when rendering a node for picking from a touch-event. You should therefore leave the value
+ * of this property at its default value, unless your app does not use touch events to pick nodes.
+ */
++(BOOL) shouldAutomaticallyAddMatchingPureColorPrograms;
+
+/**
+ * Sets whether this shader program cache should automatically add a matching pure-color
+ * shader program for each normal shader program that is added to this cache.
+ *
+ * If this property is set to YES, the addProgram method will ensure that a matching pure-color
+ * shader program is added for each normal shader program that is added using that method.
+ *
+ * The initial value of this property is YES, ensuring that a matching pure-color program will
+ * be added for each normal shader program that is added. Pure-color shader programs are used
+ * when rendering a node for picking from a touch-event. You should therefore leave the value
+ * of this property at its default value, unless your app does not use touch events to pick nodes.
+ */
++(void) setShouldAutomaticallyAddMatchingPureColorPrograms: (BOOL) shouldAdd;
 
 /** 
  * Returns whether shader programs are being pre-loaded.

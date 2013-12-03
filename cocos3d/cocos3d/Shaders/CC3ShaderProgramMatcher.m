@@ -40,25 +40,16 @@
 
 @synthesize semanticDelegate=_semanticDelegate;
 
--(Class) programClass { return [CC3ShaderProgram class]; }
-
--(CC3ShaderProgram*) programForMeshNode: (CC3MeshNode*) aMeshNode {
-	CC3ShaderProgram* shaderProgram = aMeshNode.shaderProgram;
-	if ( !shaderProgram ) {
-		shaderProgram = [self selectShaderProgramForMeshNode: aMeshNode];
-		aMeshNode.ensureMaterial.shaderProgram = shaderProgram;	// Set in material so it won't propagate to descendants
-		LogRez(@"Shader program %@ automatically selected for %@", shaderProgram, aMeshNode);
-	}
-	return shaderProgram;
+-(CC3ShaderProgram*) pureColorProgramMatching: (CC3ShaderProgram*) shaderProgram {
+	return [[shaderProgram class] programWithSemanticDelegate: shaderProgram.semanticDelegate
+										 fromVertexShaderFile: shaderProgram.vertexShader.name
+										andFragmentShaderFile: @"CC3PureColor.fsh"];
 }
 
--(CC3ShaderProgram*) selectShaderProgramForMeshNode: (CC3MeshNode*) aMeshNode {
-		
-	GLuint texCnt = aMeshNode.textureCount;
-	CC3Material* mat = aMeshNode.material;
+-(CC3ShaderProgram*) programForMeshNode: (CC3MeshNode*) aMeshNode {
 	
-	// No material
-	if ( !mat ) return self.pureColorProgram;
+	CC3Material* mat = aMeshNode.ensureMaterial;
+	GLuint texCnt = mat.textureCount;
 	
 	BOOL shouldAlphaTest = !mat.shouldDrawLowAlpha;
 	
@@ -99,17 +90,6 @@
 
 
 #pragma mark Program options
-
-/** 
- * This property is accessed quite frequently for activities like node picking,
- * so make is directly accessible.
- */
--(CC3ShaderProgram*) pureColorProgram {
-	if ( !_pureColorProgram )
-		_pureColorProgram = [self programFromVertexShaderFile: @"CC3PureColor.vsh"
-										 andFragmentShaderFile: @"CC3PureColor.fsh"];
-	return _pureColorProgram;
-}
 
 -(CC3ShaderProgram*) configurableProgram: (BOOL) shouldAlphaTest {
 	return [self programFromVertexShaderFile: @"CC3Texturable.vsh"
@@ -177,9 +157,9 @@
 
 -(CC3ShaderProgram*) programFromVertexShaderFile: (NSString*) vshFilePath
 					   andFragmentShaderFile: (NSString*) fshFilePath {
-	return [self.programClass programWithSemanticDelegate: self.semanticDelegate
-									 fromVertexShaderFile: vshFilePath
-									andFragmentShaderFile: fshFilePath];
+	return [CC3ShaderProgram programWithSemanticDelegate: self.semanticDelegate
+									fromVertexShaderFile: vshFilePath
+								   andFragmentShaderFile: fshFilePath];
 }
 
 
@@ -187,7 +167,6 @@
 
 -(id) init {
 	if ( (self = [super init]) ) {
-		_pureColorProgram = nil;
 		[self initSemanticDelegate];
 	}
 	return self;

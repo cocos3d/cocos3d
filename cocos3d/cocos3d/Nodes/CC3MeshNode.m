@@ -811,17 +811,29 @@
 	visitor.gl.color = visitor.currentColor;
 }
 
+#if CC3_GLSL
 -(void) applyShaderProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	CC3ShaderProgram* shaderProgram;
 	if (visitor.shouldDecorateNode)
-		shaderProgram = [CC3OpenGL.sharedGL programForMeshNode: self];
+		shaderProgram = self.selectShaderProgram;
 	else
-		shaderProgram = CC3OpenGL.sharedGL.pureColorProgram;
+		shaderProgram = self.shaderContext.pureColorProgram;
 
 	[shaderProgram bindWithVisitor: visitor];
 }
+#else
+-(void) applyShaderProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
+#endif	// CC3GLSL
 
--(void) selectShaderProgram { [CC3OpenGL.sharedGL programForMeshNode: self]; }
+-(CC3ShaderProgram*) selectShaderProgram {
+	CC3ShaderProgram* sp = self.shaderProgram;
+	if ( !sp ) {
+		sp = [CC3ShaderProgram.programMatcher programForMeshNode: self];
+		self.ensureMaterial.shaderProgram = sp;		// Use material, so doesn't set descendants
+		LogRez(@"Shader program %@ automatically selected for %@", sp, self);
+	}
+	return sp;
+}
 
 -(void) selectShaderPrograms {
 	[self selectShaderProgram];

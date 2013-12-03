@@ -1078,12 +1078,6 @@ typedef struct {
 
 #pragma mark Shaders
 
-/** Returns a shader program suitable for painting mesh nodes in a solid color. */
-@property(nonatomic, strong, readonly) CC3ShaderProgram* pureColorProgram;
-
-/** Returns the shader program to use to draw the specified mesh node. */
--(CC3ShaderProgram*) programForMeshNode: (CC3MeshNode*) aMeshNode;
-
 /** 
  * Generates a new shader of the specifed type and returns its ID.
  *

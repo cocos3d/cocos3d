@@ -935,10 +935,6 @@
 
 -(void) setShaderProgramPrewarmer: (CC3ShaderProgramPrewarmer*) shaderProgramPrewarmer {}
 
--(CC3ShaderProgram*) pureColorProgram { return nil; }
-
--(CC3ShaderProgram*) programForMeshNode: (CC3MeshNode*) aMeshNode { return nil; }
-
 -(id<CC3ShaderProgramSemanticsDelegate>) semanticDelegate { return nil; }
 
 -(void) setSemanticDelegate: (id<CC3ShaderProgramSemanticsDelegate>) semanticDelegate {}

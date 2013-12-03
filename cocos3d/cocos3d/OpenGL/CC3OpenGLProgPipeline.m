@@ -182,12 +182,6 @@
 	_shaderProgramPrewarmer = shaderProgramPrewarmer;
 }
 
--(CC3ShaderProgram*) pureColorProgram { return CC3ShaderProgram.programMatcher.pureColorProgram; }
-
--(CC3ShaderProgram*) programForMeshNode: (CC3MeshNode*) aMeshNode {
-	return [CC3ShaderProgram.programMatcher programForMeshNode: aMeshNode];
-}
-
 -(GLuint) generateShader: (GLenum) shaderType {
     GLuint shaderID = glCreateShader(shaderType);
 	LogGLErrorTrace(@"glCreateShader(%@) = %u", NSStringFromGLEnum(shaderType), shaderID);

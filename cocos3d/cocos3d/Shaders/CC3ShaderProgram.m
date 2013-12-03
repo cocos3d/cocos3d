@@ -674,6 +674,10 @@ static CC3Cache* _programCache = nil;
 	}
 	[self ensureCache];
 	[_programCache addObject: program];
+
+	// If appropriate, ensure that a matching pure-color program is added as well.
+	if (self.shouldAutomaticallyAddMatchingPureColorPrograms)
+		[self.programMatcher pureColorProgramMatching: program];
 }
 
 +(CC3ShaderProgram*) getProgramNamed: (NSString*) name {
@@ -685,6 +689,14 @@ static CC3Cache* _programCache = nil;
 +(void) removeProgramNamed: (NSString*) name { [_programCache removeObjectNamed: name]; }
 
 +(void) removeAllPrograms { [_programCache removeAllObjectsOfType: self];}
+
+static BOOL _shouldAutomaticallyAddMatchingPureColorPrograms = YES;
+
++(BOOL) shouldAutomaticallyAddMatchingPureColorPrograms { return _shouldAutomaticallyAddMatchingPureColorPrograms; }
+
++(void) setShouldAutomaticallyAddMatchingPureColorPrograms: (BOOL) shouldAdd {
+	_shouldAutomaticallyAddMatchingPureColorPrograms = shouldAdd;
+}
 
 +(BOOL) isPreloading { return _programCache ? !_programCache.isWeak : NO; }
 

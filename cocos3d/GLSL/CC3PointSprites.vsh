@@ -33,6 +33,7 @@
  * This vertex shader can be paired with the following fragment shaders:
  *   - CC3PointSprites.fsh
  *   - CC3PointSpritesAlphaTest.fsh
+ *   - CC3PureColor.fsh (for node picking from touches)
  *
  * The semantics of the variables in this shader can be mapped using a
  * CC3ShaderProgramSemanticsByVarName instance.
@@ -49,7 +50,7 @@ uniform highp mat4	u_cc3MatrixModelView;			/**< Current modelview matrix. */
 uniform mat3		u_cc3MatrixModelViewInvTran;	/**< Inverse-transpose of current modelview rotation matrix. */
 uniform highp mat4	u_cc3MatrixProj;				/**< Projection matrix. */
 
-uniform vec4		u_cc3Color;						/**< Color when lighting & materials are not in use. */
+uniform lowp vec4	u_cc3Color;						/**< Color when lighting & materials are not in use. */
 uniform vec4		u_cc3MaterialAmbientColor;		/**< Ambient color of the material. */
 uniform vec4		u_cc3MaterialDiffuseColor;		/**< Diffuse color of the material. */
 uniform vec4		u_cc3MaterialSpecularColor;		/**< Specular color of the material. */

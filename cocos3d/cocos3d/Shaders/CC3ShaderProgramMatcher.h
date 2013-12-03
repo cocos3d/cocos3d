@@ -57,36 +57,35 @@
 @protocol CC3ShaderProgramMatcher <NSObject>
 
 /**
- * Returns a shader program suitable for painting mesh nodes in a solid color.
- *
- * This shader program is used when a mesh node does not have a material, or when
- * painting a mesh node for node picking during user interaction.
- */
-@property(nonatomic, retain, readonly) CC3ShaderProgram* pureColorProgram;
-
-/**
  * Returns the shader program to use to draw the specified mesh node.
  *
- * If the specified mesh node does not have a material, the shader identified by the
- * pureColorProgram property is returned.
+ * Returns a shader program selected from the characteristics of the mesh node and its material.
  *
- * If the specified mesh node has a material that already has a shader program assigned,
- * that shader program is returned. 
- *
- * If the material covering the specified mesh node does not have a shader program assigned
- * already, a shader program is selected, based on the characteristics of the mesh node and
- * the material, the selected shader program is set into the material, and is returned.
- *
- * The returned program will be compiled and linked, and will have a semantics delegate 
+ * The returned program will be compiled and linked, and will have a semantics delegate
  * assigned in the semanticDelegate property.
  *
  * The implementation is responsible for determining how to match the specified mesh node to an
- * appropriate GL program, and each implementations may have a different matching methodology.
+ * appropriate GL program, and each implementation may have a different matching methodology.
  *
  * Implementations are responsible for compiling, linking, and assigning a semantics
  * delegate to the program.
  */
 -(CC3ShaderProgram*) programForMeshNode: (CC3MeshNode*) aMeshNode;
+
+/**
+ * Returns a shader program that matches the specified shader program, but renders the mesh
+ * in a single, solid color, instead of taking into consideration lighting, textures, etc.
+ *
+ * The returned shaderProgram will be used for rendering the mesh node during paint-based node
+ * picking, or can be used for simply rendering the mesh while ignoring lighting, material and 
+ * textures.
+ *
+ * Implementation should ensure that the vertices will be rendered in the same position as
+ * the specified shader program. Typical implementations will return a shader program that
+ * uses the same vertex shader as the specified shader program, but has a fragment shader 
+ * that renders in a single color.
+ */
+-(CC3ShaderProgram*) pureColorProgramMatching: (CC3ShaderProgram*) shaderProgram;
 
 /** The semantic delegate that will be attached to any program created by this matcher. */
 @property(nonatomic, retain) id<CC3ShaderProgramSemanticsDelegate> semanticDelegate;
@@ -107,35 +106,7 @@
  */
 @interface CC3ShaderProgramMatcherBase : NSObject <CC3ShaderProgramMatcher> {
 	id<CC3ShaderProgramSemanticsDelegate> _semanticDelegate;
-	CC3ShaderProgram* _pureColorProgram;
 }
-
-/**
- * Returns a program compiled and linked from the specified vertex and fragment shader files,
- * and attached to the delegate in the semanticDelegate property of this instance.
- *
- * The specified file paths may be either absolute paths, or relative to the application
- * resource directory. If the files are located directly in the application resources
- * directory, the specified file paths can simply be the names of the files.
- *
- * Programs are cached. If the program was already loaded and is in the cache, it is retrieved
- * and returned. If the program has not in the cache, it is loaded, compiled, and linked, placed
- * into the cache, and returned. It is therefore safe to invoke this method any time the program
- * is needed, without having to worry that the program will be repeatedly loaded and compiled
- * from the files.
- *
- * This method is invoked automatically from the programForMeshNode: method when a required
- * program needs to be established.
- */
--(CC3ShaderProgram*) programFromVertexShaderFile: (NSString*) vshFilePath
-					   andFragmentShaderFile: (NSString*) fshFilePath;
-
-/**
- * Property that determines the class of GL program to instantiate when required.
- *
- * This property returns the CC3ShaderProgram class. Subclasses may override.
- */
-@property(nonatomic, strong, readonly) Class programClass;
 
 @end
 

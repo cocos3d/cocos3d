@@ -3365,16 +3365,6 @@
 			<key>Path</key>
 			<string>cocos3d/GLSL/CC3PureColor.fsh</string>
 		</dict>
-		<key>cocos3d/GLSL/CC3PureColor.vsh</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>GLSL</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/GLSL/CC3PureColor.vsh</string>
-		</dict>
 		<key>cocos3d/GLSL/CC3SingleTexture.fsh</key>
 		<dict>
 			<key>Group</key>
@@ -3721,7 +3711,6 @@
 		<string>cocos3d/GLSL/CC3PointSprites.vsh</string>
 		<string>cocos3d/GLSL/CC3PointSpritesAlphaTest.fsh</string>
 		<string>cocos3d/GLSL/CC3PureColor.fsh</string>
-		<string>cocos3d/GLSL/CC3PureColor.vsh</string>
 		<string>cocos3d/GLSL/CC3SingleTexture.fsh</string>
 		<string>cocos3d/GLSL/CC3SingleTextureAlphaTest.fsh</string>
 		<string>cocos3d/GLSL/CC3SingleTextureReflect.fsh</string>
