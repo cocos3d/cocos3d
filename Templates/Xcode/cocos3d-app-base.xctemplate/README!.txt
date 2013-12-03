@@ -70,7 +70,7 @@ To add the `cocos2d` target as a dependency of the ___PROJECTNAMEASIDENTIFIER___
 3. Select the ___PROJECTNAMEASIDENTIFIER___ target in the Project Editor pane.
 4. Click on the Build Phases tab.
 5. Open the Target Dependencies section,
-6. Click the + button, select the `cocos2d` item in the list, and click the *Add* button
+6. Click the + button, select the cocos2d item in the list, and click the Add button
 
 
 Creating POD 3D Model Files

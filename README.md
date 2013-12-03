@@ -220,11 +220,12 @@ Reference Counting (ARC), and must be compiled separately in its own target.
 
 To add the `cocos2d` target as a dependency of your main app target, follow these steps:
 
-- Open your new template project in Xcode
-- Select the project in the Xcode Project Navigator
-- Select the Build Phases tab of your application Target
-- Open the Target Dependencies section,
-- Click the + button, select the `cocos2d` item in the list and click the *Add* button
+1. Open the template project in Xcode.
+2. In the Xcode Project Navigator pane, select the project.
+3. Select the main app target in the Project Editor pane.
+4. Click on the Build Phases tab.
+5. Open the Target Dependencies section,
+6. Click the + button, select the `cocos2d` item in the list, and click the *Add* button
 
 The template project starts with a working 3D variation on the familiar *hello, world*
 application, and you can use it as a starting point for your own application.
