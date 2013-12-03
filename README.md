@@ -213,6 +213,19 @@ menu selection, and select the *cocos3d2 OSX Application* project template from 
 in the OS X section. The *cocos3d2 OSX Application* template uses the OpenGL programmable pipeline and 
 your cocos3d installation must be linked to a `cocos2d 2.x` version, as described above.
 
+With either the iOS or Mac OSX template project, if you are linking to `cocos2d 2.x` or `cocos2d 1.x`,
+once the template application opens up, you must add the `cocos2d` target within your project as a 
+dependency of the main app target. This is because `cocos2d 2.x` and `cocos2d 1.x` do not use Automatic
+Reference Counting (ARC), and must be compiled separately in its own target.
+
+To add the `cocos2d` target as a dependency of your main app target, follow these steps:
+
+- Open your new template project in Xcode
+- Select the project in the Xcode Project Navigator
+- Select the Build Phases tab of your application Target
+- Open the Target Dependencies section,
+- Click the + button, select the `cocos2d` item in the list and click the *Add* button
+
 The template project starts with a working 3D variation on the familiar *hello, world*
 application, and you can use it as a starting point for your own application.
 
@@ -224,10 +237,6 @@ The cocos3d distribution includes Xcode projects to build static libraries for c
 These are available in the `cocos3d-iOS.xcworkspace` and `cocos3d-OSX.xcworkspace` Xcode workspaces,
 and the Xcode projects are also individually available in the `cocos3d-library` and `cocos2d-library`
 folders under the `Projects` folder in the cocos3d distribution.
-
-Neither the cocos3d or cocos2d frameworks currently use Automatic Reference Counting (ARC) and,
-in addition to helping to organize your development environment, using these static libraries is
-a convenient way to add cocos3d and cocos2d to application projects that make use of ARC.
 
 You can add these static library projects as sub-projects of your Xcode app project. Instructions
 for adding a static library to your app project are available through Apple's documentation, or

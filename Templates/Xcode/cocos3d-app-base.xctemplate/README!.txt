@@ -58,6 +58,20 @@ to this project by following these steps within Xcode:
 3. Add the newly linked cocos2d files to the project by dragging the cocos2d folder from
    the cocos3d distribution folder to the Xcode Project Navigator panel.
 
+If you are linking to `cocos2d 2.x` or `cocos2d 1.x`, once the template application opens up,
+you must add the `cocos2d` target within your project as a dependency of the ___PROJECTNAMEASIDENTIFIER___ 
+target. This step is necessary because `cocos2d 2.x` and `cocos2d 1.x` do not use Automatic
+Reference Counting (ARC), and must be compiled separately in its own target.
+
+To add the `cocos2d` target as a dependency of the ___PROJECTNAMEASIDENTIFIER___ target, follow these steps:
+
+1. Open ___PROJECTNAMEASIDENTIFIER___ template project in Xcode.
+2. In the Xcode Project Navigator pane, select the ___PROJECTNAMEASIDENTIFIER___ project.
+3. Select the ___PROJECTNAMEASIDENTIFIER___ target in the Project Editor pane.
+4. Click on the Build Phases tab.
+5. Open the Target Dependencies section,
+6. Click the + button, select the `cocos2d` item in the list, and click the *Add* button
+
 
 Creating POD 3D Model Files
 ---------------------------
