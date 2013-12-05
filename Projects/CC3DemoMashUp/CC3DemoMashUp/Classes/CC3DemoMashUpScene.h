@@ -416,20 +416,6 @@ typedef enum {
  * this demonstrates the ability, under OpenGL ES 1.1, to use a PFX file to describe the textures
  * that should be applied to a material.
  *
- * Touching the switch-view button again will point the camera at a wooden sign that is
- * constructed from two separate textures that are loaded separately and applied as a
- * multi-texture to the sign mesh. When multiple textures are applied to a mesh, different
- * techniques can be configured for combining the textures to create interesting effects.
- * The wooden sign is touchable, and touching the wooden sign will select a different method
- * of combining the two textures. These methods of combining cycle through the following
- * options when the wooden sign is repeated touched: Modulation, Addition, Signed Addition,
- * Simple Replacement, Subtraction, and DOT3 bump-mapping (also known as normal mapping).
- *
- * This wooden sign also demonstrates the use of the textureRectangle property to cover a mesh with
- * a section of a texture. This feature can be used to extract a texture from a texture atlas, so
- * that a single loaded texture can be used to cover multiple meshes, with each mesh covered by a
- * different section fo the texture.
- * 
  * Touching the switch-view button again will point the camera at a purple floating head that
  * looks back at the camera, regardless of where the camera moves. This floating head shows
  * quite realistic surface detail and shadowing that changes as the light source moves up
@@ -457,6 +443,24 @@ typedef enum {
  * Touching the purple head also logs an information message using userData that was attached
  * to the floating head an initialization time. The userData property can be used to attach
  * any application specific data that you want to any node, mesh, material, texture, etc.
+ *
+ * When running under OpenGL ES 1.1, to the right of the purple head is a wooden sign that is 
+ * constructed from two separate textures that are loaded separately and applied as a multi-texture
+ * to the sign mesh. When multiple textures are applied to a mesh, different techniques can be
+ * configured for combining the textures to create interesting effects. The wooden sign is 
+ * touchable, and touching the wooden sign will select a different method of combining the two 
+ * textures. These methods of combining cycle through the following options when the wooden sign
+ * is repeated touched: Modulation, Addition, Signed Addition, Simple Replacement, Subtraction,
+ * and DOT3 bump-mapping (also known as normal mapping).
+ *
+ * The wooden sign is not visible when running under OpenGL ES 2.0 or OpenGL OSX. It makes use
+ * of functionality that is provided by OpenGL ES 1.1. The same texture-combining functionality
+ * is provided under OpenGL ES 2.0 and OpenGL OSX via GLSL shaders.
+ *
+ * This wooden sign also demonstrates the use of the textureRectangle property to cover a mesh with
+ * a section of a texture. This feature can be used to extract a texture from a texture atlas, so
+ * that a single loaded texture can be used to cover multiple meshes, with each mesh covered by a
+ * different section fo the texture.
  *
  * Touching the switch-view button again will point the camera at a die cube. You can spin
  * this die cube by touching it and swiping your finger in any direction. The die will

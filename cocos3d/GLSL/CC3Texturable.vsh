@@ -53,7 +53,6 @@
  *   - CC3BumpMapObjectSpaceAlphaTest.fsh
  *   - CC3BumpMapTangentSpace.fsh
  *   - CC3BumpMapTangentSpaceAlphaTest.fsh
- *   - CC3MultiTextureConfigurable.fsh
  *   - CC3PureColor.fsh (for node picking from touches)
  *
  * The semantics of the variables in this shader can be mapped using a

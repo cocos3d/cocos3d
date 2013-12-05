@@ -3261,16 +3261,6 @@
 			<key>Path</key>
 			<string>cocos3d/GLSL/CC3Fog.fsh</string>
 		</dict>
-		<key>cocos3d/GLSL/CC3MultiTextureConfigurable.fsh</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>GLSL</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/GLSL/CC3MultiTextureConfigurable.fsh</string>
-		</dict>
 		<key>cocos3d/GLSL/CC3NoTexture.fsh</key>
 		<dict>
 			<key>Group</key>
@@ -3687,7 +3677,6 @@
 		<string>cocos3d/GLSL/CC3ClipSpaceSingleTexture.fsh</string>
 		<string>cocos3d/GLSL/CC3ClipSpaceTexturable.vsh</string>
 		<string>cocos3d/GLSL/CC3Fog.fsh</string>
-		<string>cocos3d/GLSL/CC3MultiTextureConfigurable.fsh</string>
 		<string>cocos3d/GLSL/CC3NoTexture.fsh</string>
 		<string>cocos3d/GLSL/CC3NoTextureAlphaTest.fsh</string>
 		<string>cocos3d/GLSL/CC3NoTextureReflect.fsh</string>

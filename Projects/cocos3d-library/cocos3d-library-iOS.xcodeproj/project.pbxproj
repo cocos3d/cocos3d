@@ -427,7 +427,6 @@
 		A95FC9BA1850434F004ACA71 /* CC3ClipSpaceSingleTexture.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3ClipSpaceSingleTexture.fsh; sourceTree = "<group>"; };
 		A95FC9BB1850434F004ACA71 /* CC3ClipSpaceTexturable.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3ClipSpaceTexturable.vsh; sourceTree = "<group>"; };
 		A95FC9BC1850434F004ACA71 /* CC3Fog.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3Fog.fsh; sourceTree = "<group>"; };
-		A95FC9BD1850434F004ACA71 /* CC3MultiTextureConfigurable.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3MultiTextureConfigurable.fsh; sourceTree = "<group>"; };
 		A95FC9BE1850434F004ACA71 /* CC3NoTexture.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3NoTexture.fsh; sourceTree = "<group>"; };
 		A95FC9BF1850434F004ACA71 /* CC3NoTextureAlphaTest.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3NoTextureAlphaTest.fsh; sourceTree = "<group>"; };
 		A95FC9C01850434F004ACA71 /* CC3NoTextureReflect.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3NoTextureReflect.fsh; sourceTree = "<group>"; };
@@ -989,7 +988,6 @@
 				A95FC9BA1850434F004ACA71 /* CC3ClipSpaceSingleTexture.fsh */,
 				A95FC9BB1850434F004ACA71 /* CC3ClipSpaceTexturable.vsh */,
 				A95FC9BC1850434F004ACA71 /* CC3Fog.fsh */,
-				A95FC9BD1850434F004ACA71 /* CC3MultiTextureConfigurable.fsh */,
 				A95FC9BE1850434F004ACA71 /* CC3NoTexture.fsh */,
 				A95FC9BF1850434F004ACA71 /* CC3NoTextureAlphaTest.fsh */,
 				A95FC9C01850434F004ACA71 /* CC3NoTextureReflect.fsh */,

@@ -79,22 +79,13 @@
 	// Bump-mapping using an object-space normal map texture.
 	if (texCnt > 1 && mat.hasBumpMap)
 		return [self bumpMapObjectSpaceProgram: shouldAlphaTest];
-	
-	// Single texture with no configurable texture unit
-	if (texCnt == 1 && !mat.texture.textureUnit)
-		return [self singleTextureProgram: shouldAlphaTest];
 
-	// Default to the most flexible, but least efficient shaders
-	return [self configurableProgram: shouldAlphaTest];
+	// Default to the basic single-texture shader program
+	return [self singleTextureProgram: shouldAlphaTest];
 }
 
 
 #pragma mark Program options
-
--(CC3ShaderProgram*) configurableProgram: (BOOL) shouldAlphaTest {
-	return [self programFromVertexShaderFile: @"CC3Texturable.vsh"
-					   andFragmentShaderFile: @"CC3MultiTextureConfigurable.fsh"];
-}
 
 -(CC3ShaderProgram*) singleTextureProgram: (BOOL) shouldAlphaTest {
 	return [self programFromVertexShaderFile: @"CC3Texturable.vsh"

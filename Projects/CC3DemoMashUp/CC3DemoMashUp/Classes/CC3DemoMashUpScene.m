@@ -418,8 +418,6 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	[CC3ShaderProgram programFromVertexShaderFile: @"CC3Texturable.vsh"
 							andFragmentShaderFile: @"CC3BumpMapObjectSpace.fsh"];
 	[CC3ShaderProgram programFromVertexShaderFile: @"CC3Texturable.vsh"
-							andFragmentShaderFile: @"CC3MultiTextureConfigurable.fsh"];
-	[CC3ShaderProgram programFromVertexShaderFile: @"CC3Texturable.vsh"
 							andFragmentShaderFile: @"CC3SingleTextureAlphaTest.fsh"];
 	[CC3ShaderProgram programFromVertexShaderFile: @"CC3Texturable.vsh"
 							andFragmentShaderFile: @"CC3SingleTexture.fsh"];
@@ -1284,10 +1282,18 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 }
 
 /**
+ * OpenGL ES 1.1 performs multi-texturing using a series of texture units that can be
+ * configured and chained together. This provides a flexible multi-texturing environment.
+ *
  * Adds a multi-texture sign, consisting of a combination of a wooden sign texture
  * and a stamp texture that are combined during rendering. Several styles of combining 
  * (including bump-mapping) can be cycled through by repeatedly touching the sign.
+ *
+ * OpenGL ES 2.0 and OpenGL OSX do not provide the same system of configurable texture units.
+ * In those programmable rendering pipelines, fragment shader perform the same texture-combining
+ * functionality (and much more). This example is only active under OpenGL ES 1.1.
  */
+#if CC3_OGLES_1
 -(void) addWoodenSign {
 	// Texture for the basic wooden sign
 	_signTex = [CC3Texture textureFromFile: kSignTextureFile];
@@ -1363,7 +1369,11 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// Sign is added on on background thread. Configure it for the scene, and fade it in slowly.
 	[self configureForScene: _woodenSign andMaterializeWithDuration: kFadeInDuration];
 	[_bumpMapLightTracker addChild: _woodenSign];
+
 }
+#else
+-(void) addWoodenSign {}
+#endif	// CC3_OGLES_1
 
 // Text to hold in userData of floating head and then log when the head is poked.
 static NSString* kDontPokeMe = @"Owww! Don't poke me!";
@@ -2965,8 +2975,6 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	else if (_camTarget == _teapotTextured)
 		_camTarget = _mascot;
 	else if (_camTarget == _mascot)
-		_camTarget = _woodenSign;
-	else if (_camTarget == _woodenSign)
 		_camTarget = _floatingHead;
 	else if (_camTarget == _floatingHead)
 		_camTarget = _dieCube;
@@ -3552,7 +3560,10 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  *
  * Once the multi-texture combining function is determined, the name of it is set in
  * the label that hovers above the wooden sign.
+ *
+ * This functionality is available only under OpenGL ES 1.1.
  */
+#if CC3_OGLES_1
 -(void) switchWoodenSign {
 	CC3Texture* mainTex = _woodenSign.texture;
 	CC3TextureUnitTexture* stampOverlay = _stampTex;
@@ -3607,6 +3618,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 						   NSStringFromGLEnum(stampTU.combineRGBFunction)]];
 	[bbSign resetBillboardBoundingRect];
 }
+#else
+-(void) switchWoodenSign {}
+#endif	// CC3_OGLES_1
 
 /** 
  * Toggle the floating head between a detailed bump-mapped texture and a mesh-only texture,
