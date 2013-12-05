@@ -187,8 +187,6 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	[self preloadAssets];			// Loads, compiles, links, and pre-warms all shader programs
 									// used by this scene, and certain textures.
 
-	[self addBackdrop];				// Add a sky-blue colored backdrop
-	
 	[self addGround];				// Add a ground plane to provide some perspective to the user
 	
 //	[self addSkyBox];				// Add a skybox around the scene. This is the skybox that is reflected
@@ -219,8 +217,6 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	
 	[self addSpotlight];			// Add a spotlight to the camera.
 									// This spotlight will be turned on when the sun is turned off.
-	
-	[self addFog];					// Adds fog to the scene. This is initially invisible.
 	
 	[self configureLighting];		// Set up the lighting
 	[self configureCamera];			// Check out some interesting camera options.
@@ -698,6 +694,17 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	floater.touchEnabled = YES;
 	floater.shouldBlendAtFullOpacity = YES;
 	floater.shouldDrawLocalContentWireframeBox = YES;
+	
+	// This object has some unexpected behaviour when using fog using GLSL. Since fog is dependent
+	// on the depth buffer, the fog intensity will be that of this object, even though the farther
+	// objects can be see through the transparent parts of this ring. To help with this, we
+	// can cause the transparent fragments to be discarded, which helps because the transparent
+	// fragments will not be written to the depth buffer. This works well except for the fact
+	// that we also fade the entire object in and out, which causes issues as the opqaue areas
+	// of the ring approach full transparency under fading. In general, opaque areas that have
+	// been faded almost away will not play well with GLSL fog.
+	floater.shouldDrawLowAlpha = NO;
+	floater.material.alphaTestReference = 0.05;
 
 	// Ring is added on on background thread. Configure it for the scene, and fade it in slowly.
 	[self configureForScene: floater andMaterializeWithDuration: kFadeInDuration];
@@ -1197,6 +1204,17 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 																				  rotateBy: cc3v(0, 30, 0)]]];
 }
 
+/**
+ * Add a label attached to the robot arm. This is created using a cocos2d label object wrapped
+ * in a CC3Billboard to turn it into a 3D object.
+ *
+ * Unfortunately, this label will not play nicely with the fog, because it contains transparent parts
+ * that should be discarded by the fragment shader so that the deptth component is not written to the
+ * depth buffer. This would allow the fog to show through (see the cylindrical text example in this 
+ * demo for an example of how that works. But since this is a cocos2d component, it would require
+ * changing the cocos2d shaders to get it to work. There's no point in doing that, because it would
+ * be better to simply use 3D text instead of a cocos2d text component.
+ */
 -(void) addProjectedLabel {
 	CCLabelTTF* bbLabel = [CCLabelTTF labelWithString: @"Whoa...I'm dizzy!"
 											 fontName: @"Marker Felt"
@@ -1586,9 +1604,19 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 /**
  * Adds fog to the scene. The fog is initially turned off, but will be turned on when
  * the sun button is toggled. The fog cycles in color between bluish and reddish tones.
+ * Under OpenGL ES 1.1, fog is configured in GL engine. Under OpenGL ES 2.0 or OpenGL OSX,
+ * fog provided using shader post-processing.
  */
 -(void) addFog {
 	self.fog = [CC3Fog fog];
+
+#if CC3_GLSL
+	[_fog addTexture: _preProcSurface.colorTexture];
+	[_fog addTexture: _preProcSurface.depthTexture];
+	_fog.shaderProgram = [CC3ShaderProgram programFromVertexShaderFile: @"CC3ClipSpaceTexturable.vsh"
+												 andFragmentShaderFile: @"CC3Fog.fsh"];
+#endif	// !CC3_GLSL
+
 	_fog.visible = NO;
 	_fog.color = ccc3(128, 128, 180);		// A slightly bluish fog.
 
@@ -2597,9 +2625,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * point of view of the camera that travels with the runners into a texture that is then
  * displayed on the TV screen during the main scene rendering pass.
  *
- * If the user has selected either the display-grayscale or display-depth modes via the
- * lighting button, the primary rendering pass is rendered to a texture, which is then
- * presented to the view surface as a quad via a single-node rendering pass.
+ * If the user has selected one of the post-processing options via the lighting button, the 
+ * primary rendering pass is rendered to a texture, which is then presented to the view surface
+ * as a quad via a single-node rendering pass.
  */
 -(void) drawSceneContentWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	
@@ -2614,14 +2642,10 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// six axis directions from its position.
 	[self generateTeapotEnvironmentMapWithVisitor: visitor];
 	
-	BOOL isDisplayingAsGrayscale = (_lightingType == kLightingGrayscale);
-	BOOL isDisplayingAsDepth = (_lightingType == kLightingDepth);
-	BOOL isPostProcessing = isDisplayingAsGrayscale || isDisplayingAsDepth;
-	
-	// If displaying grayscale or depth buffer, draw to an off-screen surface, clearing
-	// if first. Otherwise, draw to view surface directly, without clearing because it
-	// was done at the beginning of the rendering cycle.
-	if (isPostProcessing) {
+	// If we are post-processing the rendered scene image, draw to an off-screen surface,
+	// clearing if first. Otherwise, draw to view surface directly, without clearing because
+	// it was done at the beginning of the rendering cycle.
+	if (self.isPostProcessing) {
 		visitor.renderSurface = _preProcSurface;
 		[_preProcSurface clearColorAndDepthContent];
 	} else
@@ -2634,11 +2658,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	[self.shadowVisitor alignShotWith: visitor];
 	[self drawShadowsWithVisitor: self.shadowVisitor];
 
-	// If displaying grayscale or depth buffer, draw the corresponding off-screen surface
-	// to the view surface.
-	if (isPostProcessing) {
-		CC3MeshNode* imgNode = isDisplayingAsDepth ? _depthImageNode : _grayscaleNode;
-		
+	// If we are post-processing the rendered scene image, draw the appropriate off-screen
+	// surface to the view surface.
+	if (self.isPostProcessing) {
 		// If the layer is not full-screen, rendering the layer again will further reduce
 		// its shape. To compensate, temporarily clear the camera viewport so that it will
 		// be set to the size of the surface when the surface is attached to the visitor
@@ -2647,7 +2669,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 		visitor.camera.viewport = kCC3ViewportZero;
 		
 		visitor.renderSurface = self.viewSurface;		// Ensure drawing to the view
-		[visitor visit: imgNode];
+		[visitor visit: self.postProcessingNode];
 
 		visitor.camera.viewport = vvp;		// Now set the viewport back to the layer's size.
 	}
@@ -2734,6 +2756,34 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	}
 }
 
+/** Returns whether post-processing of the scene view is active. */
+-(BOOL) isPostProcessing {
+	switch (_lightingType) {
+		case kLightingFog:
+			return CC3_GLSL;		// Fog is performed as a post-processing if shaders are available
+		case kLightingGrayscale:
+			return YES;
+		case kLightingDepth:
+			return YES;
+		default:
+			return NO;
+	}
+}
+
+/** Returns the appropriate full-screen rendering node for the current lighting conditions. */
+-(CC3MeshNode*) postProcessingNode {
+	switch (_lightingType) {
+		case kLightingFog:
+			return _fog;
+		case kLightingGrayscale:
+			return _grayscaleNode;
+		case kLightingDepth:
+			return _depthImageNode;
+		default:
+			return nil;
+	}
+}
+
 /** 
  * If we're not already in the middle of generating an environment map, and the reflective metal
  * teapot is visible, generate an environment-map cube-map texture for it by taking snapshots of
@@ -2765,9 +2815,22 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  */
 -(void) onOpen {
 
-	// Add post-processing capabilities, demonstrating render-to-texture
-	// and post-rendering image processing.
+	// Add a backdrop. Options include a solid sky-blue colored backdrop, or a textured backdrop.
+	// We do that here, since we need to test whether the device camera is being displayed before
+	// deciding whether to add the backdrop.
+	[self addBackdrop];
+
+	// Add post-processing capabilities, demonstrating render-to-texture and post-rendering
+	// image processing. This is performed here, rather than in initializeScene, so that
+	// we can make the off-screen surfaces the same size as the view surface, which is not
+	// available during initializeScene.
 	[self addPostProcessing];
+	
+	// Adds fog to the scene. This is initially invisible.
+	// This is performed here, rather than in initializeScene, because under OpenGL ES 2.0
+	// and OpenGL OSX, fog is created as a post-processing effect, and so we need access to
+	// the off-screen surfaces created in addPostProcessing.
+	[self addFog];
 	
 	// Add additional scene content dynamically and asynchronously on a background thread
 	// after rendering has begun on the rendering thread. We use the GL backgrounder provided
@@ -2991,12 +3054,12 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// Cycle to the next lighting type, based on current lighting type
 	switch (_lightingType) {
 		case kLightingSun:
-			_lightingType = kLightingFog;
-			break;
-		case kLightingFog:
 			_lightingType = kLightingFlashlight;
 			break;
 		case kLightingFlashlight:
+			_lightingType = kLightingFog;
+			break;
+		case kLightingFog:
 #if CC3_OGLES_1
 			_lightingType = kLightingSun;	// Depth-texture not supported in OpenGL ES 1
 #else

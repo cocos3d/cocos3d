@@ -125,13 +125,21 @@
 	if (backdrop == _backdrop) return;
 	[_backdrop stopAllActions];		// Ensure all actions stopped before releasing
 	_backdrop = backdrop;
-	_backdrop.parent = self;
+	_backdrop.parent = self;		// Ensure shaders can access scene content
 }
 
 -(void) setFog: (CC3Fog*) fog {
 	if (fog == _fog) return;
-	[_fog stopAllActions];		// Ensure all actions stopped before releasing
+	[_fog stopAllActions];			// Ensure all actions stopped before releasing
 	_fog = fog;
+	_fog.parent = self;				// Ensure shaders can access scene content
+}
+
+-(void) setIsRunning: (BOOL) shouldRun {
+	[super setIsRunning: shouldRun];
+
+	_backdrop.isRunning = shouldRun;
+	_fog.isRunning = shouldRun;
 }
 
 // Deprecated
@@ -280,7 +288,6 @@
 	[self updateTargets: _deltaFrameTime];
 	[self updateCamera: _deltaFrameTime];
 	[self updateBillboards: _deltaFrameTime];
-	[self updateFog: _deltaFrameTime];
 	[self updateShadows: _deltaFrameTime];
 	[self updateDrawSequence];
 	
@@ -313,13 +320,8 @@
 /** Template method to update the camera. */
 -(void) updateCamera: (ccTime) dt {}
 
-/** Template method to update any fog characteristics. */
--(void) updateFog: (ccTime) dt { [_fog update: dt]; }
-
 /** Template method to update shadows cast by the lights. */
--(void) updateShadows: (ccTime) dt {
-	for (CC3Light* lgt in _lights) [lgt updateShadows];
-}
+-(void) updateShadows: (ccTime) dt { for (CC3Light* lgt in _lights) [lgt updateShadows]; }
 
 /**
  * Template method to update any billboards.
@@ -450,7 +452,7 @@
 	// Turn on any individual lights
 	for (CC3Light* lgt in _lights) [lgt turnOnWithVisitor: visitor];
 
-	[self drawFogWithVisitor: visitor];
+	[self configureFogWithVisitor: visitor];
 }
 
 -(BOOL) isIlluminated {
@@ -491,10 +493,9 @@
 	for (CC3Light* lgt in _lights) [lgt drawShadowsWithVisitor: visitor];
 }
 
-/** If this scene contains fog, draw it, otherwise unbind fog from the GL engine. */
--(void) drawFogWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	if (_fog) [_fog drawWithVisitor: visitor];
-	else [visitor.gl enableFog: NO];
+/** If this scene contains fog, configure it in the GL engine. */
+-(void) configureFogWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[visitor.gl bindFog: _fog withVisitor: visitor];
 }
 
 /**

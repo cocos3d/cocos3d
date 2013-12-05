@@ -260,34 +260,12 @@
  * in the clip-space of the view in order to cover the view with a rectangular image. This
  * provides an easy and convenient mechanism for creating backdrops and post-processing effects.
  *
- * The clip-space coordinate system is a transformation of the camera frustum, where the camera
- * looks down the -Z axis, and entire coorinate system is normalized to cover the range +/-1.0
- * in each of the X, Y & Z dimensions.
+ * Any mesh node can be configured for rendeirng in the clip-space by setting the shouldDrawInClipSpace
+ * property is set to YES. This subclass is a convenience class that sets that property to YES during
+ * instance initialization.
  *
- * The underlying mesh is populated as a simple rectangular mesh with width and height each
- * of 2.0, centered at the origin, and laid out on the X-Y plane.
- *
- * This mesh can be covered with a solid material or a single texture. If this mesh
- * is to be covered with a texture, use the texture property of this node to set
- * the texture. If a solid color is desired, leave the texture property unassigned.
- *
- * To create a backdrop, set the pureColor or texture property, or use the nodeWithTexture:
- * or nodeWithColor: convenience constructor methods. To create post-processing effects,
- * render your scene to a texture that is attached to this mesh node.
- *
- * Normally, you want this node to completely cover the entire view, which it does by default,
- * and you do not need to apply any transforms to this node. However, by applying location and
- * scale transforms, you can configure this node so that it only covers a portion of the view.
- * In doing so, keep in mind that clip-space, only the X & Y values of the location and scale
- * properties are used, and that the coordinate system occupies a range between -1 and +1.
- * In addition, in most cases, these nodes will not normally be included in the normal scene
- * update cycle, so you should invoke the updateTransformMatrix method on this node after you
- * have made any transform changes (location or scale).
- *
- * Since this node is being drawn in clip-space, depth testing and lighting are generally ignored.
- * As such, the shouldDisableDepthTest and shouldDisableDepthMask properties are both initialized
- * to YES, and the shouldUseLighting property is initialized to NO. The shouldDrawInClipSpace
- * property returns YES.
+ * See the notes of the shouldDrawInClipSpace property for further information about drawing
+ * a node in clip-space.
  */
 @interface CC3ClipSpaceNode : CC3MeshNode
 
@@ -496,6 +474,127 @@
  * added as a child node to the node whose bounding volume is to be displayed.
  */
 @interface CC3BoundingVolumeDisplayNode : CC3MeshNode
+@end
+
+
+#pragma mark -
+#pragma mark CC3Fog
+
+/**
+ * CC3Fog is a mesh node that can render fog in the 3D scene.
+ *
+ * Typically, instances of this class are not generally used within the node assembly of a 
+ * scene. Instead, a single instance of this class is used in the fog property of the CC3Scene.
+ *
+ * Fog color is controlled by the diffuseColor property.
+ *
+ * The style of attenuation imposed by the fog is set by the attenuationMode property.
+ * See the notes of that property for information about how fog attenuates visibility.
+ *
+ * Using the performanceHint property, you can direct the GL engine to trade off between
+ * faster or nicer rendering quality.
+ *
+ * Under OpenGL ES 1.1, fog is implemented as a direct feature of the GL engine, and this
+ * class establishes the GL state for that fog.
+ *
+ * Under OpenGL versions that support GLSL, fog is rendered as a post-processing effect,
+ * typically by rendering the scene to a surface that has both color and depth textures.
+ * Add the color and depth textures from the scene-rendering surface to this node, and a
+ * shader program that can render the node in clip-space, and provide fog effects. A good
+ * choice is the combination of the CC3ClipSpaceTexturable.vsh vertex shader and the
+ * CC3Fog.fsh fragment shader.
+ */
+@interface CC3Fog : CC3MeshNode {
+	GLenum _attenuationMode;
+	GLenum _performanceHint;
+	GLfloat _density;
+	GLfloat _startDistance;
+	GLfloat _endDistance;
+}
+
+/**
+ * Indicates how the fog attenuates visibility with distance.
+ *
+ * The value of this property must be one of the following sybolic constants:
+ * GL_LINEAR, GL_EXP or GL_EXP2.
+ *
+ * When the value of this property is GL_LINEAR, the relative visibility of an object
+ * in the fog will be determined by the linear function ((e - z) / (e - s)), where
+ * s is the value of the start property, e is the value of the end property, and z is
+ * the distance of the object from the camera
+ *
+ * When the value of this property is GL_EXP, the relative visibility of an object in
+ * the fog will be determined by the exponential function e^(-(d - z)), where d is the
+ * value of the density property and z is the distance of the object from the camera.
+ *
+ * When the value of this property is GL_EXP2, the relative visibility of an object in
+ * the fog will be determined by the exponential function e^(-(d - z)^2), where d is the
+ * value of the density property and z is the distance of the object from the camera.
+ *
+ * The initial value of this property is GL_EXP2.
+ */
+@property(nonatomic, assign) GLenum attenuationMode;
+
+/**
+ * Indicates how the GL engine should trade off between rendering quality and speed.
+ * The value of this property should be one of GL_FASTEST, GL_NICEST, or GL_DONT_CARE.
+ *
+ * The initial value of this property is GL_DONT_CARE.
+ */
+@property(nonatomic, assign) GLenum performanceHint;
+
+/**
+ * The density value used in the exponential functions. This property is only used
+ * when the attenuationMode property is set to GL_EXP or GL_EXP2.
+ *
+ * See the description of the attenuationMode for a discussion of how the exponential
+ * functions determine visibility.
+ *
+ * The initial value of this property is 1.0.
+ */
+@property(nonatomic, assign) GLfloat density;
+
+/**
+ * The distance from the camera, at which linear attenuation starts. Objects between
+ * this distance and the near clipping plane of the camera will be completly visible.
+ *
+ * This property is only used when the attenuationMode property is set to GL_LINEAR.
+ *
+ * See the description of the attenuationMode for a discussion of how the linear
+ * function determine visibility.
+ *
+ * The initial value of this property is 0.0.
+ */
+@property(nonatomic, assign) GLfloat startDistance;
+
+/**
+ * The distance from the camera, at which linear attenuation ends. Objects between
+ * this distance and the far clipping plane of the camera will be completely obscured.
+ *
+ * This property is only used when the attenuationMode property is set to GL_LINEAR.
+ *
+ * See the description of the attenuationMode for a discussion of how the linear
+ * function determine visibility.
+ *
+ * The initial value of this property is 1.0.
+ */
+@property(nonatomic, assign) GLfloat endDistance;
+
+
+#pragma mark Allocation and initialization
+
+/** Allocates and initializes an autoreleased instance. */
++(id) fog;
+
+
+#pragma mark Deprecated functionality
+
+/** @deprecated Use diffuseColor property instead. */
+@property(nonatomic, assign) ccColor4F floatColor DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Use CCActions to control the fog characteristics. */
+-(void) update: (ccTime)dt DEPRECATED_ATTRIBUTE;
+
 @end
 
 

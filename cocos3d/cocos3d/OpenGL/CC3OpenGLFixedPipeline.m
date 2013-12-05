@@ -31,8 +31,7 @@
 
 #import "CC3OpenGLFixedPipeline.h"
 #import "CC3ShaderProgramSemantics.h"
-#import "CC3NodeVisitor.h"
-#import "CC3Mesh.h"
+#import "CC3UtilityMeshNodes.h"
 
 #if !CC3_GLSL
 
@@ -365,6 +364,33 @@
 	if (CC3CheckGLfloatAt(ltIdx, val, valueLight_GL_SPOT_CUTOFF, &isKnownLight_GL_SPOT_CUTOFF)) {
 		glLightf((GL_LIGHT0 + ltIdx), GL_SPOT_CUTOFF, val);
 		LogGLErrorTrace(@"glLightf(%@, %@, %.3f)", NSStringFromGLEnum(GL_LIGHT0 + ltIdx), NSStringFromGLEnum(GL_SPOT_CUTOFF), val);
+	}
+}
+
+-(void) bindFog: (CC3Fog*) fog withVisitor: (CC3NodeDrawingVisitor*) visitor {
+	BOOL isFoggy = fog && fog.visible && visitor.shouldDecorateNode;
+	
+	[self enableFog: isFoggy];
+	
+	if ( !isFoggy ) return;
+
+	self.fogColor = fog.diffuseColor;
+	self.fogHint = fog.performanceHint;
+	
+	GLenum attnMode = fog.attenuationMode;
+	self.fogMode = attnMode;
+	switch (attnMode) {
+		case GL_LINEAR:
+			self.fogStart = fog.startDistance;
+			self.fogEnd = fog.endDistance;
+			break;
+		case GL_EXP:
+		case GL_EXP2:
+			self.fogDensity = fog.density;
+			break;
+		default:
+			CC3Assert(NO, @"%@ encountered bad attenuation mode (%04X)", fog, fog.attenuationMode);
+			break;
 	}
 }
 

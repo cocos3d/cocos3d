@@ -430,6 +430,15 @@
 
 #pragma mark Mesh configuration
 
+-(BOOL) shouldDrawInClipSpace {
+	for (CC3Node* child in _children) if (child.shouldDrawInClipSpace == YES) return YES;
+	return NO;
+}
+
+-(void) setShouldDrawInClipSpace: (BOOL) shouldClip {
+	for (CC3Node* child in _children) child.shouldDrawInClipSpace = shouldClip;
+}
+
 -(BOOL) shouldCullBackFaces {
 	for (CC3Node* child in _children) if (child.shouldCullBackFaces == NO) return NO;
 	return YES;
@@ -1565,7 +1574,6 @@ static GLuint lastAssignedNodeTag;
 		[self markBoundingVolumeDirty];
 	} else
 		_shouldUseFixedBoundingVolume = YES;
-
 }
 
 -(void) createBoundingVolume {
@@ -1635,8 +1643,6 @@ static GLuint lastAssignedNodeTag;
 	for (CC3Node* child in _children) child.shouldCastShadows = shouldCastShadows;
 }
 
--(BOOL) shouldDrawInClipSpace { return NO; }
-
 
 #pragma mark Node structural hierarchy
 
@@ -1646,6 +1652,7 @@ static GLuint lastAssignedNodeTag;
  */
 -(void) setParent: (CC3Node*) aNode {
 	_parent = aNode;
+	self.isRunning = aNode.isRunning;
 	[self markTransformDirty];
 }
 
@@ -1687,7 +1694,6 @@ static GLuint lastAssignedNodeTag;
 	[_children addObject: aNode];
 
 	aNode.parent = self;
-	aNode.isRunning = self.isRunning;
 	[self didAddDescendant: aNode];
 	[aNode markAddEnd];
 	[aNode wasAdded];

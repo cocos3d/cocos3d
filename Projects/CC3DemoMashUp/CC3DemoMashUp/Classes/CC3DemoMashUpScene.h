@@ -507,17 +507,13 @@ typedef enum {
  * The random rain is intentional, and is not some artifact of performance degredation.
  * Touching the invasion button again will cause the robot army to fade away and be removed.
  *
- * Touching the illumination button (with the sun on it) envelopes the scene in a fog. The
- * farther away an object is, the less visible it is through the fog. The effect of the fog
- * is best appreciated with the scene is full of the invading robot arms.
- *
- * Touching the illumination button again turns the sun and fog off and turns on a spotlight
- * that is attached to the camera. This spotlight is tightly focused. Objects that are away
- * from the center of the spotlight are illuminated less than objects in the center of the
- * spotlight. The intensity of the spotlight beam also attenuates with distance. Objects that
- * are farther away from the spotlight are less illumnated than objects that are closer to
- * the spotlight. Since it is attached to the camera, it moves as the camera moves, as if 
- * you were walking through the scene carrying a flashlight.
+ * Touching the illumination button  (with the sun on it) turns the sun off and turns on a 
+ * spotlight that is attached to the camera. This spotlight is tightly focused. Objects that
+ * are away from the center of the spotlight are illuminated less than objects in the center 
+ * of the spotlight. The intensity of the spotlight beam also attenuates with distance. 
+ * Objects that are farther away from the spotlight are less illumnated than objects that 
+ * are closer to the spotlight. Since it is attached to the camera, it moves as the camera
+ * moves, as if you were walking through the scene carrying a flashlight.
  *
  * If you shine the spotlight on the purple floating head, you might notice two things.
  * The first is that the head is correctly illuminated from the position of the spotlight.
@@ -529,18 +525,22 @@ typedef enum {
  * illumination outside the beam of the spotlight. This is something to keep in mind when
  * combining the techniques of spotlights and bump-mapping.
  *
- * If the device is running OpenGL ES 2.0, touching the illumination button again displays
- * the view in grayscale, as if using black & white film. This effect is created by rendering
- * the scene in color to a texture and then rendering the texture to the screen using a shader
- * that converts the texture colors to grayscale. This is only one example of such post-rendering
- * processing. Using the same techique, you could add bloom effects, blurring, or other
- * specialized colorizations.
+ * Touching the illumination button again turns the sun back on, but envelopes the scene in
+ * a fog. The farther away an object is, the less visible it is through the fog. The effect
+ * of the fog is best appreciated with the scene is full of the invading robot arms.
  *
- * If the device is running OpenGL ES 2.0, touching the illumination button again displays 
- * a visualization of the contents of the depth buffer of the scene. This effect is created 
- * by attaching a texture as the depth buffer of an off-screen framebuffer surface, and then
- * rendering the underlying texture to the screen using a shader that converts the depth
- * values in the texture to a linearized grayscale image.
+ * If the device is running OpenGL ES 2.0 or OpenGL OSX, touching the illumination button 
+ * again displays the view in grayscale, as if using black & white film. This effect is 
+ * created by rendering the scene in color to a texture and then rendering the texture to
+ * the screen using a shader that converts the texture colors to grayscale. This is only 
+ * one example of such post-rendering processing. Using the same techique, you could add 
+ * bloom effects, blurring, or other specialized colorizations.
+ *
+ * If the device is running OpenGL ES 2.0 or OpenGL OSX, touching the illumination button 
+ * again displays a visualization of the contents of the depth buffer of the scene. 
+ * This effect is created by attaching a texture as the depth buffer of an off-screen 
+ * framebuffer surface, and then rendering the underlying texture to the screen using a 
+ * shader that converts the depth values in the texture to a linearized grayscale image.
  *
  * Touching the illumination button again will bring back the original sunshine.
  *

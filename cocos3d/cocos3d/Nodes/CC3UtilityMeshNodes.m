@@ -275,30 +275,12 @@
 
 @implementation CC3ClipSpaceNode
 
--(BOOL) shouldDrawInClipSpace { return YES; }
-
-/** Generally, we don't use lighting in clip-space, so turn it off by default. */
--(void) setMaterial: (CC3Material*) aMaterial {
-	super.material = aMaterial;
-	self.shouldUseLighting = NO;
-}
-
-#pragma mark Allocation and initialization
-
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		[self populateAsCenteredRectangleWithSize: CGSizeMake(2.0f, 2.0f)];
-		self.shouldDisableDepthTest = YES;
-		self.shouldDisableDepthMask = YES;
+		self.shouldDrawInClipSpace = YES;
 	}
 	return self;
 }
-
-/** The camera frustum has no meaning in clip-space. */
--(CC3NodeBoundingVolume*) defaultBoundingVolume { return nil; }
-
-
-#pragma mark Allocation and initialization
 
 +(id) nodeWithTexture: (CC3Texture*) texture {
 	CC3MeshNode* csn = [self node];
@@ -312,6 +294,9 @@
 	csn.diffuseColor = color;
 	return csn;
 }
+
+/** The camera frustum has no meaning in clip-space. */
+-(CC3NodeBoundingVolume*) defaultBoundingVolume { return nil; }
 
 @end
 
@@ -618,5 +603,53 @@ static GLfloat directionMarkerMinimumLength = 0;
 // Overridden so that can still be visible if parent is invisible, unless explicitly turned off.
 -(BOOL) visible { return _visible; }
 @end
+
+
+#pragma mark -
+#pragma mark CC3Fog
+
+@implementation CC3Fog
+
+@synthesize attenuationMode=_attenuationMode, performanceHint=_performanceHint;
+@synthesize density=_density, startDistance=_startDistance, endDistance=_endDistance;
+
+
+#pragma mark Allocation and initialization
+
+-(id) init {
+	if ( (self = [super init]) ) {
+		_attenuationMode = GL_EXP2;
+		_performanceHint = GL_DONT_CARE;
+		_density = 1.0;
+		_startDistance = 0.0;
+		_endDistance = 1.0;
+		self.diffuseColor = kCCC4FLightGray;
+		self.shouldDrawInClipSpace = YES;
+	}
+	return self;
+}
+
++(id) fog { return [[self alloc] init]; }
+
+-(void) populateFrom: (CC3Fog*) another {
+	[super populateFrom: another];
+	
+	_attenuationMode = another.attenuationMode;
+	_performanceHint = another.performanceHint;
+	_density = another.density;
+	_startDistance = another.startDistance;
+	_endDistance = another.endDistance;
+}
+
+
+#pragma mark Deprecated functionality
+
+// Deprecated
+-(ccColor4F) floatColor { return self.diffuseColor; }
+-(void) setFloatColor: (ccColor4F) floatColor { self.diffuseColor = floatColor; }
+-(void) update: (ccTime)dt {}
+
+@end
+
 
 

@@ -219,6 +219,9 @@ cocos3d 2.0.0 - 2013/12/31
 - [API change] Class CC3VertexMatrixIndices renamed to CC3VertexBoneIndices and the former deprecated.
 	- many methods in CC3Node, CC3MeshNode, CC3Mesh & CC3VertexBoneIndices renamed and deprecated to replace concept of vertex unit with bone influence and matrix indices with bone indices
 
+- [API change] CC3Fog now subclass of CC3MeshNode, which, under GLSL, is used as a post-processing render node.
+	- CC3Fog moved to CC3UtilityMeshNodes.h/m and CC3Fog.h/m removed
+
 - [API change] Replaced use of CCArray with NSArray.
 
 - CC3DeviceCameraOverlayUIViewController now uses AVFoundation framework instead of UIImagePickerController to display device camera behind 3D scene for Augmented Reality apps.

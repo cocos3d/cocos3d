@@ -98,6 +98,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		case kCC3SemanticCameraLocationModelSpace: return @"kCC3SemanticCameraLocationModelSpace";
 		case kCC3SemanticCameraLocationGlobal: return @"kCC3SemanticCameraLocationGlobal";
 		case kCC3SemanticCameraFrustum: return @"kCC3SemanticCameraFrustum";
+		case kCC3SemanticCameraFrustumDepth: return @"kCC3SemanticCameraFrustumDepth";
 			
 		// MATERIALS --------------
 		case kCC3SemanticColor: return @"kCC3SemanticColor";
@@ -302,6 +303,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			
 		case kCC3SemanticCameraLocationGlobal:
 		case kCC3SemanticCameraFrustum:
+		case kCC3SemanticCameraFrustumDepth:
 		case kCC3SemanticViewport:
 
 		case kCC3SemanticSceneLightColorAmbient:
@@ -670,7 +672,17 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 				fovWidth = CC3DegToRad(cam.effectiveFieldOfView);
 				fovHeight = fovWidth / aspect;
 			}
-			[uniform setVector4: CC3Vector4Make(fovWidth, fovHeight, cam.nearClippingDistance, cam.farClippingDistance)];
+			[uniform setVector4: CC3Vector4Make(fovWidth, fovHeight,
+												cam.nearClippingDistance,
+												cam.farClippingDistance)];
+			return YES;
+		}
+		case kCC3SemanticCameraFrustumDepth: {
+			CC3Camera* cam = visitor.camera;
+			[cam.projectionMatrix populateCC3Matrix4x4: &m4x4];
+			[uniform setVector4: CC3Vector4Make(cam.farClippingDistance,
+												cam.nearClippingDistance,
+												m4x4.c3r3, m4x4.c4r3)];
 			return YES;
 		}
 		case kCC3SemanticViewport:
@@ -839,7 +851,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			[uniform setBoolean: visitor.scene.fog.visible];
 			return YES;
 		case kCC3SemanticFogColor:
-			[uniform setColor4F: visitor.scene.fog.floatColor];
+			[uniform setColor4F: visitor.scene.fog.diffuseColor];
 			return YES;
 		case kCC3SemanticFogAttenuationMode:
 			[uniform setInteger: visitor.scene.fog.attenuationMode];
@@ -1259,6 +1271,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVarName: @"u_cc3CameraPositionGlobal" toSemantic: kCC3SemanticCameraLocationGlobal];		/**< (vec3) Location of the camera in global coordinates. */
 	[self mapVarName: @"u_cc3CameraPositionModel" toSemantic: kCC3SemanticCameraLocationModelSpace];	/**< (vec3) Location of the camera in local coordinates of model (not camera). */
 	[self mapVarName: @"u_cc3CameraFrustum" toSemantic: kCC3SemanticCameraFrustum];						/**< (vec4) Dimensions of the camera frustum (FOV width (radians), FOV height (radians), near clip, far clip). */
+	[self mapVarName: @"u_cc3CameraFrustumDepth" toSemantic: kCC3SemanticCameraFrustumDepth];			/**< (vec4) The depth of the camera frustum (far clip, near clip, -(f+n)/(f-n), -2nf/(f-n)). */
 	[self mapVarName: @"u_cc3CameraViewport" toSemantic: kCC3SemanticViewport];							/**< (int4) The viewport rectangle in pixels (x, y, width, height). */
 	
 	// MATERIALS --------------

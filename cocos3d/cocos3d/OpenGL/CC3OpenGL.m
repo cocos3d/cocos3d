@@ -430,6 +430,8 @@
 
 -(void) setSpotlightCutoffAngle: (GLfloat) val at: (GLuint) ltIdx {}
 
+-(void) bindFog: (CC3Fog*) fog withVisitor: (CC3NodeDrawingVisitor*) visitor {}
+
 -(void) setFogColor: (ccColor4F) color {}
 
 -(void) setFogMode: (GLenum) mode {}

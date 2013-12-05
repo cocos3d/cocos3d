@@ -39,7 +39,7 @@
 precision mediump float;
 
 //-------------- UNIFORMS ----------------------
-uniform sampler2D	s_cc3Texture2D;		/**< Texture sampler. */
+uniform sampler2D	s_cc3Texture;		/**< Texture sampler. */
 
 //-------------- VARYING VARIABLE INPUTS ----------------------
 varying vec2		v_texCoord;			/**< Fragment texture coordinates. */
@@ -48,5 +48,5 @@ varying lowp vec4	v_color;			/**< Fragment base color. */
 
 //-------------- ENTRY POINT ----------------------
 void main() {
-	gl_FragColor = texture2D(s_cc3Texture2D, v_texCoord) * v_color;
+	gl_FragColor = texture2D(s_cc3Texture, v_texCoord) * v_color;
 }

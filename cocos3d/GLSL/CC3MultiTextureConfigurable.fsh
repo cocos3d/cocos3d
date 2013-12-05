@@ -78,13 +78,6 @@ uniform bool		u_cc3VertexHasTangent;			/**< Whether the vertex tangent is availa
 
 uniform float		u_cc3MaterialMinimumDrawnAlpha;	/**< Minimum alpha value to be drawn, otherwise fragment will be discarded. */
 
-uniform bool		u_cc3FogIsEnabled;			/**< Whether scene fogging is enabled. */
-uniform lowp vec4	u_cc3FogColor;				/**< Fog color. */
-uniform int			u_cc3FogAttenuationMode;	/**< Fog attenuation mode (one of GL_LINEAR, GL_EXP or GL_EXP2). */
-uniform highp float	u_cc3FogDensity;			/**< Fog density. */
-uniform highp float	u_cc3FogStartDistance;		/**< Distance from camera at which fogging effect starts. */
-uniform highp float	u_cc3FogEndDistance;		/**< Distance from camera at which fogging effect ends. */
-
 uniform int			u_cc3TextureCount;									/**< Number of textures. */
 uniform sampler2D	s_cc3Textures[MAX_TEXTURES];						/**< Texture samplers. */
 uniform lowp vec4	u_cc3TextureUnitColor[MAX_TEXTURES];				/**< Constant color of this texure unit (often used for normal mapping). */
@@ -100,7 +93,6 @@ uniform int			u_cc3TextureUnitAlphaSource1[MAX_TEXTURES];			/**< The source of t
 varying vec2		v_texCoord[MAX_TEXTURES];	/**< Fragment texture coordinates. */
 varying lowp vec4	v_color;					/**< Fragment front-face color. */
 varying lowp vec4	v_colorBack;				/**< Fragment back-face color. */
-varying highp float	v_distEye;					/**< Fragment distance in eye coordinates. */
 varying vec3		v_bumpMapLightDir;			/**< Direction to the first light in tangent space. */
 
 //-------------- LOCAL VARIABLES ----------------------
@@ -241,32 +233,6 @@ void applyTextures() {
 }
 #endif	// CC3_PLATFORM_ANDROID
 
-/** Applies fog to the specified color and returns the adjusted color. */
-lowp vec4 fogify(lowp vec4 aColor) {
-	
-#	define k_GL_LINEAR                 0x2601
-#	define k_GL_EXP                    0x0800
-#	define k_GL_EXP2                   0x0801
-	
-	if ( !u_cc3FogIsEnabled ) return aColor;
-	
-	// Determine visibility based on fog attentuation characteristics and distance through fog
-	float visibility = 1.0;
-	if (u_cc3FogAttenuationMode == k_GL_LINEAR) {
-		visibility = (u_cc3FogEndDistance - v_distEye) / (u_cc3FogEndDistance - u_cc3FogStartDistance);
-	} else if (u_cc3FogAttenuationMode == k_GL_EXP) {
-		float d = u_cc3FogDensity * v_distEye;
-		visibility = exp(-d);
-	} else if (u_cc3FogAttenuationMode == k_GL_EXP2) {
-		float d = u_cc3FogDensity * v_distEye;
-		visibility = exp(-(d * d));
-	}
-	visibility = clamp(visibility, 0.0, 1.0);
-	
-	// Mix alpha-adjusted fog color into fragment color based on visibility.
-	aColor.rgb = mix(u_cc3FogColor.rgb * aColor.a, aColor.rgb, visibility);
-	return aColor;
-}
 
 //-------------- ENTRY POINT ----------------------
 
@@ -277,7 +243,7 @@ void main() {
 
 	// If the fragment passes the alpha test, fog it and draw it, otherwise discard
 	if (fragColor.a >= u_cc3MaterialMinimumDrawnAlpha)
-		gl_FragColor = fogify(fragColor);
+		gl_FragColor = fragColor;
 	else
 		discard;
 }

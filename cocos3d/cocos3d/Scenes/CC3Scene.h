@@ -32,8 +32,8 @@
 #import "CC3Camera.h"
 #import "CC3NodeSequencer.h"
 #import "CC3RenderSurfaces.h"
+#import "CC3UtilityMeshNodes.h"
 #import "CC3PerformanceStatistics.h"
-#import "CC3Fog.h"
 #import "CC3ViewController.h"
 
 

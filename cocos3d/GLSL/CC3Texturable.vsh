@@ -121,7 +121,6 @@ attribute vec2			a_cc3TexCoord3;		/**< Vertex texture coordinate for texture uni
 varying vec2			v_texCoord[MAX_TEXTURES];	/**< Fragment texture coordinates. */
 varying lowp vec4		v_color;					/**< Fragment front-face color. */
 varying lowp vec4		v_colorBack;				/**< Fragment back-face color. */
-varying highp float		v_distEye;					/**< Fragment distance in eye coordinates. */
 varying vec3			v_bumpMapLightDir;			/**< Direction to the first light in either tangent space or model space. */
 varying vec3			v_reflectDirGlobal;			/**< Fragment reflection vector direction in global coordinates. */
 
@@ -289,8 +288,6 @@ void reflectVertex() {
 void main() {
 
 	skinVertex();	// If model has bones, transform vertex position & normal into vtxPos & vtxNorm, respectively
-	
-	v_distEye = length(vtxPos.xyz);	// Distance from vertex to eye. Used for fog effect.
 
 	reflectVertex();	// Populate v_reflectDirGlobal for reflective environmental mapping
 	

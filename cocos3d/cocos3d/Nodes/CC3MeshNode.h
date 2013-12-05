@@ -110,6 +110,7 @@
 	BOOL _shouldDisableDepthTest : 1;
 	BOOL _shouldCullFrontFaces : 1;
 	BOOL _shouldCullBackFaces : 1;
+	BOOL _shouldDrawInClipSpace : 1;
 	BOOL _shouldUseClockwiseFrontFaceWinding : 1;
 	BOOL _shouldUseSmoothShading : 1;
 	BOOL _shouldCastShadowsWhenInvisible : 1;

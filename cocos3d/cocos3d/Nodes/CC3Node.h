@@ -875,6 +875,51 @@ typedef enum {
 #pragma mark Mesh configuration
 
 /**
+ * Indicates whether drawing should be performed in clip-space.
+ *
+ * The clip-space coordinate system is a transformation of the camera frustum, where the camera
+ * looks down the -Z axis, and entire coorinate system is normalized to cover the range +/-1.0
+ * in each of the X, Y & Z dimensions.
+ *
+ * When this property is set to YES, a simple square plane node, with X & Y sides of length 2.0,
+ * centered on the origin and facing the +Z axis will fill the entire view. This makes it very
+ * easy to create backdrops and post-processing effects.
+ *
+ * When this property is set to YES, all combinations of the projection, view, and model matrices
+ * will be set to identity matrices during rendering. The node is effectivly drawn with an
+ * orthographic projection, looking down the negative Z axis, with X & Y axis dimensions
+ * normalized to +/-1.0 each.
+ *
+ * To support this node being rendered in clip-space, setting this property to YES also
+ * makes the following configuration changes to this mesh node:
+ *  - The mesh is replaced with a simple 2D square mesh with sides of length 2.0.
+ *  - The shouldUseLighting property is set to NO.
+ *  - The shouldDisableDepthTest property is set to YES.
+ *  - The shouldDisableDepthMask property is set to YES.
+ *  - The boundingVolume property is set to nil.
+ *
+ * If you want to set the above properties and characteristics to other values, do so after
+ * setting this property.
+ *
+ * Normally, you want this node to completely cover the entire view, which it does by default,
+ * and you do not need to apply any transforms to this node. However, by applying location and
+ * scale transforms, you can configure this node so that it only covers a portion of the view.
+ * In doing so, keep in mind that clip-space, only the X & Y values of the location and scale
+ * properties are used, and that the coordinate system occupies a range between -1 and +1.
+ * In addition, in most cases, these nodes will not normally be included in the normal scene
+ * update cycle, so you should invoke the updateTransformMatrix method on this node after you
+ * have made any transform changes (location or scale).
+ *
+ * Setting the value of this property sets the value of this property in all descendent nodes.
+ *
+ * Querying this property returns YES if any of the descendant mesh nodes have this property
+ * set to YES. Initially, and in most cases, all mesh nodes have this property set to NO.
+ *
+ * The initial value of this property is NO.
+ */
+@property(nonatomic, assign) BOOL shouldDrawInClipSpace;
+
+/**
  * Indicates whether the back faces should be culled on the meshes contained in
  * descendants of this node.
  *
@@ -2788,26 +2833,6 @@ typedef enum {
  * hierarchy of nodes.
  */
 @property(nonatomic, assign) BOOL shouldCastShadows;
-
-/**
- * Returns whether drawing should be performed in clip-space.
- *
- * The clip-space coordinate system is a transformation of the camera frustum, where the camera
- * looks down the -Z axis, and entire coorinate system is normalized to cover the range +/-1.0
- * in each of the X, Y & Z dimensions.
- *
- * When this property returns YES, a simple square plane node, with X & Y sides of length 2.0,
- * centered on the origin and facing the +Z axis will fill the entire view. This makes it very
- * easy to create backdrops and post-processing effects.
- *
- * When this property returns YES, all combinations of the projection, view, and model matrices
- * will be set to identity matrices during rendering. The scene is effectivly drawn with an
- * orthographic projection, looking down the negative Z axis, with X & Y axis dimensions
- * normalized to +/-1.0 each.
- *
- * This implementation returns NO. Subclasses that are designed to render in clip-space will return YES.
- */
-@property(nonatomic, readonly) BOOL shouldDrawInClipSpace;
 
 
 #pragma mark Node structural hierarchy

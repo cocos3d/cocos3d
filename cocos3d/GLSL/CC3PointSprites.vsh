@@ -89,7 +89,6 @@ attribute float			a_cc3PointSize;		/**< Vertex point size. */
 
 //-------------- VARYING VARIABLE OUTPUTS ----------------------
 varying lowp vec4		v_color;			/**< Fragment base color. */
-varying highp float		v_distEye;			/**< Fragment distance in eye coordinates. */
 
 //-------------- CONSTANTS ----------------------
 const vec4 kVec4Zero = vec4(0.0);
@@ -218,9 +217,6 @@ void main() {
 
 	// Transform vertex position and normal to eye space, in vtxPosEye and vtxNormEye, respectively.
 	vertexToEyeSpace();
-	
-	// Distance from vertex to eye. Used for fog effect.
-	v_distEye = length(vtxPosEye.xyz);
 
 	// Determine the color of the vertex by applying material & lighting, or using a pure color
 	if (u_cc3LightIsUsingLighting) {

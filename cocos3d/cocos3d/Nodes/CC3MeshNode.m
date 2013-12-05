@@ -34,6 +34,7 @@
 #import "CC3Mesh.h"
 #import "CC3Light.h"
 #import "CC3ShaderProgramMatcher.h"
+#import "CC3UtilityMeshNodes.h"
 #import "CC3OSExtensions.h"
 
 
@@ -123,6 +124,24 @@
 	return [CC3NodeSphereThenBoxBoundingVolume boundingVolume];
 }
 
+-(BOOL) shouldDrawInClipSpace { return _shouldDrawInClipSpace; }
+
+-(void) setShouldDrawInClipSpace: (BOOL) shouldClip {
+	if (shouldClip != _shouldDrawInClipSpace) {
+		_shouldDrawInClipSpace = shouldClip;
+		
+		if (_shouldDrawInClipSpace) {
+			[self populateAsCenteredRectangleWithSize: CGSizeMake(2.0f, 2.0f)];
+			self.shouldDisableDepthTest = YES;
+			self.shouldDisableDepthMask = YES;
+			self.shouldUseLighting = NO;
+			self.boundingVolume = nil;
+		}
+	}
+
+	super.shouldDrawInClipSpace = shouldClip;
+}
+
 -(BOOL) shouldCullBackFaces { return _shouldCullBackFaces; }
 
 -(void) setShouldCullBackFaces: (BOOL) shouldCull {
@@ -206,8 +225,7 @@
 -(BOOL) shouldUseLighting { return _material ? _material.shouldUseLighting : NO; }
 
 -(void) setShouldUseLighting: (BOOL) useLighting {
-	if (useLighting) [self ensureMaterial];
-	_material.shouldUseLighting = useLighting;
+	self.ensureMaterial.shouldUseLighting = useLighting;
 	[super setShouldUseLighting: useLighting];	// pass along to any children
 }
 
@@ -490,6 +508,7 @@
 		_shouldSmoothLines = NO;
 		_lineSmoothingHint = GL_DONT_CARE;
 		_shouldApplyOpacityAndColorToMeshContent = NO;
+		_shouldDrawInClipSpace = NO;
 	}
 	return self;
 }
@@ -812,6 +831,7 @@
 }
 
 #if CC3_GLSL
+
 -(void) applyShaderProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	CC3ShaderProgram* shaderProgram;
 	if (visitor.shouldDecorateNode)
@@ -821,9 +841,6 @@
 
 	[shaderProgram bindWithVisitor: visitor];
 }
-#else
--(void) applyShaderProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
-#endif	// CC3GLSL
 
 -(CC3ShaderProgram*) selectShaderProgram {
 	CC3ShaderProgram* sp = self.shaderProgram;
@@ -834,6 +851,11 @@
 	}
 	return sp;
 }
+
+#else
+-(void) applyShaderProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
+-(CC3ShaderProgram*) selectShaderProgram { return nil; }
+#endif	// CC3GLSL
 
 -(void) selectShaderPrograms {
 	[self selectShaderProgram];

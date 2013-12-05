@@ -33,7 +33,7 @@
 #import "CC3OpenGLFoundation.h"
 #import "CC3Matrix4x4.h"
 
-@class CC3NodeDrawingVisitor, CC3Mesh, CC3MeshNode;
+@class CC3NodeDrawingVisitor, CC3Mesh, CC3Fog;
 @class CC3GLSLVariable, CC3GLSLUniform, CC3GLSLAttribute;
 @class CC3ShaderProgram, CC3ShaderProgramPrewarmer;
 
@@ -531,6 +531,9 @@ typedef struct {
  * value between zero and the maximum number of lights supported by the platform.
  */
 -(void) setSpotlightCutoffAngle: (GLfloat) val at: (GLuint) ltIdx;
+
+/** Binds the specified fog configuration to the GL engine. */
+-(void) bindFog: (CC3Fog*) fog withVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /** Sets the color of the fog. */
 -(void) setFogColor: (ccColor4F) color;

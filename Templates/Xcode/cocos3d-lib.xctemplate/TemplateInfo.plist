@@ -2519,30 +2519,6 @@
 			<key>Path</key>
 			<string>cocos3d/cocos3d/Scenes/CC3ControllableLayer.m</string>
 		</dict>
-		<key>cocos3d/cocos3d/Scenes/CC3Fog.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>Scenes</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/Scenes/CC3Fog.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/Scenes/CC3Fog.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>Scenes</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/Scenes/CC3Fog.m</string>
-		</dict>
 		<key>cocos3d/cocos3d/Scenes/CC3Layer.h</key>
 		<dict>
 			<key>Group</key>
@@ -3275,6 +3251,16 @@
 			<key>Path</key>
 			<string>cocos3d/GLSL/CC3ClipSpaceTexturable.vsh</string>
 		</dict>
+		<key>cocos3d/GLSL/CC3Fog.fsh</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>GLSL</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/GLSL/CC3Fog.fsh</string>
+		</dict>
 		<key>cocos3d/GLSL/CC3MultiTextureConfigurable.fsh</key>
 		<dict>
 			<key>Group</key>
@@ -3637,8 +3623,6 @@
 		<string>cocos3d/cocos3d/Resources/CC3ResourceNode.m</string>
 		<string>cocos3d/cocos3d/Scenes/CC3ControllableLayer.h</string>
 		<string>cocos3d/cocos3d/Scenes/CC3ControllableLayer.m</string>
-		<string>cocos3d/cocos3d/Scenes/CC3Fog.h</string>
-		<string>cocos3d/cocos3d/Scenes/CC3Fog.m</string>
 		<string>cocos3d/cocos3d/Scenes/CC3Layer.h</string>
 		<string>cocos3d/cocos3d/Scenes/CC3Layer.m</string>
 		<string>cocos3d/cocos3d/Scenes/CC3NodeSequencer.h</string>
@@ -3702,6 +3686,7 @@
 		<string>cocos3d/GLSL/CC3ClipSpaceNoTexture.fsh</string>
 		<string>cocos3d/GLSL/CC3ClipSpaceSingleTexture.fsh</string>
 		<string>cocos3d/GLSL/CC3ClipSpaceTexturable.vsh</string>
+		<string>cocos3d/GLSL/CC3Fog.fsh</string>
 		<string>cocos3d/GLSL/CC3MultiTextureConfigurable.fsh</string>
 		<string>cocos3d/GLSL/CC3NoTexture.fsh</string>
 		<string>cocos3d/GLSL/CC3NoTextureAlphaTest.fsh</string>
