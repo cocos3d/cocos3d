@@ -945,7 +945,16 @@
 
 -(void) deleteShader: (GLuint) shaderID  {}
 
--(void) compileShader: (GLuint) shaderID fromSourceCodeStrings: (NSArray*) glslSources {}
+-(void) compileShader: (GLuint) shaderID fromSourceCodeStrings: (NSArray*) glslSources {
+	GLuint shSrcCnt = (GLuint)glslSources.count;
+	const GLchar* shSrcs[shSrcCnt];
+	for (GLuint shSrcIdx = 0; shSrcIdx < shSrcCnt; shSrcIdx++) {
+		shSrcs[shSrcIdx] = ((NSString*)[glslSources objectAtIndex: shSrcIdx]).UTF8String;
+	}
+	[self compileShader: shaderID from: shSrcCnt sourceCodeStrings: shSrcs];
+}
+
+-(void) compileShader: (GLuint) shaderID from: (GLuint) srcStrCount sourceCodeStrings: (const GLchar**) srcCodeStrings {}
 
 -(BOOL) getShaderWasCompiled: (GLuint) shaderID { return NO; }
 

@@ -194,16 +194,12 @@
 	LogGLErrorTrace(@"glDeleteShader(%u)", shaderID);
 }
 
--(void) compileShader: (GLuint) shaderID fromSourceCodeStrings: (NSArray*) glslSources {
-	GLuint scCnt = (GLuint)glslSources.count;
-
-	// Extract the source code into an array of null-terminated C-strings.
-	const GLchar* srcBtyes[scCnt];
-	for (GLuint scIdx = 0; scIdx < scCnt; scIdx++)
-		srcBtyes[scIdx] = ((NSString*)[glslSources objectAtIndex: scIdx]).UTF8String;
-
-	glShaderSource(shaderID, scCnt, srcBtyes, NULL);
-	LogGLErrorTrace(@"glShaderSource(%u, %u, %p, %p)", shaderID, scCnt, srcBtyes, NULL);
+-(void) compileShader: (GLuint) shaderID
+				 from: (GLuint) srcStrCount
+	sourceCodeStrings: (const GLchar**) srcCodeStrings {
+	
+	glShaderSource(shaderID, srcStrCount, srcCodeStrings, NULL);
+	LogGLErrorTrace(@"glShaderSource(%u, %u, %p, %p)", shaderID, srcStrCount, srcCodeStrings, NULL);
 	
 	glCompileShader(shaderID);
 	LogGLErrorTrace(@"glCompileShader(%u)", shaderID);

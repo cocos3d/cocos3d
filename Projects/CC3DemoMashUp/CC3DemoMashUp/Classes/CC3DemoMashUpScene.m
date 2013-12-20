@@ -327,7 +327,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	LogRez(@"The following list contains the shader programs currently in use in this scene."
 		   @" You can copy and paste much of this list into the preloadAssets method"
 		   @" in order to pre-load the shader programs during scene initialization. %@",
-		   [CC3ShaderProgram cachedProgramsDescription]);
+		   [CC3ShaderProgram loadedProgramsDescription]);
 
 	// Log a list of the PFX resources that are being used by the scene. During development, we can
 	// use this list as a starting point for adding PFX files to the preloadAssets method.
@@ -415,29 +415,49 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// when models are loaded on the background loading thread.
 	CC3ShaderProgram.isPreloading = YES;
 
+	[CC3ShaderProgram programFromVertexShaderFile: @"BumpMap.vsh"
+							andFragmentShaderFile: @"BumpMap.fsh"];
+	[CC3ShaderProgram programFromVertexShaderFile: @"BumpMap.vsh"
+							andFragmentShaderFile: @"CC3PureColor.fsh"];
+	[CC3ShaderProgram programFromVertexShaderFile: @"CC3ClipSpaceTexturable.vsh"
+							andFragmentShaderFile: @"CC3ClipSpaceNoTexture.fsh"];
+	[CC3ShaderProgram programFromVertexShaderFile: @"CC3ClipSpaceTexturable.vsh"
+							andFragmentShaderFile: @"CC3Fog.fsh"];
+	[CC3ShaderProgram programFromVertexShaderFile: @"CC3ClipSpaceTexturable.vsh"
+							andFragmentShaderFile: @"CC3PureColor.fsh"];
+	[CC3ShaderProgram programFromVertexShaderFile: @"CC3PointSprites.vsh"
+							andFragmentShaderFile: @"CC3PointSprites.fsh"];
+	[CC3ShaderProgram programFromVertexShaderFile: @"CC3PointSprites.vsh"
+							andFragmentShaderFile: @"CC3PureColor.fsh"];
 	[CC3ShaderProgram programFromVertexShaderFile: @"CC3Texturable.vsh"
 							andFragmentShaderFile: @"CC3BumpMapObjectSpace.fsh"];
 	[CC3ShaderProgram programFromVertexShaderFile: @"CC3Texturable.vsh"
-							andFragmentShaderFile: @"CC3SingleTextureAlphaTest.fsh"];
-	[CC3ShaderProgram programFromVertexShaderFile: @"CC3Texturable.vsh"
-							andFragmentShaderFile: @"CC3SingleTexture.fsh"];
-	[CC3ShaderProgram programFromVertexShaderFile: @"BumpMap.vsh"
-							andFragmentShaderFile: @"BumpMap.fsh"];
-	[CC3ShaderProgram programFromVertexShaderFile: @"CC3Texturable.vsh"
-							andFragmentShaderFile: @"CC3SingleTextureReflect.fsh"];
+							andFragmentShaderFile: @"CC3BumpMapTangentSpace.fsh"];
 	[CC3ShaderProgram programFromVertexShaderFile: @"CC3Texturable.vsh"
 							andFragmentShaderFile: @"CC3NoTexture.fsh"];
-	[CC3ShaderProgram programFromVertexShaderFile: @"CC3PointSprites.vsh"
-							andFragmentShaderFile: @"CC3PointSprites.fsh"];
-	[CC3ShaderProgram programFromVertexShaderFile: @"CC3ClipSpaceTexturable.vsh"
-							andFragmentShaderFile: @"CC3ClipSpaceNoTexture.fsh"];
 	[CC3ShaderProgram programFromVertexShaderFile: @"CC3Texturable.vsh"
+							andFragmentShaderFile: @"CC3PureColor.fsh"];
+	[CC3ShaderProgram programFromVertexShaderFile: @"CC3Texturable.vsh"
+							andFragmentShaderFile: @"CC3SingleTexture.fsh"];
+	[CC3ShaderProgram programFromVertexShaderFile: @"CC3Texturable.vsh"
+							andFragmentShaderFile: @"CC3SingleTextureAlphaTest.fsh"];
+	[CC3ShaderProgram programFromVertexShaderFile: @"CC3Texturable.vsh"
+							andFragmentShaderFile: @"CC3SingleTextureReflect.fsh"];
+	[CC3ShaderProgram programFromVertexShaderFile: @"CC3TexturableBones.vsh"
+							andFragmentShaderFile: @"CC3NoTexture.fsh"];
+	[CC3ShaderProgram programFromVertexShaderFile: @"CC3TexturableBones.vsh"
+							andFragmentShaderFile: @"CC3PureColor.fsh"];
+	[CC3ShaderProgram programFromVertexShaderFile: @"CC3TexturableBones.vsh"
+							andFragmentShaderFile: @"CC3SingleTexture.fsh"];
+	[CC3ShaderProgram programFromVertexShaderFile: @"CC3TexturableBones.vsh"
+							andFragmentShaderFile: @"CC3SingleTextureReflect.fsh"];
+	[CC3ShaderProgram programFromVertexShaderFile: @"CC3TexturableRigidBones.vsh"
 							andFragmentShaderFile: @"CC3BumpMapTangentSpace.fsh"];
+	[CC3ShaderProgram programFromVertexShaderFile: @"CC3TexturableRigidBones.vsh"
+							andFragmentShaderFile: @"CC3PureColor.fsh"];
 	[CC3ShaderProgram programFromVertexShaderFile: @"CC3TexturableRigidBones.vsh"
 							andFragmentShaderFile: @"CC3SingleTexture.fsh"];
-	[CC3ShaderProgram programFromVertexShaderFile: @"CC3TexturableRigidBones.vsh"
-							andFragmentShaderFile: @"CC3BumpMapTangentSpace.fsh"];
-
+	
 	// Now pre-load shader programs that originate in PFX resources
 	CC3Resource.isPreloading = YES;
 
@@ -1676,6 +1696,13 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// Mallet normal transforms are scaled too far during transforms, so force
 	// the normals to be individually re-normalized after being transformed.
 	mallet.normalScalingMethod = kCC3NormalScalingNormalize;
+	
+#if CC3_GLSL
+	// The bones in the mallet are rigid (no scale applied), so we can use the shader that
+	// is optimized for that. Many more active bones are possible with a rigid skeleton.
+	mallet.shaderProgram = [CC3ShaderProgram programFromVertexShaderFile: @"CC3TexturableRigidBones.vsh"
+												   andFragmentShaderFile: @"CC3SingleTexture.fsh"];
+#endif
 
 	// Because the mallet is a skinned model, it is not automatically assigned a bounding volume,
 	// and will be be drawn even if it is not in front of the camera. We can leave it like this,
@@ -1694,13 +1721,6 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	malletAndAnvils.location = cc3v(300.0, 95.0, 300.0);
 	malletAndAnvils.rotation = cc3v(0.0, -45.0, 0.0);
 	malletAndAnvils.uniformScale = 0.15;
-
-#if CC3_GLSL
-	// The bones in the mallet are rigid (no scale applied), so we can use the shader that
-	// is optimized for that. Many more active bones are possible with a rigid skeleton.
-	malletAndAnvils.shaderProgram = [CC3ShaderProgram programFromVertexShaderFile: @"CC3TexturableRigidBones.vsh"
-															andFragmentShaderFile: @"CC3SingleTexture.fsh"];
-#endif
 	
 	CCActionInterval* hammering = [CC3Animate actionWithDuration: 3.0];
 	[malletAndAnvils runAction: [CCRepeatForever actionWithAction: hammering]];
@@ -1997,14 +2017,12 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  */
 -(void) addPointParticles {
 	// Set up the emitter for 1000 particle, each an instance of the HangingParticle class.
-	// Each particle has an individual location, color, size, and normal vector so that it
-	// interacts with light sources. You can change this parameter to see different options.
+	// Each particle has an individual location, color, and size.
 	CC3PointParticleEmitter* emitter = [CC3PointParticleEmitter nodeWithName: @"Particles"];
 	emitter.particleClass = [HangingPointParticle class];
 	emitter.maximumParticleCapacity = 1000;
 	emitter.vertexContentTypes = kCC3VertexContentLocation |
 								 kCC3VertexContentColor |
-								 kCC3VertexContentNormal |
 								 kCC3VertexContentPointSize;
 	
 	// Set the emission characteristics
@@ -2022,9 +2040,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	emitter.blendFunc = (ccBlendFunc){GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA};
 //	emitter.blendFunc = (ccBlendFunc){GL_SRC_ALPHA, GL_ONE};	// Additive particles
 
-	// Uncomment to see effect of not using lighting.
-	// Can also get same effect by not including kCC3VertexContentNormal in particle content above.
-//	emitter.material.shouldUseLighting = NO;
+	// Point particles assume lighting will not be used by default. Turn it on.
+	emitter.shouldUseLighting = YES;
 
 	// Shows the bounding volume. The boundingVolumePadding gives the boundary some depth
 	// so that the emitter doesn't disappear if particles are still on-screen.
@@ -2142,6 +2159,10 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// by uncommenting second line.
 	emitter.blendFunc = (ccBlendFunc){GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA};
 //	emitter.blendFunc = (ccBlendFunc){GL_SRC_ALPHA, GL_ONE};
+	
+	// Point particles assume lighting will not be used by default.
+	// To see the effect of lighting on the particles, uncomment the following line.
+//	emitter.shouldUseLighting = YES;
 	
 	// The boundingVolumePadding gives the boundary some depth so that the emitter doesn't
 	// disappear if particles are still on-screen.

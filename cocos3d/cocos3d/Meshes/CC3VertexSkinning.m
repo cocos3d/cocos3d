@@ -66,7 +66,7 @@
 }
 
 /** Release a visitor to calculate the bind pose transforms relative to this soft-body node. */
--(void) bindRestPose { [[CC3SkeletonRestPoseBindingVisitor visitor] visit: self]; }
+-(void) bindRestPose {[((CC3NodeVisitor*)[CC3SkeletonRestPoseBindingVisitor visitor]) visit: self]; }
 
 -(CC3SoftBodyNode*) softBodyNode { return self; }
 

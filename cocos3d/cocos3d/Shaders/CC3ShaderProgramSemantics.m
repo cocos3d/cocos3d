@@ -1283,7 +1283,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVarName: @"u_cc3MaterialOpacity" toSemantic: kCC3SemanticMaterialOpacity];				/**< (float) Opacity of the material. */
 	[self mapVarName: @"u_cc3MaterialShininess" toSemantic: kCC3SemanticMaterialShininess];			/**< (float) Shininess of the material (0 <> 128). */
 	[self mapVarName: @"u_cc3MaterialReflectivity" toSemantic: kCC3SemanticMaterialReflectivity];	/**< (float) Reflectivity of the material (0 <> 1). */
-	[self mapVarName: @"u_cc3MaterialMinimumDrawnAlpha" toSemantic: kCC3SemanticMinimumDrawnAlpha];	/**< (float) Minimum alpha value to be drawn, otherwise will be discarded. */
+	[self mapVarName: @"u_cc3MaterialMinimumDrawnAlpha" toSemantic: kCC3SemanticMinimumDrawnAlpha];	/**< (float) Minimum alpha value to be drawn, otherwise will be rendered fully tranparent. */
 	
 	// LIGHTING --------------
 	[self mapVarName: @"u_cc3LightIsUsingLighting" toSemantic: kCC3SemanticIsUsingLighting];					/**< (bool) Whether any lighting is enabled. */

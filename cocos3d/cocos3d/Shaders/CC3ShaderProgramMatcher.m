@@ -30,7 +30,7 @@
  */
 
 #import "CC3ShaderProgramMatcher.h"
-#import "CC3MeshNode.h"
+#import "CC3VertexSkinning.h"
 
 
 #pragma mark -
@@ -40,117 +40,64 @@
 
 @synthesize semanticDelegate=_semanticDelegate;
 
--(CC3ShaderProgram*) pureColorProgramMatching: (CC3ShaderProgram*) shaderProgram {
-	return [[shaderProgram class] programWithSemanticDelegate: shaderProgram.semanticDelegate
-										 fromVertexShaderFile: shaderProgram.vertexShader.name
-										andFragmentShaderFile: @"CC3PureColor.fsh"];
+-(CC3ShaderProgram*) programForMeshNode: (CC3MeshNode*) aMeshNode {
+	return [CC3ShaderProgram programWithSemanticDelegate: self.semanticDelegate
+									fromVertexShaderFile: [self vertexShaderFileForMeshNode: aMeshNode]
+								   andFragmentShaderFile: [self fragmentShaderFileForMeshNode: aMeshNode]];
 }
 
--(CC3ShaderProgram*) programForMeshNode: (CC3MeshNode*) aMeshNode {
+-(NSString*) vertexShaderFileForMeshNode: (CC3MeshNode*) aMeshNode {
+
+	if (aMeshNode.shouldDrawInClipSpace) return @"CC3ClipSpaceTexturable.vsh";
+	
+//	if (aMeshNode.hasRigidSkeleton) return @"CC3TexturableRigidBones.vsh";
+	
+	if (aMeshNode.hasSkeleton) return @"CC3TexturableBones.vsh";
+	
+	if (aMeshNode.isDrawingPointSprites) return @"CC3PointSprites.vsh";
+		
+	return @"CC3Texturable.vsh";
+}
+
+-(NSString*) fragmentShaderFileForMeshNode: (CC3MeshNode*) aMeshNode {
 	
 	CC3Material* mat = aMeshNode.ensureMaterial;
 	GLuint texCnt = mat.textureCount;
-	
 	BOOL shouldAlphaTest = !mat.shouldDrawLowAlpha;
 	
-	if (aMeshNode.shouldDrawInClipSpace) {
-		if (texCnt == 0) return [self clipSpaceNoTextureProgram: shouldAlphaTest];
-		if (texCnt == 1) return [self clipSpaceSingleTextureProgram: shouldAlphaTest];
-	}
+	if (aMeshNode.shouldDrawInClipSpace)
+		return (texCnt > 0) ? @"CC3ClipSpaceSingleTexture.fsh" : @"CC3ClipSpaceNoTexture.fsh";
 	
+	if (aMeshNode.isDrawingPointSprites)
+		return shouldAlphaTest ? @"CC3PointSpritesAlphaTest.fsh" : @"CC3PointSprites.fsh";
+
 	// Material without texture
-	if (texCnt == 0) return [self noTextureProgram: shouldAlphaTest];
-	
-	// Point sprites
-	if (aMeshNode.isDrawingPointSprites) return [self pointSpriteProgram: shouldAlphaTest];
-	
+	if (texCnt == 0) return shouldAlphaTest ? @"CC3NoTextureAlphaTest.fsh" : @"CC3NoTexture.fsh";
+
 	// Reflection using cube-map texture
 	if (mat.hasTextureCube) {
 		if (texCnt > 1)
-			return [self singleTextureReflectiveProgram: shouldAlphaTest];
+			return shouldAlphaTest ? @"CC3SingleTextureReflectAlphaTest.fsh" : @"CC3SingleTextureReflect.fsh";
 		else
-			return [self noTextureReflectiveProgram: shouldAlphaTest];
+			return shouldAlphaTest ? @"CC3NoTextureReflectAlphaTest.fsh" : @"CC3NoTextureReflect.fsh";
 	}
 	
 	// Bump-mapping using a tangent-space normal map texture.
 	if (texCnt > 1 && aMeshNode.mesh.hasVertexTangents)
-		return [self bumpMapTangentSpaceProgram: shouldAlphaTest];
+		return shouldAlphaTest ? @"CC3BumpMapTangentSpaceAlphaTest.fsh" : @"CC3BumpMapTangentSpace.fsh";
 	
 	// Bump-mapping using an object-space normal map texture.
 	if (texCnt > 1 && mat.hasBumpMap)
-		return [self bumpMapObjectSpaceProgram: shouldAlphaTest];
-
+		return shouldAlphaTest ? @"CC3BumpMapObjectSpaceAlphaTest.fsh" : @"CC3BumpMapObjectSpace.fsh";
+	
 	// Default to the basic single-texture shader program
-	return [self singleTextureProgram: shouldAlphaTest];
+	return shouldAlphaTest ? @"CC3SingleTextureAlphaTest.fsh" : @"CC3SingleTexture.fsh";
 }
 
-
-#pragma mark Program options
-
--(CC3ShaderProgram*) singleTextureProgram: (BOOL) shouldAlphaTest {
-	return [self programFromVertexShaderFile: @"CC3Texturable.vsh"
-					   andFragmentShaderFile: (shouldAlphaTest
-											   ? @"CC3SingleTextureAlphaTest.fsh"
-											   : @"CC3SingleTexture.fsh")];
-}
-
--(CC3ShaderProgram*) singleTextureReflectiveProgram: (BOOL) shouldAlphaTest {
-	return [self programFromVertexShaderFile: @"CC3Texturable.vsh"
-					   andFragmentShaderFile: (shouldAlphaTest
-											   ? @"CC3SingleTextureReflectAlphaTest.fsh"
-											   : @"CC3SingleTextureReflect.fsh")];
-}
-
--(CC3ShaderProgram*) noTextureProgram: (BOOL) shouldAlphaTest {
-	return [self programFromVertexShaderFile: @"CC3Texturable.vsh"
-					   andFragmentShaderFile: (shouldAlphaTest
-											   ? @"CC3NoTextureAlphaTest.fsh"
-											   : @"CC3NoTexture.fsh")];
-}
-
--(CC3ShaderProgram*) noTextureReflectiveProgram: (BOOL) shouldAlphaTest {
-	return [self programFromVertexShaderFile: @"CC3Texturable.vsh"
-					   andFragmentShaderFile: (shouldAlphaTest
-											   ? @"CC3NoTextureReflectAlphaTest.fsh"
-											   : @"CC3NoTextureReflect.fsh")];
-}
-
--(CC3ShaderProgram*) pointSpriteProgram: (BOOL) shouldAlphaTest {
-	return [self programFromVertexShaderFile: @"CC3PointSprites.vsh"
-					   andFragmentShaderFile: (shouldAlphaTest
-											   ? @"CC3PointSpritesAlphaTest.fsh"
-											   : @"CC3PointSprites.fsh")];
-}
-
--(CC3ShaderProgram*) bumpMapObjectSpaceProgram: (BOOL) shouldAlphaTest {
-	return [self programFromVertexShaderFile: @"CC3Texturable.vsh"
-					   andFragmentShaderFile: (shouldAlphaTest
-											   ? @"CC3BumpMapObjectSpaceAlphaTest.fsh"
-											   : @"CC3BumpMapObjectSpace.fsh")];
-}
-
--(CC3ShaderProgram*) bumpMapTangentSpaceProgram: (BOOL) shouldAlphaTest {
-	return [self programFromVertexShaderFile: @"CC3Texturable.vsh"
-					   andFragmentShaderFile: (shouldAlphaTest
-											   ? @"CC3BumpMapTangentSpaceAlphaTest.fsh"
-											   : @"CC3BumpMapTangentSpace.fsh")];
-}
-
--(CC3ShaderProgram*) clipSpaceSingleTextureProgram: (BOOL) shouldAlphaTest {
-	return [self programFromVertexShaderFile: @"CC3ClipSpaceTexturable.vsh"
-					   andFragmentShaderFile: @"CC3ClipSpaceSingleTexture.fsh"];
-}
-
--(CC3ShaderProgram*) clipSpaceNoTextureProgram: (BOOL) shouldAlphaTest {
-	return [self programFromVertexShaderFile: @"CC3ClipSpaceTexturable.vsh"
-					   andFragmentShaderFile: @"CC3ClipSpaceNoTexture.fsh"];
-}
-
--(CC3ShaderProgram*) programFromVertexShaderFile: (NSString*) vshFilePath
-					   andFragmentShaderFile: (NSString*) fshFilePath {
-	return [CC3ShaderProgram programWithSemanticDelegate: self.semanticDelegate
-									fromVertexShaderFile: vshFilePath
-								   andFragmentShaderFile: fshFilePath];
+-(CC3ShaderProgram*) pureColorProgramMatching: (CC3ShaderProgram*) shaderProgram {
+	return [[shaderProgram class] programWithSemanticDelegate: shaderProgram.semanticDelegate
+										 fromVertexShaderFile: shaderProgram.vertexShader.name
+										andFragmentShaderFile: @"CC3PureColor.fsh"];
 }
 
 
@@ -166,7 +113,7 @@
 -(void) initSemanticDelegate {
 	CC3ShaderProgramSemanticsByVarName* sd = [CC3ShaderProgramSemanticsByVarName new];
 	[sd populateWithDefaultVariableNameMappings];
-	_semanticDelegate = sd;		// retained by "new" above
+	_semanticDelegate = sd;
 }
 
 @end

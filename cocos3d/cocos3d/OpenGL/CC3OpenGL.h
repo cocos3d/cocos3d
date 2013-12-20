@@ -1093,14 +1093,20 @@ typedef struct {
 /** Deletes the shader with the specified ID from the GL engine. */
 -(void) deleteShader: (GLuint) shaderID;
 
+/** @deprecated Use the compileShader:from:sourceCodeStrings: method instead. */
+-(void) compileShader: (GLuint) shaderID fromSourceCodeStrings: (NSArray*) glslSources DEPRECATED_ATTRIBUTE;
+
 /**
- * Compiles the specified shader from the specified GLSL source code strings, which is an
- * array of NSStrings each containing GLSL source code.
+ * Compiles the specified shader from the specified number of GLSL source code strings, 
+ * which is an array of null-terminated UTF8 strings. The number of source strings in 
+ * the source string array must be at least as large as the specified count.
  *
  * You can use the getShaderWasCompiled: method to determine whether compilation was successful,
  * and the getLogForShader: method to retrieve the reason for any unsuccessful compilation.
  */
--(void) compileShader: (GLuint) shaderID fromSourceCodeStrings: (NSArray*) glslSources;
+-(void) compileShader: (GLuint) shaderID
+				 from: (GLuint) srcStrCount
+	sourceCodeStrings: (const GLchar**) srcCodeStrings;
 
 /** Returns whether the specified shader was successfully compiled. */
 -(BOOL) getShaderWasCompiled: (GLuint) shaderID;

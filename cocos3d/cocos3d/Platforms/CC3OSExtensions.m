@@ -87,3 +87,26 @@
 @end
 
 
+#pragma mark -
+#pragma mark NSString extensions
+
+@implementation NSString (CC3)
+
+-(NSUInteger) lineCount {
+	NSUInteger lineCount, charIdx, strLen = [self length];
+	for (charIdx = 0, lineCount = 0; charIdx < strLen; lineCount++)
+		charIdx = NSMaxRange([self lineRangeForRange: NSMakeRange(charIdx, 0)]);
+	return lineCount;
+}
+
+-(NSArray*) lines {
+	NSArray* rawLines = [self componentsSeparatedByString: @"\n"];
+	NSMutableArray* trimmedLines = [NSMutableArray arrayWithCapacity: rawLines.count];
+	for (NSString* line in rawLines)
+		[trimmedLines addObject: [line stringByTrimmingCharactersInSet: [NSCharacterSet newlineCharacterSet]]];
+	return trimmedLines;
+}
+
+@end
+
+

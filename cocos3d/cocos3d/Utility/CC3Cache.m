@@ -57,6 +57,8 @@
 	[self lock];
 	[_objectsByName setObject: wrap forKey: objName];
 	[self unlock];
+
+	LogRez(@"Added %@ to the %@ cache.", obj, _typeName);
 }
 
 -(id<CC3Cacheable>) getObjectNamed: (NSString*) name {
@@ -71,11 +73,19 @@
 
 -(void) removeObjectNamed: (NSString*) name {
 	if ( !name ) return;
-	LogRez(@"Removing %@ named %@ from the %@ cache.", _typeName, name, _typeName);
 
 	[self lock];
+
+#if LOGGING_REZLOAD
+	BOOL wasRemoved = ([_objectsByName objectForKey: name] != nil);
+#endif
+	
 	[_objectsByName removeObjectForKey: name];
 	[self unlock];
+
+#if LOGGING_REZLOAD
+	if (wasRemoved) LogRez(@"Removed %@ named %@ from the %@ cache.", _typeName, name, _typeName);
+#endif
 }
 
 -(void) removeAllObjects {
@@ -99,6 +109,17 @@
 		block([obj unwrapCacheable], stop);
 	}];
 	[self unlock];
+}
+
+// Dummy implementation to keep compiler happy with @selector(caseInsensitiveCompare:)
+// in implementation of objectsSortedByName property.
+-(NSComparisonResult) caseInsensitiveCompare: (NSString*) string { return NSOrderedSame; }
+
+-(NSArray*) objectsSortedByName {
+	NSSortDescriptor* sorter = [NSSortDescriptor sortDescriptorWithKey: @"name"
+															 ascending: YES
+															  selector: @selector(caseInsensitiveCompare:)];
+	return [[_objectsByName allValues] sortedArrayUsingDescriptors: [NSArray arrayWithObject: sorter]];
 }
 
 

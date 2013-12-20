@@ -76,9 +76,18 @@
  * Visits the specified node, then if the shouldVisitChildren property is set to YES,
  * invokes this visit: method on each child node as well.
  *
+ * Returns whether the visitation run was stopped once a desired result was accomplished.
+ * Depending on the type of visitation, this might occur if a particular node was reached,
+ * or some other desired result has been accomplished. The purpose of the returned value
+ * is not to indicate whether all node have been visited, or even that the visitation was
+ * aborted. Instead, you should think of the returned value as a way of indicating that
+ * a desired result has been accomplished, and that there is no need to visit further nodes.
+ * For visitations that normally visit all nodes, such as drawing, or updating, the return
+ * value will generally be NO.
+ *
  * Subclasses will override several template methods to customize node visitation behaviour.
  */
--(void) visit: (CC3Node*) aNode;
+-(BOOL) visit: (CC3Node*) aNode;
 
 /**
  * Requests the removal of the specfied node.

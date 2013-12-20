@@ -1317,7 +1317,7 @@ static GLuint lastAssignedNodeTag;
 
 -(void) updateTransformMatrices {
 	CC3Node* da = self.dirtiestAncestor;
-	[[[self transformVisitorClass] visitor] visit: (da ? da : self)];
+	[((CC3NodeVisitor*)[[self transformVisitorClass] visitor]) visit: (da ? da : self)];
 }
 
 -(void) updateTransformMatrix {

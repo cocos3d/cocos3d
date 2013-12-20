@@ -116,6 +116,16 @@
  */
 -(void) enumerateObjectsUsingBlock: (void (^) (id<CC3Cacheable> obj, BOOL* stop)) block;
 
+/** 
+ * Returns an array of all objects in this cache, sorted by name.
+ *
+ * This is a convenience method for use when listing items in the array during logging and development. 
+ *
+ * Since the objects are retained within the returned array, be careful not to hold on to the array,
+ * if you want weakly cached objects to be automatically removed from this cache.
+ */
+-(NSArray*) objectsSortedByName;
+
 /** A descriptive name of the type of object being cached. */
 @property(nonatomic, strong, readonly) NSString* typeName;
 

@@ -80,6 +80,7 @@
 #pragma mark -
 #pragma mark NSThread extensions
 
+/** Extension category to support cocos3d functionality. */
 @interface NSThread (CC3)
 
 /** 
@@ -99,5 +100,23 @@
  * The current thread will halt (block) until then.
  */
 -(void) runBlockSync: (void (^)(void)) block;
+
+@end
+
+
+#pragma mark -
+#pragma mark NSString extensions
+
+/** Extension category to support cocos3d functionality. */
+@interface NSString (CC3)
+
+/** Returns the number of lines in this string. */
+@property(nonatomic, readonly) NSUInteger lineCount;
+
+/** 
+ * Returns an array of the lines in this string, as determined by separating
+ * them with the newline character, and trimming each of all newline chars.
+ */
+@property(nonatomic, readonly) NSArray* lines;
 
 @end

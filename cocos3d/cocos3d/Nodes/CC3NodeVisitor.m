@@ -66,8 +66,10 @@
 
 -(CC3Camera*) defaultCamera { return _startingNode.activeCamera; }
 
--(void) visit: (CC3Node*) aNode {
-	if (!aNode) return;					// Must have a node to work on
+-(BOOL) visit: (CC3Node*) aNode {
+	BOOL rslt = NO;
+	
+	if (!aNode) return rslt;			// Must have a node to work on
 	
 	_currentNode = aNode;				// Make the node being processed available.
 
@@ -76,7 +78,7 @@
 		[self open];					// Open the visitor
 	}
 
-	[self process: aNode];				// Process the node and its children recursively
+	rslt = [self process: aNode];		// Process the node and its children recursively
 
 	if (aNode == _startingNode) {		// If we're back to the first node, finish up
 		[self close];					// Close the visitor
@@ -84,18 +86,23 @@
 	}
 	
 	_currentNode = nil;					// Done with this node now.
+
+	return rslt;
 }
 
 /** Template method that is invoked automatically during visitation to process the specified node. */
--(void) process: (CC3Node*) aNode {
+-(BOOL) process: (CC3Node*) aNode {
+	BOOL rslt = NO;
 	LogTrace(@"%@ visiting %@ %@ children", self, aNode, (_shouldVisitChildren ? @"and" : @"but not"));
 	
 	[self processBeforeChildren: aNode];	// Heavy lifting before visiting children
 	
 	// Recurse through the child nodes if required
-	if (_shouldVisitChildren) [self processChildrenOf: aNode];
+	if (_shouldVisitChildren) rslt = [self processChildrenOf: aNode];
 
 	[self processAfterChildren: aNode];		// Heavy lifting after visiting children
+
+	return rslt;
 }
 
 /**
@@ -118,13 +125,19 @@
  *
  * Subclasses may override this method to establish a different traversal.
  */
--(void) processChildrenOf: (CC3Node*) aNode {
-	CC3Node* currNode = _currentNode;	// Remember current node
+-(BOOL) processChildrenOf: (CC3Node*) aNode {
+	CC3Node* currNode = _currentNode;		// Remember current node
 	
 	NSArray* children = aNode.children;
-	for (CC3Node* child in children) [self visit: child];
-
+	for (CC3Node* child in children) {
+		if ( [self visit: child] ) {
+			_currentNode = currNode;		// Restore current node
+			return YES;
+		}
+	}
+	
 	_currentNode = currNode;				// Restore current node
+	return NO;
 }
 
 /**
@@ -250,10 +263,14 @@
  * with a particular node, not the visitor, and a child node could modify it and mess
  * up later siblings of a the parent node.
  */
--(void) process: (CC3Node*) aNode {
+-(BOOL) process: (CC3Node*) aNode {
+	BOOL rslt = NO;
+
 	BOOL wasAncestorDirty = _isTransformDirty;
-	[super process: aNode];
+	rslt = [super process: aNode];
 	_isTransformDirty = wasAncestorDirty;
+	
+	return rslt;
 }
 
 /**
@@ -443,21 +460,21 @@
 
 -(BOOL) isNodeVisibleForDrawing: (CC3Node*) aNode { return aNode.visible; }
 
--(void) processChildrenOf: (CC3Node*) aNode {
-	if (_drawingSequencer) {
-		// Remember current node and whether children should be visited
-		CC3Node* currNode = _currentNode;
-		BOOL currSVC = _shouldVisitChildren;
+-(BOOL) processChildrenOf: (CC3Node*) aNode {
+	if ( !_drawingSequencer ) return [super processChildrenOf: aNode];
 
-		_shouldVisitChildren = NO;	// Don't delve into node hierarchy if using sequencer
-		[_drawingSequencer visitNodesWithNodeVisitor: self];
-
-		// Restore current node and whether children should be visited
-		_shouldVisitChildren = currSVC;
-		_currentNode = currNode;
-	} else {
-		[super processChildrenOf: aNode];
-	}
+	// Remember current node and whether children should be visited
+	CC3Node* currNode = _currentNode;
+	BOOL currSVC = _shouldVisitChildren;
+	
+	_shouldVisitChildren = NO;	// Don't delve into node hierarchy if using sequencer
+	[_drawingSequencer visitNodesWithNodeVisitor: self];
+	
+	// Restore current node and whether children should be visited
+	_shouldVisitChildren = currSVC;
+	_currentNode = currNode;
+	
+	return NO;
 }
 
 /** Prepares GL programs, activates the rendering surface, and opens the scene and the camera. */

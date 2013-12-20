@@ -504,34 +504,17 @@ static Class _defaultSemanticDelegateClass = nil;
 
 +(id) shaderFromPFXShader: (PFXClassPtr) pSPVRTPFXParserShader inPFXResource: (CC3PFXResource*) pfxRez {
 	SPVRTPFXParserShader* pfxShader = (SPVRTPFXParserShader*)pSPVRTPFXParserShader;
-	NSString* shaderName;
-	CC3Shader* shader;
 	if (pfxShader->bUseFileName) {
-		// Derive the shader name, attempt to retrieve it from the shader cache, and return it is if exists already.
+		// Load the shader from the file
 		NSString* shaderFilePath = [NSString stringWithUTF8String: pfxShader->pszGLSLfile];
-		shaderName = [self shaderNameFromFilePath: shaderFilePath];
-		shader = [self getShaderNamed: shaderName];
-		if (shader) return shader;
-
-		// Compile a new shader from the source code in the shader file
-		shader = [[self alloc] initFromSourceCodeFile: shaderFilePath];
+		return [self shaderFromSourceCodeFile: shaderFilePath];
 	} else {
-		// Derive the shader name, attempt to retrieve it from the shader cache, and return it is if exists already.
-		shaderName = [NSString stringWithUTF8String: pfxShader->Name.c_str()];
-		shaderName = [NSString stringWithFormat: @"%@-%@", pfxRez.name, shaderName];
-		shader = [self getShaderNamed: shaderName];
-		if (shader) return shader;
-		
-		// Compile a new shader from the source code embedded in the PFX file
-		NSString* shaderSource = [NSString stringWithUTF8String: pfxShader->pszGLSLcode];
-		shader = [[self alloc] initWithName: shaderName fromSourceCode: shaderSource];
+		// Derive the shader name as a combination of the PFX resource name and the local shader name.
+		NSString* shaderName = [NSString stringWithFormat: @"%@-%@", pfxRez.name,
+								[NSString stringWithUTF8String: pfxShader->Name.c_str()]];
+		NSString* shSrcStr = [NSString stringWithUTF8String: pfxShader->pszGLSLcode];
+		return [self shaderWithName: shaderName fromSourceCode: shSrcStr];
 	}
-
-	LogRez(@"%@ created from %@", shader, NSStringFromSPVRTPFXParserShader(pfxShader));
-	
-	// Add the shader to the shader cache and return it.
-	[self addShader: shader];
-	return shader;
 }
 
 @end
