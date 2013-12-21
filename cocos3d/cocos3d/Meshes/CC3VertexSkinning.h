@@ -355,6 +355,9 @@
  */
 -(void) addBone: (CC3Bone*) aNode;
 
+/** Returns whether all of the bones in this skin section have a rigid transform. */
+@property(nonatomic, readonly) BOOL hasRigidSkeleton;
+
 /**
  * Returns whether this skin section contains the specified vertex index.
  *
@@ -756,6 +759,25 @@
  * together structurally under a CC3SoftBodyNode.
  */
 @property(nonatomic, readonly) BOOL hasSoftBodyContent;
+
+/**
+ * Indicates whether the skeletal structures controlling any descendant skinned mesh nodes are
+ * composed of bones that undergo only rigid transforms, relative to their nearest ancestor
+ * soft-body node.
+ *
+ * When the bones in a skeleton contain only rigid transforms, the vertices in the skin-mesh
+ * node can be transformed within a shader using rotations and transforms, instead of a full
+ * transform matrix. This allows for many more bones to be transferred to the shader program
+ * during a single GL draw call, which increases performance in many larger meshes.
+ *
+ * Consequently, the value of this property on each descendant skinned mesh node affects the 
+ * choice of shader program that will be selected automatically for that node.
+ *
+ * Setting the value of this property affects all descendant skinned mesh nodes. Querying the
+ * value of this property returns YES if any descendant skinned mesh node returns YES to the
+ * same property, otherwise returns NO.
+ */
+@property(nonatomic, assign) BOOL hasRigidSkeleton;
 
 /**
  * After copying a skin mesh node, the newly created copy will still be influenced

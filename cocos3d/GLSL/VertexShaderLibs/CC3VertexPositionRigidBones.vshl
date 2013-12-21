@@ -32,7 +32,9 @@
  * movement of underlying bones. Rigid bones are moved and rotated, but are not scaled. This allows
  * the movement of each bone to be described as a single quaternion and translation, which is much
  * more concise than using a matrix (7 floats per bone instead of 16), which allows many more bones
- * to be used per skin section (batch), resulting in fewer draw calls.
+ * to be used per skin section (batch), resulting in fewer draw calls. The use of quaternion and
+ * translation math can also reduce the number of calculations that are performed per vertex, which
+ * improves performance, when compared to using matrices, even for the same number of bones.
  *
  * The vertices are considered part of a skin that covers the bones, and moves along with them.
  *

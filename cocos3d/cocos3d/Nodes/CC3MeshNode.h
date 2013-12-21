@@ -115,6 +115,7 @@
 	BOOL _shouldUseSmoothShading : 1;
 	BOOL _shouldCastShadowsWhenInvisible : 1;
 	BOOL _shouldApplyOpacityAndColorToMeshContent : 1;
+	BOOL _hasRigidSkeleton : 1;		// Used by skinned mesh node subclasses
 }
 
 /**

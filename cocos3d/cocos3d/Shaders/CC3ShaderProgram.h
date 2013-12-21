@@ -526,14 +526,16 @@
  * program name should be unique. If a program with the same name as the specified program
  * already exists in this cache, an assertion error is raised.
  *
- * Depending on the value of the isPreloading property, the shader program may be held within this
- * cache as a weak reference. As a result, the specified shader program may automatically be deallocated
- * and removed from this cache once all external strong references to it have been released.
+ * Depending on the value of the isPreloading property, the shader program may be held within 
+ * this cache as a weak reference. As a result, the specified shader program may automatically
+ * be deallocated and removed from this cache once all external strong references to it have
+ * been released.
  *
- * If the value of the shouldAutomaticallyAddMatchingPureColorPrograms is set to YES, this
- * method will ensure that a matching pure-color program is added to the cache for each regular
- * program that is added. The pureColorProgramMatching: method, of the program matcher found in
- * the class-side programMatcher property, is used to create the matching pure-color program.
+ * If the value of both the shouldAutomaticallyPreloadMatchingPureColorPrograms and isPreloading
+ * properties are set to YES, this method will ensure that a matching pure-color program is 
+ * added to the cache for each regular program that is added. The pureColorProgramMatching: 
+ * method, of the program matcher found in the class-side programMatcher property, is used 
+ * to create the matching pure-color program.
  */
 +(void) addProgram: (CC3ShaderProgram*) program;
 
@@ -560,31 +562,49 @@
 
 /**
  * Returns whether this shader program cache should automatically add a matching pure-color
- * shader program for each normal shader program that is added to this cache.
+ * shader program for each normal shader program that is added to this cache during shader
+ * program preloading.
  *
- * If this property is set to YES, the addProgram method will ensure that a matching pure-color
- * shader program is added for each normal shader program that is added using that method.
+ * If both this property and the isPreloading property are set to YES, the addProgram method
+ * will ensure that a matching pure-color shader program is added for each normal shader 
+ * program that is added using that method.
+ *
+ * If pre-loading is not active, each shader program is loaded dynamically the first time it is
+ * needed, and is added to the cache at that time. For such dynamically-loaded shader programs,
+ * the corresponding pure-color shader program will be dynamically loaded when it is needed,
+ * in turn. Typically this will be the first time node is involved in node picking as a result
+ * of a touch event.
  *
  * The initial value of this property is YES, ensuring that a matching pure-color program will
- * be added for each normal shader program that is added. Pure-color shader programs are used
- * when rendering a node for picking from a touch-event. You should therefore leave the value
- * of this property at its default value, unless your app does not use touch events to pick nodes.
+ * be added for each normal shader program that is added during pre-loading. Pure-color shader 
+ * programs are used when rendering a node for picking from a touch-event. You should therefore
+ * leave the value of this property at its default value, unless your app does not use touch 
+ * events to pick nodes.
  */
-+(BOOL) shouldAutomaticallyAddMatchingPureColorPrograms;
++(BOOL) shouldAutomaticallyPreloadMatchingPureColorPrograms;
 
 /**
  * Sets whether this shader program cache should automatically add a matching pure-color
- * shader program for each normal shader program that is added to this cache.
+ * shader program for each normal shader program that is added to this cache during shader
+ * program preloading.
  *
- * If this property is set to YES, the addProgram method will ensure that a matching pure-color
- * shader program is added for each normal shader program that is added using that method.
+ * If both this property and the isPreloading property are set to YES, the addProgram method
+ * will ensure that a matching pure-color shader program is added for each normal shader
+ * program that is added using that method.
+ *
+ * If pre-loading is not active, each shader program is loaded dynamically the first time it is
+ * needed, and is added to the cache at that time. For such dynamically-loaded shader programs,
+ * the corresponding pure-color shader program will be dynamically loaded when it is needed,
+ * in turn. Typically this will be the first time node is involved in node picking as a result
+ * of a touch event.
  *
  * The initial value of this property is YES, ensuring that a matching pure-color program will
- * be added for each normal shader program that is added. Pure-color shader programs are used
- * when rendering a node for picking from a touch-event. You should therefore leave the value
- * of this property at its default value, unless your app does not use touch events to pick nodes.
+ * be added for each normal shader program that is added during pre-loading. Pure-color shader
+ * programs are used when rendering a node for picking from a touch-event. You should therefore
+ * leave the value of this property at its default value, unless your app does not use touch
+ * events to pick nodes.
  */
-+(void) setShouldAutomaticallyAddMatchingPureColorPrograms: (BOOL) shouldAdd;
++(void) setShouldAutomaticallyPreloadMatchingPureColorPrograms: (BOOL) shouldAdd;
 
 /**
  * Returns whether shader programs are being pre-loaded.

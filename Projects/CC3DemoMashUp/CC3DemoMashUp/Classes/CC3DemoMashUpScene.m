@@ -417,18 +417,12 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 
 	[CC3ShaderProgram programFromVertexShaderFile: @"BumpMap.vsh"
 							andFragmentShaderFile: @"BumpMap.fsh"];
-	[CC3ShaderProgram programFromVertexShaderFile: @"BumpMap.vsh"
-							andFragmentShaderFile: @"CC3PureColor.fsh"];
 	[CC3ShaderProgram programFromVertexShaderFile: @"CC3ClipSpaceTexturable.vsh"
 							andFragmentShaderFile: @"CC3ClipSpaceNoTexture.fsh"];
 	[CC3ShaderProgram programFromVertexShaderFile: @"CC3ClipSpaceTexturable.vsh"
 							andFragmentShaderFile: @"CC3Fog.fsh"];
-	[CC3ShaderProgram programFromVertexShaderFile: @"CC3ClipSpaceTexturable.vsh"
-							andFragmentShaderFile: @"CC3PureColor.fsh"];
 	[CC3ShaderProgram programFromVertexShaderFile: @"CC3PointSprites.vsh"
 							andFragmentShaderFile: @"CC3PointSprites.fsh"];
-	[CC3ShaderProgram programFromVertexShaderFile: @"CC3PointSprites.vsh"
-							andFragmentShaderFile: @"CC3PureColor.fsh"];
 	[CC3ShaderProgram programFromVertexShaderFile: @"CC3Texturable.vsh"
 							andFragmentShaderFile: @"CC3BumpMapObjectSpace.fsh"];
 	[CC3ShaderProgram programFromVertexShaderFile: @"CC3Texturable.vsh"
@@ -436,17 +430,11 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	[CC3ShaderProgram programFromVertexShaderFile: @"CC3Texturable.vsh"
 							andFragmentShaderFile: @"CC3NoTexture.fsh"];
 	[CC3ShaderProgram programFromVertexShaderFile: @"CC3Texturable.vsh"
-							andFragmentShaderFile: @"CC3PureColor.fsh"];
-	[CC3ShaderProgram programFromVertexShaderFile: @"CC3Texturable.vsh"
 							andFragmentShaderFile: @"CC3SingleTexture.fsh"];
 	[CC3ShaderProgram programFromVertexShaderFile: @"CC3Texturable.vsh"
 							andFragmentShaderFile: @"CC3SingleTextureAlphaTest.fsh"];
 	[CC3ShaderProgram programFromVertexShaderFile: @"CC3Texturable.vsh"
 							andFragmentShaderFile: @"CC3SingleTextureReflect.fsh"];
-	[CC3ShaderProgram programFromVertexShaderFile: @"CC3TexturableBones.vsh"
-							andFragmentShaderFile: @"CC3NoTexture.fsh"];
-	[CC3ShaderProgram programFromVertexShaderFile: @"CC3TexturableBones.vsh"
-							andFragmentShaderFile: @"CC3PureColor.fsh"];
 	[CC3ShaderProgram programFromVertexShaderFile: @"CC3TexturableBones.vsh"
 							andFragmentShaderFile: @"CC3SingleTexture.fsh"];
 	[CC3ShaderProgram programFromVertexShaderFile: @"CC3TexturableBones.vsh"
@@ -454,11 +442,10 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	[CC3ShaderProgram programFromVertexShaderFile: @"CC3TexturableRigidBones.vsh"
 							andFragmentShaderFile: @"CC3BumpMapTangentSpace.fsh"];
 	[CC3ShaderProgram programFromVertexShaderFile: @"CC3TexturableRigidBones.vsh"
-							andFragmentShaderFile: @"CC3PureColor.fsh"];
-	[CC3ShaderProgram programFromVertexShaderFile: @"CC3TexturableRigidBones.vsh"
-							andFragmentShaderFile: @"CC3SingleTexture.fsh"];
-	
-	// Now pre-load shader programs that originate in PFX resources
+							andFragmentShaderFile: @"CC3NoTexture.fsh"];
+		
+	// Now pre-load shader programs that originate in PFX resources.
+	// Leave the shader program preloading on too...since effects will also load shaders.
 	CC3Resource.isPreloading = YES;
 
 	[CC3PFXResource resourceFromFile: kPostProcPFXFile];
@@ -1696,14 +1683,12 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// Mallet normal transforms are scaled too far during transforms, so force
 	// the normals to be individually re-normalized after being transformed.
 	mallet.normalScalingMethod = kCC3NormalScalingNormalize;
-	
-#if CC3_GLSL
-	// The bones in the mallet are rigid (no scale applied), so we can use the shader that
-	// is optimized for that. Many more active bones are possible with a rigid skeleton.
-	mallet.shaderProgram = [CC3ShaderProgram programFromVertexShaderFile: @"CC3TexturableRigidBones.vsh"
-												   andFragmentShaderFile: @"CC3SingleTexture.fsh"];
-#endif
 
+	// The bones in the mallet are rigid (no scale applied). Setting this property allows
+	// the shader program that is optimized for that to be automatically selected for the
+	// mallet skinned mesh node. Many more active bones are possible with a rigid skeleton.
+	mallet.hasRigidSkeleton = YES;
+	
 	// Because the mallet is a skinned model, it is not automatically assigned a bounding volume,
 	// and will be be drawn even if it is not in front of the camera. We can leave it like this,
 	// however, because the mallet is a complex model and is often out of view of the camera, we
@@ -2458,13 +2443,11 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	[dgnBody createBoundingVolume];
 //	dgnBody.shouldDrawBoundingVolume = YES;
 	[_dragon setSkeletalBoundingVolume: dgnBody.boundingVolume];
-	
-#if CC3_GLSL
-	// The bones in the dragon are rigid (no scale applied), so we can use the shader that
-	// is optimized for that. Many more active bones are possible with a rigid skeleton.
-	dgnBody.shaderProgram = [CC3ShaderProgram programFromVertexShaderFile: @"CC3TexturableRigidBones.vsh"
-													andFragmentShaderFile: @"CC3BumpMapTangentSpace.fsh"];
-#endif
+
+	// The bones in the dragon are rigid (no scale applied). Setting this property allows the
+	// shader program that is optimized for that to be automatically selected for the skinned
+	// mesh nodes in the dragon. Many more active bones are possible with a rigid skeleton.
+	_dragon.hasRigidSkeleton = YES;
 
 #if !CC3_GLSL
 	// The fixed pipeline of OpenGL ES 1.1 cannot make use of the tangent-space normal

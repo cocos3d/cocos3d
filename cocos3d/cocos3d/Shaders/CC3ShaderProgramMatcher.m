@@ -50,7 +50,7 @@
 
 	if (aMeshNode.shouldDrawInClipSpace) return @"CC3ClipSpaceTexturable.vsh";
 	
-//	if (aMeshNode.hasRigidSkeleton) return @"CC3TexturableRigidBones.vsh";
+	if (aMeshNode.hasRigidSkeleton) return @"CC3TexturableRigidBones.vsh";
 	
 	if (aMeshNode.hasSkeleton) return @"CC3TexturableBones.vsh";
 	

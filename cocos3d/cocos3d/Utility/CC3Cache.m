@@ -116,10 +116,21 @@
 -(NSComparisonResult) caseInsensitiveCompare: (NSString*) string { return NSOrderedSame; }
 
 -(NSArray*) objectsSortedByName {
+
+	// Extract the cached wrappers
+	[self lock];
+	NSArray* wrappers = _objectsByName.allValues;
+	[self unlock];
+	
+	// Extracts the object from each wrapper
+	NSMutableArray* objs = [NSMutableArray arrayWithCapacity: wrappers.count];
+	for (NSObject* wpr in wrappers) [objs addObject: wpr.unwrapCacheable];
+
+	// Sort the resulting objects
 	NSSortDescriptor* sorter = [NSSortDescriptor sortDescriptorWithKey: @"name"
 															 ascending: YES
 															  selector: @selector(caseInsensitiveCompare:)];
-	return [[_objectsByName allValues] sortedArrayUsingDescriptors: [NSArray arrayWithObject: sorter]];
+	return [objs sortedArrayUsingDescriptors: [NSArray arrayWithObject: sorter]];
 }
 
 

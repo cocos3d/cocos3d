@@ -910,7 +910,7 @@ typedef enum {
  * update cycle, so you should invoke the updateTransformMatrix method on this node after you
  * have made any transform changes (location or scale).
  *
- * Setting the value of this property sets the value of this property in all descendent nodes.
+ * Setting the value of this property sets the value of this property in all descendant nodes.
  *
  * Querying this property returns YES if any of the descendant mesh nodes have this property
  * set to YES. Initially, and in most cases, all mesh nodes have this property set to NO.
@@ -1568,10 +1568,10 @@ typedef enum {
  * the clearShaderProgram on a specific mesh node to cause only the shader program of that
  * mesh node to be cleared.
  *
- * Shader selection is handled by an implementation of the CC3ShaderProgramMatcher held in the
- * CC3ShaderProgram programMatcher class-side property. The application can therefore customize
- * shader program selection by establishing a custom instance in the CC3ShaderProgram programMatcher
- * class-side property
+ * Shader selection is handled by an implementation of the CC3ShaderProgramMatcher held in 
+ * the CC3ShaderProgram programMatcher class-side property. The application can therefore 
+ * customize shader program selection by establishing a custom instance in the CC3ShaderProgram
+ * programMatcher class-side property
  */
 -(void) selectShaderPrograms;
 
@@ -2826,7 +2826,7 @@ typedef enum {
  * Indicates whether this node should cast shadows, if shadows are applied to the node
  * hierarchy to which this node belongs.
  *
- * Setting the value of this property sets the value of this property in all descendent nodes.
+ * Setting the value of this property sets the value of this property in all descendant nodes.
  *
  * The initial value of this property is YES. You can set the value of this property to NO
  * on specific nodes that you do not want to cast shadows when shadows are applied to a

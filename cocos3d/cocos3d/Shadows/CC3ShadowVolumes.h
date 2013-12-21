@@ -638,10 +638,10 @@ static const GLfloat kCC3DefaultShadowVolumeVertexOffsetFactor = 0.001f;
 @property(nonatomic, assign) BOOL shouldShadowBackFaces;
 
 /** 
- * Prewarms the meshes of all descendent mesh nodes to prepare for shadow volumes.
+ * Prewarms the meshes of all descendant mesh nodes to prepare for shadow volumes.
  *
  * Shadow volumes make very heavy use of many mesh face characteristics. This method
- * ensures that the faces have been populated for each descendent mesh node.
+ * ensures that the faces have been populated for each descendant mesh node.
  *
  * This method is invoked automatically when a shadow volume is added to a mesh node.
  * Usually, the application should never need to invoke this method directly.

@@ -98,6 +98,12 @@
 	return NO;
 }
 
+-(BOOL) hasRigidSkeleton { return _hasRigidSkeleton; }
+
+-(void) setHasRigidSkeleton: (BOOL) hasRigidSkeleton {
+	_hasRigidSkeleton = hasRigidSkeleton;
+	[super setHasRigidSkeleton: hasRigidSkeleton];
+}
 
 
 #pragma mark Faces
@@ -259,6 +265,11 @@
 
 -(void) addBone: (CC3Bone*) aBone {
 	[_skinnedBones addObject: [CC3SkinnedBone skinnedBoneWithSkin: _node onBone: aBone]];
+}
+
+-(BOOL) hasRigidSkeleton {
+	for (CC3SkinnedBone* sb in _skinnedBones) if ( !sb.bone.skeletalTransformMatrix.isRigid ) return NO;
+	return (_skinnedBones.count > 0);	// YES if all bones returned YES, but NO if no bones.
 }
 
 -(BOOL) containsVertexIndex: (GLint) aVertexIndex {
@@ -736,6 +747,15 @@
 -(BOOL) hasSoftBodyContent {
 	for (CC3Node* child in _children) if (child.hasSoftBodyContent) return YES;
 	return NO;
+}
+
+-(BOOL) hasRigidSkeleton {
+	for (CC3Node* child in _children) if (child.hasRigidSkeleton) return YES;
+	return NO;
+}
+
+-(void) setHasRigidSkeleton: (BOOL) hasRigidSkeleton {
+	for (CC3Node* child in _children) [child setHasRigidSkeleton: hasRigidSkeleton];
 }
 
 -(void) cacheRestPoseMatrix {}

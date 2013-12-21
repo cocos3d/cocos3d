@@ -498,7 +498,7 @@ static CC3Cache* _programCache = nil;
 	[_programCache addObject: program];
 	
 	// If appropriate, ensure that a matching pure-color program is added as well.
-	if (self.shouldAutomaticallyAddMatchingPureColorPrograms)
+	if (self.isPreloading && self.shouldAutomaticallyPreloadMatchingPureColorPrograms)
 		[self.programMatcher pureColorProgramMatching: program];
 }
 
@@ -512,12 +512,12 @@ static CC3Cache* _programCache = nil;
 
 +(void) removeAllPrograms { [_programCache removeAllObjectsOfType: self];}
 
-static BOOL _shouldAutomaticallyAddMatchingPureColorPrograms = YES;
+static BOOL _shouldAutomaticallyPreloadMatchingPureColorPrograms = YES;
 
-+(BOOL) shouldAutomaticallyAddMatchingPureColorPrograms { return _shouldAutomaticallyAddMatchingPureColorPrograms; }
++(BOOL) shouldAutomaticallyPreloadMatchingPureColorPrograms { return _shouldAutomaticallyPreloadMatchingPureColorPrograms; }
 
-+(void) setShouldAutomaticallyAddMatchingPureColorPrograms: (BOOL) shouldAdd {
-	_shouldAutomaticallyAddMatchingPureColorPrograms = shouldAdd;
++(void) setShouldAutomaticallyPreloadMatchingPureColorPrograms: (BOOL) shouldAdd {
+	_shouldAutomaticallyPreloadMatchingPureColorPrograms = shouldAdd;
 }
 
 +(BOOL) isPreloading { return _programCache ? !_programCache.isWeak : NO; }

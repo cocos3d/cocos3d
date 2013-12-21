@@ -38,6 +38,7 @@
 #import "CC3PODResourceNode.h"
 #import "CC3UIViewController.h"
 #import "CC3UtilityMeshNodes.h"
+#import "CC3VertexSkinning.h"
 #import "CC3Actions.h"
 
 // Model names
@@ -134,21 +135,27 @@
 	CC3MeshNode* meshNode;
 	CC3LineNode* lineNode;
 	CC3ResourceNode* rezNode;
+
+	// Simple one sided plane. Only 2 faces per node.
+	meshNode = [CC3PlaneNode nodeWithName: @"Simple one-sided plane"];
+	[meshNode populateAsCenteredRectangleWithSize: CGSizeMake(30.0, 30.0)];
+	meshNode.texture = [CC3Texture textureFromFile: kLogoFileName];
+	[self configureAndAddTemplate: meshNode];
 	
-	// Make a simple plane template available. Only 2 faces per node.
-	CC3PlaneNode* planeNode = [CC3PlaneNode nodeWithName: @"Simple plane"];
-	[planeNode populateAsCenteredRectangleWithSize: CGSizeMake(30.0, 30.0)];
-	planeNode.texture = [CC3Texture textureFromFile: kLogoFileName];
-	[self configureAndAddTemplate: planeNode];
+	// Simple two sided plane. Only 2 faces per node.
+	meshNode = [meshNode copy];
+	meshNode.name = @"Simple two-sided plane";
+	meshNode.shouldCullBackFaces = NO;
+	[self configureAndAddTemplate: meshNode];
 	
-	// Make a simple box template available. Only 6 faces per node.
+	// Simple box. Only 6 faces per node.
 	CC3BoxNode* boxNode = [CC3BoxNode nodeWithName: @"Simple box"];
 	CC3Box box = CC3BoxFromMinMax(cc3v(-10.0, -10.0, -10.0), cc3v( 10.0,  10.0,  10.0));
 	[boxNode populateAsSolidBox: box];
 	boxNode.color = ccORANGE;
 	[self configureAndAddTemplate: boxNode];
 
-	// Make a circular ring out of lines
+	// Ring of lines
 	#define kRingLineCount 36
 	CC3Vector ringVertices[kRingLineCount + 1];
 	for (int i = 0; i < kRingLineCount; i++) {
@@ -167,75 +174,75 @@
 	lineNode.uniformScale = 10.0;
 	[self configureAndAddTemplate: lineNode];
 	
-	// Mascot model from POD resource.
+	// Globe with texture
+	meshNode = [CC3MeshNode nodeWithName: kGlobeName];
+	[meshNode populateAsSphereWithRadius: 1.0f andTessellation: CC3TessellationMake(32, 32)];
+	meshNode.texture = [CC3Texture textureFromFile: kGlobeTextureFile];
+	meshNode.name = @"Textured low-poly sphere mesh";
+	meshNode.rotation = cc3v(0.0, -90.0, 0.0);	// starting rotation
+	meshNode.uniformScale = 15.0;
+	[self configureAndAddTemplate: meshNode];
+	
+	// Mascot loaded from POD resource.
 	rezNode = [CC3PODResourceNode nodeFromFile: kMascotPODFile
 			  expectsVerticallyFlippedTextures: YES];
 	aNode = [rezNode getNodeNamed: kMascotName];
-	aNode.name = @"Complex textured mesh with high face-count";
+	aNode.name = @"Textured medium-poly model mesh";
 	aNode.rotation = cc3v(0.0, -90.0, 0.0);
 	aNode.uniformScale = 5.0;
+	[self configureAndAddTemplate: aNode];
+	
+	// Hello world medium mesh
+	rezNode = [CC3PODResourceNode nodeFromFile: kHelloWorldFileName];
+	aNode = [rezNode getNodeNamed: kHelloWorldName];
+	aNode.name = @"Untextured medium-poly mesh";
+	aNode.uniformScale = 12.0;
 	[self configureAndAddTemplate: aNode];
 	
 	// Die cube model from POD resource.
 	rezNode = [CC3PODResourceNode nodeFromFile: kDieCubePODFile];
 	aNode = [rezNode getNodeNamed: kDieCubeName];
-	aNode.name = @"Untextured mesh with very high face-count";
+	aNode.name = @"Untextured high-poly mesh model";
 	aNode.uniformScale = 10.0;
 	[self configureAndAddTemplate: aNode];
-	
-	// Globe with texture
-	meshNode = [CC3MeshNode nodeWithName: kGlobeName];
-	[meshNode populateAsSphereWithRadius: 1.0f andTessellation: CC3TessellationMake(32, 32)];
-	meshNode.texture = [CC3Texture textureFromFile: kGlobeTextureFile];
-	meshNode.name = @"Textured sphere with high face-count";
-	meshNode.rotation = cc3v(0.0, -90.0, 0.0);	// starting rotation
-	meshNode.uniformScale = 15.0;
-	[self configureAndAddTemplate: meshNode];
 	
 	// Beachball with no texture, but with several subnodes
 	rezNode = [CC3PODResourceNode nodeFromFile: kBeachBallFileName];
 	aNode = [rezNode getNodeNamed: kBeachBallName];
-	aNode.name = @"Opaque ball containing 4 subnodes";
+	aNode.name = @"Untextured opaque ball drawn as 4 subnodes";
 	aNode.uniformScale = 15.0;
 	aNode.isOpaque = YES;
 	[self configureAndAddTemplate: aNode];
 
 	// Translucent beachball
 	aNode = [aNode copy];
-	aNode.name = @"Translucent ball containing 4 subnodes";
+	aNode.name = @"Untextured translucent ball drawn as 4 subnodes";
 	aNode.isOpaque = NO;
 	[self configureAndAddTemplate: aNode];
 	
 	// Make a blue teapot template available.
-	aNode = [[CC3ModelSampleFactory factory] makeUniColoredTeapotNamed: @"Single-color teapot" withColor: kCCC4FBlue];
+	aNode = [[CC3ModelSampleFactory factory] makeUniColoredTeapotNamed: @"Single-color teapot drawn with line-strips" withColor: kCCC4FBlue];
 	aNode.uniformScale = 100.0;
 	[self configureAndAddTemplate: aNode];
 	
 	// Make a multicolored teapot template available.
-	aNode = [[CC3ModelSampleFactory factory] makeMultiColoredTeapotNamed: @"Vertex-colored teapot"];
+	aNode = [[CC3ModelSampleFactory factory] makeMultiColoredTeapotNamed: @"Vertex-colored teapot drawn with line-strips"];
 	aNode.uniformScale = 100.0;
 	[self configureAndAddTemplate: aNode];
 	
 	// Make a textured teapot template available.
-	meshNode = [CC3ModelSampleFactory.factory makeTexturableTeapotNamed: @"Textured teapot"];
+	meshNode = [CC3ModelSampleFactory.factory makeTexturableTeapotNamed: @"Textured teapot drawn with line-strips"];
 	meshNode.texture = [CC3Texture textureFromFile: kLogoFileName];
 	meshNode.uniformScale = 100.0;
 	[self configureAndAddTemplate: meshNode];
-
-	// Make a model template with a large number of faces available.
-	rezNode = [CC3PODResourceNode nodeFromFile: kHelloWorldFileName];
-	aNode = [rezNode getNodeNamed: kHelloWorldName];
-	aNode.name = @"Mesh with high face count";
-	aNode.uniformScale = 12.0;
-	[self configureAndAddTemplate: aNode];
 	
-	// Animated dragon from POD resource
+	// Animated dragon from POD resource using matrix bones
 	// The model animation that was loaded from the POD into track zero is a concatenation of
 	// several separate movements, such as gliding and flapping. Extract the distinct movements
 	// from the base animation and add those distinct movement animations as separate tracks.
 	rezNode = [CC3PODResourceNode nodeFromFile: @"Dragon.pod"];
 	aNode = [rezNode getNodeNamed: @"Dragon.pod-SoftBody"];
-	aNode.name = @"Skinned mesh with many animated bones.";
+	aNode.name = @"Vertex-skinned, bump-mapped mesh with matrix-animated bones.";
 	aNode.uniformScale = 0.5;
 	_flapTrack = [aNode addAnimationFromFrame: 61 toFrame: 108];
 	[self configureAndAddTemplate: aNode];
@@ -251,6 +258,13 @@
 	[dgnMat removeAllTextures];
 	dgnMat.texture = dgnTex;
 #endif
+	
+	// Animated dragon using rigid bones
+	aNode = [aNode copy];
+	aNode.name = @"Vertex-skinned, bump-mapped mesh with rigidly-animated bones.";
+	aNode.hasRigidSkeleton = YES;
+	[aNode clearShaderPrograms];	// Clear shaders to reselect rigid bone shaders
+	[self configureAndAddTemplate: aNode];
 	
 	// Start with one copy of the first available template node.
 	_templateIndex = 0;
