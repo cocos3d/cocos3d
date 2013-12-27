@@ -43,6 +43,8 @@ extern "C" {
 
 @implementation CC3PODMaterial
 
+@synthesize pfxEffect=_pfxEffect;
+
 -(GLint) podIndex { return _podIndex; }
 
 -(void) setPodIndex: (GLint) aPODIndex { _podIndex = aPODIndex; }
@@ -79,9 +81,9 @@ static GLfloat shininessExpansionFactor = 128.0f;
 		[self addTexture: psm->nIdxTexRefraction fromPODResource: aPODRez];
 		
 		if (psm->pszEffectName && psm->pszEffectFile) {
-			[aPODRez.pfxResourceClass populateMaterial: self
-									   fromEffectNamed: [NSString stringWithUTF8String: psm->pszEffectName]
-									 inPFXResourceFile: [NSString stringWithUTF8String: psm->pszEffectFile]];
+			_pfxEffect = [aPODRez.pfxResourceClass getEffectNamed: [NSString stringWithUTF8String: psm->pszEffectName]
+												inPFXResourceFile: [NSString stringWithUTF8String: psm->pszEffectFile]];
+			[_pfxEffect populateMaterial: self];
 		}
 		
 		// Assign any user data and take ownership of managing its memory

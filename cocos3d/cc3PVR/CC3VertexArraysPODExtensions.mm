@@ -50,7 +50,7 @@ extern "C" {
 	SPODMesh* psm = (SPODMesh*)aSPODMesh;
 	if ( (self = [super init]) ) {
 		GLint elemSize = pcd->n;
-		LogRez(@"\t%@ %@ from: %@", ((elemSize == 0) ? @"Creating" : @"Skipping"), [self class], NSStringFromCPODData(pcd));
+		LogRez(@"\t%@ %@ from: %@", ((elemSize == 0) ? @"Skipping" : @"Creating"), [self class], NSStringFromCPODData(pcd));
 		if (elemSize == 0) return nil;
 			
 		self.elementType = GLElementTypeFromEPVRTDataType(pcd->eType);

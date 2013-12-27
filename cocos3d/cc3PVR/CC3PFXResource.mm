@@ -39,45 +39,41 @@ extern "C" {
 #import "CC3ShaderProgramMatcher.h"
 
 
+#pragma mark -
+#pragma mark CC3PFXResource
+
 @implementation CC3PFXResource
 
 @synthesize semanticDelegateClass=_semanticDelegateClass;
 
-
-#pragma mark Populating materials
-
--(void) populateMaterial: (CC3Material*) material fromEffectNamed: (NSString*) effectName {
-	CC3PFXEffect* effect = [_effectsByName objectForKey: effectName];
-	if (effect) {
-		[effect populateMaterial: material];
-		return;
-	}
-	LogError(@"%@ could not find PFX effect named %@ to apply to %@. Reverting to default shaders.",
-			 self, effectName, material);
+-(CC3PFXEffect*) getEffectNamed: (NSString*) effectName {
+	if ( !effectName ) return nil;
+	
+	CC3PFXEffect* pfxEffect = [_effectsByName objectForKey: effectName];
+	if ( !pfxEffect ) LogError(@"%@ could not find PFX effect named %@."
+							   @" Mesh nodes using this PFX effect will revert to default shaders and textures.",
+							   self, effectName);
+	return pfxEffect;
 }
 
-+(void) populateMaterial: (CC3Material*) material
-		 fromEffectNamed: (NSString*) effectName
-	  inPFXResourceNamed: (NSString*) rezName {
++(CC3PFXEffect*) getEffectNamed: (NSString*) effectName inPFXResourceNamed: (NSString*) rezName {
+	if ( !(effectName && rezName) ) return nil;
+	
 	CC3PFXResource* pfxRez = (CC3PFXResource*)[self getResourceNamed: rezName];
-	if (pfxRez) {
-		[pfxRez populateMaterial: material fromEffectNamed: effectName];
-		return;
-	}
-	LogError(@"%@ could not find cached PFX resource named %@ to apply to %@. Reverting to default shaders.",
-			 self, rezName, material);
+	if ( !pfxRez ) LogError(@"%@ could not find cached PFX resource named %@ to apply effect named %@."
+							@" Mesh nodes using this PFX effect will revert to default shaders and textures.",
+							self, rezName, effectName);
+	return [pfxRez getEffectNamed: effectName];
 }
 
-+(void) populateMaterial: (CC3Material*) material
-		 fromEffectNamed: (NSString*) effectName
-	   inPFXResourceFile: (NSString*) aFilePath {
++(CC3PFXEffect*) getEffectNamed: (NSString*) effectName inPFXResourceFile: (NSString*) aFilePath {
+	if ( !(effectName && aFilePath) ) return nil;
+	
 	CC3PFXResource* pfxRez = (CC3PFXResource*)[self resourceFromFile: aFilePath];
-	if (pfxRez) {
-		[pfxRez populateMaterial: material fromEffectNamed: effectName];
-		return;
-	}
-	LogError(@"%@ could not load PFX resource file %@ to apply to %@. Reverting to default shaders.",
-			 self, aFilePath, material);
+	if ( !pfxRez ) LogError(@"%@ could not load PFX resource file %@ to apply effect named %@."
+							@" Mesh nodes using this PFX effect will revert to default shaders and textures.",
+							self, aFilePath, effectName);
+	return [pfxRez getEffectNamed: effectName];
 }
 
 
@@ -209,13 +205,12 @@ static Class _defaultSemanticDelegateClass = nil;
 
 #pragma mark Populating materials
 
+// Set the GL program into the mesh node
+-(void) populateMeshNode: (CC3MeshNode*) meshNode { meshNode.shaderProgram = _shaderProgram; }
+
+// Set each texture into its associated texture unit
+// After parsing, the ordering might not be consecutive, so look each up by texture unit index
 -(void) populateMaterial: (CC3Material*) material {
-
-	// Set the GL program into the material
-	material.shaderProgram = _shaderProgram;
-
-	// Set each texture into its associated texture unit
-	// After parsing, the ordering might not be consecutive, so look each up by texture unit index
 	NSUInteger tuCnt = _textures.count;
 	for (GLuint tuIdx = 0; tuIdx < tuCnt; tuIdx++) {
 		CC3PFXEffectTexture* pfxTex = [self getEffectTextureForTextureUnit: tuIdx];
@@ -443,15 +438,21 @@ static Class _defaultSemanticDelegateClass = nil;
 @implementation CC3Material (PFXEffects)
 
 -(void) applyEffectNamed: (NSString*) effectName inPFXResourceNamed: (NSString*) rezName {
-	[CC3PODResource.defaultPFXResourceClass populateMaterial: self
-											 fromEffectNamed: effectName
-										  inPFXResourceNamed: rezName];
+	CC3PFXEffect* pfxEffect = [CC3PODResource.defaultPFXResourceClass getEffectNamed: effectName
+																  inPFXResourceNamed: rezName];
+	CC3Assert(pfxEffect, @"%@ could not apply effect named %@ from PFX resource named %@."
+			  @"See previously logged error.", self, effectName, rezName);
+
+	[pfxEffect populateMaterial: self];
 }
 
--(void) applyEffectNamed: (NSString*) effectName inPFXResourceFile: (NSString*) aFilePath {
-	[CC3PODResource.defaultPFXResourceClass populateMaterial: self
-											 fromEffectNamed: effectName
-										   inPFXResourceFile: aFilePath];
+-(void) applyEffectNamed: (NSString*) effectName inPFXResourceFile: (NSString*) filePath {
+	CC3PFXEffect* pfxEffect = [CC3PODResource.defaultPFXResourceClass getEffectNamed: effectName
+																  inPFXResourceFile: filePath];
+	CC3Assert(pfxEffect, @"%@ could not apply effect named %@ from PFX resource file %@."
+			  @"See previously logged error.", self, effectName, filePath);
+	
+	[pfxEffect populateMaterial: self];
 }
 
 @end
@@ -483,15 +484,27 @@ static Class _defaultSemanticDelegateClass = nil;
 @implementation CC3MeshNode (PFXEffects)
 
 -(void) applyEffectNamed: (NSString*) effectName inPFXResourceNamed: (NSString*) rezName {
-	[self.ensureMaterial applyEffectNamed: effectName inPFXResourceNamed: rezName];
+	CC3PFXEffect* pfxEffect = [CC3PODResource.defaultPFXResourceClass getEffectNamed: effectName
+																  inPFXResourceNamed: rezName];
+	CC3Assert(pfxEffect, @"%@ could not apply effect named %@ from PFX resource named %@."
+			  @"See previously logged error.", self, effectName, rezName);
+
+	[pfxEffect populateMeshNode: self];
+	[pfxEffect populateMaterial: self.ensureMaterial];
 	[self alignTextureUnits];
 	[super applyEffectNamed: effectName inPFXResourceNamed: rezName];
 }
 
--(void) applyEffectNamed: (NSString*) effectName inPFXResourceFile: (NSString*) aFilePath {
-	[self.ensureMaterial applyEffectNamed: effectName inPFXResourceFile: aFilePath];
+-(void) applyEffectNamed: (NSString*) effectName inPFXResourceFile: (NSString*) filePath {
+	CC3PFXEffect* pfxEffect = [CC3PODResource.defaultPFXResourceClass getEffectNamed: effectName
+																   inPFXResourceFile: filePath];
+	CC3Assert(pfxEffect, @"%@ could not apply effect named %@ from PFX resource file %@."
+			  @"See previously logged error.", self, effectName, filePath);
+	
+	[pfxEffect populateMeshNode: self];
+	[pfxEffect populateMaterial: self.ensureMaterial];
 	[self alignTextureUnits];
-	[super applyEffectNamed: effectName inPFXResourceFile: aFilePath];
+	[super applyEffectNamed: effectName inPFXResourceFile: filePath];
 }
 
 @end

@@ -41,7 +41,6 @@
 @synthesize shininess=_shininess, reflectivity=_reflectivity;
 @synthesize blendFunc=_blendFunc, shouldUseLighting=_shouldUseLighting;
 @synthesize alphaTestFunction=_alphaTestFunction, alphaTestReference=_alphaTestReference;
-@synthesize shaderContext=_shaderContext;
 @synthesize shouldBlendAtFullOpacity=_shouldBlendAtFullOpacity;
 
 -(NSString*) nameSuffix { return @"Material"; }
@@ -117,27 +116,22 @@
 	return self.shouldApplyOpacityToColor ? CCC4FBlendAlpha(self.emissionColor) : self.emissionColor;
 }
 
--(CC3ShaderProgram*) shaderProgram { return _shaderContext.program; }
+-(CC3ShaderProgramContext*) shaderContext {
+	CC3Assert(NO, @"The shaderProgram and shaderContext properties have moved to CC3MeshNode.");
+	return nil;
+}
+
+-(void) setShaderContext:(CC3ShaderProgramContext *)shaderContext {
+	CC3Assert(NO, @"The shaderProgram and shaderContext properties have moved to CC3MeshNode.");
+}
+
+-(CC3ShaderProgram*) shaderProgram {
+	CC3Assert(NO, @"The shaderProgram and shaderContext properties have moved to CC3MeshNode.");
+	return nil;
+}
 
 -(void) setShaderProgram: (CC3ShaderProgram*) shaderProgram {
-
-	// Do nothing if not changing
-	if (shaderProgram == self.shaderProgram) return;
-
-	// If the shader program is being cleared, clear the context as well
-	if (!shaderProgram) {
-		self.shaderContext = nil;
-		return;
-	}
-	
-	// If the shader context exists, set the specified program into it
-	if (_shaderContext) {
-		_shaderContext.program = shaderProgram;
-		return;
-	}
-	
-	// Shader program does not exist, so create a new one on the program
-	self.shaderContext = [CC3ShaderProgramContext contextForProgram: shaderProgram];
+	CC3Assert(NO, @"The shaderProgram and shaderContext properties have moved to CC3MeshNode.");
 }
 
 
@@ -276,8 +270,11 @@ static ccBlendFunc _defaultBlendFunc = {GL_ONE, GL_ZERO};
 		self.texture = aTexture;
 	} else if (texUnit < self.textureCount) {
 		CC3Assert(aTexture, @"%@ cannot set an overlay texture to nil", self);
-		[_textureOverlays replaceObjectAtIndex: (texUnit - 1) withObject: aTexture];
-		[self texturesHaveChanged];
+		GLuint overlayIdx = texUnit - 1;
+		if ( aTexture != [_textureOverlays objectAtIndex: overlayIdx]) {
+			[_textureOverlays replaceObjectAtIndex: overlayIdx withObject: aTexture];
+			[self texturesHaveChanged];
+		}
 	} else {
 		[self addTexture: aTexture];
 	}
@@ -361,7 +358,6 @@ static ccBlendFunc _defaultBlendFunc = {GL_ONE, GL_ZERO};
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
 		_texture = nil;
 		_textureOverlays = nil;
-		_shaderContext = nil;
 		_ambientColor = kCC3DefaultMaterialColorAmbient;
 		_diffuseColor = kCC3DefaultMaterialColorDiffuse;
 		_specularColor = kCC3DefaultMaterialColorSpecular;
@@ -373,7 +369,6 @@ static ccBlendFunc _defaultBlendFunc = {GL_ONE, GL_ZERO};
 		_alphaTestFunction = GL_ALWAYS;
 		_alphaTestReference = 0.0f;
 		_shouldUseLighting = YES;
-		_shaderContext = nil;
 	}
 	return self;
 }
@@ -419,8 +414,6 @@ static ccBlendFunc _defaultBlendFunc = {GL_ONE, GL_ZERO};
 	_alphaTestFunction = another.alphaTestFunction;
 	_alphaTestReference = another.alphaTestReference;
 	_shouldUseLighting = another.shouldUseLighting;
-	
-	self.shaderContext = another.shaderContext;		// retained
 	
 	_texture = another.texture;			// retained - don't want to trigger texturesHaveChanged
 	

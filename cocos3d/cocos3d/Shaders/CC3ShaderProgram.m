@@ -334,7 +334,7 @@
 }
 
 -(void) populateUniforms: (NSArray*) uniforms withVisitor: (CC3NodeDrawingVisitor*) visitor {
-	CC3ShaderProgramContext* progCtx = visitor.currentMaterial.shaderContext;
+	CC3ShaderProgramContext* progCtx = visitor.currentMeshNode.shaderContext;
 	for (CC3GLSLUniform* var in uniforms) {
 		if ([progCtx populateUniform: var withVisitor: visitor] ||
 			[_semanticDelegate populateUniform: var withVisitor: visitor]) {

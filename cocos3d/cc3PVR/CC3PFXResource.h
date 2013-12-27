@@ -35,6 +35,11 @@
 #import "CC3MeshNode.h"
 #import "CC3ShaderProgram.h"
 
+@class CC3PFXEffect;
+
+
+#pragma mark -
+#pragma mark CC3PFXResource
 
 /**
  * CC3PFXResource is a CC3Resource that wraps a PVR PFX data structure loaded from a file.
@@ -47,26 +52,23 @@
 	Class _semanticDelegateClass;
 }
 
-/** Populates the specfied material from the PFX effect with the specified name. */
--(void) populateMaterial: (CC3Material*) material fromEffectNamed: (NSString*) effectName;
+/** Returns the PFX effect with the specified name, or nil if it doesn't exist. */
+-(CC3PFXEffect*) getEffectNamed: (NSString*) name;
 
 /**
- * Populates the specfied material from the PFX effect with the specified name, found in the
- * cached CC3PFXResource with the specifed name. Raises an assertion error if a PFX resource
- * with the specified name cannot be found in the cache.
+ * Returns the PFX effect with the specified name, found in the cached CC3PFXResource with
+ * the specifed name. Returns nil if a PFX resource with the specified name cannot be found
+ * in the PFX resource cache, or if that PFX resource does not contain an effect with the
+ * specified effect name.
  */
-+(void) populateMaterial: (CC3Material*) material
-		 fromEffectNamed: (NSString*) effectName
-	  inPFXResourceNamed: (NSString*) rezName;
++(CC3PFXEffect*) getEffectNamed: (NSString*) effectName inPFXResourceNamed: (NSString*) rezName;
 
 /**
- * Populates the specfied material from the PFX effect with the specified name, found in the
- * CC3PFXResource loaded from the specfied file. Raises an assertion error if the PFX resource
- * file is not already in the resource cache and could not be loaded.
+ * Returns the PFX effect with the specified name, found in the CC3PFXResource loaded from
+ * the specfied file. Returns nil if the PFX resource file could not be loaded, or if that
+ * PFX resource does not contain an effect with the specified effect name.
  */
-+(void) populateMaterial: (CC3Material*) material
-		 fromEffectNamed: (NSString*) effectName
-	   inPFXResourceFile: (NSString*) aFilePath;
++(CC3PFXEffect*) getEffectNamed: (NSString*) effectName inPFXResourceFile: (NSString*) aFilePath;
 
 /** 
  * The class used to instantiate the semantic delegate for the GLSL programs created for
@@ -104,8 +106,8 @@
 #pragma mark CC3PFXEffect
 
 /**
- * CC3PFXEffect represents a single effect within a PFX resource file. It combines the shader
- * code referenced by the effect into a CC3ShaderProgram, and the textures used by that program.
+ * CC3PFXEffect represents a single effect within a PFX resource file. It combines the shader code
+ * referenced by the effect into a CC3ShaderProgram, and the textures to apply to the material.
  */
 @interface CC3PFXEffect : NSObject {
 	NSString* _name;
@@ -132,6 +134,15 @@
  */
 @property(nonatomic, strong, readonly) NSArray* variables;
 
+/** Populates the specfied mesh node with the shader program in this effect. */
+-(void) populateMeshNode: (CC3MeshNode*) meshNode;
+
+/** Populates the specfied material with the textures in this effect. */
+-(void) populateMaterial: (CC3Material*) material;
+
+
+#pragma mark Allocation and initialization
+
 /**
  * Initializes this instance from the specified SPVRTPFXParserEffect C++ class, retrieved
  * from the specified CPVRTPFXParser C++ class as loaded from the specfied PFX resource.
@@ -140,8 +151,6 @@
 					 fromPFXParser: (PFXClassPtr) pCPVRTPFXParser
 					 inPFXResource: (CC3PFXResource*) pfxRez;
 
-/** Populates the specfied material with the GL program and textures. */
--(void) populateMaterial: (CC3Material*) material;
 
 @end
 
@@ -249,17 +258,25 @@
 
 /**
  * Applies the PFX effect with the specified name, found in the cached CC3PFXResource with the
- * specifed name, to this material. Raises an assertion error if a PFX resource with the specified
- * name cannot be found in the cache.
+ * specifed name, to this material.
+ *
+ * Sets the textures of this material to those defined by the retrieved PFX effect.
+ *
+ * Raises an assertion error if a PFX resource with the specified name cannot be found in the PFX
+ * resource cache, or if that PFX resource does not contain an effect with the specified effect name.
  */
 -(void) applyEffectNamed: (NSString*) effectName inPFXResourceNamed: (NSString*) rezName;
 
 /**
- * Applys the PFX effect with the specified name, found in the CC3PFXResource loaded from the
- * specfied file, to this material. Raises an assertion error if the PFX resource file is not
- * already in the resource cache and could not be loaded.
+ * Applies the PFX effect with the specified name, found in the CC3PFXResource loaded from the
+ * specfied file, to this material.
+ *
+ * Sets the textures of this material to those defined by the retrieved PFX effect.
+ *
+ * Raises an assertion error if the PFX resource file could not be loaded, or if that
+ * PFX resource does not contain an effect with the specified effect name.
  */
--(void) applyEffectNamed: (NSString*) effectName inPFXResourceFile: (NSString*) aFilePath;
+-(void) applyEffectNamed: (NSString*) effectName inPFXResourceFile: (NSString*) filePath;
 
 @end
 
@@ -272,17 +289,27 @@
 
 /**
  * Applies the PFX effect with the specified name, found in the cached CC3PFXResource with the
- * specifed name, to all descendant nodes. Raises an assertion error if a PFX resource with the
- * specified name cannot be found in the cache.
+ * specifed name, to all descendant mesh nodes.
+ *
+ * Sets the shader program to that defined by the retrieved PFX effect, and sets the textures
+ * of the material in each mesh node to those defined by the retrieved PFX effect
+ *
+ * Raises an assertion error if a PFX resource with the specified name cannot be found in the PFX
+ * resource cache, or if that PFX resource does not contain an effect with the specified effect name.
  */
 -(void) applyEffectNamed: (NSString*) effectName inPFXResourceNamed: (NSString*) rezName;
 
 /**
- * Applys the PFX effect with the specified name, found in the CC3PFXResource loaded from the
- * specfied file, to all descendant nodes. Raises an assertion error if the PFX resource file
- * is not already in the resource cache and could not be loaded.
+ * Applies the PFX effect with the specified name, found in the CC3PFXResource loaded from the
+ * specfied file, to all descendant mesh nodes. 
+ *
+ * Sets the shader program to that defined by the retrieved PFX effect, and sets the textures
+ * of the material in each mesh node to those defined by the retrieved PFX effect
+ *
+ * Raises an assertion error if the PFX resource file could not be loaded, or if that
+ * PFX resource does not contain an effect with the specified effect name.
  */
--(void) applyEffectNamed: (NSString*) effectName inPFXResourceFile: (NSString*) aFilePath;
+-(void) applyEffectNamed: (NSString*) effectName inPFXResourceFile: (NSString*) filePath;
 
 @end
 

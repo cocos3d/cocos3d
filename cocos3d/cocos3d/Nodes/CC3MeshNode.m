@@ -283,18 +283,54 @@
 	[super setGlobalLightPosition: aPosition];
 }
 
--(CC3ShaderProgramContext*) shaderContext { return self.ensureMaterial.shaderContext; }
+
+#pragma mark Shaders
+
+-(CC3ShaderProgramContext*) shaderContext {
+	if ( !_shaderContext ) _shaderContext = [CC3ShaderProgramContext context];
+	return _shaderContext;
+}
 
 -(void) setShaderContext: (CC3ShaderProgramContext*) shaderContext {
-	self.ensureMaterial.shaderContext = shaderContext;
+	_shaderContext = shaderContext;
 	super.shaderContext = shaderContext;	// pass along to any children
 }
 
--(CC3ShaderProgram*) shaderProgram { return self.ensureMaterial.shaderProgram; }
+-(CC3ShaderProgram*) shaderProgram { return _shaderContext.program; }
 
 -(void) setShaderProgram: (CC3ShaderProgram*) shaderProgram {
-	self.ensureMaterial.shaderProgram = shaderProgram;
-	super.shaderProgram = shaderProgram;	// pass along to any children
+	if (shaderProgram == self.shaderProgram) return;
+
+	self.shaderContext.program = shaderProgram;
+
+	[super setShaderProgram: shaderProgram];	// pass along to any children
+}
+
+#if CC3_GLSL
+-(CC3ShaderProgram*) selectShaderProgram {
+	CC3ShaderProgram* sp = self.shaderProgram;
+	if ( !sp ) {
+		sp = [CC3ShaderProgram.programMatcher programForMeshNode: self];
+		_shaderContext.program = sp;		// Use ivar, so doesn't set descendants
+		LogRez(@"Shader program %@ automatically selected for %@", sp, self);
+	}
+	return sp;
+}
+
+#else
+-(CC3ShaderProgram*) selectShaderProgram { return nil; }
+#endif	// CC3GLSL
+
+-(void) selectShaderPrograms {
+	[self selectShaderProgram];
+	[super selectShaderPrograms];
+}
+
+-(void) clearShaderProgram { self.shaderProgram = nil; }
+
+-(void) clearShaderPrograms {
+	[self clearShaderProgram];
+	[super clearShaderPrograms];
 }
 
 
@@ -494,6 +530,9 @@
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
+		_mesh = nil;
+		_material = nil;
+		_shaderContext = nil;
 		_pureColor = kCCC4FWhite;
 		_shouldUseSmoothShading = YES;
 		_shouldCullBackFaces = YES;
@@ -831,7 +870,6 @@
 }
 
 #if CC3_GLSL
-
 -(void) applyShaderProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	CC3ShaderProgram* shaderProgram;
 	if (visitor.shouldDecorateNode)
@@ -841,33 +879,9 @@
 
 	[shaderProgram bindWithVisitor: visitor];
 }
-
--(CC3ShaderProgram*) selectShaderProgram {
-	CC3ShaderProgram* sp = self.shaderProgram;
-	if ( !sp ) {
-		sp = [CC3ShaderProgram.programMatcher programForMeshNode: self];
-		self.ensureMaterial.shaderProgram = sp;		// Use material, so doesn't set descendants
-		LogRez(@"Shader program %@ automatically selected for %@", sp, self);
-	}
-	return sp;
-}
-
 #else
 -(void) applyShaderProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
--(CC3ShaderProgram*) selectShaderProgram { return nil; }
 #endif	// CC3GLSL
-
--(void) selectShaderPrograms {
-	[self selectShaderProgram];
-	[super selectShaderPrograms];
-}
-
--(void) clearShaderProgram { self.shaderProgram = nil; }
-
--(void) clearShaderPrograms {
-	[self clearShaderProgram];
-	[super clearShaderPrograms];
-}
 
 /** Template method to draw the mesh to the GL engine. */
 -(void) drawMeshWithVisitor: (CC3NodeDrawingVisitor*) visitor { [_mesh drawWithVisitor: visitor]; }

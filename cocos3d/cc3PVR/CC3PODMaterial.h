@@ -33,11 +33,17 @@
 #import "CC3Material.h"
 #import "CC3IdentifiablePODExtensions.h"
 
+@class CC3PFXEffect;
+
 
 /** A CC3Material whose content originates from POD resource data. */
 @interface CC3PODMaterial : CC3Material {
+	CC3PFXEffect* _pfxEffect;
 	GLint _podIndex;
 }
+
+/** Returns the PFX effect used by this material. */
+@property(nonatomic, strong, readonly) CC3PFXEffect* pfxEffect;
 
 /**
  * Allocates and initializes an autoreleased instance from the data of

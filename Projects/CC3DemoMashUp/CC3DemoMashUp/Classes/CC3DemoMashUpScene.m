@@ -2386,7 +2386,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// be retrieved from the environment.
 	CC3Matrix4x4 customMtx;
 	CC3Matrix4x4PopulateIdentity(&customMtx);	// Could be any matrix...but just make it an identity
-	CC3ShaderProgramContext* progCtx = mask.material.shaderContext;
+	CC3ShaderProgramContext* progCtx = mask.shaderContext;
 	CC3GLSLUniform* progUniform = [progCtx uniformOverrideNamed: @"CustomMatrix"];
 	progUniform.matrix4x4 = &customMtx;
 	

@@ -31,6 +31,8 @@
 
 #import "CC3PODMeshNode.h"
 #import "CC3PVRTModelPOD.h"
+#import "CC3PODMaterial.h"
+#import "CC3PFXResource.h"
 
 
 #pragma mark -
@@ -97,6 +99,12 @@
 	_podContentIndex = another.podContentIndex;
 	_podParentIndex = another.podParentIndex;
 	_podMaterialIndex = another.podMaterialIndex;
+}
+
+-(void) setMaterial: (CC3PODMaterial*) aMaterial {
+	[super setMaterial: aMaterial];
+	if ( [aMaterial isKindOfClass: [CC3PODMaterial class]] )
+		[aMaterial.pfxEffect populateMeshNode: self];
 }
 
 -(NSString*) description {

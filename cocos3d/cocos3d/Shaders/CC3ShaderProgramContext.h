@@ -139,10 +139,10 @@
  *
  * Invoking this method more than once will return the same uniform override, and the content of the
  * returned uniform is sticky, so the application does not need to keep track of the returned uniform,
- * and only needs to make changes to the content of this uniform when it wants to change that
- * content. Specifically, the application does not need to access, or set the content of, the uniform
- * during each frame update or render cycle. Once set, the content of this uniform will automatically
- * be applied to the GL engine for this context (typically a CC3MeshNode), on each render cycle.
+ * and only needs to make changes to the content of this uniform when it wants to change that content.
+ * Specifically, the application does not need to access, or set the content of, the uniform during 
+ * each frame update or render cycle. Once set, the content of this uniform will automatically be
+ * applied to the GL engine for this context (typically a CC3MeshNode), on each render cycle.
  *
  * By invoking this method, an override uniform is created, and the application takes responsibility
  * for populating the value of this overriden uniform, by invoking any of the set... methods on the
@@ -258,6 +258,13 @@
 
 
 #pragma mark Allocation and initialization
+
+/** 
+ * Allocates and initializes an instance without specifying a program during init.
+ *
+ * The program can be set later using the program property.
+ */
++(id) context;
 
 /** Initializes this instance for use with the specified program. */
 -(id) initForProgram: (CC3ShaderProgram*) program;

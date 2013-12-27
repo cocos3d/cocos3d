@@ -1505,6 +1505,8 @@ typedef enum {
  * The GLSL program context containing the GLSL program (vertex & fragment shaders) used to
  * decorate the descendant nodes.
  *
+ * See the notes about the same property in CC3MeshNode, for more info about the use of shader contexts.
+ *
  * Setting this property causes each descendant to use the specified program context. Querying
  * this property returns the value of the same property from the first descendant node that has
  * a non-nil value in its shaderContext property.
@@ -1522,13 +1524,15 @@ typedef enum {
 @property(nonatomic, strong) CC3ShaderProgramContext* shaderContext;
 
 /**
- * The GLSL program (vertex & fragment shaders) used to decorate the descendant nodes.
+ * The GLSL program (vertex & fragment shaders) used to decorate the descendant mesh nodes.
+ *
+ * See the notes about the same property in CC3MeshNode, for more info about the use of shader programs.
  *
  * Setting this property causes each descendant to use the specified program. Querying this
  * property returns the value of the same property from the first descendant node that has
  * a non-nil value in its shaderProgram property.
  *
- * Within each descendant node, the program is held in the program context in the shaderContext
+ * Within each descendant mesh node, the program is held in the program context in the shaderContext
  * property. When using this property to set the program into each descendant, a new unique context
  * will be created in each node that does not already have a context. In this way, each node may
  * have its own context, which can be customized separately. As an alternative, the shaderContext

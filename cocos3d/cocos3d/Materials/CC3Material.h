@@ -168,7 +168,6 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
 @interface CC3Material : CC3Identifiable <CCRGBAProtocol, CCBlendProtocol> {
 	CC3Texture* _texture;
 	NSMutableArray* _textureOverlays;
-	CC3ShaderProgramContext* _shaderContext;
 	ccColor4F _ambientColor;
 	ccColor4F _diffuseColor;
 	ccColor4F _specularColor;
@@ -574,30 +573,11 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
 /** Sets the default GL material source and destination blend function used for new instances. */
 +(void) setDefaultBlendFunc: (ccBlendFunc) aBlendFunc;
 
+/** @deprecated Moved to CC3MeshNode. */
+@property(nonatomic, strong) CC3ShaderProgramContext* shaderContext DEPRECATED_ATTRIBUTE;
 
-#pragma mark Shaders
-
-/**
- * The GLSL program context containing the GLSL program (vertex & fragment shaders) used to
- * decorate this material.
- *
- * This property is used only when running under OpenGL ES 2.
- */
-@property(nonatomic, strong) CC3ShaderProgramContext* shaderContext;
-
-/**
- * The GLSL program (vertex & fragment shaders) used to decorate this material.
- *
- * Within this material, the program is held in the program context in the shaderContext property.
- * This is a convenience method that allows the program within that context to be accessed or changed.
- *
- * Setting the value of this property will set the specified program into the context in the
- * shaderContext property, creating a new shader context if necessary. Setting this property
- * to nil will set the shaderContext property to nil as well.
- *
- * This property is used only when running under OpenGL ES 2.
- */
-@property(nonatomic, strong) CC3ShaderProgram* shaderProgram;
+/** @deprecated Moved to CC3MeshNode. */
+@property(nonatomic, strong) CC3ShaderProgram* shaderProgram DEPRECATED_ATTRIBUTE;
 
 
 #pragma mark Textures

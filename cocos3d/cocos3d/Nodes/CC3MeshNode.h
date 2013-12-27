@@ -98,6 +98,7 @@
 @interface CC3MeshNode : CC3LocalContentNode {
 	CC3Mesh* _mesh;
 	CC3Material* _material;
+	CC3ShaderProgramContext* _shaderContext;
 	ccColor4F _pureColor;
 	GLenum _depthFunction;
 	GLfloat _decalOffsetFactor;
@@ -288,55 +289,6 @@
  */
 @property(nonatomic, assign) GLfloat reflectivity;
 
-/**
- * Selects an appropriate shader program for this mesh node, and returns that program.
- *
- * When running under a programmable rendering pipeline, such as OpenGL ES 2.0 or OpenGL,
- * all mesh nodes require a shader program to be assigned. This can be done directly using
- * the shaderProgram property. Or a shader program can be selected automatically based on
- * the characteristics of the mesh node by invoking this method.
- *
- * Since all mesh nodes require shader programs, if this method is not invoked, and a shader
- * program is not manually assigned via the shaderProgram property, a shader program will be
- * automatically assigned the first time this mesh node is drawn. The automatic selection is
- * the same, whether this method is invoked, or the selection is made lazily. However, if the
- * shader program must be loaded and compiled, there can be a noticable pause in drawing a
- * mesh node for the first time if lazy assignment is used.
- *
- * Shader selection is handled by an implementation of the CC3ShaderProgramMatcher 
- * held in the CC3ShaderProgram programMatcher class-side property. The application 
- * can therefore customize shader program selection by establishing a custom instance
- * in the CC3ShaderProgram programMatcher class-side property
- *
- * Shader selection is driven by the characteristics of the mesh node and its material,
- * including the number of textures, whether alpha testing is used, etc. If you change
- * any of these characteristics that affect the shader selection, you can invoke the
- * clearShaderProgram method to cause a different shader program to be selected, based
- * on the new mesh node and material characteristics.
- *
- * This method differs from the selectShaderPrograms method in that this method does not
- * propagate to any descendant nodes.
- */
--(CC3ShaderProgram*) selectShaderProgram;
-
-/**
- * Clears the shader program from this mesh node, allowing a new shader to be selected, either
- * directly by subsequently invoking the selectShaderProgram method, or automatically the next
- * time this node is drawn.
- *
- * Shader selection is driven by the characteristics of the mesh node and its material,
- * including the number of textures, whether alpha testing is used, etc. If you change 
- * any of these characteristics that affect the shader selection, you can invoke the
- * clearShaderProgram method to cause a different shader program to be selected, based
- * on the new mesh node and material characteristics.
- *
- * This method is equivalent to setting the shaderProgram property to nil.
- *
- * This method differs from the clearShaderPrograms method in that this method does not
- * propagate to any descendant nodes.
- */
--(void) clearShaderProgram;
-
 /** 
  * If a material does not yet exist, this method invokes the makeMaterial method to create
  * a suitable material, and sets it into the material property. Does nothing if this mesh
@@ -360,6 +312,102 @@
  * but has not yet been established. Usually, you will never need to invoke this method.
  */
 -(CC3Material*) makeMaterial;
+
+
+#pragma mark Shaders
+
+/**
+ * The GLSL shader program context containing the GLSL program (vertex & fragment shaders) 
+ * used to draw this node.
+ *
+ * A single CC3ShaderProgram object can be used by many nodes. The CC3ShaderProgramContext
+ * instance in this property contains state and behaviour specific to the use of the shader
+ * program by this mesh node.
+ *
+ * Each shader program typically makes use of many uniform variables. In most, or many, cases,
+ * each uniform will have a semantic defined, and the content of the uniform will automatically
+ * be extracted from the environment, including from this mesh node itself. So, in most cases,
+ * once the semantic is defined, the application needs pay no further attention to the uniform.
+ *
+ * The shader context can be used to modify this standard semanitic-driven behaviour in two
+ * ways. This shader context can be used to assign a value to a specialized or custom shader
+ * uniform whose value is not derived semantically from the node or the environment, and it 
+ * can be used to override the value of an otherwise semantically-derived uniform, if needed.
+ *
+ * If this property is not set directly, it is automatically initialized to a new shader 
+ * context instance on first access (typically when the shaderProgram property is established,
+ * or a uniform override is added). Unless you have a need to set the value of this property
+ * directly, you can simply let it be managed automatically.
+ *
+ * This property is used only when running under OpenGL ES 2.
+ */
+@property(nonatomic, strong) CC3ShaderProgramContext* shaderContext;
+
+/**
+ * The GLSL program (vertex & fragment shaders) used to draw this node.
+ *
+ * The program is held in the shader context in the shaderContext property. This is a 
+ * convenience property that allows the shader program to be accessed from the shaderContext.
+ *
+ * Setting the value of this property will set the specified program into the context in the
+ * shaderContext property, creating a new shader context if necessary.
+ *
+ * As an alternative to setting this property directly, you can invoke the selectShaderProgram
+ * method (or let it be invoked automatically during the first draw), to have an appropriate
+ * shader program automatically selected for use by this node, and assigned to this property.
+ *
+ * This property is used only when running under OpenGL ES 2.
+ */
+@property(nonatomic, strong) CC3ShaderProgram* shaderProgram;
+
+/**
+ * Selects an appropriate shader program for this mesh node, and returns that program.
+ *
+ * When running under a programmable rendering pipeline, such as OpenGL ES 2.0 or OpenGL,
+ * all mesh nodes require a shader program to be assigned. This can be done directly using
+ * the shaderProgram property. Or a shader program can be selected automatically based on
+ * the characteristics of the mesh node by invoking this method.
+ *
+ * Since all mesh nodes require shader programs, if this method is not invoked, and a shader
+ * program is not manually assigned via the shaderProgram property, a shader program will be
+ * automatically assigned the first time this mesh node is drawn. The automatic selection is
+ * the same, whether this method is invoked, or the selection is made lazily. However, if the
+ * shader program must be loaded and compiled, there can be a noticable pause in drawing a
+ * mesh node for the first time if lazy assignment is used.
+ *
+ * Shader selection is handled by an implementation of the CC3ShaderProgramMatcher
+ * held in the CC3ShaderProgram programMatcher class-side property. The application
+ * can therefore customize shader program selection by establishing a custom instance
+ * in the CC3ShaderProgram programMatcher class-side property
+ *
+ * Shader selection is driven by the characteristics of the mesh node and its material,
+ * including the number of textures, whether alpha testing is used, etc. If you change
+ * any of these characteristics that affect the shader selection, you can invoke the
+ * clearShaderProgram method to cause a different shader program to be selected, based
+ * on the new mesh node and material characteristics.
+ *
+ * This method differs from the selectShaderPrograms method in that this method does not
+ * propagate to any descendant nodes.
+ */
+-(CC3ShaderProgram*) selectShaderProgram;
+
+/**
+ * Clears the shader program from this mesh node, allowing a new shader to be selected, either
+ * directly by subsequently invoking the selectShaderProgram method, or automatically the next
+ * time this node is drawn.
+ *
+ * Shader selection is driven by the characteristics of the mesh node and its material,
+ * including the number of textures, whether alpha testing is used, etc. If you change
+ * any of these characteristics that affect the shader selection, you can invoke the
+ * clearShaderProgram method to cause a different shader program to be selected, based
+ * on the new mesh node and material characteristics.
+ *
+ * This method is equivalent to setting the shaderProgram property to nil.
+ *
+ * This method differs from the clearShaderPrograms method in that this method does not
+ * propagate to any descendant nodes.
+ */
+-(void) clearShaderProgram;
 
 
 #pragma mark CCRGBAProtocol and CCBlendProtocol support

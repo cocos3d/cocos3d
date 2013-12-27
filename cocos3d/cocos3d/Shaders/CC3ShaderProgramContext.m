@@ -138,16 +138,26 @@
 
 #pragma mark Allocation and initialization
 
--(id) init { return [self initForProgram: nil]; }
-
--(id) initForProgram: (CC3ShaderProgram*) program {
+-(id) init {
 	if ( (self = [super init]) ) {
+		_program = nil;
+		_pureColorProgram = nil;
+		_uniforms = nil;
+		_uniformsByName = nil;
 		_shouldEnforceCustomOverrides = YES;
 		_shouldEnforceVertexAttributes = YES;
-		self.program = program;								// retained & will clear overrides
 	}
 	return self;
 }
+
+-(id) initForProgram: (CC3ShaderProgram*) program {
+	if ( (self = [self init]) ) {
+		self.program = program;			// will clear overrides
+	}
+	return self;
+}
+
++(id) context { return [[self alloc] init]; }
 
 +(id) contextForProgram: (CC3ShaderProgram*) program {
 	return [[self alloc] initForProgram: program];
