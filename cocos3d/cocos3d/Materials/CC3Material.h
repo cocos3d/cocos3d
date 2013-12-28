@@ -32,7 +32,7 @@
 #import "CC3Texture.h"
 #import "CCProtocols.h"
 #import "CC3NodeVisitor.h"
-#import "CC3ShaderProgramContext.h"
+#import "CC3ShaderContext.h"
 
 
 /** Default material color under ambient lighting. */
@@ -574,7 +574,7 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
 +(void) setDefaultBlendFunc: (ccBlendFunc) aBlendFunc;
 
 /** @deprecated Moved to CC3MeshNode. */
-@property(nonatomic, strong) CC3ShaderProgramContext* shaderContext DEPRECATED_ATTRIBUTE;
+@property(nonatomic, strong) CC3ShaderContext* shaderContext DEPRECATED_ATTRIBUTE;
 
 /** @deprecated Moved to CC3MeshNode. */
 @property(nonatomic, strong) CC3ShaderProgram* shaderProgram DEPRECATED_ATTRIBUTE;

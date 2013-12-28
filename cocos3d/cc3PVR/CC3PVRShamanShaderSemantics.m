@@ -1,5 +1,5 @@
 /*
- * CC3PVRShamanGLProgramSemantics.m
+ * CC3PVRShamanShaderSemantics.m
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -26,10 +26,10 @@
  *
  * http://en.wikipedia.org/wiki/MIT_License
  * 
- * See header file CC3PVRShamanGLProgramSemantics.h for full API documentation.
+ * See header file CC3PVRShamanShaderSemantics.h for full API documentation.
  */
 
-#import "CC3PVRShamanGLProgramSemantics.h"
+#import "CC3PVRShamanShaderSemantics.h"
 #import "CC3Light.h"
 #import "CC3Scene.h"
 
@@ -50,9 +50,9 @@ NSString* NSStringFromCC3PVRShamanSemantic(CC3PVRShamanSemantic semantic) {
 
 
 #pragma mark -
-#pragma mark CC3PVRShamanGLProgramSemantics
+#pragma mark CC3PVRShamanShaderSemantics
 
-@implementation CC3PVRShamanGLProgramSemantics
+@implementation CC3PVRShamanShaderSemantics
 
 -(GLenum) semanticForPFXSemanticName: (NSString*) semanticName {
 	return [self.class semanticForPVRShamanSemanticName: semanticName];

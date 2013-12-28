@@ -25,12 +25,12 @@ cocos3d 2.0.0 - 2013/12/31
 
 - Added support for OpenGL ES shaders:
     - CC3ShaderProgram added to represent a GL program pairing one vertex shader and one fragment shader under OpenGL ES 2.
-	- Each CC3Material now holds a reference to a CC3ShaderProgram on behalf of the node, through a CC3ShaderProgramContext instance.
+	- Each CC3Material now holds a reference to a CC3ShaderProgram on behalf of the node, through a CC3ShaderContext instance.
 	- CC3GLSLUniform and CC3GLSLAttribute represent a shader uniform or attribute.
 	    - CC3GLSLUniforms and CC3GLSLAttributes are extracted automatically from a CC3ShaderProgram after it is linked.
 		- CC3GLSLUniforms and CC3GLSLAttributes include declare their semantic relationship to the environment,
           allowing uniforms and attributes to be automatically populated from content automatically extracted from the scene.
-		- CC3ShaderProgramContext allows arbitrary uniforms to be attached to a shader program and have its value set programatically per node,
+		- CC3ShaderContext allows arbitrary uniforms to be attached to a shader program and have its value set programatically per node,
 		  and to allow the semantic uniform values to be overridden on a per node basis.
     - CC3OpenGLESShaders provides glue to the GL engine for CC3GLProgrms.
     - The CC3OpenGLESShaders defaultProgram assigns default shaders to materials/nodes that do not have a specific shader designated.

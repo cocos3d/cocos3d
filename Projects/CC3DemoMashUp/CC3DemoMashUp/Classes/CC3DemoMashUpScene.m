@@ -609,7 +609,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// is omitted, a shader program will be selected for each mesh node the first time that mesh
 	// node is drawn. Doing it now adds some additional time up front, but avoids potential pauses
 	// as each shader program is loaded as needed the first time it is needed during drawing.
-	[aNode selectShaderPrograms];
+	[aNode selectShaders];
 	
 	// For an interesting effect, to draw text descriptors and/or bounding boxes on every node
 	// during debugging, uncomment one or more of the following lines. The first line displays
@@ -2386,7 +2386,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// be retrieved from the environment.
 	CC3Matrix4x4 customMtx;
 	CC3Matrix4x4PopulateIdentity(&customMtx);	// Could be any matrix...but just make it an identity
-	CC3ShaderProgramContext* progCtx = mask.shaderContext;
+	CC3ShaderContext* progCtx = mask.shaderContext;
 	CC3GLSLUniform* progUniform = [progCtx uniformOverrideNamed: @"CustomMatrix"];
 	progUniform.matrix4x4 = &customMtx;
 	
@@ -3643,7 +3643,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 
 	// If running shaders under OpenGL ES 2.0, clear the shader program so that a different
 	// shader program will automatically be selected for the new texture configuration.
-	[_floatingHead clearShaderProgram];
+	[_floatingHead removeLocalShaders];
 	
 	// Demonstrate the use of application-specific data attached to a node, by logging the data.
 	if (_floatingHead.userData) LogInfo(@"%@ says '%@'", _floatingHead, _floatingHead.userData);

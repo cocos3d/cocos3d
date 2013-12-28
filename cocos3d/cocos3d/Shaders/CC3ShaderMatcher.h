@@ -1,5 +1,5 @@
 /*
- * CC3ShaderProgramMatcher.h
+ * CC3ShaderMatcher.h
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -29,20 +29,22 @@
 
 /** @file */	// Doxygen marker
 
-#import "CC3ShaderProgram.h"
+#import "CC3Shaders.h"
 
 @class CC3MeshNode, CC3NodeDrawingVisitor;
 
 // Legacy naming support
-#define CC3GLProgramMatcher				CC3ShaderProgramMatcher
-#define CC3GLProgramMatcherBase			CC3ShaderProgramMatcherBase
+#define CC3GLProgramMatcher				CC3ShaderMatcher
+#define CC3ShaderProgramMatcher			CC3ShaderMatcher
+#define CC3GLProgramMatcherBase			CC3ShaderMatcherBase
+#define CC3ShaderProgramMatcherBase		CC3ShaderMatcherBase
 
 
 #pragma mark -
-#pragma mark CC3ShaderProgramMatcher
+#pragma mark CC3ShaderMatcher
 
 /**
- * CC3ShaderProgramMatcher describes the behaviour required to match nodes and materials to an
+ * CC3ShaderMatcher describes the behaviour required to match nodes and materials to an
  * appropriate GL program for rendering a particular node.
  *
  * Under OpenGL ES 2, every drawable mesh node requires a CC3ShaderProgram to be rendered. Typically,
@@ -54,7 +56,7 @@
  * an appropriate default shader from the shader cache. The shader cache maintains an instance of an
  * implementation of this protocol and delegates to it to match the model to a suitable GL program.
  */
-@protocol CC3ShaderProgramMatcher <NSObject>
+@protocol CC3ShaderMatcher <NSObject>
 
 /**
  * Returns the shader program to use to draw the specified mesh node.
@@ -88,24 +90,24 @@
 -(CC3ShaderProgram*) pureColorProgramMatching: (CC3ShaderProgram*) shaderProgram;
 
 /** The semantic delegate that will be attached to any program created by this matcher. */
-@property(nonatomic, retain) id<CC3ShaderProgramSemanticsDelegate> semanticDelegate;
+@property(nonatomic, retain) id<CC3ShaderSemanticsDelegate> semanticDelegate;
 
 @end
 
 
 #pragma mark -
-#pragma mark CC3ShaderProgramMatcherBase
+#pragma mark CC3ShaderMatcherBase
 
 /**
- * CC3ShaderProgramMatcherBase is a basic implementation of the CC3ShaderProgramMatcher protocol.
+ * CC3ShaderMatcherBase is a basic implementation of the CC3ShaderMatcher protocol.
  *
  * It looks at aspects of the mesh node, such as number of texture units, bump-mapping, etc.
  * To determine the appropriate GL program for a particular mesh node. All programs matched
  * using this implementation will be assigned the semantics delegate from the semanticDelegate
  * property of this instance.
  */
-@interface CC3ShaderProgramMatcherBase : NSObject <CC3ShaderProgramMatcher> {
-	id<CC3ShaderProgramSemanticsDelegate> _semanticDelegate;
+@interface CC3ShaderMatcherBase : NSObject <CC3ShaderMatcher> {
+	id<CC3ShaderSemanticsDelegate> _semanticDelegate;
 }
 
 @end

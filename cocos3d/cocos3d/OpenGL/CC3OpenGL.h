@@ -35,7 +35,7 @@
 
 @class CC3NodeDrawingVisitor, CC3Mesh, CC3Fog;
 @class CC3GLSLVariable, CC3GLSLUniform, CC3GLSLAttribute;
-@class CC3ShaderProgram, CC3ShaderProgramPrewarmer;
+@class CC3ShaderProgram, CC3ShaderPrewarmer;
 
 
 /** Indicates that vertex attribute array is not available. */
@@ -1156,7 +1156,7 @@ typedef struct {
  * This prewarmer can be used to force that first draw call to be made immediately,
  * and to an off-screen surface, so it won't be visible.
  */
-@property(nonatomic, strong) CC3ShaderProgramPrewarmer* shaderProgramPrewarmer;
+@property(nonatomic, strong) CC3ShaderPrewarmer* shaderProgramPrewarmer;
 
 /** Returns whether the specified shader was successfully linked. */
 -(BOOL) getShaderProgramWasLinked: (GLuint) programID;

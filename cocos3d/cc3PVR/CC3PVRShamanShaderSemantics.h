@@ -1,5 +1,5 @@
 /*
- * CC3PVRShamanGLProgramSemantics.h
+ * CC3PVRShamanShaderSemantics.h
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -32,6 +32,9 @@
 
 #import "CC3PFXResource.h"
 
+// Legacy naming support
+#define CC3PVRShamanGLProgramSemantics		CC3PVRShamanShaderSemantics.
+
 
 #pragma mark Semantic enumerations
 
@@ -58,13 +61,13 @@ NSString* NSStringFromCC3PVRShamanSemantic(CC3PVRShamanSemantic semantic);
 
 	
 #pragma mark -
-#pragma mark CC3PVRShamanGLProgramSemantics
+#pragma mark CC3PVRShamanShaderSemantics
 
 /**
- * CC3PVRShamanGLProgramSemantics provides a mapping from the PVRShaman names declared in a PFX
+ * CC3PVRShamanShaderSemantics provides a mapping from the PVRShaman names declared in a PFX
  * effect within a PFX effects file, and the standard semantics from the CC3Semantic enumeration.
  */
-@interface CC3PVRShamanGLProgramSemantics : CC3PFXGLProgramSemantics
+@interface CC3PVRShamanShaderSemantics : CC3PFXShaderSemantics
 
 /**
  * Returns the semantic value corresponding the the specified PFX semantic name, or returns

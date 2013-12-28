@@ -30,7 +30,7 @@
  */
 
 #import "CC3OpenGLFixedPipeline.h"
-#import "CC3ShaderProgramSemantics.h"
+#import "CC3ShaderSemantics.h"
 #import "CC3UtilityMeshNodes.h"
 
 #if !CC3_GLSL

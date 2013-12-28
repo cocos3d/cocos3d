@@ -30,14 +30,14 @@
  */
 
 #import "CC3OpenGLProgPipeline.h"
-#import "CC3ShaderProgramMatcher.h"
+#import "CC3ShaderMatcher.h"
 #import "CC3NodeVisitor.h"
 #import "CC3MeshNode.h"
 
 #if CC3_GLSL
 
 #import "kazmath/GL/matrix.h"	// Only cocos2d 2.x
-#import "CC3ShaderProgram.h"
+#import "CC3Shaders.h"
 
 @interface CC3OpenGL (TemplateMethods)
 -(void) initPlatformLimits;
@@ -176,9 +176,9 @@
 
 #pragma mark Shaders
 
--(CC3ShaderProgramPrewarmer*) shaderProgramPrewarmer { return _shaderProgramPrewarmer; }
+-(CC3ShaderPrewarmer*) shaderProgramPrewarmer { return _shaderProgramPrewarmer; }
 
--(void) setShaderProgramPrewarmer: (CC3ShaderProgramPrewarmer*) shaderProgramPrewarmer {
+-(void) setShaderProgramPrewarmer: (CC3ShaderPrewarmer*) shaderProgramPrewarmer {
 	_shaderProgramPrewarmer = shaderProgramPrewarmer;
 }
 
@@ -386,7 +386,7 @@
 }
 
 -(void) initShaderProgramPrewarmer {
-	self.shaderProgramPrewarmer = [CC3ShaderProgramPrewarmer prewarmerWithName: self.name];
+	self.shaderProgramPrewarmer = [CC3ShaderPrewarmer prewarmerWithName: self.name];
 }
 
 @end

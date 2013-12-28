@@ -1,5 +1,5 @@
 /*
- * CC3ShaderProgramContext.m
+ * CC3ShaderContext.m
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -26,17 +26,17 @@
  *
  * http://en.wikipedia.org/wiki/MIT_License
  * 
- * See header file CC3ShaderProgramContext.h for full API documentation.
+ * See header file CC3ShaderContext.h for full API documentation.
  */
 
-#import "CC3ShaderProgramContext.h"
-#import "CC3ShaderProgramMatcher.h"
+#import "CC3ShaderContext.h"
+#import "CC3ShaderMatcher.h"
 
 
 #pragma mark -
-#pragma mark CC3ShaderProgramContext
+#pragma mark CC3ShaderContext
 
-@implementation CC3ShaderProgramContext
+@implementation CC3ShaderContext
 
 @synthesize shouldEnforceCustomOverrides=_shouldEnforceCustomOverrides;
 @synthesize shouldEnforceVertexAttributes=_shouldEnforceVertexAttributes;
@@ -52,7 +52,7 @@
 
 -(CC3ShaderProgram*) pureColorProgram {
 	if ( !_pureColorProgram )
-		self.pureColorProgram = [CC3ShaderProgram.programMatcher pureColorProgramMatching: self.program];
+		self.pureColorProgram = [CC3ShaderProgram.shaderMatcher pureColorProgramMatching: self.program];
 	return _pureColorProgram;
 }
 

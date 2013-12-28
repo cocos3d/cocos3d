@@ -195,7 +195,7 @@
 	// The node to use as a backdrop for each scene.
 	_backdropTemplate = [CC3ClipSpaceNode nodeWithColor: ccc4f(0.2, 0.24, 0.43, 1.0)];
 	[_backdropTemplate createGLBuffers];
-	[_backdropTemplate selectShaderPrograms];
+	[_backdropTemplate selectShaders];
 	
 	// Make a simple box template available. Only 6 faces per node.
 	mn = [CC3BoxNode nodeWithName: kBoxName];
@@ -252,7 +252,7 @@
  */
 -(void) configureAndAddTemplate: (CC3Node*) templateNode {
 	templateNode.touchEnabled = YES;
-	[templateNode selectShaderPrograms];
+	[templateNode selectShaders];
 	[templateNode createGLBuffers];
 	[templateNode releaseRedundantContent];
 	[_templates addObject: templateNode];

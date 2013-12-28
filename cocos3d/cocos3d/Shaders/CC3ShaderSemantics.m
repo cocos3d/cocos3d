@@ -1,5 +1,5 @@
 /*
- * CC3ShaderProgramSemantics.m
+ * CC3ShaderSemantics.m
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -26,10 +26,10 @@
  *
  * http://en.wikipedia.org/wiki/MIT_License
  * 
- * See header file CC3ShaderProgramSemantics.h for full API documentation.
+ * See header file CC3ShaderSemantics.h for full API documentation.
  */
 
-#import "CC3ShaderProgramSemantics.h"
+#import "CC3ShaderSemantics.h"
 #import "CC3GLSLVariable.h"
 #import "CC3NodeVisitor.h"
 #import "CC3MeshNode.h"
@@ -243,9 +243,9 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 
 
 #pragma mark -
-#pragma mark CC3ShaderProgramSemanticsBase
+#pragma mark CC3ShaderSemanticsBase
 
-@implementation CC3ShaderProgramSemanticsBase
+@implementation CC3ShaderSemanticsBase
 
 +(id) semanticsDelegate { return [[self alloc] init]; }
 
@@ -1127,9 +1127,9 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 
 
 #pragma mark -
-#pragma mark CC3ShaderProgramSemanticsByVarName
+#pragma mark CC3ShaderSemanticsByVarName
 
-@implementation CC3ShaderProgramSemanticsByVarName
+@implementation CC3ShaderSemanticsByVarName
 
 
 #pragma mark Allocation and initialization
@@ -1179,9 +1179,9 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 
 
 #pragma mark -
-#pragma mark CC3ShaderProgramSemanticsByVarName default mappings extension
+#pragma mark CC3ShaderSemanticsByVarName default mappings extension
 
-@implementation CC3ShaderProgramSemanticsByVarName (DefaultMappings)
+@implementation CC3ShaderSemanticsByVarName (DefaultMappings)
 
 -(void) populateWithDefaultVariableNameMappings {
 	

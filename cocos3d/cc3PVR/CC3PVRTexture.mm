@@ -31,7 +31,7 @@
 
 #import "CC3PVRTexture.h"
 #import "CC3PVRTTexture.h"
-#import "CC3ShaderProgramSemantics.h"
+#import "CC3ShaderSemantics.h"
 
 
 #pragma mark -

@@ -36,7 +36,7 @@
 
 #import "CC3CC2Extensions.h"
 #import "CC3GLSLVariable.h"
-#import "CC3ShaderProgramMatcher.h"
+#import "CC3ShaderMatcher.h"
 
 
 @implementation CC3OpenGL
@@ -933,13 +933,13 @@
 
 #pragma mark Shaders
 
--(CC3ShaderProgramPrewarmer*) shaderProgramPrewarmer { return nil; }
+-(CC3ShaderPrewarmer*) shaderProgramPrewarmer { return nil; }
 
--(void) setShaderProgramPrewarmer: (CC3ShaderProgramPrewarmer*) shaderProgramPrewarmer {}
+-(void) setShaderProgramPrewarmer: (CC3ShaderPrewarmer*) shaderProgramPrewarmer {}
 
--(id<CC3ShaderProgramSemanticsDelegate>) semanticDelegate { return nil; }
+-(id<CC3ShaderSemanticsDelegate>) semanticDelegate { return nil; }
 
--(void) setSemanticDelegate: (id<CC3ShaderProgramSemanticsDelegate>) semanticDelegate {}
+-(void) setSemanticDelegate: (id<CC3ShaderSemanticsDelegate>) semanticDelegate {}
 
 -(GLuint) generateShader: (GLenum) shaderType { return 0; }
 

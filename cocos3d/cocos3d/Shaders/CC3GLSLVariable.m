@@ -30,7 +30,7 @@
  */
 
 #import "CC3GLSLVariable.h"
-#import "CC3ShaderProgram.h"
+#import "CC3Shaders.h"
 #import "CC3NodeVisitor.h"
 #import "CC3OpenGLFoundation.h"
 #import "CC3OpenGLUtility.h"

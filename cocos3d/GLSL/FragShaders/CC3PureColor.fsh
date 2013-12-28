@@ -33,7 +33,7 @@
  * This shader is used during node picking and when a node does not have a material.
  *
  * The semantics of the variables in this shader can be mapped using a
- * CC3ShaderProgramSemanticsByVarName instance.
+ * CC3ShaderSemanticsByVarName instance.
  */
 
 #import "CC3DefaultPrecision.fshl"

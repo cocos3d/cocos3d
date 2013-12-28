@@ -34,9 +34,9 @@ extern "C" {
 }
 #import "CC3PFXResource.h"
 #import "CC3PVRTPFXParser.h"
-#import "CC3PVRShamanGLProgramSemantics.h"
+#import "CC3PVRShamanShaderSemantics.h"
 #import "CC3PODResource.h"
-#import "CC3ShaderProgramMatcher.h"
+#import "CC3ShaderMatcher.h"
 
 
 #pragma mark -
@@ -186,7 +186,7 @@ static Class _defaultSemanticDelegateClass = nil;
 
 +(Class) defaultSemanticDelegateClass {
 	if ( !_defaultSemanticDelegateClass)
-		self.defaultSemanticDelegateClass = [CC3PVRShamanGLProgramSemantics class];
+		self.defaultSemanticDelegateClass = [CC3PVRShamanShaderSemantics class];
 	return _defaultSemanticDelegateClass;
 }
 
@@ -315,7 +315,7 @@ static Class _defaultSemanticDelegateClass = nil;
 	CC3FragmentShader* fragShader = [CC3FragmentShader shaderFromPFXShader: pfxFragShader
 															 inPFXResource: pfxRez];
 	
-	CC3PFXGLProgramSemantics* semanticDelegate = [self semanticDelegateFrom: pfxEffect
+	CC3PFXShaderSemantics* semanticDelegate = [self semanticDelegateFrom: pfxEffect
 															  fromPFXParser: pfxParser
 															  inPFXResource: pfxRez];
 
@@ -332,10 +332,10 @@ static Class _defaultSemanticDelegateClass = nil;
 -(Class) shaderProgramClass { return [CC3ShaderProgram class]; }
 
 /** Template method to create, populate, and return the semantic delegate to use in the GL program. */
--(CC3PFXGLProgramSemantics*) semanticDelegateFrom: (SPVRTPFXParserEffect*) pfxEffect
+-(CC3PFXShaderSemantics*) semanticDelegateFrom: (SPVRTPFXParserEffect*) pfxEffect
 									fromPFXParser: (CPVRTPFXParser*) pfxParser
 									inPFXResource: (CC3PFXResource*) pfxRez {
-	CC3PFXGLProgramSemantics* semanticDelegate = [pfxRez.semanticDelegateClass new];
+	CC3PFXShaderSemantics* semanticDelegate = [pfxRez.semanticDelegateClass new];
 	[semanticDelegate populateWithVariableNameMappingsFromPFXEffect: self];
 	return semanticDelegate;
 }
@@ -401,14 +401,14 @@ static Class _defaultSemanticDelegateClass = nil;
 
 
 #pragma mark -
-#pragma mark CC3PFXGLProgramSemantics
+#pragma mark CC3PFXShaderSemantics
 
-@implementation CC3PFXGLProgramSemantics
+@implementation CC3PFXShaderSemantics
 
 /** Overridden to allow default naming semantics to be combined with PFX-defined semantics. */
 -(BOOL) configureVariable: (CC3GLSLVariable*) variable {
 	return ([super configureVariable: variable] ||
-			[CC3ShaderProgram.programMatcher.semanticDelegate configureVariable: variable]);
+			[CC3ShaderProgram.shaderMatcher.semanticDelegate configureVariable: variable]);
 }
 
 -(void) populateWithVariableNameMappingsFromPFXEffect: (CC3PFXEffect*) pfxEffect {

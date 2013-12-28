@@ -781,15 +781,15 @@
 	self.globalLightPosition = CC3Vector4FromLocation(aLocation);
 }
 
--(CC3ShaderProgramContext*) shaderContext {
+-(CC3ShaderContext*) shaderContext {
 	for (CC3Node* child in _children) {
-		CC3ShaderProgramContext* shaderContext = child.shaderContext;
+		CC3ShaderContext* shaderContext = child.shaderContext;
 		if (shaderContext) return shaderContext;
 	}
 	return nil;
 }
 
--(void) setShaderContext: (CC3ShaderProgramContext*) shaderContext {
+-(void) setShaderContext: (CC3ShaderContext*) shaderContext {
 	for (CC3Node* child in _children) child.shaderContext = shaderContext;
 }
 
@@ -805,9 +805,13 @@
 	for (CC3Node* child in _children) child.shaderProgram = shaderProgram;
 }
 
--(void) selectShaderPrograms { for (CC3Node* child in _children) [child selectShaderPrograms]; }
+-(void) selectShaders { for (CC3Node* child in _children) [child selectShaders]; }
 
--(void) clearShaderPrograms { for (CC3Node* child in _children) [child clearShaderPrograms]; }
+-(void) removeShaders { for (CC3Node* child in _children) [child removeShaders]; }
+
+// Deprecated
+-(void) selectShaderPrograms { [self selectShaders]; }
+-(void) clearShaderPrograms { [self removeShaders]; }
 
 
 #pragma mark CCRGBAProtocol and CCBlendProtocol support

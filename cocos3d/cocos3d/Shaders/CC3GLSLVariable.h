@@ -877,7 +877,7 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope);
 #pragma mark CC3GLSLUniformOverride
 
 /**
- * Instances of this class are held in the CC3ShaderProgramContext to allow the value of a uniform
+ * Instances of this class are held in the CC3ShaderContext to allow the value of a uniform
  * to be set directly by the application, on a node-by-node basis, to override the value retrieved
  * automatically from the scene via the semantic context of the uniform variable.
  *

@@ -32,7 +32,7 @@
 #import "CC3Texture.h"
 #import "CC3PVRTexture.h"
 #import "CC3CC2Extensions.h"
-#import "CC3ShaderProgramSemantics.h"
+#import "CC3ShaderSemantics.h"
 
 
 #pragma mark -

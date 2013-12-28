@@ -38,7 +38,7 @@
  *   - CC3PointSprites.vsh
  *
  * The semantics of the variables in this shader can be mapped using a
- * CC3ShaderProgramSemanticsByVarName instance.
+ * CC3ShaderSemanticsByVarName instance.
  */
 
 #import "CC3DefaultPrecision.fshl"

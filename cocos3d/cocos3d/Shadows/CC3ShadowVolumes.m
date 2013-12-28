@@ -1021,7 +1021,7 @@
 	
 	NSString* svName = [NSString stringWithFormat: @"%@-SV-%@", self.name, aLight.name];
 	CC3Node<CC3ShadowProtocol>* sv = [[self shadowVolumeClass] nodeWithName: svName];
-	[sv selectShaderPrograms];
+	[sv selectShaders];
 //	sv.visible = YES;		// Uncomment to show the shadow volume itself !
 	
 	// Retain data required to build shadow volume mesh

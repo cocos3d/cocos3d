@@ -263,7 +263,7 @@
 	aNode = [aNode copy];
 	aNode.name = @"Vertex-skinned, bump-mapped mesh with rigidly-animated bones.";
 	aNode.hasRigidSkeleton = YES;
-	[aNode clearShaderPrograms];	// Clear shaders to reselect rigid bone shaders
+	[aNode removeShaders];	// Clear shaders to reselect rigid bone shaders
 	[self configureAndAddTemplate: aNode];
 	
 	// Start with one copy of the first available template node.
@@ -277,7 +277,7 @@
  * and add it to the list of templates.
  */
 -(void) configureAndAddTemplate: (CC3Node*) templateNode {
-	[templateNode selectShaderPrograms];
+	[templateNode selectShaders];
 	[templateNode createGLBuffers];
 	[templateNode releaseRedundantContent];
 	[_availableTemplateNodes addObject: templateNode];

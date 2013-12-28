@@ -1,5 +1,5 @@
 /*
- * CC3ShaderProgram.m
+ * CC3Shaders.m
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -26,16 +26,313 @@
  *
  * http://en.wikipedia.org/wiki/MIT_License
  * 
- * See header file CC3ShaderProgram.h for full API documentation.
+ * See header file CC3Shaders.h for full API documentation.
  */
 
-#import "CC3ShaderProgram.h"
-#import "CC3ShaderProgramContext.h"
-#import "CC3ShaderProgramMatcher.h"
+#import "CC3Shaders.h"
+#import "CC3ShaderContext.h"
+#import "CC3ShaderMatcher.h"
 #import "CC3NodeVisitor.h"
 #import "CC3Material.h"
 #import "CC3RenderSurfaces.h"
 #import "CC3ParametricMeshNodes.h"
+
+
+#pragma mark -
+#pragma mark CC3Shader
+
+@implementation CC3Shader
+
+@synthesize shaderPreamble=_shaderPreamble;
+@synthesize wasLoadedFromFile=_wasLoadedFromFile;
+
+-(void) dealloc {
+	[self remove];		// remove this instance from the cache
+	[self deleteGLShader];
+}
+
+-(GLuint) shaderID {
+	if ( !_shaderID ) _shaderID = [CC3OpenGL.sharedGL generateShader: self.shaderType];
+	return _shaderID;
+}
+
+-(void) deleteGLShader {
+	[CC3OpenGL.sharedGL deleteShader: _shaderID];
+	_shaderID = 0;
+}
+
+-(GLenum) shaderType {
+	CC3AssertUnimplemented(@"shaderType");
+	return GL_ZERO;
+}
+
+-(NSString*) shaderPreambleString { return self.shaderPreamble.sourceCodeString; }
+
+-(void) setShaderPreambleString: (NSString*) shaderPreambleString {
+	NSString* preambleName = [NSString stringWithFormat: @"%@-Preamble", self.name];
+	_shaderPreamble = [CC3ShaderSourceCode shaderSourceCodeWithName: preambleName
+												 fromSourceCodeString: shaderPreambleString];
+}
+
+-(NSString*) defaultShaderPreambleString { return CC3OpenGL.sharedGL.defaultShaderPreamble; }
+
+static CC3ShaderSourceCode* _defaultShaderPreamble = nil;
+
+-(CC3ShaderSourceCode*) defaultShaderPreamble {
+	if ( !_defaultShaderPreamble ) {
+		_defaultShaderPreamble = [CC3ShaderSourceCode shaderSourceCodeWithName: @"DefaultShaderPreamble"
+														  fromSourceCodeString: self.defaultShaderPreambleString];
+	}
+	return _defaultShaderPreamble;
+}
+
+
+#pragma mark Compiling
+
+-(void) compileFromSourceCode: (CC3ShaderSourceCode*) shSrcCode {
+	CC3Assert(shSrcCode, @"%@ cannot complile NULL GLSL source.", self);
+	
+	MarkRezActivityStart();
+	
+	_wasLoadedFromFile = shSrcCode.wasLoadedFromFile;
+	
+	// Use a visitor to extract an array of source code strings from the preamble and specified source code
+	CC3ShaderSourceCodeSegmentAccumulatingVisitor* visitor = [CC3ShaderSourceCodeSegmentAccumulatingVisitor visitor];
+	[visitor visit: _shaderPreamble];
+	[visitor visit: shSrcCode];
+
+	// Submit the source code strings to the compiler
+	GLuint scCnt = visitor.sourceCodeSegmentCount;
+	const GLchar* scStrings[scCnt];
+	[visitor populateSourceCodeStrings: scStrings];
+	[CC3OpenGL.sharedGL compileShader: self.shaderID from: scCnt sourceCodeStrings: scStrings];
+	
+	CC3Assert([CC3OpenGL.sharedGL getShaderWasCompiled: self.shaderID],
+			  @"%@ failed to compile because:\n%@", self,
+			  [self localizeCompileErrors: [CC3OpenGL.sharedGL getLogForShader: self.shaderID]
+						 fromShaderSource: shSrcCode]);
+	
+#if LOGGING_REZLOAD
+	NSString* compLog = [CC3OpenGL.sharedGL getLogForShader: self.shaderID];
+	LogRez(@"Compiled %@ in %.3f ms%@", self, GetRezActivityDuration() * 1000,
+		   (compLog ? [NSString stringWithFormat: @" with the following warnings:\n%@", compLog] : @""));
+#endif	// LOGGING_REZLOAD
+	
+}
+
+-(void) compileFromSourceCodeString: (NSString*) glslSource {
+	[self compileFromSourceCode: [CC3ShaderSourceCode shaderSourceCodeWithName: self.name
+														  fromSourceCodeString: glslSource]];
+}
+
+/**
+ * Inserts a reference to the original source file and line number for each compile error found
+ * in the specified error text.
+ *
+ * The compiler concatenates all of the shader source code into one long string when referencing line
+ * numbers. However, the source code can originate from multiple imported source files. This method 
+ * extracts the line number referenced in the shader compiler error log, determines which original
+ * source file that line number refereneces, inserts the name of that source file and the corresponding
+ * line number within that source file into the error text, and returns the modified error text.
+ */
+-(NSString*) localizeCompileErrors: (NSString*) logTxt fromShaderSource: (CC3ShaderSourceCode*) shSrcCode {
+
+	// Platform-dependent content
+	NSString* fieldSeparatorStr = @":";
+	NSString* errIndicatorStr = @"ERROR";
+	NSUInteger errIndicatorFieldIdx = 0;
+	NSUInteger lineNumFieldIdx = 2;
+
+	// Create a new log string to contain the localized error text
+	NSMutableString* localizedLogTxt = [NSMutableString stringWithCapacity: logTxt.length + 100];
+
+	// Proceed line by line
+	[logTxt enumerateLinesUsingBlock: ^(NSString* line, BOOL* lineStop) {
+		BOOL __block isErrLine = NO;
+		
+		// Separate the line into fields
+		[[line componentsSeparatedByString: fieldSeparatorStr] enumerateObjectsUsingBlock: ^(NSString* field, NSUInteger fieldIdx, BOOL* segStop) {
+
+			// Write the existing field out to the new log entry
+			[localizedLogTxt appendString: field];
+
+			// If the first field contains the error indicator, this line is a compile error
+			if (fieldIdx == errIndicatorFieldIdx &&
+				([field rangeOfString: errIndicatorStr
+							  options: NSCaseInsensitiveSearch].location != NSNotFound) )
+				isErrLine = YES;
+
+			// If this line does contain an error, extract the global line number from the
+			// third field, and localize it, first to the preamble, and then to the specified
+			// shader source, and write the localized line number to the new log entry.
+			if (isErrLine && fieldIdx == lineNumFieldIdx) {
+				CC3ShaderSourceCodeLineNumberLocalizingVisitor* visitor;
+				visitor = [CC3ShaderSourceCodeLineNumberLocalizingVisitor lineNumberWithLineNumber: [field intValue]];
+				if ([visitor visit: _shaderPreamble] || [visitor visit: shSrcCode])
+					[localizedLogTxt appendFormat: @"(%@)", visitor.description];
+			}
+
+			// Write the log field separator at the end of each field
+			[localizedLogTxt appendString: fieldSeparatorStr];
+		}];
+		
+		// Strip the last field separator and append a newline
+		NSUInteger fieldSepLen = fieldSeparatorStr.length;
+		[localizedLogTxt deleteCharactersInRange: NSMakeRange(localizedLogTxt.length - fieldSepLen, fieldSepLen)];
+		[localizedLogTxt appendString: @"\n"];
+	}];
+	
+	return localizedLogTxt;
+}
+
+
+#pragma mark Allocation and initialization
+
+-(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
+	CC3Assert(aName, @"%@ cannot be created without a name", [self class]);
+	if ( (self = [super initWithTag: aTag withName: aName]) ) {
+		_shaderID = 0;
+		_wasLoadedFromFile = NO;
+		self.shaderPreamble = self.defaultShaderPreamble;
+	}
+	return self;
+}
+
+-(id) initFromSourceCode: (CC3ShaderSourceCode*) shSrcCode {
+	if ( (self = [self initWithName: shSrcCode.name]) ) {
+		[self compileFromSourceCode: shSrcCode];
+	}
+	return self;
+}
+
++(id) shaderFromSourceCode: (CC3ShaderSourceCode*) shSrcCode {
+	id shader = [self getShaderNamed: shSrcCode.name];
+	if (shader) return shader;
+	
+	shader = [[self alloc] initFromSourceCode: shSrcCode];
+	[self addShader: shader];
+	return shader;
+}
+
+-(id) initWithName: (NSString*) name fromSourceCode: (NSString*) glslSource {
+	return [self initFromSourceCode: [CC3ShaderSourceCode shaderSourceCodeWithName: name
+															  fromSourceCodeString: glslSource]];
+}
+
+// We don't delegate to shaderFromShaderSource: by retrieving the shader source, because the
+// shader source may have been dropped from its cache, even though the shader is still in its
+// cache. The result would be to constantly create and cache the shader source unnecessarily.
++(id) shaderWithName: (NSString*) name fromSourceCode: (NSString*) srcCodeString {
+	id shader = [self getShaderNamed: name];
+	if (shader) return shader;
+	
+	shader = [[self alloc] initWithName: name fromSourceCode: srcCodeString];
+	[self addShader: shader];
+	return shader;
+}
+
+-(id) initFromSourceCodeFile: (NSString*) aFilePath {
+	return [self initFromSourceCode: [CC3ShaderSourceCode shaderSourceCodeFromFile: aFilePath]];
+}
+
+// We don't delegate to shaderFromShaderSource: by retrieving the shader source, because the
+// shader source may have been dropped from its cache, even though the shader is still in its
+// cache. The result would be to constantly create and cache the shader source unnecessarily.
++(id) shaderFromSourceCodeFile: (NSString*) aFilePath {
+	id shader = [self getShaderNamed: [CC3ShaderSourceCode shaderSourceCodeNameFromFilePath: aFilePath]];
+	if (shader) return shader;
+	
+	shader = [[self alloc] initFromSourceCodeFile: aFilePath];
+	[self addShader: shader];
+	return shader;
+}
+
+// Deprecated
++(NSString*) shaderNameFromFilePath: (NSString*) aFilePath {
+	return [CC3ShaderSourceCode shaderSourceCodeNameFromFilePath: aFilePath];
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ (ID: %u)", [super description], _shaderID];
+}
+
+-(NSString*) constructorDescription {
+	return [NSString stringWithFormat: @"[%@ shaderFromSourceCodeFile: @\"%@\"];", [self class], self.name];
+}
+
+
+#pragma mark Tag allocation
+
+static GLuint _lastAssignedShaderTag = 0;
+
+-(GLuint) nextTag { return ++_lastAssignedShaderTag; }
+
++(void) resetTagAllocation { _lastAssignedShaderTag = 0; }
+
+
+#pragma mark Shader cache
+
+-(void) remove { [self.class removeShader: self]; }
+
+static CC3Cache* _shaderCache = nil;
+
++(void) ensureCache {
+	if ( !_shaderCache ) _shaderCache = [CC3Cache weakCacheForType: @"shader"];
+}
+
++(void) addShader: (CC3Shader*) shader {
+	[self ensureCache];
+	[_shaderCache addObject: shader];
+}
+
++(CC3Shader*) getShaderNamed: (NSString*) name {
+	return (CC3Shader*)[_shaderCache getObjectNamed: name];
+}
+
++(void) removeShader: (CC3Shader*) shader { [_shaderCache removeObject: shader]; }
+
++(void) removeShaderNamed: (NSString*) name { [_shaderCache removeObjectNamed: name]; }
+
++(void) removeAllShaders { [_shaderCache removeAllObjectsOfType: self];}
+
++(BOOL) isPreloading { return _shaderCache ? !_shaderCache.isWeak : NO; }
+
++(void) setIsPreloading: (BOOL) isPreloading {
+	[self ensureCache];
+	_shaderCache.isWeak = !isPreloading;
+}
+
++(NSString*) loadedShadersDescription {
+	NSMutableString* desc = [NSMutableString stringWithCapacity: 500];
+	NSArray* sortedCache = [_shaderCache objectsSortedByName];
+	for (CC3Shader* shdr in sortedCache) {
+		if ( [shdr isKindOfClass: self] && shdr.wasLoadedFromFile )
+			[desc appendFormat: @"\n\t%@", shdr.constructorDescription];
+	}
+	return desc;
+}
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3VertexShader
+
+@implementation CC3VertexShader
+
+-(GLenum) shaderType { return GL_VERTEX_SHADER; }
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3FragmentShader
+
+@implementation CC3FragmentShader
+
+-(GLenum) shaderType { return GL_FRAGMENT_SHADER; }
+
+@end
 
 
 #pragma mark -
@@ -334,7 +631,7 @@
 }
 
 -(void) populateUniforms: (NSArray*) uniforms withVisitor: (CC3NodeDrawingVisitor*) visitor {
-	CC3ShaderProgramContext* progCtx = visitor.currentMeshNode.shaderContext;
+	CC3ShaderContext* progCtx = visitor.currentMeshNode.shaderContext;
 	for (CC3GLSLUniform* var in uniforms) {
 		if ([progCtx populateUniform: var withVisitor: visitor] ||
 			[_semanticDelegate populateUniform: var withVisitor: visitor]) {
@@ -370,33 +667,33 @@
 
 -(id) initWithVertexShader: (CC3VertexShader*) vertexShader
 		 andFragmentShader: (CC3FragmentShader*) fragmentShader {
-	return [self initWithSemanticDelegate: self.class.programMatcher.semanticDelegate
+	return [self initWithSemanticDelegate: self.class.shaderMatcher.semanticDelegate
 						 withVertexShader: vertexShader
 						andFragmentShader: fragmentShader];
 }
 
 +(id) programWithVertexShader: (CC3VertexShader*) vertexShader
 			andFragmentShader: (CC3FragmentShader*) fragmentShader {
-	return [self programWithSemanticDelegate: self.programMatcher.semanticDelegate
+	return [self programWithSemanticDelegate: self.shaderMatcher.semanticDelegate
 							withVertexShader: vertexShader
 						   andFragmentShader: fragmentShader];
 }
 
 -(id) initFromVertexShaderFile: (NSString*) vshFilePath
 		 andFragmentShaderFile: (NSString*) fshFilePath {
-	return [self initWithSemanticDelegate: self.class.programMatcher.semanticDelegate
+	return [self initWithSemanticDelegate: self.class.shaderMatcher.semanticDelegate
 					 fromVertexShaderFile: vshFilePath
 					andFragmentShaderFile: fshFilePath];
 }
 
 +(id) programFromVertexShaderFile: (NSString*) vshFilePath
 			andFragmentShaderFile: (NSString*) fshFilePath {
-	return [self programWithSemanticDelegate: self.programMatcher.semanticDelegate
+	return [self programWithSemanticDelegate: self.shaderMatcher.semanticDelegate
 						fromVertexShaderFile: vshFilePath
 					   andFragmentShaderFile: fshFilePath];
 }
 
--(id) initWithSemanticDelegate: (id<CC3ShaderProgramSemanticsDelegate>) semanticDelegate
+-(id) initWithSemanticDelegate: (id<CC3ShaderSemanticsDelegate>) semanticDelegate
 			  withVertexShader: (CC3VertexShader*) vertexShader
 			 andFragmentShader: (CC3FragmentShader*) fragmentShader {
 	NSString* progName = [self.class programNameFromVertexShaderName: vertexShader.name
@@ -411,7 +708,7 @@
 	return self;
 }
 
-+(id) programWithSemanticDelegate: (id<CC3ShaderProgramSemanticsDelegate>) semanticDelegate
++(id) programWithSemanticDelegate: (id<CC3ShaderSemanticsDelegate>) semanticDelegate
 				 withVertexShader: (CC3VertexShader*) vertexShader
 				andFragmentShader: (CC3FragmentShader*) fragmentShader {
 	NSString* progName = [self programNameFromVertexShaderName: vertexShader.name
@@ -426,7 +723,7 @@
 	return program;
 }
 
--(id) initWithSemanticDelegate: (id<CC3ShaderProgramSemanticsDelegate>) semanticDelegate
+-(id) initWithSemanticDelegate: (id<CC3ShaderSemanticsDelegate>) semanticDelegate
 		  fromVertexShaderFile: (NSString*) vshFilePath
 		 andFragmentShaderFile: (NSString*) fshFilePath {
 	return [self initWithSemanticDelegate: semanticDelegate
@@ -434,7 +731,7 @@
 						andFragmentShader: [CC3FragmentShader shaderFromSourceCodeFile: fshFilePath]];
 }
 
-+(id) programWithSemanticDelegate: (id<CC3ShaderProgramSemanticsDelegate>) semanticDelegate
++(id) programWithSemanticDelegate: (id<CC3ShaderSemanticsDelegate>) semanticDelegate
 			 fromVertexShaderFile: (NSString*) vshFilePath
 			andFragmentShaderFile: (NSString*) fshFilePath {
 	return [self programWithSemanticDelegate: semanticDelegate
@@ -499,7 +796,7 @@ static CC3Cache* _programCache = nil;
 	
 	// If appropriate, ensure that a matching pure-color program is added as well.
 	if (self.isPreloading && self.shouldAutomaticallyPreloadMatchingPureColorPrograms)
-		[self.programMatcher pureColorProgramMatching: program];
+		[self.shaderMatcher pureColorProgramMatching: program];
 }
 
 +(CC3ShaderProgram*) getProgramNamed: (NSString*) name {
@@ -546,313 +843,18 @@ static BOOL _shouldAutomaticallyPreloadMatchingPureColorPrograms = YES;
 
 #pragma mark Program matching
 
-static id<CC3ShaderProgramMatcher> _programMatcher = nil;
+static id<CC3ShaderMatcher> _programMatcher = nil;
 
-+(id<CC3ShaderProgramMatcher>) programMatcher {
-	if ( !_programMatcher ) _programMatcher = [CC3ShaderProgramMatcherBase new];
++(id<CC3ShaderMatcher>) shaderMatcher {
+	if ( !_programMatcher ) _programMatcher = [CC3ShaderMatcherBase new];
 	return _programMatcher;
 }
 
-+(void) setProgramMatcher: (id<CC3ShaderProgramMatcher>) programMatcher {
-	_programMatcher = programMatcher;
-}
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3Shader
-
-@implementation CC3Shader
-
-@synthesize shaderPreamble=_shaderPreamble;
-@synthesize wasLoadedFromFile=_wasLoadedFromFile;
-
--(void) dealloc {
-	[self remove];		// remove this instance from the cache
-	[self deleteGLShader];
-}
-
--(GLuint) shaderID {
-	if ( !_shaderID ) _shaderID = [CC3OpenGL.sharedGL generateShader: self.shaderType];
-	return _shaderID;
-}
-
--(void) deleteGLShader {
-	[CC3OpenGL.sharedGL deleteShader: _shaderID];
-	_shaderID = 0;
-}
-
--(GLenum) shaderType {
-	CC3AssertUnimplemented(@"shaderType");
-	return GL_ZERO;
-}
-
--(NSString*) shaderPreambleString { return self.shaderPreamble.sourceCodeString; }
-
--(void) setShaderPreambleString: (NSString*) shaderPreambleString {
-	NSString* preambleName = [NSString stringWithFormat: @"%@-Preamble", self.name];
-	_shaderPreamble = [CC3ShaderSourceCode shaderSourceCodeWithName: preambleName
-												 fromSourceCodeString: shaderPreambleString];
-}
-
--(NSString*) defaultShaderPreambleString { return CC3OpenGL.sharedGL.defaultShaderPreamble; }
-
-static CC3ShaderSourceCode* _defaultShaderPreamble = nil;
-
--(CC3ShaderSourceCode*) defaultShaderPreamble {
-	if ( !_defaultShaderPreamble ) {
-		_defaultShaderPreamble = [CC3ShaderSourceCode shaderSourceCodeWithName: @"DefaultShaderPreamble"
-														  fromSourceCodeString: self.defaultShaderPreambleString];
-	}
-	return _defaultShaderPreamble;
-}
-
-
-#pragma mark Compiling
-
--(void) compileFromSourceCode: (CC3ShaderSourceCode*) shSrcCode {
-	CC3Assert(shSrcCode, @"%@ cannot complile NULL GLSL source.", self);
-	
-	MarkRezActivityStart();
-	
-	_wasLoadedFromFile = shSrcCode.wasLoadedFromFile;
-	
-	// Use a visitor to extract an array of source code strings from the preamble and specified source code
-	CC3ShaderSourceCodeSegmentAccumulatingVisitor* visitor = [CC3ShaderSourceCodeSegmentAccumulatingVisitor visitor];
-	[visitor visit: _shaderPreamble];
-	[visitor visit: shSrcCode];
-
-	// Submit the source code strings to the compiler
-	GLuint scCnt = visitor.sourceCodeSegmentCount;
-	const GLchar* scStrings[scCnt];
-	[visitor populateSourceCodeStrings: scStrings];
-	[CC3OpenGL.sharedGL compileShader: self.shaderID from: scCnt sourceCodeStrings: scStrings];
-	
-	CC3Assert([CC3OpenGL.sharedGL getShaderWasCompiled: self.shaderID],
-			  @"%@ failed to compile because:\n%@", self,
-			  [self localizeCompileErrors: [CC3OpenGL.sharedGL getLogForShader: self.shaderID]
-						 fromShaderSource: shSrcCode]);
-	
-#if LOGGING_REZLOAD
-	NSString* compLog = [CC3OpenGL.sharedGL getLogForShader: self.shaderID];
-	LogRez(@"Compiled %@ in %.3f ms%@", self, GetRezActivityDuration() * 1000,
-		   (compLog ? [NSString stringWithFormat: @" with the following warnings:\n%@", compLog] : @""));
-#endif	// LOGGING_REZLOAD
-	
-}
-
--(void) compileFromSourceCodeString: (NSString*) glslSource {
-	[self compileFromSourceCode: [CC3ShaderSourceCode shaderSourceCodeWithName: self.name
-														  fromSourceCodeString: glslSource]];
-}
-
-/**
- * Inserts a reference to the original source file and line number for each compile error found
- * in the specified error text.
- *
- * The compiler concatenates all of the shader source code into one long string when referencing line
- * numbers. However, the source code can originate from multiple imported source files. This method 
- * extracts the line number referenced in the shader compiler error log, determines which original
- * source file that line number refereneces, inserts the name of that source file and the corresponding
- * line number within that source file into the error text, and returns the modified error text.
- */
--(NSString*) localizeCompileErrors: (NSString*) logTxt fromShaderSource: (CC3ShaderSourceCode*) shSrcCode {
-
-	// Platform-dependent content
-	NSString* fieldSeparatorStr = @":";
-	NSString* errIndicatorStr = @"ERROR";
-	NSUInteger errIndicatorFieldIdx = 0;
-	NSUInteger lineNumFieldIdx = 2;
-
-	// Create a new log string to contain the localized error text
-	NSMutableString* localizedLogTxt = [NSMutableString stringWithCapacity: logTxt.length + 100];
-
-	// Proceed line by line
-	[logTxt enumerateLinesUsingBlock: ^(NSString* line, BOOL* lineStop) {
-		BOOL __block isErrLine = NO;
-		
-		// Separate the line into fields
-		[[line componentsSeparatedByString: fieldSeparatorStr] enumerateObjectsUsingBlock: ^(NSString* field, NSUInteger fieldIdx, BOOL* segStop) {
-
-			// Write the existing field out to the new log entry
-			[localizedLogTxt appendString: field];
-
-			// If the first field contains the error indicator, this line is a compile error
-			if (fieldIdx == errIndicatorFieldIdx &&
-				([field rangeOfString: errIndicatorStr
-							  options: NSCaseInsensitiveSearch].location != NSNotFound) )
-				isErrLine = YES;
-
-			// If this line does contain an error, extract the global line number from the
-			// third field, and localize it, first to the preamble, and then to the specified
-			// shader source, and write the localized line number to the new log entry.
-			if (isErrLine && fieldIdx == lineNumFieldIdx) {
-				CC3ShaderSourceCodeLineNumberLocalizingVisitor* visitor;
-				visitor = [CC3ShaderSourceCodeLineNumberLocalizingVisitor lineNumberWithLineNumber: [field intValue]];
-				if ([visitor visit: _shaderPreamble] || [visitor visit: shSrcCode])
-					[localizedLogTxt appendFormat: @"(%@)", visitor.description];
-			}
-
-			// Write the log field separator at the end of each field
-			[localizedLogTxt appendString: fieldSeparatorStr];
-		}];
-		
-		// Strip the last field separator and append a newline
-		NSUInteger fieldSepLen = fieldSeparatorStr.length;
-		[localizedLogTxt deleteCharactersInRange: NSMakeRange(localizedLogTxt.length - fieldSepLen, fieldSepLen)];
-		[localizedLogTxt appendString: @"\n"];
-	}];
-	
-	return localizedLogTxt;
-}
-
-
-#pragma mark Allocation and initialization
-
--(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
-	CC3Assert(aName, @"%@ cannot be created without a name", [self class]);
-	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		_shaderID = 0;
-		_wasLoadedFromFile = NO;
-		self.shaderPreamble = self.defaultShaderPreamble;
-	}
-	return self;
-}
-
--(id) initFromSourceCode: (CC3ShaderSourceCode*) shSrcCode {
-	if ( (self = [self initWithName: shSrcCode.name]) ) {
-		[self compileFromSourceCode: shSrcCode];
-	}
-	return self;
-}
-
-+(id) shaderFromSourceCode: (CC3ShaderSourceCode*) shSrcCode {
-	id shader = [self getShaderNamed: shSrcCode.name];
-	if (shader) return shader;
-	
-	shader = [[self alloc] initFromSourceCode: shSrcCode];
-	[self addShader: shader];
-	return shader;
-}
-
--(id) initWithName: (NSString*) name fromSourceCode: (NSString*) glslSource {
-	return [self initFromSourceCode: [CC3ShaderSourceCode shaderSourceCodeWithName: name
-															  fromSourceCodeString: glslSource]];
-}
-
-// We don't delegate to shaderFromShaderSource: by retrieving the shader source, because the
-// shader source may have been dropped from its cache, even though the shader is still in its
-// cache. The result would be to constantly create and cache the shader source unnecessarily.
-+(id) shaderWithName: (NSString*) name fromSourceCode: (NSString*) srcCodeString {
-	id shader = [self getShaderNamed: name];
-	if (shader) return shader;
-	
-	shader = [[self alloc] initWithName: name fromSourceCode: srcCodeString];
-	[self addShader: shader];
-	return shader;
-}
-
--(id) initFromSourceCodeFile: (NSString*) aFilePath {
-	return [self initFromSourceCode: [CC3ShaderSourceCode shaderSourceCodeFromFile: aFilePath]];
-}
-
-// We don't delegate to shaderFromShaderSource: by retrieving the shader source, because the
-// shader source may have been dropped from its cache, even though the shader is still in its
-// cache. The result would be to constantly create and cache the shader source unnecessarily.
-+(id) shaderFromSourceCodeFile: (NSString*) aFilePath {
-	id shader = [self getShaderNamed: [CC3ShaderSourceCode shaderSourceCodeNameFromFilePath: aFilePath]];
-	if (shader) return shader;
-	
-	shader = [[self alloc] initFromSourceCodeFile: aFilePath];
-	[self addShader: shader];
-	return shader;
-}
++(void) setShaderMatcher: (id<CC3ShaderMatcher>) shaderMatcher { _programMatcher = shaderMatcher; }
 
 // Deprecated
-+(NSString*) shaderNameFromFilePath: (NSString*) aFilePath {
-	return [CC3ShaderSourceCode shaderSourceCodeNameFromFilePath: aFilePath];
-}
-
--(NSString*) description {
-	return [NSString stringWithFormat: @"%@ (ID: %u)", [super description], _shaderID];
-}
-
--(NSString*) constructorDescription {
-	return [NSString stringWithFormat: @"[%@ shaderFromSourceCodeFile: @\"%@\"];", [self class], self.name];
-}
-
-
-#pragma mark Tag allocation
-
-static GLuint _lastAssignedShaderTag = 0;
-
--(GLuint) nextTag { return ++_lastAssignedShaderTag; }
-
-+(void) resetTagAllocation { _lastAssignedShaderTag = 0; }
-
-
-#pragma mark Shader cache
-
--(void) remove { [self.class removeShader: self]; }
-
-static CC3Cache* _shaderCache = nil;
-
-+(void) ensureCache {
-	if ( !_shaderCache ) _shaderCache = [CC3Cache weakCacheForType: @"shader"];
-}
-
-+(void) addShader: (CC3Shader*) shader {
-	[self ensureCache];
-	[_shaderCache addObject: shader];
-}
-
-+(CC3Shader*) getShaderNamed: (NSString*) name {
-	return (CC3Shader*)[_shaderCache getObjectNamed: name];
-}
-
-+(void) removeShader: (CC3Shader*) shader { [_shaderCache removeObject: shader]; }
-
-+(void) removeShaderNamed: (NSString*) name { [_shaderCache removeObjectNamed: name]; }
-
-+(void) removeAllShaders { [_shaderCache removeAllObjectsOfType: self];}
-
-+(BOOL) isPreloading { return _shaderCache ? !_shaderCache.isWeak : NO; }
-
-+(void) setIsPreloading: (BOOL) isPreloading {
-	[self ensureCache];
-	_shaderCache.isWeak = !isPreloading;
-}
-
-+(NSString*) loadedShadersDescription {
-	NSMutableString* desc = [NSMutableString stringWithCapacity: 500];
-	NSArray* sortedCache = [_shaderCache objectsSortedByName];
-	for (CC3Shader* shdr in sortedCache) {
-		if ( [shdr isKindOfClass: self] && shdr.wasLoadedFromFile )
-			[desc appendFormat: @"\n\t%@", shdr.constructorDescription];
-	}
-	return desc;
-}
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3VertexShader
-
-@implementation CC3VertexShader
-
--(GLenum) shaderType { return GL_VERTEX_SHADER; }
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3FragmentShader
-
-@implementation CC3FragmentShader
-
--(GLenum) shaderType { return GL_FRAGMENT_SHADER; }
++(id<CC3ShaderMatcher>) programMatcher { return [self shaderMatcher]; }
++(void) setProgramMatcher: (id<CC3ShaderMatcher>) programMatcher { [self setShaderMatcher: programMatcher]; }
 
 @end
 
@@ -1308,9 +1310,9 @@ static CC3Cache* _shaderSourceCodeCache = nil;
 
 
 #pragma mark -
-#pragma mark CC3ShaderProgramPrewarmer
+#pragma mark CC3ShaderPrewarmer
 
-@implementation CC3ShaderProgramPrewarmer
+@implementation CC3ShaderPrewarmer
 
 @synthesize prewarmingSurface=_prewarmingSurface;
 @synthesize prewarmingMeshNode=_prewarmingMeshNode;

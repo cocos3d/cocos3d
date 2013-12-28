@@ -26,17 +26,17 @@
  *
  * http://en.wikipedia.org/wiki/MIT_License
  * 
- * See header file CC3ShaderProgramMatcher.h for full API documentation.
+ * See header file CC3ShaderMatcher.h for full API documentation.
  */
 
-#import "CC3ShaderProgramMatcher.h"
+#import "CC3ShaderMatcher.h"
 #import "CC3VertexSkinning.h"
 
 
 #pragma mark -
-#pragma mark CC3ShaderProgramMatcherBase
+#pragma mark CC3ShaderMatcherBase
 
-@implementation CC3ShaderProgramMatcherBase
+@implementation CC3ShaderMatcherBase
 
 @synthesize semanticDelegate=_semanticDelegate;
 
@@ -111,7 +111,7 @@
 }
 
 -(void) initSemanticDelegate {
-	CC3ShaderProgramSemanticsByVarName* sd = [CC3ShaderProgramSemanticsByVarName new];
+	CC3ShaderSemanticsByVarName* sd = [CC3ShaderSemanticsByVarName new];
 	[sd populateWithDefaultVariableNameMappings];
 	_semanticDelegate = sd;
 }

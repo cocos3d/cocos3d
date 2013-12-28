@@ -30,7 +30,7 @@
  */
 
 #import "CC3OpenGL2.h"
-#import "CC3ShaderProgram.h"
+#import "CC3Shaders.h"
 #import "CC3NodeVisitor.h"
 #import "CC3Mesh.h"
 

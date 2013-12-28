@@ -1,5 +1,5 @@
 /*
- * CC3ShaderProgramSemantics.h
+ * CC3ShaderSemantics.h
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -32,9 +32,12 @@
 #import "CC3OpenGLFoundation.h"
 
 // Legacy naming support
-#define CC3GLProgramSemanticsDelegate	CC3ShaderProgramSemanticsDelegate
-#define CC3GLProgramSemanticsBase		CC3ShaderProgramSemanticsBase
-#define CC3GLProgramSemanticsByVarName	CC3ShaderProgramSemanticsByVarName
+#define CC3GLProgramSemanticsDelegate			CC3ShaderSemanticsDelegate
+#define CC3ShaderProgramSemanticsDelegate		CC3ShaderSemanticsDelegate
+#define CC3GLProgramSemanticsBase				CC3ShaderSemanticsBase
+#define CC3ShaderProgramSemanticsBase			CC3ShaderSemanticsBase
+#define CC3GLProgramSemanticsByVarName			CC3ShaderSemanticsByVarName
+#define CC3ShaderProgramSemanticsByVarName		CC3ShaderSemanticsByVarName
 
 @class CC3GLSLVariable, CC3GLSLUniform, CC3NodeDrawingVisitor;
 
@@ -251,7 +254,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
 
 
 #pragma mark -
-#pragma mark CC3ShaderProgramSemanticsDelegate protocol
+#pragma mark CC3ShaderSemanticsDelegate protocol
 
 /**
  * Defines the behaviour required for an object that manages the semantics for a CC3ShaderProgram.
@@ -259,7 +262,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
  * Each CC3ShaderProgram delegates to an object that implements this protocol when it needs to
  * populate the current value of a uniform variable from content within the 3D scene.
  */
-@protocol CC3ShaderProgramSemanticsDelegate <NSObject>
+@protocol CC3ShaderSemanticsDelegate <NSObject>
 
 /**
  * Configures the specified GLSL variable.
@@ -320,7 +323,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
 /**
  * A CC3GLSLVariableConfiguration carries information for configuring a single CC3GLSLVariable.
  *
- * An implementation of the CC3ShaderProgramSemanticsDelegate protocol will typically contain a
+ * An implementation of the CC3ShaderSemanticsDelegate protocol will typically contain a
  * collection of instances of this class, or a subclass, to configure the variables associated
  * with a CC3ShaderProgram.
  *
@@ -361,10 +364,10 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
 
 
 #pragma mark -
-#pragma mark CC3ShaderProgramSemanticsBase
+#pragma mark CC3ShaderSemanticsBase
 
 /**
- * CC3ShaderProgramSemanticsBase is an abstract implementation of the CC3ShaderProgramSemanticsDelegate
+ * CC3ShaderSemanticsBase is an abstract implementation of the CC3ShaderSemanticsDelegate
  * protocol, that retrieves common uniform values from the scene based on those semantics.
  *
  * This implementation can be used as a superclass for other implementations. Semantic assigment
@@ -381,7 +384,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
  * enumeration. If a subclass adds additional semantic definitions of its own, it should override
  * that method to provide a string representation of the semantic value.
  */
-@interface CC3ShaderProgramSemanticsBase : NSObject<CC3ShaderProgramSemanticsDelegate> {}
+@interface CC3ShaderSemanticsBase : NSObject<CC3ShaderSemanticsDelegate> {}
 
 /** Allocates and initializes an autoreleased instance. */
 +(id) semanticsDelegate;
@@ -416,17 +419,17 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
 
 
 #pragma mark -
-#pragma mark CC3ShaderProgramSemanticsByVarName
+#pragma mark CC3ShaderSemanticsByVarName
 
 /**
- * CC3ShaderProgramSemanticsByVarName extends CC3ShaderProgramSemanticsBase to add the assignment of
+ * CC3ShaderSemanticsByVarName extends CC3ShaderSemanticsBase to add the assignment of
  * semantics to uniform and attribute variables based on matching specific variable names
  * within the GLSL source code.
  *
  * Since the semantics are determined by GLSL variable name, it is critical that the GLSL
  * shader code use very specific attribute and uniform variable names.
  */
-@interface CC3ShaderProgramSemanticsByVarName : CC3ShaderProgramSemanticsBase {
+@interface CC3ShaderSemanticsByVarName : CC3ShaderSemanticsBase {
 	NSMutableDictionary* _varConfigsByName;
 }
 
@@ -478,17 +481,17 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
 
 
 #pragma mark -
-#pragma mark CC3ShaderProgramSemanticsByVarName default mappings extension
+#pragma mark CC3ShaderSemanticsByVarName default mappings extension
 
 /**
- * This extension to CC3ShaderProgramSemanticsByVarName establishes a cocos3d default
+ * This extension to CC3ShaderSemanticsByVarName establishes a cocos3d default
  * mappings between variable names and semantics.
  *
  * An application can use the mappings defined in this extension as the basis for its own mappings
  * and add or change a few of its own additional mappings, or an application may ignore this
  * extension and may instead provide its own extensions to populate completely different mappings.
  */
-@interface CC3ShaderProgramSemanticsByVarName (DefaultMappings)
+@interface CC3ShaderSemanticsByVarName (DefaultMappings)
 
 /**
  * Populates this instance with the default cocos3d mappings between variable names and semantics.

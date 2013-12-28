@@ -36,7 +36,7 @@
 #import "CC3BoundingVolumes.h"
 #import "CCAction.h"
 #import "CCProtocols.h"
-#import "CC3ShaderProgramContext.h"
+#import "CC3ShaderContext.h"
 #import "CC3NodeListeners.h"
 
 @class CC3NodeDrawingVisitor, CC3Scene, CC3Camera, CC3Frustum, CC3Texture;
@@ -1521,7 +1521,7 @@ typedef enum {
  *
  * This property is used only when running under OpenGL ES 2.
  */
-@property(nonatomic, strong) CC3ShaderProgramContext* shaderContext;
+@property(nonatomic, strong) CC3ShaderContext* shaderContext;
 
 /**
  * The GLSL program (vertex & fragment shaders) used to decorate the descendant mesh nodes.
@@ -1545,58 +1545,60 @@ typedef enum {
 @property(nonatomic, strong) CC3ShaderProgram* shaderProgram;
 
 /**
- * Selects an appropriate shader program for each descendant mesh node.
+ * Selects an appropriate shaders for each descendant mesh node.
  *
- * When running under a programmable rendering pipeline, such as OpenGL ES 2.0 or OpenGL,
- * all mesh nodes require a shader program to be assigned. This can be done directly using
- * the shaderProgram property. Or a shader program can be selected automatically based on
- * the characteristics of the mesh node.
+ * When running under a programmable rendering pipeline, such as OpenGL ES 2.0 or OpenGL, all
+ * mesh nodes require a shaders to be assigned. This can be done directly using the shaderProgram 
+ * property. Or shaders can be selected automatically based on the characteristics of the mesh node.
  *
- * You can use this method to cause a shader program to be automatically selected for each
- * descendant mesh node that does not already have a shader program assigned. You can assign
- * shader programs to some specific mesh nodes, and then invoke this method on the CC3Scene
- * to have shader programs assigned to the remaining mesh nodes.
+ * You can use this method to cause a shaders to be automatically selected for each descendant
+ * mesh node that does not already have shaders assigned. You can assign shader programs to some
+ * specific mesh nodes, and then invoke this method on the CC3Scene to have shaders assigned to
+ * the remaining mesh nodes.
  *
- * Since all mesh nodes require shader programs, if this method is not invoked, and a shader
- * program is not manually assigned via the shaderProgram property, a shader program will be
- * automatically assigned to each mesh node the first time it is rendered. The automatic
- * selection is the same, whether this method is invoked, or the selection is made lazily.
- * However, if the shader program must be loaded and compiled, there can be a noticable
- * pause in drawing a mesh node for the first time if lazy assignment is used.
+ * Since all mesh nodes require shaders, if this method is not invoked, and a shader program
+ * was not manually assigned via the shaderProgram property, a shaders will be automatically
+ * assigned to each mesh node the first time it is rendered. The automatic selection is the
+ * same, whether this method is invoked, or the selection is made lazily. However, if the
+ * shaders must be loaded and compiled, there can be a noticable pause in drawing a mesh node
+ * for the first time if lazy assignment is used.
  *
- * Shader selection is driven by the characteristics of each mesh node and its material,
- * including the number of textures, whether alpha testing is used, etc. If you change
- * any of these characteristics that affect the shader selection, you can invoke the
- * clearShaderPrograms method to cause a different shader program to be selected for each
- * mesh node, based on the new mesh node and material characteristics. You can also invoke
- * the clearShaderProgram on a specific mesh node to cause only the shader program of that
- * mesh node to be cleared.
+ * Shader selection is driven by the characteristics of each mesh node and its material, 
+ * including the number of textures, whether alpha testing is used, etc. If you change any
+ * of these characteristics that affect the shader selection, you can invoke the removeShaders 
+ * method to cause different shaders to be selected for each mesh node, based on the new mesh
+ * node and material characteristics. You can also invoke the removeLocalShaders on a specific
+ * mesh node to cause only the shader program of that mesh node to be cleared.
  *
- * Shader selection is handled by an implementation of the CC3ShaderProgramMatcher held in 
- * the CC3ShaderProgram programMatcher class-side property. The application can therefore 
- * customize shader program selection by establishing a custom instance in the CC3ShaderProgram
- * programMatcher class-side property
+ * Shader selection is handled by an implementation of the CC3ShaderMatcher held in the 
+ * CC3ShaderProgram shaderMatcher class-side property. The application can therefore customize
+ * shader program selection by establishing a custom instance in the CC3ShaderProgram 
+ * shaderMatcher class-side property
  */
--(void) selectShaderPrograms;
+-(void) selectShaders;
 
 /**
- * Clears the shader program from each descendant mesh node, allowing a new shader to be selected
- * for each mesh node, either directly by subsequently invoking the selectShaderPrograms method,
- * or automatically the next time each mesh node is drawn.
+ * Removes the shaders from each descendant mesh node, allowing new shaders to be selected for
+ * each mesh node, either directly by subsequently invoking the selectShaders method, or 
+ * automatically the next time each mesh node is drawn.
  *
  * Shader selection is driven by the characteristics of each mesh node and its material,
- * including the number of textures, whether alpha testing is used, etc. If you change
- * any of these characteristics that affect the shader selection, you can invoke the
- * clearShaderPrograms method to cause a different shader program to be selected for
- * each mesh node, based on the new mesh node and material characteristics. 
- *
- * You can also invoke the clearShaderProgram on a specific mesh node to cause only the
- * shader program of that mesh node to be cleared.
+ * including the number of textures, whether alpha testing is used, etc. If you change any
+ * of these characteristics that affect the shader selection, you can invoke the removeShaders
+ * method to cause different shaders to be selected for each mesh node, based on the new mesh
+ * node and material characteristics. You can also invoke the removeLocalShaders on a specific
+ * mesh node to cause only the shader program of that mesh node to be cleared.
  *
  * This method is equivalent to setting the shaderProgram property to nil on each descendant
  * mesh node.
  */
--(void) clearShaderPrograms;
+-(void) removeShaders;
+
+/** @deprecated Renamed to selectShaders. */
+-(void) selectShaderPrograms DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Renamed to removeShaders. */
+-(void) clearShaderPrograms DEPRECATED_ATTRIBUTE;
 
 
 #pragma mark CCRGBAProtocol and CCBlendProtocol support

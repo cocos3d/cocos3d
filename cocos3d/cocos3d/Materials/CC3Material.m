@@ -30,7 +30,7 @@
  */
 
 #import "CC3Material.h"
-#import "CC3ShaderProgramMatcher.h"
+#import "CC3ShaderMatcher.h"
 #import "CC3CC2Extensions.h"
 
 
@@ -116,12 +116,12 @@
 	return self.shouldApplyOpacityToColor ? CCC4FBlendAlpha(self.emissionColor) : self.emissionColor;
 }
 
--(CC3ShaderProgramContext*) shaderContext {
+-(CC3ShaderContext*) shaderContext {
 	CC3Assert(NO, @"The shaderProgram and shaderContext properties have moved to CC3MeshNode.");
 	return nil;
 }
 
--(void) setShaderContext:(CC3ShaderProgramContext *)shaderContext {
+-(void) setShaderContext:(CC3ShaderContext *)shaderContext {
 	CC3Assert(NO, @"The shaderProgram and shaderContext properties have moved to CC3MeshNode.");
 }
 

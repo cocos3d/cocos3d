@@ -33,9 +33,12 @@
 #import "CC3Resource.h"
 #import "CC3PVRFoundation.h"
 #import "CC3MeshNode.h"
-#import "CC3ShaderProgram.h"
+#import "CC3Shaders.h"
 
 @class CC3PFXEffect;
+
+// Legacy naming support
+#define CC3PFXGLProgramSemantics	CC3PFXShaderSemantics.
 
 
 #pragma mark -
@@ -73,7 +76,7 @@
 /** 
  * The class used to instantiate the semantic delegate for the GLSL programs created for
  * the PFX effects defined in this PFX resource. The returned class must be a subclass of
- * CC3PFXGLProgramSemantics.
+ * CC3PFXShaderSemantics.
  *
  * The initial value is set from the class-side defaultSemanticDelegateClass property.
  */
@@ -83,9 +86,9 @@
  * The default class used to instantiate the semantic delegate for the GLSL programs created
  * for the PFX effects defined in instances of this class. The value of this property determines
  * the initial value of the semanticDelegateClass property of any instances. The returned class
- * must be a subclass of CC3PFXGLProgramSemantics.
+ * must be a subclass of CC3PFXShaderSemantics.
  *
- * The initial value is the CC3PVRShamanGLProgramSemantics class.
+ * The initial value is the CC3PVRShamanShaderSemantics class.
  */
 +(Class) defaultSemanticDelegateClass;
 
@@ -93,9 +96,9 @@
  * The default class used to instantiate the semantic delegate for the GLSL programs created
  * for the PFX effects defined in instances of this class. The value of this property determines
  * the initial value of the semanticDelegateClass property of any instances. The class must be
- * a subclass of CC3PFXGLProgramSemantics.
+ * a subclass of CC3PFXShaderSemantics.
  *
- * The initial value is the CC3PVRShamanGLProgramSemantics class.
+ * The initial value is the CC3PVRShamanShaderSemantics class.
  */
 +(void) setDefaultSemanticDelegateClass: (Class) aClass;
 
@@ -170,24 +173,24 @@
 
 
 #pragma mark -
-#pragma mark CC3PFXGLProgramSemantics
+#pragma mark CC3PFXShaderSemantics
 
 /**
- * CC3PFXGLProgramSemantics provides a mapping from the PFX semantic names declared in a PFX
+ * CC3PFXShaderSemantics provides a mapping from the PFX semantic names declared in a PFX
  * effect within a PFX effects file, and the standard semantics from the CC3Semantic enumeration.
  *
  * GLSL shader code loaded from a PFX effect can mix custom semantics defined within the PFX effect
  * with standard default semantics defined by the semantic delegate associated with the program matcher.
  * If a GLSL variable cannot be configured based on a semantic definition for its name within the
  * PFX effect, configuration of the variable is delegated to the standard semantic delegate at
- * CC3ShaderProgram.programMatcher.semanticDelegate. It is even possible to load shaders that use only
+ * CC3ShaderProgram.shaderMatcher.semanticDelegate. It is even possible to load shaders that use only
  * standard semantic naming, without having to define any semantics within the PFX effect.
  *
  * This is an abstract implementation. Subclasses can override the semanticForPFXSemanticName:
  * method for simple name-based mapping, or can override the resolveSemanticForVariableConfiguration:
  * for more complex mapping.
  */
-@interface CC3PFXGLProgramSemantics : CC3ShaderProgramSemanticsByVarName
+@interface CC3PFXShaderSemantics : CC3ShaderSemanticsByVarName
 
 /**
  * Populates this instance with the mappings between variable names and semantics defined

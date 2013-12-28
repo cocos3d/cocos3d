@@ -33,7 +33,7 @@
 #import "CC3BoundingVolumes.h"
 #import "CC3Mesh.h"
 #import "CC3Light.h"
-#import "CC3ShaderProgramMatcher.h"
+#import "CC3ShaderMatcher.h"
 #import "CC3UtilityMeshNodes.h"
 #import "CC3OSExtensions.h"
 
@@ -286,12 +286,12 @@
 
 #pragma mark Shaders
 
--(CC3ShaderProgramContext*) shaderContext {
-	if ( !_shaderContext ) _shaderContext = [CC3ShaderProgramContext context];
+-(CC3ShaderContext*) shaderContext {
+	if ( !_shaderContext ) _shaderContext = [CC3ShaderContext context];
 	return _shaderContext;
 }
 
--(void) setShaderContext: (CC3ShaderProgramContext*) shaderContext {
+-(void) setShaderContext: (CC3ShaderContext*) shaderContext {
 	_shaderContext = shaderContext;
 	super.shaderContext = shaderContext;	// pass along to any children
 }
@@ -310,7 +310,7 @@
 -(CC3ShaderProgram*) selectShaderProgram {
 	CC3ShaderProgram* sp = self.shaderProgram;
 	if ( !sp ) {
-		sp = [CC3ShaderProgram.programMatcher programForMeshNode: self];
+		sp = [CC3ShaderProgram.shaderMatcher programForMeshNode: self];
 		_shaderContext.program = sp;		// Use ivar, so doesn't set descendants
 		LogRez(@"Shader program %@ automatically selected for %@", sp, self);
 	}
@@ -321,17 +321,20 @@
 -(CC3ShaderProgram*) selectShaderProgram { return nil; }
 #endif	// CC3GLSL
 
--(void) selectShaderPrograms {
+-(void) selectShaders {
 	[self selectShaderProgram];
-	[super selectShaderPrograms];
+	[super selectShaders];
 }
 
--(void) clearShaderProgram { self.shaderProgram = nil; }
+-(void) removeLocalShaders { self.shaderProgram = nil; }
 
--(void) clearShaderPrograms {
-	[self clearShaderProgram];
-	[super clearShaderPrograms];
+-(void) removeShaders {
+	[self removeLocalShaders];
+	[super removeShaders];
 }
+
+// Deprecated
+-(void) clearShaderProgram { [self removeLocalShaders]; }
 
 
 #pragma mark CCRGBAProtocol and CCBlendProtocol support

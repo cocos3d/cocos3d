@@ -1,5 +1,5 @@
 /*
- * CC3ShaderProgramContext.h
+ * CC3ShaderContext.h
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -29,19 +29,20 @@
 
 /** @file */	// Doxygen marker
 
-#import "CC3ShaderProgram.h"
+#import "CC3Shaders.h"
 #import "CC3GLSLVariable.h"
 
 // Legacy naming support
-#define CC3GLProgramContext				CC3ShaderProgramContext
+#define CC3GLProgramContext				CC3ShaderContext
+#define CC3ShaderProgramContext			CC3ShaderContext
 
 #pragma mark -
-#pragma mark CC3ShaderProgramContext
+#pragma mark CC3ShaderContext
 
 /** 
- * CC3ShaderProgramContext holds a CC3ShaderProgram for a particular use, such as a by a particular node.
+ * CC3ShaderContext holds a CC3ShaderProgram for a particular use, such as a by a particular node.
  *
- * A single CC3ShaderProgram object can be used by many nodes and other contexts. The CC3ShaderProgramContext
+ * A single CC3ShaderProgram object can be used by many nodes and other contexts. The CC3ShaderContext
  * contains state and behaviour specific to a particular use of the program, including providing
  * storage for local values for certain customized program variables in use by the node.
  *
@@ -54,7 +55,7 @@
  * of any uniform variable with a defined semantic is derived automatically from the environment,
  * and cannot be retrieved or set directly.
 */
-@interface CC3ShaderProgramContext : NSObject {
+@interface CC3ShaderContext : NSObject {
 	CC3ShaderProgram* _program;
 	CC3ShaderProgram* _pureColorProgram;
 	NSMutableArray* _uniforms;

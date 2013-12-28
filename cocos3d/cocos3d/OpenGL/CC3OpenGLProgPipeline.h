@@ -100,7 +100,7 @@
  */
 @interface CC3OpenGLProgPipeline : CC3OpenGL {
 	NSString* value_GL_SHADING_LANGUAGE_VERSION;
-	CC3ShaderProgramPrewarmer* _shaderProgramPrewarmer;
+	CC3ShaderPrewarmer* _shaderProgramPrewarmer;
 	
 @public
 	GLint value_GL_MAX_VARYING_VECTORS;
