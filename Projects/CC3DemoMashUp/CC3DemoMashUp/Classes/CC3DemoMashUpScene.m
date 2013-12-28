@@ -2376,19 +2376,6 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 -(void) addReflectiveMask {
 	CC3ResourceNode* podRezNode = [CC3PODResourceNode nodeFromFile: kReflectiveMaskPODFile];
 	CC3MeshNode* mask = [podRezNode getMeshNodeNamed: @"maskmain"];
-
-	// The vertex shader defines a uniform named "CustomMatrix" which uses an app-supplied
-	// 4x4 matrix to adjust the position of the vertices. This "CustomMatrix" does not map
-	// to a standard semantic, so it must be populated directly by the application. This is
-	// done by creating an override uniform on the shader context of a specific mesh node.
-	// Each node can set a different value for the customized variable. This technique can
-	// also be used to override the value of a uniform variable whose content can actually
-	// be retrieved from the environment.
-	CC3Matrix4x4 customMtx;
-	CC3Matrix4x4PopulateIdentity(&customMtx);	// Could be any matrix...but just make it an identity
-	CC3ShaderContext* progCtx = mask.shaderContext;
-	CC3GLSLUniform* progUniform = [progCtx uniformOverrideNamed: @"CustomMatrix"];
-	progUniform.matrix4x4 = &customMtx;
 	
 	// The mask animation locates the mask at a distant location and scale. Wrap it in a holder
 	// to move it to a more convenient location and scale. Remember that the location of the mask
@@ -2401,6 +2388,27 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// Mask is added on on background thread. Configure it for the scene, and fade it in slowly.
 	[self configureForScene: maskHolder andMaterializeWithDuration: kFadeInDuration];
 	[self addChild: maskHolder];
+	
+	
+	// The vertex shader defines a uniform named "CustomMatrix" which uses an app-supplied
+	// 4x4 matrix to adjust the position of the vertices. This "CustomMatrix" does not map
+	// to a standard semantic, so it must be populated directly by the application, or use
+	// a default value. Setting the uniform directly is done by creating an override uniform
+	// on the shader context of a specific mesh node. Each node can set a different value for
+	// the customized variable. This technique can also be used to override the value of a
+	// uniform variable whose content can actually be retrieved from the environment.
+	// Alternately, the shader program can use a default value for the uniform. By default,
+	// this is disabled, but can be enabled by setting the shouldAllowDefaultVariableValues
+	// property to YES. Since this app uses picking nodes from touch events, the property must
+	// also be enabled in both the shader program and the pure color shader program used for
+	// picking nodes. To use a default value instead, comment out the first four lines here,
+	// and uncomment the last two.
+	CC3GLSLUniform* progUniform = [mask.shaderContext uniformOverrideNamed: @"CustomMatrix"];
+	CC3Matrix4x4 customMtx;
+	CC3Matrix4x4PopulateIdentity(&customMtx);	// Could be any matrix...but just make it an identity
+	progUniform.matrix4x4 = &customMtx;
+//	mask.shaderProgram.shouldAllowDefaultVariableValues = YES;
+//	mask.shaderContext.pureColorProgram.shouldAllowDefaultVariableValues = YES;
 
 	// Make the mask touchable and animate it.
 	mask.isTouchEnabled = YES;

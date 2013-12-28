@@ -482,6 +482,7 @@
 	GLint _maxUniformNameLength;
 	GLint _maxAttributeNameLength;
 	GLuint _programID;
+	BOOL _shouldAllowDefaultVariableValues : 1;
 	BOOL _isSceneScopeDirty : 1;
 }
 
@@ -570,6 +571,44 @@
 
 /** Returns the vertex attribute at the specified location, or nil if no attribute is defined at the specified location. */
 -(CC3GLSLAttribute*) attributeAtLocation: (GLint) attrLocation;
+
+/**
+ * Each uniform used by this shader program must have a valid value. This property can be used to 
+ * indicate whether a uniform, whose value cannot be determined, will use its standard default value.
+ *
+ * If the value of this property is YES, and the value of a uniform has not been set via either
+ * a semantic mapping, or a uniform override in the shader context in a mesh node, a default value
+ * will be used for the variable. The default value depends on the variable type. It will be zero
+ * for scalars, (0,0,0,1) for vectors, or an identity matrix for matrices.
+ *
+ * If the value of this property is NO, and the value of a uniform has not been set via either
+ * a semantic mapping, or a uniform override in the shader context in a mesh node, an assertion
+ * error will be raised. This ensures that unexpected missing uniform variables are detected
+ * directly and early in the development cycle.
+ *
+ * The initial value of this property is determined by the value of the class-side
+ * defaultShouldAllowDefaultVariableValues property. By default, this will be NO, indicating
+ * that an assertion error will be raised if the value of a uniform cannot be determined.
+ */
+@property(nonatomic, assign) BOOL shouldAllowDefaultVariableValues;
+
+/**
+ * Indicates the initial value of the shouldAllowDefaultVariableValues for each instance.
+ *
+ * See the notes for the shouldAllowDefaultVariableValues property for a full discussion.
+ *
+ * The initial value of this property is NO.
+ */
++(BOOL) defaultShouldAllowDefaultVariableValues;
+
+/**
+ * Indicates the initial value of the shouldAllowDefaultVariableValues for each instance.
+ *
+ * See the notes for the shouldAllowDefaultVariableValues property for a full discussion.
+ *
+ * The initial value of this property is NO.
+ */
++(void) setDefaultShouldAllowDefaultVariableValues: (BOOL) shouldAllow;
 
 
 #pragma mark Linking

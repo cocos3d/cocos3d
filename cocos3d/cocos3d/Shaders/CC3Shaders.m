@@ -344,6 +344,7 @@ static CC3Cache* _shaderCache = nil;
 @synthesize semanticDelegate=_semanticDelegate;
 @synthesize maxUniformNameLength=_maxUniformNameLength;
 @synthesize maxAttributeNameLength=_maxAttributeNameLength;
+@synthesize shouldAllowDefaultVariableValues=_shouldAllowDefaultVariableValues;
 
 -(void) dealloc {
 	[self remove];					// remove this instance from the cache
@@ -472,6 +473,15 @@ static CC3Cache* _shaderCache = nil;
 	for (CC3GLSLUniform* var in _uniformsNodeScope) var.isGLStateKnown = NO;
 	for (CC3GLSLUniform* var in _uniformsDrawScope) var.isGLStateKnown = NO;
 }
+
+static BOOL _defaultShouldAllowDefaultVariableValues = NO;
+
++(BOOL) defaultShouldAllowDefaultVariableValues { return _defaultShouldAllowDefaultVariableValues; }
+
++(void) setDefaultShouldAllowDefaultVariableValues: (BOOL) shouldAllow {
+	_defaultShouldAllowDefaultVariableValues = shouldAllow;
+}
+
 
 #pragma mark Linking
 
@@ -633,15 +643,20 @@ static CC3Cache* _shaderCache = nil;
 -(void) populateUniforms: (NSArray*) uniforms withVisitor: (CC3NodeDrawingVisitor*) visitor {
 	CC3ShaderContext* progCtx = visitor.currentMeshNode.shaderContext;
 	for (CC3GLSLUniform* var in uniforms) {
-		if ([progCtx populateUniform: var withVisitor: visitor] ||
-			[_semanticDelegate populateUniform: var withVisitor: visitor]) {
-			[var updateGLValueWithVisitor: visitor];
-		} else {
-			CC3Assert(NO, @"%@ could not resolve the value of uniform %@ with semantic %@."
-					  " If this is a valid uniform, you should create a uniform override in the"
-					  " program context in your material in order to set the value of the uniform directly.",
+		BOOL wasSet = ([progCtx populateUniform: var withVisitor: visitor] ||
+					   [_semanticDelegate populateUniform: var withVisitor: visitor]);
+
+		if ( !wasSet ) {
+			CC3Assert(self.shouldAllowDefaultVariableValues,
+					  @"%@ could not resolve the value of uniform %@ with semantic %@."
+					  @" If this is a valid uniform, you should create a uniform override in the"
+					  @" shader context in your mesh node to set the value of the uniform directly."
+					  @" Or you can allow a default uniform value to be used, and avoid this message,"
+					  @" by setting the shouldAllowDefaultVariableValues property of the shader program to YES.",
 					  self, var.name, NSStringFromCC3Semantic(var.semantic));
 		}
+		
+		[var updateGLValueWithVisitor: visitor];
 	}
 }
 
@@ -661,6 +676,7 @@ static CC3Cache* _shaderCache = nil;
 		_maxAttributeNameLength = 0;
 		_isSceneScopeDirty = YES;	// start out dirty for auto-loaded programs
 		_semanticDelegate = nil;
+		_shouldAllowDefaultVariableValues = self.class.defaultShouldAllowDefaultVariableValues;
 	}
 	return self;
 }
