@@ -79,7 +79,8 @@
 #define kMeshParticleTextureFile		@"BallBoxTexture.png"
 #define kReflectiveMaskPODFile			@"ReflectiveMask.pod"
 #define kEtchedMaskPODFile				@"EtchedMask.pod"
-#define kMasksPFXFile					@"MaskEffects.pfx"
+#define kReflectivePFXFile				@"ReflectiveEffects.pfx"
+#define kEtchedPFXFile					@"EtchedEffects.pfx"
 #define kEtchedMaskPFXEffect			@"EtchedEffect"
 #define kTVPODFile						@"samsung_tv-med.pod"
 #define kTVTestCardFile					@"TVTestCard.jpg"
@@ -415,8 +416,6 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// when models are loaded on the background loading thread.
 	CC3ShaderProgram.isPreloading = YES;
 
-	[CC3ShaderProgram programFromVertexShaderFile: @"BumpMap.vsh"
-							andFragmentShaderFile: @"BumpMap.fsh"];
 	[CC3ShaderProgram programFromVertexShaderFile: @"CC3ClipSpaceTexturable.vsh"
 							andFragmentShaderFile: @"CC3ClipSpaceNoTexture.fsh"];
 	[CC3ShaderProgram programFromVertexShaderFile: @"CC3ClipSpaceTexturable.vsh"
@@ -449,10 +448,10 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	CC3Resource.isPreloading = YES;
 
 	[CC3PFXResource resourceFromFile: kPostProcPFXFile];
-	[CC3PFXResource resourceFromFile: kMasksPFXFile];
+	[CC3PFXResource resourceFromFile: kReflectivePFXFile];
 	
-	// All done with shader pre-loading...let me know if any further shader programs are loaded
-	// during the scene operation.
+	// All done with shader pre-loading...let me know in the logs if any further shader programs
+	// are loaded during the scene operation.
 	CC3Resource.isPreloading = NO;
 	CC3ShaderProgram.isPreloading = NO;
 
@@ -752,8 +751,8 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
  */
 -(void) addBeachBall {
 	
-	// To show it is possible to load model files from other directories, we copy
-	// the POD and texture files to the application Document directory.
+	// To show it is possible to load model files from other directories,
+	// we copy the POD file to the application Document directory.
 	[self copyResourceToDocuments: kBeachBallPODFile];
 	NSString* docDir = [NSHomeDirectory() stringByAppendingPathComponent: @"Documents"];
 	NSString* podPath = [docDir stringByAppendingPathComponent: kBeachBallPODFile];
@@ -807,7 +806,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 -(void) addGlobe {
 	
 	// To show it is possible to load texture files from other directories,
-	// we copy texture file to the application Document directory.
+	// we copy the texture file to the application Document directory.
 	[self copyResourceToDocuments: kGlobeTextureFile];
 	NSString* docDir = [NSHomeDirectory() stringByAppendingPathComponent: @"Documents"];
 	NSString* texPath = [docDir stringByAppendingPathComponent: kGlobeTextureFile];
@@ -2365,16 +2364,28 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * When running under OpenGL ES 2.0, specialized shaders defined in the PFX effect render the
  * second texture as an environment reflection.
  *
- * When running under OpenGL ES 1.1, only the second texture is visible, due to default
+ * When running under OpenGL ES 1.1, only the second texture is visible, due to the default
  * multi-texturing configuration. Under OpenGL ES 1.1, further texture unit configuration
  * could be applied to allow the two textures to be combined in a more realistic manner.
  *
  * This example also demonstrates the ability to define within a shader a customized uniform
- * variable, that does not have a semantic mapping to content within the environment, and have
+ * variable, that does not have a semantic mapping to content  within the environment, and have
  * the application set the value of such a uniform variable directly.
  */
 -(void) addReflectiveMask {
-	CC3ResourceNode* podRezNode = [CC3PODResourceNode nodeFromFile: kReflectiveMaskPODFile];
+
+	// To show it is possible to load PFX files from other directories, we copy the POD and
+	// PFX and texture files to the application Document directory. Actually, by this time,
+	// the PFX file has already been loaded in the preloadAssets method, so to have this work,
+	// you need to comment out the line in the preloadAssets method that preloads the
+	// kReflectivePFXFile PFX file.
+	[self copyResourceToDocuments: kReflectiveMaskPODFile];
+	[self copyResourceToDocuments: kReflectivePFXFile];
+	[self copyResourceToDocuments: @"BrushedSteel.png"];
+	[self copyResourceToDocuments: @"tex_base.bmp"];	// Not really needed, but referenced in the POD file
+	NSString* docDir = [NSHomeDirectory() stringByAppendingPathComponent: @"Documents"];
+	NSString* podPath = [docDir stringByAppendingPathComponent: kReflectiveMaskPODFile];
+	CC3ResourceNode* podRezNode = [CC3PODResourceNode nodeFromFile: podPath];
 	CC3MeshNode* mask = [podRezNode getMeshNodeNamed: @"maskmain"];
 	
 	// The mask animation locates the mask at a distant location and scale. Wrap it in a holder
@@ -2388,7 +2399,6 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// Mask is added on on background thread. Configure it for the scene, and fade it in slowly.
 	[self configureForScene: maskHolder andMaterializeWithDuration: kFadeInDuration];
 	[self addChild: maskHolder];
-	
 	
 	// The vertex shader defines a uniform named "CustomMatrix" which uses an app-supplied
 	// 4x4 matrix to adjust the position of the vertices. This "CustomMatrix" does not map
@@ -2413,6 +2423,52 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// Make the mask touchable and animate it.
 	mask.isTouchEnabled = YES;
 	[mask runAction: [CCRepeatForever actionWithAction: [CC3Animate actionWithDuration: 10.0]]];
+}
+
+/**
+ * Adds a floating mask that uses two textures to create a tangent-space bump-mapped surface
+ * when running under OpenGL ES 2.0.
+ *
+ * When running under OpenGL ES 1.1, only the second (base) texture is visible, due to default
+ * multi-texturing configuration.
+ *
+ * Two techniques for applying bump-mapping GLSL shaders are provided here, and each can be
+ * selected by selectively commenting out code in this method. By default, this method applies
+ * the bump-map and visible textures to the mask and allows the default tanget-space bump-map
+ * shaders to be applied to the mask.
+ *
+ * Alternately, you can apply the textures and specific shaders to the mask by applying a
+ * PowerVR PFX file to determine apply the textures and shaders. The shaders assigned in the
+ * PFX file are different than the default bump-map shaders, and the mask will look different.
+ */
+-(void) addEtchedMask {
+	CC3ResourceNode* podRezNode = [CC3PODResourceNode nodeFromFile: kEtchedMaskPODFile];
+	CC3MeshNode* mask = [podRezNode getMeshNodeNamed: @"objmaskmain"];
+	
+	// Load the textures into the material (bump-mapped texture first), and allow the default shaders
+	// to perform the bump-mapping. The default shaders include lighting and material coloring,
+	// and so are more realistic than the shaders defined in the PFX file.
+	[mask addTexture: [CC3Texture textureFromFile: @"NormalMap.png"]];
+	[mask addTexture: [CC3Texture textureFromFile: @"BaseTex.png"]];
+	
+	// Alternately, you can apply a PFX effect to the mask node. This will attach the GL program and
+	// texture defined in the PFX effect file, which will run shaders dedicated to tangent-space
+	// bump-mapping. The shaders in the PFX file are simpler than the default shaders and do not
+	// interact with material and lighting as effectively, and are therefore not as accurate.
+	// To load the PFX file, uncomment the following line.
+//	[mask applyEffectNamed: kEtchedMaskPFXEffect inPFXResourceFile: kEtchedPFXFile];
+	
+	mask.uniformScale = 4.0;
+	mask.location = cc3v(-750.0, 50.0, -500.0);
+	
+	// Mask is added on on background thread. Configure it for the scene, and fade it in slowly.
+	[self configureForScene: mask andMaterializeWithDuration: kFadeInDuration];
+	[self addChild: mask];
+	
+	// Make the mask touchable and animate it.
+	mask.isTouchEnabled = YES;
+	[mask runAction: [CCRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
+																			   rotateBy: cc3v(0.0, 30.0, 0.0)]]];
 }
 
 /**
@@ -2508,52 +2564,6 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// Dragon is added on on background thread. Configure it for the scene, and fade it in slowly.
 	[self configureForScene: _dragon andMaterializeWithDuration: kFadeInDuration];
 	[self addChild: flightPath];
-}
-
-/**
- * Adds a floating mask that uses two textures to create a tangent-space bump-mapped surface
- * when running under OpenGL ES 2.0.
- *
- * When running under OpenGL ES 1.1, only the second (base) texture is visible, due to default
- * multi-texturing configuration.
- *
- * Two techniques for applying bump-mapping GLSL shaders are provided here, and each can be
- * selected by selectively commenting out code in this method. By default, this method applies
- * the bump-map and visible textures to the mask and allows the default tanget-space bump-map
- * shaders to be applied to the mask.
- *
- * Alternately, you can apply the textures and specific shaders to the mask by applying a
- * PowerVR PFX file to determine apply the textures and shaders. The shaders assigned in the
- * PFX file are different than the default bump-map shaders, and the mask will look different.
- */
--(void) addEtchedMask {
-	CC3ResourceNode* podRezNode = [CC3PODResourceNode nodeFromFile: kEtchedMaskPODFile];
-	CC3MeshNode* mask = [podRezNode getMeshNodeNamed: @"objmaskmain"];
-	
-	// Load the textures into the material (bump-mapped texture first), and allow the default shaders
-	// to perform the bump-mapping. The default shaders include lighting and material coloring,
-	// and so are more realistic than the shaders defined in the PFX file.
-	[mask addTexture: [CC3Texture textureFromFile: @"NormalMap.png"]];
-	[mask addTexture: [CC3Texture textureFromFile: @"BaseTex.png"]];
-	
-	// Alternately, you can apply a PFX effect to the mask node. This will attach the GL program and
-	// texture defined in the PFX effect file, which will run shaders dedicated to tangent-space
-	// bump-mapping. The shaders in the PFX file are simpler than the default shaders and do not
-	// interact with material and lighting as effectively, and are therefore not as accurate.
-	// To load the PFX file, uncomment the following line.
-//	[mask applyEffectNamed: kEtchedMaskPFXEffect inPFXResourceFile: kMasksPFXFile];
-	
-	mask.uniformScale = 4.0;
-	mask.location = cc3v(-750.0, 50.0, -500.0);
-
-	// Mask is added on on background thread. Configure it for the scene, and fade it in slowly.
-	[self configureForScene: mask andMaterializeWithDuration: kFadeInDuration];
-	[self addChild: mask];
-	
-	// Make the mask touchable and animate it.
-	mask.isTouchEnabled = YES;
-	[mask runAction: [CCRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
-																			   rotateBy: cc3v(0.0, 30.0, 0.0)]]];
 }
 
 /**

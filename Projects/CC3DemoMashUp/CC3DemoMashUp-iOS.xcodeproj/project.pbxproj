@@ -8,6 +8,16 @@
 
 /* Begin PBXBuildFile section */
 		506EDBA5102F4C9F00A389B3 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 506EDBA4102F4C9F00A389B3 /* AVFoundation.framework */; };
+		A901CF6B186F90EC00A26A40 /* BaseTex.png in Resources */ = {isa = PBXBuildFile; fileRef = A901CF61186F90EC00A26A40 /* BaseTex.png */; };
+		A901CF6C186F90EC00A26A40 /* BrushedSteel.png in Resources */ = {isa = PBXBuildFile; fileRef = A901CF62186F90EC00A26A40 /* BrushedSteel.png */; };
+		A901CF6D186F90EC00A26A40 /* BumpMap.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A901CF63186F90EC00A26A40 /* BumpMap.fsh */; };
+		A901CF6E186F90EC00A26A40 /* BumpMap.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A901CF64186F90EC00A26A40 /* BumpMap.vsh */; };
+		A901CF6F186F90EC00A26A40 /* EtchedEffects.pfx in Resources */ = {isa = PBXBuildFile; fileRef = A901CF65186F90EC00A26A40 /* EtchedEffects.pfx */; };
+		A901CF70186F90EC00A26A40 /* EtchedMask.pod in Resources */ = {isa = PBXBuildFile; fileRef = A901CF66186F90EC00A26A40 /* EtchedMask.pod */; };
+		A901CF71186F90EC00A26A40 /* NormalMap.png in Resources */ = {isa = PBXBuildFile; fileRef = A901CF67186F90EC00A26A40 /* NormalMap.png */; };
+		A901CF72186F90EC00A26A40 /* Reflection.png in Resources */ = {isa = PBXBuildFile; fileRef = A901CF68186F90EC00A26A40 /* Reflection.png */; };
+		A901CF73186F90EC00A26A40 /* ReflectiveEffects.pfx in Resources */ = {isa = PBXBuildFile; fileRef = A901CF69186F90EC00A26A40 /* ReflectiveEffects.pfx */; };
+		A901CF74186F90EC00A26A40 /* ReflectiveMask.pod in Resources */ = {isa = PBXBuildFile; fileRef = A901CF6A186F90EC00A26A40 /* ReflectiveMask.pod */; };
 		A911536A1723A27F004A87FC /* EnvMap.pfx in Resources */ = {isa = PBXBuildFile; fileRef = A91153631723A27F004A87FC /* EnvMap.pfx */; };
 		A911536B1723A27F004A87FC /* EnvMapNegX.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A91153641723A27F004A87FC /* EnvMapNegX.jpg */; };
 		A911536C1723A27F004A87FC /* EnvMapNegY.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A91153651723A27F004A87FC /* EnvMapNegY.jpg */; };
@@ -135,15 +145,6 @@
 		A9C94ABF1451924700CE6BAD /* mallet.pod in Resources */ = {isa = PBXBuildFile; fileRef = A9C94ABD1451924700CE6BAD /* mallet.pod */; };
 		A9CD198E156C1CFD00A0EDC4 /* earthmap1k.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A9CD198D156C1CFD00A0EDC4 /* earthmap1k.jpg */; };
 		A9D58DBC14F5B44500C3A778 /* ShadowButton48x48.png in Resources */ = {isa = PBXBuildFile; fileRef = A9D58DBB14F5B44500C3A778 /* ShadowButton48x48.png */; };
-		A9D9F3E316AA351F00FBCA91 /* BaseTex.png in Resources */ = {isa = PBXBuildFile; fileRef = A9D9F3DA16AA351F00FBCA91 /* BaseTex.png */; };
-		A9D9F3E416AA351F00FBCA91 /* BrushedSteel.png in Resources */ = {isa = PBXBuildFile; fileRef = A9D9F3DB16AA351F00FBCA91 /* BrushedSteel.png */; };
-		A9D9F3E516AA351F00FBCA91 /* BumpMap.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9D9F3DC16AA351F00FBCA91 /* BumpMap.fsh */; };
-		A9D9F3E616AA351F00FBCA91 /* BumpMap.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9D9F3DD16AA351F00FBCA91 /* BumpMap.vsh */; };
-		A9D9F3E716AA351F00FBCA91 /* EtchedMask.pod in Resources */ = {isa = PBXBuildFile; fileRef = A9D9F3DE16AA351F00FBCA91 /* EtchedMask.pod */; };
-		A9D9F3E816AA351F00FBCA91 /* MaskEffects.pfx in Resources */ = {isa = PBXBuildFile; fileRef = A9D9F3DF16AA351F00FBCA91 /* MaskEffects.pfx */; };
-		A9D9F3E916AA351F00FBCA91 /* NormalMap.png in Resources */ = {isa = PBXBuildFile; fileRef = A9D9F3E016AA351F00FBCA91 /* NormalMap.png */; };
-		A9D9F3EA16AA351F00FBCA91 /* Reflection.png in Resources */ = {isa = PBXBuildFile; fileRef = A9D9F3E116AA351F00FBCA91 /* Reflection.png */; };
-		A9D9F3EB16AA351F00FBCA91 /* ReflectiveMask.pod in Resources */ = {isa = PBXBuildFile; fileRef = A9D9F3E216AA351F00FBCA91 /* ReflectiveMask.pod */; };
 		A9E9EE6A16AD7A1D0086F025 /* belt.png in Resources */ = {isa = PBXBuildFile; fileRef = A9E9EE6316AD7A1D0086F025 /* belt.png */; };
 		A9E9EE6B16AD7A1D0086F025 /* body.png in Resources */ = {isa = PBXBuildFile; fileRef = A9E9EE6416AD7A1D0086F025 /* body.png */; };
 		A9E9EE6C16AD7A1D0086F025 /* legs.png in Resources */ = {isa = PBXBuildFile; fileRef = A9E9EE6516AD7A1D0086F025 /* legs.png */; };
@@ -199,6 +200,16 @@
 /* Begin PBXFileReference section */
 		1D6058910D05DD3D006BFB54 /* CC3DemoMashUp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CC3DemoMashUp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		506EDBA4102F4C9F00A389B3 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		A901CF61186F90EC00A26A40 /* BaseTex.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = BaseTex.png; sourceTree = "<group>"; };
+		A901CF62186F90EC00A26A40 /* BrushedSteel.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = BrushedSteel.png; sourceTree = "<group>"; };
+		A901CF63186F90EC00A26A40 /* BumpMap.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = BumpMap.fsh; sourceTree = "<group>"; };
+		A901CF64186F90EC00A26A40 /* BumpMap.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = BumpMap.vsh; sourceTree = "<group>"; };
+		A901CF65186F90EC00A26A40 /* EtchedEffects.pfx */ = {isa = PBXFileReference; explicitFileType = sourcecode.glsl; fileEncoding = 4; path = EtchedEffects.pfx; sourceTree = "<group>"; };
+		A901CF66186F90EC00A26A40 /* EtchedMask.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = EtchedMask.pod; sourceTree = "<group>"; };
+		A901CF67186F90EC00A26A40 /* NormalMap.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = NormalMap.png; sourceTree = "<group>"; };
+		A901CF68186F90EC00A26A40 /* Reflection.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Reflection.png; sourceTree = "<group>"; };
+		A901CF69186F90EC00A26A40 /* ReflectiveEffects.pfx */ = {isa = PBXFileReference; explicitFileType = sourcecode.glsl; fileEncoding = 4; path = ReflectiveEffects.pfx; sourceTree = "<group>"; };
+		A901CF6A186F90EC00A26A40 /* ReflectiveMask.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = ReflectiveMask.pod; sourceTree = "<group>"; };
 		A91153631723A27F004A87FC /* EnvMap.pfx */ = {isa = PBXFileReference; explicitFileType = sourcecode.glsl; fileEncoding = 4; path = EnvMap.pfx; sourceTree = "<group>"; };
 		A91153641723A27F004A87FC /* EnvMapNegX.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = EnvMapNegX.jpg; sourceTree = "<group>"; };
 		A91153651723A27F004A87FC /* EnvMapNegY.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = EnvMapNegY.jpg; sourceTree = "<group>"; };
@@ -336,15 +347,6 @@
 		A9C94ABD1451924700CE6BAD /* mallet.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = mallet.pod; sourceTree = "<group>"; };
 		A9CD198D156C1CFD00A0EDC4 /* earthmap1k.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = earthmap1k.jpg; sourceTree = "<group>"; };
 		A9D58DBB14F5B44500C3A778 /* ShadowButton48x48.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ShadowButton48x48.png; sourceTree = "<group>"; };
-		A9D9F3DA16AA351F00FBCA91 /* BaseTex.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = BaseTex.png; sourceTree = "<group>"; };
-		A9D9F3DB16AA351F00FBCA91 /* BrushedSteel.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = BrushedSteel.png; sourceTree = "<group>"; };
-		A9D9F3DC16AA351F00FBCA91 /* BumpMap.fsh */ = {isa = PBXFileReference; explicitFileType = sourcecode.glsl; fileEncoding = 4; path = BumpMap.fsh; sourceTree = "<group>"; };
-		A9D9F3DD16AA351F00FBCA91 /* BumpMap.vsh */ = {isa = PBXFileReference; explicitFileType = sourcecode.glsl; fileEncoding = 4; path = BumpMap.vsh; sourceTree = "<group>"; };
-		A9D9F3DE16AA351F00FBCA91 /* EtchedMask.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = EtchedMask.pod; sourceTree = "<group>"; };
-		A9D9F3DF16AA351F00FBCA91 /* MaskEffects.pfx */ = {isa = PBXFileReference; explicitFileType = sourcecode.glsl; fileEncoding = 4; path = MaskEffects.pfx; sourceTree = "<group>"; };
-		A9D9F3E016AA351F00FBCA91 /* NormalMap.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = NormalMap.png; sourceTree = "<group>"; };
-		A9D9F3E116AA351F00FBCA91 /* Reflection.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Reflection.png; sourceTree = "<group>"; };
-		A9D9F3E216AA351F00FBCA91 /* ReflectiveMask.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = ReflectiveMask.pod; sourceTree = "<group>"; };
 		A9E9EE6316AD7A1D0086F025 /* belt.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = belt.png; sourceTree = "<group>"; };
 		A9E9EE6416AD7A1D0086F025 /* body.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = body.png; sourceTree = "<group>"; };
 		A9E9EE6516AD7A1D0086F025 /* legs.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = legs.png; sourceTree = "<group>"; };
@@ -427,6 +429,23 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		A901CF60186F90EC00A26A40 /* Masks */ = {
+			isa = PBXGroup;
+			children = (
+				A901CF61186F90EC00A26A40 /* BaseTex.png */,
+				A901CF62186F90EC00A26A40 /* BrushedSteel.png */,
+				A901CF63186F90EC00A26A40 /* BumpMap.fsh */,
+				A901CF64186F90EC00A26A40 /* BumpMap.vsh */,
+				A901CF65186F90EC00A26A40 /* EtchedEffects.pfx */,
+				A901CF66186F90EC00A26A40 /* EtchedMask.pod */,
+				A901CF67186F90EC00A26A40 /* NormalMap.png */,
+				A901CF68186F90EC00A26A40 /* Reflection.png */,
+				A901CF69186F90EC00A26A40 /* ReflectiveEffects.pfx */,
+				A901CF6A186F90EC00A26A40 /* ReflectiveMask.pod */,
+			);
+			path = Masks;
+			sourceTree = "<group>";
+		};
 		A91153621723A27F004A87FC /* EnvMap */ = {
 			isa = PBXGroup;
 			children = (
@@ -479,7 +498,7 @@
 				A94EF4F117C66D6900FA969E /* LaunchImages */,
 				A9C94ABC1451924700CE6BAD /* mallet.png */,
 				A9C94ABD1451924700CE6BAD /* mallet.pod */,
-				A9D9F3D916AA351F00FBCA91 /* Masks */,
+				A901CF60186F90EC00A26A40 /* Masks */,
 				A96B359D14EF2689002A7363 /* MountainGrass.jpg */,
 				A963B545174982F600A20B20 /* PostProc.pfx */,
 				A9E9EE6216AD7A1D0086F025 /* RunningMen */,
@@ -717,22 +736,6 @@
 			path = VertexShaders;
 			sourceTree = "<group>";
 		};
-		A9D9F3D916AA351F00FBCA91 /* Masks */ = {
-			isa = PBXGroup;
-			children = (
-				A9D9F3DA16AA351F00FBCA91 /* BaseTex.png */,
-				A9D9F3DB16AA351F00FBCA91 /* BrushedSteel.png */,
-				A9D9F3DC16AA351F00FBCA91 /* BumpMap.fsh */,
-				A9D9F3DD16AA351F00FBCA91 /* BumpMap.vsh */,
-				A9D9F3DE16AA351F00FBCA91 /* EtchedMask.pod */,
-				A9D9F3DF16AA351F00FBCA91 /* MaskEffects.pfx */,
-				A9D9F3E016AA351F00FBCA91 /* NormalMap.png */,
-				A9D9F3E116AA351F00FBCA91 /* Reflection.png */,
-				A9D9F3E216AA351F00FBCA91 /* ReflectiveMask.pod */,
-			);
-			path = Masks;
-			sourceTree = "<group>";
-		};
 		A9E9EE6216AD7A1D0086F025 /* RunningMen */ = {
 			isa = PBXGroup;
 			children = (
@@ -825,13 +828,12 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A9D9F3E516AA351F00FBCA91 /* BumpMap.fsh in Resources */,
-				A9D9F3E616AA351F00FBCA91 /* BumpMap.vsh in Resources */,
 				A92DA7B01427B5980051AFFA /* ArrowLeftButton48x48.png in Resources */,
 				A92DA7B21427B5980051AFFA /* ButtonRing48x48.png in Resources */,
 				A92DA7B31427B5980051AFFA /* cocos3dMascot.png in Resources */,
 				A92DA7B41427B5980051AFFA /* cocos3dMascot.pod in Resources */,
 				A92DA7B91427B5980051AFFA /* fire.png in Resources */,
+				A901CF71186F90EC00A26A40 /* NormalMap.png in Resources */,
 				A9B063F018647F2700C467B5 /* CC3DefaultPrecision.fshl in Resources */,
 				A9B0640918647F2800C467B5 /* CC3SingleTextureAlphaTest.fsh in Resources */,
 				A9B0641218647F2800C467B5 /* CC3VertexPositionBones.vshl in Resources */,
@@ -845,6 +847,7 @@
 				A92DA7CA1427B5980051AFFA /* JoystickThumb.png in Resources */,
 				A92DA7CB1427B5980051AFFA /* Shine48x48.png in Resources */,
 				A97398ED17C2C7BC00C17D89 /* DRAGON_LICENSE.txt in Resources */,
+				A901CF74186F90EC00A26A40 /* ReflectiveMask.pod in Resources */,
 				A92DA7CE1427B5980051AFFA /* SunlightButton48x48.png in Resources */,
 				A92DA7D11427B5980051AFFA /* ZoomButton48x48.png in Resources */,
 				A9B0641618647F2800C467B5 /* CC3ClipSpaceTexturable.vsh in Resources */,
@@ -852,6 +855,7 @@
 				A92C6A12144A272900B15941 /* BoxTexture.png in Resources */,
 				A9B063F818647F2700C467B5 /* CC3TexturableBumpMapTangentSpace.fshl in Resources */,
 				A9B0640018647F2700C467B5 /* CC3Fog.fsh in Resources */,
+				A901CF70186F90EC00A26A40 /* EtchedMask.pod in Resources */,
 				A9C94ABE1451924700CE6BAD /* mallet.png in Resources */,
 				A9B063FA18647F2700C467B5 /* CC3BumpMapObjectSpace.fsh in Resources */,
 				A9C94ABF1451924700CE6BAD /* mallet.pod in Resources */,
@@ -859,6 +863,7 @@
 				A9B0641918647F2800C467B5 /* CC3TexturableBones.vsh in Resources */,
 				A97398DE17C2C79000C17D89 /* BeachBall.pod in Resources */,
 				A933812E14E09E9000FCA181 /* Earth_1024.jpg in Resources */,
+				A901CF72186F90EC00A26A40 /* Reflection.png in Resources */,
 				A9B0641318647F2800C467B5 /* CC3VertexPositionNoBones.vshl in Resources */,
 				A94EF4F717C66D6900FA969E /* Default-568h@2x.png in Resources */,
 				A95A5C5714E45AC00013359F /* Crate.png in Resources */,
@@ -869,6 +874,7 @@
 				A9AE3D7D14E46118002805DA /* Stamp.png in Resources */,
 				A96B35A014EF2689002A7363 /* GrassCloseUp.jpg in Resources */,
 				A96B35A114EF2689002A7363 /* GrassWithLeaves.jpg in Resources */,
+				A901CF6B186F90EC00A26A40 /* BaseTex.png in Resources */,
 				A96B35A214EF2689002A7363 /* MountainGrass.jpg in Resources */,
 				A94EF4D617C65E5A00FA969E /* Icon-29.png in Resources */,
 				A9B0640C18647F2800C467B5 /* CC3BumpMapTangentSpaceLighting.vshl in Resources */,
@@ -882,6 +888,7 @@
 				A9B0641818647F2800C467B5 /* CC3Texturable.vsh in Resources */,
 				A9D58DBC14F5B44500C3A778 /* ShadowButton48x48.png in Resources */,
 				A92D8A0814F6B377009458BE /* ShadowButtonLatched48x48.png in Resources */,
+				A901CF6C186F90EC00A26A40 /* BrushedSteel.png in Resources */,
 				A9B063EE18647F2700C467B5 /* CC3Constants.shl in Resources */,
 				A9AAF0081525E41000E1620A /* Bricks-Red.jpg in Resources */,
 				A9CD198E156C1CFD00A0EDC4 /* earthmap1k.jpg in Resources */,
@@ -905,15 +912,9 @@
 				A97398EC17C2C7BC00C17D89 /* Dragon.pod in Resources */,
 				A9B0641718647F2800C467B5 /* CC3PointSprites.vsh in Resources */,
 				A9B0641018647F2800C467B5 /* CC3IlluminatedMaterial.vshl in Resources */,
-				A9D9F3E316AA351F00FBCA91 /* BaseTex.png in Resources */,
-				A9D9F3E416AA351F00FBCA91 /* BrushedSteel.png in Resources */,
-				A9D9F3E716AA351F00FBCA91 /* EtchedMask.pod in Resources */,
 				A9B0640518647F2700C467B5 /* CC3PointSprites.fsh in Resources */,
-				A9D9F3E816AA351F00FBCA91 /* MaskEffects.pfx in Resources */,
 				A9B063F518647F2700C467B5 /* CC3SingleSidedFragmentColor.fshl in Resources */,
-				A9D9F3E916AA351F00FBCA91 /* NormalMap.png in Resources */,
-				A9D9F3EA16AA351F00FBCA91 /* Reflection.png in Resources */,
-				A9D9F3EB16AA351F00FBCA91 /* ReflectiveMask.pod in Resources */,
+				A901CF6D186F90EC00A26A40 /* BumpMap.fsh in Resources */,
 				A9B0641418647F2800C467B5 /* CC3VertexPositionPointSprite.vshl in Resources */,
 				A9B0640D18647F2800C467B5 /* CC3DefaultPrecision.vshl in Resources */,
 				A9B063F118647F2700C467B5 /* CC3DualSidedFragmentColor.fshl in Resources */,
@@ -932,6 +933,7 @@
 				A9FF6E15170DF79D00FC35C8 /* Stamp-nm.png in Resources */,
 				A9B0641A18647F2800C467B5 /* CC3TexturableRigidBones.vsh in Resources */,
 				A9B063F318647F2700C467B5 /* CC3SetGLFragColor.fshl in Resources */,
+				A901CF6E186F90EC00A26A40 /* BumpMap.vsh in Resources */,
 				A9B063FC18647F2700C467B5 /* CC3BumpMapTangentSpace.fsh in Resources */,
 				A94EF4DA17C65E5A00FA969E /* Icon-50.png in Resources */,
 				A9FF6E18170DF7B100FC35C8 /* tex_arm.png in Resources */,
@@ -949,6 +951,7 @@
 				A9B0640718647F2800C467B5 /* CC3PureColor.fsh in Resources */,
 				A911536D1723A27F004A87FC /* EnvMapNegZ.jpg in Resources */,
 				A911536E1723A27F004A87FC /* EnvMapPosX.jpg in Resources */,
+				A901CF73186F90EC00A26A40 /* ReflectiveEffects.pfx in Resources */,
 				A94EF4DF17C65E5A00FA969E /* Icon-60@2x.png in Resources */,
 				A94EF4DC17C65E5A00FA969E /* Icon-57.png in Resources */,
 				A911536F1723A27F004A87FC /* EnvMapPosY.jpg in Resources */,
@@ -956,6 +959,7 @@
 				A963B546174982F600A20B20 /* PostProc.pfx in Resources */,
 				A9B0640318647F2700C467B5 /* CC3NoTextureReflect.fsh in Resources */,
 				A9883E16174C047300127768 /* TVTestCard.jpg in Resources */,
+				A901CF6F186F90EC00A26A40 /* EtchedEffects.pfx in Resources */,
 				A9883E18174C4D0200127768 /* samsung_tv-med.pod in Resources */,
 				A94EF4DE17C65E5A00FA969E /* Icon-60.png in Resources */,
 				A9F7DA801761412100FC5096 /* Skybox.pvr in Resources */,

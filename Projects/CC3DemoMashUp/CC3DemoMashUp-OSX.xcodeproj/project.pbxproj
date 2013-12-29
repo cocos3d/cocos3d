@@ -7,6 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A901CF88187073C900A26A40 /* BaseTex.png in Resources */ = {isa = PBXBuildFile; fileRef = A901CF7E187073C900A26A40 /* BaseTex.png */; };
+		A901CF89187073C900A26A40 /* BrushedSteel.png in Resources */ = {isa = PBXBuildFile; fileRef = A901CF7F187073C900A26A40 /* BrushedSteel.png */; };
+		A901CF8A187073C900A26A40 /* BumpMap.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A901CF80187073C900A26A40 /* BumpMap.fsh */; };
+		A901CF8B187073C900A26A40 /* BumpMap.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A901CF81187073C900A26A40 /* BumpMap.vsh */; };
+		A901CF8C187073C900A26A40 /* EtchedEffects.pfx in Resources */ = {isa = PBXBuildFile; fileRef = A901CF82187073C900A26A40 /* EtchedEffects.pfx */; };
+		A901CF8D187073C900A26A40 /* EtchedMask.pod in Resources */ = {isa = PBXBuildFile; fileRef = A901CF83187073C900A26A40 /* EtchedMask.pod */; };
+		A901CF8E187073C900A26A40 /* NormalMap.png in Resources */ = {isa = PBXBuildFile; fileRef = A901CF84187073C900A26A40 /* NormalMap.png */; };
+		A901CF8F187073C900A26A40 /* Reflection.png in Resources */ = {isa = PBXBuildFile; fileRef = A901CF85187073C900A26A40 /* Reflection.png */; };
+		A901CF90187073C900A26A40 /* ReflectiveEffects.pfx in Resources */ = {isa = PBXBuildFile; fileRef = A901CF86187073C900A26A40 /* ReflectiveEffects.pfx */; };
+		A901CF91187073C900A26A40 /* ReflectiveMask.pod in Resources */ = {isa = PBXBuildFile; fileRef = A901CF87187073C900A26A40 /* ReflectiveMask.pod */; };
 		A912B1A417510F70002F6674 /* PostProc.pfx in Resources */ = {isa = PBXBuildFile; fileRef = A912B1A317510F70002F6674 /* PostProc.pfx */; };
 		A912B1A817510F7B002F6674 /* samsung_tv-med.pod in Resources */ = {isa = PBXBuildFile; fileRef = A912B1A617510F7B002F6674 /* samsung_tv-med.pod */; };
 		A912B1A917510F7B002F6674 /* TVTestCard.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A912B1A717510F7B002F6674 /* TVTestCard.jpg */; };
@@ -131,15 +141,6 @@
 		A9FF6DF0170DE83600FC35C8 /* body.png in Resources */ = {isa = PBXBuildFile; fileRef = A9FF6DEC170DE83600FC35C8 /* body.png */; };
 		A9FF6DF1170DE83600FC35C8 /* legs.png in Resources */ = {isa = PBXBuildFile; fileRef = A9FF6DED170DE83600FC35C8 /* legs.png */; };
 		A9FF6DF2170DE83600FC35C8 /* man.pod in Resources */ = {isa = PBXBuildFile; fileRef = A9FF6DEE170DE83600FC35C8 /* man.pod */; };
-		A9FF6DFD170DE83F00FC35C8 /* BaseTex.png in Resources */ = {isa = PBXBuildFile; fileRef = A9FF6DF4170DE83F00FC35C8 /* BaseTex.png */; };
-		A9FF6DFE170DE83F00FC35C8 /* BrushedSteel.png in Resources */ = {isa = PBXBuildFile; fileRef = A9FF6DF5170DE83F00FC35C8 /* BrushedSteel.png */; };
-		A9FF6DFF170DE83F00FC35C8 /* BumpMap.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9FF6DF6170DE83F00FC35C8 /* BumpMap.fsh */; };
-		A9FF6E00170DE83F00FC35C8 /* BumpMap.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9FF6DF7170DE83F00FC35C8 /* BumpMap.vsh */; };
-		A9FF6E01170DE83F00FC35C8 /* EtchedMask.pod in Resources */ = {isa = PBXBuildFile; fileRef = A9FF6DF8170DE83F00FC35C8 /* EtchedMask.pod */; };
-		A9FF6E02170DE83F00FC35C8 /* MaskEffects.pfx in Resources */ = {isa = PBXBuildFile; fileRef = A9FF6DF9170DE83F00FC35C8 /* MaskEffects.pfx */; };
-		A9FF6E03170DE83F00FC35C8 /* NormalMap.png in Resources */ = {isa = PBXBuildFile; fileRef = A9FF6DFA170DE83F00FC35C8 /* NormalMap.png */; };
-		A9FF6E04170DE83F00FC35C8 /* Reflection.png in Resources */ = {isa = PBXBuildFile; fileRef = A9FF6DFB170DE83F00FC35C8 /* Reflection.png */; };
-		A9FF6E05170DE83F00FC35C8 /* ReflectiveMask.pod in Resources */ = {isa = PBXBuildFile; fileRef = A9FF6DFC170DE83F00FC35C8 /* ReflectiveMask.pod */; };
 		A9FF6E08170DED6600FC35C8 /* tex_arm.png in Resources */ = {isa = PBXBuildFile; fileRef = A9FF6E06170DED6600FC35C8 /* tex_arm.png */; };
 		A9FF6E09170DED6600FC35C8 /* tex_base.png in Resources */ = {isa = PBXBuildFile; fileRef = A9FF6E07170DED6600FC35C8 /* tex_base.png */; };
 		A9FF6E0C170DF27D00FC35C8 /* Head_clonespace.png in Resources */ = {isa = PBXBuildFile; fileRef = A9FF6E0A170DF27D00FC35C8 /* Head_clonespace.png */; };
@@ -180,6 +181,16 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		A901CF7E187073C900A26A40 /* BaseTex.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = BaseTex.png; sourceTree = "<group>"; };
+		A901CF7F187073C900A26A40 /* BrushedSteel.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = BrushedSteel.png; sourceTree = "<group>"; };
+		A901CF80187073C900A26A40 /* BumpMap.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = BumpMap.fsh; sourceTree = "<group>"; };
+		A901CF81187073C900A26A40 /* BumpMap.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = BumpMap.vsh; sourceTree = "<group>"; };
+		A901CF82187073C900A26A40 /* EtchedEffects.pfx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = EtchedEffects.pfx; sourceTree = "<group>"; };
+		A901CF83187073C900A26A40 /* EtchedMask.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = EtchedMask.pod; sourceTree = "<group>"; };
+		A901CF84187073C900A26A40 /* NormalMap.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = NormalMap.png; sourceTree = "<group>"; };
+		A901CF85187073C900A26A40 /* Reflection.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Reflection.png; sourceTree = "<group>"; };
+		A901CF86187073C900A26A40 /* ReflectiveEffects.pfx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ReflectiveEffects.pfx; sourceTree = "<group>"; };
+		A901CF87187073C900A26A40 /* ReflectiveMask.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = ReflectiveMask.pod; sourceTree = "<group>"; };
 		A912B1A317510F70002F6674 /* PostProc.pfx */ = {isa = PBXFileReference; explicitFileType = sourcecode.glsl; fileEncoding = 4; name = PostProc.pfx; path = ../Common/Resources/PostProc.pfx; sourceTree = "<group>"; };
 		A912B1A617510F7B002F6674 /* samsung_tv-med.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = "samsung_tv-med.pod"; sourceTree = "<group>"; };
 		A912B1A717510F7B002F6674 /* TVTestCard.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = TVTestCard.jpg; sourceTree = "<group>"; };
@@ -315,15 +326,6 @@
 		A9FF6DEC170DE83600FC35C8 /* body.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = body.png; sourceTree = "<group>"; };
 		A9FF6DED170DE83600FC35C8 /* legs.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = legs.png; sourceTree = "<group>"; };
 		A9FF6DEE170DE83600FC35C8 /* man.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = man.pod; sourceTree = "<group>"; };
-		A9FF6DF4170DE83F00FC35C8 /* BaseTex.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = BaseTex.png; sourceTree = "<group>"; };
-		A9FF6DF5170DE83F00FC35C8 /* BrushedSteel.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = BrushedSteel.png; sourceTree = "<group>"; };
-		A9FF6DF6170DE83F00FC35C8 /* BumpMap.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = BumpMap.fsh; sourceTree = "<group>"; };
-		A9FF6DF7170DE83F00FC35C8 /* BumpMap.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = BumpMap.vsh; sourceTree = "<group>"; };
-		A9FF6DF8170DE83F00FC35C8 /* EtchedMask.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = EtchedMask.pod; sourceTree = "<group>"; };
-		A9FF6DF9170DE83F00FC35C8 /* MaskEffects.pfx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = MaskEffects.pfx; sourceTree = "<group>"; };
-		A9FF6DFA170DE83F00FC35C8 /* NormalMap.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = NormalMap.png; sourceTree = "<group>"; };
-		A9FF6DFB170DE83F00FC35C8 /* Reflection.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Reflection.png; sourceTree = "<group>"; };
-		A9FF6DFC170DE83F00FC35C8 /* ReflectiveMask.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = ReflectiveMask.pod; sourceTree = "<group>"; };
 		A9FF6E06170DED6600FC35C8 /* tex_arm.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = tex_arm.png; path = ../Common/Resources/tex_arm.png; sourceTree = "<group>"; };
 		A9FF6E07170DED6600FC35C8 /* tex_base.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = tex_base.png; path = ../Common/Resources/tex_base.png; sourceTree = "<group>"; };
 		A9FF6E0A170DF27D00FC35C8 /* Head_clonespace.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Head_clonespace.png; path = ../Common/Resources/Head_clonespace.png; sourceTree = "<group>"; };
@@ -351,6 +353,24 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		A901CF7D187073C900A26A40 /* Masks */ = {
+			isa = PBXGroup;
+			children = (
+				A901CF7E187073C900A26A40 /* BaseTex.png */,
+				A901CF7F187073C900A26A40 /* BrushedSteel.png */,
+				A901CF80187073C900A26A40 /* BumpMap.fsh */,
+				A901CF81187073C900A26A40 /* BumpMap.vsh */,
+				A901CF82187073C900A26A40 /* EtchedEffects.pfx */,
+				A901CF83187073C900A26A40 /* EtchedMask.pod */,
+				A901CF84187073C900A26A40 /* NormalMap.png */,
+				A901CF85187073C900A26A40 /* Reflection.png */,
+				A901CF86187073C900A26A40 /* ReflectiveEffects.pfx */,
+				A901CF87187073C900A26A40 /* ReflectiveMask.pod */,
+			);
+			name = Masks;
+			path = ../Common/Resources/Masks;
+			sourceTree = "<group>";
+		};
 		A912B1A517510F7B002F6674 /* TV */ = {
 			isa = PBXGroup;
 			children = (
@@ -476,7 +496,7 @@
 				A9742DC3170DD72B001FD5A2 /* JoystickThumb.png */,
 				A9742DC4170DD72B001FD5A2 /* mallet.png */,
 				A9742DC5170DD72B001FD5A2 /* mallet.pod */,
-				A9FF6DF3170DE83F00FC35C8 /* Masks */,
+				A901CF7D187073C900A26A40 /* Masks */,
 				A9742DC6170DD72B001FD5A2 /* MountainGrass.jpg */,
 				A912B1A317510F70002F6674 /* PostProc.pfx */,
 				A9FF6DEA170DE83600FC35C8 /* RunningMen */,
@@ -650,23 +670,6 @@
 			path = ../Common/Resources/RunningMen;
 			sourceTree = "<group>";
 		};
-		A9FF6DF3170DE83F00FC35C8 /* Masks */ = {
-			isa = PBXGroup;
-			children = (
-				A9FF6DF4170DE83F00FC35C8 /* BaseTex.png */,
-				A9FF6DF5170DE83F00FC35C8 /* BrushedSteel.png */,
-				A9FF6DF6170DE83F00FC35C8 /* BumpMap.fsh */,
-				A9FF6DF7170DE83F00FC35C8 /* BumpMap.vsh */,
-				A9FF6DF8170DE83F00FC35C8 /* EtchedMask.pod */,
-				A9FF6DF9170DE83F00FC35C8 /* MaskEffects.pfx */,
-				A9FF6DFA170DE83F00FC35C8 /* NormalMap.png */,
-				A9FF6DFB170DE83F00FC35C8 /* Reflection.png */,
-				A9FF6DFC170DE83F00FC35C8 /* ReflectiveMask.pod */,
-			);
-			name = Masks;
-			path = ../Common/Resources/Masks;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -749,10 +752,9 @@
 			files = (
 				A9B066321864805800C467B5 /* CC3ClipSpaceSingleTexture.fsh in Resources */,
 				A97398F317C2CA6F00C17D89 /* BeachBall.pod in Resources */,
-				A9FF6DFF170DE83F00FC35C8 /* BumpMap.fsh in Resources */,
 				A9B066381864805800C467B5 /* CC3PointSprites.fsh in Resources */,
-				A9FF6E00170DE83F00FC35C8 /* BumpMap.vsh in Resources */,
 				A9B066401864805800C467B5 /* CC3DefaultPrecision.vshl in Resources */,
+				A901CF8F187073C900A26A40 /* Reflection.png in Resources */,
 				A9742D96170DD6A8001FD5A2 /* InfoPlist.strings in Resources */,
 				A9B066391864805800C467B5 /* CC3PointSpritesAlphaTest.fsh in Resources */,
 				A9B066301864805800C467B5 /* CC3BumpMapTangentSpaceAlphaTest.fsh in Resources */,
@@ -772,6 +774,7 @@
 				A9742DD7170DD72B001FD5A2 /* BoxTexture.png in Resources */,
 				A9B0663E1864805800C467B5 /* CC3SingleTextureReflectAlphaTest.fsh in Resources */,
 				A9742DD8170DD72B001FD5A2 /* Bricks-Red.jpg in Resources */,
+				A901CF88187073C900A26A40 /* BaseTex.png in Resources */,
 				A9B0663B1864805800C467B5 /* CC3SingleTexture.fsh in Resources */,
 				A9DDA35F17C8EF2E00F36657 /* Skybox.pvr in Resources */,
 				A9B066231864805800C467B5 /* CC3DefaultPrecision.fshl in Resources */,
@@ -800,13 +803,16 @@
 				A9742DEA170DD72B001FD5A2 /* GrassWithLeaves.jpg in Resources */,
 				A9B066491864805800C467B5 /* CC3ClipSpaceTexturable.vsh in Resources */,
 				A9742DEB170DD72B001FD5A2 /* GrassCloseUp.jpg in Resources */,
+				A901CF8A187073C900A26A40 /* BumpMap.fsh in Resources */,
 				A9742DEC170DD72B001FD5A2 /* GridButton48x48.png in Resources */,
 				A9B066461864805800C467B5 /* CC3VertexPositionNoBones.vshl in Resources */,
 				A9742DED170DD72B001FD5A2 /* Head.pod in Resources */,
+				A901CF8D187073C900A26A40 /* EtchedMask.pod in Resources */,
 				A973990117C2CA8F00C17D89 /* Dragon.pod in Resources */,
 				A9742DF7170DD72B001FD5A2 /* IntroducingPOD_float.pod in Resources */,
 				A9B066331864805800C467B5 /* CC3Fog.fsh in Resources */,
 				A9742DF9170DD72B001FD5A2 /* JoystickThumb.png in Resources */,
+				A901CF8E187073C900A26A40 /* NormalMap.png in Resources */,
 				A9B066241864805800C467B5 /* CC3DualSidedFragmentColor.fshl in Resources */,
 				A9742DFA170DD72B001FD5A2 /* mallet.png in Resources */,
 				A9B0664C1864805800C467B5 /* CC3TexturableBones.vsh in Resources */,
@@ -827,26 +833,22 @@
 				A9B066261864805800C467B5 /* CC3SetGLFragColor.fshl in Resources */,
 				A9B0664A1864805800C467B5 /* CC3PointSprites.vsh in Resources */,
 				A9FF6DF0170DE83600FC35C8 /* body.png in Resources */,
+				A901CF8B187073C900A26A40 /* BumpMap.vsh in Resources */,
 				A9FF6DF1170DE83600FC35C8 /* legs.png in Resources */,
 				A9FF6DF2170DE83600FC35C8 /* man.pod in Resources */,
-				A9FF6DFD170DE83F00FC35C8 /* BaseTex.png in Resources */,
-				A9FF6DFE170DE83F00FC35C8 /* BrushedSteel.png in Resources */,
-				A9FF6E01170DE83F00FC35C8 /* EtchedMask.pod in Resources */,
 				A9B066441864805800C467B5 /* CC3SingleTexture.vshl in Resources */,
-				A9FF6E02170DE83F00FC35C8 /* MaskEffects.pfx in Resources */,
-				A9FF6E03170DE83F00FC35C8 /* NormalMap.png in Resources */,
-				A9FF6E04170DE83F00FC35C8 /* Reflection.png in Resources */,
-				A9FF6E05170DE83F00FC35C8 /* ReflectiveMask.pod in Resources */,
 				A97398FE17C2CA8F00C17D89 /* Dragon-eye.jpg in Resources */,
 				A9FF6E08170DED6600FC35C8 /* tex_arm.png in Resources */,
 				A9B0662F1864805800C467B5 /* CC3BumpMapTangentSpace.fsh in Resources */,
 				A9B066341864805800C467B5 /* CC3NoTexture.fsh in Resources */,
 				A9FF6E09170DED6600FC35C8 /* tex_base.png in Resources */,
+				A901CF90187073C900A26A40 /* ReflectiveEffects.pfx in Resources */,
 				A9FF6E0C170DF27D00FC35C8 /* Head_clonespace.png in Resources */,
 				A9B066251864805800C467B5 /* CC3EnvironmentReflection.fshl in Resources */,
 				A97398FD17C2CA8F00C17D89 /* Dragon-diffuse.jpg in Resources */,
 				A9B0662B1864805800C467B5 /* CC3TexturableBumpMapTangentSpace.fshl in Resources */,
 				A9FF6E0D170DF27D00FC35C8 /* Head_diffuse.png in Resources */,
+				A901CF91187073C900A26A40 /* ReflectiveMask.pod in Resources */,
 				A9FF6E0F170DF69E00FC35C8 /* Stamp-nm.png in Resources */,
 				A9FF6E1D170E0C3B00FC35C8 /* Head_diffuse.bmp in Resources */,
 				A9B0663D1864805800C467B5 /* CC3SingleTextureReflect.fsh in Resources */,
@@ -856,7 +858,9 @@
 				A9B066431864805800C467B5 /* CC3IlluminatedMaterial.vshl in Resources */,
 				A924D162171307500061DDA0 /* tex_base.pvr in Resources */,
 				A9DDA36317C8F4DB00F36657 /* icon.icns in Resources */,
+				A901CF89187073C900A26A40 /* BrushedSteel.png in Resources */,
 				A9B0662D1864805800C467B5 /* CC3BumpMapObjectSpace.fsh in Resources */,
+				A901CF8C187073C900A26A40 /* EtchedEffects.pfx in Resources */,
 				A99205031726E58F005E96CE /* EnvMap.pfx in Resources */,
 				A99205041726E58F005E96CE /* EnvMapNegX.jpg in Resources */,
 				A99205051726E58F005E96CE /* EnvMapNegY.jpg in Resources */,
