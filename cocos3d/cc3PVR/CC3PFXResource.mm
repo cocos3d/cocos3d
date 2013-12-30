@@ -438,8 +438,7 @@ static Class _defaultSemanticDelegateClass = nil;
 @implementation CC3Material (PFXEffects)
 
 -(void) applyEffectNamed: (NSString*) effectName inPFXResourceNamed: (NSString*) rezName {
-	CC3PFXEffect* pfxEffect = [CC3PODResource.defaultPFXResourceClass getEffectNamed: effectName
-																  inPFXResourceNamed: rezName];
+	CC3PFXEffect* pfxEffect = [CC3PFXResource getEffectNamed: effectName inPFXResourceNamed: rezName];
 	CC3Assert(pfxEffect, @"%@ could not apply effect named %@ from PFX resource named %@."
 			  @"See previously logged error.", self, effectName, rezName);
 
@@ -447,8 +446,7 @@ static Class _defaultSemanticDelegateClass = nil;
 }
 
 -(void) applyEffectNamed: (NSString*) effectName inPFXResourceFile: (NSString*) filePath {
-	CC3PFXEffect* pfxEffect = [CC3PODResource.defaultPFXResourceClass getEffectNamed: effectName
-																  inPFXResourceFile: filePath];
+	CC3PFXEffect* pfxEffect = [CC3PFXResource getEffectNamed: effectName inPFXResourceFile: filePath];
 	CC3Assert(pfxEffect, @"%@ could not apply effect named %@ from PFX resource file %@."
 			  @"See previously logged error.", self, effectName, filePath);
 	
@@ -484,8 +482,7 @@ static Class _defaultSemanticDelegateClass = nil;
 @implementation CC3MeshNode (PFXEffects)
 
 -(void) applyEffectNamed: (NSString*) effectName inPFXResourceNamed: (NSString*) rezName {
-	CC3PFXEffect* pfxEffect = [CC3PODResource.defaultPFXResourceClass getEffectNamed: effectName
-																  inPFXResourceNamed: rezName];
+	CC3PFXEffect* pfxEffect = [CC3PFXResource getEffectNamed: effectName inPFXResourceNamed: rezName];
 	CC3Assert(pfxEffect, @"%@ could not apply effect named %@ from PFX resource named %@."
 			  @"See previously logged error.", self, effectName, rezName);
 
@@ -496,8 +493,7 @@ static Class _defaultSemanticDelegateClass = nil;
 }
 
 -(void) applyEffectNamed: (NSString*) effectName inPFXResourceFile: (NSString*) filePath {
-	CC3PFXEffect* pfxEffect = [CC3PODResource.defaultPFXResourceClass getEffectNamed: effectName
-																   inPFXResourceFile: filePath];
+	CC3PFXEffect* pfxEffect = [CC3PFXResource getEffectNamed: effectName inPFXResourceFile: filePath];
 	CC3Assert(pfxEffect, @"%@ could not apply effect named %@ from PFX resource file %@."
 			  @"See previously logged error.", self, effectName, filePath);
 	

@@ -872,8 +872,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// We want this node to be a SpinningNode class instead of the CC3PODNode class that
 	// is loaded from the POD file. We can swap it out by creating a copy of the loaded
 	// POD node, using a different node class as the base.
-	_dieCube = [podDieCube copyWithName: kDieCubeName
-								 asClass: [SpinningNode class]];
+	_dieCube = [podDieCube copyWithName: kDieCubeName asClass: [SpinningNode class]];
 
 	// Now set some properties, including the friction, and add the die cube to the scene
 	_dieCube.uniformScale = 30.0;

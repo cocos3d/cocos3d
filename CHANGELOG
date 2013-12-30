@@ -181,6 +181,7 @@ cocos3d 2.0.0 - 2013/12/31
 - [API change] Added CC3Node globalLightPosition property and deprecated globalLightLocation property.
 	- Fixed issue where the globalLightPosition property did not accurately track positional lights for object-space bump mapping.
 	
+- Added properties to CC3PODResource to simplify creating a resource subclass that uses alternate classes to instantiate nodes, meshes and materials during POD loading.
 - CC3PODResource now releases unneeded internal POD file structures after loading and building, to conserve memory.
 - Added CC3Resource saveToFile: method to allow resource types that support it to save content back to a file:
 	- Added CC3PODResource shouldAutoBuild property to allow POD files to be loaded without being built, so they can later be saved to file.

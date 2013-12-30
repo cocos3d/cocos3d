@@ -55,7 +55,7 @@ static const id placeHolder = [NSObject new];
 
 @synthesize pvrtModel=_pvrtModel, allNodes=_allNodes, meshes=_meshes;
 @synthesize materials=_materials, textures=_textures, textureParameters=_textureParameters;
-@synthesize pfxResourceClass=_pfxResourceClass, shouldAutoBuild = _shouldAutoBuild;
+@synthesize shouldAutoBuild = _shouldAutoBuild;
 @synthesize ambientLight=_ambientLight, backgroundColor=_backgroundColor;
 @synthesize animationFrameCount=_animationFrameCount, animationFrameRate=_animationFrameRate;
 
@@ -72,15 +72,6 @@ static const id placeHolder = [NSObject new];
 	_pvrtModel = NULL;
 }
 
-static Class _defaultPFXResourceClass = nil;
-
-+(Class) defaultPFXResourceClass {
-	if ( !_defaultPFXResourceClass ) self.defaultPFXResourceClass = [CC3PFXResource class];
-	return _defaultPFXResourceClass;
-}
-
-+(void) setDefaultPFXResourceClass: (Class) aClass { _defaultPFXResourceClass = aClass; }
-
 
 #pragma mark Allocation and initialization
 
@@ -92,7 +83,6 @@ static Class _defaultPFXResourceClass = nil;
 		_materials = [NSMutableArray array];
 		_textures = [NSMutableArray array];
 		_textureParameters = [CC3Texture defaultTextureParameters];
-		_pfxResourceClass = [[self class] defaultPFXResourceClass];
 		_shouldAutoBuild = YES;
 	}
 	return self;
@@ -308,8 +298,9 @@ static Class _defaultPFXResourceClass = nil;
 }
 
 -(CC3Node*) buildStructuralNodeAtIndex: (GLuint) nodeIndex {
-	if ( [self isBoneNode: nodeIndex] ) return [CC3PODBone nodeAtIndex: nodeIndex fromPODResource: self];
-	return [CC3PODNode nodeAtIndex: nodeIndex fromPODResource: self];
+	if ( [self isBoneNode: nodeIndex] )
+		return [self.boneNodeClass nodeAtIndex: nodeIndex fromPODResource: self];
+	return [self.structuralNodeClass nodeAtIndex: nodeIndex fromPODResource: self];
 }
 
 -(PODStructPtr) nodePODStructAtIndex: (GLuint) nodeIndex { return &self.pvrtModelImpl->pNode[nodeIndex]; }
@@ -359,7 +350,7 @@ static Class _defaultPFXResourceClass = nil;
 
 	if (softBodyComponents.count > 0) {
 		NSString* sbName = [NSString stringWithFormat: @"%@-SoftBody", self.name];
-		CC3SoftBodyNode* sbn = [CC3SoftBodyNode nodeWithName: sbName];
+		CC3SoftBodyNode* sbn = [self.softBodyNodeClass nodeWithName: sbName];
 		for (CC3Node* sbc in softBodyComponents) {
 			[sbn addChild: sbc];
 			[self removeNode: sbc];
@@ -382,8 +373,8 @@ static Class _defaultPFXResourceClass = nil;
 	SPODNode* psn = (SPODNode*)[self meshNodePODStructAtIndex: meshNodeIndex];
 	SPODMesh* psm = (SPODMesh*)[self meshPODStructAtIndex: psn->nIdx];
 	if (psm->sBoneBatches.nBatchCnt)
-		return [CC3PODSkinMeshNode nodeAtIndex: meshNodeIndex fromPODResource: self];
-	return [CC3PODMeshNode nodeAtIndex: meshNodeIndex fromPODResource: self];
+		return [self.skinMeshNodeClass nodeAtIndex: meshNodeIndex fromPODResource: self];
+	return [self.meshNodeClass nodeAtIndex: meshNodeIndex fromPODResource: self];
 }
 
 // mesh nodes appear first in the node array
@@ -403,7 +394,7 @@ static Class _defaultPFXResourceClass = nil;
 -(CC3Mesh*) meshModelAtIndex: (GLuint) meshIndex { return [self meshAtIndex: meshIndex]; }
 
 -(CC3Mesh*) buildMeshAtIndex: (GLuint) meshIndex {
-	return [CC3PODMesh meshAtIndex: meshIndex fromPODResource: self];
+	return [self.meshClass meshAtIndex: meshIndex fromPODResource: self];
 }
 
 -(PODStructPtr) meshPODStructAtIndex: (GLuint) meshIndex { return &self.pvrtModelImpl->pMesh[meshIndex]; }
@@ -419,7 +410,7 @@ static Class _defaultPFXResourceClass = nil;
 }
 
 -(CC3Light*) buildLightAtIndex: (GLuint) lightIndex {
-	return [CC3PODLight nodeAtIndex: lightIndex fromPODResource: self];
+	return [self.lightClass nodeAtIndex: lightIndex fromPODResource: self];
 }
 
 // light nodes appear after all the mesh nodes in the node array
@@ -439,7 +430,7 @@ static Class _defaultPFXResourceClass = nil;
 }
 
 -(CC3Camera*) buildCameraAtIndex: (GLuint) cameraIndex {
-	return [CC3PODCamera nodeAtIndex: cameraIndex fromPODResource: self];
+	return [self.cameraClass nodeAtIndex: cameraIndex fromPODResource: self];
 }
 
 // camera nodes appear after all the mesh nodes and light nodes in the node array
@@ -482,7 +473,7 @@ static Class _defaultPFXResourceClass = nil;
 }
 
 -(CC3Material*) buildMaterialAtIndex: (GLuint) materialIndex {
-	return [CC3PODMaterial materialAtIndex: materialIndex fromPODResource: self];
+	return [self.materialClass materialAtIndex: materialIndex fromPODResource: self];
 }
 
 -(PODStructPtr) materialPODStructAtIndex: (GLuint) materialIndex {
@@ -525,9 +516,33 @@ static Class _defaultPFXResourceClass = nil;
 	return &self.pvrtModelImpl->pTexture[textureIndex];
 }
 
+
+#pragma mark Content classes
+
+-(Class) structuralNodeClass { return [CC3PODNode class]; }
+
+-(Class) meshNodeClass { return [CC3PODMeshNode class]; }
+
+-(Class) meshClass { return [CC3PODMesh class]; }
+
+-(Class) materialClass { return [CC3PODMaterial class]; }
+
+-(Class) skinMeshNodeClass { return [CC3PODSkinMeshNode class]; }
+
+-(Class) boneNodeClass { return [CC3PODBone class]; }
+
+-(Class) softBodyNodeClass { return [CC3SoftBodyNode class]; }
+
+-(Class) lightClass { return [CC3PODLight class]; }
+
+-(Class) cameraClass { return [CC3PODCamera class]; }
+
+-(Class) pfxResourceClass { return [CC3PFXResource class]; }
+
 @end
 
 
+#pragma mark -
 #pragma mark Adding animation to nodes
 
 @implementation CC3Node (PODAnimation)

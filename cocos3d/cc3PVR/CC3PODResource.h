@@ -79,13 +79,7 @@
  * did not create yourself, and cannot edit.
  *
  * When customizing a subclass to change the properties of the objects returned, you will
- * most likely override one or more of the following methods:
- *   - buildMeshNodeAtIndex:
- *   - buildLightAtIndex:
- *   - buildCameraAtIndex:
- *   - buildStructuralNodeAtIndex:
- *   - buildMaterialAtIndex:
- *   - buildTextureAtIndex:
+ * most likely override one or more of the ...Class properties or build...AtIndex: methods:
  *
  * In most cases, the overridden method can simply invoke the superclass implementation
  * on this class, and then change the properties of the extracted object. In other cases
@@ -97,7 +91,6 @@
 	NSMutableArray* _meshes;
 	NSMutableArray* _materials;
 	NSMutableArray* _textures;
-	Class _pfxResourceClass;
 	ccTexParams _textureParameters;
 	ccColor4F _ambientLight;
 	ccColor4F _backgroundColor;
@@ -200,41 +193,6 @@
 
 /** The background color of the scene. */
 @property(nonatomic, readonly) ccColor4F backgroundColor;
-
-/**
- * The class used to instantiate CC3PFXResource instances used to read PFX files.
- * 
- * PFX effects found in PFX resource files can be used to define the GLSL shaders and textures
- * that are to be applied to a POD model under OpenGL ES 2.0. Each material in the POD file can
- * optionally specify a PFX effect and the PFX file in which it is to be found.
- *
- * The returned class must be a subclass of CC3PFXResource.
- *
- * The initial value is set from the class-side defaultPFXResourceClass property.
- */
-@property(nonatomic, assign) Class pfxResourceClass;
-
-/**
- * The default class used to instantiate CC3PFXResource instances used to read PFX files
- * from within instances of this class. When an instance of this class is created, the
- * value of the pfxResourceClass property is set from the value of this property.
- *
- * The returned class must be a subclass of CC3PFXResource.
- *
- * The initial value is the CC3PFXResource class.
- */
-+(Class) defaultPFXResourceClass;
-
-/**
- * The default class used to instantiate CC3PFXResource instances used to read PFX files
- * from within instances of this class. When an instance of this class is created, the
- * value of the pfxResourceClass property is set from the value of this property.
- *
- * The set class must be a subclass of CC3PFXResource.
- *
- * The initial value is the CC3PFXResource class.
- */
-+(void) setDefaultPFXResourceClass: (Class) aClass;
 
 
 #pragma mark Allocation and initialization
@@ -626,9 +584,99 @@
  */
 -(PODStructPtr) texturePODStructAtIndex: (uint) textureIndex;
 
+
+#pragma mark Content classes
+
+/**
+ * The class used to instantiate a structural node.
+ *
+ * Structural nodes are used to group mesh nodes together.
+ *
+ * This implementation returns CC3PODNode. To return a different class, create a subclass
+ * and override this method. The returned class must be a subclass of CC3PODNode.
+ */
+@property(nonatomic, retain, readonly) Class structuralNodeClass;
+
+/**
+ * The class used to instantiate a mesh node.
+ *
+ * This implementation returns CC3PODMeshNode. To return a different class, create a subclass
+ * and override this method. The returned class must be a subclass of CC3PODMeshNode.
+ */
+@property(nonatomic, retain, readonly) Class meshNodeClass;
+
+/**
+ * The class used to instantiate a mesh.
+ *
+ * This implementation returns CC3PODMesh. To return a different class, create a subclass
+ * and override this method. The returned class must be a subclass of CC3PODMesh.
+ */
+@property(nonatomic, retain, readonly) Class meshClass;
+
+/**
+ * The class used to instantiate a material.
+ *
+ * This implementation returns CC3PODMaterial. To return a different class, create a subclass
+ * and override this method. The returned class must be a subclass of CC3PODMaterial.
+ */
+@property(nonatomic, retain, readonly) Class materialClass;
+
+/**
+ * The class used to instantiate a mesh node in a vertex-skinned character.
+ *
+ * This implementation returns CC3PODSkinMeshNode. To return a different class, create a subclass
+ * and override this method. The returned class must be a subclass of CC3PODSkinMeshNode.
+ */
+@property(nonatomic, retain, readonly) Class skinMeshNodeClass;
+
+/**
+ * The class used to instantiate a bone in a vertex-skinned character.
+ *
+ * This implementation returns CC3PODBone. To return a different class, create a subclass
+ * and override this method. The returned class must be a subclass of CC3PODBone.
+ */
+@property(nonatomic, retain, readonly) Class boneNodeClass;
+
+/**
+ * The class used to instantiate a wrapper node around a vertex-skinned character.
+ *
+ * This implementation returns CC3SoftBodyNode. To return a different class, create a subclass
+ * and override this method. The returned class must be a subclass of CC3SoftBodyNode.
+ */
+@property(nonatomic, retain, readonly) Class softBodyNodeClass;
+
+/**
+ * The class used to instantiate a light.
+ *
+ * This implementation returns CC3PODLight. To return a different class, create a subclass
+ * and override this method. The returned class must be a subclass of CC3PODLight.
+ */
+@property(nonatomic, retain, readonly) Class lightClass;
+
+/**
+ * The class used to instantiate a camera.
+ *
+ * This implementation returns CC3PODCamera. To return a different class, create a subclass
+ * and override this method. The returned class must be a subclass of CC3PODCamera.
+ */
+@property(nonatomic, retain, readonly) Class cameraClass;
+
+/**
+ * The class used to create CC3PFXResource instances to read PFX files.
+ *
+ * PFX effects found in PFX resource files can be used to define the GLSL shaders and textures
+ * that are to be applied to a POD model under OpenGL ES 2.0. Each material in the POD file can
+ * optionally specify a PFX effect and the PFX file in which it is to be found.
+ *
+ * This implementation returns CC3PFXResource. To return a different class, create a subclass
+ * and override this method. The returned class must be a subclass of CC3PFXResource.
+ */
+@property(nonatomic, retain, readonly) Class pfxResourceClass;
+
 @end
 
 
+#pragma mark -
 #pragma mark Adding animation to nodes
 
 /** Extension category to provide support for POD animation. */
