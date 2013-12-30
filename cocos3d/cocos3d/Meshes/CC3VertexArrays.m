@@ -543,9 +543,7 @@ static GLuint lastAssignedVertexArrayTag;
 	// Allocate memory for strips, then copy them over
 	[self allocateStripLengths: another.stripCount];
 	GLuint* otherStripLengths = another.stripLengths;
-	for(int i=0; i < _stripCount; i++) {
-		_stripLengths[i] = otherStripLengths[i];
-	}
+	for(int i=0; i < _stripCount; i++) _stripLengths[i] = otherStripLengths[i];
 }
 
 -(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor {

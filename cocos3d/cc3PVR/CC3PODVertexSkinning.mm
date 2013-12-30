@@ -58,6 +58,17 @@
 
 -(void) setPodMaterialIndex: (GLint) aPODIndex { _podMaterialIndex = aPODIndex; }
 
+/** 
+ * Overridden to verify that the mesh is not constructed from triangle strips,
+ * which are not compatible with the way that skin sections render mesh sections.
+ */
+-(void) setMesh: (CC3Mesh*) mesh {
+	CC3Assert(mesh.drawingMode != GL_TRIANGLE_STRIP,
+			  @"%@ does not support the use of triangle strips."
+			  @" Vertex-skinned meshes must be constructed from triangles.", self);
+	[super setMesh: mesh];
+}
+
 /** Overridden to extract the bone batches from the associated POD mesh structure */
 -(id) initAtIndex: (GLint) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
 	if ( (self = [super initAtIndex: aPODIndex fromPODResource: aPODRez]) ) {

@@ -5,7 +5,7 @@
 	<key>Identifier</key>
 	<string>org.cocos3d.cocos3dAppOGLES2</string>
 	<key>Description</key>
-	<string>A simple cocos3d &quot;hello, world&quot; application using OpenGL ES 2.0 on an iOS or Android device. You can use this as the starting point for any cocos3d application that uses OpenGL ES 2.0 on an iOS or Android device. This template requires that cocos2d 2.x is installed. IMPORTANT: Once the template project opens, you must add the cocos2d target as a dependency of the application target. See the README! file for more.</string>
+	<string>IMPORTANT: Once this template project opens, you must add the cocos2d target as a dependency of the application target. See the README! file. You can use this as the starting point for any cocos3d application that uses OpenGL ES 2.0 on an iOS or Android device. This template requires that cocos2d 2.x is installed.</string>
 	<key>Kind</key>
 	<string>Xcode.Xcode3.ProjectTemplateUnitKind</string>
 	<key>Concrete</key>

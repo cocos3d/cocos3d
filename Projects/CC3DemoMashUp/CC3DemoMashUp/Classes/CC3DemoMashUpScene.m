@@ -604,10 +604,16 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// and the shouldDrawBoundingVolume property in the CC3Node class notes.
 //	aNode.shouldDrawAllBoundingVolumes = YES;
 	
-	// Select an appropriate shader program for each mesh node in this scene now. If this step
-	// is omitted, a shader program will be selected for each mesh node the first time that mesh
-	// node is drawn. Doing it now adds some additional time up front, but avoids potential pauses
-	// as each shader program is loaded as needed the first time it is needed during drawing.
+	// Select the appropriate shaders for each mesh node descendent now. If this step is omitted,
+	// shaders will be selected for each mesh node the first time that mesh node is drawn.
+	// Doing it now adds some additional time up front, but avoids potential pauses as the
+	// shaders are loaded, compiled, and linked, the first time it is needed during drawing.
+	// Shader selection is driven by the characteristics of each mesh node and its material,
+	// including the number of textures, whether alpha testing is used, etc. To have the
+	// correct shaders selected, it is important that you finish configuring the mesh nodes
+	// prior to invoking this method. If you change any of these characteristics that affect
+	// the shader selection, you can invoke the removeShaders method to cause different shaders
+	// to be selected, based on the new mesh node and material characteristics.
 	[aNode selectShaders];
 	
 	// For an interesting effect, to draw text descriptors and/or bounding boxes on every node

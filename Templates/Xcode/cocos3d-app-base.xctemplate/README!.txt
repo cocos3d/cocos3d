@@ -65,7 +65,7 @@ Reference Counting (ARC), and must be compiled separately in its own target.
 
 To add the `cocos2d` target as a dependency of the ___PROJECTNAMEASIDENTIFIER___ target, follow these steps:
 
-1. Open ___PROJECTNAMEASIDENTIFIER___ template project in Xcode.
+1. Open the ___PROJECTNAMEASIDENTIFIER___ template project in Xcode.
 2. In the Xcode Project Navigator pane, select the ___PROJECTNAMEASIDENTIFIER___ project.
 3. Select the ___PROJECTNAMEASIDENTIFIER___ target in the Project Editor pane.
 4. Click on the Build Phases tab.

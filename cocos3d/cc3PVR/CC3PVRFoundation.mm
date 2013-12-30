@@ -252,7 +252,7 @@ GLenum GLDrawingModeForSPODMesh(PODStructPtr aSPODMesh) {
 //			return usingStrips ? GL_LINE_STRIP : GL_LINES;
 		default:
 			LogError(@"Unknown EPODPrimitiveType %u", psm->ePrimitiveType);
-			return GL_TRIANGLE_STRIP;
+			return GL_TRIANGLES;
 	}
 }
 

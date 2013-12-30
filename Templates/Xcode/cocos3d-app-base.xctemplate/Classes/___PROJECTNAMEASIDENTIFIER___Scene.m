@@ -51,16 +51,38 @@
 	lamp.location = cc3v( -2.0, 0.0, 0.0 );
 	lamp.isDirectionalOnly = NO;
 	[cam addChild: lamp];
-
-	// This is the simplest way to load a POD resource file and add the
-	// nodes to the CC3Scene, if no customized resource subclass is needed.
-	[self addContentFromPODFile: @"hello-world.pod"];
 	
-	// Select an appropriate shader program for each mesh node in this scene now. If this step
-	// is omitted, a shader program will be selected for each mesh node the first time that mesh
-	// node is drawn. Doing it now adds some additional time up front, but avoids potential pauses
-	// as each shader program is loaded as needed the first time it is needed during drawing.
-	[self selectShaderPrograms];
+	// Create and load a POD resource file and add its entire contents to the scene.
+	// If needed, prior to adding the loaded content to the scene, you can customize the
+	// nodes in the resource, remove unwanted nodes from the resource (eg- extra cameras),
+	// or extract only specific nodes from the resource to add them directly to the scene,
+	// instead of adding the entire contents.
+	CC3ResourceNode* rezNode = [CC3PODResourceNode nodeFromFile: @"hello-world.pod"];
+	[self addChild: rezNode];
+	
+	// Or, if you don't need to modify the resource node at all before adding its content,
+	// you can simply use the following as a shortcut, instead of the previous lines.
+//	[self addContentFromPODFile: @"hello-world.pod"];
+	
+	// In some cases, PODs are created with opacity turned off by mistake. To avoid the possible
+	// surprise of an empty scene, the following line ensures that all nodes loaded so far will
+	// be visible. However, it also removes any translucency or transparency from the nodes, which
+	// may not be what you want. If your model contains transparency or translucency, remove this line.
+	self.opacity = 255;
+	
+	// Select the appropriate shaders for each mesh node in this scene now. If this step is
+	// omitted, a shaders will be selected for each mesh node the first time that mesh node is
+	// drawn. Doing it now adds some additional time up front, but avoids potential pauses as
+	// the shaders are loaded, compiled, and linked, the first time it is needed during drawing.
+	// This is not so important for content loaded in this initializeScene method, but it is
+	// very important for content loaded in the addSceneContentAsynchronously method.
+	// Shader selection is driven by the characteristics of each mesh node and its material,
+	// including the number of textures, whether alpha testing is used, etc. To have the
+	// correct shaders selected, it is important that you finish configuring the mesh nodes
+	// prior to invoking this method. If you change any of these characteristics that affect
+	// the shader selection, you can invoke the removeShaders method to cause different shaders
+	// to be selected, based on the new mesh node and material characteristics.
+	[self selectShaders];
 
 	// With complex scenes, the drawing of objects that are not within view of the camera will
 	// consume GPU resources unnecessarily, and potentially degrading app performance. We can
