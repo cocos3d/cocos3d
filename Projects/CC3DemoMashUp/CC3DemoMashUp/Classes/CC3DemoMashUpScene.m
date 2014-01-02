@@ -442,7 +442,9 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 							andFragmentShaderFile: @"CC3BumpMapTangentSpace.fsh"];
 	[CC3ShaderProgram programFromVertexShaderFile: @"CC3TexturableRigidBones.vsh"
 							andFragmentShaderFile: @"CC3NoTexture.fsh"];
-		
+	[CC3ShaderProgram programFromVertexShaderFile: @"CC3TexturableRigidBones.vsh"
+							andFragmentShaderFile: @"CC3SingleTexture.fsh"];
+
 	// Now pre-load shader programs that originate in PFX resources.
 	// Leave the shader program preloading on too...since effects will also load shaders.
 	CC3Resource.isPreloading = YES;

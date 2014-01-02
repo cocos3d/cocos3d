@@ -86,15 +86,19 @@
 }
 
 -(CC3GLSLUniform*)	addUniformOverrideFor: (CC3GLSLUniform*) uniform {
-	if( !uniform ) return nil;		// Don't add override for non-existant uniform
+	return [self addUniformOverride: [uniform copyAsClass: CC3GLSLUniformOverride.class]];
+}
+
+-(CC3GLSLUniformOverride*) addUniformOverride: (CC3GLSLUniformOverride*) uniformOverride {
+	if( !uniformOverride ) return nil;
 	
 	if ( !_uniforms ) _uniforms = [NSMutableArray array];
 	if ( !_uniformsByName ) _uniformsByName = [NSMutableDictionary new];
+	
+	[_uniformsByName setObject: uniformOverride forKey: uniformOverride.name];
+	[_uniforms addObject: uniformOverride];
 
-	CC3GLSLUniform* newUniform = [uniform copyAsClass: CC3GLSLUniformOverride.class];
-	[_uniformsByName setObject: newUniform forKey: newUniform.name];
-	[_uniforms addObject: newUniform];
-	return newUniform;
+	return uniformOverride;
 }
 
 -(void)	removeUniformOverride: (CC3GLSLUniform*) uniform {
@@ -150,17 +154,25 @@
 	return self;
 }
 
--(id) initForProgram: (CC3ShaderProgram*) program {
-	if ( (self = [self init]) ) {
-		self.program = program;			// will clear overrides
-	}
-	return self;
-}
-
 +(id) context { return [[self alloc] init]; }
 
-+(id) contextForProgram: (CC3ShaderProgram*) program {
-	return [[self alloc] initForProgram: program];
+-(id) copyWithZone: (NSZone*) zone {
+	CC3ShaderContext* aCopy = [[[self class] allocWithZone: zone] init];
+	[aCopy populateFrom: self];
+	return aCopy;
+}
+
+// Protected properties for copying
+-(NSArray*) uniforms { return _uniforms; }
+-(CC3ShaderProgram*) rawPureColorProgram { return _pureColorProgram; }
+
+-(void) populateFrom: (CC3ShaderContext*) another {
+	_program = another.program;
+	_pureColorProgram = another.rawPureColorProgram;
+	_shouldEnforceCustomOverrides = another.shouldEnforceCustomOverrides;
+	_shouldEnforceVertexAttributes = another.shouldEnforceVertexAttributes;
+
+	for (CC3GLSLUniformOverride* uo in another.uniforms) [self addUniformOverride: [uo copy]];
 }
 
 -(NSString*) description {

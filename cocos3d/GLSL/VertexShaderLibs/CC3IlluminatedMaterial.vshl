@@ -67,6 +67,7 @@
 
 #import "CC3Constants.shl"
 #import "CC3ModelMatrices.shl"
+#import "CC3CameraPosition.shl"
 
 
 #define MAX_LIGHTS	4
@@ -103,8 +104,6 @@ lowp vec3			backColor;										/**< Fragment back-face color. */
 
 varying lowp vec4	v_color;										/**< Fragment front-face color. */
 varying lowp vec4	v_colorBack;									/**< Fragment back-face color. */
-
-const vec3			kHalfPlaneOffset = vec3(0.0, 0.0, 1.0);
 
 /**
  * Returns a vector the contains the direction and intensity of light from the light at the
@@ -173,8 +172,11 @@ vec3 illuminateWith(highp vec4 illumination, int ltIdx, vec3 vNorm) {
 	vec3 vtxColor = (u_cc3LightAmbientColor[ltIdx] * matColorAmbient);
 	vtxColor += (u_cc3LightDiffuseColor[ltIdx] * matColorDiffuse.rgb * max(0.0, dot(vNorm, ltDir)));
 	
-	// Project normal onto half-plane vector to determine specular component
-	float specProj = dot(vNorm, normalize(ltDir + kHalfPlaneOffset));
+	// Project normal onto half-plane vector (between ltDir & camDir) to determine specular component.
+	// This is an efficient proxy for projecting the reflection vector onto the eye-direction.
+	highp vec3 camDir = normalize(u_cc3CameraPositionModel - vtxPosition.xyz);
+	highp vec3 halfPlane = normalize(ltDir + camDir);
+	highp float specProj = dot(vNorm, halfPlane);
 	if (specProj > 0.0) vtxColor += (pow(specProj, u_cc3MaterialShininess) *
 									 u_cc3MaterialSpecularColor *
 									 u_cc3LightSpecularColor[ltIdx]);

@@ -35,6 +35,16 @@
  *   - attribute highp vec4	a_cc3Position;				// Vertex position.
  *   - attribute vec3		a_cc3Normal;				// Vertex normal.
  *
+ * This library declares and uses the following attribute and uniform variables:
+ *   - attribute highp vec4	a_cc3Position;				// Vertex position.
+ *   - attribute float		a_cc3PointSize;				// Vertex point size.
+ *
+ *   - uniform bool			u_cc3VertexHasPointSize;	// Whether vertex point size attribute is available.
+ *   - uniform float		u_cc3PointSize;				// Default size of points, if not specified per-vertex.
+ *   - uniform float		u_cc3PointMinimumSize;		// Minimum size to which points will be allowed to shrink.
+ *   - uniform float		u_cc3PointMaximumSize;		// Maximum size to which points will be allowed to grow.
+ *   - uniform vec3			u_cc3PointSizeAttenuation;	// Coefficients of the size attenuation equation.
+ *
  * This library declares and outputs the following variables:
  *   - highp vec4			vtxPosition;				// The vertex position. High prec to match vertex attribute.
  *   - vec3					vtxNormal;					// The vertex normal.
@@ -44,12 +54,12 @@
 
 #import "CC3Constants.shl"
 #import "CC3ModelMatrices.shl"
+#import "CC3CameraPosition.shl"
 
 
 attribute highp vec4	a_cc3Position;				/**< Vertex position. */
 attribute float			a_cc3PointSize;				/**< Vertex point size. */
 
-uniform highp vec3		u_cc3CameraPositionModel;	/**< Location of the camera in local coordinates of model (not camera). */
 uniform bool			u_cc3VertexHasPointSize;	/**< Whether vertex point size attribute is available. */
 uniform float			u_cc3PointSize;				/**< Default size of points, if not specified per-vertex. */
 uniform float			u_cc3PointMinimumSize;		/**< Minimum size to which points will be allowed to shrink. */

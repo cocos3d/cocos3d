@@ -263,7 +263,7 @@
 	aNode = [aNode copy];
 	aNode.name = @"Vertex-skinned, bump-mapped mesh with rigidly-animated bones.";
 	aNode.hasRigidSkeleton = YES;
-	[aNode removeShaders];	// Clear shaders to reselect rigid bone shaders
+	[aNode removeShaders];			// Clear shaders to reselect rigid bone shaders
 	[self configureAndAddTemplate: aNode];
 	
 	// Start with one copy of the first available template node.

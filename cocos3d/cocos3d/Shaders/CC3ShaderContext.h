@@ -55,7 +55,7 @@
  * of any uniform variable with a defined semantic is derived automatically from the environment,
  * and cannot be retrieved or set directly.
 */
-@interface CC3ShaderContext : NSObject {
+@interface CC3ShaderContext : NSObject <NSCopying> {
 	CC3ShaderProgram* _program;
 	CC3ShaderProgram* _pureColorProgram;
 	NSMutableArray* _uniforms;
@@ -267,11 +267,18 @@
  */
 +(id) context;
 
-/** Initializes this instance for use with the specified program. */
--(id) initForProgram: (CC3ShaderProgram*) program;
-
-/** Allocates and initializes an autoreleased instance for use with the specified program. */
-+(id) contextForProgram: (CC3ShaderProgram*) program;
+/**
+ * Template method that populates this instance from the specified other instance.
+ *
+ * This method is invoked automatically during object copying via the copy or copyWithZone: method.
+ * In most situations, the application should use the copy method, and should never need to invoke
+ * this method directly.
+ *
+ * Subclasses that add additional instance state (instance variables) should extend copying by
+ * overriding this method to copy that additional state. Superclass that override this method should
+ * be sure to invoke the superclass implementation to ensure that superclass state is copied as well.
+ */
+-(void) populateFrom: (CC3ShaderContext*) another;
 
 /** Returns a detailed description of this instance, including a description of each uniform and attribute. */
 -(NSString*) fullDescription;

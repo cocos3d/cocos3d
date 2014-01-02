@@ -311,7 +311,7 @@
 	CC3ShaderProgram* sp = self.shaderProgram;
 	if ( !sp ) {
 		sp = [CC3ShaderProgram.shaderMatcher programForMeshNode: self];
-		_shaderContext.program = sp;		// Use ivar, so doesn't set descendants
+		self.shaderContext.program = sp;		// Use shaderContext, so doesn't set descendants
 		LogRez(@"Shader program %@ automatically selected for %@", sp, self);
 	}
 	return sp;
@@ -559,9 +559,9 @@
 	[super populateFrom: another];
 	
 	// Don't use setters, to avoid side effects, including to bounding volume and tex coords.
-	// Both this node and the other node will share the mesh.
-	_mesh = another.mesh;			// retained but not copied
-	_material = [another.material copy];	// retained
+	_mesh = another.mesh;					// Mesh shared between original and copy
+	_material = [another.material copy];
+	_shaderContext = [another.shaderContext copy];
 	
 	_pureColor = another.pureColor;
 	_shouldUseSmoothShading = another.shouldUseSmoothShading;

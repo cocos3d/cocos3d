@@ -102,13 +102,26 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 
 #pragma mark Allocation and initialization
 
--(id) initInProgram: (CC3ShaderProgram*) program atIndex: (GLuint) index {
+-(id) init {
 	if ( (self = [super init]) ) {
-		_index = index;
+		_program = nil;
+		_index = 0;
+		_location = 0;
+		_name = nil;
+		_type = GL_ZERO;
+		_size = 0;
 		_semantic = kCC3SemanticNone;
 		_semanticIndex = 0;
 		_scope = kCC3GLSLVariableScopeUnknown;
-		_program = program;			// not retained
+		_isGLStateKnown = NO;
+	}
+	return self;
+}
+
+-(id) initInProgram: (CC3ShaderProgram*) program atIndex: (GLuint) index {
+	if ( (self = [self init]) ) {
+		_index = index;
+		_program = program;
 		[self populateFromProgram];
 	}
 	return self;
@@ -123,15 +136,15 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 -(id) copyAsClass: (Class) aClass { return [self copyWithZone: nil asClass: aClass]; }
 
 -(id) copyWithZone: (NSZone*) zone asClass: (Class) aClass {
-	CC3GLSLVariable* aCopy = [[aClass allocWithZone: zone] initInProgram: _program atIndex: _index];
+	CC3GLSLVariable* aCopy = [[aClass allocWithZone: zone] init];
 	[aCopy populateFrom: self];
 	return aCopy;
 }
 
 -(void) populateFrom: (CC3GLSLVariable*) another {
-	// _program & _index set during init
+	_program = another.program;		// Not copied
+	_index = another.index;
 	_name = another.name;
-
 	_location = another.location;
 	_type = another.type;
 	_size = another.size;
@@ -216,24 +229,6 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 
 // Protected property for copying
 -(GLvoid*) varValue { return _varValue; }
-
-#pragma mark Allocation and initialization
-
--(id) initInProgram: (CC3ShaderProgram*) program atIndex: (GLuint) index {
-	// Initialized before populateFromProgram is invoked in parent initializer.
-	_varLen = 0;
-	_varValue = NULL;
-	return [super initInProgram: program atIndex: index];
-}
-
--(void) populateFrom: (CC3GLSLUniform*) another {
-	[super populateFrom: another];
-	_varLen = CC3GLElementTypeSize(_type) * _size;
-	free(_varValue);
-	_varValue = calloc(_varLen, 1);
-	free(_glVarValue);
-	_glVarValue = calloc(_varLen, 1);
-}
 
 
 #pragma mark Accessing uniform values
@@ -617,6 +612,29 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 		return YES;
 	}
 	return NO;
+}
+
+
+#pragma mark Allocation and initialization
+
+-(id) init {
+	if ( (self = [super init]) ) {
+		_varLen = 0;
+		_varValue = NULL;
+	}
+	return self;
+}
+
+-(void) populateFrom: (CC3GLSLUniform*) another {
+	[super populateFrom: another];
+	
+	_varLen = CC3GLElementTypeSize(_type) * _size;
+	free(_varValue);
+	_varValue = calloc(_varLen, 1);
+	free(_glVarValue);
+	_glVarValue = calloc(_varLen, 1);
+	
+	[self setValueFromUniform: another];
 }
 
 @end
