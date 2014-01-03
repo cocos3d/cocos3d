@@ -1,5 +1,5 @@
 /*
- * CC3VertexPositionPointSprite.vshl
+ * CC3LibVertexPositionPointSprite.vsh
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -52,9 +52,9 @@
  */
 
 
-#import "CC3Constants.shl"
-#import "CC3ModelMatrices.shl"
-#import "CC3CameraPosition.shl"
+#import "CC3LibConstants.vsh"
+#import "CC3LibModelMatrices.vsh"
+#import "CC3LibCameraPosition.vsh"
 
 
 attribute highp vec4	a_cc3Position;				/**< Vertex position. */

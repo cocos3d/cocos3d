@@ -1,5 +1,5 @@
 /*
- * CC3DefaultPrecision.vshl
+ * CC3LibModelMatrices.vsh
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -27,7 +27,9 @@
  * http://en.wikipedia.org/wiki/MIT_License
  */
 
-/** This shader library defines the default precision for vertex shaders. */
+/** This shader library declares matrices for transforming the model space to other spaces. */
 
-precision mediump float;
+uniform highp mat4	u_cc3MatrixModel;			/**< Current model-to-world matrix. */
+uniform highp mat4	u_cc3MatrixModelView;		/**< Current modelview matrix. */
+uniform highp mat4	u_cc3MatrixModelViewProj;	/**< Current model-view-projection matrix. */
 

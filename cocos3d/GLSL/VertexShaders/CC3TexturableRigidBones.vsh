@@ -58,12 +58,12 @@
  * CC3ShaderSemanticsByVarName instance.
  */
 
-#import "CC3DefaultPrecision.vshl"
-#import "CC3VertexPositionRigidBones.vshl"			// Vertex positioning
-#import "CC3IlluminatedMaterial.vshl"				// Materials and lighting
-#import "CC3BumpMapTangentSpaceLighting.vshl"		// Tangent-space bump-mapping
-#import "CC3EnvironmentReflection.vshl"				// Environmental reflections
-#import "CC3DoubleTexture.vshl"						// Textures
+#import "CC3LibDefaultPrecision.vsh"
+#import "CC3LibVertexPositionRigidBones.vsh"			// Vertex positioning
+#import "CC3LibIlluminatedMaterial.vsh"				// Materials and lighting
+#import "CC3LibBumpMapTangentSpaceLighting.vsh"		// Tangent-space bump-mapping
+#import "CC3LibEnvironmentReflection.vsh"				// Environmental reflections
+#import "CC3LibDoubleTexture.vsh"						// Textures
 
 void main() {
 	positionVertex();

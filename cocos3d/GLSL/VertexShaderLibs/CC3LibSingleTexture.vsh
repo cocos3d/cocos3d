@@ -1,5 +1,5 @@
 /*
- * CC3SingleSidedFragmentColor.fshl
+ * CC3LibSingleTexture.vsh
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -28,23 +28,21 @@
  */
 
 /**
- * This fragment shader library initializes the fragment color from the color set by the vertex shader.
+ * This vertex shader library supports a material with up to one texture.
  *
- * This library requires the following varying variables be declared and populated in the vertex shader:
- *   - varying lowp vec4	v_color;		// Fragment color.
+ * This library declares and uses the following attribute and uniform variables:
+ *   - attribute vec2		a_cc3TexCoord;		// Vertex texture coordinate for texture unit 0.
  *
- * This library declares and sets the intial values of the following local variables:
- *   - lowp vec4			fragColor;		// The fragment color
+ * This library declares and outputs the following variables:
+ *   - varying vec2			v_texCoord0;		// Fragment texture coordinates for texture unit 0.
  */
 
-varying lowp vec4	v_color;			/**< Fragment front-face color. */
+attribute vec2		a_cc3TexCoord;		/**< Vertex texture coordinate for texture unit 0. */
 
-lowp vec4			fragColor;			/**< Local fragment color variable. */
+varying vec2		v_texCoord0;		/**< Fragment texture coordinates for texture unit 0. */
 
-/** 
- * Sets the initial value of the fragment color from either the
- * front or back varying color established by the vertex shader.
- */
-void initFragmentColor() {
-	fragColor = v_color;
+/** Add textures to the vertex. Sets the v_texCoord0 varying.  */
+void textureVertex() {
+	v_texCoord0 = a_cc3TexCoord;
 }
+

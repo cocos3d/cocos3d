@@ -1,5 +1,5 @@
 /*
- * CC3EnvironmentReflection.fshl
+ * CC3LibEnvironmentReflection.fsh
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings

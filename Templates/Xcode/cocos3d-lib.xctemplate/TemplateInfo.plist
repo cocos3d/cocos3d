@@ -3181,40 +3181,7 @@
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
-		<key>cocos3d/GLSL/CommonLibs/CC3CameraPosition.shl</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>GLSL</string>
-				<string>CommonLibs</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/GLSL/CommonLibs/CC3CameraPosition.shl</string>
-		</dict>
-		<key>cocos3d/GLSL/CommonLibs/CC3Constants.shl</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>GLSL</string>
-				<string>CommonLibs</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/GLSL/CommonLibs/CC3Constants.shl</string>
-		</dict>
-		<key>cocos3d/GLSL/CommonLibs/CC3ModelMatrices.shl</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>GLSL</string>
-				<string>CommonLibs</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/GLSL/CommonLibs/CC3ModelMatrices.shl</string>
-		</dict>
-		<key>cocos3d/GLSL/FragShaderLibs/CC3DefaultPrecision.fshl</key>
+		<key>cocos3d/GLSL/FragShaderLibs/CC3LibDefaultPrecision.fsh</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -3223,9 +3190,9 @@
 				<string>FragShaderLibs</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/GLSL/FragShaderLibs/CC3DefaultPrecision.fshl</string>
+			<string>cocos3d/GLSL/FragShaderLibs/CC3LibDefaultPrecision.fsh</string>
 		</dict>
-		<key>cocos3d/GLSL/FragShaderLibs/CC3DualSidedFragmentColor.fshl</key>
+		<key>cocos3d/GLSL/FragShaderLibs/CC3LibDualSidedFragmentColor.fsh</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -3234,9 +3201,9 @@
 				<string>FragShaderLibs</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/GLSL/FragShaderLibs/CC3DualSidedFragmentColor.fshl</string>
+			<string>cocos3d/GLSL/FragShaderLibs/CC3LibDualSidedFragmentColor.fsh</string>
 		</dict>
-		<key>cocos3d/GLSL/FragShaderLibs/CC3EnvironmentReflection.fshl</key>
+		<key>cocos3d/GLSL/FragShaderLibs/CC3LibEnvironmentReflection.fsh</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -3245,9 +3212,9 @@
 				<string>FragShaderLibs</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/GLSL/FragShaderLibs/CC3EnvironmentReflection.fshl</string>
+			<string>cocos3d/GLSL/FragShaderLibs/CC3LibEnvironmentReflection.fsh</string>
 		</dict>
-		<key>cocos3d/GLSL/FragShaderLibs/CC3SetGLFragColor.fshl</key>
+		<key>cocos3d/GLSL/FragShaderLibs/CC3LibSetGLFragColor.fsh</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -3256,9 +3223,9 @@
 				<string>FragShaderLibs</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/GLSL/FragShaderLibs/CC3SetGLFragColor.fshl</string>
+			<string>cocos3d/GLSL/FragShaderLibs/CC3LibSetGLFragColor.fsh</string>
 		</dict>
-		<key>cocos3d/GLSL/FragShaderLibs/CC3SetGLFragColorAlphaTest.fshl</key>
+		<key>cocos3d/GLSL/FragShaderLibs/CC3LibSetGLFragColorAlphaTest.fsh</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -3267,9 +3234,9 @@
 				<string>FragShaderLibs</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/GLSL/FragShaderLibs/CC3SetGLFragColorAlphaTest.fshl</string>
+			<string>cocos3d/GLSL/FragShaderLibs/CC3LibSetGLFragColorAlphaTest.fsh</string>
 		</dict>
-		<key>cocos3d/GLSL/FragShaderLibs/CC3SingleSidedFragmentColor.fshl</key>
+		<key>cocos3d/GLSL/FragShaderLibs/CC3LibSingleSidedFragmentColor.fsh</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -3278,9 +3245,9 @@
 				<string>FragShaderLibs</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/GLSL/FragShaderLibs/CC3SingleSidedFragmentColor.fshl</string>
+			<string>cocos3d/GLSL/FragShaderLibs/CC3LibSingleSidedFragmentColor.fsh</string>
 		</dict>
-		<key>cocos3d/GLSL/FragShaderLibs/CC3SingleTexture2D.fshl</key>
+		<key>cocos3d/GLSL/FragShaderLibs/CC3LibSingleTexture2D.fsh</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -3289,9 +3256,9 @@
 				<string>FragShaderLibs</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/GLSL/FragShaderLibs/CC3SingleTexture2D.fshl</string>
+			<string>cocos3d/GLSL/FragShaderLibs/CC3LibSingleTexture2D.fsh</string>
 		</dict>
-		<key>cocos3d/GLSL/FragShaderLibs/CC3TexturableBumpMapObjectSpace.fshl</key>
+		<key>cocos3d/GLSL/FragShaderLibs/CC3LibTexturableBumpMapObjectSpace.fsh</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -3300,9 +3267,9 @@
 				<string>FragShaderLibs</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/GLSL/FragShaderLibs/CC3TexturableBumpMapObjectSpace.fshl</string>
+			<string>cocos3d/GLSL/FragShaderLibs/CC3LibTexturableBumpMapObjectSpace.fsh</string>
 		</dict>
-		<key>cocos3d/GLSL/FragShaderLibs/CC3TexturableBumpMapTangentSpace.fshl</key>
+		<key>cocos3d/GLSL/FragShaderLibs/CC3LibTexturableBumpMapTangentSpace.fsh</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -3311,9 +3278,9 @@
 				<string>FragShaderLibs</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/GLSL/FragShaderLibs/CC3TexturableBumpMapTangentSpace.fshl</string>
+			<string>cocos3d/GLSL/FragShaderLibs/CC3LibTexturableBumpMapTangentSpace.fsh</string>
 		</dict>
-		<key>cocos3d/GLSL/FragShaderLibs/CC3TexturedPointSprite.fshl</key>
+		<key>cocos3d/GLSL/FragShaderLibs/CC3LibTexturedPointSprite.fsh</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -3322,7 +3289,7 @@
 				<string>FragShaderLibs</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/GLSL/FragShaderLibs/CC3TexturedPointSprite.fshl</string>
+			<string>cocos3d/GLSL/FragShaderLibs/CC3LibTexturedPointSprite.fsh</string>
 		</dict>
 		<key>cocos3d/GLSL/FragShaders/CC3BumpMapObjectSpace.fsh</key>
 		<dict>
@@ -3522,7 +3489,7 @@
 			<key>Path</key>
 			<string>cocos3d/GLSL/FragShaders/CC3SingleTextureReflectAlphaTest.fsh</string>
 		</dict>
-		<key>cocos3d/GLSL/VertexShaderLibs/CC3BumpMapTangentSpaceLighting.vshl</key>
+		<key>cocos3d/GLSL/VertexShaderLibs/CC3LibBumpMapTangentSpaceLighting.vsh</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -3531,9 +3498,9 @@
 				<string>VertexShaderLibs</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/GLSL/VertexShaderLibs/CC3BumpMapTangentSpaceLighting.vshl</string>
+			<string>cocos3d/GLSL/VertexShaderLibs/CC3LibBumpMapTangentSpaceLighting.vsh</string>
 		</dict>
-		<key>cocos3d/GLSL/VertexShaderLibs/CC3DefaultPrecision.vshl</key>
+		<key>cocos3d/GLSL/VertexShaderLibs/CC3LibCameraPosition.vsh</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -3542,9 +3509,9 @@
 				<string>VertexShaderLibs</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/GLSL/VertexShaderLibs/CC3DefaultPrecision.vshl</string>
+			<string>cocos3d/GLSL/VertexShaderLibs/CC3LibCameraPosition.vsh</string>
 		</dict>
-		<key>cocos3d/GLSL/VertexShaderLibs/CC3DoubleTexture.vshl</key>
+		<key>cocos3d/GLSL/VertexShaderLibs/CC3LibConstants.vsh</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -3553,9 +3520,9 @@
 				<string>VertexShaderLibs</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/GLSL/VertexShaderLibs/CC3DoubleTexture.vshl</string>
+			<string>cocos3d/GLSL/VertexShaderLibs/CC3LibConstants.vsh</string>
 		</dict>
-		<key>cocos3d/GLSL/VertexShaderLibs/CC3EnvironmentReflection.vshl</key>
+		<key>cocos3d/GLSL/VertexShaderLibs/CC3LibDefaultPrecision.vsh</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -3564,9 +3531,9 @@
 				<string>VertexShaderLibs</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/GLSL/VertexShaderLibs/CC3EnvironmentReflection.vshl</string>
+			<string>cocos3d/GLSL/VertexShaderLibs/CC3LibDefaultPrecision.vsh</string>
 		</dict>
-		<key>cocos3d/GLSL/VertexShaderLibs/CC3IlluminatedMaterial.vshl</key>
+		<key>cocos3d/GLSL/VertexShaderLibs/CC3LibDoubleTexture.vsh</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -3575,9 +3542,9 @@
 				<string>VertexShaderLibs</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/GLSL/VertexShaderLibs/CC3IlluminatedMaterial.vshl</string>
+			<string>cocos3d/GLSL/VertexShaderLibs/CC3LibDoubleTexture.vsh</string>
 		</dict>
-		<key>cocos3d/GLSL/VertexShaderLibs/CC3SingleTexture.vshl</key>
+		<key>cocos3d/GLSL/VertexShaderLibs/CC3LibEnvironmentReflection.vsh</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -3586,9 +3553,9 @@
 				<string>VertexShaderLibs</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/GLSL/VertexShaderLibs/CC3SingleTexture.vshl</string>
+			<string>cocos3d/GLSL/VertexShaderLibs/CC3LibEnvironmentReflection.vsh</string>
 		</dict>
-		<key>cocos3d/GLSL/VertexShaderLibs/CC3VertexPositionBones.vshl</key>
+		<key>cocos3d/GLSL/VertexShaderLibs/CC3LibIlluminatedMaterial.vsh</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -3597,9 +3564,9 @@
 				<string>VertexShaderLibs</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/GLSL/VertexShaderLibs/CC3VertexPositionBones.vshl</string>
+			<string>cocos3d/GLSL/VertexShaderLibs/CC3LibIlluminatedMaterial.vsh</string>
 		</dict>
-		<key>cocos3d/GLSL/VertexShaderLibs/CC3VertexPositionNoBones.vshl</key>
+		<key>cocos3d/GLSL/VertexShaderLibs/CC3LibModelMatrices.vsh</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -3608,9 +3575,9 @@
 				<string>VertexShaderLibs</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/GLSL/VertexShaderLibs/CC3VertexPositionNoBones.vshl</string>
+			<string>cocos3d/GLSL/VertexShaderLibs/CC3LibModelMatrices.vsh</string>
 		</dict>
-		<key>cocos3d/GLSL/VertexShaderLibs/CC3VertexPositionPointSprite.vshl</key>
+		<key>cocos3d/GLSL/VertexShaderLibs/CC3LibSingleTexture.vsh</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -3619,9 +3586,9 @@
 				<string>VertexShaderLibs</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/GLSL/VertexShaderLibs/CC3VertexPositionPointSprite.vshl</string>
+			<string>cocos3d/GLSL/VertexShaderLibs/CC3LibSingleTexture.vsh</string>
 		</dict>
-		<key>cocos3d/GLSL/VertexShaderLibs/CC3VertexPositionRigidBones.vshl</key>
+		<key>cocos3d/GLSL/VertexShaderLibs/CC3LibVertexPositionBones.vsh</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -3630,7 +3597,40 @@
 				<string>VertexShaderLibs</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/GLSL/VertexShaderLibs/CC3VertexPositionRigidBones.vshl</string>
+			<string>cocos3d/GLSL/VertexShaderLibs/CC3LibVertexPositionBones.vsh</string>
+		</dict>
+		<key>cocos3d/GLSL/VertexShaderLibs/CC3LibVertexPositionNoBones.vsh</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>GLSL</string>
+				<string>VertexShaderLibs</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/GLSL/VertexShaderLibs/CC3LibVertexPositionNoBones.vsh</string>
+		</dict>
+		<key>cocos3d/GLSL/VertexShaderLibs/CC3LibVertexPositionPointSprite.vsh</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>GLSL</string>
+				<string>VertexShaderLibs</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/GLSL/VertexShaderLibs/CC3LibVertexPositionPointSprite.vsh</string>
+		</dict>
+		<key>cocos3d/GLSL/VertexShaderLibs/CC3LibVertexPositionRigidBones.vsh</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>GLSL</string>
+				<string>VertexShaderLibs</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/GLSL/VertexShaderLibs/CC3LibVertexPositionRigidBones.vsh</string>
 		</dict>
 		<key>cocos3d/GLSL/VertexShaders/CC3ClipSpaceTexturable.vsh</key>
 		<dict>
@@ -3955,19 +3955,16 @@
 		<string>cocos3d/deprecated/CC3World.m</string>
 		<string>cocos3d/deprecated/CCNodeController.h</string>
 		<string>cocos3d/deprecated/ControllableCCLayer.h</string>
-		<string>cocos3d/GLSL/CommonLibs/CC3CameraPosition.shl</string>
-		<string>cocos3d/GLSL/CommonLibs/CC3Constants.shl</string>
-		<string>cocos3d/GLSL/CommonLibs/CC3ModelMatrices.shl</string>
-		<string>cocos3d/GLSL/FragShaderLibs/CC3DefaultPrecision.fshl</string>
-		<string>cocos3d/GLSL/FragShaderLibs/CC3DualSidedFragmentColor.fshl</string>
-		<string>cocos3d/GLSL/FragShaderLibs/CC3EnvironmentReflection.fshl</string>
-		<string>cocos3d/GLSL/FragShaderLibs/CC3SetGLFragColor.fshl</string>
-		<string>cocos3d/GLSL/FragShaderLibs/CC3SetGLFragColorAlphaTest.fshl</string>
-		<string>cocos3d/GLSL/FragShaderLibs/CC3SingleSidedFragmentColor.fshl</string>
-		<string>cocos3d/GLSL/FragShaderLibs/CC3SingleTexture2D.fshl</string>
-		<string>cocos3d/GLSL/FragShaderLibs/CC3TexturableBumpMapObjectSpace.fshl</string>
-		<string>cocos3d/GLSL/FragShaderLibs/CC3TexturableBumpMapTangentSpace.fshl</string>
-		<string>cocos3d/GLSL/FragShaderLibs/CC3TexturedPointSprite.fshl</string>
+		<string>cocos3d/GLSL/FragShaderLibs/CC3LibDefaultPrecision.fsh</string>
+		<string>cocos3d/GLSL/FragShaderLibs/CC3LibDualSidedFragmentColor.fsh</string>
+		<string>cocos3d/GLSL/FragShaderLibs/CC3LibEnvironmentReflection.fsh</string>
+		<string>cocos3d/GLSL/FragShaderLibs/CC3LibSetGLFragColor.fsh</string>
+		<string>cocos3d/GLSL/FragShaderLibs/CC3LibSetGLFragColorAlphaTest.fsh</string>
+		<string>cocos3d/GLSL/FragShaderLibs/CC3LibSingleSidedFragmentColor.fsh</string>
+		<string>cocos3d/GLSL/FragShaderLibs/CC3LibSingleTexture2D.fsh</string>
+		<string>cocos3d/GLSL/FragShaderLibs/CC3LibTexturableBumpMapObjectSpace.fsh</string>
+		<string>cocos3d/GLSL/FragShaderLibs/CC3LibTexturableBumpMapTangentSpace.fsh</string>
+		<string>cocos3d/GLSL/FragShaderLibs/CC3LibTexturedPointSprite.fsh</string>
 		<string>cocos3d/GLSL/FragShaders/CC3BumpMapObjectSpace.fsh</string>
 		<string>cocos3d/GLSL/FragShaders/CC3BumpMapObjectSpaceAlphaTest.fsh</string>
 		<string>cocos3d/GLSL/FragShaders/CC3BumpMapTangentSpace.fsh</string>
@@ -3986,16 +3983,19 @@
 		<string>cocos3d/GLSL/FragShaders/CC3SingleTextureAlphaTest.fsh</string>
 		<string>cocos3d/GLSL/FragShaders/CC3SingleTextureReflect.fsh</string>
 		<string>cocos3d/GLSL/FragShaders/CC3SingleTextureReflectAlphaTest.fsh</string>
-		<string>cocos3d/GLSL/VertexShaderLibs/CC3BumpMapTangentSpaceLighting.vshl</string>
-		<string>cocos3d/GLSL/VertexShaderLibs/CC3DefaultPrecision.vshl</string>
-		<string>cocos3d/GLSL/VertexShaderLibs/CC3DoubleTexture.vshl</string>
-		<string>cocos3d/GLSL/VertexShaderLibs/CC3EnvironmentReflection.vshl</string>
-		<string>cocos3d/GLSL/VertexShaderLibs/CC3IlluminatedMaterial.vshl</string>
-		<string>cocos3d/GLSL/VertexShaderLibs/CC3SingleTexture.vshl</string>
-		<string>cocos3d/GLSL/VertexShaderLibs/CC3VertexPositionBones.vshl</string>
-		<string>cocos3d/GLSL/VertexShaderLibs/CC3VertexPositionNoBones.vshl</string>
-		<string>cocos3d/GLSL/VertexShaderLibs/CC3VertexPositionPointSprite.vshl</string>
-		<string>cocos3d/GLSL/VertexShaderLibs/CC3VertexPositionRigidBones.vshl</string>
+		<string>cocos3d/GLSL/VertexShaderLibs/CC3LibBumpMapTangentSpaceLighting.vsh</string>
+		<string>cocos3d/GLSL/VertexShaderLibs/CC3LibCameraPosition.vsh</string>
+		<string>cocos3d/GLSL/VertexShaderLibs/CC3LibConstants.vsh</string>
+		<string>cocos3d/GLSL/VertexShaderLibs/CC3LibDefaultPrecision.vsh</string>
+		<string>cocos3d/GLSL/VertexShaderLibs/CC3LibDoubleTexture.vsh</string>
+		<string>cocos3d/GLSL/VertexShaderLibs/CC3LibEnvironmentReflection.vsh</string>
+		<string>cocos3d/GLSL/VertexShaderLibs/CC3LibIlluminatedMaterial.vsh</string>
+		<string>cocos3d/GLSL/VertexShaderLibs/CC3LibModelMatrices.vsh</string>
+		<string>cocos3d/GLSL/VertexShaderLibs/CC3LibSingleTexture.vsh</string>
+		<string>cocos3d/GLSL/VertexShaderLibs/CC3LibVertexPositionBones.vsh</string>
+		<string>cocos3d/GLSL/VertexShaderLibs/CC3LibVertexPositionNoBones.vsh</string>
+		<string>cocos3d/GLSL/VertexShaderLibs/CC3LibVertexPositionPointSprite.vsh</string>
+		<string>cocos3d/GLSL/VertexShaderLibs/CC3LibVertexPositionRigidBones.vsh</string>
 		<string>cocos3d/GLSL/VertexShaders/CC3ClipSpaceTexturable.vsh</string>
 		<string>cocos3d/GLSL/VertexShaders/CC3PointSprites.vsh</string>
 		<string>cocos3d/GLSL/VertexShaders/CC3Texturable.vsh</string>

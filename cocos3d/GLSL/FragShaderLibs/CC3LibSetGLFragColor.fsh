@@ -1,5 +1,5 @@
 /*
- * CC3DoubleTexture.vshl
+ * CC3LibSetGLFragColor.fsh
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -28,21 +28,13 @@
  */
 
 /**
- * This vertex shader library supports a material with up to one texture.
+ * This fragment shader library contains a setGLFragColor() function that sets the
+ * color of the fragment with no further adjustments.
  *
- * This library declares and uses the following attribute and uniform variables:
- *   - attribute vec2		a_cc3TexCoord;		// Vertex texture coordinate for texture unit 0.
- *
- * This library declares and outputs the following variables:
- *   - varying vec2			v_texCoord0;		// Fragment texture coordinates for texture unit 0.
+ * This library requires the following local variables be declared and populated outside this library:
+ *   - lowp vec4	fragColor;		// The fragment color
  */
 
-attribute vec2		a_cc3TexCoord;		/**< Vertex texture coordinate for texture unit 0. */
-
-varying vec2		v_texCoord0;		/**< Fragment texture coordinates for texture unit 0. */
-
-/** Add textures to the vertex. Sets the v_texCoord0 varying.  */
-void textureVertex() {
-	v_texCoord0 = a_cc3TexCoord;
+void setGLFragColor() {
+	gl_FragColor = fragColor;
 }
-

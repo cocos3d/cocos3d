@@ -47,10 +47,10 @@
  * CC3ShaderSemanticsByVarName instance.
  */
 
-#import "CC3DefaultPrecision.fshl"
-#import "CC3DualSidedFragmentColor.fshl"
-#import "CC3TexturableBumpMapTangentSpace.fshl"
-#import "CC3SetGLFragColorAlphaTest.fshl"
+#import "CC3LibDefaultPrecision.fsh"
+#import "CC3LibDualSidedFragmentColor.fsh"
+#import "CC3LibTexturableBumpMapTangentSpace.fsh"
+#import "CC3LibSetGLFragColorAlphaTest.fsh"
 
 void main() {
 	initFragmentColor();

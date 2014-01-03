@@ -39,9 +39,9 @@
  * CC3ShaderSemanticsByVarName instance.
  */
 
-#import "CC3DefaultPrecision.vshl"
-#import "CC3VertexPositionPointSprite.vshl"				// Vertex positioning
-#import "CC3IlluminatedMaterial.vshl"					// Materials and lighting
+#import "CC3LibDefaultPrecision.vsh"
+#import "CC3LibVertexPositionPointSprite.vsh"				// Vertex positioning
+#import "CC3LibIlluminatedMaterial.vsh"					// Materials and lighting
 
 void main() {
 	positionVertex();

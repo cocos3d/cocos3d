@@ -1,5 +1,5 @@
 /*
- * CC3CameraPosition.shl
+ * CC3LibDefaultPrecision.vsh
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -27,7 +27,7 @@
  * http://en.wikipedia.org/wiki/MIT_License
  */
 
-/** This shader library declares uniforms for camera position. */
+/** This shader library defines the default precision for vertex shaders. */
 
-uniform highp vec3	u_cc3CameraPositionModel;		/**< Location of the camera in local coordinates of model (not camera). */
+precision mediump float;
 

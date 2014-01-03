@@ -37,7 +37,7 @@
  * CC3ShaderSemanticsByVarName instance.
  */
 
-#import "CC3DefaultPrecision.fshl"
+#import "CC3LibDefaultPrecision.fsh"
 
 //-------------- UNIFORMS ----------------------
 uniform bool		u_cc3FogIsEnabled;			/**< Whether scene fogging is enabled. */

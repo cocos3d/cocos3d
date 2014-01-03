@@ -1,5 +1,5 @@
 /*
- * CC3TexturableBumpMapObjectSpace.fshl
+ * CC3LibTexturableBumpMapObjectSpace.fsh
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings

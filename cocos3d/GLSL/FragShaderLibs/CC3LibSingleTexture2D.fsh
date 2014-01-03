@@ -1,5 +1,5 @@
 /*
- * CC3DefaultPrecision.fshl
+ * CC3LibSingleTexture2D.fsh
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -27,7 +27,23 @@
  * http://en.wikipedia.org/wiki/MIT_License
  */
 
-/** This shader library defines the default precision for fragment shaders. */
+/**
+ * This fragment shader appies a single 2D texture to the model.
+ *
+ * This library requires the following varying variables be declared and populated in the vertex shader:
+ *   - varying vec2			v_texCoord0;		// Fragment texture coordinates for texture unit 0.
+ *
+ * This library requires the following local variables be declared and populated outside this library:
+ *   - lowp vec4			fragColor;			// The fragment color
+ *
+ * This library declares and uses the following attribute and uniform variables:
+ *   - uniform sampler2D	s_cc3Texture2D;		// 2D texture sampler.
+ */
 
-precision mediump float;
+uniform sampler2D	s_cc3Texture2D;				/**< Texture sampler. */
 
+varying vec2		v_texCoord0;				/**< Fragment texture coordinates for texture unit 0. */
+
+void applyTexture2D() {
+	fragColor *= texture2D(s_cc3Texture2D, v_texCoord0);
+}

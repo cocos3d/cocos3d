@@ -1,5 +1,5 @@
 /*
- * CC3VertexPositionNoBones.vshl
+ * CC3LibEnvironmentReflection.vsh
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -28,44 +28,29 @@
  */
 
 /**
- * This vertex shader library establishes the position and normal of a vertex based on a 
- * static mesh where the vertices are not deformed by the movement of bones.
+ * This vertex shader library adds reflective materials.
  *
- * This library declares and uses the following attribute and uniform variables:
- *   - attribute highp vec4	a_cc3Position;				// Vertex position.
- *   - attribute vec3		a_cc3Normal;				// Vertex normal.
- *   - attribute vec3		a_cc3Tangent;				// Vertex tangent
- *
- *   - uniform bool			u_cc3VertexHasTangent;		// Whether the vertex tangent is available.
- *
- * This library declares and outputs the following variables:
+ * This library requires the following local variables be declared and populated outside this library:
  *   - highp vec4			vtxPosition;				// The vertex position. High prec to match vertex attribute.
  *   - vec3					vtxNormal;					// The vertex normal.
- *   - vec3					vtxTangent;					// The vertex tangent.
- *   - glPosition
+ *
+ * This library declares and outputs the following variables:
+ *   - varying vec3		v_reflectDirGlobal;				// Fragment reflection vector direction in global coordinates.
  */
 
 
-#import "CC3ModelMatrices.shl"
+#import "CC3LibModelMatrices.vsh"
+#import "CC3LibCameraPosition.vsh"
 
 
-attribute highp vec4	a_cc3Position;			/**< Vertex position. */
-attribute vec3			a_cc3Normal;			/**< Vertex normal. */
-attribute vec3			a_cc3Tangent;			/**< Vertex tangent. */
+varying vec3		v_reflectDirGlobal;			/**< Fragment reflection vector direction in global coordinates. */
 
-uniform bool			u_cc3VertexHasTangent;	/**< Whether the vertex tangent is available (used downstream). */
-
-highp vec4				vtxPosition;			/**< The vertex position. High prec to match vertex attribute. */
-vec3					vtxNormal;				/**< The vertex normal. */
-vec3					vtxTangent;				/**< The vertex tangent. */
-
-
-void positionVertex() {
-	
-	vtxPosition = a_cc3Position;
-	vtxNormal = a_cc3Normal;
-	vtxTangent = a_cc3Tangent;
-
-	gl_Position = u_cc3MatrixModelViewProj * vtxPosition;
+/** 
+ * For environmental mapping reflection effect, reflects the camera direction into a global-coordinate
+ * reflection vector, v_reflectDirGlobal that can be used in a cube-map texture sampler.
+ */
+void reflectVertex() {
+	vec3 camDir = vtxPosition.xyz - u_cc3CameraPositionModel;
+	v_reflectDirGlobal = (u_cc3MatrixModel * vec4(reflect(camDir, vtxNormal), 0.0)).xyz;
 }
 

@@ -1,5 +1,5 @@
 /*
- * CC3EnvironmentReflection.vshl
+ * CC3LibConstants.vsh
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -27,30 +27,12 @@
  * http://en.wikipedia.org/wiki/MIT_License
  */
 
-/**
- * This vertex shader library adds reflective materials.
- *
- * This library requires the following local variables be declared and populated outside this library:
- *   - highp vec4			vtxPosition;				// The vertex position. High prec to match vertex attribute.
- *   - vec3					vtxNormal;					// The vertex normal.
- *
- * This library declares and outputs the following variables:
- *   - varying vec3		v_reflectDirGlobal;				// Fragment reflection vector direction in global coordinates.
- */
+/** This shader library declares a number of standard constants. */
 
-
-#import "CC3ModelMatrices.shl"
-#import "CC3CameraPosition.shl"
-
-
-varying vec3		v_reflectDirGlobal;			/**< Fragment reflection vector direction in global coordinates. */
-
-/** 
- * For environmental mapping reflection effect, reflects the camera direction into a global-coordinate
- * reflection vector, v_reflectDirGlobal that can be used in a cube-map texture sampler.
- */
-void reflectVertex() {
-	vec3 camDir = vtxPosition.xyz - u_cc3CameraPositionModel;
-	v_reflectDirGlobal = (u_cc3MatrixModel * vec4(reflect(camDir, vtxNormal), 0.0)).xyz;
-}
+const float		kZero = 0.0;
+const float		kOne = 1.0;
+const vec3		kVec3Zero = vec3(0.0);
+const vec4		kVec4Zero = vec4(0.0);
+const vec4		kVec4ZeroLoc = vec4(0.0, 0.0, 0.0, 1.0);
+const vec3		kAttenuationNone = vec3(1.0, 0.0, 0.0);
 

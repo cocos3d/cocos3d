@@ -1,5 +1,5 @@
 /*
- * CC3IlluminatedMaterial.vshl
+ * CC3LibIlluminatedMaterial.vsh
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -65,9 +65,9 @@
  */
 
 
-#import "CC3Constants.shl"
-#import "CC3ModelMatrices.shl"
-#import "CC3CameraPosition.shl"
+#import "CC3LibConstants.vsh"
+#import "CC3LibModelMatrices.vsh"
+#import "CC3LibCameraPosition.vsh"
 
 
 #define MAX_LIGHTS	4

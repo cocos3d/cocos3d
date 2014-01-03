@@ -1,5 +1,5 @@
 /*
- * CC3TexturedPointSprite.fshl
+ * CC3LibSingleSidedFragmentColor.fsh
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -28,17 +28,23 @@
  */
 
 /**
- * This fragment shader appies a single 2D texture to a point sprite.
+ * This fragment shader library initializes the fragment color from the color set by the vertex shader.
  *
- * This library requires the following local variables be declared and populated outside this library:
- *   - lowp vec4			fragColor;			// The fragment color
+ * This library requires the following varying variables be declared and populated in the vertex shader:
+ *   - varying lowp vec4	v_color;		// Fragment color.
  *
- * This library declares and uses the following attribute and uniform variables:
- *   - uniform sampler2D	s_cc3Texture2D;		// 2D texture sampler.
+ * This library declares and sets the intial values of the following local variables:
+ *   - lowp vec4			fragColor;		// The fragment color
  */
 
-uniform sampler2D	s_cc3Texture2D;				/**< 2D texture sampler. */
+varying lowp vec4	v_color;			/**< Fragment front-face color. */
 
-void applySpriteTexture() {
-	fragColor *= texture2D(s_cc3Texture2D, gl_PointCoord);
+lowp vec4			fragColor;			/**< Local fragment color variable. */
+
+/** 
+ * Sets the initial value of the fragment color from either the
+ * front or back varying color established by the vertex shader.
+ */
+void initFragmentColor() {
+	fragColor = v_color;
 }

@@ -1,5 +1,5 @@
 /*
- * CC3ModelMatrices.shl
+ * CC3LibCameraPosition.vsh
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -27,9 +27,7 @@
  * http://en.wikipedia.org/wiki/MIT_License
  */
 
-/** This shader library declares matrices for transforming the model space to other spaces. */
+/** This shader library declares uniforms for camera position. */
 
-uniform highp mat4	u_cc3MatrixModel;			/**< Current model-to-world matrix. */
-uniform highp mat4	u_cc3MatrixModelView;		/**< Current modelview matrix. */
-uniform highp mat4	u_cc3MatrixModelViewProj;	/**< Current model-view-projection matrix. */
+uniform highp vec3	u_cc3CameraPositionModel;		/**< Location of the camera in local coordinates of model (not camera). */
 

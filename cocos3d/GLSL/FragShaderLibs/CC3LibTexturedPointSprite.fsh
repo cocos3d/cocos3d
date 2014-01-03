@@ -1,5 +1,5 @@
 /*
- * CC3SetGLFragColor.fshl
+ * CC3LibTexturedPointSprite.fsh
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -28,13 +28,17 @@
  */
 
 /**
- * This fragment shader library contains a setGLFragColor() function that sets the
- * color of the fragment with no further adjustments.
+ * This fragment shader appies a single 2D texture to a point sprite.
  *
  * This library requires the following local variables be declared and populated outside this library:
- *   - lowp vec4	fragColor;		// The fragment color
+ *   - lowp vec4			fragColor;			// The fragment color
+ *
+ * This library declares and uses the following attribute and uniform variables:
+ *   - uniform sampler2D	s_cc3Texture2D;		// 2D texture sampler.
  */
 
-void setGLFragColor() {
-	gl_FragColor = fragColor;
+uniform sampler2D	s_cc3Texture2D;				/**< 2D texture sampler. */
+
+void applySpriteTexture() {
+	fragColor *= texture2D(s_cc3Texture2D, gl_PointCoord);
 }

@@ -42,11 +42,11 @@
  * CC3ShaderSemanticsByVarName instance.
  */
 
-#import "CC3DefaultPrecision.fshl"
-#import "CC3DualSidedFragmentColor.fshl"
-#import "CC3SingleTexture2D.fshl"
-#import "CC3EnvironmentReflection.fshl"
-#import "CC3SetGLFragColor.fshl"
+#import "CC3LibDefaultPrecision.fsh"
+#import "CC3LibDualSidedFragmentColor.fsh"
+#import "CC3LibSingleTexture2D.fsh"
+#import "CC3LibEnvironmentReflection.fsh"
+#import "CC3LibSetGLFragColor.fsh"
 
 void main() {
 	initFragmentColor();

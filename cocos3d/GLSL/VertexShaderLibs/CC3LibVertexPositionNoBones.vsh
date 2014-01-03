@@ -1,5 +1,5 @@
 /*
- * CC3DoubleTexture.vshl
+ * CC3LibVertexPositionNoBones.vsh
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -28,26 +28,44 @@
  */
 
 /**
- * This vertex shader library supports a material with up to two textures.
+ * This vertex shader library establishes the position and normal of a vertex based on a 
+ * static mesh where the vertices are not deformed by the movement of bones.
  *
  * This library declares and uses the following attribute and uniform variables:
- *   - attribute vec2	a_cc3TexCoord0;		// Vertex texture coordinate for texture unit 0.
- *   - attribute vec2	a_cc3TexCoord1;		// Vertex texture coordinate for texture unit 1.
+ *   - attribute highp vec4	a_cc3Position;				// Vertex position.
+ *   - attribute vec3		a_cc3Normal;				// Vertex normal.
+ *   - attribute vec3		a_cc3Tangent;				// Vertex tangent
+ *
+ *   - uniform bool			u_cc3VertexHasTangent;		// Whether the vertex tangent is available.
  *
  * This library declares and outputs the following variables:
- *   - varying vec2		v_texCoord0;		// Fragment texture coordinates for texture unit 0.
- *   - varying vec2		v_texCoord1;		// Fragment texture coordinates for texture unit 1.
+ *   - highp vec4			vtxPosition;				// The vertex position. High prec to match vertex attribute.
+ *   - vec3					vtxNormal;					// The vertex normal.
+ *   - vec3					vtxTangent;					// The vertex tangent.
+ *   - glPosition
  */
 
-attribute vec2		a_cc3TexCoord0;		/**< Vertex texture coordinate for texture unit 0. */
-attribute vec2		a_cc3TexCoord1;		/**< Vertex texture coordinate for texture unit 1. */
 
-varying vec2		v_texCoord0;		/**< Fragment texture coordinates for texture unit 0. */
-varying vec2		v_texCoord1;		/**< Fragment texture coordinates for texture unit 1. */
+#import "CC3LibModelMatrices.vsh"
 
-/** Add textures to the vertex. Sets the v_texCoord0 varying.  */
-void textureVertex() {
-	v_texCoord0 = a_cc3TexCoord0;
-	v_texCoord1 = a_cc3TexCoord1;
+
+attribute highp vec4	a_cc3Position;			/**< Vertex position. */
+attribute vec3			a_cc3Normal;			/**< Vertex normal. */
+attribute vec3			a_cc3Tangent;			/**< Vertex tangent. */
+
+uniform bool			u_cc3VertexHasTangent;	/**< Whether the vertex tangent is available (used downstream). */
+
+highp vec4				vtxPosition;			/**< The vertex position. High prec to match vertex attribute. */
+vec3					vtxNormal;				/**< The vertex normal. */
+vec3					vtxTangent;				/**< The vertex tangent. */
+
+
+void positionVertex() {
+	
+	vtxPosition = a_cc3Position;
+	vtxNormal = a_cc3Normal;
+	vtxTangent = a_cc3Tangent;
+
+	gl_Position = u_cc3MatrixModelViewProj * vtxPosition;
 }
 

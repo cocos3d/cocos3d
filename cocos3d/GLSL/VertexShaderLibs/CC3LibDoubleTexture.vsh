@@ -1,5 +1,5 @@
 /*
- * CC3Constants.shl
+ * CC3LibDoubleTexture.vsh
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -27,12 +27,27 @@
  * http://en.wikipedia.org/wiki/MIT_License
  */
 
-/** This shader library declares a number of standard constants. */
+/**
+ * This vertex shader library supports a material with up to two textures.
+ *
+ * This library declares and uses the following attribute and uniform variables:
+ *   - attribute vec2	a_cc3TexCoord0;		// Vertex texture coordinate for texture unit 0.
+ *   - attribute vec2	a_cc3TexCoord1;		// Vertex texture coordinate for texture unit 1.
+ *
+ * This library declares and outputs the following variables:
+ *   - varying vec2		v_texCoord0;		// Fragment texture coordinates for texture unit 0.
+ *   - varying vec2		v_texCoord1;		// Fragment texture coordinates for texture unit 1.
+ */
 
-const float		kZero = 0.0;
-const float		kOne = 1.0;
-const vec3		kVec3Zero = vec3(0.0);
-const vec4		kVec4Zero = vec4(0.0);
-const vec4		kVec4ZeroLoc = vec4(0.0, 0.0, 0.0, 1.0);
-const vec3		kAttenuationNone = vec3(1.0, 0.0, 0.0);
+attribute vec2		a_cc3TexCoord0;		/**< Vertex texture coordinate for texture unit 0. */
+attribute vec2		a_cc3TexCoord1;		/**< Vertex texture coordinate for texture unit 1. */
+
+varying vec2		v_texCoord0;		/**< Fragment texture coordinates for texture unit 0. */
+varying vec2		v_texCoord1;		/**< Fragment texture coordinates for texture unit 1. */
+
+/** Add textures to the vertex. Sets the v_texCoord0 varying.  */
+void textureVertex() {
+	v_texCoord0 = a_cc3TexCoord0;
+	v_texCoord1 = a_cc3TexCoord1;
+}
 

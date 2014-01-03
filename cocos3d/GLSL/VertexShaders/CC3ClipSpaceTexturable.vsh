@@ -40,7 +40,7 @@
  * CC3ShaderSemanticsByVarName instance.
  */
 
-#import "CC3DefaultPrecision.vshl"
+#import "CC3LibDefaultPrecision.vsh"
 
 //-------------- UNIFORMS ----------------------
 

@@ -1,5 +1,5 @@
 /*
- * CC3SetGLFragColorAlphaTest.fshl
+ * CC3LibSetGLFragColorAlphaTest.fsh
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
