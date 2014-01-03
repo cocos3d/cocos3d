@@ -1233,51 +1233,47 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	CC3Billboard* bb = [CC3Billboard nodeWithName: kBillboardName withBillboard: bbLabel];
 	bb.color = ccYELLOW;
 	
-	// The billboard is a one-sided rectangular mesh, and would not normally be visible
-	// from the back side. This is not an issue, since it is configured to always face
-	// the camera. However, this also affects its ability to cast a shadow when the light
-	// is behind it. Set the back faces to draw so that a shadow will be cast when the
-	// light is behind the billboard.
+	// The billboard is a one-sided rectangular mesh, and would not normally be visible from the
+	// back side. This is not an issue, since it is configured to always face the camera. However,
+	// this also affects its ability to cast a shadow when the light is behind it. Set the back
+	// faces to draw so that a shadow will be cast when the light is behind the billboard.
 //	bb.shouldCullBackFaces = NO;
 	
-	// As the hose emitter moves around, it is sometimes in front of this billboard,
-	// but emits some particles behind this billboard. The result is that those
-	// particles are blocked by the transparent parts of the billboard and appear to
-	// inappropriately disappear. To compensate, set the explicit Z-order of the
-	// billboard to be either always in-front of (< 0) or always behind (> 0) the
-	// particle emitter. You can experiment with both options here. Or set the Z-order
-	// to zero (the default and same as the emitter), and see what the problem is in
-	// the first place! The problem is more evident when the emitter is set to a wide
-	// dispersion angle.
+	// As the hose emitter moves around, it is sometimes in front of this billboard, but emits
+	// some particles behind this billboard. The result is that those particles are blocked by
+	// the transparent parts of the billboard and appear to inappropriately disappear. To compensate,
+	// set the explicit Z-order of the billboard to be either always in-front of (< 0) or always
+	// behind (> 0) the particle emitter. You can experiment with both options here. Or set the
+	// Z-order to zero (the default and same as the emitter), and see what the problem is in the
+	// first place! The problem is more evident when the emitter is set to a wide dispersion angle.
 	bb.zOrder = -1;
 	
 	// Uncomment to see the extent of the label as it moves in the 3D scene
 //	bb.shouldDrawLocalContentWireframeBox = YES;
+
 	
 	// A billboard can be drawn either as part of the 3D scene, or as an overlay
 	// above the 3D scene. By commenting out one of the following sections of code,
 	// you can choose which method to use.
 	
-	// 1) In the 3D scene.
-	// Locate the billboard at the end of the robot's arm, and tell it to
-	// find the camera and track it, so that it always faces the camera.
-	bb.location = cc3v( 0.0, 90.0, 0.0 );
+	// 1) In the 3D scene:
+	//    Find the camera and track it, so that it always faces the camera.
 	bb.shouldAutotargetCamera = YES;
-
-	// Billboards with transparency don't shadow well, so don't let this billboard cast a shadow.
-	bb.shouldCastShadows = NO;
-
-	[[self getNodeNamed: kRobotTopArm] addChild: bb];
 	
-	// 2) Overlaid above the 3D scene.
-	// The following lines add the emitter billboard as a 2D overlay that draws above
-	// the 3D scene. The label text will not be occluded by any other 3D nodes.
-	// Comment out the lines just above, and uncomment the following lines:
+	// 2) Overlaid above the 3D scene:
+	//    The following lines add the emitter billboard as a 2D overlay that draws above
+	//    the 3D scene. The label text will not be occluded by any other 3D nodes.
+	//    Comment out the lines just above, and uncomment the following lines:
 //	bb.shouldDrawAs2DOverlay = YES;
-//	bb.location = cc3v( 0.0, 80.0, 0.0 );
 //	bb.unityScaleDistance = 425.0;
 //	bb.offsetPosition = ccp( 0.0, 15.0 );
-//	[[self getNodeNamed: kRobotTopArm] addChild: bb];
+	
+	// Billboards with transparency don't shadow well, so don't let this billboard cast a shadow.
+	bb.shouldCastShadows = NO;
+	
+	// Locate the billboard at the end of the robot's arm
+	bb.location = cc3v( 0.0, 90.0, 0.0 );
+	[[self getNodeNamed: kRobotTopArm] addChild: bb];
 }
 
 /**
@@ -3461,11 +3457,10 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 }
 
 /**
- * Unproject the 2D touch point into a 3D global-coordinate ray running from
- * the camera through the touched node. Find the node that is punctured by the
- * ray, the location at which the ray punctures the node's bounding volume
- * in the local coordinates of the node, and add a temporary visible marker
- * at that local location that fades in and out, and then removes itself.
+ * Unproject the 2D touch point into a 3D global-coordinate ray running from the camera through
+ * the touched node. Find the node that is punctured by the ray, the location at which the ray
+ * punctures the node's bounding volume in the local coordinates of the node, and add a temporary
+ * visible marker at that local location that fades in and out, and then removes itself.
  */
 -(void) markTouchPoint: (CGPoint) touchPoint on: (CC3Node*) aNode {
 
