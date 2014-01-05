@@ -78,7 +78,7 @@ typedef struct {
  * if the state really is changing.
  */
 @interface CC3OpenGL : CC3Identifiable {
-	BOOL _isPrimaryContext : 1;
+	BOOL _isRenderingContext : 1;
 
 @public
 
@@ -212,7 +212,7 @@ typedef struct {
  * Returns whether this instance is tracking state for the primary rendering GL context
  * on the rendering thread.
  */
-@property(nonatomic, readonly) BOOL isPrimaryContext;
+@property(nonatomic, readonly) BOOL isRenderingContext;
 
 
 #pragma mark Capabilities
@@ -1213,7 +1213,7 @@ typedef struct {
  * Initializes this instance with the specified name, and marking whether this is the
  * primary GL rendering context.
  */
--(id) initWithName: (NSString*) aName asPrimaryContext: (BOOL) isPrimaryContext;
+-(id) initWithName: (NSString*) aName asRenderingContext: (BOOL) isRenderingContext;
 
 /** 
  * Returns the shared singleton instance for the currently running thread, creating it if necessary.
@@ -1390,7 +1390,7 @@ void CC3SetGLCapAt(GLenum cap, GLuint idx, BOOL val, GLbitfield* stateBits, GLbi
  * info message, otherwise does nothing.
  */
 #if LOGGING_LEVEL_INFO
-#	define LogInfoIfPrimary(fmt, ...)	if (self.isPrimaryContext) LogInfo(fmt, ##__VA_ARGS__)
+#	define LogInfoIfPrimary(fmt, ...)	if (self.isRenderingContext) LogInfo(fmt, ##__VA_ARGS__)
 #else
 #	define LogInfoIfPrimary(fmt, ...)
 #endif

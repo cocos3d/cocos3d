@@ -1378,8 +1378,8 @@ static CC3Cache* _shaderSourceCodeCache = nil;
 	pwVisitor.renderSurface = pwSurface;
 	[pwSurface activate];
 	[pwVisitor visit: pwNode];
-	[program resetGLState];		// Reset GL state. Needed if pre-warming in background...
-								// ... GL context, since state is different between contexts.
+	[program resetGLState];		// Reset GL state. Needed if pre-warming in background context...
+								// ...since state is different between contexts.
 }
 
 

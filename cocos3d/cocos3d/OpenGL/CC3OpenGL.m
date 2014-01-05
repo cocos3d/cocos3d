@@ -41,7 +41,7 @@
 
 @implementation CC3OpenGL
 
-@synthesize isPrimaryContext=_isPrimaryContext;
+@synthesize isRenderingContext=_isRenderingContext;
 
 -(void) dealloc {
 	free(vertexAttributes);
@@ -221,7 +221,7 @@
 	// iOS & OSX do support background VAO's, but they are not shared across contexts.
 	// Android seems to share the VAO binding state across contexts, which causes
 	// interference between threads.
-	if ( !_isPrimaryContext ) return;
+	if ( !_isRenderingContext ) return;
 
 #if COCOS2D_VERSION >= 0x020100
 	// If available, use cocos2d state management. This method can be invoked from outside
@@ -1046,9 +1046,9 @@
 
 #pragma mark Allocation and initialization
 
--(id) initWithName: (NSString*) aName asPrimaryContext: (BOOL) isPrimaryContext {
+-(id) initWithName: (NSString*) aName asRenderingContext: (BOOL) isRenderingContext {
 	if ( (self = [super initWithName: aName]) ) {
-		_isPrimaryContext = isPrimaryContext;
+		_isRenderingContext = isRenderingContext;
 		LogInfoIfPrimary(@"Third dimension provided by %@", NSStringFromCC3Version());
 		LogInfo(@"Starting GL context %@", self);
 		[self initPlatformLimits];
@@ -1112,12 +1112,12 @@ static CC3OpenGL* _bgGL = nil;
 +(CC3OpenGL*) sharedGL {
 	NSThread* currThread = NSThread.currentThread;
 	if (currThread == CCDirector.sharedDirector.runningThread || currThread.isMainThread) {
-		if (!_renderGL) _renderGL = [[self alloc] initWithName: @"Primary Engine"
-											  asPrimaryContext: YES];	// retained
+		if (!_renderGL) _renderGL = [[self alloc] initWithName: @"Rendering Engine"
+											asRenderingContext: YES];
 		return _renderGL;
 	} else {
 		if (!_bgGL) _bgGL = [[self alloc] initWithName: @"Background Engine"
-									  asPrimaryContext: NO];			// retained
+									asRenderingContext: NO];
 		return _bgGL;
 	}
 }

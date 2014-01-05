@@ -345,7 +345,7 @@
  * avoid the possibility of adding a shadow in the middle of a render iteration.
  */
 -(void) addShadow: (id<CC3ShadowProtocol>) aShadowNode {
-	if ( !CC3OpenGL.sharedGL.isPrimaryContext && self.scene )
+	if ( !CC3OpenGL.sharedGL.isRenderingContext && self.scene )
 		[self addShadowFromBackgroundThread: aShadowNode];
 	else
 		[self addShadowNow: aShadowNode];

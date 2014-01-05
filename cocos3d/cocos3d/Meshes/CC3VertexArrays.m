@@ -973,7 +973,7 @@ static GLuint lastAssignedVertexArrayTag;
 					 startingAt: (_firstVertex + vtxIdx)
 					 withLength: vtxCount];
 
-//	if (CC3OpenGL.sharedGL.isPrimaryContext) {
+//	if (CC3OpenGL.sharedGL.isRenderingContext) {
 //		NSTimeInterval drawDur = GetRezActivityDuration() * 1000.0;
 //		if (drawDur > 5.0) {
 //			LogDebug(@"%@ from %@ drawn from buffer %u by %@ in %.3f ms on %@ (slow)",
@@ -1471,7 +1471,7 @@ static BOOL defaultExpectsVerticallyFlippedTextures = NO;
 					 andType: _elementType
 						  as: _drawingMode];
 	
-//	if (CC3OpenGL.sharedGL.isPrimaryContext) {
+//	if (CC3OpenGL.sharedGL.isRenderingContext) {
 //		NSTimeInterval drawDur = GetRezActivityDuration() * 1000.0;
 //		if (drawDur > 5.0) {
 //			LogDebug(@"%@ from %@ drawn from buffer %u by %@ in %.3f ms on %@ (slow)",

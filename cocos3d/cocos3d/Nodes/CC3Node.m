@@ -1682,7 +1682,7 @@ static GLuint lastAssignedNodeTag;
 
 	[aNode markAddBegin];	// Mark that this node is being added
 
-	if ( !CC3OpenGL.sharedGL.isPrimaryContext && self.scene )
+	if ( !CC3OpenGL.sharedGL.isRenderingContext && self.scene )
 		[self addChildFromBackgroundThread: aNode];
 	else
 		[self addChildNow: aNode];

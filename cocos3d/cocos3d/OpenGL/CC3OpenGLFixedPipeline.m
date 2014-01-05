@@ -516,8 +516,13 @@
 
 
 #pragma mark Matrices
+	
+// Don't change matrix state on background thread (which only occurs during shader prewarming, and so should
+// not occur here), because it messes with the concurrent rendering of cocos2d components on the rendering thread.
 
 -(void) activateMatrixStack: (GLenum) mode {
+	if ( !_isRenderingContext ) return;
+
 	cc3_CheckGLPrim(mode, value_GL_MATRIX_MODE, isKnown_GL_MATRIX_MODE);
 	if ( !needsUpdate ) return;
 	glMatrixMode(mode);
@@ -525,6 +530,8 @@
 }
 
 -(void) loadModelviewMatrix: (CC3Matrix4x3*) mtx {
+	if ( !_isRenderingContext ) return;
+	
 	[self activateMatrixStack: GL_MODELVIEW];
 	CC3Matrix4x4 glMtx;
 	CC3Matrix4x4PopulateFrom4x3(&glMtx, mtx);
@@ -533,12 +540,16 @@
 }
 
 -(void) loadProjectionMatrix: (CC3Matrix4x4*) mtx {
+	if ( !_isRenderingContext ) return;
+	
 	[self activateMatrixStack: GL_PROJECTION];
 	glLoadMatrixf(mtx->elements);
 	LogGLErrorTrace(@"glLoadMatrixf(%@)", NSStringFromCC3Matrix4x4(mtx));
 }
 
 -(void) loadPaletteMatrix: (CC3Matrix4x3*) mtx at: (GLuint) pmIdx {
+	if ( !_isRenderingContext ) return;
+	
 	[self activatePaletteMatrixStack: pmIdx];
 	CC3Matrix4x4 glMtx;
 	CC3Matrix4x4PopulateFrom4x3(&glMtx, mtx);
@@ -547,24 +558,32 @@
 }
 
 -(void) pushModelviewMatrixStack {
+	if ( !_isRenderingContext ) return;
+	
 	[self activateMatrixStack: GL_MODELVIEW];
 	glPushMatrix();
 	LogGLErrorTrace(@"glPushMatrix()");
 }
 
 -(void) popModelviewMatrixStack {
+	if ( !_isRenderingContext ) return;
+	
 	[self activateMatrixStack: GL_MODELVIEW];
 	glPopMatrix();
 	LogGLErrorTrace(@"glPopMatrix()");
 }
 
 -(void) pushProjectionMatrixStack {
+	if ( !_isRenderingContext ) return;
+	
 	[self activateMatrixStack: GL_PROJECTION];
 	glPushMatrix();
 	LogGLErrorTrace(@"glPushMatrix()");
 }
 
 -(void) popProjectionMatrixStack {
+	if ( !_isRenderingContext ) return;
+	
 	[self activateMatrixStack: GL_PROJECTION];
 	glPopMatrix();
 	LogGLErrorTrace(@"glPopMatrix()");
