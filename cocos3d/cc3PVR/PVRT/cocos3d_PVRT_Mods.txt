@@ -1,0 +1,11 @@
+cocos3d Modifications to PVRT library
+------------------------------------------------------------------
+
+PVRT version: 3.2
+
+To reduce overhead, many unneeded files have been culled from the PVRT
+library for use in cocos3d.
+
+Where necessary, the remaining files have been patched to accomodate the
+missing files, and these patches have been marked with "patched for cocos3d".
+
