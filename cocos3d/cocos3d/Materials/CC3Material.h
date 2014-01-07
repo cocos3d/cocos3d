@@ -824,19 +824,10 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
 
 /**
  * Unbinds all materials from the GL engine.
- * 
- * This implementation simply delegates to the unbind class method.
- * Usually, the application never needs to invoke this method directly.
- */
--(void) unbindWithVisitor: (CC3NodeDrawingVisitor*) visitor;
-
-/**
- * Unbinds all materials from the GL engine.
  *
- * Disables material blending in the GL engine, and invokes the unbind class method
- * of CC3Texture to disable all texturing.
+ * Disables material blending in the GL engine.
  *
- * This method is invoked automatically from the CC3Node instance.
+ * This method is invoked automatically from the CC3MeshNode instance.
  * Usually, the application never needs to invoke this method directly.
  */
 +(void) unbindWithVisitor: (CC3NodeDrawingVisitor*) visitor;

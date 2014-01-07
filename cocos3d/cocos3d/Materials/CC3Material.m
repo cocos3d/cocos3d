@@ -499,19 +499,14 @@ static GLuint lastAssignedMaterialTag;
 }
 
 /**
- * Draws the texture property and the texture overlays using separate GL texture units
- * The visitor keeps track of which texture unit is being processed, with each texture
- * incrementing the current texture unit index as it draws. GL texture units that were
- * not used by the texture and texture overlays are disabled.
+ * Draws the texture property and the texture overlays using separate GL texture units. 
+ * The visitor keeps track of which texture unit is being processed, with each texture 
+ * incrementing the current texture unit index as it draws. GL texture units that were 
+ * not used by the textures are disabled by the mesh node after this method is complete.
  */
 -(void) drawTexturesWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	visitor.currentTextureUnitIndex = 0;
-
 	[self drawTexture: _texture withVisitor: visitor];
-
 	for (CC3Texture* ot in _textureOverlays) [self drawTexture: ot withVisitor: visitor];
-	
-	[visitor disableUnusedTextureUnits];
 }
 
 /** Draws the specified texture to the GL engine, and then increments the texture unit. */
@@ -520,16 +515,11 @@ static GLuint lastAssignedMaterialTag;
 	if (texture) visitor.currentTextureUnitIndex += 1;	// Move to next texture unit
 }
 
--(void) unbindWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[self.class unbindWithVisitor: visitor];
-}
-
 +(void) unbindWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	CC3OpenGL* gl = visitor.gl;
 	[gl enableLighting: NO];
 	[gl enableBlend: NO];
 	[gl enableAlphaTesting: NO];
-	[gl disableTexturingFrom: 0];
 }
 
 @end

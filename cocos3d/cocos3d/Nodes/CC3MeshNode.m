@@ -860,14 +860,25 @@
  */
 -(void) cleanupDrawingParameters: (CC3NodeDrawingVisitor*) visitor {}
 
-/** Template method to configure the material properties in the GL engine. */
+/** 
+ * Template method to configure the material and texture properties in the GL engine. 
+ * The visitor keeps track of which texture unit is being processed, with each texture
+ * incrementing the current texture unit index as it draws. GL texture units that were
+ * not used by the textures are disabled by the mesh node after this method is complete.
+ */
 -(void) configureMaterialWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+
+	visitor.currentTextureUnitIndex = 0;
+	
 	if (_material && visitor.shouldDecorateNode) {
 		[_material drawWithVisitor: visitor];
 	} else {
 		[CC3Material unbindWithVisitor: visitor];
 		if (visitor.shouldDecorateNode) visitor.currentColor = _pureColor;
 	}
+
+	[visitor disableUnusedTextureUnits];
+
 	// currentColor can be set by material, mesh node, or node picking visitor prior to this method.
 	visitor.gl.color = visitor.currentColor;
 }

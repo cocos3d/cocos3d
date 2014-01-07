@@ -1368,6 +1368,7 @@ static CC3Cache* _shaderSourceCodeCache = nil;
 }
 
 -(void) prewarmShaderProgram: (CC3ShaderProgram*) program {
+	LogRez(@"Prewarming %@", program);
 	CC3MeshNode* pwNode = self.prewarmingMeshNode;
 	id<CC3RenderSurface> pwSurface = self.prewarmingSurface;
 	CC3NodeDrawingVisitor* pwVisitor = self.drawingVisitor;
