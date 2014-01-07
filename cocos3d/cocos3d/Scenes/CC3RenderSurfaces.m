@@ -909,8 +909,6 @@
 -(void) resizeTo: (CC3IntSize) size {
 	if ( CC3IntSizesAreEqual(size, self.size) ) return;
 
-	LogInfo(@"View surface size set to: %@", NSStringFromCC3IntSize(size));
-	
 	// Resize all attachments on registered surfaces, except the viewSurface color buffer,
 	// which was resized above, and validate each surface.
 	NSMutableArray* resizedAttachments = [NSMutableArray array];
@@ -920,6 +918,11 @@
 		[self resizeAttachment: surface.stencilAttachment to: size ifNotIn: resizedAttachments];
 		[surface validate];
 	}
+
+	LogInfo(@"View surface size set to: %@, %@.", NSStringFromCC3IntSize(self.size),
+			(self.isMultisampling ? [NSString stringWithFormat: @"multisampling from %@",
+									 NSStringFromCC3IntSize(self.multisamplingSize)]
+								  : @"with no multisampling"));
 
 	// After validating each surface, ensure we leave the rendering surface active for cocos2d
 	[self.renderingSurface activate];
@@ -972,7 +975,7 @@
 -(id) initWithView: (CC3GLView*) view {
     if ( (self = [self init]) ) {
 		
-		_view = view;		// not retained
+		_view = view;
 		
 		// Limit pixel samples to what the platform will support
 		GLuint requestedSamples = _view.requestedSamples;
@@ -989,7 +992,7 @@
 			CC3GLFramebuffer* msSurf = [CC3GLFramebuffer surface];
 			msSurf.colorAttachment = [CC3GLRenderbuffer renderbufferWithPixelFormat: colorFormat
 																	andPixelSamples: samples];
-			self.multisampleSurface = msSurf;		// retained
+			self.multisampleSurface = msSurf;
 		}
 		
 		// If using depth testing, attach a depth buffer to the rendering surface.
