@@ -3,7 +3,7 @@ README!
 
 cocos3d 2.0.0
 
-Copyright (c) 2010-2013 The Brenwill Workshop Ltd. All rights reserved.
+Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
 http://www.brenwill.com
 
 +++++++++++++++++++++++++++++++++++

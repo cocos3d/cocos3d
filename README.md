@@ -1,6 +1,6 @@
 <img src="http://www.brenwill.com/docs/cocos3d/Logos/cocos3d-Banner-150h.png">
 
-Copyright (c) 2010-2013 The Brenwill Workshop Ltd. All rights reserved.
+Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
 
 cocos3d
 =======

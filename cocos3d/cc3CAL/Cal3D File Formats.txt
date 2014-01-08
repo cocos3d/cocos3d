@@ -2,11 +2,11 @@ o------------------------------------------------------------------------------o
 |                                                                              |
 |                       cal3d fileformat description                           |
 |                                                                              |
-|                                Version @VERSION@                                |
+|                                Version 13                                    |
 |                                                                              |
-|        Copyright (C) 2001, 2002, 2003 Bruno 'Beosil' Heidelberger            |
-|        Copyright (C) 2006 Loic Dachary <loic@gnu.org>                        |
-|        Copyright (C) 2013 The Brenwill Workshop Ltd. <support@brenwill.org>  |
+|  Copyright (C) 2001, 2002, 2003 Bruno 'Beosil' Heidelberger                  |
+|  Copyright (C) 2006 Loic Dachary <loic@gnu.org>                              |
+|  Copyright (C) 2013-2014 The Brenwill Workshop Ltd. <support@brenwill.com>   |
 |                                                                              |
 o------------------------------------------------------------------------------o
 
