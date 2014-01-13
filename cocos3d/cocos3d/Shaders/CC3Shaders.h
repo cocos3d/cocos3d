@@ -44,6 +44,8 @@
 @class CC3ShaderSourceCode, CC3ShaderSourceCodeStrings;
 @class CC3ShaderSourceCodeLineNumberLocalizingVisitor;
 @class CC3ShaderSourceCodeSegmentAccumulatingVisitor;
+@class CC3ShaderSourceCodeCompilationStringVisitor;
+@class CC3ShaderSourceCodeCompilationStringCountVisitor;
 
 
 #pragma mark -
@@ -1202,9 +1204,22 @@
 /** 
  * If the value of the wasLoadedFromFile property is NO, returns the value of the
  * sourceCodeString property. If the value of the wasLoadedFromFile property is YES,
- * returns an equivalent #import "filename" statement.
+ * returns an equivalent #import "filename" directive.
  */
 @property(nonatomic, readonly) NSString* importableSourceCodeString;
+
+/** Returns the number of source code strings that will be submitted to the shader compiler.  */
+@property(nonatomic, readonly) GLuint sourceStringCount;
+
+/** 
+ * Appends the specified source code section to the source code managed by this instance.
+ * Depending on how the source code is being parsed, the specfied string may contain any
+ * amount of source code, but will typically contain a single line of code.
+ * 
+ * The mechansim for organizing the various source code sections submitted through this
+ * method is defined by each subclass.
+ */
+-(void) appendSourceCodeString: (NSString*) srcCode;
 
 /**
  * Returns the collection of source code subsections. 
@@ -1215,27 +1230,45 @@
  */
 @property(nonatomic, readonly) NSArray* subsections;
 
+/**
+ * Indicates whether this source code was loaded from a file.
+ *
+ * The value of this property is automatically set by the allocation and instantiation
+ * methods that load this source code from a file.
+ */
+@property(nonatomic, assign) BOOL wasLoadedFromFile;
+
 
 #pragma mark Visiting
 
 /**
- * This callback method is invoked by the specified visitor when it traverses a tree of
- * nested source code references in which this source code instance is contained.
+ * Uses the specified visitor to accumulate the collection of source code strings that will
+ * be submitted to the shader compiler. Invokes the addSourceCompilationString: method on
+ * the visitor for each source code string managed by this instance.
  *
- * If this instance contains source code text, and the line number in the visitor is contained
- * within the lineCount of that text, the localizedSourceCode property of the visitor is set
- * to this instance, and this method returns YES. Otherwise, the lineNumber
+ * The mechanism for managing the source code sections depends on the subclass.
  */
--(BOOL) localizeLineNumberWithVisitor: (CC3ShaderSourceCodeLineNumberLocalizingVisitor*) visitor;
+-(void) accumulateSourceCompilationStringsWithVisitor: (CC3ShaderSourceCodeCompilationStringVisitor*) visitor;
 
 /**
- * This callback method is invoked by the specified visitor when it traverses a tree of
- * nested source code references in which this source code instance is contained.
+ * Uses the specified visitor to accumulate the total number of source code strings that will be
+ * submitted to the shader compiler. Invokes the addSourceCompilationStringCount: method on the 
+ * visitor to provide the number of source code strings that are being managed by this instance.
  *
- * If this instance contains source code text, this instance is added to the source code
- * segments in the specified visitor.
+ * The mechanism for managing the source code sections depends on the subclass.
  */
--(BOOL) addSourceCodeSegmentsToVisitor: (CC3ShaderSourceCodeSegmentAccumulatingVisitor*) visitor;
+-(void) accumulateSourceCompilationStringCountWithVisitor: (CC3ShaderSourceCodeCompilationStringCountVisitor*) visitor;
+
+/**
+ * This callback method is invoked during error handling, to determine the file and location
+ * within that file at which the error occurred.
+ *
+ * If this instance contains the source of the error, the lineNumber and localizedSourceCode
+ * properties of the visitor are set, and this method returns YES. Otherwise, this method
+ * adjusts other properties within the visitor, to manage the traversal of the sourcde code,
+ * and returns NO.
+ */
+-(BOOL) localizeLineNumberWithVisitor: (CC3ShaderSourceCodeLineNumberLocalizingVisitor*) visitor;
 
 
 #pragma mark Allocation and initialization
@@ -1301,12 +1334,28 @@
 +(NSString*) shaderSourceCodeNameFromFilePath: (NSString*) aFilePath;
 
 /**
- * Indicates whether this source code was loaded from a file.
+ * As shader source code is parsed and assembled using #import and #include directives,
+ * sections of code that do not require importing other code, are wrapped in an instance
+ * of a CC3ShaderSourceCode subclass. This class-side property indicates the class to
+ * instantiate for each section of GLSL code.
  *
- * The value of this property is automatically set by the allocation and instantiation
- * methods that load this source code from a file.
+ * This propery must be set to a CC3ShaderSourceCode subclass.
+ *
+ * The initial value of this property is the CC3ShaderSourceCodeString class.
  */
-@property(nonatomic, assign) BOOL wasLoadedFromFile;
++(Class) sourceCodeSubsectionClass;
+
+/**
+ * As shader source code is parsed and assembled using #import and #include directives,
+ * sections of code that do not require importing other code, are wrapped in an instance
+ * of a CC3ShaderSourceCode subclass. This class-side property indicates the class to
+ * instantiate for each section of GLSL code.
+ *
+ * This propery must be set to a CC3ShaderSourceCode subclass.
+ *
+ * The initial value of this property is the CC3ShaderSourceCodeString class.
+ */
++(void) setSourceCodeSubsectionClass: (Class) sourceCodeSubsectionClass;
 
 /**
  * Returns a description formatted as a source-code line for loading this shader from a source code file.
@@ -1421,29 +1470,33 @@
 
 
 #pragma mark -
-#pragma mark CC3ShaderSourceCodeBytes
+#pragma mark CC3ShaderSourceCodeString
 
 /**
- * A member of the CC3ShaderSourceCode class cluster that contains a simple string of source
- * code bytes. The contained source code may have come from a single source code string 
- * (or file) that contained no #import or #include statements, or it may represent a segment
- * of a source code string or file before, between, or after an #import or #include statement.
- *
- * In a tree structure of nested imported source code, instances of this class represent the
- * leaves of the source-code tree.
+ * A member of the CC3ShaderSourceCode class cluster that contains a single string of source code.
+ * The contained source code may have come from a single source code string (or file) that contained
+ * no #import or #include statements, or it may represent a segment of a source code string or file
+ * before, between, or after an #import or #include directive.
  */
-@interface CC3ShaderSourceCodeBytes : CC3ShaderSourceCode {
-	NSData* _sourceCode;
+@interface CC3ShaderSourceCodeString : CC3ShaderSourceCode {
+	NSMutableString* _sourceCodeString;
 }
 
-/** The raw source code bytes. These are passed to the GLSL compiler.*/
-@property(nonatomic, readonly) const GLchar* sourceCodeBytes;
+@end
 
 
-#pragma mark Allocation and initialization
+#pragma mark -
+#pragma mark CC3ShaderSourceCodeLines
 
-/** Initializes this instance with the specified name and source code string. */
--(id) initWithName: (NSString*) name fromSourceCodeString: (NSString*) srcCodeString;
+/**
+ * A member of the CC3ShaderSourceCode class cluster that contains source code as a collection of
+ * individual source code lines. The contained source code may have come from a single source code
+ * string (or file) that contained no #import or #include statements, or it may represent a segment
+ * of a source code string or file before, between, or after an #import or #include directive.
+ */
+@interface CC3ShaderSourceCodeLines : CC3ShaderSourceCode {
+	NSMutableArray* _sourceCodeLines;
+}
 
 @end
 
@@ -1452,17 +1505,28 @@
 #pragma mark CC3ShaderSourceCodeGroup
 
 /**
- * A member of the CC3ShaderSourceCode class cluster that contains a structure of nested
- * imported source code as subsections.
+ * A member of the CC3ShaderSourceCode class cluster that contains instances of CC3ShaderSource
+ * class-cluster subclasses, assembled into a source code tree. When source code is organized
+ * into files that contain references to other files using #import or #include statements, an
+ * instance of this class will contain instances of CC3ShaderSource class-cluster subclasses
+ * that each contain the source code for a segment of a file before, between, or after #import
+ * or #include statements, and other instances of CC3ShaderSource class-cluster subclasses that
+ * contain the source code of the imported files, all assembled into a nested structure.
  *
- * In a tree structure of nested imported source code, instances of this class represent
- * the branches of the source-code tree.
+ * Typically, within the nested structure of CC3ShaderSource subclass instances, an instance
+ * of this class represents a single source code file, either stand-alone, or imported by
+ * another file.
  */
 @interface CC3ShaderSourceCodeGroup : CC3ShaderSourceCode {
 	NSMutableArray* _subsections;
 }
 
-/** Adds the specified subsection of source code to the source code tree. */
+/** 
+ * Adds the specified subsection of source code to the source code tree. Depending on the
+ * class of the specified source code, it may contain a section of code before, between,
+ * or after an #import directive, or it may contain the source code from the file identified
+ * by an #import or #include directive.
+ */
 -(void) addSubsection: (CC3ShaderSourceCode*) shSrcCode;
 
 @end
@@ -1474,30 +1538,19 @@
 /**
  * This is an abstract parent of a class hierarchy that is used to visit a source code
  * tree, in order to retrieve information about the source code tree.
+ *
+ * A new instance should be created for each visitation run, in order to ensure the 
+ * visitor state is initialized correctly at the beginning of each visitation run.
  */
 @interface CC3ShaderSourceCodeVisitor : NSObject {
 	NSMutableSet* _sourceCodeNamesTraversed;
 }
 
 /**
- * Visit the specified source code tree.
- *
- * Returns whether the visitation run was stopped once a desired result was accomplished.
- * Depending on the type of visitation, this might occur if a particular source code segment
- * was reached, such as when the source code segment corresponding to a specific line number
- * is encountered. The purpose of the return value is not to indicate whether all source code
- * segments have been visited, or even that the visitation was aborted. Instead, you should
- * think of the returned value as a way of indicating that a desired result has been accomplished,
- * and that there is no need to visit further nodes. For visitations that normally visit all
- * nodes, the return value will generally be NO.
+ * Tests whether the specified CC3ShaderSourceCode class-cluster instance has already been
+ * traversed by this visitor, and remembers and returns the result.
  */
--(BOOL) visit: (CC3ShaderSourceCode*) srcCode;
-
-/**
- * Template method that processes the specified source code instance. Subclasses override
- * this method to perform their primary action on each source code instance in the tree.
- */
--(BOOL) process: (CC3ShaderSourceCode*) srcCode;
+-(BOOL) hasAlreadyVisited: (CC3ShaderSourceCode*) srcCode;
 
 
 #pragma mark Allocation and initialization
@@ -1509,15 +1562,78 @@
 
 
 #pragma mark -
+#pragma mark CC3ShaderSourceCodeCompilationStringCountVisitor
+
+/** 
+ * Visits an assembly of nested CC3ShaderSourceCode instances to determine the number
+ * of source code strings that will be submitted to the compiler, in order to compile 
+ * the source code contained within the assembly of CC3ShaderSourceCode instances.
+ */
+@interface CC3ShaderSourceCodeCompilationStringCountVisitor : CC3ShaderSourceCodeVisitor {
+	GLuint _sourceCompilationStringCount;
+}
+
+/** Returns the total number of source code strings that will be submitted to the compiler. */
+@property(nonatomic, readonly) GLuint sourceCompilationStringCount;
+
+/**
+ * Invoked by each CC3ShaderSourceCode instances that contains source code, to indicate the
+ * number source code strings are contained within that instance. This visitor accumulates
+ * the total of all values submitted by invocations of this method, and makes that total
+ * accessible via the sourceCompilationStringCount property.
+ */
+-(void) addSourceCompilationStringCount: (GLuint) sourceStringCount;
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3ShaderSourceCodeCompilationStringVisitor
+
+/**
+ * Visits an assembly of nested CC3ShaderSourceCode instances to populate an array of source
+ * code strings to be submitted to the compiler, in order to compile the source code contained
+ * within the assembly of CC3ShaderSourceCode instances.
+ *
+ * The source code strings are accumulated in the sourceCompilationStrings array property, and
+ * the number of strings added to that array is contained within the sourceCompilationStringCount 
+ * superclass property.
+ */
+@interface CC3ShaderSourceCodeCompilationStringVisitor : CC3ShaderSourceCodeCompilationStringCountVisitor {
+	const GLchar** _sourceCompilationStrings;
+}
+
+/** Returns the pointer to the array of source code strings that is populated by this visitor. */
+@property(nonatomic, readonly) const GLchar** sourceCompilationStrings;
+
+/**
+ * Adds the specified source code string to the array in the sourceCompilationStrings property,
+ * and increments the value of the sourceCompilationStringCount property.
+ */
+-(void) addSourceCompilationString: (const GLchar*) sourceCompilationString;
+
+
+#pragma mark Allocation and initialization
+
+/** Initializes this instance to populate the specified compilation strings. */
+-(id) initWithCompilationStrings: (const GLchar**) sourceCompilationStrings;
+
+/** Allocates and initializes an instance that populates the specified compilation strings. */
++(id) visitorWithCompilationStrings: (const GLchar**) sourceCompilationStrings;
+
+@end
+
+
+#pragma mark -
 #pragma mark CC3ShaderSourceCodeLineNumberLocalizingVisitor
 
 /**
- * This source code visitor traverses a source code tree to determine in which source code
- * segment a particular global line number exists.
+ * Visits an assembly of nested CC3ShaderSourceCode instances to determine in which source
+ * code group a particular global line number exists.
  *
  * The GLSL compiler treats the GLSL source code as a monolithic block, and errors are
  * attributed to source code lines as if all of the submitted source code came from a single
- * string or file. 
+ * string or file.
  *
  * When a GLSL compiler error is reported, this visitor can be used to map the global line
  * number, reported by the compiler, to a local line number within a particular source
@@ -1534,10 +1650,10 @@
 }
 
 /** 
- * The source code segment that contains the line of code reported as bad by the compiler.
+ * The source code group that contains the line of code reported as bad by the compiler.
  *
  * The value of this property will be nil until the visitation run has finished, after which
- * it will contain the source code segment that contains the error.
+ * it will contain the source code group that contains the error.
  */
 @property(nonatomic, strong) CC3ShaderSourceCode* localizedSourceCode;
 
@@ -1601,47 +1717,7 @@
  * Allocates and initializes an instance with the specified global line number, which is
  * the line number reported by the compiler when a compilation error occurs.
  */
-+(id) lineNumberWithLineNumber: (GLuint) lineNumber;
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3ShaderSourceCodeSegmentAccumulatingVisitor
-
-/**
- * This source code visitor traverses a source code tree to accumulate a collection of 
- * source code segments to be submitted to the GLSL compiler. Along the way, this visitor
- * ensures that source code that has been imported multiple times by various segments only
- * appears once in the source code submitted to the compiler.
- */
-@interface CC3ShaderSourceCodeSegmentAccumulatingVisitor : CC3ShaderSourceCodeVisitor {
-	NSMutableArray* _sourceCodeSegments;
-}
-
-/** 
- * The number of source code segments that are to be submitted to the GLSL compiler.
- *
- * The value of this property can be used when creating the size of the array of strings
- * that is submitted to the populateSourceCodeStrings: method.
- */
-@property(nonatomic, readonly) GLuint sourceCodeSegmentCount;
-
-/** 
- * During the traversal of the source code tree, this callback method is invoked by any source
- * code segment that wants to be included in the submission of source code to the GLSL compiler.
- */
--(void) addSourceCodeSegment: (CC3ShaderSourceCodeBytes*) srcCodeBytes;
-
-/**
- * Populates the specified array of source code byte strings.
- *
- * The number of strings that will be added to the array is indicated by the sourceCodeSegmentCount
- * property, and the size of the specified array must be at least as large as that value.
- *
- * Each of the strings in the specifie array will be null-terminated.
- */
--(void) populateSourceCodeStrings: (const GLchar**) sourceCodeSegmentStrings;
++(id) visitorWithLineNumber: (GLuint) lineNumber;
 
 @end
 

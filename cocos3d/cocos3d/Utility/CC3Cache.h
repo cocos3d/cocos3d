@@ -30,6 +30,7 @@
 /** @file */	// Doxygen marker
 
 #import "CC3Foundation.h"
+#import <pthread.h>
 
 
 #pragma mark CC3Cacheable

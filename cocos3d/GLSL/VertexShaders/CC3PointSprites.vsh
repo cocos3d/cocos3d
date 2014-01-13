@@ -40,8 +40,8 @@
  */
 
 #import "CC3LibDefaultPrecision.vsh"
-#import "CC3LibVertexPositionPointSprite.vsh"				// Vertex positioning
-#import "CC3LibIlluminatedMaterial.vsh"					// Materials and lighting
+#import "CC3LibVertexPositionPointSprite.vsh"		// Vertex positioning
+#import "CC3LibIlluminatedMaterial.vsh"				// Materials and lighting
 
 void main() {
 	positionVertex();

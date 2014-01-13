@@ -30,7 +30,6 @@
  */
 
 #import "CC3NodeListeners.h"
-#import "pthread.h"
 
 
 #pragma mark -

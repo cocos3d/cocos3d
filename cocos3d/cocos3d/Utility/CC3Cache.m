@@ -30,7 +30,6 @@
  */
 
 #import "CC3Cache.h"
-#import "pthread.h"
 
 
 #pragma mark CC3Cache

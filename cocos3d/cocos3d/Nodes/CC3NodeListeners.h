@@ -30,6 +30,7 @@
 /** @file */	// Doxygen marker
 
 #import "CC3Foundation.h"
+#import <pthread.h>
 
 @class CC3Node;
 

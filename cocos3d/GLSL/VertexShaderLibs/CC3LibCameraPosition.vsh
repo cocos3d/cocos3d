@@ -30,4 +30,3 @@
 /** This shader library declares uniforms for camera position. */
 
 uniform highp vec3	u_cc3CameraPositionModel;		/**< Location of the camera in local coordinates of model (not camera). */
-

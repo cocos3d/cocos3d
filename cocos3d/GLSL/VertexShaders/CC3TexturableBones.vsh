@@ -62,8 +62,8 @@
 #import "CC3LibVertexPositionBones.vsh"				// Vertex positioning
 #import "CC3LibIlluminatedMaterial.vsh"				// Materials and lighting
 #import "CC3LibBumpMapTangentSpaceLighting.vsh"		// Tangent-space bump-mapping
-#import "CC3LibEnvironmentReflection.vsh"				// Environmental reflections
-#import "CC3LibDoubleTexture.vsh"						// Textures
+#import "CC3LibEnvironmentReflection.vsh"			// Environmental reflections
+#import "CC3LibDoubleTexture.vsh"					// Textures
 
 void main() {
 	positionVertex();

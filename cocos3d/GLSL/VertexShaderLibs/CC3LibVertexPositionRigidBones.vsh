@@ -120,14 +120,19 @@ highp vec3 rotateWithQuaternion(highp vec3 v, highp vec4 q) {
  * will not harm anything other than performance.
  */
 void positionVertex() {
+	
+	// Copy the indices and weights attibutes so the components can be indexed.
+	ivec4 boneIndices = ivec4(a_cc3BoneIndices);
+	vec4 boneWeights = a_cc3BoneWeights;
+	
 	vtxPosition = kVec4ZeroLoc;				// Start at zero to accumulate weighted values
 	vtxNormal = kVec3Zero;
 	for (lowp int i = 0; i < MAX_BONES_PER_VERTEX; ++i) {
 		if (i < u_cc3VertexBoneCount) {
 			
 			// Get the index and weight of this bone
-			int boneIdx = int(a_cc3BoneIndices[i]);
-			float boneWeight = a_cc3BoneWeights[i];
+			int boneIdx = boneIndices[i];
+			float boneWeight = boneWeights[i];
 			
 			// Get the bone rotation quaternion and translation
 			highp vec4 q = u_cc3BoneQuaternionsModelSpace[boneIdx];

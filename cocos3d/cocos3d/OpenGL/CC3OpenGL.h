@@ -85,7 +85,7 @@ typedef struct {
 	NSString* value_GL_VENDOR;
 	NSString* value_GL_RENDERER;
 	NSString* value_GL_VERSION;
-	NSSet* _extensions;
+	NSMutableSet* _extensions;
 	
 	CC3VertexAttr* vertexAttributes;
 	GLuint value_MaxVertexAttribsUsed;

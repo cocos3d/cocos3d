@@ -119,4 +119,10 @@
  */
 @property(nonatomic, readonly) NSArray* lines;
 
+/**
+ * Returns an array of the lines in this string, as determined by separating them with the
+ * newline character. Each line in the returned array is terminated by the newline character.
+ */
+@property(nonatomic, readonly) NSArray* terminatedLines;
+
 @end

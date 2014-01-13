@@ -95,16 +95,22 @@ static CC3ShaderSourceCode* _defaultShaderPreamble = nil;
 	MarkRezActivityStart();
 	
 	_wasLoadedFromFile = shSrcCode.wasLoadedFromFile;
-	
-	// Use a visitor to extract an array of source code strings from the preamble and specified source code
-	CC3ShaderSourceCodeSegmentAccumulatingVisitor* visitor = [CC3ShaderSourceCodeSegmentAccumulatingVisitor visitor];
-	[visitor visit: _shaderPreamble];
-	[visitor visit: shSrcCode];
 
-	// Submit the source code strings to the compiler
-	GLuint scCnt = visitor.sourceCodeSegmentCount;
+	// Allocate an array of source code strings
+	GLuint scCnt = _shaderPreamble.sourceStringCount + shSrcCode.sourceStringCount;
 	const GLchar* scStrings[scCnt];
-	[visitor populateSourceCodeStrings: scStrings];
+
+	// Populate the source code strings from the preamble and specified source code
+	CC3ShaderSourceCodeCompilationStringVisitor* visitor = [CC3ShaderSourceCodeCompilationStringVisitor visitorWithCompilationStrings: scStrings];
+	[_shaderPreamble accumulateSourceCompilationStringsWithVisitor: visitor];
+	[shSrcCode accumulateSourceCompilationStringsWithVisitor: visitor];
+	
+	// Double-check the accummulation logic
+	CC3Assert(visitor.sourceCompilationStringCount == scCnt,
+			  @"%@ mismatch between sourceStringCount %u and number of accumulated source stings %u",
+			  self, scCnt, visitor.sourceCompilationStringCount);
+	
+	// Submit the source code strings to the compiler
 	[CC3OpenGL.sharedGL compileShader: self.shaderID from: scCnt sourceCodeStrings: scStrings];
 	
 	CC3Assert([CC3OpenGL.sharedGL getShaderWasCompiled: self.shaderID],
@@ -147,40 +153,42 @@ static CC3ShaderSourceCode* _defaultShaderPreamble = nil;
 	NSMutableString* localizedLogTxt = [NSMutableString stringWithCapacity: logTxt.length + 100];
 
 	// Proceed line by line
-	[logTxt enumerateLinesUsingBlock: ^(NSString* line, BOOL* lineStop) {
-		BOOL __block isErrLine = NO;
-		
-		// Separate the line into fields
-		[[line componentsSeparatedByString: fieldSeparatorStr] enumerateObjectsUsingBlock: ^(NSString* field, NSUInteger fieldIdx, BOOL* segStop) {
-
+	for (NSString* line in logTxt.lines) {
+		BOOL isErrLine = NO;
+		NSArray* fields = [line componentsSeparatedByString: fieldSeparatorStr];
+		NSUInteger fieldCount = fields.count;
+		for (NSUInteger fieldIdx = 0; fieldIdx < fieldCount; fieldIdx++) {
+			NSString* field = [fields objectAtIndex: fieldIdx];
+			
 			// Write the existing field out to the new log entry
 			[localizedLogTxt appendString: field];
-
+			
 			// If the first field contains the error indicator, this line is a compile error
 			if (fieldIdx == errIndicatorFieldIdx &&
 				([field rangeOfString: errIndicatorStr
 							  options: NSCaseInsensitiveSearch].location != NSNotFound) )
 				isErrLine = YES;
-
+			
 			// If this line does contain an error, extract the global line number from the
 			// third field, and localize it, first to the preamble, and then to the specified
 			// shader source, and write the localized line number to the new log entry.
 			if (isErrLine && fieldIdx == lineNumFieldIdx) {
 				CC3ShaderSourceCodeLineNumberLocalizingVisitor* visitor;
-				visitor = [CC3ShaderSourceCodeLineNumberLocalizingVisitor lineNumberWithLineNumber: [field intValue]];
-				if ([visitor visit: _shaderPreamble] || [visitor visit: shSrcCode])
-					[localizedLogTxt appendFormat: @"(%@)", visitor.description];
+				visitor = [CC3ShaderSourceCodeLineNumberLocalizingVisitor visitorWithLineNumber: [field intValue]];
+				if ([_shaderPreamble localizeLineNumberWithVisitor: visitor] ||
+					[shSrcCode localizeLineNumberWithVisitor: visitor])
+					[localizedLogTxt appendFormat: @"(at %@)", visitor.description];
 			}
-
+			
 			// Write the log field separator at the end of each field
 			[localizedLogTxt appendString: fieldSeparatorStr];
-		}];
+		}
 		
 		// Strip the last field separator and append a newline
 		NSUInteger fieldSepLen = fieldSeparatorStr.length;
 		[localizedLogTxt deleteCharactersInRange: NSMakeRange(localizedLogTxt.length - fieldSepLen, fieldSepLen)];
 		[localizedLogTxt appendString: @"\n"];
-	}];
+	}
 	
 	return localizedLogTxt;
 }
@@ -891,27 +899,48 @@ static id<CC3ShaderMatcher> _programMatcher = nil;
 	return 0;
 }
 
+-(GLuint) sourceStringCount {
+	CC3ShaderSourceCodeCompilationStringCountVisitor* visitor = [CC3ShaderSourceCodeCompilationStringCountVisitor visitor];
+	[self accumulateSourceCompilationStringCountWithVisitor: visitor];
+	return visitor.sourceCompilationStringCount;
+}
+
 -(NSString*) sourceCodeString {
-	CC3AssertUnimplemented(@"sourceCode");
+	CC3AssertUnimplemented(@"sourceCodeString");
 	return nil;
 }
 
 -(NSString*) importableSourceCodeString {
 	return (self.wasLoadedFromFile
-				? [NSString stringWithFormat:@"#import \"%@\"", self.name]
+				? [NSString stringWithFormat:@"#import \"%@\"\n", self.name]
 				: self.sourceCodeString);
 }
 
 -(NSArray*) subsections { return nil; }
 
+-(void) appendSourceCodeString: (NSString*) srcCode { CC3AssertUnimplemented(@"appendSourceCodeString:"); }
+
 
 #pragma mark Visiting
 
--(BOOL) localizeLineNumberWithVisitor: (CC3ShaderSourceCodeLineNumberLocalizingVisitor*) visitor { return NO; }
+-(void) accumulateSourceCompilationStringsWithVisitor: (CC3ShaderSourceCodeCompilationStringVisitor*) visitor {
+	CC3AssertUnimplemented(@"accumulateSourceCompilationStringsWithVisitor:");
+}
 
--(BOOL) finishLocalizingLineNumberWithVisitor: (CC3ShaderSourceCodeLineNumberLocalizingVisitor*) visitor { return NO; }
+-(void) accumulateSourceCompilationStringCountWithVisitor: (CC3ShaderSourceCodeCompilationStringCountVisitor*) visitor {
+	CC3AssertUnimplemented(@"accumulateSourceCompilationStringCountWithVisitor:");
+}
 
--(BOOL) addSourceCodeSegmentsToVisitor: (CC3ShaderSourceCodeSegmentAccumulatingVisitor*) visitor { return NO; }
+-(BOOL) localizeLineNumberWithVisitor: (CC3ShaderSourceCodeLineNumberLocalizingVisitor*) visitor {
+	GLuint lineCount = self.lineCount;
+	if (visitor.lineNumber <= lineCount) {
+		return YES;
+	} else {
+		visitor.lineNumber -= lineCount;
+		[visitor addLineNumberOffset: lineCount];
+		return NO;
+	}
+}
 
 
 #pragma mark Allocation and initialization
@@ -928,70 +957,51 @@ static id<CC3ShaderMatcher> _programMatcher = nil;
 	CC3ShaderSourceCode* shSrc = [self getShaderSourceCodeNamed: name];
 	if (shSrc) return shSrc;
 	
-	NSUInteger srcStrLen = srcCodeString.length;
-	
-	CC3ShaderSourceCodeGroup* shSrcGrp = [[CC3ShaderSourceCodeGroup alloc] initWithName: name];
-	CC3ShaderSourceCodeBytes* shSrcStr = nil;
-	NSUInteger cursorPos = 0;		// Start at the beginning of the source code string
-	GLuint sectionCount = 0;		// Running count of the number of compilable sections within this file.
-	
-	// We now have the entire contents of the source code in a string. We loop through the file
-	// contents looking for any occurrences of #import or #include statements. The source code
-	// before the statement is added to the source code group, and then the contents of the
-	// imported/included file is loaded and added to the source code group.
-	while (cursorPos < srcStrLen) {
-		NSRange srcCodeRange;
-		NSString* importFileName;
-		
-		// Look for the next occurence of an #import or #include statement
-		NSRange importMatchRange = [srcCodeString rangeOfString: @"(?im)^[ \\t]*#[ \\t]*(import|include)"
-														options: NSRegularExpressionSearch
-														  range: NSMakeRange(cursorPos, srcStrLen - cursorPos)];
-		// Determine whether a match was found.
-		BOOL importWasFound = (importMatchRange.location != NSNotFound);
-		if (importWasFound) {
-			
-			// Get the range of source code that appears prior to the import statement in this file.
-			srcCodeRange = NSMakeRange(cursorPos, importMatchRange.location - cursorPos);
-			
-			// Extract the full line of text containing the import/include statement.
-			// Break the line into components deliniated by double-quote marks (").
-			// The file name to import will be the second of these components.
-			// Finally, set the cursor to the end of the line containing the import/include statement.
-			NSRange importLineRange = [srcCodeString lineRangeForRange: importMatchRange];
-			NSString* importLine = [srcCodeString substringWithRange: importLineRange];
- 			NSArray* importLineComponents = [importLine componentsSeparatedByString: @"\""];
-			if (importLineComponents.count > 1) importFileName = [importLineComponents objectAtIndex: 1];
-			cursorPos = NSMaxRange(importLineRange);
-			
-		} else {
-			// No further import/include statements found. Get the range for all remaining
-			// source code in this file, and place the cursor at the end of the file.
-			srcCodeRange = NSMakeRange(cursorPos, srcStrLen - cursorPos);
-			importFileName = nil;
-			cursorPos = srcStrLen;
-		}
-		
-		// Get the block of source code that appears between the current cursor position in the file
-		// and the import/include statement (or end of file), and create a uncached source code bytes
-		// instance from it. If a shader source group has been created, add the new shader source to it.
-		// Exclude source code that is empty (eg- between two consecutive import lines), but do include
-		// all other code (even comments and whitespace), to retain line numbering for error reporting.
-		NSString* srcCode = [srcCodeString substringWithRange: srcCodeRange];
-		if (srcCode.length > 0) {
-			NSString* shSrcStrName = [name stringByAppendingFormat: @"-Section-%u", ++sectionCount];
-			shSrcStr = [[CC3ShaderSourceCodeBytes alloc] initWithName: shSrcStrName fromSourceCodeString: srcCode];
-			[shSrcGrp addSubsection: shSrcStr];
-		}
+	MarkRezActivityStart();
 
-		// If an import/include file name was extracted, load the file into a shader source object,
-		// and add it to the root shader source object for this file.
-		if (importFileName) [shSrcGrp addSubsection: [self shaderSourceCodeFromFile: importFileName]];
+	CC3ShaderSourceCodeGroup* srcGroup = [[CC3ShaderSourceCodeGroup alloc] initWithName: name];
+	CC3ShaderSourceCode* srcSection = nil;
+
+	GLuint lineCount = 1;			// Running count of the lines parsed
+	GLuint sectionCount = 0;		// Running count of the number of compilable sections within this file.
+	NSArray* srcLines = srcCodeString.terminatedLines;
+	for (NSString* srcLine in srcLines) {
+		if ( [self lineContainsImportDirective: srcLine] ) {
+ 			NSArray* importLineComponents = [srcLine componentsSeparatedByString: @"\""];
+			CC3Assert(importLineComponents.count > 1, @"Shader source file %@ missing import target at line %u", name, lineCount);
+
+			// Add the source code read since the previous import directive
+			[srcGroup addSubsection: srcSection];
+			srcSection = nil;
+
+			// Add the source code from the imported file
+			NSString* importFileName = [importLineComponents objectAtIndex: 1];
+			[srcGroup addSubsection: [self shaderSourceCodeFromFile: importFileName]];
+		} else {
+			if ( !srcSection ) {
+				NSString* sectionName = [name stringByAppendingFormat: @"-Section-%u", ++sectionCount];
+				srcSection = [[self.sourceCodeSubsectionClass alloc] initWithName: sectionName];
+			}
+			[srcSection appendSourceCodeString: srcLine];
+		}
+		lineCount++;
 	}
 	
+	// Add the source code read since the final import directive
+	[srcGroup addSubsection: srcSection];
+	
+	LogRez(@"Parsed GLSL source named %@ in %.3f ms", name, GetRezActivityDuration() * 1000);
+	
 	// Add extracted source code group to the cache and return it.
-	[self addShaderSourceCode: shSrcGrp];
-	return shSrcGrp;
+	[self addShaderSourceCode: srcGroup];
+	
+	return srcGroup;
+}
+
+/** Returns whether the specified source code line contains an #import or #include directive. */
++(BOOL) lineContainsImportDirective: (NSString*) srcLine {
+	NSString* trimmedLine = [srcLine stringByTrimmingCharactersInSet: [NSCharacterSet whitespaceCharacterSet]];
+	return [trimmedLine hasPrefix: @"#import"] || [trimmedLine hasPrefix: @"#include"];
 }
 
 +(id) shaderSourceCodeFromFile: (NSString*) aFilePath {
@@ -1016,8 +1026,18 @@ static id<CC3ShaderMatcher> _programMatcher = nil;
 	return shSrc;
 }
 
-
 +(NSString*) shaderSourceCodeNameFromFilePath: (NSString*) aFilePath { return aFilePath.lastPathComponent; }
+
+static Class _sourceCodeSubsectionClass;
+
++(Class) sourceCodeSubsectionClass {
+	if ( !_sourceCodeSubsectionClass ) _sourceCodeSubsectionClass = CC3ShaderSourceCodeString.class;
+	return _sourceCodeSubsectionClass;
+}
+
++(void) setSourceCodeSubsectionClass: (Class) sourceCodeSubsectionClass {
+	_sourceCodeSubsectionClass = sourceCodeSubsectionClass;
+}
 
 -(NSString*) constructorDescription {
 	return [NSString stringWithFormat: @"[%@ shaderSourceCodeFromFile: @\"%@\"];", [self class], self.name];
@@ -1070,64 +1090,90 @@ static CC3Cache* _shaderSourceCodeCache = nil;
 
 
 #pragma mark -
-#pragma mark CC3ShaderSourceCodeBytes
+#pragma mark CC3ShaderSourceCodeString
 
-@implementation CC3ShaderSourceCodeBytes
+@implementation CC3ShaderSourceCodeString
 
--(GLuint) sourceStringCount { return 1; }
+-(NSString*) sourceCodeString { return _sourceCodeString; }
 
--(const GLchar*) sourceCodeBytes { return _sourceCode.bytes; }
+-(GLuint) lineCount { return _sourceCodeString.lineCount; }
 
--(GLuint) lineCount {
-	GLuint lineCnt = 0;
-	GLuint charCnt = (GLuint)_sourceCode.length;
-	const GLchar* scBytes = self.sourceCodeBytes;
-	for (GLuint charIdx = 0; charIdx < charCnt; charIdx++)
-		if (scBytes[charIdx] == '\n') lineCnt++;
-	return lineCnt;
-}
+-(void) appendSourceCodeString: (NSString*) srcCode { [_sourceCodeString appendString: srcCode]; }
 
 
 #pragma mark Visiting
 
-/**
- * If the line number is within my range, this is the source of the line number. Set the
- * shSrcCode of the line number to this object and return YES. Otherwise, subtract the
- * number of lines in this source from the line number and return NO.
- */
--(BOOL) localizeLineNumberWithVisitor: (CC3ShaderSourceCodeLineNumberLocalizingVisitor*) visitor {
-	GLuint lineCount = self.lineCount;
-	if (visitor.lineNumber <= lineCount) {
-		visitor.localizedSourceCode = self;
-		return YES;
-	} else {
-		visitor.lineNumber -= lineCount;
-		[visitor addLineNumberOffset: lineCount];
-		return NO;
-	}
+-(void) accumulateSourceCompilationStringsWithVisitor: (CC3ShaderSourceCodeCompilationStringVisitor*) visitor {
+	if ( [visitor hasAlreadyVisited: self] ) return;
+	[visitor addSourceCompilationString: _sourceCodeString.UTF8String];
 }
 
--(BOOL) addSourceCodeSegmentsToVisitor: (CC3ShaderSourceCodeSegmentAccumulatingVisitor*) visitor {
-	[visitor addSourceCodeSegment: self];
-	return NO;
+-(void) accumulateSourceCompilationStringCountWithVisitor: (CC3ShaderSourceCodeCompilationStringCountVisitor*) visitor {
+	if ( [visitor hasAlreadyVisited: self] ) return;
+	[visitor addSourceCompilationStringCount: 1];
 }
-
--(NSString*) sourceCode { return [NSString stringWithUTF8String: _sourceCode.bytes]; }
 
 
 #pragma mark Allocation and initialization
 
--(id) initWithName: (NSString*) name fromSourceCodeString: (NSString*) srcCodeString {
-	CC3Assert(srcCodeString, @"%@ cannot complile NULL source code.", self);
-	if ( (self = [self initWithName: name]) ) {
-		_sourceCode = [NSData dataWithBytes: srcCodeString.UTF8String
-									 length: (srcCodeString.length + 1)];	// Don't forget the null-terminator
+-(id) initWithTag: (GLuint) tag withName: (NSString*) name {
+	if ( (self = [super initWithTag: tag withName: name]) ) {
+		_sourceCodeString = [NSMutableString string];
 	}
 	return self;
 }
 
 -(NSString*) description {
-	return [NSString stringWithFormat: @"%@ of length %lu bytes", [super description], (unsigned long)_sourceCode.length];
+	return [NSString stringWithFormat: @"%@ of length %lu bytes", [super description], (unsigned long)_sourceCodeString.length];
+}
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3ShaderSourceCodeLines
+
+@implementation CC3ShaderSourceCodeLines
+
+-(NSString*) sourceCodeString {
+	NSMutableString* srcCodeString = [NSMutableString stringWithCapacity: 1000];
+	for (NSData* srcLine in _sourceCodeLines)
+		[srcCodeString appendString: [NSString stringWithUTF8String: srcLine.bytes]];
+	return srcCodeString;
+}
+
+-(GLuint) lineCount { return _sourceCodeLines.count; }
+
+-(void) appendSourceCodeString: (NSString*) srcCode {
+	[_sourceCodeLines addObject: [NSData dataWithBytes: srcCode.UTF8String
+												length: (srcCode.length + 1)]];	// Plus null-terminator
+}
+
+
+#pragma mark Visiting
+
+-(void) accumulateSourceCompilationStringsWithVisitor: (CC3ShaderSourceCodeCompilationStringVisitor*) visitor {
+	if ( [visitor hasAlreadyVisited: self] ) return;
+	for (NSData* srcLine in _sourceCodeLines) [visitor addSourceCompilationString: srcLine.bytes];
+}
+
+-(void) accumulateSourceCompilationStringCountWithVisitor: (CC3ShaderSourceCodeCompilationStringCountVisitor*) visitor {
+	if ( [visitor hasAlreadyVisited: self] ) return;
+	[visitor addSourceCompilationStringCount: _sourceCodeLines.count];
+}
+
+
+#pragma mark Allocation and initialization
+
+-(id) initWithTag: (GLuint) tag withName: (NSString*) name {
+	if ( (self = [super initWithTag: tag withName: name]) ) {
+		_sourceCodeLines = [NSMutableArray array];
+	}
+	return self;
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ in %lu lines", [super description], (unsigned long)_sourceCodeLines.count];
 }
 
 @end
@@ -1152,27 +1198,51 @@ static CC3Cache* _shaderSourceCodeCache = nil;
 
 -(NSString*) sourceCodeString {
 	NSMutableString* srcCode = [NSMutableString stringWithCapacity: 500];
-	for (CC3ShaderSourceCode* shSrc in _subsections) {
+	for (CC3ShaderSourceCode* shSrc in _subsections)
 		[srcCode appendString: shSrc.importableSourceCodeString];
-		[srcCode appendString: @"\n"];
-	}
 	return srcCode;
+}
+
+-(void) appendSourceCodeString: (NSString*) srcCode {
+	CC3ShaderSourceCode* sscs = [[CC3ShaderSourceCodeString alloc] init];
+	[sscs appendSourceCodeString: srcCode];
+	[self addSubsection: sscs];
 }
 
 
 #pragma mark Visiting
 
-/** Starting a new group, so reset line number offset to zero. */
--(BOOL) localizeLineNumberWithVisitor: (CC3ShaderSourceCodeLineNumberLocalizingVisitor*) visitor {
-	[visitor pushLineNumberOffset: 0];
-	return NO;
+-(void) accumulateSourceCompilationStringsWithVisitor: (CC3ShaderSourceCodeCompilationStringVisitor*) visitor {
+	if ( [visitor hasAlreadyVisited: self] ) return;
+	for (CC3ShaderSourceCode* shSrc in _subsections)
+		[shSrc accumulateSourceCompilationStringsWithVisitor: visitor];
 }
 
-/** 
- * Done with this group, so pop up to the next level for line number offset tracking, 
- * and increment to cover the #import/include statement that invoked this group. 
- */
--(BOOL) finishLocalizingLineNumberWithVisitor: (CC3ShaderSourceCodeLineNumberLocalizingVisitor*) visitor {
+-(void) accumulateSourceCompilationStringCountWithVisitor: (CC3ShaderSourceCodeCompilationStringCountVisitor*) visitor {
+	if ( [visitor hasAlreadyVisited: self] ) return;
+	for (CC3ShaderSourceCode* shSrc in _subsections)
+		[shSrc accumulateSourceCompilationStringCountWithVisitor: visitor];
+}
+
+-(BOOL) localizeLineNumberWithVisitor: (CC3ShaderSourceCodeLineNumberLocalizingVisitor*) visitor {
+
+	// Increment the line offset to compensate for the #import/include statement that is being skipped.
+	if ( [visitor hasAlreadyVisited: self] ) {
+		[visitor addLineNumberOffset: 1];
+		return NO;
+	}
+
+	// Traverse the subsections, and return right away if the line number was resolved.
+	// If the subsection did not claim to be the source of the line number, identify it as this file.
+	[visitor pushLineNumberOffset: 0];
+	for (CC3ShaderSourceCode* shSrc in _subsections)
+		if ( [shSrc localizeLineNumberWithVisitor: visitor] ) {
+			if ( !visitor.localizedSourceCode ) visitor.localizedSourceCode = self;
+			return YES;
+		}
+
+	// Done with this group, so pop up to the next level for line number offset tracking,
+	// and increment to cover the #import/include statement that invoked this group.
 	[visitor popLineNumberOffset];
 	[visitor addLineNumberOffset: 1];
 	return NO;
@@ -1200,24 +1270,12 @@ static CC3Cache* _shaderSourceCodeCache = nil;
 
 @implementation CC3ShaderSourceCodeVisitor
 
--(BOOL) visit: (CC3ShaderSourceCode*) srcCode {
+-(BOOL) hasAlreadyVisited: (CC3ShaderSourceCode*) srcCode {
 	NSString* ssName = srcCode.name;
-	if ( !ssName || [_sourceCodeNamesTraversed containsObject: ssName] ) return [self skip: srcCode];
-	
+	if ( !ssName || [_sourceCodeNamesTraversed containsObject: ssName] ) return YES;
 	[_sourceCodeNamesTraversed addObject: ssName];
-	
-	if ( [self process: srcCode] ) return YES;
-	
-	for (CC3ShaderSourceCode* ss in srcCode.subsections) if ( [self visit: ss] ) return YES;
-	
-	return [self finish: srcCode];
+	return NO;
 }
-
--(BOOL) skip: (CC3ShaderSourceCode*) srcCode { return NO; }
-
--(BOOL) process: (CC3ShaderSourceCode*) srcCode { return NO; }
-
--(BOOL) finish: (CC3ShaderSourceCode*) srcCode { return NO; }
 
 
 #pragma mark Allocation and initialization
@@ -1235,25 +1293,63 @@ static CC3Cache* _shaderSourceCodeCache = nil;
 
 
 #pragma mark -
+#pragma mark CC3ShaderSourceCodeCompilationStringCountVisitor
+
+@implementation CC3ShaderSourceCodeCompilationStringCountVisitor
+
+@synthesize sourceCompilationStringCount=_sourceCompilationStringCount;
+
+-(void) addSourceCompilationStringCount: (GLuint) sourceStringCount {
+	_sourceCompilationStringCount += sourceStringCount;
+};
+
+
+#pragma mark Allocation and initialization
+
+-(id) init {
+	if ( (self = [super init]) ) {
+		_sourceCompilationStringCount = 0;
+	}
+	return self;
+}
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3ShaderSourceCodeCompilationStringVisitor
+
+@implementation CC3ShaderSourceCodeCompilationStringVisitor
+
+@synthesize sourceCompilationStrings=_sourceCompilationStrings;
+
+-(void) addSourceCompilationString: (const GLchar*) sourceCompilationString {
+	_sourceCompilationStrings[_sourceCompilationStringCount++] = sourceCompilationString;
+}
+
+
+#pragma mark Allocation and initialization
+
+-(id) initWithCompilationStrings: (const GLchar**) sourceCompilationStrings {
+	if ( (self = [super init]) ) {
+		_sourceCompilationStrings = sourceCompilationStrings;
+	}
+	return self;
+}
+
++(id) visitorWithCompilationStrings: (const GLchar**) sourceCompilationStrings {
+	return [[self alloc] initWithCompilationStrings: sourceCompilationStrings];
+}
+
+@end
+
+
+#pragma mark -
 #pragma mark CC3ShaderSourceCodeLineNumberLocalizingVisitor
 
 @implementation CC3ShaderSourceCodeLineNumberLocalizingVisitor
 
 @synthesize lineNumber=_lineNumber, localizedSourceCode=_localizedSourceCode;
-
-/** Increment the line offset to compensate for the #import/include statement that is being skipped. */
--(BOOL) skip: (CC3ShaderSourceCode*) srcCode {
-	[self addLineNumberOffset: 1];
-	return NO;
-}
-
--(BOOL) process: (CC3ShaderSourceCode*) srcCode {
-	return [srcCode localizeLineNumberWithVisitor: self];
-}
-
--(BOOL) finish: (CC3ShaderSourceCode*) srcCode {
-	return [srcCode finishLocalizingLineNumberWithVisitor: self];
-}
 
 -(GLuint) lineNumberOffset { return ((NSNumber*)_lineNumberOffsets.lastObject).unsignedIntValue; }
 
@@ -1281,45 +1377,12 @@ static CC3Cache* _shaderSourceCodeCache = nil;
 	return self;
 }
 
-+(id) lineNumberWithLineNumber: (GLuint) lineNumber {
++(id) visitorWithLineNumber: (GLuint) lineNumber {
 	return [[self alloc] initWithLineNumber: lineNumber];
 }
 
 -(NSString*) description {
 	return [NSString stringWithFormat: @"%@:%u", _localizedSourceCode.name, _lineNumber + self.lineNumberOffset];
-}
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3ShaderSourceCodeSegmentAccumulatingVisitor
-
-@implementation CC3ShaderSourceCodeSegmentAccumulatingVisitor
-
--(GLuint) sourceCodeSegmentCount { return (GLuint)_sourceCodeSegments.count; }
-
--(BOOL) process: (CC3ShaderSourceCode*) srcCode {
-	return [srcCode addSourceCodeSegmentsToVisitor: self];
-}
-
--(void) addSourceCodeSegment: (CC3ShaderSourceCodeBytes*) srcCodeBytes {
-	[_sourceCodeSegments addObject: srcCodeBytes];
-}
-
--(void) populateSourceCodeStrings: (const GLchar**) sourceCodeSegmentStrings {
-	GLuint segIdx = 0;
-	for (CC3ShaderSourceCodeBytes* seg in _sourceCodeSegments)
-		sourceCodeSegmentStrings[segIdx++] = seg.sourceCodeBytes;
-}
-
-#pragma mark Allocation and initialization
-
--(id) init {
-	if ( (self = [super init]) ) {
-		_sourceCodeSegments = [NSMutableArray array];
-	}
-	return self;
 }
 
 @end

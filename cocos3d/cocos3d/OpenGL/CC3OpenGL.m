@@ -892,7 +892,7 @@
 #pragma mark GL Extensions
 
 /** Returns the specified extension name, stripped of any optional GL_ prefix. */
--(NSString*) trimExtensionName: (NSString*) extensionName {
+-(NSString*) trimGLPrefix: (NSString*) extensionName {
 	NSString* extPfx = @"GL_";
 	return ([extensionName hasPrefix: extPfx]
 			? [extensionName substringFromIndex: extPfx.length]
@@ -901,18 +901,20 @@
 
 -(NSSet*) extensions {
 	if ( !_extensions ) {
-		NSMutableSet* trimmedExts = [NSMutableSet set];
+		_extensions = [NSMutableSet set];
 		NSArray* rawExts = [[self getString: GL_EXTENSIONS]
 							componentsSeparatedByCharactersInSet:
 							[NSCharacterSet whitespaceCharacterSet]];
-		for (NSString* extName in rawExts) [trimmedExts addObject: [self trimExtensionName: extName]];
-		_extensions = [trimmedExts filteredSetUsingPredicate: [NSPredicate predicateWithFormat: @"length > 0"]];
+		for (NSString* extName in rawExts) {
+			NSString* trimmedName = [self trimGLPrefix: extName];
+			if (trimmedName.length > 0) [_extensions addObject: trimmedName];
+		}
 	}
 	return _extensions;
 }
 
 -(BOOL) supportsExtension: (NSString*) extensionName {
-	return [_extensions containsObject: [self trimExtensionName: extensionName]];
+	return [_extensions containsObject: [self trimGLPrefix: extensionName]];
 }
 
 // Dummy implementation to keep compiler happy with @selector(caseInsensitiveCompare:)

@@ -42,6 +42,8 @@
  *   - attribute highp vec4	a_cc3Position;						// Vertex position.
  *   - attribute vec3		a_cc3Normal;						// Vertex normal.
  *   - attribute vec3		a_cc3Tangent;						// Vertex tangent
+ *   - attribute vec4		a_cc3BoneWeights;					// Vertex skinning bone weights (each an array of length specified by u_cc3VertexBoneCount).
+ *   - attribute vec4		a_cc3BoneIndices;					// Vertex skinning bone indices (each an array of length specified by u_cc3VertexBoneCount).
  *
  *   - uniform lowp int		u_cc3VertexBoneCount;				// Number of bones influencing each vertex.
  *   - uniform highp mat4	u_cc3BoneMatricesModel[];			// Array of bone matrices in the current mesh skin section in model space.
@@ -95,6 +97,11 @@ vec3					vtxTangent;			/**< The vertex tangent. */
  * will not harm anything other than performance.
  */
 void positionVertex() {
+	
+	// Copy the indices and weights attibutes so the components can be indexed.
+	ivec4 boneIndices = ivec4(a_cc3BoneIndices);
+	vec4 boneWeights = a_cc3BoneWeights;
+
 	vtxPosition = kVec4Zero;				// Start at zero to accumulate weighted values
 	vtxNormal = kVec3Zero;
 	vtxTangent = kVec3Zero;
@@ -102,8 +109,8 @@ void positionVertex() {
 		if (i < u_cc3VertexBoneCount) {
 
 			// Get the index and weight of this bone
-			int boneIdx = int(a_cc3BoneIndices[i]);
-			float boneWeight = a_cc3BoneWeights[i];
+			int boneIdx = boneIndices[i];
+			float boneWeight = boneWeights[i];
 
 			// Rotate and translate the vertex position and add its weighted contribution.
 			vtxPosition += u_cc3BoneMatricesModel[boneIdx] * a_cc3Position * boneWeight;

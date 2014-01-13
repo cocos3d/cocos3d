@@ -93,7 +93,7 @@
 @implementation NSString (CC3)
 
 -(NSUInteger) lineCount {
-	NSUInteger lineCount, charIdx, strLen = [self length];
+	NSUInteger lineCount, charIdx, strLen = self.length;
 	for (charIdx = 0, lineCount = 0; charIdx < strLen; lineCount++)
 		charIdx = NSMaxRange([self lineRangeForRange: NSMakeRange(charIdx, 0)]);
 	return lineCount;
@@ -105,6 +105,15 @@
 	for (NSString* line in rawLines)
 		[trimmedLines addObject: [line stringByTrimmingCharactersInSet: [NSCharacterSet newlineCharacterSet]]];
 	return trimmedLines;
+}
+
+-(NSArray*) terminatedLines {
+	NSString* terminator = @"\n";
+	NSArray* rawLines = [self componentsSeparatedByString: terminator];
+	NSMutableArray* terminatedLines = [NSMutableArray arrayWithCapacity: rawLines.count];
+	for (NSString* line in rawLines)
+		[terminatedLines addObject: [line stringByAppendingString: terminator]];
+	return terminatedLines;
 }
 
 @end
