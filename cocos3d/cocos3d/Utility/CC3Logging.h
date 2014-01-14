@@ -67,6 +67,9 @@
  *
  * ALL logging can be enabled or disabled via the LOGGING_ENABLED switch.
  *
+ * Each logging level also has a conditional logging variation, which outputs a log entry
+ * only if the specified conditional expression evaluates to YES.
+ *
  * Logging functions are implemented here via macros. Disabling logging, either entirely, or
  * at a specific level, completely removes the corresponding log invocations from the compiled
  * code, thus eliminating both the memory and CPU overhead that the logging calls would add.
@@ -77,30 +80,40 @@
  *
  * To perform logging, use any of the following function calls in your code:
  *
- *		LogCleanTrace(fmt, ...)	- recommended for detailed tracing of program flow
- *								- will print if LOGGING_LEVEL_TRACE is set on.
- *		LogTimedTrace(fmt, ...)	- as above but prints a standard timestamp and app context preamble
- *		LogTrace(fmt, ...)		- convenience alias for LogCleanTrace. Can be changed to LogTimedTrace below.
+ *		LogCleanTrace(fmt, ...)		- recommended for detailed tracing of program flow
+ *									- will print if LOGGING_LEVEL_TRACE is set on.
+ *		LogTimedTrace(fmt, ...)		- as above but prints a standard timestamp and app context preamble
+ *		LogTrace(fmt, ...)			- convenience alias for LogCleanTrace. Can be changed to LogTimedTrace below.
+ *		LogTraceIf(cond, fmt, ...)	- same as LogTrace if boolean "cond" condition expression evaluates to YES, 
+ *									  otherwise logs nothing.
  *
- *		LogCleanInfo(fmt, ...)	- recommended for general, infrequent, information messages
- *								- will print if LOGGING_LEVEL_INFO is set on.
- *		LogTimedInfo(fmt, ...)	- as above but prints a standard timestamp and app context preamble
- *		LogInfo(fmt, ...)		- convenience alias for LogCleanInfo. Can be changed to LogTimedInfo below.
+ *		LogCleanInfo(fmt, ...)		- recommended for general, infrequent, information messages
+ *									- will print if LOGGING_LEVEL_INFO is set on.
+ *		LogTimedInfo(fmt, ...)		- as above but prints a standard timestamp and app context preamble
+ *		LogInfo(fmt, ...)			- convenience alias for LogCleanInfo. Can be changed to LogTimedInfo below.
+ *		LogInfoIf(cond, fmt, ...)	- same as LogInfo if boolean "cond" condition expression evaluates to YES,
+ *									  otherwise logs nothing.
  *
- *		LogCleanError(fmt, ...)	- recommended for use only when there is an error to be logged
- *								- will print if LOGGING_LEVEL_ERROR is set on.
- *		LogTimedError(fmt, ...)	- as above but prints a standard timestamp and app context preamble
- *		LogError(fmt, ...)		- convenience alias for LogCleanError. Can be changed to LogTimedError below.
+ *		LogCleanError(fmt, ...)		- recommended for use only when there is an error to be logged
+ *									- will print if LOGGING_LEVEL_ERROR is set on.
+ *		LogTimedError(fmt, ...)		- as above but prints a standard timestamp and app context preamble
+ *		LogError(fmt, ...)			- convenience alias for LogCleanError. Can be changed to LogTimedError below.
+ *		LogErrorIf(cond, fmt, ...)	- same as LogError if boolean "cond" condition expression evaluates to YES,
+ *									  otherwise logs nothing.
  *
- *		LogCleanDebug(fmt, ...)	- recommended for temporary use during debugging
- *								- will print if LOGGING_LEVEL_DEBUG is set on.
- *		LogTimedDebug(fmt, ...)	- as above but prints a standard timestamp and app context preamble
- *		LogDebug(fmt, ...)		- convenience alias for LogCleanDebug. Can be changed to LogTimedDebug below.
+ *		LogCleanDebug(fmt, ...)		- recommended for temporary use during debugging
+ *									- will print if LOGGING_LEVEL_DEBUG is set on.
+ *		LogTimedDebug(fmt, ...)		- as above but prints a standard timestamp and app context preamble
+ *		LogDebug(fmt, ...)			- convenience alias for LogCleanDebug. Can be changed to LogTimedDebug below.
+ *		LogDebugIf(cond, fmt, ...)	- same as LogDebug if boolean "cond" condition expression evaluates to YES,
+ *									  otherwise logs nothing.
  *
- *		LogCleanRez(fmt, ...)	- recommended for use during development
- *								- will print if LOGGING_REZLOAD is set on.
- *		LogTimedRez(fmt, ...)	- as above but prints a standard timestamp and app context preamble
- *		LogRez(fmt, ...)		- convenience alias for LogCleanRez. Can be changed to LogTimedRez below.
+ *		LogCleanRez(fmt, ...)		- recommended for use during development
+ *									- will print if LOGGING_REZLOAD is set on.
+ *		LogTimedRez(fmt, ...)		- as above but prints a standard timestamp and app context preamble
+ *		LogRez(fmt, ...)			- convenience alias for LogCleanRez. Can be changed to LogTimedRez below.
+ *		LogRezIf(cond, fmt, ...)	- same as LogRez if boolean "cond" condition expression evaluates to YES,
+ *									  otherwise logs nothing.
  *
  * In each case, the functions follow the general NSLog/printf template, where the first argument
  * "fmt" is an NSString that optionally includes embedded Format Specifiers, and subsequent optional
@@ -178,6 +191,7 @@
 #define LOG_FORMAT_NO_LOCATION(fmt, lvl, ...) NSLog((@"[%@] " fmt), lvl, ##__VA_ARGS__)
 #define LOG_FORMAT_WITH_LOCATION(fmt, lvl, ...) NSLog((@"%s[Line %d] [%@] " fmt), __PRETTY_FUNCTION__, __LINE__, lvl, ##__VA_ARGS__)
 #define LOG_FORMAT_CLEAN(fmt, lvl, ...) printf("[%s] %s\n", [lvl UTF8String], [[NSString stringWithFormat: fmt, ##__VA_ARGS__] UTF8String])
+#define LOG_FORMAT_CLEAN_IF(cond, fmt, lvl, ...) if(cond) { LOG_FORMAT_CLEAN(fmt, lvl, ##__VA_ARGS__); }
 
 #if LOGGING_INCLUDE_CODE_LOCATION
 #	define LOG_FORMAT(fmt, lvl, ...) LOG_FORMAT_WITH_LOCATION(fmt, lvl, ##__VA_ARGS__)
@@ -189,9 +203,11 @@
 #if LOGGING_LEVEL_TRACE
 #	define LogTimedTrace(fmt, ...) LOG_FORMAT(fmt, @"trace", ##__VA_ARGS__)
 #	define LogCleanTrace(fmt, ...) LOG_FORMAT_CLEAN(fmt, @"trace", ##__VA_ARGS__)
+#	define LogTraceIf(cond, fmt, ...) LOG_FORMAT_CLEAN_IF((cond), fmt, @"trace", ##__VA_ARGS__)
 #else
 #	define LogTimedTrace(...)
 #	define LogCleanTrace(...)
+#	define LogTraceIf(cond, fmt, ...)
 #endif
 #define LogTrace(fmt, ...) LogCleanTrace(fmt, ##__VA_ARGS__)
 
@@ -199,9 +215,11 @@
 #if LOGGING_LEVEL_INFO
 #	define LogTimedInfo(fmt, ...) LOG_FORMAT(fmt, @"info", ##__VA_ARGS__)
 #	define LogCleanInfo(fmt, ...) LOG_FORMAT_CLEAN(fmt, @"info", ##__VA_ARGS__)
+#	define LogInfoIf(cond, fmt, ...) LOG_FORMAT_CLEAN_IF((cond), fmt, @"info", ##__VA_ARGS__)
 #else
 #	define LogTimedInfo(...)
 #	define LogCleanInfo(...)
+#	define LogInfoIf(cond, fmt, ...)
 #endif
 #define LogInfo(fmt, ...) LogCleanInfo(fmt, ##__VA_ARGS__)
 
@@ -209,9 +227,11 @@
 #if LOGGING_LEVEL_ERROR
 #	define LogTimedError(fmt, ...) LOG_FORMAT(fmt, @"***ERROR***", ##__VA_ARGS__)
 #	define LogCleanError(fmt, ...) LOG_FORMAT_CLEAN(fmt, @"***ERROR***", ##__VA_ARGS__)
+#	define LogErrorIf(cond, fmt, ...) LOG_FORMAT_CLEAN_IF((cond), fmt, @"***ERROR***", ##__VA_ARGS__)
 #else
 #	define LogTimedError(...)
 #	define LogCleanError(...)
+#	define LogErrorIf(cond, fmt, ...)
 #endif
 #define LogError(fmt, ...) LogCleanError(fmt, ##__VA_ARGS__)
 
@@ -219,11 +239,13 @@
 #if LOGGING_LEVEL_DEBUG
 #	define LogTimedDebug(fmt, ...) LOG_FORMAT(fmt, @"debug", ##__VA_ARGS__)
 #	define LogCleanDebug(fmt, ...) LOG_FORMAT_CLEAN(fmt, @"debug", ##__VA_ARGS__)
+#	define LogDebugIf(cond, fmt, ...) LOG_FORMAT_CLEAN_IF((cond), fmt, @"debug", ##__VA_ARGS__)
 #	define MarkDebugActivityStart() NSTimeInterval _DEBUG_START_TIME_ = [NSDate timeIntervalSinceReferenceDate]
 #	define GetDebugActivityDuration() ([NSDate timeIntervalSinceReferenceDate] - _DEBUG_START_TIME_)
 #else
 #	define LogTimedDebug(...)
 #	define LogCleanDebug(...)
+#	define LogDebugIf(cond, fmt, ...)
 #	define MarkDebugActivityStart()
 #	define GetDebugActivityDuration() 0.0
 #endif
@@ -233,11 +255,13 @@
 #if LOGGING_REZLOAD
 #	define LogTimedRez(fmt, ...) LOG_FORMAT(fmt, @"rez", ##__VA_ARGS__)
 #	define LogCleanRez(fmt, ...) LOG_FORMAT_CLEAN(fmt, @"rez", ##__VA_ARGS__)
+#	define LogRezIf(cond, fmt, ...) LOG_FORMAT_CLEAN_IF((cond), fmt, @"rez", ##__VA_ARGS__)
 #	define MarkRezActivityStart() NSTimeInterval _REZ_START_TIME_ = [NSDate timeIntervalSinceReferenceDate]
 #	define GetRezActivityDuration() ([NSDate timeIntervalSinceReferenceDate] - _REZ_START_TIME_)
 #else
 #	define LogTimedRez(...)
 #	define LogCleanRez(...)
+#	define LogRezIf(cond, fmt, ...)
 #	define MarkRezActivityStart()
 #	define GetRezActivityDuration() 0.0
 #endif

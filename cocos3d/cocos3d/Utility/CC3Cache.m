@@ -76,30 +76,34 @@
 	[self lock];
 
 #if LOGGING_REZLOAD
-	BOOL wasRemoved = ([_objectsByName objectForKey: name] != nil);
+	id obj = [_objectsByName objectForKey: name];
 #endif
 	
 	[_objectsByName removeObjectForKey: name];
 	[self unlock];
 
-#if LOGGING_REZLOAD
-	if (wasRemoved) LogRez(@"Removed %@ named %@ from the %@ cache.", _typeName, name, _typeName);
-#endif
+	LogRezIf(obj != nil, @"Removed %@ named %@ from the %@ cache.", [[obj unwrapCacheable] class], name, _typeName);
 }
 
--(void) removeAllObjects {
-	[self lock];
-	[_objectsByName removeAllObjects];
-	[self unlock];
-}
+-(void) removeAllObjects { [self removeAllObjectsOfType: NSObject.class]; }
 
 -(void) removeAllObjectsOfType: (Class) type {
 	[self lock];
-	NSDictionary* cacheCopy = [_objectsByName copy];
-	[cacheCopy enumerateKeysAndObjectsUsingBlock: ^(id key, id obj, BOOL* stop) {
-		if ( [obj isKindOfClass: type] ) [_objectsByName removeObjectForKey: key];
-	}];
+	NSArray* names = [_objectsByName allKeys];
 	[self unlock];
+
+	for (NSString* name in names) {
+		[self lock];
+		id wrap = [_objectsByName objectForKey: name];
+		[self unlock];
+		if ( [[wrap unwrapCacheable] isKindOfClass: type] ) {
+			LogInfoIf([wrap isKindOfClass: NSValue.class],
+					  @"%@ is being removed from the %@ cache, but is still being retained elsewhere in your app."
+					  @" You should verify your app logic to ensure this is not the result of a memory leak.",
+					  [wrap unwrapCacheable], _typeName);
+			[self removeObjectNamed: name];
+		}
+	}
 }
 
 -(void) enumerateObjectsUsingBlock: (void (^) (id<CC3Cacheable> obj, BOOL* stop)) block {

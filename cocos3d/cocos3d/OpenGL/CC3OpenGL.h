@@ -1386,12 +1386,7 @@ void CC3SetGLCapAt(GLenum cap, GLuint idx, BOOL val, GLbitfield* stateBits, GLbi
 	}
 
 /**
- * If info logging is enabled AND this is the primary context, logs the specified
+ * If info logging is enabled AND this is the primary rendering context, logs the specified
  * info message, otherwise does nothing.
  */
-#if LOGGING_LEVEL_INFO
-#	define LogInfoIfPrimary(fmt, ...)	if (self.isRenderingContext) LogInfo(fmt, ##__VA_ARGS__)
-#else
-#	define LogInfoIfPrimary(fmt, ...)
-#endif
-
+#define LogInfoIfPrimary(fmt, ...)	LogInfoIf(self.isRenderingContext, fmt, ##__VA_ARGS__)

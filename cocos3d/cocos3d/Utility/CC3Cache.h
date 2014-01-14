@@ -103,10 +103,26 @@
 /** Removes the object with the specified name from the cache. */
 -(void) removeObjectNamed: (NSString*) name;
 
-/** Removes all objects from the cache. */
+/** 
+ * Removes all objects from the cache.
+ *
+ * This is typically invoked when 3D capabilities are no longer required, or will not be needed
+ * for a significant time, and the app wishes to release 3D resources. This method checks each
+ * cache entry, and logs an info message for any object that is weakly cached, as the existence
+ * of a weakly-cached entry is an indication that the cached object is being retained somewhere
+ * else within the app, and is therefore a potential source of a memory leak.
+ */
 -(void) removeAllObjects;
 
-/** Removes all objects that are instances of the specified class, or a subclass. */
+/** 
+ * Removes all objects that are instances of the specified class, or a subclass. 
+ *
+ * This is typically invoked when strongly cached objects are no longer required, or will not
+ * be needed for a significant time, and the app wishes to release 3D resources. This method
+ * checks each cache entry, and logs an info message for any object that is weakly cached, as
+ * the existence of a weakly-cached entry is an indication that the cached object is being 
+ * retained somewhere else within the app, and is therefore a potential source of a memory leak.
+ */
 -(void) removeAllObjectsOfType: (Class) type;
 
 /**
