@@ -943,7 +943,7 @@
 
 -(void) setSemanticDelegate: (id<CC3ShaderSemanticsDelegate>) semanticDelegate {}
 
--(GLuint) generateShader: (GLenum) shaderType { return 0; }
+-(GLuint) createShader: (GLenum) shaderType { return 0; }
 
 -(void) deleteShader: (GLuint) shaderID  {}
 
@@ -968,7 +968,7 @@
 
 -(NSString*) defaultShaderPreamble { return @""; }
 
--(GLuint) generateShaderProgram { return 0; }
+-(GLuint) createShaderProgram { return 0; }
 
 -(void) deleteShaderProgram: (GLuint) programID {}
 

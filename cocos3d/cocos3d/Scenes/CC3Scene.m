@@ -61,7 +61,6 @@
 @synthesize updateVisitor=_updateVisitor, transformVisitor=_transformVisitor;
 @synthesize performanceStatistics=_performanceStatistics;
 @synthesize deltaFrameTime=_deltaFrameTime, backdrop=_backdrop, fog=_fog, lights=_lights;
-@synthesize viewSurfaceManager=_viewSurfaceManager;
 @synthesize elapsedTimeSinceOpened=_elapsedTimeSinceOpened;
 
 /**
@@ -242,12 +241,8 @@
 	_elapsedTimeSinceOpened = 0;
 	[self play];
 	[self updateScene];
-	[self openSurfaces];
 	[self onOpen];
 }
-
-/** Template method that is invoked when the scene is first opened. */
--(void) openSurfaces { self.viewSurfaceManager = self.controller.view.surfaceManager; }
 
 -(void) onOpen {}
 
@@ -345,9 +340,11 @@
 
 #pragma mark Drawing
 
--(id<CC3RenderSurface>) viewSurface { return _viewSurfaceManager.renderingSurface; }
+-(CC3GLViewSurfaceManager*) viewSurfaceManager { return self.controller.view.surfaceManager; }
 
--(id<CC3RenderSurface>) pickingSurface { return _viewSurfaceManager.pickingSurface; }
+-(id<CC3RenderSurface>) viewSurface { return self.viewSurfaceManager.renderingSurface; }
+
+-(id<CC3RenderSurface>) pickingSurface { return self.viewSurfaceManager.pickingSurface; }
 
 -(void) drawScene { [self drawSceneWithVisitor: _viewDrawingVisitor]; }
 	

@@ -1082,13 +1082,13 @@ typedef struct {
 #pragma mark Shaders
 
 /** 
- * Generates a new shader of the specifed type and returns its ID.
+ * Creates a new shader of the specifed type and returns its ID.
  *
  * The shaderType parameter must be one of the following values:
  *   - GL_VERTEX_SHADER
  *   - GL_FRAGMENT_SHADER
  */
--(GLuint) generateShader: (GLenum) shaderType;
+-(GLuint) createShader: (GLenum) shaderType;
 
 /** Deletes the shader with the specified ID from the GL engine. */
 -(void) deleteShader: (GLuint) shaderID;
@@ -1126,8 +1126,8 @@ typedef struct {
  */
 -(NSString*) defaultShaderPreamble;
 
-/** Generates a new GLSL program and returns its ID. */
--(GLuint) generateShaderProgram;
+/** Creates a new GLSL program and returns its ID. */
+-(GLuint) createShaderProgram;
 
 /** Deletes the shader program with the specified ID from the GL engine. */
 -(void) deleteShaderProgram: (GLuint) programID;

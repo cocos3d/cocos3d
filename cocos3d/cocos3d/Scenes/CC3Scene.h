@@ -243,7 +243,6 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 	CC3NodeSequencerVisitor* _drawingSequenceVisitor;
 	CC3MeshNode* _backdrop;
 	CC3Fog* _fog;
-	CC3GLViewSurfaceManager* _viewSurfaceManager;
 	ccColor4F _ambientLight;
 	NSTimeInterval _timeAtOpen;
 	NSTimeInterval _elapsedTimeSinceOpened;
@@ -854,11 +853,8 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  *
  * You can access this property from the onOpen method of this scene, or any time after.
  * This property is not valid before that time.
- *
- * The initial value of this property is retrieved automatically from the view when this
- * scene is first opened. Normally, the application never needs to set this property.
  */
-@property(nonatomic, strong) CC3GLViewSurfaceManager* viewSurfaceManager;
+@property(nonatomic, strong, readonly) CC3GLViewSurfaceManager* viewSurfaceManager;
 
 /**
  * The render surface being used to draw to the view on the screen.

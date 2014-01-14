@@ -201,7 +201,7 @@
 	_shaderProgramPrewarmer = shaderProgramPrewarmer;
 }
 
--(GLuint) generateShader: (GLenum) shaderType {
+-(GLuint) createShader: (GLenum) shaderType {
     GLuint shaderID = glCreateShader(shaderType);
 	LogGLErrorTrace(@"glCreateShader(%@) = %u", NSStringFromGLEnum(shaderType), shaderID);
 	return shaderID;
@@ -260,16 +260,23 @@
 	return [NSString stringWithUTF8String: contentBytes];
 }
 
--(GLuint) generateShaderProgram {
+-(GLuint) createShaderProgram {
     GLuint programID = glCreateProgram();
 	LogGLErrorTrace(@"glCreateProgram() = %u", programID);
 	return programID;
 }
 
-// We don't need to clear the value_GL_CURRENT_PROGRAM, because shader program deletion is
-// lazy. The shader program won't actually be deleted until it is no longer the current program.
 -(void) deleteShaderProgram: (GLuint) programID {
 	if ( !programID ) return;		// Silently ignore zero ID
+
+	// If the program to be deleted is currently bound, force it to unbind first. Program deletion
+	// is deferred by the GL engine until the program is no longer in use. If the GL state is not
+	// updated, the program will not actually be deleted in the GL engine. This can occur, for
+	// instance, when closing 3D rendering temporarily within an app. The currently bound program
+	// will actually never be deleted. In addition, this state engine will continue to think it is
+	// bound, which can cause problems if a new shader program is later created with the same ID.
+	if (value_GL_CURRENT_PROGRAM == programID) [self useShaderProgram: 0];
+	
 	glDeleteProgram(programID);
 	LogGLErrorTrace(@"glDeleteProgram(%u)", programID);
 }

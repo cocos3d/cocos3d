@@ -52,7 +52,7 @@
 }
 
 -(GLuint) shaderID {
-	if ( !_shaderID ) _shaderID = [CC3OpenGL.sharedGL generateShader: self.shaderType];
+	if ( !_shaderID ) _shaderID = [CC3OpenGL.sharedGL createShader: self.shaderType];
 	return _shaderID;
 }
 
@@ -362,7 +362,7 @@ static CC3Cache* _shaderCache = nil;
 }
 
 -(GLuint) programID {
-	if ( !_programID ) _programID = [CC3OpenGL.sharedGL generateShaderProgram];
+	if ( !_programID ) _programID = [CC3OpenGL.sharedGL createShaderProgram];
 	return _programID;
 }
 
@@ -1413,14 +1413,10 @@ static CC3Cache* _shaderSourceCodeCache = nil;
 		self.prewarmingMeshNode = [CC3MeshNode nodeWithName: @"ShaderPrewarmer"];
 		_prewarmingMeshNode.vertexContentTypes = kCC3VertexContentLocation;
 		
-		// Populate the mesh as a single triangular face
-		CC3Face triangle = CC3FaceMake(kCC3VectorZero, kCC3VectorUnitXPositive, kCC3VectorUnitYPositive);
+		// Populate the mesh as a single triangular face of zero dimensions
+		CC3Face triangle = CC3FaceMake(kCC3VectorZero, kCC3VectorZero, kCC3VectorZero);
 		ccTex2F texCoords[3] = { {0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0} };				// unused
 		[_prewarmingMeshNode populateAsTriangle: triangle withTexCoords: texCoords andTessellation: 1];
-
-		// Create VBOs in the GL engine and release the mesh from memory
-		[_prewarmingMeshNode createGLBuffers];
-		[_prewarmingMeshNode releaseRedundantContent];
 	}
 	return _prewarmingMeshNode;
 }
@@ -1442,6 +1438,8 @@ static CC3Cache* _shaderSourceCodeCache = nil;
 	pwVisitor.renderSurface = pwSurface;
 	[pwSurface activate];
 	[pwVisitor visit: pwNode];
+	
+	pwNode.shaderProgram = nil;	// Release the program immediately, since it is only used once.
 	[program resetGLState];		// Reset GL state. Needed if pre-warming in background context...
 								// ...since state is different between contexts.
 }
