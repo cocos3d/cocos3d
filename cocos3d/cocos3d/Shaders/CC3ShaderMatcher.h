@@ -78,14 +78,13 @@
  * Returns a shader program that matches the specified shader program, but renders the mesh
  * in a single, solid color, instead of taking into consideration lighting, textures, etc.
  *
- * The returned shaderProgram will be used for rendering the mesh node during paint-based node
- * picking, or can be used for simply rendering the mesh while ignoring lighting, material and 
- * textures.
+ * The returned shaderProgram will be used for rendering the mesh node during paint-based node picking,
+ * or can be used for simply rendering the mesh while ignoring lighting, material and textures.
  *
- * Implementation should ensure that the vertices will be rendered in the same position as
- * the specified shader program. Typical implementations will return a shader program that
- * uses the same vertex shader as the specified shader program, but has a fragment shader 
- * that renders in a single color.
+ * Implementation should ensure that the vertices will be rendered in the same position as the
+ * specified shader program. Typical implementations will return a shader program that uses the
+ * same vertex shader as the specified shader program, but has a fragment shader that renders 
+ * in a single color.
  */
 -(CC3ShaderProgram*) pureColorProgramMatching: (CC3ShaderProgram*) shaderProgram;
 

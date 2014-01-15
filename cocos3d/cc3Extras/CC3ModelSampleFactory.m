@@ -127,12 +127,14 @@
 	return self;
 }
 
-static CC3ModelSampleFactory* factory;
+static CC3ModelSampleFactory* _factory;
 
 +(CC3ModelSampleFactory*) factory {
-	if (!factory) factory = [self new];	// statically retained
-	return factory;
+	if (!_factory) _factory = [self new];
+	return _factory;
 }
+
++(void) deleteFactory { _factory = nil; }
 
 
 #pragma mark Factory methods

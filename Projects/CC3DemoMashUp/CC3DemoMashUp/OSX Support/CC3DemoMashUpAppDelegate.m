@@ -62,7 +62,7 @@
 	_viewController = [CC3NSViewController new];	// retained
 	_viewController.view = _glView;
 	
-	CC3Layer* cc3Layer = [CC3DemoMashUpLayer layerWithController: _viewController];
+	CC3Layer* cc3Layer = [CC3DemoMashUpLayer layer];
 	cc3Layer.cc3Scene = [CC3DemoMashUpScene scene];
 	_viewController.controlledNode = cc3Layer;
 	

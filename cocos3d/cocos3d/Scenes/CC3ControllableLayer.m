@@ -37,28 +37,26 @@
 
 @implementation CC3ControllableLayer
 
-// Override to store the controller in the unretained iVar
--(CC3ViewController*) controller { return _controller; }
+/** If not set directly, try to retrieve it from an ancestor controllable node. */
+-(CC3ViewController*) controller {
+	if (!_controller) _controller = super.controller;
+	CC3Assert(_controller, @"%@ requires a controller.", self);
+	return _controller;
+}
+
 -(void) setController: (CC3ViewController*) aController { _controller = aController; }
 
 
 #pragma mark Allocation and initialization
 
-// Will fail assertion with nil controller
--(id) init { return [self initWithController: nil]; }
-
--(id) initWithController: (CC3ViewController*) controller {
-	CC3Assert(controller, @"%@ requires a CC3ViewController controller.", self);
+-(id) init {
 	if( (self = [super init]) ) {
-		_controller = controller;		// not retained
 		[self initInitialState];		// Deprecated legacy
 	}
 	return self;
 }
 
-+(id) layerWithController: (CC3ViewController*) controller {
-	return [[self alloc] initWithController: controller];
-}
++(id) layer { return [[self alloc] init]; }
 
 -(NSString*) description { return [NSString stringWithFormat: @"%@", [self class]]; }
 
@@ -76,7 +74,7 @@
 
 #pragma mark Device camera support
 
--(BOOL) isOverlayingDeviceCamera { return _controller ? _controller.isOverlayingDeviceCamera : NO; }
+-(BOOL) isOverlayingDeviceCamera { return self.controller.isOverlayingDeviceCamera; }
 
 // If this layer is overlaying the device camera, the GL clear color is
 // set to transparent black, otherwise it is set to opaque black.
@@ -94,6 +92,15 @@
 +(id) layerWithColor: (ccColor4B) color { return [[self alloc] init]; }
 -(void) initInitialState {}
 -(BOOL) isColored { return NO; }
+-(id) initWithController: (CC3ViewController*) controller {
+	if( (self = [self init]) ) {
+		self.controller = controller;
+	}
+	return self;
+}
++(id) layerWithController: (CC3ViewController*) controller {
+	return [[self alloc] initWithController: controller];
+}
 
 
 @end

@@ -40,7 +40,7 @@
  * device orientation.
  */
 @interface CC3ControllableLayer : CCLayer {
-	CC3ViewController* _controller;
+	CC3ViewController* __unsafe_unretained _controller;
 }
 
 
@@ -77,13 +77,8 @@
 
 #pragma mark Allocation and initialization
 
-/** Initializes this instance to be controlled by the specified controller, which may not be nil. */
--(id) initWithController: (CC3ViewController*) controller;
-
-/** 
- * Allocates and initializes an autoreleased instance controlled by the specified controller,
- * which may not be nil. */
-+(id) layerWithController: (CC3ViewController*) controller;
+/** Allocates and initializes a layer. */
++(id) layer;
 
 
 #pragma mark Deprecated functionality
@@ -106,6 +101,12 @@
 /** @deprecated CC3ControllableLayer no longer draws a backdrop. Use CC3Scene backdrop property instead. */
 @property(nonatomic, readonly) BOOL isColored DEPRECATED_ATTRIBUTE;
 
+/** @deprecated Use init instead. The controller property is set automatically when the layer, or an ancestor is assigned to a controller. */
+-(id) initWithController: (CC3ViewController*) controller DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Use layer instead. The controller property is set automatically when the layer, or an ancestor is assigned to a controller. */
++(id) layerWithController: (CC3ViewController*) controller DEPRECATED_ATTRIBUTE;
+
 @end
 
 
@@ -125,7 +126,7 @@
  * returns the value of the same property from the parent of this CCNode, or returns nil if this
  * node has no parent.
  */
-@property(nonatomic, assign) CC3ViewController* controller;
+@property(nonatomic, unsafe_unretained) CC3ViewController* controller;
 
 /**
  * Invoked automatically by a CC3UIViewController when the orientation of the view (portrait,

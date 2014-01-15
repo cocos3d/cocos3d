@@ -121,7 +121,8 @@
 	// ******** START OF COCOS3D SETUP CODE... ********
 	
 	// Create the main controllable layer. It will create multiple CC3Layers inside it.
-	CC3ControllableLayer* mainLayer = [MainLayer layerWithController: _viewController];
+	CC3ControllableLayer* mainLayer = [MainLayer layer];
+//	CC3ControllableLayer* mainLayer = [MainLayer layerWithController: _viewController];
 	
 	// Set the layer in the controller
 	_viewController.controlledNode = mainLayer;

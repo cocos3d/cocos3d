@@ -88,5 +88,22 @@
  */
 -(void) resumeAnimation;
 
+/** 
+ * Clears all OpenGL resource, texture and shader caches, and shuts down the OpenGL context.
+ *
+ * This method also detaches the view from this controller, but does not remove the view
+ * from its superview. You must handle that directly.
+ *
+ * This method also invokes [CCDirector.sharedDirector end], to ensure all resources loaded
+ * by cocos2d code is also released, and all scenes are deleted.
+ *
+ * You can invoke this method when you want to close the OpenGL functionality, and release both
+ * app and GL memory that is being used by OpenGL resources. You might choose to do this once
+ * your application has completely finished using OpenGL, or even when your app will not be 
+ * needing OpenGL resources for some period of time, and your app can absorb the overhead of
+ * restarting OpenGL and reloading resources.
+ */
+-(void) endOpenGL;
+
 @end
 

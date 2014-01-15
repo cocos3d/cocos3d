@@ -409,7 +409,7 @@
 	// Create the HUD CC3Layer, with a semi-transparent background, set its position
 	// to the touch-point (offset by the size of the layer), and set its final size.
 	// Start it with a small scale.
-	hudLayer = [HUDLayer layerWithController: self.controller];
+	hudLayer = [HUDLayer layer];
 	hudLayer.position = ccpSub(touchPoint, ccpMult(ccpFromSize(hudSize), 0.5));
 	hudLayer.contentSize = hudSize;
 	hudLayer.scale = 0.1;

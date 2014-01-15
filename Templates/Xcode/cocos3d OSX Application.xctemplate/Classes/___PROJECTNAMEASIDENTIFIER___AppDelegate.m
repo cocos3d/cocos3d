@@ -39,10 +39,11 @@
 	_viewController = [CC3NSViewController new];	// retained
 	_viewController.view = _glView;
 
-	CC3Layer* cc3Layer = [___PROJECTNAMEASIDENTIFIER___Layer layerWithController: _viewController];
+	CC3Layer* cc3Layer = [___PROJECTNAMEASIDENTIFIER___Layer layer];
 	cc3Layer.cc3Scene = [___PROJECTNAMEASIDENTIFIER___Scene scene];
 	_viewController.controlledNode = cc3Layer;
 	
+	// Wrap the layer in a 2D scene and run it in the director
 	CCScene *scene = [CCScene node];
 	[scene addChild: cc3Layer];
 	[director runWithScene: scene];

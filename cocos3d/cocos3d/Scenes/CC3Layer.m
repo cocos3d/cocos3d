@@ -62,8 +62,8 @@
 
 #pragma mark Allocation and initialization
 
--(id) initWithController: (CC3ViewController*) controller {
-	if( (self = [super initWithController: controller]) ) {
+-(id) init {
+	if( (self = [super init]) ) {
 		_shouldAlwaysUpdateViewport = NO;
 		self.mousePriority = 0;
 		[self initializeControls];

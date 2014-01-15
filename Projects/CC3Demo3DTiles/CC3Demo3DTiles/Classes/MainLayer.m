@@ -68,8 +68,8 @@
 // MainLayer implementation
 @implementation MainLayer
 
--(id) initWithController: (CC3ViewController*) controller {
-	if( (self = [super initWithController: controller]) ) {
+-(id) init {
+	if( (self = [super init]) ) {
 		_tiles = [NSMutableArray array];
 		_templates = [NSMutableArray array];
 		_backdropTemplate = nil;
@@ -80,6 +80,19 @@
 	}
 	return self;
 }
+
+//-(id) initWithController: (CC3ViewController*) controller {
+//	if( (self = [super initWithController: controller]) ) {
+//		_tiles = [NSMutableArray array];
+//		_templates = [NSMutableArray array];
+//		_backdropTemplate = nil;
+//		_tilesPerSide = 1;
+//		[self initializeTemplates];
+//		[self initializeControls];
+//		[self addTiles];
+//	}
+//	return self;
+//}
 
 
 # pragma mark UI Controls
@@ -289,7 +302,8 @@
  * and adds the CC3Layer to this layer.
  */
 -(void) addTileIn: (CGRect) bounds {
-	CC3Layer* tileLayer = [TileLayer layerWithController: self.controller];
+	CC3Layer* tileLayer = [TileLayer layer];
+//	CC3Layer* tileLayer = [TileLayer layerWithController: self.controller];
 	tileLayer.position = bounds.origin;
 	tileLayer.contentSize = bounds.size;
 	tileLayer.cc3Scene = [self makeScene];

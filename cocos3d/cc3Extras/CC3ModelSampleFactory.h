@@ -33,18 +33,15 @@
 
 
 /**
- * CC3ModelSampleFactory is a convenience utility for creating sample 3D models
- * for experimentation.
+ * CC3ModelSampleFactory is a convenience utility for creating sample 3D models for experimentation.
  * 
- * The design pattern is a singleton factory object, with methods for creating
- * instances of various 3D models.
+ * The design pattern is a singleton factory object, with methods for creating instances
+ * of various 3D models. Access to the factory instance is through the factory class method.
  *
- * Access to the factory instance is through the factory class method.
- *
- * This class should be considered for testing and experimental use only.
- * Unless you really need teapots in your application, there is no need to include
- * this class, or the teapot.h data header file, in any finished application.
- * Doing so will just bloat the size of the application unnecessarily.
+ * This class should be considered for testing and experimental use only. Unless you really
+ * need teapots in your application, there is no need to include this class, or the teapot.h
+ * data header file, in any finished application. Doing so will just bloat the size of the
+ * application unnecessarily.
  */
 @interface CC3ModelSampleFactory : NSObject {
 	CC3VertexLocations* teapotVertexLocations;
@@ -59,6 +56,9 @@
 
 /** Returns the singleton instance. */
 +(CC3ModelSampleFactory*) factory;
+
+/** Deletes the factory singleton, to clear items from memory. */
++(void) deleteFactory;
 
 /** An instance of a teapot mesh that includes a texture coordinate map. */
 @property(nonatomic, strong, readonly) CC3Mesh* texturedTeapotMesh;
