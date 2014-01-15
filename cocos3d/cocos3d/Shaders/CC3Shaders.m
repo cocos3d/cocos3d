@@ -1096,7 +1096,7 @@ static CC3Cache* _shaderSourceCodeCache = nil;
 
 -(NSString*) sourceCodeString { return _sourceCodeString; }
 
--(GLuint) lineCount { return _sourceCodeString.lineCount; }
+-(GLuint) lineCount { return (GLuint)_sourceCodeString.lineCount; }
 
 -(void) appendSourceCodeString: (NSString*) srcCode { [_sourceCodeString appendString: srcCode]; }
 
@@ -1142,7 +1142,7 @@ static CC3Cache* _shaderSourceCodeCache = nil;
 	return srcCodeString;
 }
 
--(GLuint) lineCount { return _sourceCodeLines.count; }
+-(GLuint) lineCount { return (GLuint)_sourceCodeLines.count; }
 
 -(void) appendSourceCodeString: (NSString*) srcCode {
 	[_sourceCodeLines addObject: [NSData dataWithBytes: srcCode.UTF8String
@@ -1159,7 +1159,7 @@ static CC3Cache* _shaderSourceCodeCache = nil;
 
 -(void) accumulateSourceCompilationStringCountWithVisitor: (CC3ShaderSourceCodeCompilationStringCountVisitor*) visitor {
 	if ( [visitor hasAlreadyVisited: self] ) return;
-	[visitor addSourceCompilationStringCount: _sourceCodeLines.count];
+	[visitor addSourceCompilationStringCount: (GLuint)_sourceCodeLines.count];
 }
 
 

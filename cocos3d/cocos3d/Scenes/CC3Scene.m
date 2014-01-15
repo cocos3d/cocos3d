@@ -62,6 +62,7 @@
 @synthesize performanceStatistics=_performanceStatistics;
 @synthesize deltaFrameTime=_deltaFrameTime, backdrop=_backdrop, fog=_fog, lights=_lights;
 @synthesize elapsedTimeSinceOpened=_elapsedTimeSinceOpened;
+@synthesize backgrounder=_backgrounder;
 
 /**
  * Descendant nodes will be removed by superclass. Their removal may invoke
@@ -79,6 +80,11 @@
 -(BOOL) isScene { return YES; }
 
 -(CC3ViewController*) controller { return _cc3Layer.controller; }
+
+-(CC3Backgrounder*) backgrounder {
+	if ( !_backgrounder ) _backgrounder = [CC3Backgrounder backgrounder];
+	return _backgrounder;
+}
 
 -(CC3Camera*) activeCamera { return _activeCamera; }
 

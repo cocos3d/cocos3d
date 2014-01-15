@@ -30,7 +30,7 @@
 /** @file */	// Doxygen marker
 
 #import "CC3Identifiable.h"
-#import "CC3OpenGLFoundation.h"
+#import "CC3OSExtensions.h"
 #import "CC3Matrix4x4.h"
 
 @class CC3NodeDrawingVisitor, CC3Mesh, CC3Fog;
@@ -78,7 +78,7 @@ typedef struct {
  * if the state really is changing.
  */
 @interface CC3OpenGL : CC3Identifiable {
-	BOOL _isRenderingContext : 1;
+	CC3GLContext* _context;
 
 @public
 
@@ -207,6 +207,17 @@ typedef struct {
 	BOOL isKnown_GL_UNPACK_ALIGNMENT : 1;
 
 }
+
+/** 
+ * The OpenGL engine context.
+ *
+ * The initial value of this property depends on the platform. Under iOS, this property 
+ * will be initialized to an appropriate OpenGL ES context during instance initialization.
+ * Under OSX, this property will be set by the CC3GLView for the primary rendering context
+ * (isRenderingContext property is YES), and will be initialized to a shared GL context
+ * for background instances (isRenderingContext property is NO).
+ */
+@property(nonatomic, strong) CC3GLContext* context;
 
 /**
  * Returns whether this instance is tracking state for the primary rendering GL context
@@ -1209,12 +1220,6 @@ typedef struct {
 
 #pragma mark Allocation and initialization
 
-/**
- * Initializes this instance with the specified name, and marking whether this is the
- * primary GL rendering context.
- */
--(id) initWithName: (NSString*) aName asRenderingContext: (BOOL) isRenderingContext;
-
 /** 
  * Returns the shared singleton instance for the currently running thread, creating it if necessary.
  *
@@ -1227,6 +1232,17 @@ typedef struct {
  * one for a single background thread that can be used for loading resources, textures, and shaders.
  */
 +(CC3OpenGL*) sharedGL;
+
+/** 
+ * Deletes all GL contexts, serving all threads.
+ *
+ * You can invoke this method when your app no longer needs support for OpenGL, or will not
+ * use OpenGL for a significant amount of time, in order to free up app and OpenGL memory
+ * used by your application.
+ *
+ * Use this method with caution, as creating the GL contexts again will require significant overhead.
+ */
++(void) deleteGL;
 
 @end
 

@@ -86,8 +86,6 @@ typedef enum {
 #define UIInterfaceOrientationIsPortrait(orientation)  ((orientation) == UIInterfaceOrientationPortrait || (orientation) == UIInterfaceOrientationPortraitUpsideDown)
 #define UIInterfaceOrientationIsLandscape(orientation) ((orientation) == UIInterfaceOrientationLandscapeLeft || (orientation) == UIInterfaceOrientationLandscapeRight)
 
-//@class CCGLView;
-
 
 #pragma mark -
 #pragma mark Open GL Context

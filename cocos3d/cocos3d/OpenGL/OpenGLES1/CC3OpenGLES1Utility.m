@@ -29,11 +29,11 @@
  * See header file CC3OpenGLUtility.h for full API documentation.
  */
 
-#include "CC3OpenGLUtility.h"
+#import "CC3OpenGLUtility.h"
 
 #if CC3_OGLES_1
 
-#include "CC3OpenGLES1Compatibility.h"
+#import "CC3OpenGLES1Compatibility.h"
 
 char* CC3GLEnumName(GLenum gle) {
 	switch (gle) {

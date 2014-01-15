@@ -46,7 +46,7 @@
 
 -(GLuint) pixelSamples { return _surfaceManager.pixelSamples; }
 
--(NSOpenGLContext*) context { return self.openGLContext; }
+-(CC3GLContext*) context { return (CC3GLContext*)self.openGLContext; }
 
 -(void) prepareOpenGL {
 	[super prepareOpenGL];
@@ -65,7 +65,8 @@
 
 	_colorFormat = CC3GLColorFormatFromBitPlanes(colorSize, alphaSize);
 	_depthFormat = CC3GLDepthFormatFromBitPlanes(depthSize, stencilSize);
-
+	
+	CC3OpenGL.sharedGL.context = self.context;	// Set the primary GL context from this view
 	_surfaceManager = [[CC3GLViewSurfaceManager alloc] initWithView: self];
 }
 

@@ -38,23 +38,34 @@
 #pragma mark -
 #pragma mark CCGLView & CC3GLView
 
-/**
- * Under cocos2d 1.x, create an alias CCGLView for EAGLView in iOS, allowing EAGLView to be
- * used where CCGLView is under cocos2d 2.x. Under OSX, create CCGLView as a subclass of
- * MacGLView, so it will be created by the NIB.
- */
-#if CC3_CC2_1
 
 #if CC3_IOS
+
+/** Under cocos2d 1.x iOS, create an alias CCGLView for EAGLView. */
+#if CC3_CC2_1
 #	define CCGLView EAGLView
-#endif	// CC3_IOS
-
-#if CC3_OSX
-@interface CCGLView : MacGLView
-@end
-#endif	// CC3_OSX
-
 #endif	// CC3_CC2_1
+
+
+/** Extension to support cocos3d functionality. */
+@interface CCGLView (CC3)
+
+/** Initializes this instance with the specified characteristics. */
+-(id) initWithFrame: (CGRect) frame
+		pixelFormat: (NSString*) colorFormat
+		depthFormat: (GLenum) depthFormat
+ preserveBackbuffer: (BOOL) isRetained
+	numberOfSamples: (GLuint) sampleCount;
+
+/** Allocates and initializes an instance with the specified characteristics. */
++(id) viewWithFrame: (CGRect) frame
+		pixelFormat: (NSString*) colorFormat
+		depthFormat: (GLenum) depthFormat
+ preserveBackbuffer: (BOOL) isRetained
+	numberOfSamples: (GLuint) sampleCount;
+
+@end
+#endif	// CC3_IOS
 
 /** Add state caching aliases for compatiblity with 2.1 and above */
 #if CC3_CC2_2 && COCOS2D_VERSION < 0x020100

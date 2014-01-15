@@ -92,8 +92,6 @@
 								  pixelFormat: self.viewColorFormat
 								  depthFormat: self.viewDepthFormat
 						   preserveBackbuffer: NO
-								   sharegroup: nil
-								multiSampling: (self.viewPixelSamples > 1)
 							  numberOfSamples: self.viewPixelSamples];
 }
 

@@ -1817,6 +1817,19 @@
 			<key>Path</key>
 			<string>cocos3d/cocos3d/Nodes/CC3UtilityMeshNodes.m</string>
 		</dict>
+		<key>cocos3d/cocos3d/OpenGL/CC3GLView.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>OpenGL</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/OpenGL/CC3GLView.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
 		<key>cocos3d/cocos3d/OpenGL/CC3OpenGL.h</key>
 		<dict>
 			<key>Group</key>
@@ -3843,6 +3856,7 @@
 		<string>cocos3d/cocos3d/Nodes/CC3ParametricMeshNodes.m</string>
 		<string>cocos3d/cocos3d/Nodes/CC3UtilityMeshNodes.h</string>
 		<string>cocos3d/cocos3d/Nodes/CC3UtilityMeshNodes.m</string>
+		<string>cocos3d/cocos3d/OpenGL/CC3GLView.h</string>
 		<string>cocos3d/cocos3d/OpenGL/CC3OpenGL.h</string>
 		<string>cocos3d/cocos3d/OpenGL/CC3OpenGL.m</string>
 		<string>cocos3d/cocos3d/OpenGL/CC3OpenGLFixedPipeline.h</string>

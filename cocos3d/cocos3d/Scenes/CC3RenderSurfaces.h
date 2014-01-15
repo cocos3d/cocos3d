@@ -30,9 +30,8 @@
 /** @file */	// Doxygen marker
 
 #import "CC3Texture.h"
-#import "CC3Backgrounder.h"
 
-@class CC3GLView;
+@class CC3GLView, CC3Backgrounder;
 
 
 #pragma mark -
@@ -931,7 +930,6 @@
 	CC3GLFramebuffer* _viewSurface;
 	CC3GLFramebuffer* _multisampleSurface;
 	CC3GLFramebuffer* _pickingSurface;
-	CC3GLBackgrounder* _backgrounder;
 	BOOL _shouldUseDedicatedPickingSurface : 1;
 }
 
@@ -1079,13 +1077,8 @@
  */
 -(void) resolveMultisampling;
 
-/**
- * Returns a backgrounder that can be used to perform cetain GL tasks, such as loading
- * resources, textures and shaders on a background thread.
- *
- * If not set beforehand, the instance in this property is lazily created.
- */
-@property(nonatomic, strong) CC3GLBackgrounder* backgrounder;
+/** @deprecated Property moved to CC3Scene. */
+@property(nonatomic, strong) CC3Backgrounder* backgrounder DEPRECATED_ATTRIBUTE;
 
 
 #pragma mark Resizing surfaces

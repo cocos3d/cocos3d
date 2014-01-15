@@ -29,9 +29,7 @@
 
 /** @file */	// Doxygen marker
 
-#import "CC3GLView-GL.h"
-#import "CC3GLView-GLES2.h"
-#import "CC3GLView-GLES1.h"
+#import "CC3GLView.h"
 
 // The superclass of the CC3ViewController depends on the platform
 #if CC3_OGLES_2

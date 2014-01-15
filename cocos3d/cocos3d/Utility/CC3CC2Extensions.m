@@ -33,11 +33,37 @@
 #import "CC3Logging.h"
 #import "uthash.h"
 
-#if ((CC3_CC2_1) && (CC3_OSX))
-@implementation CCGLView
-@end
-#endif	// CC3_CC2_1 && CC3_OSX
+#if CC3_IOS
+@implementation CCGLView (CC3)
 
+-(id) initWithFrame: (CGRect) frame
+		pixelFormat: (NSString*) colorFormat
+		depthFormat: (GLenum) depthFormat
+ preserveBackbuffer: (BOOL) isRetained
+	numberOfSamples: (GLuint) sampleCount {
+	return [self initWithFrame: frame
+				   pixelFormat: colorFormat
+				   depthFormat: depthFormat
+			preserveBackbuffer: isRetained
+					sharegroup: nil
+				 multiSampling: (sampleCount > 1)
+			   numberOfSamples: sampleCount];
+}
+
++(id) viewWithFrame: (CGRect) frame
+		pixelFormat: (NSString*) colorFormat
+		depthFormat: (GLenum) depthFormat
+ preserveBackbuffer: (BOOL) isRetained
+	numberOfSamples: (GLuint) sampleCount {
+	return [[self alloc] initWithFrame: frame
+						   pixelFormat: colorFormat
+						   depthFormat: depthFormat
+					preserveBackbuffer: isRetained
+					   numberOfSamples: sampleCount];
+}
+
+@end
+#endif	// CC3_IOS
 
 #if !CC3_IOS
 

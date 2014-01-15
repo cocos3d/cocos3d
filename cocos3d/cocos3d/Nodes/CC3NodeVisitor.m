@@ -35,9 +35,7 @@
 #import "CC3Mesh.h"
 #import "CC3NodeSequencer.h"
 #import "CC3VertexSkinning.h"
-#import "CC3GLView-GL.h"
-#import "CC3GLView-GLES2.h"
-#import "CC3GLView-GLES1.h"
+#import "CC3GLView.h"
 
 @interface CC3Node (TemplateMethods)
 -(void) processUpdateBeforeTransform: (CC3NodeUpdatingVisitor*) visitor;

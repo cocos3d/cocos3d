@@ -64,6 +64,8 @@
 
 @synthesize surfaceManager=_surfaceManager;
 
+-(CC3GLContext*) context { return (CC3GLContext*)CC2_CONTEXT; }
+
 -(CAEAGLLayer*) layer { return (CAEAGLLayer*)super.layer; }
 
 -(GLenum) colorFormat { return [self convertPixelFormat: CC2_PIXEL_FORMAT]; }
@@ -74,7 +76,7 @@
 
 -(GLuint) pixelSamples { return _surfaceManager.pixelSamples; }
 
--(BOOL) setupSurfaceWithSharegroup:(EAGLSharegroup*)sharegroup {
+-(BOOL) setupSurfaceWithSharegroup: (EAGLSharegroup*) sharegroup {
 	self.layer.opaque = YES;
 	self.layer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
 									 [NSNumber numberWithBool: CC2_PRESERVE_BACKBUFFER],
@@ -82,13 +84,7 @@
 									 CC2_PIXEL_FORMAT,
 									 kEAGLDrawablePropertyColorFormat,
 									 nil];
-
-	CC2_CONTEXT = [[EAGLContext alloc] initWithAPI: kEAGLRenderingAPIOpenGLES2 sharegroup: sharegroup];
-	if ( !CC2_CONTEXT || ![EAGLContext setCurrentContext: CC2_CONTEXT] ) {
-		CC3Assert(NO, @"Could not create EAGLContext. OpenGL ES 2.0 is required.");
-		return NO;
-	}
-	
+	CC2_CONTEXT = CC3OpenGL.sharedGL.context;
 	_surfaceManager = [[CC3GLViewSurfaceManager alloc] initWithView: self];
 	return YES;
 }

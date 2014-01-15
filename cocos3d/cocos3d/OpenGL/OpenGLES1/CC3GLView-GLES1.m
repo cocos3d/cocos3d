@@ -42,6 +42,7 @@
 #define CC2_DEPTH_FORMAT depthFormat_
 #define CC2_CONTEXT context_
 #define CC2_SIZE size_
+#define CC2_PRESERVE_BACKBUFFER preserveBackbuffer_
 
 
 #pragma mark -
@@ -55,6 +56,8 @@
 
 @synthesize surfaceManager=_surfaceManager;
 
+-(CC3GLContext*) context { return (CC3GLContext*)CC2_CONTEXT; }
+
 -(CAEAGLLayer*) layer { return (CAEAGLLayer*)super.layer; }
 
 -(GLenum) colorFormat { return [self convertPixelFormat: CC2_PIXEL_FORMAT]; }
@@ -65,21 +68,15 @@
 
 -(GLuint) pixelSamples { return _surfaceManager.pixelSamples; }
 
--(BOOL) setupSurfaceWithSharegroup:(EAGLSharegroup*)sharegroup {
+-(BOOL) setupSurfaceWithSharegroup: (EAGLSharegroup*) sharegroup {
 	self.layer.opaque = YES;
 	self.layer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
-									 [NSNumber numberWithBool:preserveBackbuffer_],
+									 [NSNumber numberWithBool: CC2_PRESERVE_BACKBUFFER],
 									 kEAGLDrawablePropertyRetainedBacking,
-									 pixelformat_,
+									 CC2_PIXEL_FORMAT,
 									 kEAGLDrawablePropertyColorFormat,
 									 nil];
-	
-	CC2_CONTEXT = [[EAGLContext alloc] initWithAPI: kEAGLRenderingAPIOpenGLES1 sharegroup: sharegroup];
-	if ( !CC2_CONTEXT || ![EAGLContext setCurrentContext: CC2_CONTEXT] ) {
-		CC3Assert(NO, @"Could not create EAGLContext.");
-		return NO;
-	}
-	
+	CC2_CONTEXT = CC3OpenGL.sharedGL.context;
 	_surfaceManager = [[CC3GLViewSurfaceManager alloc] initWithView: self];
 	return YES;
 }

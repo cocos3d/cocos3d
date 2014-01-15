@@ -143,13 +143,13 @@
 // because it messes with the concurrent rendering of cocos2d components on the rendering thread.
 	
 -(void) activateMatrixStack: (GLenum) mode {
-	if ( !_isRenderingContext ) return;
+	if ( !self.isRenderingContext ) return;
 	
 	kmGLMatrixMode(mode);
 }
 
 -(void) loadModelviewMatrix: (CC3Matrix4x3*) mtx {
-	if ( !_isRenderingContext ) return;
+	if ( !self.isRenderingContext ) return;
 
 	[self activateMatrixStack: GL_MODELVIEW];
 	CC3Matrix4x4 glMtx;
@@ -158,35 +158,35 @@
 }
 
 -(void) loadProjectionMatrix: (CC3Matrix4x4*) mtx {
-	if ( !_isRenderingContext ) return;
+	if ( !self.isRenderingContext ) return;
 	
 	[self activateMatrixStack: GL_PROJECTION];
 	kmGLLoadMatrix((kmMat4*)mtx);
 }
 
 -(void) pushModelviewMatrixStack {
-	if ( !_isRenderingContext ) return;
+	if ( !self.isRenderingContext ) return;
 	
 	[self activateMatrixStack: GL_MODELVIEW];
 	kmGLPushMatrix();
 }
 
 -(void) popModelviewMatrixStack {
-	if ( !_isRenderingContext ) return;
+	if ( !self.isRenderingContext ) return;
 	
 	[self activateMatrixStack: GL_MODELVIEW];
 	kmGLPopMatrix();
 }
 
 -(void) pushProjectionMatrixStack {
-	if ( !_isRenderingContext ) return;
+	if ( !self.isRenderingContext ) return;
 	
 	[self activateMatrixStack: GL_PROJECTION];
 	kmGLPushMatrix();
 }
 
 -(void) popProjectionMatrixStack {
-	if ( !_isRenderingContext ) return;
+	if ( !self.isRenderingContext ) return;
 	
 	[self activateMatrixStack: GL_PROJECTION];
 	kmGLPopMatrix();
@@ -375,8 +375,8 @@
 
 #pragma mark Allocation and initialization
 
--(id) initWithName: (NSString*) aName asRenderingContext: (BOOL) isRenderingContext {
-	if ( (self = [super initWithName: aName asRenderingContext: isRenderingContext]) ) {
+-(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
+	if ( (self = [super initWithTag: aTag withName: aName]) ) {
 		[self initShaderProgramPrewarmer];
 	}
 	return self;

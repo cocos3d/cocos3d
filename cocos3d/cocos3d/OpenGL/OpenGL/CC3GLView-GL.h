@@ -84,7 +84,7 @@
 @property(nonatomic, readonly) GLuint pixelSamples;
 
 /** The OpenGL context used by this view. */
-@property(nonatomic, strong, readonly) NSOpenGLContext *context;
+@property(nonatomic, strong, readonly) CC3GLContext* context;
 
 /** Compatibility with iOS view signature. This implementation does nothing under OSX. */
 -(void) addGestureRecognizer: (UIGestureRecognizer*) gesture;

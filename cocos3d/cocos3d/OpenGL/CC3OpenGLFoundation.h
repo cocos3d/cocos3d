@@ -34,7 +34,7 @@
 #if CC3_OGLES_1
 #import <OpenGLES/ES1/gl.h>
 #import <OpenGLES/ES1/glext.h>
-#include "CC3OpenGLES1Compatibility.h"
+#import "CC3OpenGLES1Compatibility.h"
 #endif	// CC3_OGLES_1
 
 #if CC3_OGLES_2

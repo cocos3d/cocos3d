@@ -30,8 +30,6 @@
  */
 
 #import "CC3Backgrounder.h"
-#import "CC3OpenGL.h"
-#import "CC3CC2Extensions.h"
 
 /** The default backgrounder task queue name. */
 #define kCC3BackgrounderDefaultTaskQueueName	"org.cocos3d.backgrounder.default"
@@ -109,39 +107,5 @@
 }
 
 +(id) backgrounder { return [[self alloc] init]; }
-
-@end
-
-
-#pragma mark CC3GLBackgrounder
-
-@implementation CC3GLBackgrounder : CC3Backgrounder
-
-@synthesize glContext=_glContext;
-
-
-#pragma mark Backgrounding tasks
-
-/** Overridden to ensure that the contained GL context is active on the current thread. */
--(void) runBlock: (void (^)(void))block {
-	[super runBlock: ^{
-		[_glContext ensureCurrentContext];
-		block();
-	}];
-}
-
-
-#pragma mark Allocation and initialization
-
--(id) initWithGLContext: (CC3GLContext*) glContext {
-	if ( (self = [super init]) ) {
-		_glContext = glContext;
-	}
-	return self;
-}
-
-+(id) backgrounderWithGLContext: (CC3GLContext*) glContext {
-	return [[self alloc] initWithGLContext: glContext];
-}
 
 @end

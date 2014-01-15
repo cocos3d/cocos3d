@@ -30,6 +30,7 @@
  */
 
 #import "CC3OSXExtensions.h"
+#import	"CC3Logging.h"
 
 
 #if CC3_OSX
@@ -45,7 +46,8 @@
 }
 
 -(CC3GLContext*) asSharedContext {
-	return [[self.class alloc] initWithFormat: ((CCGLView*)self.view).pixelFormat
+	CC3Assert(self.view, @"%@ has no view and cannot be the source of a shared context.", self);
+	return [[self.class alloc] initWithFormat: ((NSOpenGLView*)self.view).pixelFormat
 								 shareContext: self];
 }
 

@@ -175,19 +175,19 @@
  * asynchronously after the scene is open.
  *
  * This method is invoked from a code block defined in the onOpen method, that is run on a
- * background thread by the CC3GLBackgrounder available through the backgrounder property of
- * the viewSurfaceManager. It adds content dynamically and asynchronously while rendering is
- * running on the main rendering thread.
+ * background thread by the CC3Backgrounder available through the backgrounder property.
+ * It adds content dynamically and asynchronously while rendering is running on the main
+ * rendering thread.
  *
  * You can add content on the background thread at any time while your scene is running, by
- * defining a code block and running it on the backgrounder of the viewSurfaceManager. The
- * example provided in the onOpen method is a template for how to do this, but it does not
- * need to be invoked only from the onOpen method.
+ * defining a code block and running it on the backgrounder. The example provided in the
+ * onOpen method is a template for how to do this, but it does not need to be invoked only
+ * from the onOpen method.
  *
  * Certain assets, notably shader programs, will cause short, but unavoidable, delays in the
  * rendering of the scene, because certain finalization steps from shader compilation occur on
- * the main thread. Shaders and certain other critical assets should be pre-loaded in the
- * initializeScene method prior to the opening of this scene.
+ * the main thread when the shader is first used. Shaders and certain other critical assets can
+ * be pre-loaded and cached in the initializeScene method, prior to the opening of this scene.
  */
 -(void) addSceneContentAsynchronously {}
 
@@ -228,17 +228,14 @@
  * For more info, read the notes of this method on CC3Scene.
  */
 -(void) onOpen {
-	
-	// Add additional scene content dynamically and asynchronously on a background thread
-	// after the scene is open and rendering has begun on the rendering thread. We use the
-	// GL backgrounder provided by the viewSurfaceManager to accomplish this. Asynchronous
-	// loading must be initiated after the scene has been attached to the view. It cannot
-	// be started in the initializeScene method. However, you do not need to start it only
-	// in this onOpen method. You can use the code here as a template for use whenever your
-	// app requires background content loading.
-	[self.viewSurfaceManager.backgrounder runBlock: ^{
-		[self addSceneContentAsynchronously];
-	}];
+
+	// Add additional scene content dynamically and asynchronously, on a background thread after
+	// rendering has begun on the rendering thread, using the CC3Backgrounder instance available
+	// in the backgrounder property. Asynchronous loading must be initiated after the scene has been
+	// attached to the view. It cannot be started in the initializeScene method. However, it does
+	// not need to be invoked only from the onOpen method. You can use the code here as a template
+	// for use whenever your app requires background content loading after the scene has opened.
+	[self.backgrounder runBlock: ^{ [self addSceneContentAsynchronously]; }];
 
 	// Move the camera to frame the scene. The resulting configuration of the camera is output as
 	// a [debug] log message, so you know where the camera needs to be in order to view your scene.

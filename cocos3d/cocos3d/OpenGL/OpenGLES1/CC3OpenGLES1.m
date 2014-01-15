@@ -203,6 +203,12 @@
 
 #pragma mark Allocation and initialization
 
+-(CC3GLContext*) makeRenderingGLContext {
+	CC3GLContext* context = [[CC3GLContext alloc] initWithAPI: kEAGLRenderingAPIOpenGLES1 sharegroup: nil];
+	CC3Assert(context, @"Could not create CC3GLContext. OpenGL ES 1.1 is required.");
+	return context;
+}
+
 -(void) initPlatformLimits {
 	[super initPlatformLimits];
 	

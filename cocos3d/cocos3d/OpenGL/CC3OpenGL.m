@@ -41,7 +41,7 @@
 
 @implementation CC3OpenGL
 
-@synthesize isRenderingContext=_isRenderingContext;
+@synthesize context=_context;
 
 -(void) dealloc {
 	free(vertexAttributes);
@@ -221,7 +221,7 @@
 	// iOS & OSX do support background VAO's, but they are not shared across contexts.
 	// Android seems to share the VAO binding state across contexts, which causes
 	// interference between threads.
-	if ( !_isRenderingContext ) return;
+	if ( !self.isRenderingContext ) return;
 
 #if COCOS2D_VERSION >= 0x020100
 	// If available, use cocos2d state management. This method can be invoked from outside
@@ -1048,11 +1048,13 @@
 
 #pragma mark Allocation and initialization
 
--(id) initWithName: (NSString*) aName asRenderingContext: (BOOL) isRenderingContext {
-	if ( (self = [super initWithName: aName]) ) {
-		_isRenderingContext = isRenderingContext;
+-(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
+	if ( (self = [super initWithTag: aTag withName: aName]) ) {
+		// Ensure _renderGL set, so isRenderingContext property will work during init
+		if (!_renderGL) _renderGL = self;
 		LogInfoIfPrimary(@"Third dimension provided by %@", NSStringFromCC3Version());
 		LogInfo(@"Starting GL context %@", self);
+		[self initGLContext];
 		[self initPlatformLimits];
 		[self initSurfaces];
 		[self initVertexAttributes];
@@ -1061,6 +1063,26 @@
 	}
 	return self;
 }
+
+/** Template method to establish the OpenGL engine context. */
+-(void) initGLContext {
+	self.context = self.isRenderingContext ? [self makeRenderingGLContext] : [self makeBackgroundGLContext];
+	[_context ensureCurrentContext];
+}
+
+/** Template method to create and return the primary rendering OpenGL context. */
+-(CC3GLContext*) makeRenderingGLContext {
+	CC3AssertUnimplemented(@"makeRenderingGLContext");
+	return nil;
+}
+
+/**
+ * Template method to create and return the background OpenGL context.
+ *
+ * This implementation creates the background GL context from the primary rendering context,
+ * using a sharegroup, so that the two can share GL objects.
+ */
+-(CC3GLContext*) makeBackgroundGLContext { return [_renderGL.context asSharedContext]; }
 
 /** Template method to retrieve the GL platform limits. */
 -(void) initPlatformLimits {
@@ -1111,17 +1133,22 @@
 static CC3OpenGL* _renderGL = nil;
 static CC3OpenGL* _bgGL = nil;
 
+-(BOOL) isRenderingContext { return (self == _renderGL); }
+
 +(CC3OpenGL*) sharedGL {
 	NSThread* currThread = NSThread.currentThread;
 	if (currThread == CCDirector.sharedDirector.runningThread || currThread.isMainThread) {
-		if (!_renderGL) _renderGL = [[self alloc] initWithName: @"Rendering Engine"
-											asRenderingContext: YES];
+		if (!_renderGL) _renderGL = [[self alloc] initWithName: @"Rendering Engine"];
 		return _renderGL;
 	} else {
-		if (!_bgGL) _bgGL = [[self alloc] initWithName: @"Background Engine"
-									asRenderingContext: NO];
+		if (!_bgGL) _bgGL = [[self alloc] initWithName: @"Background Engine"];
 		return _bgGL;
 	}
+}
+
++(void) deleteGL {
+	_renderGL = nil;
+	_bgGL = nil;
 }
 
 @end

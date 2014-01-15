@@ -1,5 +1,5 @@
 /*
- * CC3OpenGLUtility.h
+ * CC3GLView.h
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -29,34 +29,7 @@
 
 /** @file */	// Doxygen marker
 
-
-#import "CC3Environment.h"
-
-#if CC3_OGLES_1
-#import <OpenGLES/ES1/gl.h>
-#import <OpenGLES/ES1/glext.h>
-#import "CC3OpenGLES1Compatibility.h"
-#endif	// CC3_OGLES_1
-
-#if CC3_OGLES_2
-#import <OpenGLES/ES2/gl.h>
-#import <OpenGLES/ES2/glext.h>
-#import "CC3OpenGLES2Compatibility.h"
-#endif	// CC3_OGLES_2
-
-#if CC3_OGL
-#import <OpenGL/gl.h>
-#import <OpenGL/glu.h>
-#import "CC3OpenGLCompatibility.h"
-#endif	// CC3_OGL
-
-#import <stdio.h>
-
-/** Returns a string containing the name of the specified GL enumeration code. */
-char* CC3GLEnumName(GLenum gle);
-
-/** 
- * Returns the size of the specified GL dataType, which must be one of:
- * GL_BYTE, GL_UNSIGNED_BYTE, GL_SHORT, GL_UNSIGNED_SHORT, GL_FLOAT, GL_FIXED.
- */
-size_t CC3GLElementTypeSize(GLenum dataType);
+//#import "CC3GLContext.h"
+#import "CC3GLView-GL.h"
+#import "CC3GLView-GLES2.h"
+#import "CC3GLView-GLES1.h"

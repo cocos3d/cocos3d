@@ -33,9 +33,7 @@
 #import "CC3OpenGL.h"
 #import "CC3CC2Extensions.h"
 #import "CC3Scene.h"
-#import "CC3GLView-GL.h"
-#import "CC3GLView-GLES2.h"
-#import "CC3GLView-GLES1.h"
+#import "CC3GLView.h"
 
 
 #pragma mark -
@@ -767,8 +765,7 @@
 
 @implementation CC3GLViewSurfaceManager
 
-@synthesize view=_view, backgrounder=_backgrounder;
-@synthesize shouldUseDedicatedPickingSurface=__shouldUseDedicatedPickingSurface;
+@synthesize view=_view, shouldUseDedicatedPickingSurface=__shouldUseDedicatedPickingSurface;
 
 -(CC3GLFramebuffer*) viewSurface { return _viewSurface; }
 
@@ -887,11 +884,13 @@
 	}
 }
 
--(CC3GLBackgrounder*) backgrounder {
-	if ( !_backgrounder ) {
-		_backgrounder = [[CC3GLBackgrounder alloc] initWithGLContext: [_view.context asSharedContext]];	// retained
-	}
-	return _backgrounder;
+// Deprecated
+-(CC3Backgrounder*) backgrounder {
+	CC3Assert(NO, @"The backgrounder property has moved to CC3Scene.");
+	return nil;
+}
+-(void) setBackgrounder: (CC3Backgrounder*) backgrounder {
+	CC3Assert(NO, @"The backgrounder property has moved to CC3Scene.");
 }
 
 

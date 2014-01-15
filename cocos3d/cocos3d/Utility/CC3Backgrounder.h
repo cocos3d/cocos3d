@@ -30,7 +30,6 @@
 /** @file */	// Doxygen marker
 
 #import "CC3Foundation.h"
-#import "CC3OSExtensions.h"
 
 
 #pragma mark CC3Backgrounder
@@ -79,64 +78,3 @@
 +(id) backgrounder;
 
 @end
-
-
-#pragma mark CC3GLBackgrounder
-
-/**
- * CC3GLBackgrounder is a type of CC3Backgrounder specialized to perform OpenGL 
- * operations on a background thread.
- *
- * An instance of CC3GLBackgrounder manages a GL context that is distinct from the GL context
- * that is used for rendering, but shares content with the rendering context.
- *
- * No explicit synchronization is provided between the GL context managed by this instance
- * and the GL context used for rendering. For operations such as loading new content on a
- * background thread, this should not cause a problem, as the rendering context will not
- * encounter the new content until it is added to the scene.
- *
- * When using the CC3Node addChild: method to add new nodes (including the corresponding
- * meshes, textures and shaders), to an active scene, the addChild: method will automatically
- * ensure the actual addition to the scene will occur on the rendering thread, to ensure that
- * content is not added during the middle of actual rendering.
- *
- * However, if you use an instance of this class to modify existing GL content that is
- * actively being used by the rendering GL context, you must provide explicit sychronization.
- */
-@interface CC3GLBackgrounder : CC3Backgrounder {
-	CC3GLContext* _glContext;
-}
-
-/** 
- * The GL context used during GL operations on the thread used by this instance.
- *
- * The initial value is set during instance initialization.
- */
-@property(nonatomic, strong) CC3GLContext* glContext;
-
-
-#pragma mark Allocation and initialization
-
-/**
- * Initializes this instance, and sets the value of the glContext property
- * to the specified GL context.
- *
- * In most cases, the specified GL context should share GL content with the
- * GL context used for rendering.
- */
--(id) initWithGLContext: (CC3GLContext*) glContext;
-
-/**
- * Allocates and initializes an autoreleased instance, and sets the value of
- * the glContext property to the specified GL context.
- *
- * In most cases, the specified GL context should share GL content with the
- * GL context used for rendering.
- */
-+(id) backgrounderWithGLContext: (CC3GLContext*) glContext;
-
-@end
-
-
-
-
