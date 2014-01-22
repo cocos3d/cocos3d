@@ -69,7 +69,7 @@
  * Make sure they are all made nil in addition to being released here!
  */
 -(void) dealloc {
-	LogDebug(@"Deallocating %@ on thread %@", self, NSThread.currentThread);
+	LogInfo(@"Deallocating %@ on thread %@", self, NSThread.currentThread);
 	self.drawingSequencer = nil;			// Use setter to release and make nil
 	self.activeCamera = nil;				// Use setter to release and make nil
 	self.fog = nil;							// Use setter to stop any actions

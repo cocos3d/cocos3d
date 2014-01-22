@@ -65,19 +65,19 @@
 	[self close3DController];
 	switch (segmentIndex.intValue) {
 		case kSelectedSceneMashUp:
-			LogDebug(@"MashUp scene selected");
+			LogInfo(@"MashUp scene selected");
 			[self open3DControllerWithShadows: YES];
 			[self open3DLayer: [self makeDemoMashUpLayer]];
 			break;
 		case kSelectedSceneTiles:
-			LogDebug(@"Tiles scene selected");
+			LogInfo(@"Tiles scene selected");
 			break;
 		case kSelectedScenePerformance:
-			LogDebug(@"Performance scene selected");
+			LogInfo(@"Performance scene selected");
 			break;
 		case kSelectedSceneNone:
 		default:
-			LogDebug(@"No scene selected");
+			LogInfo(@"No scene selected");
 		break;
 	}
 	[_progressView stopAnimating];
@@ -85,7 +85,8 @@
 
 /** 
  * Creates and opens a new 3D controller. The supportShadows argument indicates whether
- * the controller should be configured to support shadows. 
+ * the controller should be configured to support shadows. The frame of the GL view is
+ * set to fill the framing container view.
  */
 -(void) open3DControllerWithShadows: (BOOL) supportShadows {
 	CC3Assert(!_cc3Controller, @"%@ already exists. Close it before opening it again.", _cc3Controller);
@@ -93,7 +94,7 @@
 	// Ensure the 3D controller has been created, set its view bounds to fill the placeholder
 	// frame view that is part of the parent view controller, and add the 3D view to the frame view.
 	_cc3Controller = [self makeCC3ControllerWithShadows: supportShadows];
-	_cc3Controller.viewBounds = [_cc3FrameView bounds];
+	_cc3Controller.view.frame = [_cc3FrameView bounds];
 	[_cc3FrameView addSubview: _cc3Controller.view];
 }
 
@@ -197,9 +198,10 @@
 
 #pragma mark View management
 
+/** After device rotation, re-align the frame of the GL view to fill the frame view. */
 -(void) viewDidLayoutSubviews {
 	[super viewDidLayoutSubviews];
-	_cc3Controller.view.bounds = [_cc3FrameView bounds];
+	_cc3Controller.view.frame = [_cc3FrameView bounds];
 }
 
 -(void) viewDidLoad {
@@ -207,7 +209,7 @@
 	// Do any additional setup after loading the view, typically from a nib.
 }
 
-/** If the view disappears, we want to shut down the 3D controller and scene. */
+/** If the view disappears, shut down the 3D controller and scene. */
 -(void)viewWillDisappear: (BOOL) animated {
     [self close3DController];
 	[super viewWillDisappear: animated];
