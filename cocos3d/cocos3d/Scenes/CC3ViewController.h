@@ -72,6 +72,15 @@
 @property(nonatomic, strong) CC3GLView* view;
 
 /**
+ * Starts the cocos2d/3d animation.
+ *
+ * You should invoke this method when the application enters the foreground.
+ *
+ * Use the stopAnimation method to stop the animation.
+ */
+-(void) startAnimation;
+
+/**
  * Reduces cocos2d/3d animation to a minimum.
  *
  * Invoke this method when you want to reliquish CPU to perform some other task, such as
@@ -87,6 +96,15 @@
  * temporarily reduced by a prior invocation of the pauseAnimation method.
  */
 -(void) resumeAnimation;
+
+/** 
+ * Stops the cocos2d/3d animation.
+ *
+ * You should invoke this method when the application will enter the background.
+ *
+ * Use the startAnimation method to start the animation again.
+ */
+-(void) stopAnimation;
 
 /** 
  * Clears all OpenGL resource, texture and shader caches, and shuts down the OpenGL context.

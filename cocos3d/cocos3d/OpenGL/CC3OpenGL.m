@@ -34,16 +34,30 @@
 #import "CC3OpenGLES1.h"
 #import "CC3OpenGL2.h"
 
+#import "CC3OSExtensions.h"
 #import "CC3CC2Extensions.h"
 #import "CC3GLSLVariable.h"
 #import "CC3ShaderMatcher.h"
+#import "CC3Backgrounder.h"
+#import "CC3Resource.h"
+#import "CC3Texture.h"
+#import "CC3Shaders.h"
 
+
+/** Extension to keep the compiler happy for dynamic classes. */
+@interface NSObject(CC3ModelSampleFactory)
++ (void) deleteFactory;
+@end
+
+
+#pragma mark CC3OpenGL
 
 @implementation CC3OpenGL
 
-@synthesize context=_context;
+@synthesize context=_context, deletionDelay=_deletionDelay;
 
 -(void) dealloc {
+	LogInfo(@"Deallocating %@ and closing OpenGL on %@.", self, NSThread.currentThread);
 	free(vertexAttributes);
 	free(value_GL_TEXTURE_BINDING_2D);
 	free(value_GL_TEXTURE_BINDING_CUBE_MAP);
@@ -1050,10 +1064,12 @@
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		// Ensure _renderGL set, so isRenderingContext property will work during init
+		// Ensure _renderGL is set, so isRenderingContext property will work during init
+		// The rendering instance must be created first !!
 		if (!_renderGL) _renderGL = self;
 		LogInfoIfPrimary(@"Third dimension provided by %@", NSStringFromCC3Version());
-		LogInfo(@"Starting GL context %@", self);
+		LogInfo(@"Starting GL context %@ on %@", self, NSThread.currentThread);
+		[self initDeletionDelay];
 		[self initGLContext];
 		[self initPlatformLimits];
 		[self initSurfaces];
@@ -1063,6 +1079,9 @@
 	}
 	return self;
 }
+
+/** Template method to establish the initial value of the deletionDelay property. */
+-(void) initDeletionDelay { _deletionDelay = self.isRenderingContext ? 0.0 : 0.25; }
 
 /** Template method to establish the OpenGL engine context. */
 -(void) initGLContext {
@@ -1136,8 +1155,7 @@ static CC3OpenGL* _bgGL = nil;
 -(BOOL) isRenderingContext { return (self == _renderGL); }
 
 +(CC3OpenGL*) sharedGL {
-	NSThread* currThread = NSThread.currentThread;
-	if (currThread == CCDirector.sharedDirector.runningThread || currThread.isMainThread) {
+	if (NSThread.isRenderingThread) {
 		if (!_renderGL) _renderGL = [[self alloc] initWithName: @"Rendering Engine"];
 		return _renderGL;
 	} else {
@@ -1147,8 +1165,49 @@ static CC3OpenGL* _bgGL = nil;
 }
 
 +(void) deleteGL {
-	_renderGL = nil;
-	_bgGL = nil;
+	[_renderGL deleteGL];
+	[_bgGL deleteGL];
+}
+
+-(void) deleteGL {
+	if (self.isRenderingContext) {
+		[NSThread.mainThread runBlockAsync: ^{ [self clearResourceCaches]; } ];
+		[NSThread.mainThread runBlockAsync: ^{ [self deleteSoon]; } ];
+	} else {
+		[CC3Backgrounder.sharedBackgrounder runBlock: ^{ [self clearResourceCaches]; }];
+		[CC3Backgrounder.sharedBackgrounder runBlock: ^{ [self deleteSoon]; }];
+	}
+}
+
+-(void) deleteSoon {
+	LogInfo(@"Requesting deletion of %@ on thread %@.", self, NSThread.currentThread);
+	if (self.isRenderingContext) {
+		[NSThread.mainThread runBlock: ^{ [self deleteNow]; } after: _deletionDelay ];
+	} else {
+		[CC3Backgrounder.sharedBackgrounder runBlock: ^{ [self deleteNow]; } after: _deletionDelay];
+	}
+}
+
+-(void) deleteNow {
+	LogInfo(@"Deleting %@ now on thread %@.", self, NSThread.currentThread);
+	[self finish];
+	if (self == _renderGL) _renderGL = nil;
+	if (self == _bgGL) _bgGL = nil;
+}
+
+-(void) clearResourceCaches {
+	LogInfo(@"Clearing resource caches on thread %@.", NSThread.currentThread);
+
+	self.shaderProgramPrewarmer = nil;
+
+	[CC3Resource removeAllResources];
+	[CC3Texture removeAllTextures];
+	[CC3ShaderProgram removeAllPrograms];
+	[CC3Shader removeAllShaders];
+	[CC3ShaderSourceCode removeAllShaderSourceCode];
+	
+	// Dynamically reference model factory class, as it might not be present.
+	[NSClassFromString(@"CC3ModelSampleFactory") deleteFactory];
 }
 
 @end

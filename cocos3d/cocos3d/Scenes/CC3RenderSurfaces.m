@@ -34,6 +34,7 @@
 #import "CC3CC2Extensions.h"
 #import "CC3Scene.h"
 #import "CC3GLView.h"
+#import "CC3Backgrounder.h"
 
 
 #pragma mark -
@@ -885,13 +886,8 @@
 }
 
 // Deprecated
--(CC3Backgrounder*) backgrounder {
-	CC3Assert(NO, @"The backgrounder property has moved to CC3Scene.");
-	return nil;
-}
--(void) setBackgrounder: (CC3Backgrounder*) backgrounder {
-	CC3Assert(NO, @"The backgrounder property has moved to CC3Scene.");
-}
+-(CC3Backgrounder*) backgrounder { return CC3Backgrounder.sharedBackgrounder; }
+-(void) setBackgrounder: (CC3Backgrounder*) backgrounder {}
 
 
 #pragma mark Resizing surfaces

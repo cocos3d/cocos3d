@@ -35,8 +35,9 @@
 #pragma mark CC3Backgrounder
 
 /**
- * An instance of CC3Backgrounder performs activity on a background thread by submitting
- * tasks to a Grand Central Dispatch (GCD) queue.
+ * CC3Backgrounder performs activity on a background thread by submitting tasks to 
+ * a Grand Central Dispatch (GCD) queue. In order to ensure that the GL engine is
+ * presented activity in an defined order, CC3Backgrounder is a singleton.
  */
 @interface CC3Backgrounder : NSObject {
 	dispatch_queue_t _taskQueue;
@@ -65,16 +66,19 @@
 /** 
  * Runs the specified block of code by dispatching it to the global GCD queue identified
  * by the value of the queuePriority property.
- *
- * You should use this method instead of dispatching to a GCD queue directly, because subclasses
- * may override this method to perform additional activities around the queuing of the block.
  */
 -(void) runBlock: (void (^)(void))block;
+
+/**
+ * Waits the specified number of seconds, then runs the specified block of code by dispatching
+ * it to the global GCD queue identified by the value of the queuePriority property.
+ */
+-(void) runBlock: (void (^)(void))block after: (NSTimeInterval) seconds;
 
 
 #pragma mark Allocation and initialization
 
-/** Allocates and initializes an autoreleased instance. */
-+(id) backgrounder;
+/** Returns the singleton backgrounder instance. */
++(id) sharedBackgrounder;
 
 @end

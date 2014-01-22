@@ -101,6 +101,40 @@
  */
 -(void) runBlockSync: (void (^)(void)) block;
 
+/**
+ * Waits the specified number of seconds, then dispatches the specified block to the run 
+ * loop of this thread.
+ *
+ * This method returns immediately once the specified block is queued for execution on the run
+ * loop of this thread. This method does not wait for the execution of the block to complete.
+ */
+-(void) runBlock: (void (^)(void))block after: (NSTimeInterval) seconds;
+
+/** Returns whether the current thread is the thread on which OpenGL rendering is occurring. */
++(BOOL) isRenderingThread;
+
+@end
+
+
+#pragma mark -
+#pragma mark NSRunLoop extensions
+
+/** Extension category to support cocos3d functionality. */
+@interface NSRunLoop (CC3)
+
+/**
+ * Dispatches the specified block to be run on the next iteration of this run loop. 
+ * The block will be run only once, within one of the default run loop modes, during
+ * the next iteration of the run loop.
+ *
+ * This is useful for running a block that is used for cleaning-up, and you want to ensure
+ * that all autoreleased objects have been deallocated before running the block.
+ *
+ * This method returns immediately once the specified block is queued for execution on
+ * this run loop. This method does not wait for the execution of the block to complete.
+ */
+-(void) runBlockOnNextIteration: (void (^)(void)) block;
+
 @end
 
 

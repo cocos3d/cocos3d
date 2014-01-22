@@ -59,15 +59,19 @@
  * instruct the CCTexture2D to take over management of the GL texture object in 
  * the GL engine. Otherwise, delete the GL texture object from the GL engine.
  */
+//-(void) deleteGLTexture {
+//	NSString* texName = self.name;
+//	if (texName) {
+//		CCTexture2D* tex2D = [CCTextureCache.sharedTextureCache textureForKey: texName];
+//		if (tex2D && (tex2D.name == _textureID)) {
+//			tex2D.shouldManageGL = YES;
+//			return;
+//		}
+//	}
+//	[CC3OpenGL.sharedGL deleteTexture: _textureID];
+//	_textureID = 0;
+//}
 -(void) deleteGLTexture {
-	NSString* texName = self.name;
-	if (texName) {
-		CCTexture2D* tex2D = [CCTextureCache.sharedTextureCache textureForKey: texName];
-		if (tex2D && (tex2D.name == _textureID)) {
-			tex2D.shouldManageGL = YES;
-			return;
-		}
-	}
 	[CC3OpenGL.sharedGL deleteTexture: _textureID];
 	_textureID = 0;
 }

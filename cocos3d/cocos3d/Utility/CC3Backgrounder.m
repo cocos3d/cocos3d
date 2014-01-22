@@ -76,14 +76,12 @@
 
 /** Delete the serial task queue. */
 -(void) deleteTaskQueue {
-	if ( !_taskQueue) return;
 	dispatch_release(_taskQueue);
 	_taskQueue = NULL;
 }
 
 /** Update the underlying target queue of the serial task queue to match the queue priority. */
 -(void) updateTaskQueuePriority {
-	if ( !_taskQueue ) return;
 	dispatch_set_target_queue(_taskQueue, dispatch_get_global_queue(_queuePriority, 0));
 }
 
@@ -91,9 +89,16 @@
 #pragma mark Backgrounding tasks
 
 -(void) runBlock: (void (^)(void))block {
-	if ( !_taskQueue) return;
-	dispatch_async(_taskQueue, block);
+	dispatch_async(_taskQueue, ^{ [self runBlockNow: block]; });
 }
+
+-(void) runBlock: (void (^)(void))block after: (NSTimeInterval) seconds {
+	dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (seconds * NSEC_PER_SEC)),
+				   _taskQueue,
+				   ^{ [self runBlockNow: block]; });
+}
+
+-(void) runBlockNow: (void (^)(void)) block { @autoreleasepool { block(); } }
 
 
 #pragma mark Allocation and initialization
@@ -106,6 +111,11 @@
 	return self;
 }
 
-+(id) backgrounder { return [[self alloc] init]; }
+static CC3Backgrounder* _singleton;
+
++(CC3Backgrounder*) sharedBackgrounder {
+	if (!_singleton) _singleton = [self new];
+	return _singleton;
+}
 
 @end

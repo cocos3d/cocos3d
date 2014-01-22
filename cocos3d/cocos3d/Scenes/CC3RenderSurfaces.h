@@ -1077,7 +1077,7 @@
  */
 -(void) resolveMultisampling;
 
-/** @deprecated Property moved to CC3Scene. */
+/** @deprecated Property moved to [CC3Backgrounder sharedBackgrounder] singleton. */
 @property(nonatomic, strong) CC3Backgrounder* backgrounder DEPRECATED_ATTRIBUTE;
 
 

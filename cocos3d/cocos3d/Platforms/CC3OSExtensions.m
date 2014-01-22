@@ -68,21 +68,49 @@
 
 @implementation NSThread (CC3)
 
--(void) runBlockAsync: (void (^)(void)) block {
+-(void) runBlockAsync: (void (^)(void)) block { [self runBlock: block waitUntilDone: NO]; }
+
+-(void) runBlockSync: (void (^)(void)) block { [self runBlock: block waitUntilDone: NO]; }
+
+-(void) runBlock: (void (^)(void)) block waitUntilDone: (BOOL) wait {
 	[self performSelector: @selector(runBlockNow:)
 				 onThread: self
 			   withObject: [block copy]
-			waitUntilDone: NO];
+			waitUntilDone: wait];
 }
 
--(void) runBlockSync: (void (^)(void)) block {
+-(void) runBlock: (void (^)(void)) block after: (NSTimeInterval) seconds {
+	[self runBlockAsync: ^{
+		[self performSelector: @selector(runBlockNow:)
+				   withObject: [block copy]
+				   afterDelay: seconds];
+	}];
+}
+
+-(void) runBlockNow: (void (^)(void)) block { @autoreleasepool { block(); } }
+
++(BOOL) isRenderingThread {
+	NSThread* currThread = self.currentThread;
+	return (currThread == CCDirector.sharedDirector.runningThread || currThread.isMainThread);
+}
+
+@end
+
+
+#pragma mark -
+#pragma mark NSRunLoop extensions
+
+@implementation NSRunLoop (CC3)
+
+-(void) runBlockOnNextIteration: (void (^)(void)) block {
 	[self performSelector: @selector(runBlockNow:)
-				 onThread: self
-			   withObject: [block copy]
-			waitUntilDone: YES];
+				   target: self
+				 argument: [block copy]
+					order: 0
+					modes: [NSArray arrayWithObject: NSDefaultRunLoopMode]];
 }
 
--(void) runBlockNow: (void (^)(void)) block; { block(); }
+-(void) runBlockNow: (void (^)(void)) block { @autoreleasepool { block(); } }
 
 @end
 

@@ -64,11 +64,12 @@
 		A92DA81C1427B80E0051AFFA /* arial16.fnt in Resources */ = {isa = PBXBuildFile; fileRef = A92DA81A1427B80E0051AFFA /* arial16.fnt */; };
 		A92DA81D1427B80E0051AFFA /* arial16.png in Resources */ = {isa = PBXBuildFile; fileRef = A92DA81B1427B80E0051AFFA /* arial16.png */; };
 		A93C003B1821B283003A0C43 /* configuration.json in Resources */ = {isa = PBXBuildFile; fileRef = A93C003A1821B283003A0C43 /* configuration.json */; };
+		A946374518898D530097E355 /* CC3PerformanceAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = A946374118898D530097E355 /* CC3PerformanceAppDelegate.m */; };
+		A946374818898D530097E355 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = A946374418898D530097E355 /* main.m */; };
+		A946375818898F920097E355 /* Images-iOS.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A946375718898F920097E355 /* Images-iOS.xcassets */; };
 		A947374C140E5983006F410C /* CC3PerformanceLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = A947372B140E5983006F410C /* CC3PerformanceLayer.m */; };
 		A947374D140E5983006F410C /* CC3PerformanceScene.m in Sources */ = {isa = PBXBuildFile; fileRef = A947372D140E5983006F410C /* CC3PerformanceScene.m */; };
 		A9473751140E5983006F410C /* NodeGrid.m in Sources */ = {isa = PBXBuildFile; fileRef = A9473736140E5983006F410C /* NodeGrid.m */; };
-		A94EEA3917F60BA7005A43E7 /* CC3PerformanceAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = A94EEA3617F60BA7005A43E7 /* CC3PerformanceAppDelegate.m */; };
-		A94EEA3B17F60BA7005A43E7 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = A94EEA3817F60BA7005A43E7 /* main.m */; };
 		A94EEA3D17F60C58005A43E7 /* BeachBall.pod in Resources */ = {isa = PBXBuildFile; fileRef = A94EEA3C17F60C58005A43E7 /* BeachBall.pod */; };
 		A94EEA3F17F60C66005A43E7 /* DieCube.pod in Resources */ = {isa = PBXBuildFile; fileRef = A94EEA3E17F60C66005A43E7 /* DieCube.pod */; };
 		A94EEA4117F60C76005A43E7 /* hello-world.pod in Resources */ = {isa = PBXBuildFile; fileRef = A94EEA4017F60C76005A43E7 /* hello-world.pod */; };
@@ -203,16 +204,17 @@
 		A92DA81A1427B80E0051AFFA /* arial16.fnt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = arial16.fnt; sourceTree = "<group>"; };
 		A92DA81B1427B80E0051AFFA /* arial16.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = arial16.png; sourceTree = "<group>"; };
 		A93C003A1821B283003A0C43 /* configuration.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = configuration.json; path = "CC3Performance-iOS.approj/configuration.json"; sourceTree = SOURCE_ROOT; };
+		A946374018898D530097E355 /* CC3PerformanceAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PerformanceAppDelegate.h; sourceTree = "<group>"; };
+		A946374118898D530097E355 /* CC3PerformanceAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3PerformanceAppDelegate.m; sourceTree = "<group>"; };
+		A946374318898D530097E355 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A946374418898D530097E355 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		A946375718898F920097E355 /* Images-iOS.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = "Images-iOS.xcassets"; path = "../Common/Images-iOS.xcassets"; sourceTree = "<group>"; };
 		A947372A140E5983006F410C /* CC3PerformanceLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PerformanceLayer.h; sourceTree = "<group>"; };
 		A947372B140E5983006F410C /* CC3PerformanceLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3PerformanceLayer.m; sourceTree = "<group>"; };
 		A947372C140E5983006F410C /* CC3PerformanceScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PerformanceScene.h; sourceTree = "<group>"; };
 		A947372D140E5983006F410C /* CC3PerformanceScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3PerformanceScene.m; sourceTree = "<group>"; };
 		A9473735140E5983006F410C /* NodeGrid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NodeGrid.h; sourceTree = "<group>"; };
 		A9473736140E5983006F410C /* NodeGrid.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NodeGrid.m; sourceTree = "<group>"; };
-		A94EEA3517F60BA7005A43E7 /* CC3PerformanceAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PerformanceAppDelegate.h; sourceTree = "<group>"; };
-		A94EEA3617F60BA7005A43E7 /* CC3PerformanceAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3PerformanceAppDelegate.m; sourceTree = "<group>"; };
-		A94EEA3717F60BA7005A43E7 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		A94EEA3817F60BA7005A43E7 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		A94EEA3C17F60C58005A43E7 /* BeachBall.pod */ = {isa = PBXFileReference; lastKnownFileType = file; name = BeachBall.pod; path = "../../../Models/Beach Ball/BeachBall.pod"; sourceTree = "<group>"; };
 		A94EEA3E17F60C66005A43E7 /* DieCube.pod */ = {isa = PBXFileReference; lastKnownFileType = file; name = DieCube.pod; path = "../../../Models/Die Cube/DieCube.pod"; sourceTree = "<group>"; };
 		A94EEA4017F60C76005A43E7 /* hello-world.pod */ = {isa = PBXFileReference; lastKnownFileType = file; name = "hello-world.pod"; path = "../../../Models/Hello World/hello-world.pod"; sourceTree = "<group>"; };
@@ -293,14 +295,15 @@
 			isa = PBXGroup;
 			children = (
 				A9473727140E5983006F410C /* Classes */,
+				A946373F18898D530097E355 /* iOS Support */,
 				A92DA7D21427B7870051AFFA /* Resources */,
 				A903C02618772DD100BDE9C1 /* GLSL */,
-				A94EEA3417F60BA7005A43E7 /* iOS Support */,
 				A93C00371821B217003A0C43 /* Apportable */,
-				A94EEA6817F60DC4005A43E7 /* cocos3d-library-iOS.xcodeproj */,
-				A94EEA6E17F60DD2005A43E7 /* cocos2d-library-iOS.xcodeproj */,
+				A946375718898F920097E355 /* Images-iOS.xcassets */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
+				A94EEA6817F60DC4005A43E7 /* cocos3d-library-iOS.xcodeproj */,
+				A94EEA6E17F60DD2005A43E7 /* cocos2d-library-iOS.xcodeproj */,
 			);
 			name = CustomTemplate;
 			sourceTree = "<group>";
@@ -442,6 +445,18 @@
 			path = ../CC3Demo3DTiles;
 			sourceTree = "<group>";
 		};
+		A946373F18898D530097E355 /* iOS Support */ = {
+			isa = PBXGroup;
+			children = (
+				A946374018898D530097E355 /* CC3PerformanceAppDelegate.h */,
+				A946374118898D530097E355 /* CC3PerformanceAppDelegate.m */,
+				A946374318898D530097E355 /* Info.plist */,
+				A946374418898D530097E355 /* main.m */,
+			);
+			name = "iOS Support";
+			path = "CC3Performance/iOS Support";
+			sourceTree = "<group>";
+		};
 		A9473727140E5983006F410C /* Classes */ = {
 			isa = PBXGroup;
 			children = (
@@ -455,18 +470,6 @@
 			);
 			name = Classes;
 			path = CC3Performance/Classes;
-			sourceTree = "<group>";
-		};
-		A94EEA3417F60BA7005A43E7 /* iOS Support */ = {
-			isa = PBXGroup;
-			children = (
-				A94EEA3517F60BA7005A43E7 /* CC3PerformanceAppDelegate.h */,
-				A94EEA3617F60BA7005A43E7 /* CC3PerformanceAppDelegate.m */,
-				A94EEA3717F60BA7005A43E7 /* Info.plist */,
-				A94EEA3817F60BA7005A43E7 /* main.m */,
-			);
-			name = "iOS Support";
-			path = "CC3Performance/iOS Support";
 			sourceTree = "<group>";
 		};
 		A94EEA4217F60C99005A43E7 /* Icons */ = {
@@ -673,6 +676,7 @@
 				A903C06018772DD100BDE9C1 /* CC3LibTexturableBumpMapObjectSpace.fsh in Resources */,
 				A903C08418772DD100BDE9C1 /* CC3Texturable.vsh in Resources */,
 				A92DA8111427B7870051AFFA /* JoystickThumb.png in Resources */,
+				A946375818898F920097E355 /* Images-iOS.xcassets in Resources */,
 				A92DA81C1427B80E0051AFFA /* arial16.fnt in Resources */,
 				A94EEA9117F77E41005A43E7 /* Dragon-diffuse.jpg in Resources */,
 				A903C07518772DD100BDE9C1 /* CC3LibBumpMapTangentSpaceLighting.vsh in Resources */,
@@ -722,11 +726,11 @@
 			files = (
 				A94EEA7D17F60E2D005A43E7 /* CCNodeAdornments.m in Sources */,
 				A94EEA7E17F60E2D005A43E7 /* CCNodeExtensions.m in Sources */,
+				A946374518898D530097E355 /* CC3PerformanceAppDelegate.m in Sources */,
 				A947374C140E5983006F410C /* CC3PerformanceLayer.m in Sources */,
 				A947374D140E5983006F410C /* CC3PerformanceScene.m in Sources */,
-				A94EEA3917F60BA7005A43E7 /* CC3PerformanceAppDelegate.m in Sources */,
 				A94EEA7F17F60E2D005A43E7 /* Joystick.m in Sources */,
-				A94EEA3B17F60BA7005A43E7 /* main.m in Sources */,
+				A946374818898D530097E355 /* main.m in Sources */,
 				A9473751140E5983006F410C /* NodeGrid.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -750,7 +754,10 @@
 		1D6058940D05DD3E006BFB54 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				INFOPLIST_FILE = "CC3Performance/iOS Support/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				PRODUCT_NAME = CC3Performance;
 			};
 			name = Debug;
@@ -758,7 +765,10 @@
 		1D6058950D05DD3E006BFB54 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				INFOPLIST_FILE = "CC3Performance/iOS Support/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				PRODUCT_NAME = CC3Performance;
 			};
 			name = Release;

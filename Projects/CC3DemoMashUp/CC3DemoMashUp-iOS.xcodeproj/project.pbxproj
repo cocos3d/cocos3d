@@ -94,6 +94,9 @@
 		A933812E14E09E9000FCA181 /* Earth_1024.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A933812D14E09E9000FCA181 /* Earth_1024.jpg */; };
 		A93B2AA91695E6A6007144C7 /* Arial32BMGlyph.fnt in Resources */ = {isa = PBXBuildFile; fileRef = A93B2AA71695E6A6007144C7 /* Arial32BMGlyph.fnt */; };
 		A93B2AAA1695E6A6007144C7 /* Arial32BMGlyph.png in Resources */ = {isa = PBXBuildFile; fileRef = A93B2AA81695E6A6007144C7 /* Arial32BMGlyph.png */; };
+		A946373B18898B510097E355 /* CC3DemoMashUpAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = A946373718898B510097E355 /* CC3DemoMashUpAppDelegate.m */; };
+		A946373E18898B510097E355 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = A946373A18898B510097E355 /* main.m */; };
+		A946375418898F4E0097E355 /* Images-iOS.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A946375318898F4E0097E355 /* Images-iOS.xcassets */; };
 		A94736FB140E58E7006F410C /* CC3DemoMashUpLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = A94736CC140E58E7006F410C /* CC3DemoMashUpLayer.m */; };
 		A94736FC140E58E7006F410C /* CC3DemoMashUpScene.m in Sources */ = {isa = PBXBuildFile; fileRef = A94736CE140E58E7006F410C /* CC3DemoMashUpScene.m */; };
 		A94736FD140E58E7006F410C /* CCNodeAdornments.m in Sources */ = {isa = PBXBuildFile; fileRef = A94736D1140E58E7006F410C /* CCNodeAdornments.m */; };
@@ -124,8 +127,6 @@
 		A96B35A114EF2689002A7363 /* GrassWithLeaves.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A96B359C14EF2689002A7363 /* GrassWithLeaves.jpg */; };
 		A96B35A214EF2689002A7363 /* MountainGrass.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A96B359D14EF2689002A7363 /* MountainGrass.jpg */; };
 		A96B35A414EF2689002A7363 /* Grass.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A96B359F14EF2689002A7363 /* Grass.jpg */; };
-		A96E0FFE170DCFB00044CA2A /* CC3DemoMashUpAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = A96E0FFB170DCFB00044CA2A /* CC3DemoMashUpAppDelegate.m */; };
-		A96E1000170DCFB00044CA2A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = A96E0FFD170DCFB00044CA2A /* main.m */; };
 		A971D3101663EC6E00769DC5 /* fps_images-hd.png in Resources */ = {isa = PBXBuildFile; fileRef = A971D30D1663EC6E00769DC5 /* fps_images-hd.png */; };
 		A971D3111663EC6E00769DC5 /* fps_images-ipadhd.png in Resources */ = {isa = PBXBuildFile; fileRef = A971D30E1663EC6E00769DC5 /* fps_images-ipadhd.png */; };
 		A971D3121663EC6E00769DC5 /* fps_images.png in Resources */ = {isa = PBXBuildFile; fileRef = A971D30F1663EC6E00769DC5 /* fps_images.png */; };
@@ -288,6 +289,11 @@
 		A933812D14E09E9000FCA181 /* Earth_1024.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = Earth_1024.jpg; sourceTree = "<group>"; };
 		A93B2AA71695E6A6007144C7 /* Arial32BMGlyph.fnt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Arial32BMGlyph.fnt; sourceTree = "<group>"; };
 		A93B2AA81695E6A6007144C7 /* Arial32BMGlyph.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Arial32BMGlyph.png; sourceTree = "<group>"; };
+		A946373618898B510097E355 /* CC3DemoMashUpAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3DemoMashUpAppDelegate.h; sourceTree = "<group>"; };
+		A946373718898B510097E355 /* CC3DemoMashUpAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3DemoMashUpAppDelegate.m; sourceTree = "<group>"; };
+		A946373918898B510097E355 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A946373A18898B510097E355 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		A946375318898F4E0097E355 /* Images-iOS.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = "Images-iOS.xcassets"; path = "../Common/Images-iOS.xcassets"; sourceTree = "<group>"; };
 		A94736CB140E58E7006F410C /* CC3DemoMashUpLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3DemoMashUpLayer.h; sourceTree = "<group>"; };
 		A94736CC140E58E7006F410C /* CC3DemoMashUpLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3DemoMashUpLayer.m; sourceTree = "<group>"; };
 		A94736CD140E58E7006F410C /* CC3DemoMashUpScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3DemoMashUpScene.h; sourceTree = "<group>"; };
@@ -325,10 +331,6 @@
 		A96B359C14EF2689002A7363 /* GrassWithLeaves.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = GrassWithLeaves.jpg; sourceTree = "<group>"; };
 		A96B359D14EF2689002A7363 /* MountainGrass.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = MountainGrass.jpg; sourceTree = "<group>"; };
 		A96B359F14EF2689002A7363 /* Grass.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = Grass.jpg; sourceTree = "<group>"; };
-		A96E0FFA170DCFB00044CA2A /* CC3DemoMashUpAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3DemoMashUpAppDelegate.h; sourceTree = "<group>"; };
-		A96E0FFB170DCFB00044CA2A /* CC3DemoMashUpAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3DemoMashUpAppDelegate.m; sourceTree = "<group>"; };
-		A96E0FFC170DCFB00044CA2A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		A96E0FFD170DCFB00044CA2A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		A971D30D1663EC6E00769DC5 /* fps_images-hd.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "fps_images-hd.png"; sourceTree = "<group>"; };
 		A971D30E1663EC6E00769DC5 /* fps_images-ipadhd.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "fps_images-ipadhd.png"; sourceTree = "<group>"; };
 		A971D30F1663EC6E00769DC5 /* fps_images.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fps_images.png; sourceTree = "<group>"; };
@@ -404,14 +406,15 @@
 			isa = PBXGroup;
 			children = (
 				A94736C8140E58E7006F410C /* Classes */,
+				A946373518898B510097E355 /* iOS Support */,
 				A92DA78D1427B5980051AFFA /* Resources */,
 				A903C0E81877329300BDE9C1 /* GLSL */,
-				A96E0FF8170DCFB00044CA2A /* iOS Support */,
 				A95B478C18119AD6007A3804 /* Apportable */,
-				A92E871E17A6E4D9003B859E /* cocos3d-library-iOS.xcodeproj */,
-				A92E836E17A6CB18003B859E /* cocos2d-library-iOS.xcodeproj */,
+				A946375318898F4E0097E355 /* Images-iOS.xcassets */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
+				A92E871E17A6E4D9003B859E /* cocos3d-library-iOS.xcodeproj */,
+				A92E836E17A6CB18003B859E /* cocos2d-library-iOS.xcodeproj */,
 			);
 			name = CustomTemplate;
 			sourceTree = "<group>";
@@ -625,6 +628,18 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		A946373518898B510097E355 /* iOS Support */ = {
+			isa = PBXGroup;
+			children = (
+				A946373618898B510097E355 /* CC3DemoMashUpAppDelegate.h */,
+				A946373718898B510097E355 /* CC3DemoMashUpAppDelegate.m */,
+				A946373918898B510097E355 /* Info.plist */,
+				A946373A18898B510097E355 /* main.m */,
+			);
+			name = "iOS Support";
+			path = "CC3DemoMashUp/iOS Support";
+			sourceTree = "<group>";
+		};
 		A94736C8140E58E7006F410C /* Classes */ = {
 			isa = PBXGroup;
 			children = (
@@ -695,18 +710,6 @@
 				A95B479218119BBD007A3804 /* configuration.json */,
 			);
 			name = Apportable;
-			sourceTree = "<group>";
-		};
-		A96E0FF8170DCFB00044CA2A /* iOS Support */ = {
-			isa = PBXGroup;
-			children = (
-				A96E0FFA170DCFB00044CA2A /* CC3DemoMashUpAppDelegate.h */,
-				A96E0FFB170DCFB00044CA2A /* CC3DemoMashUpAppDelegate.m */,
-				A96E0FFC170DCFB00044CA2A /* Info.plist */,
-				A96E0FFD170DCFB00044CA2A /* main.m */,
-			);
-			name = "iOS Support";
-			path = "CC3DemoMashUp/iOS Support";
 			sourceTree = "<group>";
 		};
 		A97398E117C2C7BC00C17D89 /* Dragon */ = {
@@ -891,6 +894,7 @@
 				A94EF4D817C65E5A00FA969E /* Icon-40.png in Resources */,
 				A903C11E1877329300BDE9C1 /* CC3LibSetGLFragColor.fsh in Resources */,
 				A93B2AA91695E6A6007144C7 /* Arial32BMGlyph.fnt in Resources */,
+				A946375418898F4E0097E355 /* Images-iOS.xcassets in Resources */,
 				A94EF4D717C65E5A00FA969E /* Icon-29@2x.png in Resources */,
 				A93B2AAA1695E6A6007144C7 /* Arial32BMGlyph.png in Resources */,
 				A903C12A1877329300BDE9C1 /* CC3ClipSpaceSingleTexture.fsh in Resources */,
@@ -971,7 +975,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A946373E18898B510097E355 /* main.m in Sources */,
 				A94736FB140E58E7006F410C /* CC3DemoMashUpLayer.m in Sources */,
+				A946373B18898B510097E355 /* CC3DemoMashUpAppDelegate.m in Sources */,
 				A94736FC140E58E7006F410C /* CC3DemoMashUpScene.m in Sources */,
 				A94736FD140E58E7006F410C /* CCNodeAdornments.m in Sources */,
 				A94736FE140E58E7006F410C /* CCNodeExtensions.m in Sources */,
@@ -979,8 +985,6 @@
 				A9473700140E58E7006F410C /* Models.m in Sources */,
 				A9306A851445B23C0004EB5A /* HUDLayer.m in Sources */,
 				A9EBA32615376A4E007FFE0C /* HUDScene.m in Sources */,
-				A96E0FFE170DCFB00044CA2A /* CC3DemoMashUpAppDelegate.m in Sources */,
-				A96E1000170DCFB00044CA2A /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1003,7 +1007,10 @@
 		1D6058940D05DD3E006BFB54 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				INFOPLIST_FILE = "CC3DemoMashUp/iOS Support/Info.plist";
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				INFOPLIST_FILE = "$(SRCROOT)/CC3DemoMashUp/iOS Support/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				PRODUCT_NAME = CC3DemoMashUp;
 			};
 			name = Debug;
@@ -1011,7 +1018,10 @@
 		1D6058950D05DD3E006BFB54 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				INFOPLIST_FILE = "CC3DemoMashUp/iOS Support/Info.plist";
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				INFOPLIST_FILE = "$(SRCROOT)/CC3DemoMashUp/iOS Support/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				PRODUCT_NAME = CC3DemoMashUp;
 			};
 			name = Release;

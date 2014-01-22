@@ -106,10 +106,6 @@
 
 -(void) applicationDidFinishLaunching: (UIApplication*) application {
 
-	// Default texture format for PNG/BMP/TIFF/JPEG/GIF images.
-	// It can be RGBA8888, RGBA4444, RGB5_A1, RGB565. You can change anytime.
-	CCTexture2D.defaultAlphaPixelFormat = kCCTexture2DPixelFormat_RGBA8888;
-
 	// Establish the view controller and CCDirector (in cocos2d 2.x, these are one and the same)
 	[self establishDirectorController];
 	
@@ -162,41 +158,39 @@
 }
 
 -(void) applicationWillResignActive: (UIApplication*) application {
-	[CCDirector.sharedDirector pause];
+	[_viewController pauseAnimation];
 }
 
 /** Resume the cocos3d/cocos2d action. */
--(void) resumeApp { [CCDirector.sharedDirector resume]; }
+-(void) resumeApp { [_viewController resumeAnimation]; }
 
 -(void) applicationDidBecomeActive: (UIApplication*) application {
-
+	
 	// Workaround to fix the issue of drop to 40fps on iOS4.X on app resume.
 	// Adds short delay before resuming the app.
-	[NSTimer scheduledTimerWithTimeInterval: 0.5f
+	[NSTimer scheduledTimerWithTimeInterval: 0.25
 									 target: self
 								   selector: @selector(resumeApp)
 								   userInfo: nil
 									repeats: NO];
-
+	
 	// If dropping to 40fps is not an issue, remove above, and uncomment the following to avoid delay.
-//	[self resumeApp];
+	//	[self resumeApp];
 }
 
 -(void) applicationDidReceiveMemoryWarning: (UIApplication*) application {
-	[CCDirector.sharedDirector purgeCachedData];
 }
 
 -(void) applicationDidEnterBackground: (UIApplication*) application {
-	[CCDirector.sharedDirector stopAnimation];
+	[_viewController stopAnimation];
 }
 
 -(void) applicationWillEnterForeground: (UIApplication*) application {
-	[CCDirector.sharedDirector startAnimation];
+	[_viewController startAnimation];
 }
 
 -(void)applicationWillTerminate: (UIApplication*) application {
-	[CCDirector.sharedDirector.view removeFromSuperview];
-	[CCDirector.sharedDirector end];
+	[_viewController endOpenGL];
 }
 
 -(void) applicationSignificantTimeChange: (UIApplication*) application {

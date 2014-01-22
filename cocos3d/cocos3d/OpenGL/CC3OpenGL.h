@@ -79,13 +79,14 @@ typedef struct {
  */
 @interface CC3OpenGL : CC3Identifiable {
 	CC3GLContext* _context;
+	NSMutableSet* _extensions;
+	NSTimeInterval _deletionDelay;
 
 @public
 
 	NSString* value_GL_VENDOR;
 	NSString* value_GL_RENDERER;
 	NSString* value_GL_VERSION;
-	NSMutableSet* _extensions;
 	
 	CC3VertexAttr* vertexAttributes;
 	GLuint value_MaxVertexAttribsUsed;
@@ -1236,13 +1237,31 @@ typedef struct {
 /** 
  * Deletes all GL contexts, serving all threads.
  *
- * You can invoke this method when your app no longer needs support for OpenGL, or will not
- * use OpenGL for a significant amount of time, in order to free up app and OpenGL memory
- * used by your application.
+ * You can invoke this method when your app no longer needs support for OpenGL, or will not use OpenGL
+ * for a significant amount of time, in order to free up app and OpenGL memory used by your application.
+ *
+ * To ensure that that the current GL activity has finished before pulling the rug out from under it,
+ * this request is queued for each existing context on the thread for which the context was created.
+ *
+ * In addition, once dequeued, a short delay is imposed, before the context instance is actually released
+ * and deallocated, to provide time for object deallocation and cleanup after the caches have been cleared,
+ * and autorelease pools have been drained. The length of this delay may be different for each context
+ * instance, and is specified by the deletionDelay property.
  *
  * Use this method with caution, as creating the GL contexts again will require significant overhead.
  */
 +(void) deleteGL;
+
+/**
+ * Indicates the length of time, in seconds, that this instance will wait after the deleteGL method is
+ * invoked, before this instance is actually deleted. This delay is intended to provide time for object
+ * deallocation and cleanup after the caches have been cleared, and autorelease pools have been drained.
+ *
+ * The value of this property is specified in seconds. The initial value of this is 0 for the instance
+ * that is used on the primary rendering thread, and 0.25 for the instance that is used for loading
+ * resources in the background.
+ */
+@property(nonatomic, assign) NSTimeInterval deletionDelay;
 
 @end
 

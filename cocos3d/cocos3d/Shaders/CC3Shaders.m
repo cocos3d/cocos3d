@@ -1417,6 +1417,9 @@ static CC3Cache* _shaderSourceCodeCache = nil;
 		CC3Face triangle = CC3FaceMake(kCC3VectorZero, kCC3VectorZero, kCC3VectorZero);
 		ccTex2F texCoords[3] = { {0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0} };				// unused
 		[_prewarmingMeshNode populateAsTriangle: triangle withTexCoords: texCoords andTessellation: 1];
+
+		_prewarmingMeshNode.shaderContext.shouldEnforceCustomOverrides = NO;
+		_prewarmingMeshNode.shaderContext.shouldEnforceVertexAttributes = NO;
 	}
 	return _prewarmingMeshNode;
 }
@@ -1433,11 +1436,13 @@ static CC3Cache* _shaderSourceCodeCache = nil;
 	CC3NodeDrawingVisitor* pwVisitor = self.drawingVisitor;
 
 	pwNode.shaderProgram = program;
-	pwNode.shaderContext.shouldEnforceCustomOverrides = NO;
-	pwNode.shaderContext.shouldEnforceVertexAttributes = NO;
 	pwVisitor.renderSurface = pwSurface;
 	[pwSurface activate];
 	[pwVisitor visit: pwNode];
+	
+	// Release visitor state so it won't interfere with later deallocations
+	pwVisitor.renderSurface = nil;
+	pwVisitor.gl = nil;
 	
 	pwNode.shaderProgram = nil;	// Release the program immediately, since it is only used once.
 	[program resetGLState];		// Reset GL state. Needed if pre-warming in background context...

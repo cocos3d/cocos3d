@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="4514" systemVersion="13B42" targetRuntime="iOS.CocoaTouch.iPad" propertyAccessControl="none" useAutolayout="YES" initialViewController="BYZ-38-t0r">
+    <dependencies>
+        <deployment defaultVersion="1536" identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="3747"/>
+    </dependencies>
+    <scenes>
+        <!--Main View Controller-->
+        <scene sceneID="tne-QT-ifu">
+            <objects>
+                <viewController id="BYZ-38-t0r" customClass="MainViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="hrd-Sc-VOe"/>
+                        <viewControllerLayoutGuide type="bottom" id="Evu-J6-47n"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
+                        <rect key="frame" x="0.0" y="0.0" width="768" height="1024"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" segmentControlStyle="plain" selectedSegmentIndex="3" translatesAutoresizingMaskIntoConstraints="NO" id="5cu-Oh-UO1">
+                                <rect key="frame" x="201" y="991" width="367" height="29"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <segments>
+                                    <segment title="Mash Up"/>
+                                    <segment title="Tiles"/>
+                                    <segment title="Performance"/>
+                                    <segment title="None"/>
+                                </segments>
+                                <connections>
+                                    <action selector="requestChange3DSceneFrom:" destination="BYZ-38-t0r" eventType="valueChanged" id="IJs-1A-DDM"/>
+                                </connections>
+                            </segmentedControl>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="cA2-Gk-cNF">
+                                <rect key="frame" x="20" y="40" width="728" height="946"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <subviews>
+                                    <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="CVd-E5-TPi">
+                                        <rect key="frame" x="346" y="455" width="37" height="37"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                    </activityIndicatorView>
+                                </subviews>
+                                <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="centerX" secondItem="CVd-E5-TPi" secondAttribute="centerX" id="094-xX-qyM"/>
+                                    <constraint firstAttribute="centerY" secondItem="CVd-E5-TPi" secondAttribute="centerY" id="2Fz-82-6VR"/>
+                                </constraints>
+                            </view>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstAttribute="trailing" secondItem="cA2-Gk-cNF" secondAttribute="trailing" constant="20" id="Gfk-ED-Bh3"/>
+                            <constraint firstAttribute="centerX" secondItem="5cu-Oh-UO1" secondAttribute="centerX" id="UgZ-zc-jnP"/>
+                            <constraint firstItem="Evu-J6-47n" firstAttribute="top" secondItem="5cu-Oh-UO1" secondAttribute="bottom" constant="5" id="Vap-WN-F5z"/>
+                            <constraint firstItem="cA2-Gk-cNF" firstAttribute="top" secondItem="hrd-Sc-VOe" secondAttribute="bottom" constant="20" id="biG-iL-dwR"/>
+                            <constraint firstItem="cA2-Gk-cNF" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="20" id="d2R-y6-M1w"/>
+                            <constraint firstItem="5cu-Oh-UO1" firstAttribute="top" secondItem="cA2-Gk-cNF" secondAttribute="bottom" constant="5" id="e2u-g2-Qn7"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="cc3FrameView" destination="cA2-Gk-cNF" id="Opb-Pf-Svg"/>
+                        <outlet property="progressView" destination="CVd-E5-TPi" id="fsF-kZ-Yeh"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+            </objects>
+        </scene>
+    </scenes>
+    <simulatedMetricsContainer key="defaultSimulatedMetrics">
+        <simulatedStatusBarMetrics key="statusBar" statusBarStyle="blackOpaque"/>
+        <simulatedOrientationMetrics key="orientation"/>
+        <simulatedScreenMetrics key="destination"/>
+    </simulatedMetricsContainer>
+</document>

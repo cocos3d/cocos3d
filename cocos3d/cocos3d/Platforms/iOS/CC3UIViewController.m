@@ -171,7 +171,7 @@ CC3_POP_NOSELECTOR
  * As of iOS6, this method is deprecated and is no longer invoked. The supportedInterfaceOrientations
  * property is used instead.
  */
- -(BOOL) shouldAutorotateToInterfaceOrientation: (UIInterfaceOrientation) uiOrientation {
+-(BOOL) shouldAutorotateToInterfaceOrientation: (UIInterfaceOrientation) uiOrientation {
 	LogTrace(@"%@ should %@autorotate to UI orientation %@", self.class,
 			 (CC3UIInterfaceOrientationMaskIncludesUIOrientation(_supportedInterfaceOrientations, uiOrientation) ? @"" : @"not "),
 			 NSStringFromUIInterfaceOrientation(uiOrientation));
@@ -179,12 +179,12 @@ CC3_POP_NOSELECTOR
 	 return CC3UIInterfaceOrientationMaskIncludesUIOrientation(_supportedInterfaceOrientations, uiOrientation);
 }
 
-- (void)didRotateFromInterfaceOrientation: (UIInterfaceOrientation) uiOrientation {
+-(void) didRotateFromInterfaceOrientation: (UIInterfaceOrientation) uiOrientation {
 	[super didRotateFromInterfaceOrientation: uiOrientation];
  	[_controlledNode viewDidRotateFrom: uiOrientation to: self.interfaceOrientation];
 }
 
-- (void)viewDidLayoutSubviews {
+-(void) viewDidLayoutSubviews {
 	[super viewDidLayoutSubviews];
 	_controlledNode.contentSize = self.view.bounds.size;
 }

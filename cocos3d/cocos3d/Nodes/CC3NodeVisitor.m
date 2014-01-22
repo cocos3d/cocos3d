@@ -441,8 +441,8 @@
 -(void) processBeforeChildren: (CC3Node*) aNode {
 	[self.performanceStatistics incrementNodesVisitedForDrawing];
 	if ([self shouldDrawNode: aNode]) [aNode transformAndDrawWithVisitor: self];
-	_currentSkinSection = nil;		// not retained
-	_currentShaderProgram = nil;	// not retained
+	_currentSkinSection = nil;
+	_currentShaderProgram = nil;
 }
 
 -(BOOL) shouldDrawNode: (CC3Node*) aNode {
@@ -513,7 +513,7 @@
 /** Close the camera. */
 -(void) close {
 	[self closeCamera];
-	_drawingSequencer = nil;		// not retained
+	_drawingSequencer = nil;
 	[super close];
 }
 

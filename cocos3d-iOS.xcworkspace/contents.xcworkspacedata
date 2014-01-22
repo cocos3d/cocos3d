@@ -11,6 +11,9 @@
       location = "group:Projects/CC3Performance/CC3Performance-iOS.xcodeproj">
    </FileRef>
    <FileRef
+      location = "group:Projects/CC3DemoMultiScene/CC3DemoMultiScene-iOS.xcodeproj">
+   </FileRef>
+   <FileRef
       location = "group:Projects/cocos3d-library/cocos3d-library-iOS.xcodeproj">
    </FileRef>
    <FileRef

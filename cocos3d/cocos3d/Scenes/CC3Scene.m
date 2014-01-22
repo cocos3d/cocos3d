@@ -62,7 +62,6 @@
 @synthesize performanceStatistics=_performanceStatistics;
 @synthesize deltaFrameTime=_deltaFrameTime, backdrop=_backdrop, fog=_fog, lights=_lights;
 @synthesize elapsedTimeSinceOpened=_elapsedTimeSinceOpened;
-@synthesize backgrounder=_backgrounder;
 
 /**
  * Descendant nodes will be removed by superclass. Their removal may invoke
@@ -70,6 +69,7 @@
  * Make sure they are all made nil in addition to being released here!
  */
 -(void) dealloc {
+	LogDebug(@"Deallocating %@ on thread %@", self, NSThread.currentThread);
 	self.drawingSequencer = nil;			// Use setter to release and make nil
 	self.activeCamera = nil;				// Use setter to release and make nil
 	self.fog = nil;							// Use setter to stop any actions
@@ -80,11 +80,6 @@
 -(BOOL) isScene { return YES; }
 
 -(CC3ViewController*) controller { return _cc3Layer.controller; }
-
--(CC3Backgrounder*) backgrounder {
-	if ( !_backgrounder ) _backgrounder = [CC3Backgrounder backgrounder];
-	return _backgrounder;
-}
 
 -(CC3Camera*) activeCamera { return _activeCamera; }
 

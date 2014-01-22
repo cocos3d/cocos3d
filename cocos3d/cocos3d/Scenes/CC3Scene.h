@@ -242,7 +242,6 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 	CC3NodeDrawingVisitor* _shadowVisitor;
 	CC3NodeTransformingVisitor* _transformVisitor;
 	CC3NodeSequencerVisitor* _drawingSequenceVisitor;
-	CC3Backgrounder* _backgrounder;
 	CC3MeshNode* _backdrop;
 	CC3Fog* _fog;
 	ccColor4F _ambientLight;
@@ -271,14 +270,6 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * and is made available to support delegation from this 3D scene.
  */
 @property(nonatomic, strong, readonly) CC3ViewController* controller;
-
-/**
- * Returns a backgrounder that can be used to perform tasks, such as loading resources,
- * textures and shaders on a background thread.
- *
- * If not set beforehand, the instance in this property is lazily created.
- */
-@property(nonatomic, strong) CC3Backgrounder* backgrounder;
 
 /**
  * The 3D camera that is currently displaying the scene of this scene.

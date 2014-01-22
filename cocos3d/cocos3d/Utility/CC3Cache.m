@@ -98,7 +98,7 @@
 		[self unlock];
 		if ( [[wrap unwrapCacheable] isKindOfClass: type] ) {
 			LogInfoIf([wrap isKindOfClass: NSValue.class],
-					  @"%@ is being removed from the %@ cache, but is still being retained elsewhere in your app."
+					  @"%@ is being removed from the %@ cache, but is may be retained elsewhere in your app."
 					  @" You should verify your app logic to ensure this is not the result of a memory leak.",
 					  [wrap unwrapCacheable], _typeName);
 			[self removeObjectNamed: name];

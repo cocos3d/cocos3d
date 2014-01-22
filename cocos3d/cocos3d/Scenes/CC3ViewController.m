@@ -32,14 +32,6 @@
 #import "CC3ViewController.h"
 #import "CC3ControllableLayer.h"
 #import "CC3Logging.h"
-#import "CC3Resource.h"
-#import "CC3Texture.h"
-#import "CC3Shaders.h"
-
-/** Extension to keep the compiler happy for dynamic classes. */
-@interface NSObject(CC3ModelSampleFactory)
-+ (void) deleteFactory;
-@end
 
 
 @implementation CC3ViewController
@@ -65,29 +57,36 @@
 	aNode.controller = self;
 }
 
--(void) pauseAnimation { [[CCDirector sharedDirector] pause]; }
+#if CC3_CC2_2 && CC3_IOS
 
--(void) resumeAnimation { [[CCDirector sharedDirector] resume]; }
+-(void) startAnimation { [super startAnimation]; }
+
+-(void) stopAnimation { [super stopAnimation]; }
+
+#else
+
+-(void) startAnimation { [CCDirector.sharedDirector startAnimation]; }
+
+-(void) stopAnimation { [CCDirector.sharedDirector stopAnimation]; }
+
+#endif	// CC3_CC2_2 && CC3_IOS
+
+-(void) pauseAnimation { [CCDirector.sharedDirector pause]; }
+
+-(void) resumeAnimation { [CCDirector.sharedDirector resume]; }
 
 -(void) endOpenGL {
 	self.controlledNode = nil;
-	self.view = nil;
-
-	[CC3Resource removeAllResources];
-	[CC3Texture removeAllTextures];
-	[CC3ShaderProgram removeAllPrograms];
-	[CC3Shader removeAllShaders];
-	[CC3ShaderSourceCode removeAllShaderSourceCode];
-
-	// Dynamically reference model factory class, as it might not be present.
-	[NSClassFromString(@"CC3ModelSampleFactory") deleteFactory];
+	
+	// If the controller is not combined with the director, clear the view separately.
+	// Then, end the CCDirector.
+	if ( ![self isKindOfClass: CCDirector.class] ) self.view = nil;
+	[self endDirector];
 	
 	[CC3OpenGL deleteGL];
-	
-	[self endDirector];
 }
 
--(void) endDirector { [[CCDirector sharedDirector] end]; }
+-(void) endDirector { [CCDirector.sharedDirector end]; }
 
 @end
 

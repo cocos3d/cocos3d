@@ -179,7 +179,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
  *
  * Once the scene is displayed and running, additional content is added asynchronously in
  * the addSceneContentAsynchronously method, which is invoked on a background thread by the
- * CC3Backgrounder available through the backgrounder property of the viewSurfaceManager.
+ * CC3Backgrounder singleton.
  */
 -(void) initializeScene {
 	
@@ -241,8 +241,8 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
  * Adds additional scene content dynamically and asynchronously.
  *
  * This method is invoked from a code block that is run on a background thread by the 
- * CC3Backgrounder available through the backgrounder property of the viewSurfaceManager.
- * It adds content dynamically and asynchronously after rendering has begun on the rendering thread.
+ * CC3Backgrounder singleton. It adds content dynamically and asynchronously after
+ * rendering has begun on the rendering thread.
  *
  * To emphasize that the loading is happening on a background thread while the existing scene
  * is running, this method takes a small pause before loading each model. This pause is purely
@@ -1957,7 +1957,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  *
  * Since this method accesses the view's surface manager, it must be invoked after the
  * view has been created. This method is invoked from the onOpen method of this class,
- * instead of from the initializeScene method,
+ * instead of from the initializeScene method.
  */
 -(void) addPostProcessing {
 #if !CC3_OGLES_1	// Depth-texture not supported in OpenGL ES 1
@@ -2867,11 +2867,11 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// the off-screen surfaces created in addPostProcessing.
 	[self addFog];
 	
-	// Add additional scene content dynamically and asynchronously, on a background thread after
-	// rendering has begun on the rendering thread, using the CC3Backgrounder instance available
-	// in the backgrounder property. Asynchronous loading must be initiated after the scene has
-	// been attached to the view. It cannot be started in the initializeScene method.
-	[self.backgrounder runBlock: ^{ [self addSceneContentAsynchronously]; }];
+	// Add additional scene content dynamically and asynchronously, on a background thread
+	// after rendering has begun on the rendering thread, using the CC3Backgrounder singleton.
+	// Asynchronous loading must be initiated after the scene has been attached to the view.
+	// It cannot be started in the initializeScene method.
+	[CC3Backgrounder.sharedBackgrounder runBlock: ^{ [self addSceneContentAsynchronously]; }];
 
 	// Uncomment the first line to have the camera move to show the entire scene.
 	// Uncomment the second line to draw the bounding box of the scene.
@@ -3756,7 +3756,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	} else {
 		// Since we're already running, spawn a background threaded task to create and
 		// populate the shadow volume, in order to reduce any unwanted animation pauses.
-		[self.backgrounder runBlock: ^{
+		[CC3Backgrounder.sharedBackgrounder runBlock: ^{
 			[aNode addShadowVolumesForLight: _robotLamp];
 			LogInfo(@"Added shadow to: %@", aNode);
 		}];

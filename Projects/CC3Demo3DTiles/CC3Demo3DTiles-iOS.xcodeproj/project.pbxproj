@@ -62,6 +62,9 @@
 		A92DA8521427C6F00051AFFA /* fire.png in Resources */ = {isa = PBXBuildFile; fileRef = A92DA82D1427C6F00051AFFA /* fire.png */; };
 		A92DA8531427C6F00051AFFA /* fps_images.png in Resources */ = {isa = PBXBuildFile; fileRef = A92DA82E1427C6F00051AFFA /* fps_images.png */; };
 		A93C00391821B278003A0C43 /* configuration.json in Resources */ = {isa = PBXBuildFile; fileRef = A93C00381821B278003A0C43 /* configuration.json */; };
+		A946374F18898D7B0097E355 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = A946374B18898D7B0097E355 /* AppDelegate.m */; };
+		A946375218898D7B0097E355 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = A946374E18898D7B0097E355 /* main.m */; };
+		A946375618898F790097E355 /* Images-iOS.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A946375518898F780097E355 /* Images-iOS.xcassets */; };
 		A9473C1214100DA5006F410C /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9473C1114100DA5006F410C /* QuartzCore.framework */; };
 		A9473C1414100DA5006F410C /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9473C1314100DA5006F410C /* OpenGLES.framework */; };
 		A9473C1614100DA5006F410C /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9473C1514100DA5006F410C /* OpenAL.framework */; };
@@ -80,8 +83,6 @@
 		A971D31C1663ECDE00769DC5 /* fps_images-ipadhd.png in Resources */ = {isa = PBXBuildFile; fileRef = A971D31A1663ECDE00769DC5 /* fps_images-ipadhd.png */; };
 		A97A31351689004C004CBAA1 /* fps_images_1.png in Resources */ = {isa = PBXBuildFile; fileRef = A97A31341689004C004CBAA1 /* fps_images_1.png */; };
 		A97DA66A1418056200D72A4B /* TileLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = A97DA6691418056100D72A4B /* TileLayer.m */; };
-		A9A3600717F47DBA00C76E2B /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = A9A3600417F47DBA00C76E2B /* AppDelegate.m */; };
-		A9A3600917F47DBA00C76E2B /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = A9A3600617F47DBA00C76E2B /* main.m */; };
 		A9A3600B17F47E5400C76E2B /* BeachBall.pod in Resources */ = {isa = PBXBuildFile; fileRef = A9A3600A17F47E5400C76E2B /* BeachBall.pod */; };
 		A9A3600D17F47E6300C76E2B /* DieCube.pod in Resources */ = {isa = PBXBuildFile; fileRef = A9A3600C17F47E6300C76E2B /* DieCube.pod */; };
 		A9A3600F17F47E7700C76E2B /* hello-world.pod in Resources */ = {isa = PBXBuildFile; fileRef = A9A3600E17F47E7700C76E2B /* hello-world.pod */; };
@@ -198,6 +199,11 @@
 		A92DA82D1427C6F00051AFFA /* fire.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fire.png; sourceTree = "<group>"; };
 		A92DA82E1427C6F00051AFFA /* fps_images.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fps_images.png; sourceTree = "<group>"; };
 		A93C00381821B278003A0C43 /* configuration.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = configuration.json; path = "CC3Demo3DTiles-iOS.approj/configuration.json"; sourceTree = "<group>"; };
+		A946374A18898D7B0097E355 /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		A946374B18898D7B0097E355 /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		A946374D18898D7B0097E355 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A946374E18898D7B0097E355 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		A946375518898F780097E355 /* Images-iOS.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = "Images-iOS.xcassets"; path = "../Common/Images-iOS.xcassets"; sourceTree = "<group>"; };
 		A9473C0D14100DA5006F410C /* CC3Demo3DTiles.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CC3Demo3DTiles.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A9473C1114100DA5006F410C /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		A9473C1314100DA5006F410C /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
@@ -221,10 +227,6 @@
 		A97DA6691418056100D72A4B /* TileLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TileLayer.m; sourceTree = "<group>"; };
 		A9A35FF617F47CE600C76E2B /* cocos3d-library-iOS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "cocos3d-library-iOS.xcodeproj"; path = "../cocos3d-library/cocos3d-library-iOS.xcodeproj"; sourceTree = "<group>"; };
 		A9A35FFC17F47CF100C76E2B /* cocos2d-library-iOS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "cocos2d-library-iOS.xcodeproj"; path = "../cocos2d-library/cocos2d-library-iOS.xcodeproj"; sourceTree = "<group>"; };
-		A9A3600317F47DBA00C76E2B /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
-		A9A3600417F47DBA00C76E2B /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
-		A9A3600517F47DBA00C76E2B /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		A9A3600617F47DBA00C76E2B /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		A9A3600A17F47E5400C76E2B /* BeachBall.pod */ = {isa = PBXFileReference; lastKnownFileType = file; name = BeachBall.pod; path = "../../../Models/Beach Ball/BeachBall.pod"; sourceTree = "<group>"; };
 		A9A3600C17F47E6300C76E2B /* DieCube.pod */ = {isa = PBXFileReference; lastKnownFileType = file; name = DieCube.pod; path = "../../../Models/Die Cube/DieCube.pod"; sourceTree = "<group>"; };
 		A9A3600E17F47E7700C76E2B /* hello-world.pod */ = {isa = PBXFileReference; lastKnownFileType = file; name = "hello-world.pod"; path = "../../../Models/Hello World/hello-world.pod"; sourceTree = "<group>"; };
@@ -396,18 +398,31 @@
 			name = Apportable;
 			sourceTree = "<group>";
 		};
+		A946374918898D7B0097E355 /* iOS Support */ = {
+			isa = PBXGroup;
+			children = (
+				A946374A18898D7B0097E355 /* AppDelegate.h */,
+				A946374B18898D7B0097E355 /* AppDelegate.m */,
+				A946374D18898D7B0097E355 /* Info.plist */,
+				A946374E18898D7B0097E355 /* main.m */,
+			);
+			name = "iOS Support";
+			path = "CC3Demo3DTiles/iOS Support";
+			sourceTree = "<group>";
+		};
 		A9473C0214100DA5006F410C = {
 			isa = PBXGroup;
 			children = (
 				A9473D8214100EB3006F410C /* Classes */,
+				A946374918898D7B0097E355 /* iOS Support */,
 				A92DA8201427C6F00051AFFA /* Resources */,
 				A903C0871877328E00BDE9C1 /* GLSL */,
-				A9A3600217F47DBA00C76E2B /* iOS Support */,
 				A93C00361821B1FD003A0C43 /* Apportable */,
-				A9A35FF617F47CE600C76E2B /* cocos3d-library-iOS.xcodeproj */,
-				A9A35FFC17F47CF100C76E2B /* cocos2d-library-iOS.xcodeproj */,
+				A946375518898F780097E355 /* Images-iOS.xcassets */,
 				A9473C1014100DA5006F410C /* Frameworks */,
 				A9473C0E14100DA5006F410C /* Products */,
+				A9A35FF617F47CE600C76E2B /* cocos3d-library-iOS.xcodeproj */,
+				A9A35FFC17F47CF100C76E2B /* cocos2d-library-iOS.xcodeproj */,
 			);
 			sourceTree = "<group>";
 		};
@@ -476,18 +491,6 @@
 				A9A3600117F47CF200C76E2B /* libcocos2d-library-iOS.a */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		A9A3600217F47DBA00C76E2B /* iOS Support */ = {
-			isa = PBXGroup;
-			children = (
-				A9A3600317F47DBA00C76E2B /* AppDelegate.h */,
-				A9A3600417F47DBA00C76E2B /* AppDelegate.m */,
-				A9A3600517F47DBA00C76E2B /* Info.plist */,
-				A9A3600617F47DBA00C76E2B /* main.m */,
-			);
-			name = "iOS Support";
-			path = "CC3Demo3DTiles/iOS Support";
 			sourceTree = "<group>";
 		};
 		A9A3601017F47EA800C76E2B /* Icons */ = {
@@ -664,6 +667,7 @@
 				A92DA8521427C6F00051AFFA /* fire.png in Resources */,
 				A9A3602117F47EA800C76E2B /* Icon-40.png in Resources */,
 				A903C0E71877328E00BDE9C1 /* CC3TexturableRigidBones.vsh in Resources */,
+				A946375618898F790097E355 /* Images-iOS.xcassets in Resources */,
 				A903C0BE1877328E00BDE9C1 /* CC3LibSetGLFragColorAlphaTest.fsh in Resources */,
 				A903C0C21877328E00BDE9C1 /* CC3LibTexturableBumpMapTangentSpace.fsh in Resources */,
 				A903C0D71877328E00BDE9C1 /* CC3LibCameraPosition.vsh in Resources */,
@@ -708,14 +712,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A9A3600917F47DBA00C76E2B /* main.m in Sources */,
 				A9473D8B14100EB3006F410C /* MainLayer.m in Sources */,
-				A9A3600717F47DBA00C76E2B /* AppDelegate.m in Sources */,
 				A9EB5D07141029FC00240563 /* CCNodeAdornments.m in Sources */,
 				A9EB5D08141029FC00240563 /* CCNodeExtensions.m in Sources */,
 				A9EB5D09141029FC00240563 /* Joystick.m in Sources */,
 				A9EB5D0E14103A8700240563 /* TileScene.m in Sources */,
 				A97DA66A1418056200D72A4B /* TileLayer.m in Sources */,
+				A946375218898D7B0097E355 /* main.m in Sources */,
+				A946374F18898D7B0097E355 /* AppDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -841,7 +845,10 @@
 		A9473D8014100DA7006F410C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				INFOPLIST_FILE = "CC3Demo3DTiles/iOS Support/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				PRODUCT_NAME = CC3Demo3DTiles;
 			};
 			name = Debug;
@@ -849,7 +856,10 @@
 		A9473D8114100DA7006F410C /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				INFOPLIST_FILE = "CC3Demo3DTiles/iOS Support/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				PRODUCT_NAME = CC3Demo3DTiles;
 			};
 			name = Release;
