@@ -1149,6 +1149,23 @@
 	return [super alloc];
 }
 
+static NSThread* _renderThread = nil;
+
+/**
+ * Retrieve from CCDirector, and cache for fast access, and to allow CCDirector to be shut
+ * down, but the render thread to still be accessible for any outstanding background loading
+ * that occurs before GL is shut down.
+ */
++(NSThread*) renderThread {
+	if (!_renderThread) _renderThread = CCDirector.sharedDirector.runningThread;
+	return _renderThread;
+}
+
+/** If BOTH the render context AND the background context have been deleted, release the render thread. */
++(void) checkClearRenderThread {
+	if (!_renderGL && !_bgGL) _renderThread = nil;
+}
+
 static CC3OpenGL* _renderGL = nil;
 static CC3OpenGL* _bgGL = nil;
 
@@ -1191,8 +1208,11 @@ static CC3OpenGL* _bgGL = nil;
 -(void) deleteNow {
 	LogInfo(@"Deleting %@ now on thread %@.", self, NSThread.currentThread);
 	[self finish];
+	
 	if (self == _renderGL) _renderGL = nil;
 	if (self == _bgGL) _bgGL = nil;
+	
+	[self.class checkClearRenderThread];
 }
 
 -(void) clearResourceCaches {

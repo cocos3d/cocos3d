@@ -226,6 +226,9 @@ typedef struct {
  */
 @property(nonatomic, readonly) BOOL isRenderingContext;
 
+/** Returns the thread that is being used for primary rendering. */
++(NSThread*) renderThread;
+
 
 #pragma mark Capabilities
 

@@ -30,7 +30,7 @@
  */
 
 #import "CC3OSExtensions.h"
-
+#import "CC3OpenGL.h"
 
 #pragma mark -
 #pragma mark NSObject extensions
@@ -91,7 +91,7 @@
 
 +(BOOL) isRenderingThread {
 	NSThread* currThread = self.currentThread;
-	return (currThread == CCDirector.sharedDirector.runningThread || currThread.isMainThread);
+	return ((currThread == CC3OpenGL.renderThread) || currThread.isMainThread);
 }
 
 @end
