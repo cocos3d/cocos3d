@@ -36,6 +36,7 @@
 @class CC3NodeDrawingVisitor, CC3Mesh, CC3Fog;
 @class CC3GLSLVariable, CC3GLSLUniform, CC3GLSLAttribute;
 @class CC3ShaderProgram, CC3ShaderPrewarmer;
+@protocol CC3OpenGLDelegate;
 
 
 /** Indicates that vertex attribute array is not available. */
@@ -228,6 +229,18 @@ typedef struct {
 
 /** Returns the thread that is being used for primary rendering. */
 +(NSThread*) renderThread;
+
+/**
+ * Returns the CC3OpenGLDelegate delegate that will receive callback notifications for
+ * asynchronous OpenGL activities.
+ */
++(NSObject<CC3OpenGLDelegate>*) delegate;
+
+/**
+ * Sets the CC3OpenGLDelegate delegate that will receive callback notifications for
+ * asynchronous OpenGL activities.
+ */
++(void) setDelegate: (NSObject<CC3OpenGLDelegate>*) delegate;
 
 
 #pragma mark Capabilities
@@ -1222,6 +1235,20 @@ typedef struct {
 -(void) alignFor3DDrawing;
 
 
+#pragma mark OpenGL resources
+
+/**
+ * Clears content and resource caches that use OpenGL, including the CC3ShaderPrewarmer
+ * instance in the shaderProgramPrewarmer property, and the following resource caches:
+ * 	 - CC3Resource
+ *   - CC3Texture
+ *   - CC3ShaderProgram
+ *   - CC3Shader
+ *   - CC3ShaderSourceCode
+ */
+-(void) clearResourceCaches;
+
+
 #pragma mark Allocation and initialization
 
 /** 
@@ -1238,33 +1265,86 @@ typedef struct {
 +(CC3OpenGL*) sharedGL;
 
 /** 
- * Deletes all GL contexts, serving all threads.
+ * Terminates the current use of OpenGL by this application.
  *
- * You can invoke this method when your app no longer needs support for OpenGL, or will not use OpenGL
- * for a significant amount of time, in order to free up app and OpenGL memory used by your application.
+ * Terminates OpenGL and deletes all GL contexts, serving all threads. Also clears all caches
+ * that contain content that uses OpenGL, including:
+ * 	 - CC3Resource
+ *   - CC3Texture
+ *   - CC3ShaderProgram
+ *   - CC3Shader
+ *   - CC3ShaderSourceCode
  *
- * To ensure that that the current GL activity has finished before pulling the rug out from under it,
- * this request is queued for each existing context on the thread for which the context was created.
+ * To ensure that further OpenGL calls are not attempted, before invoking this method, you 
+ * should release all CC3Scenes and CC3ViewControllers that you have created or loaded, along
+ * with any cocos2d components, and that the CCDirector singleton has been ended.
  *
- * In addition, once dequeued, a short delay is imposed, before the context instance is actually released
- * and deallocated, to provide time for object deallocation and cleanup after the caches have been cleared,
- * and autorelease pools have been drained. The length of this delay may be different for each context
- * instance, and is specified by the deletionDelay property.
+ * CC3ViewController also provides a terminateOpenGL convenience method that will take care of
+ * all of that for you, and then will invoke this method. Unless you have special requirements,
+ * use that CC3ViewController terminateOpenGL method, instead of invoking this method directly.
+ *
+ * You can invoke this method (or preferrably the CC3ViewController terminateOpenGL method) 
+ * when your app no longer needs support for OpenGL, or will not use OpenGL for a significant
+ * amount of time, in order to free up app and OpenGL memory used by your application.
+ *
+ * To ensure that that the current GL activity has finished before pulling the rug out from
+ * under it, this request is queued for each existing context, on the thread for which the
+ * context was created, and will only be executed once any currently running tasks on the 
+ * queue have been completed.
+ *
+ * In addition, once dequeued, a short delay is imposed, before the context instance is 
+ * actually released and deallocated, to provide time for object deallocation and cleanup 
+ * after the caches have been cleared, and autorelease pools have been drained. The length
+ * of this delay may be different for each context instance, and is specified by the 
+ * deletionDelay property of each instance.
+ *
+ * Since much of the processing of this method is handled through queued operations, as 
+ * described above, this method will return as soon as the requests are queued, and well
+ * before the operations have completed, and OpenGL has been terminated. 
+ *
+ * You can choose to be notified once all operations triggered by this method have completed,
+ * and OpenGL has been terminated, by registering a delegate object using the setDelegate: 
+ * class method. The delegate object will be sent the didTerminateOpenGL method once  all 
+ * operations triggered by this method have completed, and OpenGL has been terminated. 
+ * You should use this delegate notification if you intend to make use of OpenGL again, 
+ * as you must wait for one OpenGL session to terminate before starting another.
  *
  * Use this method with caution, as creating the GL contexts again will require significant overhead.
  */
-+(void) deleteGL;
++(void) terminateOpenGL;
 
 /**
- * Indicates the length of time, in seconds, that this instance will wait after the deleteGL method is
- * invoked, before this instance is actually deleted. This delay is intended to provide time for object
- * deallocation and cleanup after the caches have been cleared, and autorelease pools have been drained.
+ * Indicates the length of time, in seconds, that this instance will wait after the terminateOpenGL
+ * method is invoked, before this instance is actually deleted. This delay is intended to provide
+ * time for object deallocation and cleanup after the caches have been cleared, and autorelease
+ * pools have been drained.
  *
- * The value of this property is specified in seconds. The initial value of this is 0 for the instance
- * that is used on the primary rendering thread, and 0.25 for the instance that is used for loading
- * resources in the background.
+ * The value of this property is specified in seconds. The initial value of this is 0 for the
+ * instance that is used on the primary rendering thread, and 0.25 for the instance that is used
+ * for loading resources in the background.
  */
 @property(nonatomic, assign) NSTimeInterval deletionDelay;
+
+@end
+
+
+#pragma mark CC3OpenGLDelegate
+
+/**
+ * This protocol specifies methods that will be invoked by certain asynchronous operations
+ * performed by instances of CC3OpenGL.
+ *
+ * All callback notification methods are invoked on the main application thread.
+ */
+@protocol CC3OpenGLDelegate <NSObject>
+
+@optional
+
+/** 
+ * This method is invoked once all of the operations triggered by invoking the CC3OpenGL
+ * terminateOpenGL class method have completed, and OpenGL has been terminated.
+ */
+-(void) didTerminateOpenGL;
 
 @end
 

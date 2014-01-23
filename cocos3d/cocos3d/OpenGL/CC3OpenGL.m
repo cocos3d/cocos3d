@@ -63,6 +63,24 @@
 	free(value_GL_TEXTURE_BINDING_CUBE_MAP);
 }
 
+static NSThread* _renderThread = nil;
+
+/**
+ * Retrieve from CCDirector, and cache for fast access, and to allow CCDirector to be shut
+ * down, but the render thread to still be accessible for any outstanding background loading
+ * that occurs before GL is shut down.
+ */
++(NSThread*) renderThread {
+	if (!_renderThread) _renderThread = CCDirector.sharedDirector.runningThread;
+	return _renderThread;
+}
+
+static NSObject<CC3OpenGLDelegate>* _delegate = nil;
+
++(NSObject<CC3OpenGLDelegate>*) delegate { return _delegate; }
+
++(void) setDelegate: (NSObject<CC3OpenGLDelegate>*) delegate { _delegate = delegate; }
+
 
 #pragma mark Capabilities
 
@@ -1060,6 +1078,24 @@
 -(void) align3DVertexAttributeState {}
 
 
+#pragma mark OpenGL resources
+
+-(void) clearResourceCaches {
+	LogInfo(@"Clearing resource caches on thread %@.", NSThread.currentThread);
+	
+	self.shaderProgramPrewarmer = nil;
+	
+	[CC3Resource removeAllResources];
+	[CC3Texture removeAllTextures];
+	[CC3ShaderProgram removeAllPrograms];
+	[CC3Shader removeAllShaders];
+	[CC3ShaderSourceCode removeAllShaderSourceCode];
+	
+	// Dynamically reference model factory class, as it might not be present.
+	[NSClassFromString(@"CC3ModelSampleFactory") deleteFactory];
+}
+
+
 #pragma mark Allocation and initialization
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
@@ -1149,23 +1185,6 @@
 	return [super alloc];
 }
 
-static NSThread* _renderThread = nil;
-
-/**
- * Retrieve from CCDirector, and cache for fast access, and to allow CCDirector to be shut
- * down, but the render thread to still be accessible for any outstanding background loading
- * that occurs before GL is shut down.
- */
-+(NSThread*) renderThread {
-	if (!_renderThread) _renderThread = CCDirector.sharedDirector.runningThread;
-	return _renderThread;
-}
-
-/** If BOTH the render context AND the background context have been deleted, release the render thread. */
-+(void) checkClearRenderThread {
-	if (!_renderGL && !_bgGL) _renderThread = nil;
-}
-
 static CC3OpenGL* _renderGL = nil;
 static CC3OpenGL* _bgGL = nil;
 
@@ -1181,31 +1200,31 @@ static CC3OpenGL* _bgGL = nil;
 	}
 }
 
-+(void) deleteGL {
-	[_renderGL deleteGL];
-	[_bgGL deleteGL];
++(void) terminateOpenGL {
+	[_renderGL terminate];
+	[_bgGL terminate];
 }
 
--(void) deleteGL {
+-(void) terminate {
 	if (self.isRenderingContext) {
 		[NSThread.mainThread runBlockAsync: ^{ [self clearResourceCaches]; } ];
-		[NSThread.mainThread runBlockAsync: ^{ [self deleteSoon]; } ];
+		[NSThread.mainThread runBlockAsync: ^{ [self terminateSoon]; } ];
 	} else {
 		[CC3Backgrounder.sharedBackgrounder runBlock: ^{ [self clearResourceCaches]; }];
-		[CC3Backgrounder.sharedBackgrounder runBlock: ^{ [self deleteSoon]; }];
+		[CC3Backgrounder.sharedBackgrounder runBlock: ^{ [self terminateSoon]; }];
 	}
 }
 
--(void) deleteSoon {
+-(void) terminateSoon {
 	LogInfo(@"Requesting deletion of %@ on thread %@.", self, NSThread.currentThread);
 	if (self.isRenderingContext) {
-		[NSThread.mainThread runBlock: ^{ [self deleteNow]; } after: _deletionDelay ];
+		[NSThread.mainThread runBlock: ^{ [self terminateNow]; } after: _deletionDelay ];
 	} else {
-		[CC3Backgrounder.sharedBackgrounder runBlock: ^{ [self deleteNow]; } after: _deletionDelay];
+		[CC3Backgrounder.sharedBackgrounder runBlock: ^{ [self terminateNow]; } after: _deletionDelay];
 	}
 }
 
--(void) deleteNow {
+-(void) terminateNow {
 	LogInfo(@"Deleting %@ now on thread %@.", self, NSThread.currentThread);
 	[self finish];
 	
@@ -1213,21 +1232,30 @@ static CC3OpenGL* _bgGL = nil;
 	if (self == _bgGL) _bgGL = nil;
 	
 	[self.class checkClearRenderThread];
+	[self.class checkTerminationNotify];
 }
 
--(void) clearResourceCaches {
-	LogInfo(@"Clearing resource caches on thread %@.", NSThread.currentThread);
+/** If BOTH the render context AND the background context have been deleted, release the render thread. */
++(void) checkClearRenderThread {
+	if (!_renderGL && !_bgGL) _renderThread = nil;
+}
 
-	self.shaderProgramPrewarmer = nil;
+/** If BOTH the render context AND the background context have been deleted, notify the delegate. */
++(void) checkTerminationNotify {
+	if (!_renderGL && !_bgGL)
+		[self notifyDelegateOf: @selector(didTerminateOpenGL) withObject: nil];
+}
 
-	[CC3Resource removeAllResources];
-	[CC3Texture removeAllTextures];
-	[CC3ShaderProgram removeAllPrograms];
-	[CC3Shader removeAllShaders];
-	[CC3ShaderSourceCode removeAllShaderSourceCode];
-	
-	// Dynamically reference model factory class, as it might not be present.
-	[NSClassFromString(@"CC3ModelSampleFactory") deleteFactory];
+/** 
+ * Notifies the delegate by invoking the specified method, with the specified optional argument.
+ * If the method does not take an argument, the arg value should be nil. If the delegate does
+ * not support the method, then the notification is not sent.
+ *
+ * The notification is queued to the main thread for execution, and is processed asynchronously.
+ */
++(void) notifyDelegateOf: (SEL) selector withObject: (id) arg {
+	if ([_delegate respondsToSelector: selector])
+		[_delegate performSelectorOnMainThread: selector withObject: arg waitUntilDone: NO];
 }
 
 @end

@@ -106,22 +106,47 @@
  */
 -(void) stopAnimation;
 
-/** 
- * Clears all OpenGL resource, texture and shader caches, and shuts down the OpenGL context.
+/**
+ * Terminates the current use of OpenGL by this application.
  *
- * This method also detaches the view from this controller, but does not remove the view
- * from its superview. You must handle that directly.
+ * Releases the object in the controlledNode property, releases the view of this controller,
+ * ends the CCDirector session, terminates OpenGL and deletes all GL contexts, serving all
+ * threads, and clears all caches that contain content that uses OpenGL, including:
+ * 	 - CC3Resource
+ *   - CC3Texture
+ *   - CC3ShaderProgram
+ *   - CC3Shader
+ *   - CC3ShaderSourceCode
  *
- * This method also invokes [CCDirector.sharedDirector end], to ensure all resources loaded
- * by cocos2d code is also released, and all scenes are deleted.
+ * You can invoke this method when your app no longer needs support for OpenGL, or will not
+ * use OpenGL for a significant amount of time, in order to free up app and OpenGL memory 
+ * used by your application.
  *
- * You can invoke this method when you want to close the OpenGL functionality, and release both
- * app and GL memory that is being used by OpenGL resources. You might choose to do this once
- * your application has completely finished using OpenGL, or even when your app will not be 
- * needing OpenGL resources for some period of time, and your app can absorb the overhead of
- * restarting OpenGL and reloading resources.
+ * To ensure that that the current GL activity has finished before pulling the rug out from
+ * under it, this request is queued for each existing GL context, on the thread for which 
+ * the context was created, and will only be executed once any currently running tasks on 
+ * the queue have been completed.
+ *
+ * In addition, once dequeued, a short delay is imposed, before the GL context instance is
+ * actually released and deallocated, to provide time for object deallocation and cleanup
+ * after the caches have been cleared, and autorelease pools have been drained. The length
+ * of this delay may be different for each context instance, and is specified by the
+ * CC3OpenGL deletionDelay property of each instance.
+ *
+ * Since much of the processing of this method is handled through queued operations, as
+ * described above, this method will return as soon as the requests are queued, and well
+ * before the operations have completed, and OpenGL has been terminated.
+ *
+ * You can choose to be notified once all operations triggered by this method have completed,
+ * and OpenGL has been terminated, by registering a delegate object using the CC3OpenGL 
+ * setDelegate: class method. The delegate object will be sent the didTerminateOpenGL method
+ * once  all operations triggered by this method have completed, and OpenGL has been terminated.
+ * You should use this delegate notification if you intend to make use of OpenGL again, as you
+ * must wait for one OpenGL session to terminate before starting another.
+ *
+ * Use this method with caution, as creating the GL contexts again will require significant overhead.
  */
--(void) endOpenGL;
+-(void) terminateOpenGL;
 
 @end
 

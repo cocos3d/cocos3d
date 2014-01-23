@@ -54,7 +54,7 @@
 }
 
 -(void) dealloc {
-	[[CCDirector sharedDirector] end];
+	[_viewController terminateOpenGL];
 }
 
 #pragma mark AppDelegate - IBActions

@@ -30,12 +30,16 @@
 #import <UIKit/UIKit.h>
 #import "CC3UIViewController.h"
 
+/**
+ * Identifies the types of scenes that can be selected by the scene selector control.
+ * The values must correspond to the indices of the scene selector UISegmentedControl.
+ */
 typedef enum {
 	kSelectedSceneMashUp,			/**< The MashUp scene was selected. */
 	kSelectedSceneTiles,			/**< The Tiles scene was selected. */
 	kSelectedScenePerformance,		/**< The Performance scene was selected. */
 	kSelectedSceneNone,				/**< The Tiles scene was selected. */
-} SelectSceneControlIndex;
+} SelectedScene;
 
 /**
  * The main application view controller.
@@ -44,10 +48,12 @@ typedef enum {
  * This controller loads and manages different CC3UIViewControllers, through
  * user interaction with standard UI controls.
  */
-@interface MainViewController : UIViewController {
+@interface MainViewController : UIViewController <CC3OpenGLDelegate> {
     CC3UIViewController* _cc3Controller;
 	UIView* _cc3FrameView;
+	UISegmentedControl* _sceneSelectorControl;
 	UIActivityIndicatorView* _progressView;
+	SelectedScene _selectedScene;
 }
 
 /** 
@@ -57,7 +63,7 @@ typedef enum {
  * Different controllers are created and destroyed through user interaction with the
  * UI controls on this controller.
  */
-@property (nonatomic, strong, readonly) CC3UIViewController* cc3Controller;
+@property (nonatomic, strong, readonly) IBOutlet CC3UIViewController* cc3Controller;
 
 /** 
  * The UIView that is used as a container for the OpenGL view that is manage by the
@@ -69,21 +75,19 @@ typedef enum {
  */
 @property (strong, nonatomic) IBOutlet UIView* cc3FrameView;
 
+/** The UI control for selecting the 3D scene to display. */
+@property (strong, nonatomic) IBOutlet UISegmentedControl* sceneSelectorControl;
+
 /** A standard activity progress view, displayed while the 3D scene is loading, or being removed. */
 @property (strong, nonatomic) IBOutlet UIActivityIndicatorView* progressView;
 
+
 #pragma mark Event handling
 
-/** 
- * Invoked when an on-screen control indicates that the user has selected a particular
- * 3D scene for display. 
+/**
+ * Received from the specified segmented control to indicate that the user has selected
+ * a new 3D scene for display.
  */
--(IBAction) requestChange3DSceneFrom: (UISegmentedControl*) sender;
+-(IBAction) requestChange3DSceneFromSegmentControl: (UISegmentedControl*) sender;
 
-/** 
- * Closes the current 3D controller. This can be invoked directly from the user interface,
- * of indirectly as a result of changing the 3D scene.
- */
--(void) close3DController;
-	
 @end

@@ -75,7 +75,7 @@
 
 -(void) resumeAnimation { [CCDirector.sharedDirector resume]; }
 
--(void) endOpenGL {
+-(void) terminateOpenGL {
 	self.controlledNode = nil;
 	
 	// If the controller is not combined with the director, clear the view separately.
@@ -83,7 +83,7 @@
 	if ( ![self isKindOfClass: CCDirector.class] ) self.view = nil;
 	[self endDirector];
 	
-	[CC3OpenGL deleteGL];
+	[CC3OpenGL terminateOpenGL];
 }
 
 -(void) endDirector { [CCDirector.sharedDirector end]; }

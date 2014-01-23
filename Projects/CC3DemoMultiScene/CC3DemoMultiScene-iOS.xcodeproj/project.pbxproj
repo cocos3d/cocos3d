@@ -121,7 +121,6 @@
 		A9A9C43918886E8000659FAC /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9A9C43818886E8000659FAC /* UIKit.framework */; };
 		A9D4F69A1889741900382DDC /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = A9D4F68E1889741900382DDC /* AppDelegate.m */; };
 		A9D4F69B1889741900382DDC /* Main_iPad.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A9D4F68F1889741900382DDC /* Main_iPad.storyboard */; };
-		A9D4F69C1889741900382DDC /* Main_iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A9D4F6911889741900382DDC /* Main_iPhone.storyboard */; };
 		A9D4F69E1889741900382DDC /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = A9D4F6941889741900382DDC /* InfoPlist.strings */; };
 		A9D4F6A01889741900382DDC /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = A9D4F6971889741900382DDC /* main.m */; };
 		A9D4F6A11889741900382DDC /* MainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A9D4F6991889741900382DDC /* MainViewController.m */; };
@@ -328,7 +327,6 @@
 		A9D4F68D1889741900382DDC /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		A9D4F68E1889741900382DDC /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		A9D4F6901889741900382DDC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main_iPad.storyboard; sourceTree = "<group>"; };
-		A9D4F6921889741900382DDC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main_iPhone.storyboard; sourceTree = "<group>"; };
 		A9D4F6931889741900382DDC /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A9D4F6951889741900382DDC /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		A9D4F6971889741900382DDC /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -653,7 +651,6 @@
 				A9D4F68D1889741900382DDC /* AppDelegate.h */,
 				A9D4F68E1889741900382DDC /* AppDelegate.m */,
 				A9D4F68F1889741900382DDC /* Main_iPad.storyboard */,
-				A9D4F6911889741900382DDC /* Main_iPhone.storyboard */,
 				A9D4F6931889741900382DDC /* Info.plist */,
 				A9D4F6941889741900382DDC /* InfoPlist.strings */,
 				A9D4F6971889741900382DDC /* main.m */,
@@ -908,7 +905,6 @@
 				A904C4F518887FD00070C47F /* ButtonRing48x48.png in Resources */,
 				A904C51818887FD00070C47F /* Icon-40@2x.png in Resources */,
 				A904C54418887FD00070C47F /* tex_base.bmp in Resources */,
-				A9D4F69C1889741900382DDC /* Main_iPhone.storyboard in Resources */,
 				A9D4F6E1188979F000382DDC /* CC3BumpMapTangentSpace.fsh in Resources */,
 				A904C53718887FD00070C47F /* belt.png in Resources */,
 				A904C52718887FD00070C47F /* Default-Portrait~ipad.png in Resources */,
@@ -1020,14 +1016,6 @@
 				A9D4F6901889741900382DDC /* Base */,
 			);
 			name = Main_iPad.storyboard;
-			sourceTree = "<group>";
-		};
-		A9D4F6911889741900382DDC /* Main_iPhone.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				A9D4F6921889741900382DDC /* Base */,
-			);
-			name = Main_iPhone.storyboard;
 			sourceTree = "<group>";
 		};
 		A9D4F6941889741900382DDC /* InfoPlist.strings */ = {
@@ -1154,6 +1142,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/CC3DemoMultiScene/iOS Support/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				PRODUCT_NAME = "CC3DemoMultiScene-iOS";
+				TARGETED_DEVICE_FAMILY = 2;
 			};
 			name = Debug;
 		};
@@ -1165,6 +1154,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/CC3DemoMultiScene/iOS Support/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				PRODUCT_NAME = "CC3DemoMultiScene-iOS";
+				TARGETED_DEVICE_FAMILY = 2;
 			};
 			name = Release;
 		};

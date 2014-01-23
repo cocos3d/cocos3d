@@ -27,7 +27,7 @@
                                     <segment title="None"/>
                                 </segments>
                                 <connections>
-                                    <action selector="requestChange3DSceneFrom:" destination="BYZ-38-t0r" eventType="valueChanged" id="IJs-1A-DDM"/>
+                                    <action selector="requestChange3DSceneFromSegmentControl:" destination="BYZ-38-t0r" eventType="valueChanged" id="eyh-2Y-5uI"/>
                                 </connections>
                             </segmentedControl>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="cA2-Gk-cNF">
@@ -59,6 +59,7 @@
                     <connections>
                         <outlet property="cc3FrameView" destination="cA2-Gk-cNF" id="Opb-Pf-Svg"/>
                         <outlet property="progressView" destination="CVd-E5-TPi" id="fsF-kZ-Yeh"/>
+                        <outlet property="sceneSelectorControl" destination="5cu-Oh-UO1" id="Xy8-Yv-3vI"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>

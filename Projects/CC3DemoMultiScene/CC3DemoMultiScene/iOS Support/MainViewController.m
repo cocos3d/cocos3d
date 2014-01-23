@@ -41,29 +41,35 @@
 
 @synthesize cc3Controller=_cc3Controller;
 @synthesize cc3FrameView=_cc3FrameView;
+@synthesize sceneSelectorControl=_sceneSelectorControl;
 @synthesize progressView=_progressView;
 
 #pragma mark 3D scene selection
 
-/** 
- * Show the animated progress view, and then delegate to the change3DSceneTo: method.
- * The performSelector:withObject:afterDelay: method is used to avoid blocking the
- * progress view.
+/**
+ * Received from the specified segmented control.
+ *
+ * Take note of which 3D scene has been selected, disable further user interation during the initial
+ * loading of the new 3D scene, and trigger the closing of the current 3D scene. The new 3D scene
+ * will be loaded once the current 3D scene has been closed. Since closing the current 3D scene
+ * is performed asynchonously, we get a callback when that is complete, and we can then load the
+ * new scene from there.
  */
--(IBAction) requestChange3DSceneFrom: (UISegmentedControl*) sender {
-	[_progressView startAnimating];
-	[self performSelector: @selector(change3DSceneTo:)
-			   withObject: [NSNumber numberWithInt: (sender.selectedSegmentIndex)]
-			   afterDelay: 0];
+-(IBAction) requestChange3DSceneFromSegmentControl: (UISegmentedControl*) sender {
+	_selectedScene = sender.selectedSegmentIndex;
+	[self disableUI];
+
+	// The delay added here before closing the current 3D scene gives the UI a chance
+	// to refresh before the scene closing operation starts.
+	[self performSelector: @selector(close3DController) withObject: nil afterDelay: 0];
 }
 
-/** 
- * Closes the current 3D controller, and opens a new 3D controller, with a new 3D scene,
- * as selected by the specified segment index.
+/**
+ * Opens a new 3D controller, with a new, previously selected, 3D scene.
+ * This method is invoked asynchronously from the didTerminateOpenGL callback.
  */
--(void) change3DSceneTo: (NSNumber*) segmentIndex {
-	[self close3DController];
-	switch (segmentIndex.intValue) {
+-(void) loadSelected3DScene {
+	switch (_selectedScene) {
 		case kSelectedSceneMashUp:
 			LogInfo(@"MashUp scene selected");
 			[self open3DControllerWithShadows: YES];
@@ -78,15 +84,23 @@
 		case kSelectedSceneNone:
 		default:
 			LogInfo(@"No scene selected");
-		break;
+			break;
 	}
-	[_progressView stopAnimating];
+
+	// Enable the UI only after a short delay. This gives the main thread loop a chance to drain
+	// any touch events on the controls accumulated while they were disabled, before enabling them.
+	// It also allows any background loading in the 3D scene, that is started when the view is
+	// first opened, to start before possibly queuing a request to close the OpenGL environment,
+	// which must be processed after (not before) the background loading starts. Although a
+	// shorter delay is possible, we've chosen 0.5 seconds as visually appealing, as it appears
+	// more deliberate than, say, a 0.2 second delay.
+	[self performSelector: @selector(enableUI) withObject: nil afterDelay: 0.5];
 }
 
 /** 
- * Creates and opens a new 3D controller. The supportShadows argument indicates whether
- * the controller should be configured to support shadows. The frame of the GL view is
- * set to fill the framing container view.
+ * Creates and opens a new 3D controller. The supportShadows argument indicates whether the
+ * controller should be configured to support shadows. The frame of the GL view is set to 
+ * fill the framing container view.
  */
 -(void) open3DControllerWithShadows: (BOOL) supportShadows {
 	CC3Assert(!_cc3Controller, @"%@ already exists. Close it before opening it again.", _cc3Controller);
@@ -188,11 +202,44 @@
 /**
  * Closes the current 3D controller, removes the controller's view from the view hierarchy,
  * and shuts down all OpenGL behaviour.
+ *
+ * If a current controller exists, once it is closed, and OpenGL is terminated, the 
+ * didTerminateOpenGL callback will trigger the loading of the new selected 3D scene.
+ * If there is no current controller to close, no callback will be sent, so load the
+ * new selected 3D scene immediately.
  */
 -(void) close3DController {
-	[_cc3Controller.view removeFromSuperview];
-	[_cc3Controller endOpenGL];
-	_cc3Controller = nil;
+	if (_cc3Controller) {
+		[_cc3Controller.view removeFromSuperview];
+		[_cc3Controller terminateOpenGL];
+		_cc3Controller = nil;
+	} else {
+		[self loadSelected3DScene];
+	}
+}
+
+
+#pragma mark User interface interaction
+
+/** Disables user interaction. */
+-(void) disableUI {
+	[_progressView startAnimating];
+	_sceneSelectorControl.enabled = NO;
+}
+
+/** Enables user interaction. */
+-(void) enableUI {
+	[_progressView stopAnimating];
+	_sceneSelectorControl.enabled = YES;
+}
+
+/**
+ * This callback method (from the CC3OpenGLDelegate protocol) is invoked once the current
+ * 3D scene has been closed, and OpenGL has been terminated. Loads the new selected 3D scene.
+ */
+-(void) didTerminateOpenGL {
+	LogDebug(@"OpenGL is dead. Long live OpenGL! on %@", NSThread.currentThread);
+	[self loadSelected3DScene];
 }
 
 
@@ -204,20 +251,19 @@
 	_cc3Controller.view.frame = [_cc3FrameView bounds];
 }
 
+/** 
+ * Adds this controller as the delegate of the OpenGL context,
+ * so that we can be notified when the OpenGL context is terminated.
+ */
 -(void) viewDidLoad {
     [super viewDidLoad];
-	// Do any additional setup after loading the view, typically from a nib.
+	CC3OpenGL.delegate = self;
 }
 
 /** If the view disappears, shut down the 3D controller and scene. */
 -(void)viewWillDisappear: (BOOL) animated {
     [self close3DController];
 	[super viewWillDisappear: animated];
-}
-
--(void) didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
 }
 
 @end

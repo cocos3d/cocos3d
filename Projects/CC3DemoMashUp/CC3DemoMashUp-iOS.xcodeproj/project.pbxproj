@@ -1012,6 +1012,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/CC3DemoMashUp/iOS Support/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				PRODUCT_NAME = CC3DemoMashUp;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -1023,6 +1024,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/CC3DemoMashUp/iOS Support/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				PRODUCT_NAME = CC3DemoMashUp;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
