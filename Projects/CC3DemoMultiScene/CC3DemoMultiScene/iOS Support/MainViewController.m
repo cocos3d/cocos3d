@@ -33,6 +33,9 @@
 #import "CC3DeviceCameraOverlayUIViewController.h"
 #import "CC3DemoMashUpLayer.h"
 #import "CC3DemoMashUpScene.h"
+#import "CC3PerformanceLayer.h"
+#import "CC3PerformanceScene.h"
+#import "MainLayer.h"
 
 
 #define kAnimationFrameRate		60		// Animation frame rate
@@ -58,6 +61,7 @@
 -(IBAction) requestChange3DSceneFromSegmentControl: (UISegmentedControl*) sender {
 	_selectedScene = sender.selectedSegmentIndex;
 	[self disableUI];
+	[_cc3Controller.view removeFromSuperview];
 
 	// The delay added here before closing the current 3D scene gives the UI a chance
 	// to refresh before the scene closing operation starts.
@@ -77,9 +81,13 @@
 			break;
 		case kSelectedSceneTiles:
 			LogInfo(@"Tiles scene selected");
+			[self open3DControllerWithShadows: NO];
+			[self open3DLayer: [self makeDemo3DTilesLayer]];
 			break;
 		case kSelectedScenePerformance:
 			LogInfo(@"Performance scene selected");
+			[self open3DControllerWithShadows: NO];
+			[self open3DLayer: [self makePerformanceLayer]];
 			break;
 		case kSelectedSceneNone:
 		default:
@@ -110,19 +118,6 @@
 	_cc3Controller = [self makeCC3ControllerWithShadows: supportShadows];
 	_cc3Controller.view.frame = [_cc3FrameView bounds];
 	[_cc3FrameView addSubview: _cc3Controller.view];
-}
-
-/** Opens the specified 3D layer (containing a 3D scene), on the 3D controller. */
--(void) open3DLayer: (CC3Layer*) cc3Layer {
-	CC3Assert(_cc3Controller, @"The view controller for %@ has not be created.", cc3Layer);
-	
-	// Set the 3D layer in the 3D controller
-	_cc3Controller.controlledNode = cc3Layer;
-	
-	// Wrap the 3D layer in a 2D scene and run it in the director
-	CCScene* cc2Scene = [CCScene node];
-	[cc2Scene addChild: cc3Layer];
-	[CCDirector.sharedDirector runWithScene: cc2Scene];
 }
 
 #if CC3_CC2_1
@@ -192,13 +187,6 @@
 }
 #endif
 
-/** Creates and returns a 3D layer and scene to display the CC3DemoMashUp scene. */
--(CC3Layer*) makeDemoMashUpLayer {
-	CC3Layer* cc3Layer = [CC3DemoMashUpLayer layer];
-	cc3Layer.cc3Scene = [CC3DemoMashUpScene scene];
-	return cc3Layer;
-}
-
 /**
  * Closes the current 3D controller, removes the controller's view from the view hierarchy,
  * and shuts down all OpenGL behaviour.
@@ -210,12 +198,44 @@
  */
 -(void) close3DController {
 	if (_cc3Controller) {
-		[_cc3Controller.view removeFromSuperview];
 		[_cc3Controller terminateOpenGL];
 		_cc3Controller = nil;
 	} else {
 		[self loadSelected3DScene];
 	}
+}
+
+
+#pragma mark 3D scene and display layer
+
+/** Opens the specified 3D layer (containing a 3D scene), on the 3D controller. */
+-(void) open3DLayer: (CC3ControllableLayer*) layer3D {
+	CC3Assert(_cc3Controller, @"The view controller for %@ has not be created.", layer3D);
+	
+	// Set the 3D layer in the 3D controller
+	_cc3Controller.controlledNode = layer3D;
+	
+	// Wrap the 3D layer in a 2D scene and run it in the director
+	CCScene* cc2Scene = [CCScene node];
+	[cc2Scene addChild: layer3D];
+	[CCDirector.sharedDirector runWithScene: cc2Scene];
+}
+
+/** Creates and returns a 3D layer and scene to display the CC3Demo3DTiles demo scene. */
+-(CC3ControllableLayer*) makeDemo3DTilesLayer { return [MainLayer layer]; }
+
+/** Creates and returns a 3D layer and scene to display the CC3DemoMashUp demo scene. */
+-(CC3Layer*) makeDemoMashUpLayer {
+	CC3Layer* cc3Layer = [CC3DemoMashUpLayer layer];
+	cc3Layer.cc3Scene = [CC3DemoMashUpScene scene];
+	return cc3Layer;
+}
+
+/** Creates and returns a 3D layer and scene to display the CC3Performance demo scene. */
+-(CC3Layer*) makePerformanceLayer {
+	CC3Layer* cc3Layer = [CC3PerformanceLayer layer];
+	cc3Layer.cc3Scene = [CC3PerformanceScene scene];
+	return cc3Layer;
 }
 
 

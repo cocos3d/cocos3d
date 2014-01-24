@@ -584,10 +584,7 @@
 		[_drawingSequencer add: addedNode withVisitor: _drawingSequenceVisitor];
 		
 		// If the node has a target, add it to the collection of such nodes
-		if (addedNode.hasTarget) {
-			LogTrace(@"Adding targetting node %@", addedNode.fullDescription);
-			[_targettingNodes addObject: addedNode];
-		}
+		if (addedNode.hasTarget) [_targettingNodes addObject: addedNode];
 		
 		// If the node is a light, add it to the collection of lights
 		if (addedNode.isLight) [_lights addObject: addedNode];
@@ -604,7 +601,7 @@
 }
 
 /**
- * Overridden to attempt to remove each node to the drawingSequencer, and to remove any nodes
+ * Overridden to attempt to remove each node from the drawingSequencer, and to remove any nodes
  * that require special handling, like lights and billboards from their respective caches.
  * The node being removed is first flattened, so that this processing is performed not only
  * on that node, but all its hierarchical decendants.
@@ -621,10 +618,7 @@
 		[_drawingSequencer remove: removedNode withVisitor: _drawingSequenceVisitor];
 		
 		// If the node has a target, remove it from the collection of such nodes
-		if (removedNode.hasTarget) {
-			LogTrace(@"Removing targetting node %@", removedNode);
-			[_targettingNodes removeObjectIdenticalTo: removedNode];
-		}
+		if (removedNode.hasTarget) [_targettingNodes removeObjectIdenticalTo: removedNode];
 		
 		// If the node is a light, remove it from the collection of lights
 		if (removedNode.isLight) [_lights removeObjectIdenticalTo: removedNode];

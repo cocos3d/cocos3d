@@ -119,7 +119,6 @@
 	
 	// Create the customized CC3Layer and CC3Scene.
 	CC3Layer* cc3Layer = [CC3PerformanceLayer layer];
-//	CC3Layer* cc3Layer = [CC3PerformanceLayer layerWithController: _viewController];
 	cc3Layer.cc3Scene = [CC3PerformanceScene scene];
 	
 	// Set the layer in the controller

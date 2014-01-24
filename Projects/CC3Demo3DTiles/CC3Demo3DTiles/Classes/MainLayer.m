@@ -303,7 +303,6 @@
  */
 -(void) addTileIn: (CGRect) bounds {
 	CC3Layer* tileLayer = [TileLayer layer];
-//	CC3Layer* tileLayer = [TileLayer layerWithController: self.controller];
 	tileLayer.position = bounds.origin;
 	tileLayer.contentSize = bounds.size;
 	tileLayer.cc3Scene = [self makeScene];

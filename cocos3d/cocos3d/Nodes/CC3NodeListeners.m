@@ -126,7 +126,6 @@
 
 +(id) listenersForNode: (CC3Node*) node { return [[self alloc] initForNode: node]; }
 
-
 @end
 
 

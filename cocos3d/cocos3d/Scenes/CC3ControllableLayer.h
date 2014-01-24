@@ -92,14 +92,14 @@
  */
 @property(nonatomic, assign) BOOL alignContentSizeWithDeviceOrientation DEPRECATED_ATTRIBUTE;
 
-/** @deprecated CC3ControllableLayer requires a controller and no longer draws a backdrop. Use initWithController: instead. */
--(id) initWithColor: (ccColor4B) color DEPRECATED_ATTRIBUTE;
-
-/** @deprecated CC3ControllableLayer requires a controller and no longer draws a backdrop. Use layerWithController: instead. */
-+(id) layerWithColor: (ccColor4B) color DEPRECATED_ATTRIBUTE;
-
 /** @deprecated CC3ControllableLayer no longer draws a backdrop. Use CC3Scene backdrop property instead. */
 @property(nonatomic, readonly) BOOL isColored DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Use init instead. */
+-(id) initWithColor: (ccColor4B) color DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Use layer instead. */
++(id) layerWithColor: (ccColor4B) color DEPRECATED_ATTRIBUTE;
 
 /** @deprecated Use init instead. The controller property is set automatically when the layer, or an ancestor is assigned to a controller. */
 -(id) initWithController: (CC3ViewController*) controller DEPRECATED_ATTRIBUTE;

@@ -178,6 +178,18 @@ typedef enum {
  */
 @property(nonatomic, readonly) BOOL shouldRotateToTargetLocation;
 
+/**
+ * If the specified node is the target node at which this rotator is pointed,
+ * the target of this rotator is set to nil.
+ *
+ * This method is required in order to be able to clear the target without retrieving it
+ * outside this object to test if it is nil. Since the target is not retained, it may be
+ * deallocated while this rotator still maintains a reference to it. Any subsequent attempt
+ * to retrieve the target reference will result in ARC attempting to retain and autorelease
+ * it, which will create a zombie object error.
+ */
+-(BOOL) clearIfTarget: (CC3Node*) aNode;
+
 
 #pragma mark Allocation and initialization
 

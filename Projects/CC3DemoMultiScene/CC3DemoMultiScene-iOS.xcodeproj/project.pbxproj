@@ -119,6 +119,16 @@
 		A9A9C43518886E8000659FAC /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9A9C43418886E8000659FAC /* Foundation.framework */; };
 		A9A9C43718886E8000659FAC /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9A9C43618886E8000659FAC /* CoreGraphics.framework */; };
 		A9A9C43918886E8000659FAC /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9A9C43818886E8000659FAC /* UIKit.framework */; };
+		A9AC655F1891706500EC5462 /* CC3PerformanceLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = A9AC65531891706500EC5462 /* CC3PerformanceLayer.m */; };
+		A9AC65601891706500EC5462 /* CC3PerformanceScene.m in Sources */ = {isa = PBXBuildFile; fileRef = A9AC65551891706500EC5462 /* CC3PerformanceScene.m */; };
+		A9AC65641891706500EC5462 /* NodeGrid.m in Sources */ = {isa = PBXBuildFile; fileRef = A9AC655E1891706500EC5462 /* NodeGrid.m */; };
+		A9AC65671891729200EC5462 /* arial16.fnt in Resources */ = {isa = PBXBuildFile; fileRef = A9AC65651891729200EC5462 /* arial16.fnt */; };
+		A9AC65681891729200EC5462 /* arial16.png in Resources */ = {isa = PBXBuildFile; fileRef = A9AC65661891729200EC5462 /* arial16.png */; };
+		A9AC656A189172A300EC5462 /* ArrowUpButton48x48.png in Resources */ = {isa = PBXBuildFile; fileRef = A9AC6569189172A300EC5462 /* ArrowUpButton48x48.png */; };
+		A9AC656C1891733000EC5462 /* hello-world.pod in Resources */ = {isa = PBXBuildFile; fileRef = A9AC656B1891733000EC5462 /* hello-world.pod */; };
+		A9AC657E189175FC00EC5462 /* MainLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = A9AC6576189175FC00EC5462 /* MainLayer.m */; };
+		A9AC657F189175FC00EC5462 /* TileLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = A9AC6578189175FC00EC5462 /* TileLayer.m */; };
+		A9AC6580189175FC00EC5462 /* TileScene.m in Sources */ = {isa = PBXBuildFile; fileRef = A9AC657A189175FC00EC5462 /* TileScene.m */; };
 		A9D4F69A1889741900382DDC /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = A9D4F68E1889741900382DDC /* AppDelegate.m */; };
 		A9D4F69B1889741900382DDC /* Main_iPad.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A9D4F68F1889741900382DDC /* Main_iPad.storyboard */; };
 		A9D4F69E1889741900382DDC /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = A9D4F6941889741900382DDC /* InfoPlist.strings */; };
@@ -324,6 +334,22 @@
 		A9A9C43418886E8000659FAC /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		A9A9C43618886E8000659FAC /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		A9A9C43818886E8000659FAC /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		A9AC65521891706500EC5462 /* CC3PerformanceLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PerformanceLayer.h; sourceTree = "<group>"; };
+		A9AC65531891706500EC5462 /* CC3PerformanceLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3PerformanceLayer.m; sourceTree = "<group>"; };
+		A9AC65541891706500EC5462 /* CC3PerformanceScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PerformanceScene.h; sourceTree = "<group>"; };
+		A9AC65551891706500EC5462 /* CC3PerformanceScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3PerformanceScene.m; sourceTree = "<group>"; };
+		A9AC655D1891706500EC5462 /* NodeGrid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NodeGrid.h; sourceTree = "<group>"; };
+		A9AC655E1891706500EC5462 /* NodeGrid.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NodeGrid.m; sourceTree = "<group>"; };
+		A9AC65651891729200EC5462 /* arial16.fnt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = arial16.fnt; sourceTree = "<group>"; };
+		A9AC65661891729200EC5462 /* arial16.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = arial16.png; sourceTree = "<group>"; };
+		A9AC6569189172A300EC5462 /* ArrowUpButton48x48.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ArrowUpButton48x48.png; sourceTree = "<group>"; };
+		A9AC656B1891733000EC5462 /* hello-world.pod */ = {isa = PBXFileReference; lastKnownFileType = file; name = "hello-world.pod"; path = "/Users/bill/Documents/Dev/iOSProjects/cocos3d/cocos3d-bh/Models/Hello World/hello-world.pod"; sourceTree = "<absolute>"; };
+		A9AC6575189175FC00EC5462 /* MainLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MainLayer.h; sourceTree = "<group>"; };
+		A9AC6576189175FC00EC5462 /* MainLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MainLayer.m; sourceTree = "<group>"; };
+		A9AC6577189175FC00EC5462 /* TileLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TileLayer.h; sourceTree = "<group>"; };
+		A9AC6578189175FC00EC5462 /* TileLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TileLayer.m; sourceTree = "<group>"; };
+		A9AC6579189175FC00EC5462 /* TileScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TileScene.h; sourceTree = "<group>"; };
+		A9AC657A189175FC00EC5462 /* TileScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TileScene.m; sourceTree = "<group>"; };
 		A9D4F68D1889741900382DDC /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		A9D4F68E1889741900382DDC /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		A9D4F6901889741900382DDC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main_iPad.storyboard; sourceTree = "<group>"; };
@@ -500,9 +526,12 @@
 		A904C4ED18887FCF0070C47F /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				A9AC65651891729200EC5462 /* arial16.fnt */,
+				A9AC65661891729200EC5462 /* arial16.png */,
 				A904C48A18887FCF0070C47F /* Arial32BMGlyph.fnt */,
 				A904C48B18887FCF0070C47F /* Arial32BMGlyph.png */,
 				A904C48C18887FCF0070C47F /* ArrowLeftButton48x48.png */,
+				A9AC6569189172A300EC5462 /* ArrowUpButton48x48.png */,
 				A904C48D18887FCF0070C47F /* BallBoxTexture.png */,
 				A904C48E18887FCF0070C47F /* BeachBall.pod */,
 				A904C48F18887FCF0070C47F /* BoxTexture.png */,
@@ -529,6 +558,7 @@
 				A904C4B018887FCF0070C47F /* Head_clonespace.png */,
 				A904C4B118887FCF0070C47F /* Head_diffuse.bmp */,
 				A904C4B218887FCF0070C47F /* Head_diffuse.png */,
+				A9AC656B1891733000EC5462 /* hello-world.pod */,
 				A904C4C118887FCF0070C47F /* Icons */,
 				A904C4C218887FCF0070C47F /* IntroducingPOD_float.pod */,
 				A904C4C318887FCF0070C47F /* JoystickThumb.png */,
@@ -602,7 +632,9 @@
 			isa = PBXGroup;
 			children = (
 				A946377F18899B790097E355 /* Controls */,
+				A9AC656D189175FC00EC5462 /* CC3Demo3DTiles */,
 				A946376518899B250097E355 /* CC3DemoMashUp */,
+				A9AC65511891706500EC5462 /* CC3Performance */,
 				A9D4F68C1889741900382DDC /* iOS Support */,
 				A904C4ED18887FCF0070C47F /* Resources */,
 				A9D4F6D4188979F000382DDC /* GLSL */,
@@ -635,6 +667,34 @@
 				A9A9C43818886E8000659FAC /* UIKit.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		A9AC65511891706500EC5462 /* CC3Performance */ = {
+			isa = PBXGroup;
+			children = (
+				A9AC65521891706500EC5462 /* CC3PerformanceLayer.h */,
+				A9AC65531891706500EC5462 /* CC3PerformanceLayer.m */,
+				A9AC65541891706500EC5462 /* CC3PerformanceScene.h */,
+				A9AC65551891706500EC5462 /* CC3PerformanceScene.m */,
+				A9AC655D1891706500EC5462 /* NodeGrid.h */,
+				A9AC655E1891706500EC5462 /* NodeGrid.m */,
+			);
+			name = CC3Performance;
+			path = ../CC3Performance/CC3Performance/Classes;
+			sourceTree = "<group>";
+		};
+		A9AC656D189175FC00EC5462 /* CC3Demo3DTiles */ = {
+			isa = PBXGroup;
+			children = (
+				A9AC6575189175FC00EC5462 /* MainLayer.h */,
+				A9AC6576189175FC00EC5462 /* MainLayer.m */,
+				A9AC6577189175FC00EC5462 /* TileLayer.h */,
+				A9AC6578189175FC00EC5462 /* TileLayer.m */,
+				A9AC6579189175FC00EC5462 /* TileScene.h */,
+				A9AC657A189175FC00EC5462 /* TileScene.m */,
+			);
+			name = CC3Demo3DTiles;
+			path = ../CC3Demo3DTiles/CC3Demo3DTiles/Classes;
 			sourceTree = "<group>";
 		};
 		A9D4F67418888F9B00382DDC /* Products */ = {
@@ -938,6 +998,7 @@
 				A9D4F6DC188979F000382DDC /* CC3LibTexturableBumpMapObjectSpace.fsh in Resources */,
 				A9D4F6E0188979F000382DDC /* CC3BumpMapObjectSpaceAlphaTest.fsh in Resources */,
 				A904C51718887FD00070C47F /* Icon-40.png in Resources */,
+				A9AC65681891729200EC5462 /* arial16.png in Resources */,
 				A904C50018887FD00070C47F /* Earth_1024.jpg in Resources */,
 				A904C50518887FD00070C47F /* EnvMapPosX.jpg in Resources */,
 				A9D4F6F5188979F000382DDC /* CC3LibDoubleTexture.vsh in Resources */,
@@ -948,7 +1009,9 @@
 				A904C53C18887FD00070C47F /* ShadowButtonLatched48x48.png in Resources */,
 				A9D4F6D7188979F000382DDC /* CC3LibEnvironmentReflection.fsh in Resources */,
 				A904C52618887FD00070C47F /* Default-Landscape~ipad.png in Resources */,
+				A9AC656A189172A300EC5462 /* ArrowUpButton48x48.png in Resources */,
 				A9D4F6F7188979F000382DDC /* CC3LibIlluminatedMaterial.vsh in Resources */,
+				A9AC656C1891733000EC5462 /* hello-world.pod in Resources */,
 				A9D4F6DF188979F000382DDC /* CC3BumpMapObjectSpace.fsh in Resources */,
 				A9D4F6EA188979F000382DDC /* CC3PointSprites.fsh in Resources */,
 				A904C52F18887FD00070C47F /* EtchedEffects.pfx in Resources */,
@@ -956,6 +1019,7 @@
 				A904C4EE18887FD00070C47F /* Arial32BMGlyph.fnt in Resources */,
 				A904C53818887FD00070C47F /* body.png in Resources */,
 				A9D4F700188979F000382DDC /* CC3Texturable.vsh in Resources */,
+				A9AC65671891729200EC5462 /* arial16.fnt in Resources */,
 				A9D4F6E4188979F000382DDC /* CC3ClipSpaceSingleTexture.fsh in Resources */,
 				A904C52518887FD00070C47F /* Default-568h@2x.png in Resources */,
 				A9D4F6D6188979F000382DDC /* CC3LibDualSidedFragmentColor.fsh in Resources */,
@@ -982,12 +1046,18 @@
 			files = (
 				A946377D18899B250097E355 /* HUDScene.m in Sources */,
 				A946377C18899B250097E355 /* HUDLayer.m in Sources */,
+				A9AC657E189175FC00EC5462 /* MainLayer.m in Sources */,
 				A946377718899B250097E355 /* CC3DemoMashUpLayer.m in Sources */,
 				A946378818899B790097E355 /* Joystick.m in Sources */,
+				A9AC65641891706500EC5462 /* NodeGrid.m in Sources */,
+				A9AC65601891706500EC5462 /* CC3PerformanceScene.m in Sources */,
 				A946377818899B250097E355 /* CC3DemoMashUpScene.m in Sources */,
 				A946377E18899B250097E355 /* Models.m in Sources */,
 				A946378718899B790097E355 /* CCNodeExtensions.m in Sources */,
+				A9AC6580189175FC00EC5462 /* TileScene.m in Sources */,
+				A9AC657F189175FC00EC5462 /* TileLayer.m in Sources */,
 				A9D4F6A01889741900382DDC /* main.m in Sources */,
+				A9AC655F1891706500EC5462 /* CC3PerformanceLayer.m in Sources */,
 				A946378618899B790097E355 /* CCNodeAdornments.m in Sources */,
 				A9D4F6A11889741900382DDC /* MainViewController.m in Sources */,
 				A9D4F69A1889741900382DDC /* AppDelegate.m in Sources */,

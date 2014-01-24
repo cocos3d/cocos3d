@@ -63,6 +63,8 @@
 
 -(BOOL) shouldRotateToTargetLocation { return NO; }
 
+-(BOOL) clearIfTarget: (CC3Node*) aNode { return NO; }
+
 
 #pragma mark Allocation and initialization
 
@@ -484,6 +486,12 @@ static GLubyte _autoOrthonormalizeCount = 0;
 
 -(BOOL) shouldRotateToTargetLocation {
 	return (self.isDirtyByTargetLocation || _shouldTrackTarget) && !_isTrackingForBumpMapping;
+}
+
+-(BOOL) clearIfTarget: (CC3Node*) aNode {
+	if (aNode != _target) return NO;
+	_target = nil;
+	return YES;
 }
 
 

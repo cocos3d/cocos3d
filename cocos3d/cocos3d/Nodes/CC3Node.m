@@ -1272,13 +1272,10 @@ static GLuint lastAssignedNodeTag;
 }
 
 -(void) nodeWasDestroyed: (CC3Node*) aNode {
-	if (aNode == self.target) {
-		// Don't use setTarget: nil because the old target is now destroyed and setTarget: will
-		// attempt to remove this node from the target's transform listeners, which will create
-		// a race condition, since this is being called from the transform listeners array.
-		self.targettingRotator.target = nil;
-		[self didSetTargetInDescendant: self];
-	}
+	// Can't retrieve target from rotator, because it might be deallocated already,
+	// and ARC will attempt to retain and autorelease it, resulting in a zombie.
+	// Maybe revisit need for this once using true weak refs under minimum iOS 5.
+	if ( [_rotator clearIfTarget: aNode] ) [self didSetTargetInDescendant: self];
 }
 
 /** Check if target location needs to be updated from target, and do so if needed. */
@@ -1816,7 +1813,7 @@ static GLuint lastAssignedNodeTag;
 	// If the last child has been removed, and this instance should autoremove when
 	// that occurs, remove this node from the hierarchy as well. This must be performed
 	// after everything else is done, particularly only after the didRemoveDescendant:
-	// has been invoked so that that notification can propagate up the node hierarchy.
+	// has been invoked so notification can propagate up the node hierarchy.
 	if (!_children && _shouldAutoremoveWhenEmpty) [self remove];
 }
 
