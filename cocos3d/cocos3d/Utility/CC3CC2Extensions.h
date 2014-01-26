@@ -357,15 +357,14 @@ enum {
 /** Extension category to support cocos3d functionality. */
 @interface CCTexture2D (CC3)
 
-/** 
- * Indicates whether this instance will delete the GL texture object in the GL engine
- * when this instance is deallocated.
+/**
+ * If a CCTexture2D with the specified name does not already exist in the CCTextureCache,
+ * this texture is added to the CCTextureCache under that name.
  *
- * Deleting the GL texture object is default behaviour for CCTexture2D. This property
- * always returns YES, and setting this property has no effect. Subclasses that allow
- * the option of managing the GL texture object elsewhere will override this property.
+ * If a texture already exists in the cache under the specified name, or if the specified
+ * name is nil, this texture is not added to the cache.
  */
-@property(nonatomic, assign) BOOL shouldManageGL;
+-(void) addToCacheWithName: (NSString*) texName;
 
 @end
 
@@ -376,7 +375,13 @@ enum {
 /** Extension category to support cocos3d functionality. */
 @interface CCTextureCache (CC3)
 
-/** Adds (or replaces) the specified texture to the cache under the specified name. */
+/** 
+ * If a texture with the specified name does not already exist in this cache, the specified
+ * texture is added under the specified name.
+ *
+ * If a texture already exists in this cache under the specified name, or if either the 
+ * specified texture or specified name is nil, the texture is not added to the cache.
+ */
 -(void) addTexture: (CCTexture2D*) tex2D named: (NSString*) texName;
 
 @end

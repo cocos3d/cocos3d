@@ -86,7 +86,10 @@
 	[CC3OpenGL terminateOpenGL];
 }
 
--(void) endDirector { [CCDirector.sharedDirector end]; }
+-(void) endDirector {
+	CC3Texture.shouldCacheAssociatedCCTexture2Ds = NO;
+	[CCDirector.sharedDirector end];
+}
 
 @end
 

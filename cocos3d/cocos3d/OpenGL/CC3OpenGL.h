@@ -1239,14 +1239,16 @@ typedef struct {
 
 /**
  * Clears content and resource caches that use OpenGL, including the CC3ShaderPrewarmer
- * instance in the shaderProgramPrewarmer property, and the following resource caches:
+ * instance in the shaderProgramPrewarmer property, and the following OpenGL resource caches:
+ *
  * 	 - CC3Resource
  *   - CC3Texture
  *   - CC3ShaderProgram
  *   - CC3Shader
  *   - CC3ShaderSourceCode
+ *   - CC3ShaderSourceCode
  */
--(void) clearResourceCaches;
+-(void) clearOpenGLResourceCaches;
 
 
 #pragma mark Allocation and initialization
@@ -1308,6 +1310,12 @@ typedef struct {
  * operations triggered by this method have completed, and OpenGL has been terminated. 
  * You should use this delegate notification if you intend to make use of OpenGL again, 
  * as you must wait for one OpenGL session to terminate before starting another.
+ *
+ * Note that, in order to ensure that OpenGL is free to shutdown, this method forces the
+ * CC3Texture shouldCacheAssociatedCCTexture2Ds class-side property to NO, so that any
+ * background loading that is currently occurring will not cache cocos2d textures.
+ * If you had set this property to YES, and intend to restart OpenGL at some point, then
+ * you might want to set it back to YES before reloading 3D resources again.
  *
  * Use this method with caution, as creating the GL contexts again will require significant overhead.
  */

@@ -54,25 +54,12 @@
 
 -(void) ensureGLTexture { if (!_textureID) _textureID = CC3OpenGL.sharedGL.generateTexture; }
 
-/** 
- * If a CCTexture2D with the same name and textureID exists in the CCTextureCache,
- * instruct the CCTexture2D to take over management of the GL texture object in 
- * the GL engine. Otherwise, delete the GL texture object from the GL engine.
+/**
+ * If the GL texture is not also tracked by a CCTexture2D, delete the GL texture, 
+ * otherwise, let the CCTexture2D take care of it when it is deallocated.
  */
-//-(void) deleteGLTexture {
-//	NSString* texName = self.name;
-//	if (texName) {
-//		CCTexture2D* tex2D = [CCTextureCache.sharedTextureCache textureForKey: texName];
-//		if (tex2D && (tex2D.name == _textureID)) {
-//			tex2D.shouldManageGL = YES;
-//			return;
-//		}
-//	}
-//	[CC3OpenGL.sharedGL deleteTexture: _textureID];
-//	_textureID = 0;
-//}
 -(void) deleteGLTexture {
-	[CC3OpenGL.sharedGL deleteTexture: _textureID];
+	if (!_ccTexture2D) [CC3OpenGL.sharedGL deleteTexture: _textureID];
 	_textureID = 0;
 }
 
@@ -112,8 +99,6 @@
 -(BOOL) isBumpMap { return NO; }
 
 -(CC3Texture*) texture { return self; }
-
--(CCTexture2D*) asCCTexture2D { return [CC3UnmanagedTexture2D textureFromCC3Texture: self]; }
 
 
 #pragma mark Texture transformations
@@ -484,6 +469,37 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 }
 
 
+#pragma mark Associated CCTexture2D
+
+-(CCTexture2D*) ccTexture2D {
+	if (!_ccTexture2D) {
+		_ccTexture2D = [CC3Texture2DContent textureFromCC3Texture: self];
+		[self cacheCCTexture2D];
+	}
+	return _ccTexture2D;
+}
+
+/**
+ * If the class-side shouldCacheAssociatedCCTexture2Ds propery is set to YES, and a CCTexture2D
+ * with the same name as this texture does not already exist in the CCTextureCache, adds the
+ * CCTexture2D returned by the ccTexture2D property to the CCTextureCache.
+ */
+-(void) cacheCCTexture2D {
+	if (self.class.shouldCacheAssociatedCCTexture2Ds) [_ccTexture2D addToCacheWithName: _name];
+}
+
+static BOOL _shouldCacheAssociatedCCTexture2Ds = NO;
+
++(BOOL) shouldCacheAssociatedCCTexture2Ds { return _shouldCacheAssociatedCCTexture2Ds; }
+
++(void) setShouldCacheAssociatedCCTexture2Ds: (BOOL) shouldCache {
+	_shouldCacheAssociatedCCTexture2Ds = shouldCache;
+}
+
+// Deprecated
+-(CCTexture2D*) asCCTexture2D { return self.ccTexture2D; }
+
+
 #pragma mark Allocation and initialization
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
@@ -729,6 +745,13 @@ static CC3Cache* _textureCache = nil;
 -(GLenum) initialAttachmentFace { return GL_TEXTURE_2D; }
 
 -(Class) textureContentClass { return CC3Texture2DContent.class; }
+
+-(void) bindTextureContent: (CC3Texture2DContent*) texContent toTarget: (GLenum) target {
+	[super bindTextureContent: texContent toTarget: target];
+	texContent.name = self.textureID;
+	_ccTexture2D = texContent;
+	[self cacheCCTexture2D];
+}
 
 -(void) bindEmptyContent {
 	id texContent = [[self.textureContentClass alloc] initWithSize: self.size
@@ -1209,6 +1232,10 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 	_imageData = NULL;
 }
 
+-(GLuint) name { return CC2_TEX_NAME; }
+
+-(void) setName: (GLuint) name { CC2_TEX_NAME = name; }
+
 /** Overridden to do nothing so that texture data is retained until bound to the GL engine. */
 -(void) releaseData: (void*) data {}
 
@@ -1443,27 +1470,8 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 #endif	// CC_OSX
 }
 
-@end
-
-
-#pragma mark -
-#pragma mark CC3UnmanagedTexture2D
-
-@implementation CC3UnmanagedTexture2D
-
-@synthesize shouldManageGL=_shouldManageGL;
-
-/** 
- * If I should not delete the GL texture object from the GL engine, set the reference
- * to the GL texture object to zero, so the superclass will not attempt to delete it.
- */
--(void) dealloc {
-	if ( !self.shouldManageGL ) CC2_TEX_NAME = 0;
-}
-
 -(id) initFromCC3Texture: (CC3Texture*) texture {
 	if( (self = [super init]) ) {
-		_shouldManageGL = NO;
 		CC2_TEX_NAME = texture.textureID;
 		CC2_TEX_WIDTH = texture.size.width;
 		CC2_TEX_HEIGHT = texture.size.height;
@@ -1479,18 +1487,6 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 	return self;
 }
 
-+(id) textureFromCC3Texture: (CC3Texture*) texture {
-	NSString* texName = texture.name;
-	if ( !texName ) {
-		texName = [NSString stringWithFormat: @"Texture_%i", texture.tag];
-		texture.name = texName;
-	}
-	CCTexture2D* tex2D = [CCTextureCache.sharedTextureCache textureForKey: texName];
-	if ( !tex2D ) {
-		tex2D = [[self alloc] initFromCC3Texture: texture];
-		[CCTextureCache.sharedTextureCache addTexture: tex2D named: texName];
-	}
-	return tex2D;
-}
++(id) textureFromCC3Texture: (CC3Texture*) texture { return [[self alloc] initFromCC3Texture: texture]; }
 
 @end

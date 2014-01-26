@@ -258,7 +258,7 @@
  * 3D scene has been closed, and OpenGL has been terminated. Loads the new selected 3D scene.
  */
 -(void) didTerminateOpenGL {
-	LogDebug(@"OpenGL is dead. Long live OpenGL! on %@", NSThread.currentThread);
+	LogInfo(@"OpenGL is dead. Long live OpenGL! on %@", NSThread.currentThread);
 	[self loadSelected3DScene];
 }
 

@@ -103,6 +103,7 @@
 	GLenum _magnifyingFunction;
 	GLenum _horizontalWrappingFunction;
 	GLenum _verticalWrappingFunction;
+	CCTexture2D* _ccTexture2D;
 	BOOL _texParametersAreDirty : 1;
 	BOOL _hasMipmap : 1;
 	BOOL _isUpsideDown : 1;
@@ -272,30 +273,6 @@
  * CC3TextureUnitTexture, that contain another, underlying texture.
  */
 @property(nonatomic, strong, readonly) CC3Texture* texture;
-
-/**
- * Returns a CCTexture2D based on the this CC3Texture.
- *
- * If the CCTextureCache contains a CCTexture2D cached under the same name as this CC3Texture
- * (typically the file name), that CCTexture2D is retrieved from the cache and returned.
- *
- * If the CCTextureCache does not contain a CCTexture2D with the same name, a new CCTexture2D
- * instance is allocated, initialized, and added to the CCTextureCache under the name of this
- * CC3Texture. The new CCTexture2D and the this CC3Texture will reference the same GL texture
- * object in the GL engine.
- *
- * Since the returned CCTexture2D is to be cached under the name of this CC3Texture, if this
- * CC3Texture does not have a name, a unique name, based on the tag property, is assigned to
- * this CC3Texture, and used to cache the returned CCTexture2D.
- *
- * You should not change the name of this CC3Texture after this method has been invoked.
- *
- * Textures in cocos2d are loaded upside down and remain that way, whereas CC3Textures are
- * loaded the right way up. Therefore, if a new CCTexture2D is created using this method,
- * it will appear upside down when applied to a CCSprite. To correct this, set the flipY 
- * property of the sprite to YES.
- */
--(CCTexture2D*) asCCTexture2D;
 
 
 #pragma mark Texture transformations
@@ -605,6 +582,51 @@
 
 /** Resizes this texture to the specified dimensions and clears all texture content. */
 -(void) resizeTo: (CC3IntSize) size;
+
+
+#pragma mark Associated CCTexture2D
+
+/** 
+ * Returns a cocos2d-compatible 2D texture, that references the same GL texture.
+ *
+ * The value of the class-side shouldCacheAssociatedCCTexture2Ds property determines whether
+ * the CCTexture2D returned by this method will automatically be added to the CCTextureCache.
+ *
+ * With the class-side shouldCacheAssociatedCCTexture2Ds property set to NO, you can still 
+ * add any CCTexture2D retrieved from this property to the CCTextureCache using the 
+ * CCTextureCache addTexture:named: method.
+ *
+ * Although a CCTexture2D can be retrieved for any type of CC3Texture, including cube-maps,
+ * using a cube-mapped texture as a cocos2d texture may lead to unexpected behavour.
+ */
+@property(nonatomic, strong, readonly) 	CCTexture2D* ccTexture2D;
+
+/**
+ * Indicates whether the associated cocos2d CCTexture, available through the ccTexture2D 
+ * property, should be automatically added to the cocos2d CCTextureCache.
+ *
+ * The initial value of this property is NO. If you intend to share many of the same textures
+ * between cocos3d and cocos2d objects, you may want to set this property to YES.
+ *
+ * With this property set to NO, you can still add any CCTexture2D retrieved from the ccTexture2D
+ * property to the CCTextureCache using the CCTexture2D addToCacheWithName: method.
+ */
++(BOOL) shouldCacheAssociatedCCTexture2Ds;
+
+/**
+ * Indicates whether the associated cocos2d CCTexture, available through the ccTexture2D
+ * property, should be automatically added to the cocos2d CCTextureCache.
+ *
+ * The initial value of this property is NO. If you intend to share many of the same textures
+ * between cocos3d and cocos2d objects, you may want to set this property to YES.
+ *
+ * With this property set to NO, you can still add any CCTexture2D retrieved from the ccTexture2D
+ * property to the CCTextureCache using the CCTexture2D addToCacheWithName: method.
+ */
++(void) setShouldCacheAssociatedCCTexture2Ds: (BOOL) shouldCache;
+
+/** @deprecated Use the ccTexture2D property instead. */
+-(CCTexture2D*) asCCTexture2D DEPRECATED_ATTRIBUTE;
 
 
 #pragma mark Allocation and Initialization
@@ -1553,7 +1575,8 @@
 #pragma mark CC3Texture2DContent
 
 /**
- * A helper class used by the CC3Texture class cluster during the loading of a 2D texture.
+ * A CCTexture2D subclass used by the CC3Texture class cluster during the loading of a 2D
+ * texture, and when extracting a CCTexture2D from the CC3Texture ccTexture2D property.
  *
  * PVR texture files cannot be loaded using this class.
  */
@@ -1563,6 +1586,14 @@
 	GLenum _pixelGLType;
 	BOOL _isUpsideDown : 1;
 }
+
+/** 
+ * The texture ID used to identify this texture to the GL engine.
+ *
+ * This implementation allows this property to be set, in order to permit an instance
+ * to be created from CC3Textures.
+ */
+@property(nonatomic,readwrite) GLuint name;
 
 /** Returns a pointer to the texture image data. */
 @property(nonatomic, readonly) const GLvoid* imageData;
@@ -1651,57 +1682,10 @@
  */
 -(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type;
 
-@end
-
-
-#pragma mark -
-#pragma mark CC3UnmanagedTexture2D
-
-/**
- * A specialized CCTexture2D that is returned from the CC3Texture asCCTexture2D method.
- *
- * Instances of this class do not delete the texture from the GL engine when being
- * deallocated, unless the shouldManageGL property is set.
- */
-@interface CC3UnmanagedTexture2D : CCTexture2D {
-	BOOL _shouldManageGL : 1;
-}
-
-/**
- * Indicates whether this instance will delete the GL texture object in the GL engine
- * when this instance is deallocated.
- *
- * The initial value of this property is NO. It is automatically set to YES when the
- * CC3Texture that created this instance is deallocated. You should never need to set
- * this property directly.
- */
-@property(nonatomic, assign) BOOL shouldManageGL;
-
-
-#pragma mark Allocation and initialization
-/**
- * Initializes this instance based on the specified CC3Texture.
- *
- * This instance and the specified CC3Texture will reference the same GL texture object
- * in the GL engine.
- */
+/** Initializes this instance to represent the same GL texture as the specified CC3Texture. */
 -(id) initFromCC3Texture: (CC3Texture*) texture;
 
-/**
- * Returns a CCTexture2D based on the specified CC3Texture.
- *
- * If the CCTextureCache contains a CCTexture2D with the same name (typically the file name)
- * as the specified CC3Texture, that CCTexture2D is retrieved and returned.
- *
- * If the CCTextureCache does not contain a CCTexture2D with the same name, a new instance
- * of this class is allocated, initialized, and added to the CCTextureCache under the name
- * of the specified CC3Texture. The new CCTexture2D instance and the specified CC3Texture 
- * will reference the same GL texture object in the GL engine.
- *
- * Since the returned CCTexture2D is to be cached under the name of the specified CC3Texture,
- * if the CC3Texture does not have a name, a unique name, based on the tag property is assigned
- * to the CC3Texture, and used to cache the returned CCTexture2D.
- */
+/** Allocates and initializes an instance to represent the same GL texture as the specified CC3Texture. */
 +(id) textureFromCC3Texture: (CC3Texture*) texture;
 
 @end

@@ -1080,7 +1080,7 @@ static NSObject<CC3OpenGLDelegate>* _delegate = nil;
 
 #pragma mark OpenGL resources
 
--(void) clearResourceCaches {
+-(void) clearOpenGLResourceCaches {
 	LogInfo(@"Clearing resource caches on thread %@.", NSThread.currentThread);
 	
 	self.shaderProgramPrewarmer = nil;
@@ -1090,7 +1090,7 @@ static NSObject<CC3OpenGLDelegate>* _delegate = nil;
 	[CC3ShaderProgram removeAllPrograms];
 	[CC3Shader removeAllShaders];
 	[CC3ShaderSourceCode removeAllShaderSourceCode];
-	
+
 	// Dynamically reference model factory class, as it might not be present.
 	[NSClassFromString(@"CC3ModelSampleFactory") deleteFactory];
 }
@@ -1201,16 +1201,17 @@ static CC3OpenGL* _bgGL = nil;
 }
 
 +(void) terminateOpenGL {
+	CC3Texture.shouldCacheAssociatedCCTexture2Ds = NO;
 	[_renderGL terminate];
 	[_bgGL terminate];
 }
 
 -(void) terminate {
 	if (self.isRenderingContext) {
-		[NSThread.mainThread runBlockAsync: ^{ [self clearResourceCaches]; } ];
+		[NSThread.mainThread runBlockAsync: ^{ [self clearOpenGLResourceCaches]; } ];
 		[NSThread.mainThread runBlockAsync: ^{ [self terminateSoon]; } ];
 	} else {
-		[CC3Backgrounder.sharedBackgrounder runBlock: ^{ [self clearResourceCaches]; }];
+		[CC3Backgrounder.sharedBackgrounder runBlock: ^{ [self clearOpenGLResourceCaches]; }];
 		[CC3Backgrounder.sharedBackgrounder runBlock: ^{ [self terminateSoon]; }];
 	}
 }

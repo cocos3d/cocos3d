@@ -123,7 +123,13 @@
 }
 #endif
 
-
+/** 
+ * Only propgate upwards if the view is already loaded, otherwise, 
+ * CCDirector will attempt to create the view as part of purging caches!
+ */
+-(void) didReceiveMemoryWarning {
+	if (self.isViewLoaded) [super didReceiveMemoryWarning];
+}
 
 
 #pragma mark Device orientation

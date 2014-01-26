@@ -334,9 +334,9 @@
 
 @implementation CCTexture2D (CC3)
 
--(BOOL) shouldManageGL { return YES; }
-
--(void) setShouldManageGL: (BOOL) shouldManageGL {}
+-(void) addToCacheWithName: (NSString*) texName {
+	[CCTextureCache.sharedTextureCache addTexture: self named: texName];
+}
 
 @end
 
@@ -356,10 +356,11 @@
 #endif	// COCOS2D_VERSION < 0x020100
 
 -(void) addTexture: (CCTexture2D*) tex2D named: (NSString*) texName {
-	if ( !tex2D ) return;
+	if ( !tex2D || !texName ) return;
 	
 	dispatch_sync(CC2_DICT_QUEUE, ^{
-		[CC2_TEX_DICT setObject: tex2D forKey: texName];
+		if ( ![CC2_TEX_DICT objectForKey: texName] )
+			[CC2_TEX_DICT setObject: tex2D forKey: texName];
 	});
 }
 

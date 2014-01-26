@@ -1923,9 +1923,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// display dynamic video if the larger TV is in the camera view as well. To view both
 	// the big TV and the portable TV updating together, move behind the robot arm and look
 	// back towards the big TV so that you can see both TV's displaying live video. You can
-	// also comment out the optimization line in the drawToTVScreenWithVisitor: method to
-	// have both TV's show live video at all times.
-//	CCSprite* portableTV = [CCSprite spriteWithTexture: [tvSurface.colorTexture asCCTexture2D]];
+	// also change the optimization line in the drawSceneContentWithVisitor: method, and invoke
+	// the drawToTVScreen method on each loop, to have both TV's show live video at all times.
+//	CCSprite* portableTV = [CCSprite spriteWithTexture: [tvSurface.colorTexture ccTexture2D]];
 //	portableTV.flipY = YES;
 //	CC3Billboard* bb = (CC3Billboard*)[self getNodeNamed: kBillboardName];
 //	bb.uniformScale = 0.1;
