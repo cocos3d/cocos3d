@@ -276,18 +276,20 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 
 #pragma mark Drawing
 
+// This method uses no direct iVar references, to allow subclasses (incl CC3TextureUnitTexture) to override.
 -(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	CC3Assert(_textureID, @"%@ cannot be bound to the GL engine because it has not been loaded.", self);
+	CC3Assert(self.textureID, @"%@ cannot be bound to the GL engine because it has not been loaded.", self);
 
 	CC3OpenGL* gl = visitor.gl;
-	GLuint tuIdx = visitor.currentTextureUnitIndex;
+	GLuint tuIdx = [self getTextureUnitFromVisitor: visitor];
 	GLenum target = self.textureTarget;
 
 	[gl enableTexturing: YES inTarget: target at: tuIdx];
-	[gl bindTexture: _textureID toTarget: target at: tuIdx];
+	[gl bindTexture: self.textureID toTarget: target at: tuIdx];
 	[self bindTextureParametersAt: tuIdx usingGL: gl];
 	[self bindTextureEnvironmentWithVisitor: visitor];
 
+	[self incrementTextureUnitInVisitor: visitor];
 	LogTrace(@"%@ bound to texture unit %u", self, tuIdx);
 }
 
@@ -308,6 +310,27 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 /** Binds the default texture unit environment to the GL engine. */
 -(void) bindTextureEnvironmentWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	[CC3TextureUnit bindDefaultWithVisitor: visitor];
+}
+
+/** 
+ * Returns the appopriate texture unit, by retrieving it from the specfied visitor.
+ *
+ * The visitor keeps track of separate counters for 2D and cube-map textures,
+ * and subclasses of this class will determine which of these to retrieve.
+ */
+-(GLuint) getTextureUnitFromVisitor: (CC3NodeDrawingVisitor*) visitor {
+	CC3AssertUnimplemented(@"getTextureUnitFromVisitor:");
+	return 0;
+}
+
+/**
+ * Increments the appopriate texture unit in the specfied visitor.
+ *
+ * The visitor keeps track of separate counters for 2D and cube-map textures, 
+ * and subclasses of this class will determine which of these to increment.
+ */
+-(void) incrementTextureUnitInVisitor: (CC3NodeDrawingVisitor*) visitor {
+	CC3AssertUnimplemented(@"incrementTextureUnitInVisitor:");
 }
 
 
@@ -762,6 +785,17 @@ static CC3Cache* _textureCache = nil;
 }
 
 
+#pragma mark Drawing
+
+-(GLuint) getTextureUnitFromVisitor: (CC3NodeDrawingVisitor*) visitor {
+	return visitor.current2DTextureUnit;
+}
+
+-(void) incrementTextureUnitInVisitor: (CC3NodeDrawingVisitor*) visitor {
+	visitor.current2DTextureUnit += 1;
+}
+
+
 #pragma mark Texture content and sizing
 
 
@@ -890,6 +924,17 @@ static ccTexParams _defaultCubeMapTextureParameters = { GL_LINEAR_MIPMAP_NEAREST
 							  negY: [NSString stringWithFormat: aFilePathPattern, @"NegY"]
 							  posZ: [NSString stringWithFormat: aFilePathPattern, @"PosZ"]
 							  negZ: [NSString stringWithFormat: aFilePathPattern, @"NegZ"]];
+}
+
+
+#pragma mark Drawing
+
+-(GLuint) getTextureUnitFromVisitor: (CC3NodeDrawingVisitor*) visitor {
+	return visitor.currentCubeTextureUnit;
+}
+
+-(void) incrementTextureUnitInVisitor: (CC3NodeDrawingVisitor*) visitor {
+	visitor.currentCubeTextureUnit += 1;
 }
 
 
@@ -1073,14 +1118,24 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 
 #pragma mark Drawing
 
-/**
- * Draw wrapped texture, then draw texture unit.
- * Wrapped texture resets texture unit bindings to default, so if no texture unit,
- * will behave with default behaviour.
- */
--(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[_texture drawWithVisitor: visitor];
-	[_textureUnit bindWithVisitor: visitor];	// If no textureUnit, default set by texture
+-(void) bindTextureParametersAt: (GLuint) tuIdx usingGL: (CC3OpenGL*) gl {
+	[_texture bindTextureParametersAt: tuIdx usingGL: gl];
+}
+
+/** Binds texture unit environment to the GL engine. */
+-(void) bindTextureEnvironmentWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	if (_textureUnit)
+		[_textureUnit bindWithVisitor: visitor];
+	else
+		[super bindTextureEnvironmentWithVisitor: visitor];
+}
+
+-(GLuint) getTextureUnitFromVisitor: (CC3NodeDrawingVisitor*) visitor {
+	return [_texture getTextureUnitFromVisitor: visitor];
+}
+
+-(void) incrementTextureUnitInVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[_texture incrementTextureUnitInVisitor: visitor];
 }
 
 

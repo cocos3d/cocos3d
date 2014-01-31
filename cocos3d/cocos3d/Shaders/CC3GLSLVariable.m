@@ -537,6 +537,64 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 	memcpy(_varValue, uniform.varValue, _varLen);
 }
 
+-(NSString*) valueDescription {
+	NSMutableString* desc = [NSMutableString stringWithCapacity: 100];
+	[desc appendString: @"["];
+	for (GLuint vIdx = 0 ; vIdx < _size; vIdx++) {
+		
+		if (vIdx > 0) [desc appendString: @", "];
+
+		switch (_type) {
+				
+			case GL_FLOAT:
+				[desc appendFormat: @"%.3f", ((GLfloat*)_varValue)[vIdx]];
+				break;
+			case GL_FLOAT_VEC2:
+				[desc appendFormat: @"%@", NSStringFromCGPoint(((CGPoint*)_varValue)[vIdx])];
+				break;
+			case GL_FLOAT_VEC3:
+				[desc appendFormat: @"%@", NSStringFromCC3Vector(((CC3Vector*)_varValue)[vIdx])];
+				break;
+			case GL_FLOAT_VEC4:
+			case GL_FLOAT_MAT2:
+				[desc appendFormat: @"%@", NSStringFromCC3Vector4(((CC3Vector4*)_varValue)[vIdx])];
+				break;
+				
+			case GL_FLOAT_MAT3:
+				[desc appendFormat: @"%@", NSStringFromCC3Matrix3x3(&(((CC3Matrix3x3*)_varValue)[vIdx]))];
+				break;
+			case GL_FLOAT_MAT4:
+				[desc appendFormat: @"%@", NSStringFromCC3Matrix4x4(&(((CC3Matrix4x4*)_varValue)[vIdx]))];
+				break;
+			case GL_SAMPLER_2D:
+			case GL_SAMPLER_CUBE:
+			case GL_INT:
+			case GL_BOOL:
+				[desc appendFormat: @"%i", ((GLint*)_varValue)[vIdx]];
+				break;
+			case GL_INT_VEC2:
+			case GL_BOOL_VEC2:
+				[desc appendFormat: @"%@", NSStringFromCC3IntPoint(((CC3IntPoint*)_varValue)[vIdx])];
+				break;
+			case GL_INT_VEC3:
+			case GL_BOOL_VEC3:
+				[desc appendFormat: @"%@", NSStringFromCC3IntVector(((CC3IntVector*)_varValue)[vIdx])];
+				break;
+			case GL_INT_VEC4:
+			case GL_BOOL_VEC4:
+				[desc appendFormat: @"%@", NSStringFromCC3IntVector4(((CC3IntVector4*)_varValue)[vIdx])];
+				break;
+				
+			default:
+				CC3Assert(NO, @"%@ could not set value because type %@ is not understood",
+						  self, NSStringFromGLEnum(_type));
+				break;
+		}
+	}
+	[desc appendString: @"]"];
+	return desc;
+}
+
 
 #pragma mark Updating the GL engine
 
@@ -605,13 +663,12 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 }
 
 -(BOOL) updateGLValueWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	if ( !_isGLStateKnown || memcmp(_glVarValue, _varValue, _varLen) != 0 ) {
-		memcpy(_glVarValue, _varValue, _varLen);
-		[visitor.gl setShaderProgramUniformValue: self];
-		_isGLStateKnown = YES;
-		return YES;
-	}
-	return NO;
+	if ( _isGLStateKnown && memcmp(_glVarValue, _varValue, _varLen) == 0 ) return NO;
+
+	memcpy(_glVarValue, _varValue, _varLen);
+	[visitor.gl setShaderProgramUniformValue: self];
+	_isGLStateKnown = YES;
+	return YES;
 }
 
 

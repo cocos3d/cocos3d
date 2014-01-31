@@ -189,6 +189,7 @@
 		_deltaFrameTime = 0;
 		_timeAtOpen = 0;
 		_elapsedTimeSinceOpened = 0;
+		_shouldDisplayPickingRender = NO;
 		[self initializeSceneAndClose3D];
 		LogGLErrorState(@"after initializing %@", self);
 	}
@@ -232,6 +233,7 @@
 	_ambientLight = another.ambientLight;
 	_minUpdateInterval = another.minUpdateInterval;
 	_maxUpdateInterval = another.maxUpdateInterval;
+	_shouldDisplayPickingRender = another.shouldDisplayPickingRender;
 }
 
 
@@ -362,7 +364,7 @@
 	
 	[_touchedNodePicker pickTouchedNode];
 	
-	[self drawSceneContentWithVisitor: visitor];
+	if (!_shouldDisplayPickingRender) [self drawSceneContentWithVisitor: visitor];
 
 	[self close3DWithVisitor: visitor];
 	[self draw2DBillboardsWithVisitor: visitor];	// Back to 2D now
@@ -689,6 +691,15 @@
 
 -(id) pickVisitorClass { return [CC3NodePickingVisitor class]; }
 
+-(BOOL) shouldDisplayPickingRender { return _shouldDisplayPickingRender; }
+
+-(void) setShouldDisplayPickingRender: (BOOL) shouldDisplayPickingRender {
+	CC3Assert( !(shouldDisplayPickingRender && self.viewSurfaceManager.shouldUseDedicatedPickingSurface),
+			  @"The node picking render surface is not visible to the view. Ensure multisampling is disabled,"
+			  @" and the shouldUseDedicatedPickingSurface property in the viewSurfaceManager is set to NO.");
+	_shouldDisplayPickingRender = shouldDisplayPickingRender;
+}
+
 @end
 
 
@@ -722,10 +733,10 @@
 }
 
 -(void) pickTouchedNode {
-	if ( !_wasTouched ) return;
+	if ( !(_wasTouched || _scene.shouldDisplayPickingRender) ) return;
 	
+	_wasPicked = _wasTouched;
 	_wasTouched = NO;
-	_wasPicked = YES;
 	
 	// Draw the scene for node picking. Don't bother drawing the backdrop.
 	[_pickVisitor visit: _scene];
@@ -734,26 +745,26 @@
 }
 
 -(void) dispatchPickedNode {
-	if (_wasPicked) {
-		_wasPicked = NO;
+	if (!_wasPicked) return;
+
+	_wasPicked = NO;
 		
-		uint touchesToDispatch[kCC3TouchQueueLength];
+	uint touchesToDispatch[kCC3TouchQueueLength];
 
-		uint touchCount;
-		@synchronized(self) {
-			touchCount = _queuedTouchCount;
-			memcpy(touchesToDispatch, _touchQueue, (touchCount * sizeof(uint)));
-			_queuedTouchCount = 0;
-		}
-
-		for (int i = 0; i < touchCount; i++) {
-			LogTrace(@"%@ dispatching %@ with picked node %@ at %@ GL %@ touched node %@",
-					 self, NSStringFromTouchType(_touchQueue[i]), _pickedNode.touchableNode,
-					 NSStringFromCGPoint(_touchPoint), NSStringFromCGPoint(self.glTouchPoint), _pickedNode);
-			[_scene nodeSelected: _pickedNode.touchableNode byTouchEvent: _touchQueue[i] at: _touchPoint];
-		}
-		_pickedNode = nil;	// Clear the node once it has been dispatched
+	uint touchCount;
+	@synchronized(self) {
+		touchCount = _queuedTouchCount;
+		memcpy(touchesToDispatch, _touchQueue, (touchCount * sizeof(uint)));
+		_queuedTouchCount = 0;
 	}
+
+	for (int i = 0; i < touchCount; i++) {
+		LogTrace(@"%@ dispatching %@ with picked node %@ at %@ GL %@ touched node %@",
+				 self, NSStringFromTouchType(_touchQueue[i]), _pickedNode.touchableNode,
+				 NSStringFromCGPoint(_touchPoint), NSStringFromCGPoint(self.glTouchPoint), _pickedNode);
+		[_scene nodeSelected: _pickedNode.touchableNode byTouchEvent: _touchQueue[i] at: _touchPoint];
+	}
+	_pickedNode = nil;	// Clear the node once it has been dispatched
 }
 
 

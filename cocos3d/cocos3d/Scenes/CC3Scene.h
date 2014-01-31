@@ -250,6 +250,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 	ccTime _minUpdateInterval;
 	ccTime _maxUpdateInterval;
 	ccTime _deltaFrameTime;
+	BOOL _shouldDisplayPickingRender : 1;
 }
 
 /** Returns whether this node is a scene. Returns YES. */
@@ -1149,6 +1150,15 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * of the viewSurfaceManager to YES, at any time.
  */
 @property(nonatomic, strong, readonly) id<CC3RenderSurface> pickingSurface;
+
+/**
+ * When set to YES, the scene will be displayed on the screen as rendered while picking a
+ * node from a touch event, instead of the normal scene display render.
+ *
+ * This is a development-time diagnostic property, that can be used to debug node picking
+ * from touch events.
+ */
+@property(nonatomic, assign) BOOL shouldDisplayPickingRender;
 
 @end
 

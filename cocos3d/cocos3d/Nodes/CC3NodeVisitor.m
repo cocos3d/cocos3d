@@ -190,9 +190,13 @@
 
 -(CC3Material*) currentMaterial { return self.currentMeshNode.material; }
 
+-(GLuint) textureCount { return self.currentMeshNode.textureCount; }
+
 -(CC3TextureUnit*) currentTextureUnitAt: (GLuint) texUnit {
 	return [self.currentMaterial textureForTextureUnit: texUnit].textureUnit;
 }
+
+-(CC3ShaderProgram*) currentShaderProgram { return self.currentMeshNode.shaderProgram; }
 
 -(CC3Mesh*) currentMesh { return self.currentMeshNode.mesh; }
 
@@ -399,9 +403,11 @@
 
 @implementation CC3NodeDrawingVisitor
 
-@synthesize gl=_gl, deltaTime=_deltaTime, isDrawingEnvironmentMap=_isDrawingEnvironmentMap;
-@synthesize shouldDecorateNode=_shouldDecorateNode, currentShaderProgram=_currentShaderProgram;
-@synthesize currentTextureUnitIndex=_currentTextureUnitIndex, textureUnitCount=_textureUnitCount;
+@synthesize gl=_gl, deltaTime=_deltaTime;
+@synthesize shouldDecorateNode=_shouldDecorateNode;
+@synthesize isDrawingEnvironmentMap=_isDrawingEnvironmentMap;
+@synthesize current2DTextureUnit=_current2DTextureUnit;
+@synthesize currentCubeTextureUnit=_currentCubeTextureUnit;
 @synthesize currentColor=_currentColor;
 
 -(CC3OpenGL*) gl {
@@ -438,11 +444,22 @@
 	self.renderSurface = otherVisitor.renderSurface;
 }
 
+/** 
+ * Overridden to return either the real shader program, or the pure-color shader program,
+ * depending on whether the node should be decorated. For example, during node picking,
+ * the node is not decorated, and the pure-color program will be used.
+ * The shaderProgram will be selected if it has not been assigned already.
+ */
+-(CC3ShaderProgram*) currentShaderProgram {
+	return (self.shouldDecorateNode
+			? self.currentMeshNode.shaderProgram
+			: self.currentMeshNode.shaderContext.pureColorProgram);
+}
+
 -(void) processBeforeChildren: (CC3Node*) aNode {
 	[self.performanceStatistics incrementNodesVisitedForDrawing];
 	if ([self shouldDrawNode: aNode]) [aNode transformAndDrawWithVisitor: self];
 	_currentSkinSection = nil;
-	_currentShaderProgram = nil;
 }
 
 -(BOOL) shouldDrawNode: (CC3Node*) aNode {
@@ -526,13 +543,34 @@
 	[self.performanceStatistics incrementNodesDrawn];
 }
 
--(void) disableUnusedTextureUnits {
-	_textureUnitCount = _currentTextureUnitIndex;
-	_nextUnassignedTextureSampler = _textureUnitCount;
-	[_gl disableTexturingFrom: _currentTextureUnitIndex];
+-(void) resetTextureUnits {
+	// Under OGLES 2.0 & OGL, the required texture units are determined by the shader uniforms.
+	// Under OGLES 1.1, they are determined by the number of textures attached to the mesh node.
+	CC3ShaderProgram* sp = self.currentShaderProgram;
+	_current2DTextureUnit = 0;
+	_currentCubeTextureUnit = sp ? sp.texture2DCount : self.textureCount;
 }
 
--(GLuint) nextUnassignedTextureSampler { return _nextUnassignedTextureSampler++; }
+-(void) disableUnusedTextureUnits {
+
+	// Determine the maximum number of textures of each type that could be used
+	// Under OGLES 2.0 & OGL, this is determined by the shader uniforms.
+	// Under OGLES 1.1, this is determined by the number of textures attached to the mesh node.
+	CC3ShaderProgram* sp = self.currentShaderProgram;
+	GLuint tex2DMax = sp ? sp.texture2DCount : self.textureCount;
+	GLuint texCubeMax = tex2DMax + (sp ? sp.textureCubeCount : 0);
+	
+	// Disable remaining unused 2D textures
+	for (GLuint tuIdx = _current2DTextureUnit; tuIdx < tex2DMax; tuIdx++)
+		[_gl disableTexturingAt: tuIdx];
+	
+	// Disable remaining unused cube textures
+	for (GLuint tuIdx = _currentCubeTextureUnit; tuIdx < texCubeMax; tuIdx++)
+		[_gl disableTexturingAt: tuIdx];
+	
+	// Ensure remaining system texture units are disabled
+	[_gl disableTexturingFrom: texCubeMax];
+}
 
 
 #pragma mark Accessing node contents
@@ -683,7 +721,6 @@
 		_renderSurface = nil;
 		_drawingSequencer = nil;
 		_currentSkinSection = nil;
-		_currentShaderProgram = nil;
 		_boneMatricesGlobal = [[CC3DataArray alloc] initWithElementSize: sizeof(CC3Matrix4x3)];	// retained
 		_boneMatricesEyeSpace = [[CC3DataArray alloc] initWithElementSize: sizeof(CC3Matrix4x3)];	// retained
 		_boneMatricesModelSpace = [[CC3DataArray alloc] initWithElementSize: sizeof(CC3Matrix4x3)];	// retained
@@ -700,9 +737,8 @@
 }
 
 -(NSString*) fullDescription {
-	return [NSString stringWithFormat: @"%@, drawing nodes in seq %@, tex: %i of %i units, decorating: %@",
-			[super fullDescription], _drawingSequencer, _currentTextureUnitIndex, _textureUnitCount,
-			NSStringFromBoolean(_shouldDecorateNode)];
+	return [NSString stringWithFormat: @"%@, drawing %@nodes in seq %@", [super fullDescription],
+			(_shouldDecorateNode ? @"and decorating " : @""), _drawingSequencer];
 }
 
 @end
@@ -713,12 +749,14 @@
 
 @implementation CC3NodePickingVisitor
 
-@synthesize pickedNode=_pickedNode;
+@synthesize pickedNode=_pickedNode, tagColorShift=_tagColorShift;
 
 /** Overridden to initially set the shouldDecorateNode to NO. */
 -(id) init {
 	if ( (self = [super init]) ) {
+		_pickedNode = nil;
 		_shouldDecorateNode = NO;
+		_tagColorShift = 0;
 	}
 	return self;
 }
@@ -777,16 +815,13 @@
 	LogTrace(@"%@ painting %@ with color %@", self, aNode, NSStringFromCCC4B(self.currentColor4B));
 }
 
-// During visual testing, change this value to better distingusih the colors between nodes
-#define kTagShift	0
-
 /**
  * Maps the specified integer tag to a color, by spreading the bits of the integer across
  * the red, green and blue unsigned bytes of the color. This permits 2^24 objects to be
  * encoded by colors. This is the compliment of the tagFromColor: method.
  */
 -(ccColor4B) colorFromNodeTag: (GLuint) tag {
-	tag <<= kTagShift;
+	tag <<= _tagColorShift;
 	GLuint mask = 255;
 	GLubyte r = (tag >> 16) & mask;
 	GLubyte g = (tag >> 8) & mask;
@@ -799,7 +834,7 @@
  * colors into a single integer value. This is the compliment of the colorFromNodeTag: method.
  */
 -(GLuint) tagFromColor: (ccColor4B) color {
-	return (((GLuint)color.r << 16) | ((GLuint)color.g << 8) | (GLuint)color.b) >> kTagShift;
+	return (((GLuint)color.r << 16) | ((GLuint)color.g << 8) | (GLuint)color.b) >> _tagColorShift;
 }
 
 -(NSString*) fullDescription {

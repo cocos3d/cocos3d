@@ -295,7 +295,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
  *
  * To permit access to content within the scene, the specified visitor contains several 
  * convenience properties for accessing typical content, including currentMeshNode,
- * currentMaterial, textureUnitCount, camera, and scene properties, and a lightAt: method.
+ * currentMaterial, textureCount, camera, and scene properties, and a lightAt: method.
  *
  * Implementers of this method can use the various set... methods on the specified uniform
  * to set the content into the specified uniform variable. The implementor does not need to

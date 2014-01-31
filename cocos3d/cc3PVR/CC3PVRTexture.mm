@@ -94,6 +94,20 @@
 	CC3AssertUnimplemented(@"replacePixels:inTarget:withContent:");
 }
 
+
+#pragma mark Drawing
+
+-(GLuint) getTextureUnitFromVisitor: (CC3NodeDrawingVisitor*) visitor {
+	return self.isTextureCube ? visitor.currentCubeTextureUnit : visitor.current2DTextureUnit;
+}
+
+-(void) incrementTextureUnitInVisitor: (CC3NodeDrawingVisitor*) visitor {
+	if (self.isTextureCube)
+		visitor.currentCubeTextureUnit += 1;
+	else
+		visitor.current2DTextureUnit += 1;
+}
+
 @end
 
 

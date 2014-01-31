@@ -481,9 +481,11 @@
 	NSMutableArray* _uniformsNodeScope;
 	NSMutableArray* _uniformsDrawScope;
 	NSMutableArray* _attributes;
+	GLuint _programID;
 	GLint _maxUniformNameLength;
 	GLint _maxAttributeNameLength;
-	GLuint _programID;
+	GLuint _texture2DCount;
+	GLuint _textureCubeCount;
 	BOOL _shouldAllowDefaultVariableValues : 1;
 	BOOL _isSceneScopeDirty : 1;
 }
@@ -549,6 +551,12 @@
 
 /** Returns the uniform at the specified location, or nil if no uniform is defined at the specified location. */
 -(CC3GLSLUniform*) uniformAtLocation: (GLint) uniformLocation;
+
+/** Returns the number of 2D textures supported by this shader program. */
+@property(nonatomic, readonly) GLuint texture2DCount;
+
+/** Returns the number of cube-map textures supported by this shader program. */
+@property(nonatomic, readonly) GLuint textureCubeCount;
 
 /** Returns the number of vertex attributes declared and in use by this program. */
 @property(nonatomic, readonly) GLuint attributeCount;

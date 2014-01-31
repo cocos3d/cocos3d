@@ -957,9 +957,9 @@
 /**
  * The surface to which rendering for picking should be directed.
  *
- * If the shouldUseDedicatedPickingSurface returns NO, this property returns the surface in
- * the viewSurface property. However, if the shouldUseDedicatedPickingSurface returns YES,
- * this property returns a dedicated surface created just for picking.
+ * If the shouldUseDedicatedPickingSurface property returns NO, this property returns the 
+ * surface in the viewSurface property. However, if the shouldUseDedicatedPickingSurface 
+ * returns YES, this property returns a dedicated surface created just for picking.
  *
  * Lazy initialization is used in case touch picking is never actually used by the app.
  */

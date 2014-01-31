@@ -352,6 +352,8 @@ static CC3Cache* _shaderCache = nil;
 @synthesize semanticDelegate=_semanticDelegate;
 @synthesize maxUniformNameLength=_maxUniformNameLength;
 @synthesize maxAttributeNameLength=_maxAttributeNameLength;
+@synthesize texture2DCount=_texture2DCount;
+@synthesize textureCubeCount=_textureCubeCount;
 @synthesize shouldAllowDefaultVariableValues=_shouldAllowDefaultVariableValues;
 
 -(void) dealloc {
@@ -538,10 +540,8 @@ static BOOL _defaultShouldAllowDefaultVariableValues = NO;
  */
 -(void) configureUniforms {
 	MarkRezActivityStart();
-	[_uniformsSceneScope removeAllObjects];
-	[_uniformsNodeScope removeAllObjects];
-	[_uniformsDrawScope removeAllObjects];
-	
+	[self clearUniforms];
+
 	CC3OpenGL* gl = CC3OpenGL.sharedGL;
 	GLuint progID = self.programID;
 	GLint varCnt = [gl getIntegerParameter: GL_ACTIVE_UNIFORMS forShaderProgram: progID];
@@ -550,13 +550,30 @@ static BOOL _defaultShouldAllowDefaultVariableValues = NO;
 		CC3GLSLUniform* var = [CC3GLSLUniform variableInProgram: self atIndex: varIdx];
 		CC3Assert(var.location >= 0, @"%@ has an invalid location. Make sure the maximum number of program uniforms for this platform has not been exceeded.", var.fullDescription);
 		if (var.semantic != kCC3SemanticRedundant) {
-			[_semanticDelegate configureVariable: var];
+			[self configureUniform: var];
 			[self addUniform: var];
 		} else {
 			LogRez(@"%@ is redundant and was not added to %@", var, self);
 		}
 	}
 	LogRez(@"%@ configured %u uniforms in %.3f ms", self, varCnt, GetRezActivityDuration() * 1000);
+}
+
+-(void) clearUniforms {
+	[_uniformsSceneScope removeAllObjects];
+	[_uniformsNodeScope removeAllObjects];
+	[_uniformsDrawScope removeAllObjects];
+	_texture2DCount = 0;
+	_textureCubeCount = 0;
+}
+
+/** Let the delegate configure the uniform, and then update the texture counts. */
+-(void) configureUniform: (CC3GLSLUniform*) var {
+	[_semanticDelegate configureVariable: var];
+	
+	if (var.semantic == kCC3SemanticTextureSampler) _texture2DCount += var.size;
+	if (var.semantic == kCC3SemanticTexture2DSampler) _texture2DCount += var.size;
+	if (var.semantic == kCC3SemanticTextureCubeSampler) _textureCubeCount += var.size;
 }
 
 /** Adds the specified uniform to the appropriate internal collection, based on variable scope. */
@@ -580,7 +597,7 @@ static BOOL _defaultShouldAllowDefaultVariableValues = NO;
  */
 -(void) configureAttributes {
 	MarkRezActivityStart();
-	[_attributes removeAllObjects];
+	[self clearAttributes];
 	
 	CC3OpenGL* gl = CC3OpenGL.sharedGL;
 	GLuint progID = self.programID;
@@ -590,14 +607,24 @@ static BOOL _defaultShouldAllowDefaultVariableValues = NO;
 		CC3GLSLAttribute* var = [CC3GLSLAttribute variableInProgram: self atIndex: varIdx];
 		CC3Assert(var.location >= 0, @"%@ has an invalid location. Make sure the maximum number of program attributes for this platform has not been exceeded.", var.fullDescription);
 		if (var.semantic != kCC3SemanticRedundant) {
-			[_semanticDelegate configureVariable: var];
-			[_attributes addObject: var];
+			[self configureAttribute: var];
+			[self addAttribute: var];
 		} else {
 			LogRez(@"%@ is redundant and was not added to %@", var, self);
 		}
 	}
 	LogRez(@"%@ configured %u attributes in %.3f ms", self, varCnt, GetRezActivityDuration() * 1000);
 }
+
+-(void) clearAttributes { [_attributes removeAllObjects]; }
+
+/** Let the delegate configure the attribute. */
+-(void) configureAttribute: (CC3GLSLAttribute*) var {
+	[_semanticDelegate configureVariable: var];
+}
+
+/** Adds the specified attribute to the internal collection. */
+-(void) addAttribute: (CC3GLSLAttribute*) var { [_attributes addObject: var]; }
 
 -(void) prewarm {
 	MarkRezActivityStart();
@@ -611,8 +638,6 @@ static BOOL _defaultShouldAllowDefaultVariableValues = NO;
 -(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"Drawing %@ with %@", visitor.currentMeshNode, self);
 	CC3OpenGL* gl = visitor.gl;
-	
-	visitor.currentShaderProgram = self;
 	
 	[gl useShaderProgram: self.programID];
 	
@@ -682,6 +707,8 @@ static BOOL _defaultShouldAllowDefaultVariableValues = NO;
 		_fragmentShader = nil;
 		_maxUniformNameLength = 0;
 		_maxAttributeNameLength = 0;
+		_texture2DCount = 0;
+		_textureCubeCount = 0;
 		_isSceneScopeDirty = YES;	// start out dirty for auto-loaded programs
 		_semanticDelegate = nil;
 		_shouldAllowDefaultVariableValues = self.class.defaultShouldAllowDefaultVariableValues;

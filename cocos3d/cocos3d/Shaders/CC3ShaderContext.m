@@ -50,11 +50,15 @@
 	[self removeAllOverrides];
 }
 
+#if CC3_GLSL
 -(CC3ShaderProgram*) pureColorProgram {
 	if ( !_pureColorProgram )
 		self.pureColorProgram = [CC3ShaderProgram.shaderMatcher pureColorProgramMatching: self.program];
 	return _pureColorProgram;
 }
+#else
+-(CC3ShaderProgram*) pureColorProgram { return _pureColorProgram; }
+#endif	// CC3GLSL
 
 -(void) setPureColorProgram:(CC3ShaderProgram*) program {
 	if (program == _pureColorProgram) return;

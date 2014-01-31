@@ -93,9 +93,9 @@
 		[self bindVertexArray: mesh.vertexBitangents withVisitor: visitor];
 		[self bindVertexArray: mesh.vertexColors withVisitor: visitor];
 		
-		GLuint tuCnt = visitor.textureUnitCount;
+		GLuint tuCnt = visitor.textureCount;
 		for (GLuint tuIdx = 0; tuIdx < tuCnt; tuIdx++) {
-			visitor.currentTextureUnitIndex = tuIdx;
+			visitor.current2DTextureUnit = tuIdx;
 			[self bindVertexArray: [mesh textureCoordinatesForTextureUnit: tuIdx]
 					  withVisitor: visitor];
 		}
@@ -117,7 +117,7 @@
 	
 	// Texture coordinate attribute arrays come after the others and are indexed by texture unit
 	if (semantic == kCC3SemanticVertexTexture)
-		return [self attributeIndexForTextureUnit: visitor.currentTextureUnitIndex];
+		return [self attributeIndexForTextureUnit: visitor.current2DTextureUnit];
 	
 	// Other vertex attributes are compared by semantic
 	for (GLuint vaIdx = 0; vaIdx < value_NumNonTexVertexAttribs; vaIdx++)

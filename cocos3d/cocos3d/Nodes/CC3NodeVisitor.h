@@ -172,6 +172,13 @@
 @property(nonatomic, strong, readonly) CC3Mesh* currentMesh;
 
 /**
+ * Returns the number of textures in the current mesh node.
+ *
+ * It is up to the invoker to make sure that the current node actually is a CC3MeshNode.
+ */
+@property(nonatomic, readonly) GLuint textureCount;
+
+/**
  * Returns the material of the mesh node that is currently being visited, or returns nil
  * if that mesh node has no material.
  *
@@ -193,6 +200,17 @@
  * is invoked on that node.
  */
 -(CC3TextureUnit*) currentTextureUnitAt: (GLuint) texUnit;
+
+/**
+ * Under OpenGL ES 2.0 & OpenGL, returns the shader program of the mesh node that is currently being
+ * visited, or returns nil if that mesh node has no shader program, or when using OpenGL ES 1.1.
+ *
+ * It is up to the invoker to make sure that the current node actually is a CC3MeshNode.
+ *
+ * This property is only valid during the traversal of the node returned by the currentMeshNode
+ * property, and will be nil both before and after the visit: method is invoked on that node.
+ */
+@property(nonatomic, strong, readonly) CC3ShaderProgram* currentShaderProgram;
 
 /** The number of lights in the scene. */
 @property(nonatomic, readonly) NSUInteger lightCount;
@@ -391,11 +409,13 @@
  * Drawing operations only visit drawable mesh nodes, so the node access properties defined on
  * the CC3NodeVisitor superclass that rely on the current node being a CC3MeshNode containing
  * a mesh and material will be valid.
+ *
+ * This visitor maintains access to a number of properties of the node being drawn, and
+ * other components in the scene, for access by rendering logic and shaders.
  */
 @interface CC3NodeDrawingVisitor : CC3NodeVisitor {
 	CC3NodeSequencer* _drawingSequencer;
 	CC3SkinSection* _currentSkinSection;
-	CC3ShaderProgram* _currentShaderProgram;
 	id<CC3RenderSurface> _renderSurface;
 	CC3OpenGL* _gl;
 	CC3DataArray* _boneMatricesGlobal;
@@ -409,8 +429,8 @@
 	CC3Matrix4x4 _modelViewProjMatrix;
 	ccColor4F _currentColor;
 	GLuint _textureUnitCount;
-	GLuint _currentTextureUnitIndex;
-	GLuint _nextUnassignedTextureSampler;
+	GLuint _current2DTextureUnit;
+	GLuint _currentCubeTextureUnit;
 	ccTime _deltaTime;
 	BOOL _shouldDecorateNode : 1;
 	BOOL _isDrawingEnvironmentMap : 1;
@@ -427,40 +447,53 @@
 @property(nonatomic, strong) CC3OpenGL* gl;
 
 /**
- * The index of the current texture unit being drawn.
+ * The index of the current texture unit holding a 2D texture.
  *
- * This value is set during drawing when the visitor is passed to the texture coordinates array.
+ * This value is initialized to zero when starting to draw each material, and is incremented
+ * as each 2D texture in the material is drawn.
  */
-@property(nonatomic, assign) GLuint currentTextureUnitIndex;
+@property(nonatomic, assign) GLuint current2DTextureUnit;
 
 /**
- * Set the value of the textureUnitCount to that of the currentTextureUnitIndex property,
- * and disables all texture units whose index is at or above the current value of the
- * currentTextureUnitIndex property.
+ * The index of the current texture unit holding a cube-map texture.
+ *
+ * This value is initialized to zero when starting to draw each material, and is incremented
+ * as each cube-map texture in the material is drawn.
+ */
+@property(nonatomic, assign) GLuint currentCubeTextureUnit;
+
+//@property(nonatomic, assign) GLuint currentTextureUnitIndex;
+
+/** 
+ * Sets the value of the current2DTextureUnit property to zero, and sets the value of the 
+ * currentCubeTextureUnit property to either the value of the texture2DCount property of 
+ * the currentShaderProgram (OpenGL ES 2.0 & OpenGL), or to the same as the textureCount
+ * property of this instance (OpenGL ES 1.1).
+ *
+ * The 2D texture are assigned to the lower texture units, and cube-map textures are assigned
+ * to texture units above all the 2D textures. This ensures that the same texture types are
+ * consistently assigned to the shader samplers, to avoid the shaders recompiling on the
+ * fly to adapt to changing texture types.
+ *
+ * GL texture units of each type that were not used by the textures are disabled via the
+ * disabledTextureUnits method.
+ */
+-(void) resetTextureUnits;
+
+/** 
+ * Disables all texture units that do not have an associated texture. 
+ *
+ * The 2D texture are assigned to the lower texture units, and cube-map textures are assigned
+ * to texture units above all the 2D textures. This ensures that the same texture types are
+ * consistently assigned to the shader samplers, to avoid the shaders recompiling on the
+ * fly to adapt to changing texture types.
+ *
+ * GL texture units of each type that were not used by the textures are disabled by this method.
+ * Since cube-map textures are assigned to texture units above all 2D textures, for nodes with
+ * fewer 2D textures than expected by the shader, one or more 2D texture units may be disabled
+ * in between the active 2D texture units and any cube-map texture units.
  */
 -(void) disableUnusedTextureUnits;
-
-/**
- * Returns the number of texture units being drawn.
- *
- * The value of this property is set by the disableUnusedTextureUnits method, which is invoked
- * by the node's material, and is then consumed by the mesh when binding texture coordinates.
- */
-@property(nonatomic, readonly) GLuint textureUnitCount;
-
-/**
- * Returns the value to use for the next texture sampler that does not have an corresponding
- * texture in the current material.
- *
- * This property is accessed whenever the current material has fewer textures than texture
- * samplers declared in the shader program, and is accessed once for each of the surplus shader
- * program texture samplers (both 2D and cube-map samplers), in order to assign them a value
- * that is not already consumed by a valid texture from the material.
- *
- * As each material is drawn, the value of this property starts at the value of the
- * textureUnitCount property, and then increments by one each time this property is accessed.
- */
-@property(nonatomic, readonly) GLuint nextUnassignedTextureSampler;
 
 /**
  * This property gives the interval, in seconds, since the previous frame.
@@ -548,13 +581,6 @@
  * during the drawing of that skin section.
  */
 @property(nonatomic, strong) CC3SkinSection* currentSkinSection;
-
-/**
- * The currently active shader program.
- *
- * This property is set automatically by the program when it binds to the GL engine.
- */
-@property(nonatomic, strong) CC3ShaderProgram* currentShaderProgram;
 
 /**
  * The current color used during drawing if no materials or lighting are engaged.
@@ -655,10 +681,28 @@
  */
 @interface CC3NodePickingVisitor : CC3NodeDrawingVisitor {
 	CC3Node* _pickedNode;
+	GLuint _tagColorShift;
 }
 
 /** The node that was most recently picked. */
 @property(nonatomic, strong, readonly) CC3Node* pickedNode;
+
+/** 
+ * Indicates the value to shift the bits of the value of the tag property of each node to
+ * determine the color to paint that node.
+ *
+ * The initial value of this property is zero, indicating that the node tag value will not
+ * be shifted when converting it to and from a color. Increasing the value will increase the
+ * color separation between different nodes, which can be helpful during development when 
+ * debugging node picking visually (ie- when the shouldDisplayPickingRender property of the
+ * CC3Scene is set to YES), However, increasing the shift value will also decrease the number
+ * of nodes that can be displayed and resolved on screen.
+ *
+ * This value is a shift value that operates on the bits of the tag value. A value of one
+ * will effectively double the tag value before it is converted to a color, a value of two
+ * will quadruple the tag value, etc.
+ */
+@property(nonatomic, assign) GLuint tagColorShift;
 
 @end
 

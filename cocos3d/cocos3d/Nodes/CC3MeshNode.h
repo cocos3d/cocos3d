@@ -352,9 +352,10 @@
  * Setting the value of this property will set the specified program into the context in the
  * shaderContext property, creating a new shader context if necessary.
  *
- * As an alternative to setting this property directly, you can invoke the selectShaderProgram
- * method (or let it be invoked automatically during the first draw), to have an appropriate
- * shader program automatically selected for use by this node, and assigned to this property.
+ * As an alternative to setting this property directly, you can either access this property,
+ * or invoke the selectShaderProgram method (or let it be invoked automatically during the 
+ * first draw), to have an appropriate shader program automatically selected for use by this
+ * node, and assigned to this property,
  *
  * This property is used only when running under OpenGL ES 2.
  */

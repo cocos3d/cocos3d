@@ -858,6 +858,12 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope);
 /** Sets the value of this uniform from the value of the specified uniform. */
 -(void) setValueFromUniform: (CC3GLSLUniform*) uniform;
 
+/** Returns a string description of the current value of this uniform. */
+-(NSString*) valueDescription;
+
+#pragma mark Updating the GL engine
+
+
 /**
  * Invoked during drawing, after all of the content of the variable has been set using
  * the set... methods, in order to have the value of this variable set into the GL engine.

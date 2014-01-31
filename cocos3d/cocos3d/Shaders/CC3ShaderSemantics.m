@@ -870,7 +870,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		// TEXTURES --------------
 		case kCC3SemanticTextureCount:
 			// Count all textures of any type
-			[uniform setInteger: visitor.textureUnitCount];
+			[uniform setInteger: visitor.textureCount];
 			return YES;
 		case kCC3SemanticTextureSampler:
 			// Samplers that can be any type are simply consecutive texture unit indices
@@ -881,7 +881,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 
 		case kCC3SemanticTexture2DCount:
 			mat = visitor.currentMaterial;
-			tuCnt = visitor.textureUnitCount;
+			tuCnt = visitor.textureCount;
 			// Count just the textures whose sampler semantic is of the correct type
 			for (GLuint tuIdx = 0; tuIdx < tuCnt; tuIdx++)
 				if ( [mat textureForTextureUnit: tuIdx].samplerSemantic == kCC3SemanticTexture2DSampler ) texCnt++;
@@ -889,7 +889,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			return YES;
 		case kCC3SemanticTextureCubeCount:
 			mat = visitor.currentMaterial;
-			tuCnt = visitor.textureUnitCount;
+			tuCnt = visitor.textureCount;
 			// Count just the textures whose sampler semantic is of the correct type
 			for (GLuint tuIdx = 0; tuIdx < tuCnt; tuIdx++)
 				if ( [mat textureForTextureUnit: tuIdx].samplerSemantic == kCC3SemanticTextureCubeSampler ) texCnt++;
@@ -897,22 +897,19 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			return YES;
 
 		case kCC3SemanticTexture2DSampler:
+			// 2D samplers always come first and are consecutive, so we can simply use consecutive
+			// texture unit indices starting at the semanticIndex of the uniform. Typically,
+			// semanticIndex > 0 and uniformSize > 1 are mutually exclusive.
+			for (GLuint i = 0; i < uniformSize; i++) [uniform setInteger: (semanticIndex + i) at: i];
+			return YES;
+
 		case kCC3SemanticTextureCubeSampler:
-			mat = visitor.currentMaterial;
-			// Cycle through the uniform slots. Move to next texture unit each time, but
-			// only move to next uniform slot if the current uniform slot was populated.
-			// If we run out of texture units of the correct type, populate uniform with
-			// unassigned sampler values in the range beyond the number of valid texture units.
-			for (GLuint tuIdx = semanticIndex, uIdx = 0; uIdx < uniformSize; tuIdx++) {
-				// Get the texture assigned to this texture unit
-				CC3Texture* tex = [mat textureForTextureUnit: tuIdx];
-				if (tex) {
-					// If correct texture type, set uniform to this texture unit...if not, try next tex unit
-					if (tex.samplerSemantic == semantic) [uniform setInteger: tuIdx at: uIdx++];
-				} else
-					// No remaining textures, so set uniform to the next unassigned sampler
-					[uniform setInteger: visitor.nextUnassignedTextureSampler at: uIdx++];
-			}
+			// Cube samplers always come after 2D samplers, and are consecutive, so we can simply
+			// use consecutive texture unit indices starting at the semanticIndex of the uniform,
+			// plus an offset to skip any 2D textures. Typically, semanticIndex > 0 and
+			// uniformSize > 1 are mutually exclusive.
+			semanticIndex += visitor.currentShaderProgram.texture2DCount;
+			for (GLuint i = 0; i < uniformSize; i++) [uniform setInteger: (semanticIndex + i) at: i];
 			return YES;
 
 		// The semantics below mimic OpenGL ES 1.1 configuration functionality for combining texture units.

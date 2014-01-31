@@ -296,19 +296,9 @@
 	super.shaderContext = shaderContext;	// pass along to any children
 }
 
--(CC3ShaderProgram*) shaderProgram { return _shaderContext.program; }
-
--(void) setShaderProgram: (CC3ShaderProgram*) shaderProgram {
-	if (shaderProgram == self.shaderProgram) return;
-
-	self.shaderContext.program = shaderProgram;
-
-	[super setShaderProgram: shaderProgram];	// pass along to any children
-}
-
 #if CC3_GLSL
--(CC3ShaderProgram*) selectShaderProgram {
-	CC3ShaderProgram* sp = self.shaderProgram;
+-(CC3ShaderProgram*) shaderProgram {
+	CC3ShaderProgram* sp = self.shaderContext.program;
 	if ( !sp ) {
 		sp = [CC3ShaderProgram.shaderMatcher programForMeshNode: self];
 		self.shaderContext.program = sp;		// Use shaderContext, so doesn't set descendants
@@ -317,9 +307,16 @@
 	return sp;
 }
 
+-(void) setShaderProgram: (CC3ShaderProgram*) shaderProgram {
+	self.shaderContext.program = shaderProgram;
+	[super setShaderProgram: shaderProgram];	// pass along to any children
+}
 #else
--(CC3ShaderProgram*) selectShaderProgram { return nil; }
+-(CC3ShaderProgram*) shaderProgram { return nil; }
+-(void) setShaderProgram: (CC3ShaderProgram*) shaderProgram {}
 #endif	// CC3GLSL
+
+-(CC3ShaderProgram*) selectShaderProgram { return self.shaderProgram; }
 
 -(void) selectShaders {
 	[self selectShaderProgram];
@@ -863,12 +860,12 @@
 /** 
  * Template method to configure the material and texture properties in the GL engine. 
  * The visitor keeps track of which texture unit is being processed, with each texture
- * incrementing the current texture unit index as it draws. GL texture units that were
- * not used by the textures are disabled by the mesh node after this method is complete.
+ * incrementing the appropriate texture unit counter as it draws. GL texture units that
+ * are not used by the textures are disabled.
  */
 -(void) configureMaterialWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 
-	visitor.currentTextureUnitIndex = 0;
+	[visitor resetTextureUnits];
 	
 	if (_material && visitor.shouldDecorateNode) {
 		[_material drawWithVisitor: visitor];
@@ -883,19 +880,9 @@
 	visitor.gl.color = visitor.currentColor;
 }
 
-#if CC3_GLSL
 -(void) applyShaderProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	CC3ShaderProgram* shaderProgram;
-	if (visitor.shouldDecorateNode)
-		shaderProgram = self.selectShaderProgram;
-	else
-		shaderProgram = self.shaderContext.pureColorProgram;
-
-	[shaderProgram bindWithVisitor: visitor];
+	[visitor.currentShaderProgram bindWithVisitor: visitor];
 }
-#else
--(void) applyShaderProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
-#endif	// CC3GLSL
 
 /** Template method to draw the mesh to the GL engine. */
 -(void) drawMeshWithVisitor: (CC3NodeDrawingVisitor*) visitor { [_mesh drawWithVisitor: visitor]; }

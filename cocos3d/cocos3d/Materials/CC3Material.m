@@ -501,18 +501,19 @@ static GLuint lastAssignedMaterialTag;
 /**
  * Draws the texture property and the texture overlays using separate GL texture units. 
  * The visitor keeps track of which texture unit is being processed, with each texture 
- * incrementing the current texture unit index as it draws. GL texture units that were 
- * not used by the textures are disabled by the mesh node after this method is complete.
+ * incrementing the appropriate texture unit index as it draws.
+ *
+ * The 2D texture are assigned to the lower texture units, and cube-map textures are assigned
+ * to texture units above all the 2D textures. This ensures that the same texture types are
+ * consistently assigned to the shader samplers, to avoid the shaders recompiling on the
+ * fly to adapt to changing texture types.
+ *
+ * GL texture units of each type that were not used by the textures are disabled by the
+ * mesh node after this method is complete.
  */
 -(void) drawTexturesWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[self drawTexture: _texture withVisitor: visitor];
-	for (CC3Texture* ot in _textureOverlays) [self drawTexture: ot withVisitor: visitor];
-}
-
-/** Draws the specified texture to the GL engine, and then increments the texture unit. */
--(void) drawTexture: (CC3Texture*) texture withVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[texture drawWithVisitor: visitor];
-	if (texture) visitor.currentTextureUnitIndex += 1;	// Move to next texture unit
+	[_texture drawWithVisitor: visitor];
+	for (CC3Texture* ot in _textureOverlays) [ot drawWithVisitor: visitor];
 }
 
 +(void) unbindWithVisitor: (CC3NodeDrawingVisitor*) visitor {
