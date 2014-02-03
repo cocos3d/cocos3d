@@ -64,7 +64,6 @@
 #define kMascotPODFile					@"cocos3dMascot.pod"
 #define kDieCubePODFile					@"DieCube.pod"
 #define kGroundTextureFile				@"Grass.jpg"
-#define kFloaterTextureFile				@"ButtonRing48x48.png"
 #define kSignTextureFile				@"Crate.png"
 #define kSignStampTextureFile			@"Stamp.png"
 #define kSignStampNormalsTextureFile	@"Stamp-nm.png"
@@ -674,25 +673,36 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 }
 
 /**
- * Adds a large rectangular yellow ring floating above the ground. This ring is created from a plane
+ * Adds a large rectangular orange ring floating above the ground. This ring is created from a plane
  * using a texture that combines transparency and opacity. It demonstrates the use of transparency in
  * textures. You can see through the transparent areas to the scene behind the texture. The texture
  * as a whole fades in and out periodically, and rotates around the vertical (Y) axis.
  *
  * The use of the shouldBlendAtFullOpacity property ensures that the transparent parts of the
- * texture will still be alpha blended, even when the floating ring is set to full opacity.
+ * texture will still be alpha blended, even when the floating ring is set to full opacity as
+ * it is faded in and out. Normally, when an object is set to full opacity, the blending function
+ * is updated to treat the object as opaque, which is much more efficient. However, since the
+ * texture itself contains transparency, we want it to be alpha-blended even when the object
+ * has been compltely faded in.
+ *
+ * The type blending function used to blend the transparent/translucent areas of the texture
+ * with the object behind is set automatically, and is influenced by the opacity of the object,
+ * and whether the color channels of the texture have been pre-multiplied by the alpha channel
+ * in the texture. Here we provide the option to demonstrate textures with either pre-multiplied
+ * content or non-pre-multiplied content, and the difference is logged to help you understand
+ * the difference.
+ *
+ * The non-premultiplied alpha texture is a PNG file with the special file-extension PPNG. 
+ * This is a normal PNG file, but the renamed extension will stop Xcode from modifying the file
+ * to pre-multiply the alpha during app building. The PPNG file is loaded with a custom image
+ * loader, again, to avoid iOS pre-multiplying the texture content during image loading. 
+ * This allows the texture to appear exactly as it was created. This is an important feature
+ * when loading textures that contain custom content, such as normal-maps, light-maps, shininess,
+ * weightings, etc. See the notes for the CC3STBImage useForFileExtensions property to learn 
+ * more about these special file extensions.
  *
  * As the ring rotates, both sides are visible. This is because the shouldCullBackFaces property is
- * set to NO, so that both sides of each face are rendered. However, one side appears bright and
- * colorful and the other appears dark. Surprisingly, it is the front sides of the faces that appear
- * dark and it is the back side of the faces that appear bright and colorful. This is because the
- * light is located on the opposite side of the ring from the camera, and therefore the side that
- * faces towards the light is illuminated. However, since the normals of the faces in the rectangular
- * plane extend out from the front face of the plane, it is when the front face faces towards the
- * light (and away from the camera) that the plane appears most illuminated. At that time, it is the
- * back faces of the plane that we see. When the front faces are facing the camera, the normals are
- * facing away from the light and the entire plane appears dark. Understanding this behaviour helps
- * to understand the interaction between lighting, faces, and normals in any object.
+ * set to NO, so that both sides of each face are rendered. 
  *
  * A border is drawn around the bounding box of the mesh to highlight the extent of the
  * transparency in the texture.
@@ -700,12 +710,30 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 -(void) addFloatingRing {
 	CC3MeshNode* floater = [CC3PlaneNode nodeWithName: kFloaterName];
 	[floater populateAsCenteredRectangleWithSize: CGSizeMake(120.0, 120.0)];
-	floater.texture = [CC3Texture textureFromFile: kFloaterTextureFile];
-	floater.location = cc3v(400.0, 150.0, -250.0);
-	floater.shouldCullBackFaces = NO;			// Show from behind as well.
-	floater.touchEnabled = YES;
+
+	// The OrangeRing.ppng texture will be loaded without pre-multiplied alpha.
+	// The OrangeRing.png texture will be loaded without pre-multiplied alpha.
+	// Comment out one or other of the following lines to see the difference. The effect
+	// on the material blending that is automatically assigned is output in the logs.
+	floater.texture = [CC3Texture textureFromFile: @"OrangeRing.ppng"];
+//	floater.texture = [CC3Texture textureFromFile: @"OrangeRing.png"];
+	floater.isOpaque = NO;		// Not strictly needed, because will be set automatically
+								// during fading action, but set here to allow the blending
+								// function to be logged on the next line.
+	LogInfo(@"%@ with %@ blending (%@/%@) and %@ %@ pre-multiplied alpha.",
+			floater, floater.material,
+			NSStringFromGLEnum(floater.material.sourceBlend),
+			NSStringFromGLEnum(floater.material.destinationBlend),
+			floater.texture, (floater.texture.hasPremultipliedAlpha ? @"with" : @"without"));
+
+	// We will be fading this ring in and out. The shouldBlendAtFullOpacity property ensures that
+	// the transparent parts of the texture will still be alpha blended, even when the floating
+	// ring is set to full opacity as it is faded in and out. See the method notes for more.
 	floater.shouldBlendAtFullOpacity = YES;
-	floater.shouldDrawLocalContentWireframeBox = YES;
+
+	// This is a simple plane node. To make this object visible from behind, we need
+	// to show the back sides of the faces as well.
+	floater.shouldCullBackFaces = NO;			// Show from behind as well.
 	
 	// This object has some unexpected behaviour when using fog using GLSL. Since fog is dependent
 	// on the depth buffer, the fog intensity will be that of this object, even though the farther
@@ -717,6 +745,10 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// been faded almost away will not play well with GLSL fog.
 	floater.shouldDrawLowAlpha = NO;
 	floater.material.alphaTestReference = 0.05;
+	
+	floater.location = cc3v(400.0, 150.0, -250.0);
+	floater.touchEnabled = YES;
+	floater.shouldDrawLocalContentWireframeBox = YES;	// Draw an box around texture
 
 	// Ring is added on on background thread. Configure it for the scene, and fade it in slowly.
 	[self configureForScene: floater andMaterializeWithDuration: kFadeInDuration];

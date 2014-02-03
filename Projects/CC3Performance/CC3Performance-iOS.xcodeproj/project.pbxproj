@@ -105,6 +105,10 @@
 		A971D3171663ECD100769DC5 /* fps_images-ipadhd.png in Resources */ = {isa = PBXBuildFile; fileRef = A971D3151663ECD100769DC5 /* fps_images-ipadhd.png */; };
 		A97A31321689002F004CBAA1 /* fps_images_1.png in Resources */ = {isa = PBXBuildFile; fileRef = A97A31311689002F004CBAA1 /* fps_images_1.png */; };
 		A9B6265F14E181AA002BB0DB /* Earth_1024.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A9B6265D14E181AA002BB0DB /* Earth_1024.jpg */; };
+		A9BC8FD1189C45AC000FB28C /* TestRedTexture.png in Resources */ = {isa = PBXBuildFile; fileRef = A9BC8FD0189C45AC000FB28C /* TestRedTexture.png */; };
+		A9BC8FD5189C4A7D000FB28C /* TestRedTexture.ppng in Resources */ = {isa = PBXBuildFile; fileRef = A9BC8FD4189C4A7C000FB28C /* TestRedTexture.ppng */; };
+		A9BC8FDA189C6A10000FB28C /* TestRedTextureShort.png in Resources */ = {isa = PBXBuildFile; fileRef = A9BC8FD8189C6A10000FB28C /* TestRedTextureShort.png */; };
+		A9BC8FDB189C6A10000FB28C /* TestRedTextureShort.ppng in Resources */ = {isa = PBXBuildFile; fileRef = A9BC8FD9189C6A10000FB28C /* TestRedTextureShort.ppng */; };
 		DC6640030F83B3EA000B3E49 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC6640020F83B3EA000B3E49 /* AudioToolbox.framework */; };
 		DC6640050F83B3EA000B3E49 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC6640040F83B3EA000B3E49 /* OpenAL.framework */; };
 		DCCBF1B70F6022AE0040855A /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DCCBF1B60F6022AE0040855A /* CoreGraphics.framework */; };
@@ -253,6 +257,10 @@
 		A971D3151663ECD100769DC5 /* fps_images-ipadhd.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "fps_images-ipadhd.png"; sourceTree = "<group>"; };
 		A97A31311689002F004CBAA1 /* fps_images_1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fps_images_1.png; sourceTree = "<group>"; };
 		A9B6265D14E181AA002BB0DB /* Earth_1024.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = Earth_1024.jpg; sourceTree = "<group>"; };
+		A9BC8FD0189C45AC000FB28C /* TestRedTexture.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = TestRedTexture.png; path = "../../../../../../Models & Textures/TestRedTexture.png"; sourceTree = "<group>"; };
+		A9BC8FD4189C4A7C000FB28C /* TestRedTexture.ppng */ = {isa = PBXFileReference; lastKnownFileType = file; name = TestRedTexture.ppng; path = "../../../../../../Models & Textures/TestRedTexture.ppng"; sourceTree = "<group>"; };
+		A9BC8FD8189C6A10000FB28C /* TestRedTextureShort.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = TestRedTextureShort.png; path = "../../../../../../Models & Textures/TestRedTextureShort.png"; sourceTree = "<group>"; };
+		A9BC8FD9189C6A10000FB28C /* TestRedTextureShort.ppng */ = {isa = PBXFileReference; lastKnownFileType = file; name = TestRedTextureShort.ppng; path = "../../../../../../Models & Textures/TestRedTextureShort.ppng"; sourceTree = "<group>"; };
 		DC6640020F83B3EA000B3E49 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		DC6640040F83B3EA000B3E49 /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
 		DCCBF1B60F6022AE0040855A /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -412,6 +420,10 @@
 		A92DA7D21427B7870051AFFA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				A9BC8FD8189C6A10000FB28C /* TestRedTextureShort.png */,
+				A9BC8FD9189C6A10000FB28C /* TestRedTextureShort.ppng */,
+				A9BC8FD4189C4A7C000FB28C /* TestRedTexture.ppng */,
+				A9BC8FD0189C45AC000FB28C /* TestRedTexture.png */,
 				A92DA81A1427B80E0051AFFA /* arial16.fnt */,
 				A92DA81B1427B80E0051AFFA /* arial16.png */,
 				A92DA7D41427B7870051AFFA /* ArrowUpButton48x48.png */,
@@ -640,6 +652,7 @@
 				A903C05F18772DD100BDE9C1 /* CC3LibSingleTexture2D.fsh in Resources */,
 				A903C05918772DD100BDE9C1 /* CC3LibDefaultPrecision.fsh in Resources */,
 				A92DA7F71427B7870051AFFA /* ArrowUpButton48x48.png in Resources */,
+				A9BC8FD5189C4A7D000FB28C /* TestRedTexture.ppng in Resources */,
 				A903C07A18772DD100BDE9C1 /* CC3LibEnvironmentReflection.vsh in Resources */,
 				A903C08618772DD100BDE9C1 /* CC3TexturableRigidBones.vsh in Resources */,
 				A903C05D18772DD100BDE9C1 /* CC3LibSetGLFragColorAlphaTest.fsh in Resources */,
@@ -659,6 +672,7 @@
 				A93C003B1821B283003A0C43 /* configuration.json in Resources */,
 				A903C07018772DD100BDE9C1 /* CC3PureColor.fsh in Resources */,
 				A903C06318772DD100BDE9C1 /* CC3BumpMapObjectSpace.fsh in Resources */,
+				A9BC8FDB189C6A10000FB28C /* TestRedTextureShort.ppng in Resources */,
 				A92DA8011427B7870051AFFA /* fps_images.png in Resources */,
 				A94EEA6717F60CAD005A43E7 /* Default.png in Resources */,
 				A903C07D18772DD100BDE9C1 /* CC3LibSingleTexture.vsh in Resources */,
@@ -673,7 +687,9 @@
 				A94EEA3D17F60C58005A43E7 /* BeachBall.pod in Resources */,
 				A903C05C18772DD100BDE9C1 /* CC3LibSetGLFragColor.fsh in Resources */,
 				A903C06118772DD100BDE9C1 /* CC3LibTexturableBumpMapTangentSpace.fsh in Resources */,
+				A9BC8FD1189C45AC000FB28C /* TestRedTexture.png in Resources */,
 				A94EEA5A17F60C99005A43E7 /* Icon-60@2x.png in Resources */,
+				A9BC8FDA189C6A10000FB28C /* TestRedTextureShort.png in Resources */,
 				A903C06818772DD100BDE9C1 /* CC3ClipSpaceSingleTexture.fsh in Resources */,
 				A903C07818772DD100BDE9C1 /* CC3LibDefaultPrecision.vsh in Resources */,
 				A903C06518772DD100BDE9C1 /* CC3BumpMapTangentSpace.fsh in Resources */,

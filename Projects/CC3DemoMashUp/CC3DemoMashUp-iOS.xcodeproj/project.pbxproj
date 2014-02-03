@@ -143,6 +143,8 @@
 		A99CD83815866E1C00B5BAC3 /* BallBoxTexture.png in Resources */ = {isa = PBXBuildFile; fileRef = A99CD83715866E1C00B5BAC3 /* BallBoxTexture.png */; };
 		A9AAF0081525E41000E1620A /* Bricks-Red.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A9AAF0071525E41000E1620A /* Bricks-Red.jpg */; };
 		A9AE3D7D14E46118002805DA /* Stamp.png in Resources */ = {isa = PBXBuildFile; fileRef = A9AE3D7C14E46118002805DA /* Stamp.png */; };
+		A9BC8FDE189C7610000FB28C /* TestRedTextureShort.png in Resources */ = {isa = PBXBuildFile; fileRef = A9BC8FDC189C7610000FB28C /* TestRedTextureShort.png */; };
+		A9BC8FDF189C7610000FB28C /* TestRedTextureShort.ppng in Resources */ = {isa = PBXBuildFile; fileRef = A9BC8FDD189C7610000FB28C /* TestRedTextureShort.ppng */; };
 		A9C94ABE1451924700CE6BAD /* mallet.png in Resources */ = {isa = PBXBuildFile; fileRef = A9C94ABC1451924700CE6BAD /* mallet.png */; };
 		A9C94ABF1451924700CE6BAD /* mallet.pod in Resources */ = {isa = PBXBuildFile; fileRef = A9C94ABD1451924700CE6BAD /* mallet.pod */; };
 		A9CD198E156C1CFD00A0EDC4 /* earthmap1k.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A9CD198D156C1CFD00A0EDC4 /* earthmap1k.jpg */; };
@@ -152,6 +154,8 @@
 		A9E9EE6C16AD7A1D0086F025 /* legs.png in Resources */ = {isa = PBXBuildFile; fileRef = A9E9EE6516AD7A1D0086F025 /* legs.png */; };
 		A9E9EE6F16AD7A1D0086F025 /* man.pod in Resources */ = {isa = PBXBuildFile; fileRef = A9E9EE6816AD7A1D0086F025 /* man.pod */; };
 		A9EBA32615376A4E007FFE0C /* HUDScene.m in Sources */ = {isa = PBXBuildFile; fileRef = A9EBA32515376A4E007FFE0C /* HUDScene.m */; };
+		A9F78F5A189EA362001AE65E /* OrangeRing.png in Resources */ = {isa = PBXBuildFile; fileRef = A9F78F58189EA362001AE65E /* OrangeRing.png */; };
+		A9F78F5B189EA362001AE65E /* OrangeRing.ppng in Resources */ = {isa = PBXBuildFile; fileRef = A9F78F59189EA362001AE65E /* OrangeRing.ppng */; };
 		A9F7DA801761412100FC5096 /* Skybox.pvr in Resources */ = {isa = PBXBuildFile; fileRef = A9F7DA7F1761412100FC5096 /* Skybox.pvr */; };
 		A9FF6E12170DF78600FC35C8 /* Head_clonespace.png in Resources */ = {isa = PBXBuildFile; fileRef = A9FF6E10170DF78600FC35C8 /* Head_clonespace.png */; };
 		A9FF6E13170DF78600FC35C8 /* Head_diffuse.png in Resources */ = {isa = PBXBuildFile; fileRef = A9FF6E11170DF78600FC35C8 /* Head_diffuse.png */; };
@@ -347,6 +351,8 @@
 		A99CD83715866E1C00B5BAC3 /* BallBoxTexture.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = BallBoxTexture.png; sourceTree = "<group>"; };
 		A9AAF0071525E41000E1620A /* Bricks-Red.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "Bricks-Red.jpg"; sourceTree = "<group>"; };
 		A9AE3D7C14E46118002805DA /* Stamp.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Stamp.png; sourceTree = "<group>"; };
+		A9BC8FDC189C7610000FB28C /* TestRedTextureShort.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = TestRedTextureShort.png; path = "../../../../../../Models & Textures/TestRedTextureShort.png"; sourceTree = "<group>"; };
+		A9BC8FDD189C7610000FB28C /* TestRedTextureShort.ppng */ = {isa = PBXFileReference; lastKnownFileType = file; name = TestRedTextureShort.ppng; path = "../../../../../../Models & Textures/TestRedTextureShort.ppng"; sourceTree = "<group>"; };
 		A9C94ABC1451924700CE6BAD /* mallet.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = mallet.png; sourceTree = "<group>"; };
 		A9C94ABD1451924700CE6BAD /* mallet.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = mallet.pod; sourceTree = "<group>"; };
 		A9CD198D156C1CFD00A0EDC4 /* earthmap1k.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = earthmap1k.jpg; sourceTree = "<group>"; };
@@ -357,6 +363,8 @@
 		A9E9EE6816AD7A1D0086F025 /* man.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = man.pod; sourceTree = "<group>"; };
 		A9EBA32415376A4E007FFE0C /* HUDScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HUDScene.h; sourceTree = "<group>"; };
 		A9EBA32515376A4E007FFE0C /* HUDScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HUDScene.m; sourceTree = "<group>"; };
+		A9F78F58189EA362001AE65E /* OrangeRing.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = OrangeRing.png; sourceTree = "<group>"; };
+		A9F78F59189EA362001AE65E /* OrangeRing.ppng */ = {isa = PBXFileReference; lastKnownFileType = file; path = OrangeRing.ppng; sourceTree = "<group>"; };
 		A9F7DA7F1761412100FC5096 /* Skybox.pvr */ = {isa = PBXFileReference; lastKnownFileType = file; path = Skybox.pvr; sourceTree = "<group>"; };
 		A9FF6E10170DF78600FC35C8 /* Head_clonespace.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Head_clonespace.png; sourceTree = "<group>"; };
 		A9FF6E11170DF78600FC35C8 /* Head_diffuse.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Head_diffuse.png; sourceTree = "<group>"; };
@@ -554,6 +562,8 @@
 		A92DA78D1427B5980051AFFA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				A9BC8FDC189C7610000FB28C /* TestRedTextureShort.png */,
+				A9BC8FDD189C7610000FB28C /* TestRedTextureShort.ppng */,
 				A93B2AA71695E6A6007144C7 /* Arial32BMGlyph.fnt */,
 				A93B2AA81695E6A6007144C7 /* Arial32BMGlyph.png */,
 				A92DA78E1427B5980051AFFA /* ArrowLeftButton48x48.png */,
@@ -591,6 +601,8 @@
 				A9C94ABD1451924700CE6BAD /* mallet.pod */,
 				A901CF60186F90EC00A26A40 /* Masks */,
 				A96B359D14EF2689002A7363 /* MountainGrass.jpg */,
+				A9F78F58189EA362001AE65E /* OrangeRing.png */,
+				A9F78F59189EA362001AE65E /* OrangeRing.ppng */,
 				A963B545174982F600A20B20 /* PostProc.pfx */,
 				A9E9EE6216AD7A1D0086F025 /* RunningMen */,
 				A9D58DBB14F5B44500C3A778 /* ShadowButton48x48.png */,
@@ -863,8 +875,10 @@
 				A95A5C5714E45AC00013359F /* Crate.png in Resources */,
 				A94EF4E017C65E5A00FA969E /* Icon-72.png in Resources */,
 				A9AE3D7D14E46118002805DA /* Stamp.png in Resources */,
+				A9F78F5A189EA362001AE65E /* OrangeRing.png in Resources */,
 				A96B35A014EF2689002A7363 /* GrassCloseUp.jpg in Resources */,
 				A903C1421877329400BDE9C1 /* CC3LibVertexPositionPointSprite.vsh in Resources */,
+				A9BC8FDF189C7610000FB28C /* TestRedTextureShort.ppng in Resources */,
 				A96B35A114EF2689002A7363 /* GrassWithLeaves.jpg in Resources */,
 				A901CF6B186F90EC00A26A40 /* BaseTex.png in Resources */,
 				A96B35A214EF2689002A7363 /* MountainGrass.jpg in Resources */,
@@ -893,6 +907,7 @@
 				A97A31301688FD6A004CBAA1 /* fps_images_1.png in Resources */,
 				A94EF4D817C65E5A00FA969E /* Icon-40.png in Resources */,
 				A903C11E1877329300BDE9C1 /* CC3LibSetGLFragColor.fsh in Resources */,
+				A9F78F5B189EA362001AE65E /* OrangeRing.ppng in Resources */,
 				A93B2AA91695E6A6007144C7 /* Arial32BMGlyph.fnt in Resources */,
 				A946375418898F4E0097E355 /* Images-iOS.xcassets in Resources */,
 				A94EF4D717C65E5A00FA969E /* Icon-29@2x.png in Resources */,
@@ -920,6 +935,7 @@
 				A97398E817C2C7BC00C17D89 /* Dragon-diffuse.jpg in Resources */,
 				A903C1461877329400BDE9C1 /* CC3Texturable.vsh in Resources */,
 				A9E9EE6F16AD7A1D0086F025 /* man.pod in Resources */,
+				A9BC8FDE189C7610000FB28C /* TestRedTextureShort.png in Resources */,
 				A94EF4E217C65E5A00FA969E /* Icon-76.png in Resources */,
 				A9FF6E12170DF78600FC35C8 /* Head_clonespace.png in Resources */,
 				A9FF6E13170DF78600FC35C8 /* Head_diffuse.png in Resources */,

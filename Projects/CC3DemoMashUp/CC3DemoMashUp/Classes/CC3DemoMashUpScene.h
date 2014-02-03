@@ -139,6 +139,7 @@ typedef enum {
  *   - dynamically generate an environmental cube-map for creating a real-time dynamic reflective surfaces.
  *   - apply multiple animation tracks to a model, blend them together, and smoothly transition between
  *     animation tracks using a cross-fade action.
+ *   - bypassing Xcode/iOS automatic pre-multiplying of texture color content with alpha content
  *
  * In addition, there are a number of interesting options for you to play with by uncommenting
  * certain lines of code in the methods of this class that build objects in the 3D scene,
@@ -284,24 +285,20 @@ typedef enum {
  * see the main scene behind it. Touching the HUD window or the globe again will cause
  * the HUD window CC3Layer and CC3Scene to fade away.
  *
- * To the left of the globe is a large rotating rectangular yellow ring floating above the ground.
+ * To the left of the globe is a large rotating rectangular orange ring floating above the ground.
  * This ring is created from a plane using a texture that combines transparency and opacity. It
  * demonstrates the use of transparency in textures. You can see through the transparent areas to
  * the scene behind the texture. This is particularly apparent when the runners run behind the
  * ring and can be seen through the middle of the ring. The texture as a whole fades in and out
  * periodically, and rotates around the vertical (Y) axis.
  *
+ * The texture loaded for this ring has a special PPNG file extension that will stop Xcode from
+ * pre-multipying the alpha component of the texture into the color components, and the PPNG
+ * file is loaded with a custom image loader, again, to avoid iOS pre-multiplying the texture
+ * content during image loading.
+ *
  * As the ring rotates, both sides are visible. This is because the shouldCullBackFaces property is
- * set to NO, so that both sides of each face are rendered. However, one side appears bright and
- * colorful and the other appears dark. Surprisingly, it is the front sides of the faces that appear
- * dark and it is the back side of the faces that appear bright and colorful. This is because the
- * light is located on the opposite side of the ring from the camera, and therefore the side that
- * faces towards the light is illuminated. However, since the normals of the faces in the rectangular
- * plane extend out from the front face of the plane, it is when the front face faces towards the
- * light (and away from the camera) that the plane appears most illuminated. At that time, it is the
- * back faces of the plane that we see. When the front faces are facing the camera, the normals are
- * facing away from the light and the entire plane appears dark. Understanding this behaviour helps
- * to understand the interaction between lighting, faces, and normals in any object.
+ * set to NO, so that both sides of each face are rendered.
  *
  * Touching the switch-view button again will point the camera at a bouncing, rotating beach ball.
  * Touching the beach ball will toggle the beach ball between fully opaque and translucent,

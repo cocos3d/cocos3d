@@ -537,6 +537,15 @@
  * To compensate, when a texture is attached to a mesh node, the texture coordinates
  * of the mesh are automatically adjusted to correctly display the texture, taking
  * into consideration POT padding and vertical orientation.
+ *
+ * When building for iOS, raw PNG and TGA images are pre-processed by Xcode to pre-multiply
+ * alpha, and to reorder the pixel component byte order, to optimize the image for the iOS
+ * platform. If you want to avoid this pre-processing for PNG or TGA files, for textures
+ * such as normal maps or lighting maps, that you don't want to be modified, you can prepend
+ * a 'p' to the file extension ("ppng" or "ptga") to cause Xcode to skip this pre-processing
+ * and to use a loader that does not pre-multiply the alpha. You can also use this for other
+ * file types as well. See the notes for the CC3STBImage useForFileExtensions class-side
+ * property for more info.
  */
 @property(nonatomic, strong) CC3Texture* texture;
 
@@ -573,6 +582,15 @@
  * To compensate, when a texture is attached to a mesh node, the texture coordinates
  * of the mesh are automatically adjusted to correctly display the texture, taking
  * into consideration POT padding and vertical orientation.
+ *
+ * When building for iOS, raw PNG and TGA images are pre-processed by Xcode to pre-multiply
+ * alpha, and to reorder the pixel component byte order, to optimize the image for the iOS
+ * platform. If you want to avoid this pre-processing for PNG or TGA files, for textures
+ * such as normal maps or lighting maps, that you don't want to be modified, you can prepend
+ * a 'p' to the file extension ("ppng" or "ptga") to cause Xcode to skip this pre-processing
+ * and to use a loader that does not pre-multiply the alpha. You can also use this for other
+ * file types as well. See the notes for the CC3STBImage useForFileExtensions class-side
+ * property for more info.
  */
 -(void) addTexture: (CC3Texture*) aTexture;
 

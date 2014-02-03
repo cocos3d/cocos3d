@@ -180,6 +180,8 @@
 		A9D4F700188979F000382DDC /* CC3Texturable.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9D4F6D0188979F000382DDC /* CC3Texturable.vsh */; };
 		A9D4F701188979F000382DDC /* CC3TexturableBones.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9D4F6D1188979F000382DDC /* CC3TexturableBones.vsh */; };
 		A9D4F702188979F000382DDC /* CC3TexturableRigidBones.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9D4F6D2188979F000382DDC /* CC3TexturableRigidBones.vsh */; };
+		A9F78F5E189EA377001AE65E /* OrangeRing.png in Resources */ = {isa = PBXBuildFile; fileRef = A9F78F5C189EA377001AE65E /* OrangeRing.png */; };
+		A9F78F5F189EA377001AE65E /* OrangeRing.ppng in Resources */ = {isa = PBXBuildFile; fileRef = A9F78F5D189EA377001AE65E /* OrangeRing.ppng */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -404,6 +406,8 @@
 		A9D4F6D0188979F000382DDC /* CC3Texturable.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3Texturable.vsh; sourceTree = "<group>"; };
 		A9D4F6D1188979F000382DDC /* CC3TexturableBones.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3TexturableBones.vsh; sourceTree = "<group>"; };
 		A9D4F6D2188979F000382DDC /* CC3TexturableRigidBones.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3TexturableRigidBones.vsh; sourceTree = "<group>"; };
+		A9F78F5C189EA377001AE65E /* OrangeRing.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = OrangeRing.png; sourceTree = "<group>"; };
+		A9F78F5D189EA377001AE65E /* OrangeRing.ppng */ = {isa = PBXFileReference; lastKnownFileType = file; path = OrangeRing.ppng; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -567,6 +571,8 @@
 				A904C4CA18887FCF0070C47F /* mallet.pod */,
 				A904C4D518887FCF0070C47F /* Masks */,
 				A904C4D618887FCF0070C47F /* MountainGrass.jpg */,
+				A9F78F5C189EA377001AE65E /* OrangeRing.png */,
+				A9F78F5D189EA377001AE65E /* OrangeRing.ppng */,
 				A904C4D718887FCF0070C47F /* PostProc.pfx */,
 				A904C4DC18887FCF0070C47F /* RunningMen */,
 				A904C4DD18887FCF0070C47F /* ShadowButton48x48.png */,
@@ -1026,6 +1032,8 @@
 				A904C51D18887FD00070C47F /* Icon-60.png in Resources */,
 				A904C51118887FD00070C47F /* Head.pod in Resources */,
 				A9D4F6F8188979F000382DDC /* CC3LibModelMatrices.vsh in Resources */,
+				A9F78F5F189EA377001AE65E /* OrangeRing.ppng in Resources */,
+				A9F78F5E189EA377001AE65E /* OrangeRing.png in Resources */,
 				A9D4F6EF188979F000382DDC /* CC3SingleTextureReflect.fsh in Resources */,
 				A904C4F918887FD00070C47F /* DieCube.pod in Resources */,
 				A904C52918887FD00070C47F /* mallet.png in Resources */,

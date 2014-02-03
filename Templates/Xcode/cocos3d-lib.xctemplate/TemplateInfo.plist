@@ -1217,6 +1217,30 @@
 			<key>Path</key>
 			<string>cocos3d/cocos3d/Materials/CC3Material.m</string>
 		</dict>
+		<key>cocos3d/cocos3d/Materials/CC3STBImage.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Materials</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Materials/CC3STBImage.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cocos3d/Materials/CC3STBImage.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Materials</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Materials/CC3STBImage.m</string>
+		</dict>
 		<key>cocos3d/cocos3d/Materials/CC3Texture.h</key>
 		<dict>
 			<key>Group</key>
@@ -1264,6 +1288,17 @@
 			</array>
 			<key>Path</key>
 			<string>cocos3d/cocos3d/Materials/CC3TextureUnit.m</string>
+		</dict>
+		<key>cocos3d/cocos3d/Materials/stb_image.c</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Materials</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Materials/stb_image.c</string>
 		</dict>
 		<key>cocos3d/cocos3d/Matrices/CC3AffineMatrix.h</key>
 		<dict>
@@ -3806,10 +3841,13 @@
 		<string>cocos3d/cocos3d/Animation/CC3NodeAnimation.m</string>
 		<string>cocos3d/cocos3d/Materials/CC3Material.h</string>
 		<string>cocos3d/cocos3d/Materials/CC3Material.m</string>
+		<string>cocos3d/cocos3d/Materials/CC3STBImage.h</string>
+		<string>cocos3d/cocos3d/Materials/CC3STBImage.m</string>
 		<string>cocos3d/cocos3d/Materials/CC3Texture.h</string>
 		<string>cocos3d/cocos3d/Materials/CC3Texture.m</string>
 		<string>cocos3d/cocos3d/Materials/CC3TextureUnit.h</string>
 		<string>cocos3d/cocos3d/Materials/CC3TextureUnit.m</string>
+		<string>cocos3d/cocos3d/Materials/stb_image.c</string>
 		<string>cocos3d/cocos3d/Matrices/CC3AffineMatrix.h</string>
 		<string>cocos3d/cocos3d/Matrices/CC3AffineMatrix.m</string>
 		<string>cocos3d/cocos3d/Matrices/CC3LinearMatrix.h</string>

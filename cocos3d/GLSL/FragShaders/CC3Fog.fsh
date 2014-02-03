@@ -53,7 +53,7 @@ uniform vec4		u_cc3CameraFrustumDepth;	/**< The depth of the camera frustum (far
 uniform sampler2D	s_cc3Textures[2];			/**< Texture samplers. Color in first, depth in second. */
 
 //-------------- VARYING VARIABLE INPUTS ----------------------
-varying vec2		v_texCoord;					/**< Fragment texture coordinates. */
+varying vec2		v_texCoord0;					/**< Fragment texture coordinates. */
 
 
 //-------------- FUNCTIONS ----------------------
@@ -113,8 +113,8 @@ float linearizeDepth(float zb){
 
 //-------------- ENTRY POINT ----------------------
 void main (void) {
-	lowp vec4 fragColor = texture2D(s_cc3Textures[0], v_texCoord);
-	vec4 buffDepth = texture2D(s_cc3Textures[1], v_texCoord);
+	lowp vec4 fragColor = texture2D(s_cc3Textures[0], v_texCoord0);
+	vec4 buffDepth = texture2D(s_cc3Textures[1], v_texCoord0);
 	float eyeDepth = linearizeDepth(buffDepth.r);
 	gl_FragColor = fogify(fragColor, eyeDepth);
 }

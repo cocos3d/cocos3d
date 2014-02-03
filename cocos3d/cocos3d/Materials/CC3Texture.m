@@ -33,6 +33,7 @@
 #import "CC3PVRTexture.h"
 #import "CC3CC2Extensions.h"
 #import "CC3ShaderSemantics.h"
+#import "CC3STBImage.h"
 
 
 #pragma mark -
@@ -565,9 +566,7 @@ static BOOL _shouldCacheAssociatedCCTexture2Ds = NO;
 	}
 	
 	if ( (self = [self init]) ) {
-		if ( ![self loadFromFile: aFilePath] ) {
-			return nil;
-		}
+		if ( ![self loadFromFile: aFilePath] ) return nil;
 	}
 	return self;
 }
@@ -772,6 +771,7 @@ static CC3Cache* _textureCache = nil;
 -(void) bindTextureContent: (CC3Texture2DContent*) texContent toTarget: (GLenum) target {
 	[super bindTextureContent: texContent toTarget: target];
 	texContent.name = self.textureID;
+	[texContent deleteImageData];
 	_ccTexture2D = texContent;
 	[self cacheCCTexture2D];
 }
@@ -1295,25 +1295,60 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 -(void) releaseData: (void*) data {}
 
 -(GLuint) bytesPerPixel {
-	GLuint pixFmt = self.pixelFormat;	// Not all versions of cocos2d contain all enum values.
-	switch(pixFmt) {
-		case kCCTexture2DPixelFormat_RGBA8888:
-			return 4;
-		case kCCTexture2DPixelFormat_RGB888:
-			return 3;
-		case kCCTexture2DPixelFormat_RGB565:
-		case kCCTexture2DPixelFormat_RGBA4444:
-		case kCCTexture2DPixelFormat_RGB5A1:
-		case kCCTexture2DPixelFormat_AI88:
+	switch (_pixelGLFormat) {
+		case GL_RGBA: {
+			switch (_pixelGLType) {
+				case GL_UNSIGNED_BYTE:
+					return 4;
+				case GL_UNSIGNED_SHORT_4_4_4_4:
+				case GL_UNSIGNED_SHORT_5_5_5_1:
+					return 2;
+				default:
+					break;
+			}
+			break;
+		}
+
+		case GL_RGB: {
+			switch (_pixelGLType) {
+				case GL_UNSIGNED_BYTE:
+					return 3;
+				case GL_UNSIGNED_SHORT_5_6_5:
+					return 2;
+				default:
+					break;
+			}
+			break;
+		}
+
+		case GL_LUMINANCE_ALPHA:
 			return 2;
-			break;
-		case kCCTexture2DPixelFormat_A8:
+		
+		case GL_LUMINANCE:
+		case GL_ALPHA:
 			return 1;
+			
+		case GL_DEPTH_COMPONENT: {
+			switch (_pixelGLType) {
+				case GL_UNSIGNED_INT:
+					return 4;
+				case GL_UNSIGNED_SHORT:
+					return 2;
+				default:
+					break;
+			}
 			break;
+		}
+			
+		case GL_DEPTH_STENCIL:
+			return 4;
+			
 		default:
-			CC3Assert(NO, @"%@ encountered unexpected format %u", self, self.pixelFormat);
-			return 0;
+			break;
 	}
+	CC3Assert(NO, @"%@ encountered unexpected combination of pixel format %@ and type %@",
+			  self, NSStringFromGLEnum(_pixelGLFormat), NSStringFromGLEnum(_pixelGLType));
+	return 0;
 }
 
 -(void) flipVertically {
@@ -1390,14 +1425,14 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 		CC2_TEX_SIZE = CGSizeFromCC3IntSize(size);
 		CC2_TEX_WIDTH = size.width;
 		CC2_TEX_HEIGHT = size.height;
-		CC2_TEX_FORMAT = kCCTexture2DPixelFormat_Default;	// Unused
 		CC2_TEX_MAXS = 1.0f;
 		CC2_TEX_MAXT = 1.0f;
 		CC2_TEX_HAS_PREMULT_ALPHA = NO;
 		_imageData = NULL;
+		_isUpsideDown = NO;		// Empty texture is not upside down!
 		_pixelGLFormat = format;
 		_pixelGLType = type;
-		_isUpsideDown = NO;		// Empty texture is not upside down!
+		[self updatePixelFormat];
 	}
 	return self;
 }
@@ -1464,6 +1499,54 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 	}
 }
 
+-(void) updatePixelFormat {
+	switch (_pixelGLFormat) {
+		case GL_RGBA: {
+			switch (_pixelGLType) {
+				case GL_UNSIGNED_BYTE:
+					CC2_TEX_FORMAT = kCCTexture2DPixelFormat_RGBA8888;
+					return;
+				case GL_UNSIGNED_SHORT_4_4_4_4:
+					CC2_TEX_FORMAT = kCCTexture2DPixelFormat_RGBA4444;
+					return;
+				case GL_UNSIGNED_SHORT_5_5_5_1:
+					CC2_TEX_FORMAT = kCCTexture2DPixelFormat_RGB5A1;
+					return;
+				default:
+					break;
+			}
+			break;
+		}
+			
+		case GL_RGB: {
+			switch (_pixelGLType) {
+				case GL_UNSIGNED_BYTE:
+					CC2_TEX_FORMAT = kCCTexture2DPixelFormat_RGB888;
+					return;
+				case GL_UNSIGNED_SHORT_5_6_5:
+					CC2_TEX_FORMAT = kCCTexture2DPixelFormat_RGB565;
+					return;
+				default:
+					break;
+			}
+			break;
+		}
+			
+		case GL_LUMINANCE_ALPHA:
+			CC2_TEX_FORMAT = kCCTexture2DPixelFormat_AI88;
+			return;
+			
+		case GL_LUMINANCE:
+		case GL_ALPHA:
+			CC2_TEX_FORMAT = kCCTexture2DPixelFormat_A8;
+			return;
+			
+		default:
+			break;
+	}
+	CC2_TEX_FORMAT = kCCTexture2DPixelFormat_Default;
+}
+
 -(id) initWithCGImage: (CGImageRef) cgImg {
 #if CC3_IOS
 
@@ -1501,6 +1584,33 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 }
 
 -(id) initFromFile: (NSString*) aFilePath {
+	if ( [CC3STBImage shouldUseForFileExtension: aFilePath.pathExtension] )
+		return [self initFromSTBIFile: aFilePath];
+	else
+		return [self initFromOSFile: aFilePath];
+}
+
+-(id) initFromSTBIFile: (NSString*) aFilePath {
+	if( (self = [super init]) ) {
+		CC3STBImage* stbImage = [CC3STBImage imageFromFile: aFilePath];
+		if (!stbImage) return nil;
+		
+		_imageData = stbImage.extractImageData;
+		CC2_TEX_SIZE = CGSizeFromCC3IntSize(stbImage.size);
+		CC2_TEX_WIDTH = stbImage.size.width;
+		CC2_TEX_HEIGHT = stbImage.size.height;
+		CC2_TEX_MAXS = 1.0f;
+		CC2_TEX_MAXT = 1.0f;
+		CC2_TEX_HAS_PREMULT_ALPHA = NO;
+		_isUpsideDown = YES;			// Loaded upside-down
+		_pixelGLFormat = stbImage.pixelFormat;
+		_pixelGLType = stbImage.pixelType;
+		[self updatePixelFormat];
+	}
+	return self;
+}
+
+-(id) initFromOSFile: (NSString*) aFilePath {
 #if CC3_IOS
 	UIImage* uiImg = [UIImage imageWithContentsOfFile: CC3EnsureAbsoluteFilePath(aFilePath)];
 	
@@ -1533,11 +1643,14 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 		CC2_TEX_MAXS = texture.coverage.width;
 		CC2_TEX_MAXT = texture.coverage.height;
 		CC2_TEX_SIZE = CGSizeMake((CGFloat)CC2_TEX_WIDTH * CC2_TEX_MAXS, (CGFloat)CC2_TEX_HEIGHT * CC2_TEX_MAXT);
-		CC2_TEX_FORMAT = kCCTexture2DPixelFormat_Default;
 		CC2_TEX_HAS_PREMULT_ALPHA = texture.hasPremultipliedAlpha;
 #if CC3_CC2_2
 		CC2_TEX_HAS_MIPMAP = texture.hasMipmap;
 #endif
+		_isUpsideDown = texture.isUpsideDown;
+		_pixelGLFormat = texture.pixelFormat;
+		_pixelGLType = texture.pixelType;
+		[self updatePixelFormat];
 	}
 	return self;
 }

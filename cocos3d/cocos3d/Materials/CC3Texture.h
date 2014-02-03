@@ -92,6 +92,14 @@
  * texture is upside down. This can be used to ensure that textures are displayed with the correct
  * orientation. When a CC3Texture is applied to a mesh, the mesh will be adjusted automatically if
  * the texture is upside down.
+ *
+ * When building for iOS, raw PNG and TGA images are pre-processed by Xcode to pre-multiply alpha,
+ * and to reorder the pixel component byte order, to optimize the image for the iOS platform.
+ * If you want to avoid this pre-processing for PNG or TGA files, for textures such as normal maps
+ * or lighting maps, that you don't want to be modified, you can prepend a 'p' to the file
+ * extension ("ppng" or "ptga") to cause Xcode to skip this pre-processing and to use a loader
+ * that does not pre-multiply the alpha. You can also use this for other file types as well.
+ * See the notes for the CC3STBImage useForFileExtensions class-side property for more info.
  */
 @interface CC3Texture : CC3Identifiable {
 	GLuint _textureID;
@@ -1648,6 +1656,12 @@
  * The value of the isUpsideDown property is toggled after rotating.
  */
 -(void) rotateHalfCircle;
+
+/**
+ * Deletes the texture content from main memory. This should be invoked
+ * once the texture is bound to the GL engine. 
+ */
+-(void) deleteImageData;
 
 
 #pragma mark Allocation and Initialization

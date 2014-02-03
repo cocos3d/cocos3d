@@ -138,6 +138,8 @@
 		A99205091726E58F005E96CE /* EnvMapPosZ.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A99205021726E58F005E96CE /* EnvMapPosZ.jpg */; };
 		A9DDA35F17C8EF2E00F36657 /* Skybox.pvr in Resources */ = {isa = PBXBuildFile; fileRef = A9DDA35E17C8EF2E00F36657 /* Skybox.pvr */; };
 		A9DDA36317C8F4DB00F36657 /* icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = A9DDA36217C8F4DB00F36657 /* icon.icns */; };
+		A9F78F4C189EA32E001AE65E /* OrangeRing.png in Resources */ = {isa = PBXBuildFile; fileRef = A9F78F4A189EA32E001AE65E /* OrangeRing.png */; };
+		A9F78F4D189EA32E001AE65E /* OrangeRing.ppng in Resources */ = {isa = PBXBuildFile; fileRef = A9F78F4B189EA32E001AE65E /* OrangeRing.ppng */; };
 		A9FF6DEF170DE83600FC35C8 /* belt.png in Resources */ = {isa = PBXBuildFile; fileRef = A9FF6DEB170DE83600FC35C8 /* belt.png */; };
 		A9FF6DF0170DE83600FC35C8 /* body.png in Resources */ = {isa = PBXBuildFile; fileRef = A9FF6DEC170DE83600FC35C8 /* body.png */; };
 		A9FF6DF1170DE83600FC35C8 /* legs.png in Resources */ = {isa = PBXBuildFile; fileRef = A9FF6DED170DE83600FC35C8 /* legs.png */; };
@@ -324,6 +326,8 @@
 		A99205021726E58F005E96CE /* EnvMapPosZ.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = EnvMapPosZ.jpg; sourceTree = "<group>"; };
 		A9DDA35E17C8EF2E00F36657 /* Skybox.pvr */ = {isa = PBXFileReference; lastKnownFileType = file; name = Skybox.pvr; path = ../Common/Resources/Skybox.pvr; sourceTree = "<group>"; };
 		A9DDA36217C8F4DB00F36657 /* icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = icon.icns; sourceTree = "<group>"; };
+		A9F78F4A189EA32E001AE65E /* OrangeRing.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = OrangeRing.png; path = ../Common/Resources/OrangeRing.png; sourceTree = "<group>"; };
+		A9F78F4B189EA32E001AE65E /* OrangeRing.ppng */ = {isa = PBXFileReference; lastKnownFileType = file; name = OrangeRing.ppng; path = ../Common/Resources/OrangeRing.ppng; sourceTree = "<group>"; };
 		A9FF6DEB170DE83600FC35C8 /* belt.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = belt.png; sourceTree = "<group>"; };
 		A9FF6DEC170DE83600FC35C8 /* body.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = body.png; sourceTree = "<group>"; };
 		A9FF6DED170DE83600FC35C8 /* legs.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = legs.png; sourceTree = "<group>"; };
@@ -586,6 +590,8 @@
 				A9742DC5170DD72B001FD5A2 /* mallet.pod */,
 				A901CF7D187073C900A26A40 /* Masks */,
 				A9742DC6170DD72B001FD5A2 /* MountainGrass.jpg */,
+				A9F78F4A189EA32E001AE65E /* OrangeRing.png */,
+				A9F78F4B189EA32E001AE65E /* OrangeRing.ppng */,
 				A912B1A317510F70002F6674 /* PostProc.pfx */,
 				A9FF6DEA170DE83600FC35C8 /* RunningMen */,
 				A9742DC7170DD72B001FD5A2 /* ShadowButton48x48.png */,
@@ -759,6 +765,7 @@
 				A9742DD7170DD72B001FD5A2 /* BoxTexture.png in Resources */,
 				A9742DD8170DD72B001FD5A2 /* Bricks-Red.jpg in Resources */,
 				A901CF88187073C900A26A40 /* BaseTex.png in Resources */,
+				A9F78F4D189EA32E001AE65E /* OrangeRing.ppng in Resources */,
 				A9DDA35F17C8EF2E00F36657 /* Skybox.pvr in Resources */,
 				A9742DD9170DD72B001FD5A2 /* ButtonRing48x48.png in Resources */,
 				A9742DDA170DD72B001FD5A2 /* cocos3dMascot.png in Resources */,
@@ -766,6 +773,7 @@
 				A903C3511877331300BDE9C1 /* CC3LibEnvironmentReflection.fsh in Resources */,
 				A903C35A1877331300BDE9C1 /* CC3BumpMapObjectSpaceAlphaTest.fsh in Resources */,
 				A9742DDB170DD72B001FD5A2 /* cocos3dMascot.pod in Resources */,
+				A9F78F4C189EA32E001AE65E /* OrangeRing.png in Resources */,
 				A9742DDC170DD72B001FD5A2 /* Crate.png in Resources */,
 				A97398FF17C2CA8F00C17D89 /* Dragon-normals.jpg in Resources */,
 				A903C3611877331300BDE9C1 /* CC3NoTextureAlphaTest.fsh in Resources */,
