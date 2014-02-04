@@ -302,6 +302,13 @@
 
 
 #pragma mark -
+#pragma mark CC3Backdrop
+
+@implementation CC3Backdrop
+@end
+
+
+#pragma mark -
 #pragma mark CC3WireframeBoundingBoxNode
 
 @implementation CC3WireframeBoundingBoxNode

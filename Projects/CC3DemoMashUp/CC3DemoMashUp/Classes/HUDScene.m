@@ -43,7 +43,7 @@
 /** Create the camera and light. Other items are added from the main scene. */
 -(void) initializeScene {
 
-	self.backdrop = [CC3ClipSpaceNode node];
+	self.backdrop = [CC3Backdrop node];
 	
 	// Create the camera, place it back a bit, and add it to the scene
 	CC3Camera* cam = [CC3Camera nodeWithName: @"Camera"];

@@ -287,6 +287,21 @@
 
 
 #pragma mark -
+#pragma mark CC3Backdrop
+
+/**
+ * CC3Backdrop represents a simple full-view static backdrop that is rendered in clip-space.
+ * The backdrop can be created as a solid color, or a texture, by using either the nodeWithColor:
+ * or nodeWithTexture: method inherited from the CC3ClipSpaceNode superclass.
+ *
+ * See the class notes for the CC3ClipSpaceNode superclass, and the notes of the 
+ * shouldDrawInClipSpace property for further information about drawing a node in clip-space.
+ */
+@interface CC3Backdrop : CC3ClipSpaceNode
+@end
+
+
+#pragma mark -
 #pragma mark CC3WireframeBoundingBoxNode
 
 /**

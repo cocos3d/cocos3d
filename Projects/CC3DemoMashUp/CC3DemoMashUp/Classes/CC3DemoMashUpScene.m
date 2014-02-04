@@ -644,8 +644,8 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
  */
 -(void) addBackdrop {
 	if (self.cc3Layer.isOverlayingDeviceCamera) return;
-	self.backdrop = [CC3ClipSpaceNode nodeWithColor: kSkyColor];
-//	self.backdrop = [CC3ClipSpaceNode nodeWithTexture: [CC3Texture textureFromFile: kBrickTextureFile]];
+	self.backdrop = [CC3Backdrop nodeWithColor: kSkyColor];
+//	self.backdrop = [CC3Backdrop nodeWithTexture: [CC3Texture textureFromFile: kBrickTextureFile]];
 }
 
 /**
