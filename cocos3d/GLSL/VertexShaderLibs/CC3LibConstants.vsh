@@ -29,10 +29,10 @@
 
 /** This shader library declares a number of standard constants. */
 
-const float		kZero = 0.0;
-const float		kOne = 1.0;
-const vec3		kVec3Zero = vec3(0.0);
-const vec4		kVec4Zero = vec4(0.0);
-const vec4		kVec4ZeroLoc = vec4(0.0, 0.0, 0.0, 1.0);
-const vec3		kAttenuationNone = vec3(1.0, 0.0, 0.0);
+const float			kZero = 0.0;
+const float			kOne = 1.0;
+const vec3			kVec3Zero = vec3(0.0);
+const vec4			kVec4Zero = vec4(0.0);
+const vec4			kVec4ZeroLoc = vec4(0.0, 0.0, 0.0, 1.0);
+const highp vec3	kAttenuationNone = vec3(1.0, 0.0, 0.0);
 

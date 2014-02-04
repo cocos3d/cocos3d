@@ -1909,7 +1909,7 @@ static inline BOOL CC3AttenuationCoefficientsAreEqual(CC3AttenuationCoefficients
  * If at least one of the coefficients in the specified attenuation is not zero, the specified
  * attenuation coefficients is returned unchanged. However, if all three coefficients of the
  * specified attenuation coefficients are zero, the value is illegal (and will cause divide-by-zero
- * errors). If that is the case, this function returns kCC3AttenuationNone. 
+ * errors, especially in shaders). If that is the case, this function returns kCC3AttenuationNone.
  */
 static inline CC3AttenuationCoefficients CC3AttenuationCoefficientsLegalize(CC3AttenuationCoefficients ac) {
 	return (ac.a != 0.0f || ac.b != 0.0f || ac.c != 0.0f) ? ac : kCC3AttenuationNone;

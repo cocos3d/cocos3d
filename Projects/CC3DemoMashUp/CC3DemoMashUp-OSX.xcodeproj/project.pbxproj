@@ -140,6 +140,7 @@
 		A9DDA36317C8F4DB00F36657 /* icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = A9DDA36217C8F4DB00F36657 /* icon.icns */; };
 		A9F78F4C189EA32E001AE65E /* OrangeRing.png in Resources */ = {isa = PBXBuildFile; fileRef = A9F78F4A189EA32E001AE65E /* OrangeRing.png */; };
 		A9F78F4D189EA32E001AE65E /* OrangeRing.ppng in Resources */ = {isa = PBXBuildFile; fileRef = A9F78F4B189EA32E001AE65E /* OrangeRing.ppng */; };
+		A9F7924418A18DE5001AE65E /* fire.ppng in Resources */ = {isa = PBXBuildFile; fileRef = A9F7924318A18DE5001AE65E /* fire.ppng */; };
 		A9FF6DEF170DE83600FC35C8 /* belt.png in Resources */ = {isa = PBXBuildFile; fileRef = A9FF6DEB170DE83600FC35C8 /* belt.png */; };
 		A9FF6DF0170DE83600FC35C8 /* body.png in Resources */ = {isa = PBXBuildFile; fileRef = A9FF6DEC170DE83600FC35C8 /* body.png */; };
 		A9FF6DF1170DE83600FC35C8 /* legs.png in Resources */ = {isa = PBXBuildFile; fileRef = A9FF6DED170DE83600FC35C8 /* legs.png */; };
@@ -328,6 +329,7 @@
 		A9DDA36217C8F4DB00F36657 /* icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = icon.icns; sourceTree = "<group>"; };
 		A9F78F4A189EA32E001AE65E /* OrangeRing.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = OrangeRing.png; path = ../Common/Resources/OrangeRing.png; sourceTree = "<group>"; };
 		A9F78F4B189EA32E001AE65E /* OrangeRing.ppng */ = {isa = PBXFileReference; lastKnownFileType = file; name = OrangeRing.ppng; path = ../Common/Resources/OrangeRing.ppng; sourceTree = "<group>"; };
+		A9F7924318A18DE5001AE65E /* fire.ppng */ = {isa = PBXFileReference; lastKnownFileType = file; name = fire.ppng; path = ../Common/Resources/fire.ppng; sourceTree = "<group>"; };
 		A9FF6DEB170DE83600FC35C8 /* belt.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = belt.png; sourceTree = "<group>"; };
 		A9FF6DEC170DE83600FC35C8 /* body.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = body.png; sourceTree = "<group>"; };
 		A9FF6DED170DE83600FC35C8 /* legs.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = legs.png; sourceTree = "<group>"; };
@@ -572,6 +574,7 @@
 				A9742DAD170DD72B001FD5A2 /* Earth_1024.jpg */,
 				A99204FB1726E58F005E96CE /* EnvMap */,
 				A9742DAE170DD72B001FD5A2 /* fire.png */,
+				A9F7924318A18DE5001AE65E /* fire.ppng */,
 				A9742DAF170DD72B001FD5A2 /* fps_images-hd.png */,
 				A9742DB0170DD72B001FD5A2 /* fps_images-ipadhd.png */,
 				A9742DB1170DD72B001FD5A2 /* fps_images.png */,
@@ -817,6 +820,7 @@
 				A903C3621877331300BDE9C1 /* CC3NoTextureReflect.fsh in Resources */,
 				A903C3731877331300BDE9C1 /* CC3LibSingleTexture.vsh in Resources */,
 				A9742DFC170DD72B001FD5A2 /* MountainGrass.jpg in Resources */,
+				A9F7924418A18DE5001AE65E /* fire.ppng in Resources */,
 				A903C3541877331300BDE9C1 /* CC3LibSingleSidedFragmentColor.fsh in Resources */,
 				A903C3771877331300BDE9C1 /* CC3LibVertexPositionRigidBones.vsh in Resources */,
 				A9742DFD170DD72B001FD5A2 /* ShadowButton48x48.png in Resources */,

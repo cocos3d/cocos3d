@@ -39,7 +39,8 @@
 @synthesize ambientColor=_ambientColor, diffuseColor=_diffuseColor;
 @synthesize specularColor=_specularColor, emissionColor=_emissionColor;
 @synthesize shininess=_shininess, reflectivity=_reflectivity;
-@synthesize blendFunc=_blendFunc, shouldUseLighting=_shouldUseLighting;
+@synthesize shouldUseLighting=_shouldUseLighting;
+@synthesize blendFuncRGB=_blendFuncRGB, blendFuncAlpha=_blendFuncAlpha;
 @synthesize alphaTestFunction=_alphaTestFunction, alphaTestReference=_alphaTestReference;
 @synthesize shouldBlendAtFullOpacity=_shouldBlendAtFullOpacity;
 
@@ -51,15 +52,37 @@
 // Clamp to allowed range
 -(void) setReflectivity: (GLfloat) reflectivity { _reflectivity = CLAMP(reflectivity, 0.0, 1.0); }
 
--(GLenum) sourceBlend { return _blendFunc.src; }
+-(GLenum) sourceBlend { return self.sourceBlendRGB; }
 
--(void) setSourceBlend: (GLenum) aBlend { _blendFunc.src = aBlend; }
+-(void) setSourceBlend: (GLenum) aBlend {
+	self.sourceBlendRGB = aBlend;
+	self.sourceBlendAlpha = aBlend;
+}
 
--(GLenum) destinationBlend { return _blendFunc.dst; }
+-(GLenum) destinationBlend { return self.destinationBlendRGB; }
 
--(void) setDestinationBlend: (GLenum) aBlend { _blendFunc.dst = aBlend; }
+-(void) setDestinationBlend: (GLenum) aBlend {
+	self.destinationBlendRGB = aBlend;
+	self.destinationBlendAlpha = aBlend;
+}
 
--(BOOL) isOpaque { return (_blendFunc.src == GL_ONE && _blendFunc.dst == GL_ZERO); }
+-(GLenum) sourceBlendRGB { return _blendFuncRGB.src; }
+
+-(void) setSourceBlendRGB: (GLenum) aBlend { _blendFuncRGB.src = aBlend; }
+
+-(GLenum) destinationBlendRGB { return _blendFuncRGB.dst; }
+
+-(void) setDestinationBlendRGB: (GLenum) aBlend { _blendFuncRGB.dst = aBlend; }
+
+-(GLenum) sourceBlendAlpha { return _blendFuncAlpha.src; }
+
+-(void) setSourceBlendAlpha: (GLenum) aBlend { _blendFuncAlpha.src = aBlend; }
+
+-(GLenum) destinationBlendAlpha { return _blendFuncAlpha.dst; }
+
+-(void) setDestinationBlendAlpha: (GLenum) aBlend { _blendFuncAlpha.dst = aBlend; }
+
+-(BOOL) isOpaque { return (self.sourceBlendRGB == GL_ONE && self.destinationBlendRGB == GL_ZERO); }
 
 /**
  * If I should be opaque, turn off alpha blending. If I should not be opaque and I
@@ -68,16 +91,19 @@
 -(void) setIsOpaque: (BOOL) shouldBeOpaque {
 	if (shouldBeOpaque) {
 		// I should be opaque, so turn off alpha blending altogether.
-		_blendFunc.src = GL_ONE;
-		_blendFunc.dst = GL_ZERO;
+		self.sourceBlend = GL_ONE;
+		self.destinationBlend = GL_ZERO;
 	} else {
 		// If a source blend has not yet been set AND the texture does NOT contain pre-multiplied
 		// alpha, set a source alpha blend. If the texture contains pre-multiplied alpha, leave the
 		// source blend at GL_ONE and apply the opacity to the color of the material instead.
-		if ( (_blendFunc.src == GL_ONE) && !self.hasPremultipliedAlpha ) _blendFunc.src = GL_SRC_ALPHA;
+		BOOL noPreMultAlpha = !self.hasPremultipliedAlpha;
+		if ( (self.sourceBlendRGB == GL_ONE) && noPreMultAlpha ) self.sourceBlendRGB = GL_SRC_ALPHA;
+		if ( (self.sourceBlendAlpha == GL_ONE) && noPreMultAlpha ) self.sourceBlendAlpha = GL_SRC_ALPHA;
 		
 		// If destination blend has not yet been set, set it a destination alpha blend.
-		if (_blendFunc.dst == GL_ZERO) _blendFunc.dst = GL_ONE_MINUS_SRC_ALPHA;
+		if (self.destinationBlendRGB == GL_ZERO) self.destinationBlendRGB = GL_ONE_MINUS_SRC_ALPHA;
+		if (self.destinationBlendAlpha == GL_ZERO) self.destinationBlendAlpha = GL_ONE_MINUS_SRC_ALPHA;
 	}
 }
 
@@ -96,9 +122,7 @@
 	_alphaTestFunction = shouldDraw ? GL_ALWAYS : GL_GREATER;
 }
 
--(BOOL) shouldApplyOpacityToColor {
-	return _blendFunc.src == GL_ONE && self.hasPremultipliedAlpha;
-}
+-(BOOL) shouldApplyOpacityToColor { return self.sourceBlendRGB == GL_ONE && self.hasPremultipliedAlpha; }
 
 -(ccColor4F) effectiveAmbientColor {
 	return self.shouldApplyOpacityToColor ? CCC4FBlendAlpha(self.ambientColor) : self.ambientColor;
@@ -191,6 +215,13 @@
 -(void) setCascadeOpacityEnabled: (BOOL) cascadeOpacityEnabled {}
 
 -(void) updateDisplayedOpacity: (GLubyte) opacity {}
+
+-(ccBlendFunc) blendFunc { return self.blendFuncRGB; }
+
+-(void) setBlendFunc: (ccBlendFunc) blendFunc {
+	self.blendFuncRGB = blendFunc;
+	self.blendFuncAlpha = blendFunc;
+}
 
 static ccBlendFunc _defaultBlendFunc = {GL_ONE, GL_ZERO};
 
@@ -364,7 +395,7 @@ static ccBlendFunc _defaultBlendFunc = {GL_ONE, GL_ZERO};
 		_emissionColor = kCC3DefaultMaterialColorEmission;
 		_shininess = kCC3DefaultMaterialShininess;
 		_reflectivity = kCC3DefaultMaterialReflectivity;
-		_blendFunc = [[self class] defaultBlendFunc];
+		self.blendFunc = [[self class] defaultBlendFunc];
 		_shouldBlendAtFullOpacity = NO;
 		_alphaTestFunction = GL_ALWAYS;
 		_alphaTestReference = 0.0f;
@@ -410,7 +441,8 @@ static ccBlendFunc _defaultBlendFunc = {GL_ONE, GL_ZERO};
 	_emissionColor = another.emissionColor;
 	_shininess = another.shininess;
 	_reflectivity = another.reflectivity;
-	_blendFunc = another.blendFunc;
+	_blendFuncRGB = another.blendFuncRGB;
+	_blendFuncAlpha = another.blendFuncAlpha;
 	_alphaTestFunction = another.alphaTestFunction;
 	_alphaTestReference = another.alphaTestReference;
 	_shouldUseLighting = another.shouldUseLighting;
@@ -424,12 +456,15 @@ static ccBlendFunc _defaultBlendFunc = {GL_ONE, GL_ZERO};
 }
 
 -(NSString*) fullDescription {
-	return [NSString stringWithFormat: @"%@ %@using lighting, ambient: %@, diffuse: %@, specular: %@, emission: %@, shininess: %.2f, reflectivity: %.3f, blend: (%@, %@), alpha test: (%@, %.3f), with %u textures",
+	return [NSString stringWithFormat: @"%@ %@using lighting, ambient: %@, diffuse: %@, specular: %@,"
+			@" emission: %@, shininess: %.2f, reflectivity: %.3f, blendRGB: (%@, %@), blendAlpha: (%@, %@),"
+			@" alpha test: (%@, %.3f), with %u textures",
 			[super fullDescription], (_shouldUseLighting ? @"" : @"not"),
 			NSStringFromCCC4F(_ambientColor), NSStringFromCCC4F(_diffuseColor),
 			NSStringFromCCC4F(_specularColor), NSStringFromCCC4F(_emissionColor),
 			_shininess, _reflectivity,
-			NSStringFromGLEnum(_blendFunc.src), NSStringFromGLEnum(_blendFunc.dst),
+			NSStringFromGLEnum(self.sourceBlendRGB), NSStringFromGLEnum(self.destinationBlendRGB),
+			NSStringFromGLEnum(self.sourceBlendAlpha), NSStringFromGLEnum(self.destinationBlendAlpha),
 			NSStringFromGLEnum(_alphaTestFunction), _alphaTestReference,
 			self.textureCount];
 }
@@ -476,7 +511,10 @@ static GLuint lastAssignedMaterialTag;
 	CC3OpenGL* gl = visitor.gl;
 	BOOL shouldBlend = !self.isOpaque;
 	[gl enableBlend: shouldBlend];
-	if (shouldBlend) [gl setBlendFuncSrc: _blendFunc.src dst: _blendFunc.dst];
+	if (shouldBlend) [gl setBlendFuncSrcRGB: _blendFuncRGB.src
+									 dstRGB: _blendFuncRGB.dst
+								   srcAlpha: _blendFuncAlpha.src
+								   dstAlpha: _blendFuncAlpha.dst];
 }
 
 /**

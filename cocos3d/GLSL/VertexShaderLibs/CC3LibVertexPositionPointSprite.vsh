@@ -64,7 +64,7 @@ uniform bool			u_cc3VertexHasPointSize;	/**< Whether vertex point size attribute
 uniform float			u_cc3PointSize;				/**< Default size of points, if not specified per-vertex. */
 uniform float			u_cc3PointMinimumSize;		/**< Minimum size to which points will be allowed to shrink. */
 uniform float			u_cc3PointMaximumSize;		/**< Maximum size to which points will be allowed to grow. */
-uniform vec3			u_cc3PointSizeAttenuation;	/**< Coefficients of the size attenuation equation. */
+uniform highp vec3		u_cc3PointSizeAttenuation;	/**< Coefficients of the size attenuation equation. */
 
 highp vec4				vtxPosition;				/**< The vertex position. High prec to match vertex attribute. */
 vec3					vtxNormal;					/**< The vertex normal. */
@@ -88,8 +88,8 @@ void sizePoint() {
 
 	if (u_cc3PointSizeAttenuation != kAttenuationNone) {
 		highp vec3 vtxPosEye = (u_cc3MatrixModelView * vtxPosition).xyz;
-		float vtxDistEye = length(vtxPosEye);
-		vec3 attenuationEquation = vec3(1.0, vtxDistEye, vtxDistEye * vtxDistEye);
+		highp float vtxDistEye = length(vtxPosEye);
+		highp vec3 attenuationEquation = highp vec3(1.0, vtxDistEye, vtxDistEye * vtxDistEye);
 		size /= sqrt(dot(attenuationEquation, u_cc3PointSizeAttenuation));
 	}
 

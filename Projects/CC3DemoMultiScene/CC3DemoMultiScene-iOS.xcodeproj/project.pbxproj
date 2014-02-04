@@ -182,6 +182,7 @@
 		A9D4F702188979F000382DDC /* CC3TexturableRigidBones.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9D4F6D2188979F000382DDC /* CC3TexturableRigidBones.vsh */; };
 		A9F78F5E189EA377001AE65E /* OrangeRing.png in Resources */ = {isa = PBXBuildFile; fileRef = A9F78F5C189EA377001AE65E /* OrangeRing.png */; };
 		A9F78F5F189EA377001AE65E /* OrangeRing.ppng in Resources */ = {isa = PBXBuildFile; fileRef = A9F78F5D189EA377001AE65E /* OrangeRing.ppng */; };
+		A9F7924018A185F8001AE65E /* fire.ppng in Resources */ = {isa = PBXBuildFile; fileRef = A9F7923F18A185F8001AE65E /* fire.ppng */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -408,6 +409,7 @@
 		A9D4F6D2188979F000382DDC /* CC3TexturableRigidBones.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3TexturableRigidBones.vsh; sourceTree = "<group>"; };
 		A9F78F5C189EA377001AE65E /* OrangeRing.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = OrangeRing.png; sourceTree = "<group>"; };
 		A9F78F5D189EA377001AE65E /* OrangeRing.ppng */ = {isa = PBXFileReference; lastKnownFileType = file; path = OrangeRing.ppng; sourceTree = "<group>"; };
+		A9F7923F18A185F8001AE65E /* fire.ppng */ = {isa = PBXFileReference; lastKnownFileType = file; path = fire.ppng; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -550,6 +552,7 @@
 				A904C49D18887FCF0070C47F /* Earth_1024.jpg */,
 				A904C4A518887FCF0070C47F /* EnvMap */,
 				A904C4A618887FCF0070C47F /* fire.png */,
+				A9F7923F18A185F8001AE65E /* fire.ppng */,
 				A904C4A718887FCF0070C47F /* fps_images-hd.png */,
 				A904C4A818887FCF0070C47F /* fps_images-ipadhd.png */,
 				A904C4A918887FCF0070C47F /* fps_images.png */,
@@ -1011,6 +1014,7 @@
 				A904C50D18887FD00070C47F /* Grass.jpg in Resources */,
 				A904C53A18887FD00070C47F /* man.pod in Resources */,
 				A904C50918887FD00070C47F /* fps_images-hd.png in Resources */,
+				A9F7924018A185F8001AE65E /* fire.ppng in Resources */,
 				A904C51918887FD00070C47F /* Icon-50.png in Resources */,
 				A904C53C18887FD00070C47F /* ShadowButtonLatched48x48.png in Resources */,
 				A9D4F6D7188979F000382DDC /* CC3LibEnvironmentReflection.fsh in Resources */,

@@ -156,6 +156,7 @@
 		A9EBA32615376A4E007FFE0C /* HUDScene.m in Sources */ = {isa = PBXBuildFile; fileRef = A9EBA32515376A4E007FFE0C /* HUDScene.m */; };
 		A9F78F5A189EA362001AE65E /* OrangeRing.png in Resources */ = {isa = PBXBuildFile; fileRef = A9F78F58189EA362001AE65E /* OrangeRing.png */; };
 		A9F78F5B189EA362001AE65E /* OrangeRing.ppng in Resources */ = {isa = PBXBuildFile; fileRef = A9F78F59189EA362001AE65E /* OrangeRing.ppng */; };
+		A9F7923E18A17BA5001AE65E /* fire.ppng in Resources */ = {isa = PBXBuildFile; fileRef = A9F7923D18A17BA5001AE65E /* fire.ppng */; };
 		A9F7DA801761412100FC5096 /* Skybox.pvr in Resources */ = {isa = PBXBuildFile; fileRef = A9F7DA7F1761412100FC5096 /* Skybox.pvr */; };
 		A9FF6E12170DF78600FC35C8 /* Head_clonespace.png in Resources */ = {isa = PBXBuildFile; fileRef = A9FF6E10170DF78600FC35C8 /* Head_clonespace.png */; };
 		A9FF6E13170DF78600FC35C8 /* Head_diffuse.png in Resources */ = {isa = PBXBuildFile; fileRef = A9FF6E11170DF78600FC35C8 /* Head_diffuse.png */; };
@@ -365,6 +366,7 @@
 		A9EBA32515376A4E007FFE0C /* HUDScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HUDScene.m; sourceTree = "<group>"; };
 		A9F78F58189EA362001AE65E /* OrangeRing.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = OrangeRing.png; sourceTree = "<group>"; };
 		A9F78F59189EA362001AE65E /* OrangeRing.ppng */ = {isa = PBXFileReference; lastKnownFileType = file; path = OrangeRing.ppng; sourceTree = "<group>"; };
+		A9F7923D18A17BA5001AE65E /* fire.ppng */ = {isa = PBXFileReference; lastKnownFileType = file; path = fire.ppng; sourceTree = "<group>"; };
 		A9F7DA7F1761412100FC5096 /* Skybox.pvr */ = {isa = PBXFileReference; lastKnownFileType = file; path = Skybox.pvr; sourceTree = "<group>"; };
 		A9FF6E10170DF78600FC35C8 /* Head_clonespace.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Head_clonespace.png; sourceTree = "<group>"; };
 		A9FF6E11170DF78600FC35C8 /* Head_diffuse.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Head_diffuse.png; sourceTree = "<group>"; };
@@ -581,6 +583,7 @@
 				A933812D14E09E9000FCA181 /* Earth_1024.jpg */,
 				A91153621723A27F004A87FC /* EnvMap */,
 				A92DA7971427B5980051AFFA /* fire.png */,
+				A9F7923D18A17BA5001AE65E /* fire.ppng */,
 				A971D30D1663EC6E00769DC5 /* fps_images-hd.png */,
 				A971D30E1663EC6E00769DC5 /* fps_images-ipadhd.png */,
 				A971D30F1663EC6E00769DC5 /* fps_images.png */,
@@ -904,6 +907,7 @@
 				A971D3111663EC6E00769DC5 /* fps_images-ipadhd.png in Resources */,
 				A971D3121663EC6E00769DC5 /* fps_images.png in Resources */,
 				A94EF4FA17C66D6900FA969E /* Default.png in Resources */,
+				A9F7923E18A17BA5001AE65E /* fire.ppng in Resources */,
 				A97A31301688FD6A004CBAA1 /* fps_images_1.png in Resources */,
 				A94EF4D817C65E5A00FA969E /* Icon-40.png in Resources */,
 				A903C11E1877329300BDE9C1 /* CC3LibSetGLFragColor.fsh in Resources */,

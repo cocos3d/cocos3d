@@ -101,8 +101,10 @@ typedef struct {
 	GLbitfield value_GL_COORD_REPLACE;				// Track up to 32 texture units
 	GLbitfield isKnownCap_GL_COORD_REPLACE;			// Track up to 32 texture units
 	
-	GLenum value_GL_BLEND_SRC;
-	GLenum value_GL_BLEND_DST;
+	GLenum value_GL_BLEND_SRC_RGB;
+	GLenum value_GL_BLEND_DST_RGB;
+	GLenum value_GL_BLEND_SRC_ALPHA;
+	GLenum value_GL_BLEND_DST_ALPHA;
 	
 	ccColor4F value_GL_COLOR_CLEAR_VALUE;
 	GLfloat value_GL_DEPTH_CLEAR_VALUE;
@@ -599,8 +601,12 @@ typedef struct {
 /** Sets the alpha function and reference value. */
 -(void) setAlphaFunc: (GLenum) func reference: (GLfloat) ref;
 
-/** Sets the blend function. */
+/** Sets the blend function, forcing RGB and alpha blending to use the same blending function. */
 -(void) setBlendFuncSrc: (GLenum) src dst: (GLenum) dst;
+
+/** Sets the blend function, allowing RGB and alpha blending to be set separately. */
+-(void) setBlendFuncSrcRGB: (GLenum) srcRGB dstRGB: (GLenum) dstRGB
+				  srcAlpha: (GLenum) srcAlpha dstAlpha: (GLenum) dstAlpha;
 
 
 #pragma mark Textures

@@ -74,7 +74,7 @@
 #define kBrickTextureFile				@"Bricks-Red.jpg"
 #define kRunningManPODFile				@"man.pod"
 #define kMalletPODFile					@"mallet.pod"
-#define kPointParticleTextureFile		@"fire.png"
+#define kPointParticleTextureFile		@"fire.ppng"
 #define kMeshParticleTextureFile		@"BallBoxTexture.png"
 #define kReflectiveMaskPODFile			@"ReflectiveMask.pod"
 #define kEtchedMaskPODFile				@"EtchedMask.pod"
@@ -2212,7 +2212,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	emitter.minParticleStartingSize = 20.0f;
 	emitter.maxParticleStartingSize = 40.0f;					// Starting at 20-40 pixels wide
 	emitter.minParticleEndingSize = kCC3ParticleConstantSize;
-	emitter.maxParticleEndingSize = kCC3ParticleConstantSize;	// Stay same size will alive
+	emitter.maxParticleEndingSize = kCC3ParticleConstantSize;	// Stay same size while alive
 	emitter.minParticleStartingColor = kCCC4FDarkGray;
 	emitter.maxParticleStartingColor = kCCC4FWhite;				// Mix of light colors
 	emitter.minParticleEndingColor = kCC3ParticleFadeOut;

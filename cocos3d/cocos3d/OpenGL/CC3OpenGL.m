@@ -490,13 +490,26 @@ static NSObject<CC3OpenGLDelegate>* _delegate = nil;
 -(void) setAlphaFunc: (GLenum) func reference: (GLfloat) ref {}
 
 -(void) setBlendFuncSrc: (GLenum) src dst: (GLenum) dst {
-	if ((src != value_GL_BLEND_SRC) || (dst != value_GL_BLEND_DST) || !isKnownBlendFunc) {
-		value_GL_BLEND_SRC = src;
-		value_GL_BLEND_DST = dst;
-		isKnownBlendFunc = YES;
-		glBlendFunc(src, dst);
-		LogGLErrorTrace(@"glBlendFunc(%@, %@)", NSStringFromGLEnum(src), NSStringFromGLEnum(dst));
-	}
+	[self setBlendFuncSrcRGB: src dstRGB: dst srcAlpha: src dstAlpha: dst];
+}
+
+-(void) setBlendFuncSrcRGB: (GLenum) srcRGB dstRGB: (GLenum) dstRGB
+				  srcAlpha: (GLenum) srcAlpha dstAlpha: (GLenum) dstAlpha {
+	if ((srcRGB == value_GL_BLEND_SRC_RGB) &&
+		(dstRGB == value_GL_BLEND_DST_RGB) &&
+		(srcAlpha == value_GL_BLEND_SRC_ALPHA) &&
+		(dstAlpha == value_GL_BLEND_DST_ALPHA) &&
+		isKnownBlendFunc) return;
+	
+	value_GL_BLEND_SRC_RGB = srcRGB;
+	value_GL_BLEND_DST_RGB = dstRGB;
+	value_GL_BLEND_SRC_ALPHA = srcAlpha;
+	value_GL_BLEND_DST_ALPHA = dstAlpha;
+	isKnownBlendFunc = YES;
+	glBlendFuncSeparate(srcRGB, dstRGB, srcAlpha, dstAlpha);
+	LogGLErrorTrace(@"glBlendFuncSeparate(%@, %@, %@, %@)",
+					NSStringFromGLEnum(srcRGB), NSStringFromGLEnum(dstRGB),
+					NSStringFromGLEnum(srcAlpha), NSStringFromGLEnum(dstAlpha));
 }
 
 

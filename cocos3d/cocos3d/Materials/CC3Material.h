@@ -176,7 +176,8 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
 	GLfloat _reflectivity;
 	GLenum _alphaTestFunction;
 	GLfloat _alphaTestReference;
-	ccBlendFunc _blendFunc;
+	ccBlendFunc _blendFuncRGB;
+	ccBlendFunc _blendFuncAlpha;
 	BOOL _shouldUseLighting : 1;
 	BOOL _shouldBlendAtFullOpacity : 1;
 }
@@ -331,6 +332,11 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
  * performance. The performance improvement is small, but can add up if a large number of opaque
  * objects are rendered as if they were translucent.
  *
+ * Materials support different using blending functions for the RGB components and the alpha component.
+ * To set separate source blend values for RGB and alpha, use the sourceBlendRGB and sourceBlendAlpha
+ * properties instead. Setting this property sets the sourceBlendRGB and sourceBlendAlpha properties
+ * to the same value. Querying this property returns the value of the sourceBlendRGB property.
+ *
  * The initial value is determined by the value of the class-side property
  * defaultBlendFunc, which can be modified by the setDefaultBlendFunc: method.
  */
@@ -360,10 +366,64 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
  * performance. The performance improvement is small, but can add up if a large number of opaque
  * objects are rendered as if they were translucent.
  *
+ * Materials support different using blending functions for the RGB components and the alpha component.
+ * To set separate destination blend values for RGB and alpha, use the destinationBlendRGB and 
+ * destinationBlendAlpha properties instead. Setting this property sets the destinationBlendRGB and
+ * destinationBlendAlpha properties to the same value. Querying this property returns the value of
+ * the destinationBlendRGB property.
+ *
  * The initial value is determined by the value of the class-side property
  * defaultBlendFunc, which can be modified by the setDefaultBlendFunc: method.
  */
 @property(nonatomic, assign) GLenum destinationBlend;
+
+/**
+ * The blending function to be applied to the RGB components of the source material (this material).
+ * This property must be set to one of the valid GL blending functions.
+ *
+ * In conjunction with the sourceBlendAlpha property, this property allows the RGB blending and
+ * alpha blending to be specified separately. Alternately, you can use the sourceBlend property
+ * to set both RGB and alpha blending functions to the same value.
+ *
+ * See the notes of the sourceBlend property for more information about material blending.
+ */
+@property(nonatomic, assign) GLenum sourceBlendRGB;
+
+/**
+ * The blending function to be applied to the RGB components of the destination material.
+ * This property must be set to one of the valid GL blending functions.
+ *
+ * In conjunction with the destinationBlendAlpha property, this property allows the RGB blending 
+ * and alpha blending to be specified separately. Alternately, you can use the destinationBlend
+ * property to set both RGB and alpha blending functions to the same value.
+ *
+ * See the notes of the destinationBlend property for more information about material blending.
+ */
+@property(nonatomic, assign) GLenum destinationBlendRGB;
+
+/**
+ * The blending function to be applied to the alpha components of the source material (this material).
+ * This property must be set to one of the valid GL blending functions.
+ *
+ * In conjunction with the sourceBlendRGB property, this property allows the RGB blending and
+ * alpha blending to be specified separately. Alternately, you can use the sourceBlend property
+ * to set both RGB and alpha blending functions to the same value.
+ *
+ * See the notes of the sourceBlend property for more information about material blending.
+ */
+@property(nonatomic, assign) GLenum sourceBlendAlpha;
+
+/**
+ * The blending function to be applied to the alpha components of the destination material.
+ * This property must be set to one of the valid GL blending functions.
+ *
+ * In conjunction with the destinationBlendRGB property, this property allows the RGB blending
+ * and alpha blending to be specified separately. Alternately, you can use the destinationBlend
+ * property to set both RGB and alpha blending functions to the same value.
+ *
+ * See the notes of the destinationBlend property for more information about material blending.
+ */
+@property(nonatomic, assign) GLenum destinationBlendAlpha;
 
 /**
  * Indicates whether this material is opaque.
@@ -558,19 +618,58 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
 /**
  * Implementation of the CCBlendProtocol blendFunc property.
  *
- * This is a convenience property that gets and sets both the sourceBlend and
- * destinationBlend properties using a single structure.
+ * This is a convenience property that gets and sets the sourceBlend and destinationBlend 
+ * properties using a single structure.
+ *
+ * Materials support different using blending functions for the RGB components and the alpha component.
+ * To set separate blend values for RGB and alpha, use the blendFuncRGB and blendFuncAlpha properties
+ * instead. Setting this property sets the blendFuncRGB and blendFuncAlpha properties to the same value.
+ * Querying this property returns the value of the blendFuncRGB property.
  */
 @property(nonatomic, assign) ccBlendFunc blendFunc;
 
 /**
+ * The blending function to be applied to the RGB components.
+ *
+ * This is a convenience property that gets and sets both the sourceBlendRGB and
+ * destinationBlendRGB properties using a single structure.
+ *
+ * In conjunction with the blendFuncAlpha property, this property allows the RGB blending and
+ * alpha blending to be specified separately. Alternately, you can use the blendFunc property
+ * to set both RGB and alpha blending functions to the same value.
+ *
+ * See the notes of the sourceBlend and destinationBlend properties for more information
+ * about material blending.
+ */
+@property(nonatomic, assign) ccBlendFunc blendFuncRGB;
+
+/**
+ * The blending function to be applied to the alpha component.
+ *
+ * This is a convenience property that gets and sets both the sourceBlendAlpha and
+ * destinationBlendAlpha properties using a single structure.
+ *
+ * In conjunction with the blendFuncRGB property, this property allows the RGB blending and
+ * alpha blending to be specified separately. Alternately, you can use the blendFunc property
+ * to set both RGB and alpha blending functions to the same value.
+ *
+ * See the notes of the sourceBlend and destinationBlend properties for more information 
+ * about material blending.
+ */
+@property(nonatomic, assign) ccBlendFunc blendFuncAlpha;
+
+/**
  * Returns the default GL material source and destination blend function used for new instances.
+ * This affects both the RGB and alpha blending components.
  *
  * The initial value is {GL_ONE, GL_ZERO}.
  */
 +(ccBlendFunc) defaultBlendFunc;
 
-/** Sets the default GL material source and destination blend function used for new instances. */
+/** 
+ * Sets the default GL material source and destination blend function used for new instances. 
+ * This affects both the RGB and alpha blending components.
+ */
 +(void) setDefaultBlendFunc: (ccBlendFunc) aBlendFunc;
 
 /** @deprecated Moved to CC3MeshNode. */
@@ -718,7 +817,7 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
  * Returns whether the opacity of each of the material colors (ambient, diffuse, specular and emission)
  * should be blended (multiplied) by its alpha value prior to being submitted to the GL engine.
  *
- * This property returns YES if the sourceBlend property is set to GL_ONE and the hasPremultipliedAlpha
+ * This property returns YES if the sourceBlendRGB property is set to GL_ONE and the hasPremultipliedAlpha
  * property returns YES, otherwise this property returns NO. The combination of full source blending
  * and pre-multiplied texture alpha can be made translucent by blending each color with its alpha value.
  *

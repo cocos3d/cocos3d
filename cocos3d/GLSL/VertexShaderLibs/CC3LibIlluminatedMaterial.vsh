@@ -50,7 +50,7 @@
  *   - uniform lowp vec4	u_cc3LightAmbientColor[];			// Ambient color of each light.
  *   - uniform lowp vec4	u_cc3LightDiffuseColor[];			// Diffuse color of each light.
  *   - uniform lowp vec4	u_cc3LightSpecularColor[];			// Specular color of each light.
- *   - uniform vec3			u_cc3LightAttenuation[];			// Coefficients of the attenuation equation of each light.
+ *   - uniform highp vec3	u_cc3LightAttenuation[];			// Coefficients of the attenuation equation of each light.
  *   - uniform highp vec3	u_cc3LightSpotDirectionModel[];		// Direction of each spotlight in local coordinates of the model (not light).
  *   - uniform float		u_cc3LightSpotExponent[];			// Directional attenuation factor, if spotlight, of each light.
  *   - uniform float		u_cc3LightSpotCutoffAngleCosine[];	// Cosine of spotlight cutoff angle of each light.
@@ -88,7 +88,7 @@ uniform highp vec4	u_cc3LightPositionModel[MAX_LIGHTS];			/**< Position or norma
 uniform lowp vec3	u_cc3LightAmbientColor[MAX_LIGHTS];				/**< Ambient color of each light. */
 uniform lowp vec3	u_cc3LightDiffuseColor[MAX_LIGHTS];				/**< Diffuse color of each light. */
 uniform lowp vec3	u_cc3LightSpecularColor[MAX_LIGHTS];			/**< Specular color of each light. */
-uniform vec3		u_cc3LightAttenuation[MAX_LIGHTS];				/**< Coefficients of the attenuation equation of each light. */
+uniform highp vec3	u_cc3LightAttenuation[MAX_LIGHTS];				/**< Coefficients of the attenuation equation of each light. */
 uniform highp vec3	u_cc3LightSpotDirectionModel[MAX_LIGHTS];		/**< Direction of each spotlight in local coordinates of the model (not light). */
 uniform float		u_cc3LightSpotExponent[MAX_LIGHTS];				/**< Directional attenuation factor, if spotlight, of each light. */
 uniform float		u_cc3LightSpotCutoffAngleCosine[MAX_LIGHTS];	/**< Cosine of spotlight cutoff angle of each light. */

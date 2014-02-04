@@ -64,8 +64,11 @@ static GLfloat shininessExpansionFactor = 128.0f;
 		self.diffuseColor = ccc4f(psm->pfMatDiffuse[0], psm->pfMatDiffuse[1], psm->pfMatDiffuse[2], psm->fMatOpacity);
 		self.specularColor = ccc4f(psm->pfMatSpecular[0], psm->pfMatSpecular[1], psm->pfMatSpecular[2], psm->fMatOpacity);
 		self.shininess = psm->fMatShininess * shininessExpansionFactor;
-		self.sourceBlend = GLBlendFuncFromEPODBlendFunc(psm->eBlendSrcA);
-		self.destinationBlend = GLBlendFuncFromEPODBlendFunc(psm->eBlendDstA);
+		
+		self.sourceBlendRGB = GLBlendFuncFromEPODBlendFunc(psm->eBlendSrcRGB);
+		self.destinationBlendRGB = GLBlendFuncFromEPODBlendFunc(psm->eBlendDstRGB);
+		self.sourceBlendAlpha = GLBlendFuncFromEPODBlendFunc(psm->eBlendSrcA);
+		self.destinationBlendAlpha = GLBlendFuncFromEPODBlendFunc(psm->eBlendDstA);
 
 		// Add the bump-map texture first, then add the remaining in order.
 		// Textures are only added if they are in the POD file.
