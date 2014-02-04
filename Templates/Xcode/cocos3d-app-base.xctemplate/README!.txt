@@ -39,14 +39,14 @@ When adapting this template project for your own application, don't forget to re
 cocos2d & OpenGL ES Version Compatibility
 -----------------------------------------
 
-cocos3d under iOS is compatible with `cocos2d` `2.1` and `2.0`, for using programmable-pipeline
-OpenGL ES 2.0, and is compatible with `cocos2d` `1.1` and `1.0.1`, for using fixed-pipeline OpenGL ES 1.1.
+cocos3d under iOS and Android is compatible with `cocos2d` `2.1`, for using programmable-pipeline
+OpenGL ES 2.0, and is compatible with `cocos2d` `1.1`, for using fixed-pipeline OpenGL ES 1.1.
 
-cocos3d under OSX is compatible with `cocos2d` `2.1` and `2.0`, for using programmable-pipeline
-OpenGL (OSX). cocos3d is not compatible with `cocos2d` `1.1` and `1.0.1` under OSX.
+cocos3d under OSX is compatible with `cocos2d` `2.1`, for using programmable-pipeline
+OpenGL (OSX). cocos3d is not compatible with `cocos2d` `1.1` under OSX.
 
-By linking to cocos2d 2.x, you will automatically use OpenGL ES 2.0, and by linking to
-cocos2d 1.x, you will automatically use OpenGL ES 1.1. Because of this, you cannot mix
+By linking to cocos2d 2.1, you will automatically use OpenGL ES 2.0, and by linking to
+cocos2d 1.1, you will automatically use OpenGL ES 1.1. Because of this, you cannot mix
 the use of OpenGL ES 2.0 and 1.1 within a single application.
 
 This template application will use whichever version of cocos2d you indicated when you ran
@@ -58,9 +58,9 @@ to this project by following these steps within Xcode:
 3. Add the newly linked cocos2d files to the project by dragging the cocos2d folder from
    the cocos3d distribution folder to the Xcode Project Navigator panel.
 
-If you are linking to `cocos2d 2.x` or `cocos2d 1.x`, once the template application opens up,
+If you are linking to `cocos2d 2.1` or `cocos2d 1.1`, once the template application opens up,
 you must add the `cocos2d` target within your project as a dependency of the ___PROJECTNAMEASIDENTIFIER___ 
-target. This step is necessary because `cocos2d 2.x` and `cocos2d 1.x` do not use Automatic
+target. This step is necessary because `cocos2d 2.1` and `cocos2d 1.1` do not use Automatic
 Reference Counting (ARC), and must be compiled separately in its own target.
 
 To add the `cocos2d` target as a dependency of the ___PROJECTNAMEASIDENTIFIER___ target, follow these steps:
