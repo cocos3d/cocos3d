@@ -34,15 +34,25 @@
 
 @implementation CC3PODResourceNode
 
--(GLuint) animationFrameCount {
-	return _resource ? ((CC3PODResource*)_resource).animationFrameCount : 0;
-}
-
--(GLfloat) animationFrameRate {
-	return _resource ? ((CC3PODResource*)_resource).animationFrameRate : 0.0f;
-}
+@synthesize animationFrameCount=_animationFrameCount;
+@synthesize animationFrameRate=_animationFrameRate;
 
 -(Class) resourceClass { return [CC3PODResource class]; }
+
+/** Overridden to extract the animation frame count and rate. */
+-(void) populateFromResource: (CC3PODResource*) resource {
+	[super populateFromResource: resource];
+	
+	_animationFrameCount = resource.animationFrameCount;
+	_animationFrameRate = resource.animationFrameRate;
+}
+
+-(void) populateFrom: (CC3PODResourceNode*) another {
+	[super populateFrom: another];
+	
+	_animationFrameCount = another.animationFrameCount;
+	_animationFrameRate = another.animationFrameRate;
+}
 
 @end
 

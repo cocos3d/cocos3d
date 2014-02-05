@@ -35,94 +35,76 @@
 
 
 /**
- * A CC3ResourceNode is a CC3Node that that wraps an instance of CC3NodesResource in the
- * resource property, extracts the nodes from that resource, and forms the root of the
- * resulting node structural assembly.
+ * A CC3ResourceNode is a CC3Node that that can be populated from a CC3NodesResource, and
+ * forms the root of the node structural assembly loaded from a resource file.
  *
- * The underlying CC3NodesResource instance can either be set directly, or subclasses can
- * override the resourceClass property to allow the resource property to be lazily created
- * when it is first accessed.
+ * This is an abstract class, and subclasses are specialized for loading different types
+ * of resource files.
  *
- * Once this resource node contains a resource, this resource node can be loaded
- * using the loadFromFile: method.
+ * A subclass instance can be populated in one of several ways:
+ *   - The most common way is to invoke one of the initialization methods that specify a
+ *     path to a resource file.
+ *   - Or, an instance can be instantiated, and then populated by invoking one of the
+ *     loadFromFile:... methods.
+ *   - Or, if a compatible resource has already been loaded, this instance can be instantiated,
+ *     and then populated using the populateFromResource: method.
  *
- * As shortcuts, for subclasses that override the resourceClass property, there
- * are also several class and instance initialization methods for this class that
- * will load the file automatically during instance initialization.
- *
- * However, before using any of these shortcut methods, you should take into
- * consideration whether you need to set the the expectsVerticallyFlippedTextures
- * property prior to loading, as explained here.
- *
- * Under iOS, a texture whose width and height are not each a power-of-two, will be
- * converted to a size whose width and height are a power-of-two. The result is a
- * texture that can have empty space on the top and right sides. If the texture
- * coordinates of the mesh do not take this into consideration, the result will be
- * that only the lower left of the mesh will be covered by the texture.
+ * Under iOS, a texture whose width and height are not each a power-of-two, will be converted
+ * to a size whose width and height are a power-of-two. The result is a texture that can have
+ * empty space on the top and right sides. If the texture coordinates of the mesh do not take
+ * this into consideration, the result will be that only the lower left of the mesh will be
+ * covered by the texture.
  * 
- * In addition, the vertical axis of the coordinate system of OpenGL is inverted
- * relative to the iOS view coordinate system. This results in textures being
- * displayed upside-down, relative to the OpenGL coordinate system.
+ * In addition, the vertical axis of the coordinate system of OpenGL is inverted relative 
+ * to the iOS view coordinate system. This results in textures being displayed upside-down,
+ * relative to the OpenGL coordinate system.
  *
- * The contained CC3NodesResource will automatically adjust the meshes to compensate for this.
- * Meshes loaded by this resource loader will have their texture coordinates adjusted to align
- * with the usable area of an NPOT texture, and to vertically flip a texture that has been
- * loaded upside-down.
+ * The CC3NodesResource that actually loads the file content will automatically adjust the 
+ * meshes to compensate for this. Meshes loaded by this resource loader will have their 
+ * texture coordinates adjusted to align with the usable area of an NPOT texture, and to
+ * vertically flip a texture that has been loaded upside-down.
  *
  * To determine whether textures will need to be vertically flipped, the loader needs to know
  * whether or not the meshes have already been flipped (by the 3D editor or file exporter).
- * The expectsVerticallyFlippedTextures property can be set to indicate to the loader whether
- * the texture coordinates have already been flipped. If the value of that property needs to
- * be changed, it should be set before the file is loaded.
- *
- * When a copy is made of a CC3ResourceNode instance, a copy is not made of the encapsulated
- * CC3NodesResource instance. Instead, the CC3NodesResource is retained by reference and shared
- * between both the original CC3ResourceNode, and the new copy.
+ * The initialization and loading methods have an option to pass an indication of whether
+ * the texture coordinates have already been flipped.
  */
-@interface CC3ResourceNode : CC3Node {
-	CC3NodesResource* _resource;
-}
+@interface CC3ResourceNode : CC3Node {}
 
 /**
- * The underlying CC3NodesResource instance containing the 3D nodes.
- * 
- * Setting this property to a resource will remove all child nodes of this instance and
- * replace them with the nodes extracted from the nodes property of the new resoure instance,
- * if it has already been loaded.
+ * Returns the class of the CC3NodesResource instance used to load 3D content files.
+ * The returned value is used by the initializers that load a file, and determines the
+ * type of resource that can be passed to the populateFromResource: method.
  *
- * Setting this property to nil will release the underlying resource, but will not remove
- * any child nodes of this instance. Once the underlying resource is released, it will be
- * removed from the resource cache, and its memory reclaimed, if no other object retains a
- * strong references to it.
+ * Default implementation triggers an assertion and returns CC3NodesResource.
+ * Subclasses must override to return an appropriate resource class.
+ */
+@property(nonatomic, readonly) Class resourceClass;
+
+/**
+ * Populates this instance from the specified resource, which must be of the type specified
+ * by the resourceClass property.
  *
- * If this node has not yet been assigned a name, it will be set to the name
- * of the resource when this property is set.
+ * This method removes all child nodes of this instance and replaces them with the nodes
+ * extracted from the nodes property of the specified resource.
+ *
+ * If this node has not yet been assigned a name, it will be set to the name of the specified resource.
  *
  * The userData property of this node will be set to the userData property of the resource.
- * 
- * For subclasses of CC3ResourceNode that override the resourceClass property,
- * if this resource property is not explicitly set, it is lazily created, as an
- * instance of the class identified by the resourceClass property, when this
- * resource property is first accessed. Since the resourceClass property depends
- * on the type of resource file format to be loaded, lazy creation of the resource
- * property from the resourceClass property requires the creation of a subclass
- * of CC3ResourceNode that defines the appropriate resourceClass value.
+ *
+ * This method is automatically invoked by the loadFromFile:... methods, and in turn, from
+ * any of the initialization methods that load content from a file.
+ *
+ * Subclass may override to extract additional content from the resource.
  */
-@property(nonatomic, strong) CC3NodesResource* resource;
+-(void) populateFromResource: (CC3NodesResource*) resource;
+
+
+#pragma mark Loading file resources
 
 /**
- * Returns the class of the CC3NodesResource instance used to load 3D data files.
- * This returned value is used by the initializers that load the file,
- * and must be overridden in a sublcass if those initializers are to be used.
- * 
- * Default implementation triggers and assertion and returns CC3NodesResource.
- * Subclasses must override.
- */
--(Class) resourceClass;
-
-/**
- * Loads the file at the specified file path, extracts the loaded CC3Nodes from the contained
- * resource, and adds them as child nodes to this resource node.
+ * Loads the file at the specified file path, extracts the loaded CC3Nodes from the resource,
+ * and adds them as child nodes to this resource node.
  *
  * The specified file path may be either an absolute path, or a path relative to the application
  * resource directory. If the file is located directly in the application resources directory,
@@ -137,8 +119,8 @@
 -(void) loadFromFile: (NSString*) aFilepath;
 
 /**
- * Loads the file at the specified file path, extracts the loaded CC3Nodes from the contained
- * resource, and adds them as child nodes to this resource node.
+ * Loads the file at the specified file path, extracts the loaded CC3Nodes from the resource,
+ * and adds them as child nodes to this resource node.
  *
  * The specified file path may be either an absolute path, or a path relative to the application
  * resource directory. If the file is located directly in the application resources directory,
@@ -153,10 +135,12 @@
  */
 -(void) loadFromFile: (NSString*) aFilepath expectsVerticallyFlippedTextures: (BOOL) flipped;
 
+
+#pragma mark Allocation and initialization
+
 /**
- * Initializes this instance and, using the contained resource, loads the file at the specified
- * file path, extracts the loaded CC3Nodes from the contained resource, and adds them as child
- * nodes to this resource node.
+ * Initializes this instance, loads the file at the specified file path, extracts the loaded
+ * CC3Nodes from the resource, and adds them as child nodes to this resource node.
  *
  * The specified file path may be either an absolute path, or a path relative to the application
  * resource directory. If the file is located directly in the application resources directory,
@@ -170,9 +154,8 @@
 -(id) initFromFile: (NSString*) aFilepath;
 
 /**
- * Allocates and initializes an autoreleased instance and, using the contained resource, loads
- * the file at the specified file path, extracts the loaded CC3Nodes from the contained resource,
- * and adds them as child nodes to this resource node.
+ * Allocates and initializes an autoreleased instance, loads the file at the specified file path,
+ * extracts the loaded CC3Nodes from the resource, and adds them as child nodes to this resource node.
  *
  * The specified file path may be either an absolute path, or a path relative to the application
  * resource directory. If the file is located directly in the application resources directory,
@@ -186,9 +169,8 @@
 +(id) nodeFromFile: (NSString*) aFilepath;
 
 /**
- * Initializes this instance and, using the contained resource, loads the file at the specified
- * file path, extracts the loaded CC3Nodes from the contained resource, and adds them as child
- * nodes to this resource node.
+ * Initializes this instance, loads the file at the specified file path, extracts the loaded
+ * CC3Nodes from the resource, and adds them as child nodes to this resource node.
  *
  * The specified file path may be either an absolute path, or a path relative to the application
  * resource directory. If the file is located directly in the application resources directory,
@@ -202,9 +184,8 @@
 -(id) initFromFile: (NSString*) aFilepath expectsVerticallyFlippedTextures: (BOOL) flipped;
 
 /**
- * Allocates and initializes an autoreleased instance and, using the contained resource, loads
- * the file at the specified file path, extracts the loaded CC3Nodes from the contained resource,
- * and adds them as child nodes to this resource node.
+ * Allocates and initializes an autoreleased instance, loads the file at the specified file path,
+ * extracts the loaded CC3Nodes from the resource, and adds them as child nodes to this resource node.
  *
  * The specified file path may be either an absolute path, or a path relative to the application
  * resource directory. If the file is located directly in the application resources directory,
@@ -218,9 +199,8 @@
 +(id) nodeFromFile: (NSString*) aFilepath expectsVerticallyFlippedTextures: (BOOL) flipped;
 
 /**
- * Initializes this instance and, using the contained resource, loads the file
- * at the specified file path, extracts the loaded CC3Nodes from the contained
- * resource, and adds them as child nodes to this resource node.
+ * Initializes this instance, loads the file at the specified file path, extracts the loaded
+ * CC3Nodes from the resource, and adds them as child nodes to this resource node.
  *
  * The specified file path may be either an absolute path, or a path relative to the
  * application resource directory. If the file is located directly in the application
@@ -231,9 +211,8 @@
 -(id) initWithName: (NSString*) aName fromFile: (NSString*) aFilepath;
 
 /**
- * Allocates and initializes an autoreleased instance and, using the contained
- * resource, loads the file at the specified file path, extracts the loaded CC3Nodes
- * from the contained resource, and adds them as child nodes to this resource node.
+ * Allocates and initializes an autoreleased instance, loads the file at the specified file path,
+ * extracts the loaded CC3Nodes from the resource, and adds them as child nodes to this resource node.
  *
  * The specified file path may be either an absolute path, or a path relative to the
  * application resource directory. If the file is located directly in the application
@@ -244,45 +223,16 @@
 +(id) nodeWithName: (NSString*) aName fromFile: (NSString*) aFilepath;
 
 
-#pragma mark Aligning texture coordinates to NPOT and iOS-inverted textures
+#pragma mark Deprecated file loading methods
 
 /**
- * Indicates whether the texture coordinates of the meshes that will be loaded
- * by the CC3NodesResource loader expect that the texture will be flipped upside-down
- * during texture loading.
- *
- * This property is a convenience property that simply gets and sets the same
- * property on the contained CC3NodesResource instance.
- * 
- * The vertical axis of the coordinate system of OpenGL is inverted relative to the
- * CoreGraphics view coordinate system. As a result, some texture file formats may be
- * loaded upside down. Most common file formats, including JPG, PNG & PVR are loaded
- * right-way up, but using proprietary texture formats developed for other platforms
- * may result in textures being loaded upside-down.
- *
- * If the value of this property is YES, the texture coordinates of meshes loaded
- * by the CC3NodesResource will be assumed to have already been flipped vertically,
- * (typically by the 3D editor or file exporter) to align with textures that will
- * be vertically flipped by the texture loader.
- *
- * If the value of this property is NO, the texture coordinates of meshes loaded by
- * the CC3NodesResource loader will be assumed to have their original orientation, and
- * aligned with textures that have not been vertically flipped by the texture loader.
- *
- * The value of this property is then used to cause the meshes to automatically
- * correctly align themselves with the orientation of any texture applied to them.
- *
- * For meshes that are based on vertex arrays, this property is used to set the
- * same property on each CC3VertexTextureCoordinates instance created and loaded
- * by this resource. When a texture is assigned to cover the mesh, the value of
- * that CC3VertexTextureCoordinates property is used in combination with the value
- * of the isUpsideDown property of a texture to determine whether the texture
- * coordinates should automatically be reoriented when displaying that texture.
+ * @deprecated Use the populateFromResource: method instead. Setting this property invokes
+ * the populateFromResource: method. Querying this property always returns nil.
  */
-@property(nonatomic, assign) BOOL expectsVerticallyFlippedTextures;
+@property(nonatomic, strong) CC3NodesResource* resource DEPRECATED_ATTRIBUTE;
 
-
-#pragma mark Deprecated file loading methods
+/** @deprecated Setting this property has no effect. Querying this property always returns NO. */
+@property(nonatomic, assign) BOOL expectsVerticallyFlippedTextures DEPRECATED_ATTRIBUTE;
 
 /**
  * @deprecated Use the loadFromFile: method instead, which supports both absolute

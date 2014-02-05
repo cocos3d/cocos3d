@@ -35,8 +35,17 @@
 #import "CC3Scene.h"
 
 
-/** A CC3ResourceNode that that wraps a CC3PODResource PVR POD resource. */
-@interface CC3PODResourceNode : CC3ResourceNode {}
+/** 
+ * A CC3ResourceNode that can be loaded from a PVR POD resource file. 
+ *
+ * An instance is loaded using an instance of CC3PODResource. The resourceClass property
+ * returns CC3PODResource, and the populateFromResource: method expects to be passed an
+ * instance of CC3PODResource.
+ */
+@interface CC3PODResourceNode : CC3ResourceNode {
+	GLuint _animationFrameCount;
+	GLfloat _animationFrameRate;
+}
 
 /** The number of frames of animation in the POD file. */
 @property(nonatomic, readonly) GLuint animationFrameCount;

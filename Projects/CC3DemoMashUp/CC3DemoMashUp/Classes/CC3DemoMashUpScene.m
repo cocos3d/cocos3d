@@ -1110,7 +1110,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// the PVR demo faithfully, we must do the same, by tweaking the loader to act accordingly
 	// by creating a specialized subclass.
 	CC3ResourceNode* podRezNode = [CC3PODResourceNode nodeWithName: kPODRobotRezNodeName];
-	podRezNode.resource = [IntroducingPODResource resourceFromFile: kRobotPODFile];
+	[podRezNode populateFromResource: [IntroducingPODResource resourceFromFile: kRobotPODFile]];
 	
 	// If you want to stop the robot arm from being animated, uncomment the following line.
 //	[podRezNode disableAllAnimation];

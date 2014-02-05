@@ -39,34 +39,37 @@
 	return [CC3NodesResource class];
 }
 
--(void) addResourceNodes {
-	if ( !_resource ) return;
+-(void) populateFromResource: (CC3NodesResource*) resource {
+	if ( !resource ) return;
 	
+	CC3Assert( [resource isKindOfClass: self.resourceClass],
+			  @"%@ must be populated from a resource of type %@. It cannot be populated from %@",
+			  self, self.resourceClass, resource);
+	
+	if (!_name) { self.name = resource.name; }
+	self.userData = resource.userData;
+
 	[self removeAllChildren];
-	for (CC3Node* aNode in _resource.nodes) [self addChild: aNode];
-	LogRez(@"%@ added resource %@ with node structure: %@", self, _resource,
+	for (CC3Node* aNode in resource.nodes) [self addChild: aNode];
+	LogRez(@"%@ added resource %@ with node structure: %@", self, resource,
 		   [self appendStructureDescriptionTo: [NSMutableString stringWithCapacity: 1000]
 								   withIndent: 1]);
 }
 
--(CC3NodesResource*) resource { return _resource; }
 
--(void) setResource: (CC3NodesResource*) aResource {
-	if (aResource == _resource) return;
-	_resource = aResource;
-	if (!_name) { self.name = _resource.name; }
-	self.userData = _resource.userData;
-	[self addResourceNodes];
-}
+#pragma mark Loading file resources
 
 -(void) loadFromFile: (NSString*) aFilepath {
-	self.resource = [self.resourceClass resourceFromFile: aFilepath];
+	[self populateFromResource: [self.resourceClass resourceFromFile: aFilepath]];
 }
 
 -(void) loadFromFile: (NSString*) aFilepath expectsVerticallyFlippedTextures: (BOOL) flipped {
-	self.resource = [self.resourceClass resourceFromFile: aFilepath
-						expectsVerticallyFlippedTextures: flipped];
+	[self populateFromResource: [self.resourceClass resourceFromFile: aFilepath
+									expectsVerticallyFlippedTextures: flipped]];
 }
+
+
+#pragma mark Allocation and initialization
 
 -(id) initFromFile: (NSString*) aFilepath {
 	if ( (self = [super init]) ) {
@@ -101,26 +104,14 @@
 	return [[self alloc] initWithName: aName fromFile: aFilepath];
 }
 
--(void) populateFrom: (CC3ResourceNode*) another {
-	[super populateFrom: another];
-	
-	// The resource is not copied, but is shared between instances.
-	_resource = another.resource;
-}
-
-
-#pragma mark Aligning texture coordinates to NPOT and iOS-inverted textures
-
--(BOOL) expectsVerticallyFlippedTextures { return _resource.expectsVerticallyFlippedTextures; }
-
--(void) setExpectsVerticallyFlippedTextures: (BOOL) expectsFlipped {
-	_resource.expectsVerticallyFlippedTextures = expectsFlipped;
-}
-
 
 #pragma mark Deprecated file loading methods
 
 // Deprecated methods
+-(CC3NodesResource*) resource { return nil; }
+-(void) setResource: (CC3NodesResource*) aResource { [self populateFromResource: aResource]; }
+-(BOOL) expectsVerticallyFlippedTextures { return NO; }
+-(void) setExpectsVerticallyFlippedTextures: (BOOL) expectsFlipped {}
 -(void) loadFromResourceFile: (NSString*) aRezPath { [self loadFromFile: aRezPath]; }
 -(id) initFromResourceFile: (NSString*) aRezPath { return [self initFromFile: aRezPath]; }
 +(id) nodeFromResourceFile: (NSString*) aRezPath { return [self nodeFromFile: aRezPath]; }
