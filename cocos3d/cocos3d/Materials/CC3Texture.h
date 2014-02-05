@@ -117,6 +117,7 @@
 	BOOL _isUpsideDown : 1;
 	BOOL _shouldFlipVerticallyOnLoad : 1;
 	BOOL _shouldFlipHorizontallyOnLoad : 1;
+	BOOL _hasAlpha : 1;
 	BOOL _hasPremultipliedAlpha : 1;
 }
 
@@ -190,6 +191,13 @@
  */
 @property(nonatomic, readonly) GLenum pixelType;
 
+/**
+ * Indicates whether this texture has an alpha channel, representing opacity.
+ *
+ * The value of this property is determined from the contents of the texture file,
+ * but you can set this property directly to override the value determined from the file.
+ */
+@property(nonatomic, assign) BOOL hasAlpha;
 
 /**
  * Indicates whether the alpha channel of this texture has already been multiplied
@@ -1620,6 +1628,13 @@
  * property of CC3Texture for the range of possible values.
  */
 @property(nonatomic, readonly) GLenum pixelGLType;
+
+/** 
+ * Indicates whether this texture has an alpha channel, representing opacity.
+ *
+ * The value of this property is derived from the value of the pixelGLFomat property.
+ */
+@property(nonatomic, readonly) BOOL hasAlpha;
 
 /** Returns the number of bytes in each pixel of content. */
 @property(nonatomic, readonly) GLuint bytesPerPixel;

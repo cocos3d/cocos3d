@@ -468,7 +468,7 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
 /**
  * Indicates whether blending should be applied even when the material is at full opacity.
  *
- * If this property is set to NO, when the opacity property of this material is set to full 
+ * If this property is set to NO, when the opacity property of this material is set to full
  * opacity (255), the isOpaque property will be set to YES, which in turn will set the
  * sourceBlend property to GL_ONE and the destinationBlend property to GL_ZERO, effectively 
  * turning blending off. This allows a node that is opaque to be faded, but when fading is
@@ -482,9 +482,12 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
  * transparency. When this material reaches full opacity, blending will be left enabled, and
  * the transparent sections of the textures will continue to be rendered correctly.
  *
- * The default value of this property is NO. You should set this property to YES if this
- * material contains textures with transparent sections AND you intend to fade the node
- * out and in using the opacity property.
+ * The initial value of this property is NO. Whenever a texture is added to, or removed from,
+ * this material, the value is set to the value of the hasTextureAlpha property, reflecting
+ * whether any of the textures contain an alpha channel. If you know that the alpha channel
+ * in each texture does not contain transparency, and that this material will be displayed at
+ * full opacity, you can set this property back to NO to benefit from improved performance
+ * in sorting and rendering opaque materials.
  */
 @property(nonatomic, assign) BOOL shouldBlendAtFullOpacity;
 
@@ -803,15 +806,28 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
 -(void) setTexture: (CC3Texture*) aTexture forTextureUnit: (GLuint) texUnit;
 
 /**
+ * Returns whether any of the textures used by this material have an alpha channel, representing opacity.
+ *
+ * Returns YES if any of the textures contained in this instance has an alpha channel.
+ *
+ * See also the notes of the shouldBlendAtFullOpacity property for the effects of using a
+ * texture with an alpha channel.
+ */
+@property(nonatomic, readonly) BOOL hasTextureAlpha;
+
+/**
  * Returns whether the alpha channel has already been multiplied into each of the RGB
  * color channels, in any of the textures used by this material.
  *
  * Returns YES if any of the textures contained in this instance has pre-mulitiplied alpha.
- * 
+ *
  * See also the notes of the shouldApplyOpacityToColor property for the effects of using textures
  * with pre-multiplied alpha.
  */
-@property(nonatomic, readonly) BOOL hasPremultipliedAlpha;
+@property(nonatomic, readonly) BOOL hasTexturePremultipliedAlpha;
+
+/** @deprecated Renamed to hasTexturePremultipliedAlpha. */
+@property(nonatomic, readonly) BOOL hasPremultipliedAlpha DEPRECATED_ATTRIBUTE;
 
 /**
  * Returns whether the opacity of each of the material colors (ambient, diffuse, specular and emission)

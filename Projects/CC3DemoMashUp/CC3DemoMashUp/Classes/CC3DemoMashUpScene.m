@@ -678,19 +678,12 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
  * textures. You can see through the transparent areas to the scene behind the texture. The texture
  * as a whole fades in and out periodically, and rotates around the vertical (Y) axis.
  *
- * The use of the shouldBlendAtFullOpacity property ensures that the transparent parts of the
- * texture will still be alpha blended, even when the floating ring is set to full opacity as
- * it is faded in and out. Normally, when an object is set to full opacity, the blending function
- * is updated to treat the object as opaque, which is much more efficient. However, since the
- * texture itself contains transparency, we want it to be alpha-blended even when the object
- * has been compltely faded in.
- *
- * The type blending function used to blend the transparent/translucent areas of the texture
+ * The type of blending function used to blend the transparent/translucent areas of the texture
  * with the object behind is set automatically, and is influenced by the opacity of the object,
- * and whether the color channels of the texture have been pre-multiplied by the alpha channel
- * in the texture. Here we provide the option to demonstrate textures with either pre-multiplied
- * content or non-pre-multiplied content, and the difference is logged to help you understand
- * the difference.
+ * whether the texture contains an alpha channel, and whether the color channels of the texture
+ * have been pre-multiplied by the alpha channel in the texture. Here we provide the option to
+ * demonstrate textures with either pre-multiplied content or non-pre-multiplied content, and
+ * the resulting blending function is logged to help you understand the difference.
  *
  * The non-premultiplied alpha texture is a PNG file with the special file-extension PPNG. 
  * This is a normal PNG file, but the renamed extension will stop Xcode from modifying the file
@@ -725,11 +718,6 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 			NSStringFromGLEnum(floater.material.sourceBlend),
 			NSStringFromGLEnum(floater.material.destinationBlend),
 			floater.texture, (floater.texture.hasPremultipliedAlpha ? @"with" : @"without"));
-
-	// We will be fading this ring in and out. The shouldBlendAtFullOpacity property ensures that
-	// the transparent parts of the texture will still be alpha blended, even when the floating
-	// ring is set to full opacity as it is faded in and out. See the method notes for more.
-	floater.shouldBlendAtFullOpacity = YES;
 
 	// This is a simple plane node. To make this object visible from behind, we need
 	// to show the back sides of the faces as well.
@@ -1218,9 +1206,6 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
  * a circle whose center is behind the text. The effect is like a marquee on a round tower.
  * This example demonstrates both the use of bitmapped text labels, and the ability to
  * manipulate the locations of vertices programmatically.
- *
- * The use of the shouldBlendAtFullOpacity property ensures that the transparent parts of the
- * texture will still be alpha blended, even when the label is set to full opacity.
  */
 -(void) addBitmapLabel {
 	CylinderLabel* bmLabel = [CylinderLabel nodeWithName: kBitmapLabelName];
@@ -1237,7 +1222,6 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	bmLabel.uniformScale = 2.0;
 	bmLabel.color = ccc3(0, 220, 120);
 	bmLabel.shouldCullBackFaces = NO;			// Show from behind as well.
-	bmLabel.shouldBlendAtFullOpacity = YES;		// We're fading in, so ensure blending remains
 	bmLabel.touchEnabled = YES;
 
 	// Label is added on on background thread. Configure it for the scene, and fade it in slowly.

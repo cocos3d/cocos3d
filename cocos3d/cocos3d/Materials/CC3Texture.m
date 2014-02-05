@@ -44,7 +44,8 @@
 
 @synthesize textureID=_textureID, size=_size, coverage=_coverage, hasMipmap=_hasMipmap;
 @synthesize pixelFormat=_pixelFormat, pixelType=_pixelType;
-@synthesize hasPremultipliedAlpha=_hasPremultipliedAlpha, isUpsideDown=_isUpsideDown;
+@synthesize hasAlpha=_hasAlpha, hasPremultipliedAlpha=_hasPremultipliedAlpha;
+@synthesize isUpsideDown=_isUpsideDown;
 @synthesize shouldFlipVerticallyOnLoad=_shouldFlipVerticallyOnLoad;
 @synthesize shouldFlipHorizontallyOnLoad=_shouldFlipHorizontallyOnLoad;
 
@@ -127,6 +128,7 @@
 	_coverage = CGSizeMake(texContent.maxS, texContent.maxT);
 	_pixelFormat = texContent.pixelGLFormat;
 	_pixelType = texContent.pixelGLType;
+	_hasAlpha = texContent.hasAlpha;
 	_hasPremultipliedAlpha = texContent.hasPremultipliedAlpha;
 	_isUpsideDown = texContent.isUpsideDown;
 		
@@ -533,6 +535,7 @@ static BOOL _shouldCacheAssociatedCCTexture2Ds = NO;
 		_coverage = CGSizeZero;
 		_pixelFormat = kCCTexture2DPixelFormat_Default;
 		_hasMipmap = NO;
+		_hasAlpha = NO;
 		_hasPremultipliedAlpha = NO;
 		_isUpsideDown = NO;
 		_shouldFlipVerticallyOnLoad = self.class.defaultShouldFlipVerticallyOnLoad;
@@ -1038,6 +1041,10 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 
 -(GLenum) pixelType { return _texture.pixelType; }
 
+-(BOOL) hasAlpha { return _texture.hasAlpha; }
+
+-(void) setHasAlpha: (BOOL) hasAlpha { _texture.hasAlpha = hasAlpha; }
+
 -(BOOL) hasPremultipliedAlpha { return _texture.hasPremultipliedAlpha; }
 
 -(void) setHasPremultipliedAlpha: (BOOL) hasPremultipliedAlpha {
@@ -1293,6 +1300,17 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 
 /** Overridden to do nothing so that texture data is retained until bound to the GL engine. */
 -(void) releaseData: (void*) data {}
+
+-(BOOL) hasAlpha {
+	switch (_pixelGLFormat) {
+		case GL_RGBA:
+		case GL_LUMINANCE_ALPHA:
+		case GL_ALPHA:
+			return YES;
+		default:
+			return NO;
+	}
+}
 
 -(GLuint) bytesPerPixel {
 	switch (_pixelGLFormat) {

@@ -42,7 +42,6 @@
 @synthesize shouldUseLighting=_shouldUseLighting;
 @synthesize blendFuncRGB=_blendFuncRGB, blendFuncAlpha=_blendFuncAlpha;
 @synthesize alphaTestFunction=_alphaTestFunction, alphaTestReference=_alphaTestReference;
-@synthesize shouldBlendAtFullOpacity=_shouldBlendAtFullOpacity;
 
 -(NSString*) nameSuffix { return @"Material"; }
 
@@ -82,6 +81,13 @@
 
 -(void) setDestinationBlendAlpha: (GLenum) aBlend { _blendFuncAlpha.dst = aBlend; }
 
+-(BOOL) shouldBlendAtFullOpacity { return _shouldBlendAtFullOpacity; }
+
+-(void) setShouldBlendAtFullOpacity: (BOOL) shouldBlendAtFullOpacity {
+	_shouldBlendAtFullOpacity = shouldBlendAtFullOpacity;
+	self.isOpaque = self.isOpaque;
+}
+
 -(BOOL) isOpaque { return (self.sourceBlendRGB == GL_ONE && self.destinationBlendRGB == GL_ZERO); }
 
 /**
@@ -97,7 +103,7 @@
 		// If a source blend has not yet been set AND the texture does NOT contain pre-multiplied
 		// alpha, set a source alpha blend. If the texture contains pre-multiplied alpha, leave the
 		// source blend at GL_ONE and apply the opacity to the color of the material instead.
-		BOOL noPreMultAlpha = !self.hasPremultipliedAlpha;
+		BOOL noPreMultAlpha = !self.hasTexturePremultipliedAlpha;
 		if ( (self.sourceBlendRGB == GL_ONE) && noPreMultAlpha ) self.sourceBlendRGB = GL_SRC_ALPHA;
 		if ( (self.sourceBlendAlpha == GL_ONE) && noPreMultAlpha ) self.sourceBlendAlpha = GL_SRC_ALPHA;
 		
@@ -122,7 +128,7 @@
 	_alphaTestFunction = shouldDraw ? GL_ALWAYS : GL_GREATER;
 }
 
--(BOOL) shouldApplyOpacityToColor { return self.sourceBlendRGB == GL_ONE && self.hasPremultipliedAlpha; }
+-(BOOL) shouldApplyOpacityToColor { return self.sourceBlendRGB == GL_ONE && self.hasTexturePremultipliedAlpha; }
 
 -(ccColor4F) effectiveAmbientColor {
 	return self.shouldApplyOpacityToColor ? CCC4FBlendAlpha(self.ambientColor) : self.ambientColor;
@@ -333,12 +339,24 @@ static ccBlendFunc _defaultBlendFunc = {GL_ONE, GL_ZERO};
 /**
  * The textures have changed in some way.
  *
- * Updates the blend, by setting the isOpaque property from the current value.
- * If something has changed that affects the effective blend, the blend will be updated.
+ * Updates the blend, by setting the shouldBlendAtFullOpacity property, based on whether
+ * any textures have an alpha channel, which in turn will update the isOpaque property.
  */
--(void) texturesHaveChanged { self.isOpaque = self.isOpaque; }
+-(void) texturesHaveChanged {
+	self.shouldBlendAtFullOpacity = self.hasTextureAlpha;
+}
 
--(BOOL) hasPremultipliedAlpha {
+-(BOOL) hasTextureAlpha {
+	// Check the first texture.
+	if (_texture && _texture.hasAlpha) return YES;
+	
+	// Then check in the overlays array
+	for (CC3Texture* ot in _textureOverlays) if (ot.hasAlpha) return YES;
+	
+	return NO;
+}
+
+-(BOOL) hasTexturePremultipliedAlpha {
 	// Check the first texture.
 	if (_texture && _texture.hasPremultipliedAlpha) return YES;
 	
@@ -347,6 +365,9 @@ static ccBlendFunc _defaultBlendFunc = {GL_ONE, GL_ZERO};
 	
 	return NO;
 }
+
+// Deprecated
+-(BOOL) hasPremultipliedAlpha { return self.hasTexturePremultipliedAlpha; }
 
 // Check the first texture, hen check in the overlays array
 -(CC3Texture*) textureCube {

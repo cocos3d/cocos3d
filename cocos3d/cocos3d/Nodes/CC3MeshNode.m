@@ -521,7 +521,11 @@
 
 -(BOOL) isDrawingPointSprites { return (self.drawingMode == GL_POINTS) && (self.textureCount > 0); }
 
--(BOOL) hasPremultipliedAlpha { return _material ? _material.hasPremultipliedAlpha : NO; }
+-(BOOL) hasTextureAlpha { return _material ? _material.hasTextureAlpha : NO; }
+
+-(BOOL) hasTexturePremultipliedAlpha { return _material ? _material.hasTexturePremultipliedAlpha : NO; }
+
+-(BOOL) hasPremultipliedAlpha { return self.hasTexturePremultipliedAlpha; }		// Deprecated
 
 -(BOOL) shouldApplyOpacityToColor { return _material ? _material.shouldApplyOpacityToColor : NO; }
 
