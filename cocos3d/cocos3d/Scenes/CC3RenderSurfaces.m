@@ -35,6 +35,7 @@
 #import "CC3Scene.h"
 #import "CC3GLView.h"
 #import "CC3Backgrounder.h"
+#import "CC3OSExtensions.h"
 
 
 #pragma mark -
@@ -195,24 +196,45 @@
 @implementation CC3TextureFramebufferAttachment
 
 @synthesize face=_face, mipmapLevel=_mipmapLevel;
+@synthesize shouldUseStrongReferenceToTexture=_shouldUseStrongReferenceToTexture;
 
--(CC3Texture*) texture { return _texture; }
+-(CC3Texture*) texture { return (CC3Texture*)_texObj.resolveWeakReference; }
 
 -(void) setTexture: (CC3Texture*) texture {
-	if (texture == _texture) return;
-	_texture = texture;
-	_texture.horizontalWrappingFunction = GL_CLAMP_TO_EDGE;
-	_texture.verticalWrappingFunction = GL_CLAMP_TO_EDGE;
+	if (texture == self.texture) return;
+	texture.horizontalWrappingFunction = GL_CLAMP_TO_EDGE;
+	texture.verticalWrappingFunction = GL_CLAMP_TO_EDGE;
+	[self setTexObj: texture];
 }
 
--(CC3IntSize) size { return _texture.size; }
+-(BOOL) shouldUseStrongReferenceToTexture { return _shouldUseStrongReferenceToTexture; }
 
--(void) resizeTo: (CC3IntSize) size { [_texture resizeTo: size]; }
+-(void) setShouldUseStrongReferenceToTexture: (BOOL) shouldUseStrongRef {
+	if (shouldUseStrongRef == _shouldUseStrongReferenceToTexture) return;
+	_shouldUseStrongReferenceToTexture = shouldUseStrongRef;
+	[self setTexObj: self.texture];		// Update the reference type of the texture
+}
 
--(GLenum) pixelFormat { return _texture.pixelFormat; }
+/**
+ * Sets the _texObj instance variable from the specified texture.
+ *
+ * If the value of the shouldUseStrongReferenceToTexture property is YES, the texture
+ * is held directly in the strongly referenced _texObj iVar. If the value of the
+ * shouldUseStrongReferenceToTexture property is NO, the texture is first wrapped in
+ * a weak reference, which is then assigned to the strongly referenced _texObj iVar.
+ */
+-(void) setTexObj: (CC3Texture*) texture {
+	_texObj = self.shouldUseStrongReferenceToTexture ? texture : [texture asWeakReference];
+}
+
+-(CC3IntSize) size { return self.texture.size; }
+
+-(void) resizeTo: (CC3IntSize) size { [self.texture resizeTo: size]; }
+
+-(GLenum) pixelFormat { return self.texture.pixelFormat; }
 
 -(void) bindToFramebuffer: (GLuint) framebufferID asAttachment: (GLenum) attachment {
-	[CC3OpenGL.sharedGL bindTexture2D: _texture.textureID
+	[CC3OpenGL.sharedGL bindTexture2D: self.texture.textureID
 								 face: _face
 						  mipmapLevel: _mipmapLevel
 						toFrameBuffer: framebufferID
@@ -228,7 +250,7 @@
 }
 
 -(void) replacePixels: (CC3Viewport) rect withContent: (ccColor4B*) colorArray {
-	[_texture replacePixels: rect inTarget: _face withContent: colorArray];
+	[self.texture replacePixels: rect inTarget: _face withContent: colorArray];
 }
 
 
@@ -258,6 +280,7 @@
 	if ( (self = [super init]) ) {
 		_face = face;
 		_mipmapLevel = mipmapLevel;
+		_shouldUseStrongReferenceToTexture = YES;
 		self.texture = texture;
 	}
 	return self;
@@ -267,7 +290,7 @@
 	return [[self alloc] initWithTexture: texture usingFace: face andLevel: mipmapLevel];
 }
 
--(NSString*) description { return [NSString stringWithFormat: @"%@ on %@", self.class, _texture]; }
+-(NSString*) description { return [NSString stringWithFormat: @"%@ on %@", self.class, self.texture]; }
 
 @end
 
@@ -560,7 +583,7 @@
 	GLuint facesToGenerate = self.facesToGenerate;
 	if ( !facesToGenerate ) return;
 	
-	// Get the scen and the cube-map visitor, and set the render surface to that of this texture.
+	// Get the scene and the cube-map visitor, and set the render surface to that of this texture.
 	CC3NodeDrawingVisitor* envMapVisitor = scene.envMapDrawingVisitor;
 	envMapVisitor.renderSurface = self.renderSurface;
 
@@ -742,9 +765,15 @@
 		_faceCount = 0.0f;
 		_numberOfFacesPerSnapshot = 1.0f;
 		_currentFace = GL_ZERO;
-		_renderSurface = [CC3GLFramebuffer new];		// retained
+		_renderSurface = [CC3GLFramebuffer new];
 		_renderSurface.depthAttachment = depthAttachment;
-		_renderSurface.colorTexture = self;
+
+		// Create the texture attachment, based on this texture. Since this texture holds the rendering surface,
+		// it must be attached to the surface attachment with a weak reference, to avoid a retain cycle.
+		CC3TextureFramebufferAttachment* ta = [CC3TextureFramebufferAttachment attachmentWithTexture: self];
+		ta.shouldUseStrongReferenceToTexture = NO;
+		_renderSurface.colorAttachment = ta;
+
 		[_renderSurface validate];
 	}
 	return self;

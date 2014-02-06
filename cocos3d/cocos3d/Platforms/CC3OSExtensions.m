@@ -39,9 +39,22 @@
 
 -(NSString*) fullDescription { return [self description]; }
 
+-(id) asWeakReference { return [NSValue valueWithNonretainedObject: self]; }
+
+-(id) resolveWeakReference { return self; }
+
 // Deprecated
 -(id) autoreleasedCopy { return [self copy]; }
 -(id) copyAutoreleased { return [self copy]; }
+
+@end
+
+
+#pragma mark NSValue extension+
+
+@implementation NSValue (CC3)
+
+-(id) resolveWeakReference { return self.nonretainedObjectValue; }
 
 @end
 

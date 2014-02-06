@@ -93,7 +93,7 @@
  * You can also set the isAlive property to NO in the initializeParticle method
  * to cause the emission of the particle to be aborted.
  */
-@protocol CC3ParticleProtocol <NSObject>
+@protocol CC3ParticleProtocol <CC3Object>
 
 /**
  * The emitter that emitted this particle.

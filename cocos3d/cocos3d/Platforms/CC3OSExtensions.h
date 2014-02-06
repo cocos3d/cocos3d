@@ -39,10 +39,10 @@
 
 
 #pragma mark -
-#pragma mark NSObject extensions
+#pragma mark NSObject protocol extensions
 
-/** Extension category to support cocos3d functionality. */
-@interface NSObject (CC3)
+/** Extension to support cocos3d functionality. */
+@protocol CC3Object <NSObject>
 
 /**
  * Returns a string containing a more complete description of this object.
@@ -52,27 +52,39 @@
  */
 -(NSString*) fullDescription;
 
-/** @deprecated Not required with ARC. */
--(id) autoreleasedCopy DEPRECATED_ATTRIBUTE;
+/**
+ * Returns this object wrapped in a weak reference.
+ *
+ * You can retrieve this original object by invoking the resolveWeakReference on the returned object.
+ *
+ * This method is useful when you want to add this object to a collection, but don't want to create
+ * a strong reference to it within the collection, or in any other situation where you want to
+ * assign this object to a strong reference, but need to avoid a potential retain cycle.
+ *
+ * This implementation creates and returns an NSValue, with this object set as its nonretainedObjectValue.
+ */
+-(id) asWeakReference;
 
-/** @deprecated Renamed to autoreleasedCopy to satisfy naming paradigm for copy... methods. */
--(id) copyAutoreleased DEPRECATED_ATTRIBUTE;
+/**
+ * When invoked on the object returned by the asWeakReference method, returns the original object.
+ * When invoked on any other object, simply returns that object.
+ */
+-(id) resolveWeakReference;
 
 @end
 
 
 #pragma mark -
-#pragma mark NSArray extensions
+#pragma mark NSObject class extensions
 
 /** Extension category to support cocos3d functionality. */
-@interface NSArray (CC3)
+@interface NSObject (CC3) <CC3Object>
 
-/**
- * Returns a string containing a more complete description of this object.
- *
- * The returned string includes a description of each element, each on a separate line.
- */
--(NSString*) fullDescription;
+/** @deprecated Not required with ARC. */
+-(id) autoreleasedCopy DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Renamed to autoreleasedCopy to satisfy naming paradigm for copy... methods. */
+-(id) copyAutoreleased DEPRECATED_ATTRIBUTE;
 
 @end
 
@@ -160,3 +172,6 @@
 @property(nonatomic, readonly) NSArray* terminatedLines;
 
 @end
+
+
+

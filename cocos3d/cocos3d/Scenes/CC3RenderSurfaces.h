@@ -43,7 +43,7 @@
  * attachment depends on how it is attached to the CC3RenderSurface, and can include
  * color data, depth data, or stencil data.
  */
-@protocol CC3RenderSurfaceAttachment <NSObject>
+@protocol CC3RenderSurfaceAttachment <CC3Object>
 
 /** The size of this attachment in pixels. */
 @property(nonatomic, readonly) CC3IntSize size;
@@ -96,7 +96,7 @@
 #pragma mark CC3RenderSurface
 
 /** A CC3RenderSurface is a surface on which rendering or drawing can occur. */
-@protocol CC3RenderSurface <NSObject>
+@protocol CC3RenderSurface <CC3Object>
 
 /** The size of this surface in pixels. */
 @property(nonatomic, readonly) CC3IntSize size;
@@ -461,10 +461,33 @@
  * as the rendering buffer.
  */
 @interface CC3TextureFramebufferAttachment : NSObject <CC3FramebufferAttachment> {
-	CC3Texture* _texture;
+	NSObject* _texObj;
 	GLenum _face;
 	GLint _mipmapLevel;
+	BOOL _shouldUseStrongReferenceToTexture : 1;
 }
+
+/** 
+ * Indicates whether this attachment should create a strong reference to the texture in the
+ * texture property.
+ *
+ * The initial value of this property is YES, indicating that the texture will be held as a strong
+ * reference, and in most cases, this is sufficient. However, in the case where this attachment is
+ * part of a surface that is, in turn, being held by the texture that is being rendered to (the
+ * contained texture), this attachment should maintain a weak reference to the texture, to avoid
+ * a retain cycle. Such a retain cycle would occur if this attachment holds a texture, that holds
+ * a surface, that, in turn, holds this attachment. 
+ *
+ * CC3EnvironmentMapTexture is an example of this design. CC3EnvironmentMapTexture holds a
+ * render surface that in turns holds the CC3EnvironmentMapTexture as the color attachment.
+ * CC3EnvironmentMapTexture automatically sets the shouldUseStrongReferenceToTexture property
+ * of the color texture attachment to NO, avoiding the retain cycle that would arise if the
+ * reference from the attachment to the texture was left as a strong reference.
+ *
+ * If the texture property has already been set when this property is changed, the texture
+ * reference type is modified to comply with the new setting.
+ */
+@property(nonatomic, assign) BOOL shouldUseStrongReferenceToTexture;
 
 /** 
  * The texture to bind as an attachment to the framebuffer, and into which rendering will occur. 
@@ -472,8 +495,11 @@
  * When the value of this property is set, both the horizontalWrappingFunction and
  * verticalWrappingFunction properties of the texture will be set to GL_CLAMP_TO_EDGE,
  * as required when using a texture as a rendering target.
+ *
+ * The shouldUseStrongReferenceToTexture property determines whether the texture in this 
+ * property will be held by a strong, or weak, reference.
  */
-@property(nonatomic, strong) CC3Texture* texture;
+@property(nonatomic) CC3Texture* texture;
 
 /** 
  * The target face within the texture into which rendering is to occur.

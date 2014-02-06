@@ -30,6 +30,7 @@
 /** @file */	// Doxygen marker
 
 #import "CC3Foundation.h"
+#import "CC3OSExtensions.h"
 #import <pthread.h>
 
 @class CC3Node;
@@ -42,7 +43,7 @@
  * This protocol defines the behaviour requirements for objects that wish to be
  * notified about the basic existence of a node.
  */
-@protocol CC3NodeListenerProtocol
+@protocol CC3NodeListenerProtocol <CC3Object>
 
 /**
  * Callback method that will be invoked when the node has been deallocated.

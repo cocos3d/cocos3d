@@ -1350,7 +1350,7 @@ typedef struct {
  *
  * All callback notification methods are invoked on the main application thread.
  */
-@protocol CC3OpenGLDelegate <NSObject>
+@protocol CC3OpenGLDelegate <CC3Object>
 
 @optional
 

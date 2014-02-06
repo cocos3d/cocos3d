@@ -30,6 +30,7 @@
 /** @file */	// Doxygen marker
 
 #import "CC3OpenGLFoundation.h"
+#import "CC3OSExtensions.h"
 
 // Legacy naming support
 #define CC3GLProgramSemanticsDelegate			CC3ShaderSemanticsDelegate
@@ -262,7 +263,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
  * Each CC3ShaderProgram delegates to an object that implements this protocol when it needs to
  * populate the current value of a uniform variable from content within the 3D scene.
  */
-@protocol CC3ShaderSemanticsDelegate <NSObject>
+@protocol CC3ShaderSemanticsDelegate <CC3Object>
 
 /**
  * Configures the specified GLSL variable.

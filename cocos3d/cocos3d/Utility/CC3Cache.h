@@ -30,6 +30,7 @@
 /** @file */	// Doxygen marker
 
 #import "CC3Foundation.h"
+#import "CC3OSExtensions.h"
 #import <pthread.h>
 
 
@@ -42,7 +43,7 @@
  * object's name property to extract the name under which the object will be identified
  * within the cache. Each object must have a unique name.
  */
-@protocol CC3Cacheable <NSObject>
+@protocol CC3Cacheable <CC3Object>
 
 /** A unique name to be used by the cache to store and retrieve this object. */
 @property(nonatomic, strong, readonly) NSString* name;
@@ -194,26 +195,3 @@
 +(id) strongCacheForType: (NSString*) typeName;
 
 @end
-
-
-#pragma mark NSObject extension
-
-/** Extension to support storing in a CC3Cache */
-@interface NSObject (CC3Cache)
-
-/** Returns the unwrapped cached value. Default implementation simply returns self. */
--(id) unwrapCacheable;
-
-@end
-
-
-#pragma mark NSValue extension
-
-/** Extension to support storing in a CC3Cache */
-@interface NSValue (CC3Cache)
-
-/** Returns the weakly cached value by invoking nonretainedObjectValue on this instance. */
--(id) unwrapCacheable;
-
-@end
-

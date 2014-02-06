@@ -55,9 +55,9 @@
 
 #pragma mark Transformation listeners
 
-/** Utility method to extract and cast a listener from an NSValue that wraps it as an unretained object. */
--(id<CC3NodeTransformListenerProtocol>) getListenerFrom: (NSValue*) listenerWrapper {
-	return (id<CC3NodeTransformListenerProtocol>)listenerWrapper.nonretainedObjectValue;
+/** Utility method to resolve the weak reference from the specified object, and cast the result as a listener. */
+-(id<CC3NodeTransformListenerProtocol>) getListenerFrom: (NSObject*) listenerWrapper {
+	return (id<CC3NodeTransformListenerProtocol>)listenerWrapper.resolveWeakReference;
 }
 
 -(NSUInteger) count { return _transformListenerWrappers.count; }
@@ -78,7 +78,7 @@
 	
 	// Adds listener as a weak reference
 	[self lock];
-	[_transformListenerWrappers addObject: [NSValue valueWithNonretainedObject: aListener]];
+	[_transformListenerWrappers addObject: [aListener asWeakReference]];
 	[self unlock];
 }
 
@@ -87,7 +87,7 @@
 
 	// Removes listener as a weak reference
 	[self lock];
-	[_transformListenerWrappers removeObject: [NSValue valueWithNonretainedObject: aListener]];
+	[_transformListenerWrappers removeObject: [aListener asWeakReference]];
 	[self unlock];
 }
 

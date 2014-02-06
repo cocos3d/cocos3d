@@ -51,7 +51,7 @@
 			  obj, _typeName, _typeName, objName);
 
 	// If this is a weak cache, wrap the object in an NSValue weakly.
-	id wrap = _isWeak ? (id)[NSValue valueWithNonretainedObject: obj] : obj;
+	id wrap = _isWeak ? [obj asWeakReference] : obj;
 
 	[self lock];
 	[_objectsByName setObject: wrap forKey: objName];
@@ -65,7 +65,7 @@
 	id obj = [_objectsByName objectForKey: name];
 	[self unlock];
 
-	return [obj unwrapCacheable];
+	return [obj resolveWeakReference];
 }
 
 -(void) removeObject: (id<CC3Cacheable>) obj { [self removeObjectNamed: obj.name]; }
@@ -82,7 +82,7 @@
 	[_objectsByName removeObjectForKey: name];
 	[self unlock];
 
-	LogRezIf(obj != nil, @"Removed %@ named %@ from the %@ cache.", [[obj unwrapCacheable] class], name, _typeName);
+	LogRezIf(obj != nil, @"Removed %@ named %@ from the %@ cache.", [[obj resolveWeakReference] class], name, _typeName);
 }
 
 -(void) removeAllObjects { [self removeAllObjectsOfType: NSObject.class]; }
@@ -96,11 +96,11 @@
 		[self lock];
 		id wrap = [_objectsByName objectForKey: name];
 		[self unlock];
-		if ( [[wrap unwrapCacheable] isKindOfClass: type] ) {
+		if ( [[wrap resolveWeakReference] isKindOfClass: type] ) {
 			LogInfoIf([wrap isKindOfClass: NSValue.class],
 					  @"%@ is being removed from the %@ cache, but is may be retained elsewhere in your app."
 					  @" You should verify your app logic to ensure this is not the result of a memory leak.",
-					  [wrap unwrapCacheable], _typeName);
+					  [wrap resolveWeakReference], _typeName);
 			[self removeObjectNamed: name];
 		}
 	}
@@ -109,7 +109,7 @@
 -(void) enumerateObjectsUsingBlock: (void (^) (id<CC3Cacheable> obj, BOOL* stop)) block {
 	[self lock];
 	[_objectsByName enumerateKeysAndObjectsUsingBlock: ^(id key, id obj, BOOL* stop) {
-		block([obj unwrapCacheable], stop);
+		block([obj resolveWeakReference], stop);
 	}];
 	[self unlock];
 }
@@ -127,7 +127,7 @@
 	
 	// Extracts the object from each wrapper
 	NSMutableArray* objs = [NSMutableArray arrayWithCapacity: wrappers.count];
-	for (NSObject* wpr in wrappers) [objs addObject: wpr.unwrapCacheable];
+	for (NSObject* wpr in wrappers) [objs addObject: wpr.resolveWeakReference];
 
 	// Sort the resulting objects
 	NSSortDescriptor* sorter = [NSSortDescriptor sortDescriptorWithKey: @"name"
@@ -169,23 +169,5 @@
 +(id) strongCacheForType: (NSString*) typeName {
 	return [[self alloc] initAsWeakCache: NO forType: typeName];
 }
-
-@end
-
-
-#pragma mark NSObject extension
-
-@implementation NSObject (CC3Cache)
-
--(id) unwrapCacheable { return self; }
-
-@end
-
-
-#pragma mark NSValue extension
-
-@implementation NSValue (CC3Cache)
-
--(id) unwrapCacheable { return self.nonretainedObjectValue; }
 
 @end

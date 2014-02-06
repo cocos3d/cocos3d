@@ -56,7 +56,7 @@
  * an appropriate default shader from the shader cache. The shader cache maintains an instance of an
  * implementation of this protocol and delegates to it to match the model to a suitable GL program.
  */
-@protocol CC3ShaderMatcher <NSObject>
+@protocol CC3ShaderMatcher <CC3Object>
 
 /**
  * Returns the shader program to use to draw the specified mesh node.
