@@ -235,10 +235,17 @@
 	// attached to the view. It cannot be started in the initializeScene method. However, it does
 	// not need to be invoked only from the onOpen method. You can use the code here as a template
 	// for use whenever your app requires background content loading after the scene has opened.
-	[self.backgrounder runBlock: ^{ [self addSceneContentAsynchronously]; }];
+
+	// Add additional scene content dynamically and asynchronously, on a background thread
+	// after rendering has begun on the rendering thread, using the CC3Backgrounder singleton.
+	// Asynchronous loading must be initiated after the scene has been attached to the view.
+	// It cannot be started in the initializeScene method. However, it does not need to be
+	// invoked only from the onOpen method. You can use the code in the line here as a template
+	// for use whenever your app requires background content loading after the scene has opened.
+	[CC3Backgrounder.sharedBackgrounder runBlock: ^{ [self addSceneContentAsynchronously]; }];
 
 	// Move the camera to frame the scene. The resulting configuration of the camera is output as
-	// a [debug] log message, so you know where the camera needs to be in order to view your scene.
+	// an [info] log message, so you know where the camera needs to be in order to view your scene.
 	[self.activeCamera moveWithDuration: 3.0 toShowAllOf: self withPadding: 0.5f];
 
 	// Uncomment this line to draw the bounding box of the scene.

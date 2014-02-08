@@ -177,8 +177,8 @@ static ccTime _interpolationEpsilon = 0.1f;
 }
 
 -(ccTime) timeAtFrame: (GLuint) frameIndex {
-	GLfloat thisIdx = frameIndex;
-	GLfloat lastIdx = _frameCount - 1;
+	GLfloat thisIdx = frameIndex;					// floatify
+	GLfloat lastIdx = MAX(_frameCount - 1, 1);		// floatify & ensure not zero
 	return CLAMP(thisIdx / lastIdx, 0.0f, 1.0f);
 }
 
@@ -389,6 +389,65 @@ static ccTime _interpolationEpsilon = 0.1f;
 		LogTrace(@"%@ deallocated %u previously allocated animated scales", self, _frameCount);
 	}
 }
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3FrozenNodeAnimation
+
+@implementation CC3FrozenNodeAnimation : CC3NodeAnimation
+
+@synthesize location=_location, quaternion=_quaternion, scale=_scale;
+
+-(BOOL) isAnimatingLocation { return !CC3VectorIsNull(_location); }
+
+-(BOOL) isAnimatingQuaternion { return !CC3QuaternionIsNull(_quaternion); }
+
+-(BOOL) isAnimatingScale { return !CC3VectorIsNull(_scale); }
+
+-(void) populateFromNodeState: (CC3Node*) node {
+	_location = node.location;
+	_quaternion = node.quaternion;
+	_scale = node.scale;
+}
+
+
+#pragma mark Animating
+
+-(void) establishFrameAt: (ccTime) t inNodeAnimationState: (CC3NodeAnimationState*) animState {
+	CC3Assert(t >= 0.0 && t <= 1.0, @"%@ animation frame time %f must be between 0.0 and 1.0", self, t);
+
+	if(animState.isAnimatingLocation) animState.location = self.location;
+	if(animState.isAnimatingQuaternion) animState.quaternion = self.quaternion;
+	if(animState.isAnimatingScale) animState.scale = self.scale;
+}
+
+
+#pragma mark Allocation and initialization
+
+-(id) init { return [self initWithFrameCount: 1]; }
+
+-(id) initWithFrameCount: (GLuint) numFrames {
+	if ( (self = [super initWithFrameCount: 1]) ) {
+		_shouldInterpolate = NO;
+		_location = kCC3VectorNull;
+		_quaternion = kCC3QuaternionNull;
+		_scale = kCC3VectorNull;
+	}
+	return self;
+}
+
++(id) animation { return [[self alloc] init]; }
+
+-(id) initFromNodeState: (CC3Node*) aNode {
+	if ( (self = [self init]) ) {
+		[self populateFromNodeState: aNode];
+	}
+	return self;
+}
+
++(id) animationFromNodeState: (CC3Node*) aNode { return [[self alloc] initFromNodeState: aNode]; }
 
 @end
 
@@ -670,5 +729,394 @@ static GLuint _lastTrackID = 0;
 -(NSString*) describeStateForFrames: (GLuint) frameCount {
 	return [self describeStateForFrames: frameCount fromTime: 0.0f toTime: 1.0f];
 }
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3Node animation
+
+@implementation CC3Node (Animation)
+
+
+#pragma mark Adding and accessing animation
+
+-(CC3NodeAnimationState*) getAnimationStateOnTrack: (GLuint) trackID {
+	for (CC3NodeAnimationState* as in _animationStates) if (as.trackID == trackID) return as;
+	return nil;
+}
+
+-(void) addAnimationState: (CC3NodeAnimationState*) animationState {
+	CC3NodeAnimationState* currAnim = [self getAnimationStateOnTrack: animationState.trackID];
+	if ( !animationState || animationState == currAnim ) return;	// leave if not changing
+	
+	if ( !_animationStates ) _animationStates = [NSMutableArray array];		// ensure array exists
+	[_animationStates removeObject: currAnim];						// remove existing
+	[_animationStates addObject: animationState];					// add to array
+}
+
+-(void) removeAnimationState: (CC3NodeAnimationState*) animationState {
+	[_animationStates removeObject: animationState];
+	if (_animationStates.count == 0) _animationStates = nil;
+}
+
+-(CC3NodeAnimationState*) animationState { return [self getAnimationStateOnTrack: 0]; }
+
+-(CC3NodeAnimation*) getAnimationOnTrack: (GLuint) trackID {
+	return [self getAnimationStateOnTrack: trackID].animation;
+}
+
+-(void) addAnimation: (CC3NodeAnimation*) animation asTrack: (GLuint) trackID {
+	CC3NodeAnimation* currAnim = [self getAnimationOnTrack: trackID];
+	if ( !animation || animation == currAnim) return;		// leave if not changing
+	[self addAnimationState: [CC3NodeAnimationState animationStateWithAnimation: animation
+																		onTrack: trackID
+																		forNode: self]];
+}
+
+-(GLuint) addAnimationFrom: (ccTime) startTime to: (ccTime) endTime {
+	return [self addAnimationFrom: startTime to: endTime ofBaseTrack: 0];
+}
+
+-(GLuint) addAnimationFrom: (ccTime) startTime
+						to: (ccTime) endTime
+			   ofBaseTrack: (GLuint) baseTrackID {
+	GLuint trackID = [CC3NodeAnimationState generateTrackID];
+	[self addAnimationFrom: startTime to: endTime ofBaseTrack: baseTrackID asTrack: trackID];
+	return trackID;
+}
+
+-(void) addAnimationFrom: (ccTime) startTime to: (ccTime) endTime asTrack: (GLuint) trackID {
+	[self addAnimationFrom: startTime to: endTime ofBaseTrack: 0 asTrack: trackID];
+}
+
+-(void) addAnimationFrom: (ccTime) startTime
+					  to: (ccTime) endTime
+			 ofBaseTrack: (GLuint) baseTrackID
+				 asTrack: (GLuint) trackID {
+	
+	// Retrieve the base animation, and contruct a partial animation on it
+	CC3NodeAnimation* baseAnim = [self getAnimationOnTrack: baseTrackID];
+	if (baseAnim) {
+		[self addAnimation: [CC3NodeAnimationSegment animationOnAnimation: baseAnim
+																	 from: startTime
+																	   to: endTime]
+				   asTrack: trackID];
+	}
+	
+	// Propagate to children
+	for (CC3Node* child in self.children) {
+		[child addAnimationFrom: startTime
+							 to: endTime
+					ofBaseTrack: baseTrackID
+						asTrack: trackID];
+	}
+}
+
+-(GLuint) addAnimationFromFrame: (GLuint) startFrameIndex
+						toFrame: (GLuint) endFrameIndex {
+	return [self addAnimationFromFrame: startFrameIndex
+							   toFrame: endFrameIndex
+						   ofBaseTrack: 0];
+}
+
+-(GLuint) addAnimationFromFrame: (GLuint) startFrameIndex
+						toFrame: (GLuint) endFrameIndex
+					ofBaseTrack: (GLuint) baseTrackID {
+	GLuint trackID = [CC3NodeAnimationState generateTrackID];
+	[self addAnimationFromFrame: startFrameIndex
+						toFrame: endFrameIndex
+					ofBaseTrack: baseTrackID
+						asTrack: trackID];
+	return trackID;
+}
+
+-(void) addAnimationFromFrame: (GLuint) startFrameIndex
+					  toFrame: (GLuint) endFrameIndex
+					  asTrack: (GLuint) trackID {
+	[self addAnimationFromFrame: startFrameIndex
+						toFrame: endFrameIndex
+					ofBaseTrack: 0
+						asTrack: trackID];
+}
+
+-(void) addAnimationFromFrame: (GLuint) startFrameIndex
+					  toFrame: (GLuint) endFrameIndex
+				  ofBaseTrack: (GLuint) baseTrackID
+					  asTrack: (GLuint) trackID {
+	
+	// Retrieve the base animation, and contruct a partial animation on it
+	CC3NodeAnimation* baseAnim = [self getAnimationOnTrack: baseTrackID];
+	if (baseAnim) {
+		[self addAnimation: [CC3NodeAnimationSegment animationOnAnimation: baseAnim
+																fromFrame: startFrameIndex
+																  toFrame: endFrameIndex]
+				   asTrack: trackID];
+	}
+	
+	// Propagate to children
+	for (CC3Node* child in self.children) {
+		[child addAnimationFromFrame: startFrameIndex
+							 toFrame: endFrameIndex
+						 ofBaseTrack: baseTrackID
+							 asTrack: trackID];
+	}
+}
+
+-(CC3NodeAnimationState*) getAnimationStateForAnimation: (CC3NodeAnimation*) animation {
+	for (CC3NodeAnimationState* as in _animationStates) if (as.animation == animation) return as;
+	return nil;
+}
+
+-(void) removeAnimation: (CC3NodeAnimation*) animation {
+	[self removeAnimationState: [self getAnimationStateForAnimation: animation]];
+}
+
+-(void) removeAnimationTrack: (GLuint) trackID {
+	[self removeAnimationState: [self getAnimationStateOnTrack: trackID]];
+	for (CC3Node* child in _children) [child removeAnimationTrack: trackID];
+}
+
+-(CC3NodeAnimation*) animation { return [self getAnimationOnTrack: 0]; }
+
+-(void) setAnimation: (CC3NodeAnimation*) animation { [self addAnimation: animation asTrack: 0]; }
+
+-(BOOL) containsAnimationOnTrack: (GLuint) trackID {
+	if ([self getAnimationStateOnTrack: trackID] != nil) return YES;
+	for (CC3Node* child in _children) if ( [child containsAnimationOnTrack: trackID] ) return YES;
+	return NO;
+}
+
+-(BOOL) containsAnimation {
+	if (_animationStates && _animationStates.count > 0) return YES;
+	for (CC3Node* child in _children) if (child.containsAnimation) return YES;
+	return NO;
+}
+
+-(ccTime) animationTimeOnTrack: (GLuint) trackID {
+	CC3NodeAnimationState* as = [self getAnimationStateOnTrack: trackID];
+	if (as) return as.animationTime;
+	for (CC3Node* child in _children) {
+		ccTime animTime = [child animationTimeOnTrack: trackID];
+		if (animTime) return animTime;
+	}
+	return 0.0f;
+}
+
+-(GLfloat) animationBlendingWeightOnTrack: (GLuint) trackID {
+	CC3NodeAnimationState* as = [self getAnimationStateOnTrack: trackID];
+	if (as) return as.blendingWeight;
+	for (CC3Node* child in _children) {
+		GLfloat animBlend = [child animationBlendingWeightOnTrack: trackID];
+		if (animBlend) return animBlend;
+	}
+	return 0.0f;
+}
+
+-(void) setAnimationBlendingWeight: (GLfloat) blendWeight onTrack: (GLuint) trackID {
+	[self getAnimationStateOnTrack: trackID].blendingWeight = blendWeight;
+	for (CC3Node* child in _children) [child setAnimationBlendingWeight: blendWeight onTrack: trackID];
+}
+
+-(void) freezeIfInanimateOnTrack: (GLuint) trackID {
+	CC3NodeAnimation* anim = [self getAnimationOnTrack: trackID];
+	if ( [anim isKindOfClass: CC3FrozenNodeAnimation.class] )
+		[((CC3FrozenNodeAnimation*)anim) populateFromNodeState: self];
+	else if ( !anim )
+		[self addAnimation: [CC3FrozenNodeAnimation animationFromNodeState: self] asTrack: trackID];
+}
+
+-(void) freezeAllInanimatesOnTrack: (GLuint) trackID {
+	[self freezeIfInanimateOnTrack: trackID];
+	for (CC3Node* child in _children) [child freezeAllInanimatesOnTrack: trackID];
+}
+
+
+#pragma mark Enabling and disabling animation
+
+-(void) enableAnimation { self.isAnimationEnabled = YES; }
+
+-(void) disableAnimation { self.isAnimationEnabled = NO; }
+
+-(BOOL) isAnimationEnabled {
+	for (CC3NodeAnimationState* as in _animationStates) if (as.isEnabled) return YES;
+	return NO;
+}
+
+-(void) setIsAnimationEnabled: (BOOL) isAnimationEnabled {
+	for (CC3NodeAnimationState* as in _animationStates) as.isEnabled = isAnimationEnabled;
+}
+
+-(void) enableAnimationOnTrack: (GLuint) trackID {
+	[[self getAnimationStateOnTrack: trackID] enable];
+}
+
+-(void) disableAnimationOnTrack: (GLuint) trackID {
+	[[self getAnimationStateOnTrack: trackID] disable];
+}
+
+-(BOOL) isAnimationEnabledOnTrack: (GLuint) trackID {
+	CC3NodeAnimationState* as = [self getAnimationStateOnTrack: trackID];
+	return as ? as.isEnabled : NO;
+}
+-(void) enableAllAnimationOnTrack: (GLuint) trackID {
+	[self enableAnimationOnTrack: trackID];
+	for (CC3Node* child in _children) [child enableAllAnimationOnTrack: trackID];
+}
+
+-(void) disableAllAnimationOnTrack: (GLuint) trackID {
+	[self disableAnimationOnTrack: trackID];
+	for (CC3Node* child in _children) [child disableAllAnimationOnTrack: trackID];
+}
+
+-(void) enableAllAnimation {
+	[self enableAnimation];
+	for (CC3Node* child in _children) [child enableAllAnimation];
+}
+
+-(void) disableAllAnimation {
+	[self disableAnimation];
+	for (CC3Node* child in _children) [child disableAllAnimation];
+}
+
+-(void) enableLocationAnimation {
+	for (CC3NodeAnimationState* as in _animationStates) as.isLocationAnimationEnabled = YES;
+}
+
+-(void) disableLocationAnimation {
+	for (CC3NodeAnimationState* as in _animationStates) as.isLocationAnimationEnabled = NO;
+}
+
+-(void) enableQuaternionAnimation {
+	for (CC3NodeAnimationState* as in _animationStates) as.isQuaternionAnimationEnabled = YES;
+}
+
+-(void) disableQuaternionAnimation {
+	for (CC3NodeAnimationState* as in _animationStates) as.isQuaternionAnimationEnabled = NO;
+}
+
+-(void) enableScaleAnimation {
+	for (CC3NodeAnimationState* as in _animationStates) as.isScaleAnimationEnabled = YES;
+}
+
+-(void) disableScaleAnimation {
+	for (CC3NodeAnimationState* as in _animationStates) as.isScaleAnimationEnabled = NO;
+}
+
+-(void) enableAllLocationAnimation {
+	[self enableLocationAnimation];
+	for (CC3Node* child in _children) [child enableAllLocationAnimation];
+}
+
+-(void) disableAllLocationAnimation {
+	[self disableLocationAnimation];
+	for (CC3Node* child in _children) [child disableAllLocationAnimation];
+}
+
+-(void) enableAllQuaternionAnimation {
+	[self enableQuaternionAnimation];
+	for (CC3Node* child in _children) [child enableAllQuaternionAnimation];
+}
+
+-(void) disableAllQuaternionAnimation {
+	[self disableQuaternionAnimation];
+	for (CC3Node* child in _children) [child disableAllQuaternionAnimation];
+}
+
+-(void) enableAllScaleAnimation {
+	[self enableScaleAnimation];
+	for (CC3Node* child in _children) [child enableAllScaleAnimation];
+}
+
+-(void) disableAllScaleAnimation {
+	[self disableScaleAnimation];
+	for (CC3Node* child in _children) [child disableAllScaleAnimation];
+}
+
+-(void) markAnimationDirty { _isAnimationDirty = YES; }
+
+
+#pragma mark Establishing an animation frame
+
+-(void) establishAnimationFrameAt: (ccTime) t onTrack: (GLuint) trackID {
+	[[self getAnimationStateOnTrack: trackID] establishFrameAt: t];
+	for (CC3Node* child in _children) [child establishAnimationFrameAt: t onTrack: trackID];
+}
+
+/** Updates this node from a blending of any contained animation. */
+-(void) updateFromAnimationState {
+	if ( !_isAnimationDirty ) return;
+	
+	// Start with identity transforms
+	CC3Vector blendedLoc = kCC3VectorZero;
+	CC3Vector blendedRot = kCC3VectorZero;
+	CC3Quaternion blendedQuat = kCC3QuaternionIdentity;
+	CC3Vector blendedScale = kCC3VectorUnitCube;
+	
+	// Accumulated weights
+	GLfloat totWtL = 0.0f;		// Accumulated location weight
+	GLfloat totWtR = 0.0f;		// Accumulated rotation weight
+	GLfloat totWtQ = 0.0f;		// Accumulated quaternion weight
+	GLfloat totWtS = 0.0f;		// Accumulated scale weight
+	
+	for (CC3NodeAnimationState* as in _animationStates) {
+		GLfloat currWt = as.blendingWeight;
+		if (currWt && as.isEnabled) {		// Don't blend if disabled or zero weight
+			
+			// Blend the location
+			if (as.isAnimatingLocation) {
+				totWtL += currWt;
+				blendedLoc = CC3VectorLerp(blendedLoc, as.location, (currWt / totWtL));
+			}
+			
+			// Blend the quaternion
+			if (as.isAnimatingQuaternion) {
+				totWtQ += currWt;
+				blendedQuat = CC3QuaternionSlerp(blendedQuat, as.quaternion, (currWt / totWtQ));
+			}
+			
+			// Blend the scale
+			if (as.isAnimatingScale) {
+				totWtS += currWt;
+				blendedScale = CC3VectorLerp(blendedScale, as.scale, (currWt / totWtS));
+			}
+		}
+	}
+	
+	if (totWtL) self.location = blendedLoc;
+	if (totWtR) self.rotation = blendedRot;
+	if (totWtQ) self.quaternion = blendedQuat;
+	if (totWtS) self.scale = blendedScale;
+	
+	_isAnimationDirty = NO;
+}
+
+
+#pragma mark Developer support
+
+#define kAnimStateDescLen 100
+
+-(NSString*) describeCurrentAnimationState {
+	NSMutableString* desc = [NSMutableString stringWithCapacity: (_animationStates.count * kAnimStateDescLen)];
+	for (CC3NodeAnimationState* as in _animationStates) [desc appendFormat: @"\n%@ ", as.describeCurrentState];
+	return desc;
+}
+
+-(NSString*) describeAnimationStateForFrames: (GLuint) frameCount fromTime: (ccTime) startTime toTime: (ccTime) endTime {
+	NSMutableString* desc = [NSMutableString stringWithCapacity: (_animationStates.count * kAnimStateDescLen * frameCount + 200)];
+	for (CC3NodeAnimationState* as in _animationStates)
+		[desc appendFormat: @"\n%@ ", [as describeStateForFrames: frameCount fromTime: startTime toTime: endTime]];
+	return desc;
+}
+
+-(NSString*) describeAnimationStateForFrames: (GLuint) frameCount {
+	return [self describeAnimationStateForFrames: frameCount fromTime: 0.0f toTime: 1.0f];
+}
+
+
+#pragma mark Deprecated functionality
+
+-(GLuint) animationFrameCount { return self.animation.frameCount; }
+-(void) establishAnimationFrameAt: (ccTime) t { [self establishAnimationFrameAt: t onTrack: 0]; }
 
 @end

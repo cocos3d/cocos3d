@@ -30,6 +30,7 @@
  */
 
 #import "NodeGrid.h"
+#import "CC3NodeAnimation.h"
 #import "CC3IOSExtensions.h"
 
 

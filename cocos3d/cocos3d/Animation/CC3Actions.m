@@ -30,7 +30,7 @@
  */
 
 #import "CC3Actions.h"
-#import "CC3Node.h"
+#import "CC3NodeAnimation.h"
 
 
 #pragma mark -

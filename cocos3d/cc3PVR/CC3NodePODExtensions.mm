@@ -84,6 +84,8 @@ extern "C" {
 		if ([CC3PODNodeAnimation sPODNodeDoesContainAnimation: (PODStructPtr)psn])
 			self.animation = [CC3PODNodeAnimation animationFromSPODNode: (PODStructPtr)psn
 														 withFrameCount: aPODRez.animationFrameCount];
+		else if (aPODRez.shouldFreezeInanimateNodes)
+			self.animation = [CC3FrozenNodeAnimation animationFromNodeState: self];
 		
 		// Assign any user data and take ownership of managing its memory
 		if (psn->pUserData && psn->nUserDataSize > 0) {
