@@ -55,7 +55,7 @@ static const id placeHolder = [NSObject new];
 
 @synthesize pvrtModel=_pvrtModel, allNodes=_allNodes, meshes=_meshes;
 @synthesize materials=_materials, textures=_textures, textureParameters=_textureParameters;
-@synthesize shouldAutoBuild = _shouldAutoBuild, shouldFreezeInanimateNodes=_shouldFreezeInanimateNodes;
+@synthesize shouldAutoBuild = _shouldAutoBuild;
 @synthesize ambientLight=_ambientLight, backgroundColor=_backgroundColor;
 @synthesize animationFrameCount=_animationFrameCount, animationFrameRate=_animationFrameRate;
 
@@ -84,7 +84,6 @@ static const id placeHolder = [NSObject new];
 		_textures = [NSMutableArray array];
 		_textureParameters = [CC3Texture defaultTextureParameters];
 		_shouldAutoBuild = YES;
-		_shouldFreezeInanimateNodes = self.class.defaultShouldFreezeInanimateNodes;
 	}
 	return self;
 }
@@ -109,14 +108,6 @@ static const id placeHolder = [NSObject new];
 
 
 #pragma mark Building
-
-static BOOL _defaultShouldFreezeInanimateNodes = NO;
-
-+(BOOL) defaultShouldFreezeInanimateNodes { return _defaultShouldFreezeInanimateNodes; }
-
-+(void) setDefaultShouldFreezeInanimateNodes: (BOOL) shouldFreeze {
-	_defaultShouldFreezeInanimateNodes = shouldFreeze;
-}
 
 -(void) build {
 	[self buildSceneInfo];

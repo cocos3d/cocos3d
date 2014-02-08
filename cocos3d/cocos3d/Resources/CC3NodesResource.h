@@ -96,6 +96,7 @@
 @interface CC3NodesResource : CC3Resource {
 	NSMutableArray* _nodes;
 	BOOL _expectsVerticallyFlippedTextures : 1;
+	BOOL _shouldFreezeInanimateNodes : 1;
 }
 
 /**
@@ -220,6 +221,38 @@
  * The initial value of this class-side property is NO.
  */
 +(void) setDefaultExpectsVerticallyFlippedTextures: (BOOL) expectsFlipped;
+
+
+#pragma mark Animation
+
+/**
+ * Indicates whether any nodes that do not contain animation should be frozen to their initial
+ * location, quaternion, and scale properties when animation is run.
+ *
+ * Setting this property to YES has the same effect as invoking freezeIfInanimateOnTrack:
+ * on each node, immediately after loading the node. See the notes for that method to learn
+ * more about freezing inanimate nodes during animation.
+ *
+ * The initial value of this property is determined by the value of the class-side
+ * defaultShouldFreezeInanimateNodes property at the time of instantiation.
+ */
+@property(nonatomic, assign) BOOL shouldFreezeInanimateNodes;
+
+/**
+ * Indicates the initial value to which the shouldFreezeInanimateNodes property will be set
+ * for each new instance of this class.
+ *
+ * The initial value of this class-side property is NO.
+ */
++(BOOL) defaultShouldFreezeInanimateNodes;
+
+/**
+ * Indicates the initial value to which the shouldFreezeInanimateNodes property will be set
+ * for each new instance of this class.
+ *
+ * The initial value of this class-side property is NO.
+ */
++(void) setDefaultShouldFreezeInanimateNodes: (BOOL) shouldFreeze;
 
 @end
 

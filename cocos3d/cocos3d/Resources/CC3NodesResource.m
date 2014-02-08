@@ -34,6 +34,7 @@
 @implementation CC3NodesResource
 
 @synthesize nodes=_nodes, expectsVerticallyFlippedTextures=_expectsVerticallyFlippedTextures;
+@synthesize shouldFreezeInanimateNodes=_shouldFreezeInanimateNodes;
 
 -(CC3Node*) getNodeMatching: (CC3Node*) node {
 	NSString* nodeName = node.name;
@@ -55,6 +56,7 @@
 	if ( (self = [super init]) ) {
 		_nodes = [NSMutableArray array];
 		_expectsVerticallyFlippedTextures = self.class.defaultExpectsVerticallyFlippedTextures;
+		_shouldFreezeInanimateNodes = self.class.defaultShouldFreezeInanimateNodes;
 	}
 	return self;
 }
@@ -79,6 +81,17 @@ static BOOL defaultExpectsVerticallyFlippedTextures = NO;
 
 +(void) setDefaultExpectsVerticallyFlippedTextures: (BOOL) expectsFlipped {
 	defaultExpectsVerticallyFlippedTextures = expectsFlipped;
+}
+
+
+#pragma mark Animation
+
+static BOOL _defaultShouldFreezeInanimateNodes = NO;
+
++(BOOL) defaultShouldFreezeInanimateNodes { return _defaultShouldFreezeInanimateNodes; }
+
++(void) setDefaultShouldFreezeInanimateNodes: (BOOL) shouldFreeze {
+	_defaultShouldFreezeInanimateNodes = shouldFreeze;
 }
 
 @end
