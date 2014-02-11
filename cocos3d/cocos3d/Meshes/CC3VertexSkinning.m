@@ -100,9 +100,9 @@
 
 -(BOOL) hasRigidSkeleton { return _hasRigidSkeleton; }
 
--(void) setHasRigidSkeleton: (BOOL) hasRigidSkeleton {
-	_hasRigidSkeleton = hasRigidSkeleton;
-	[super setHasRigidSkeleton: hasRigidSkeleton];
+-(void) ensureRigidSkeleton {
+	_hasRigidSkeleton = self.hasSkeleton;
+	[super ensureRigidSkeleton];
 }
 
 
@@ -405,6 +405,13 @@
 @synthesize restPoseSkeletalTransformMatrixInverted=_restPoseSkeletalTransformMatrixInverted;
 
 -(BOOL) hasSoftBodyContent  { return YES; }
+
+-(void) ensureRigidSkeleton {
+	self.uniformScale = 1.0f;
+	[self disableScaleAnimation];
+	[super ensureRigidSkeleton];
+}
+
 
 #pragma mark Allocation and initialization
 
@@ -749,14 +756,7 @@
 	return NO;
 }
 
--(BOOL) hasRigidSkeleton {
-	for (CC3Node* child in _children) if (child.hasRigidSkeleton) return YES;
-	return NO;
-}
-
--(void) setHasRigidSkeleton: (BOOL) hasRigidSkeleton {
-	for (CC3Node* child in _children) [child setHasRigidSkeleton: hasRigidSkeleton];
-}
+-(void) ensureRigidSkeleton { for (CC3Node* child in _children) [child ensureRigidSkeleton]; }
 
 -(void) cacheRestPoseMatrix {}
 
@@ -779,6 +779,8 @@
 @implementation CC3MeshNode (Skinning)
 
 -(BOOL) hasSkeleton { return NO; }
+
+-(BOOL) hasRigidSkeleton { return NO; }
 
 
 #pragma mark Faces

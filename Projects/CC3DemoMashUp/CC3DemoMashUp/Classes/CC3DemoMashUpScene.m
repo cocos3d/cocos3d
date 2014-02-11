@@ -1702,10 +1702,11 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// the normals to be individually re-normalized after being transformed.
 	mallet.normalScalingMethod = kCC3NormalScalingNormalize;
 
-	// The bones in the mallet are rigid (no scale applied). Setting this property allows
-	// the shader program that is optimized for that to be automatically selected for the
-	// mallet skinned mesh node. Many more active bones are possible with a rigid skeleton.
-	mallet.hasRigidSkeleton = YES;
+	// Ensure the bones in the mallet are rigid (no scale applied). Doing this allows the
+	// shader program that is optimized for that to be automatically selected for the mallet
+	// skinned mesh node. Many more active bones are possible with a rigid skeleton.
+	// The model must be designed as a rigid model, otherwise it won't animate correctly.
+	[mallet ensureRigidSkeleton];
 	
 	// Because the mallet is a skinned model, it is not automatically assigned a bounding volume,
 	// and will be be drawn even if it is not in front of the camera. We can leave it like this,
@@ -2527,10 +2528,11 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 //	dgnBody.shouldDrawBoundingVolume = YES;
 	[_dragon setSkeletalBoundingVolume: dgnBody.boundingVolume];
 
-	// The bones in the dragon are rigid (no scale applied). Setting this property allows the
+	// Ensure the bones in the dragon are rigid (no scale applied). Doing this allows the
 	// shader program that is optimized for that to be automatically selected for the skinned
 	// mesh nodes in the dragon. Many more active bones are possible with a rigid skeleton.
-	_dragon.hasRigidSkeleton = YES;
+	// The model must be designed as a rigid model, otherwise it won't animate correctly.
+	[_dragon ensureRigidSkeleton];
 
 #if !CC3_GLSL
 	// The fixed pipeline of OpenGL ES 1.1 cannot make use of the tangent-space normal

@@ -132,48 +132,45 @@ static ccTime _interpolationEpsilon = 0.1f;
  * Updates the location of the node animation state by interpolating between the animation
  * content at the specified frame index and that at the next frame index, using the specified
  * interpolation fraction value, which will be between zero and one.
+ * If frameInterpolation is zero, the lerp function will immediately return first frame.
  */
 -(void) establishLocationAtFrame: (GLuint) frameIndex
 			   plusInterpolation: (GLfloat) frameInterpolation
 			inNodeAnimationState: (CC3NodeAnimationState*) animState {
-	if(animState.isAnimatingLocation) {
-		// If frameInterpolation is zero, Lerp function will immediately return first frame.
-		animState.location = CC3VectorLerp([self locationAtFrame: frameIndex],
-										   [self locationAtFrame: frameIndex + 1],
-										   frameInterpolation);
-	}
+	if( !animState.isAnimatingLocation ) return;
+	animState.location = CC3VectorLerp([self locationAtFrame: frameIndex],
+									   [self locationAtFrame: frameIndex + 1],
+									   frameInterpolation);
 }
 
 /**
  * Updates the rotation quaternion of the node animation state by interpolating between the
  * animation content at the specified frame index and that at the next frame index, using
  * the specified interpolation fraction value, which will be between zero and one.
+ * If frameInterpolation is zero, the slerp function will immediately return first frame.
  */
 -(void) establishQuaternionAtFrame: (GLuint) frameIndex
 				 plusInterpolation: (GLfloat) frameInterpolation
 			  inNodeAnimationState: (CC3NodeAnimationState*) animState {
-	if(animState.isAnimatingQuaternion) {
-		// If frameInterpolation is zero, Slerp function will immediately return first frame.
-		animState.quaternion = CC3QuaternionSlerp([self quaternionAtFrame: frameIndex],
-												  [self quaternionAtFrame: frameIndex + 1],
-												  frameInterpolation);
-	}
+	if( !animState.isAnimatingQuaternion ) return;
+	animState.quaternion = CC3QuaternionSlerp([self quaternionAtFrame: frameIndex],
+											  [self quaternionAtFrame: frameIndex + 1],
+											  frameInterpolation);
 }
 
 /**
  * Updates the scale of the node animation state by interpolating between the the animation
  * content at the specified frame index and that at the next frame index, using the specified
  * interpolation fraction value, which will be between zero and one.
+ * If frameInterpolation is zero, the lerp function will immediately return first frame.
  */
 -(void) establishScaleAtFrame: (GLuint) frameIndex
 			plusInterpolation: (GLfloat) frameInterpolation
 		 inNodeAnimationState: (CC3NodeAnimationState*) animState {
-	if(animState.isAnimatingScale) {
-		// If frameInterpolation is zero, Lerp function will immediately return first frame.
-		animState.scale = CC3VectorLerp([self scaleAtFrame: frameIndex],
-										[self scaleAtFrame: frameIndex + 1],
-										frameInterpolation);
-	}
+	if( !animState.isAnimatingScale ) return;
+	animState.scale = CC3VectorLerp([self scaleAtFrame: frameIndex],
+									[self scaleAtFrame: frameIndex + 1],
+									frameInterpolation);
 }
 
 -(ccTime) timeAtFrame: (GLuint) frameIndex {

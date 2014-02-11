@@ -262,7 +262,7 @@
 	// Animated dragon using rigid bones
 	aNode = [aNode copy];
 	aNode.name = @"Vertex-skinned, bump-mapped mesh with rigidly-animated bones.";
-	aNode.hasRigidSkeleton = YES;
+	[aNode ensureRigidSkeleton];
 	[aNode removeShaders];			// Clear shaders to reselect rigid bone shaders
 	[self configureAndAddTemplate: aNode];
 	

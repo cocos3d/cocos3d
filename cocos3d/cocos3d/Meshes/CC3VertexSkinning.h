@@ -761,23 +761,35 @@
 @property(nonatomic, readonly) BOOL hasSoftBodyContent;
 
 /**
- * Indicates whether the skeletal structures controlling any descendant skinned mesh nodes are
- * composed of bones that undergo only rigid transforms, relative to their nearest ancestor
- * soft-body node.
+ * Ensures the skeletal structures controlling any descendant skinned mesh nodes are composed
+ * of bones that undergo only rigid transforms, relative to their nearest ancestor soft-body node.
+ * Typically, you invoke this method on the resource node, soft-body node, or other ancestor node
+ * that contains the animated skinned character model.
  *
- * When the bones in a skeleton contain only rigid transforms, the vertices in the skin-mesh
- * node can be transformed within a shader using rotations and transforms, instead of a full
- * transform matrix. This allows for many more bones to be transferred to the shader program
+ * When the bones in a skeleton contain only rigid transforms, the vertices in the skinned mesh node
+ * can be transformed within a shader using rotations and transforms only, instead of requiring a 
+ * full transform matrix. This allows for many more bones to be transferred to the shader program
  * during a single GL draw call, which increases performance in many larger meshes.
  *
- * Consequently, the value of this property on each descendant skinned mesh node affects the 
- * choice of shader program that will be selected automatically for that node.
+ * Consequently, invoking this method affects the choice of shader that will be selected
+ * automatically for descendant skinned mesh nodes.
  *
- * Setting the value of this property affects all descendant skinned mesh nodes. Querying the
- * value of this property returns YES if any descendant skinned mesh node returns YES to the
- * same property, otherwise returns NO.
+ * You must invoke this method in order to have such a shader automatically selected for each
+ * skinned mesh node, even if you know that all bones contain, and are animated by, only unit
+ * scales. Otherwise, automatic shader selection will select a shader that transforms vertices
+ * using bone transform matrices, instead. Alternately, if you know all bones contain, and are
+ * animated by, only unit scales, you can manually assign the appropriate shader program, and
+ * in that case, you do not need to invoke this method.
+ *
+ * For each descendant bone node, this method sets the uniformScale property to 1.0, and invokes
+ * the disableScaleAnimation method to ensure that no changes will be made to the scale property
+ * during animation. You should invoke this method after all animation tracks have been added to
+ * the bone nodes, or anytime a new animation track is added.
+ *
+ * After this method has been invoked, the hasRigidSkeleton properties of all descendant skinned
+ * mesh nodes will return YES.
  */
-@property(nonatomic, assign) BOOL hasRigidSkeleton;
+-(void) ensureRigidSkeleton;
 
 /**
  * After copying a skin mesh node, the newly created copy will still be influenced
@@ -867,6 +879,25 @@
  * subclass) will return YES if the vertices are influenced by a skeleton of bone nodes.
  */
 @property(nonatomic, readonly) BOOL hasSkeleton;
+
+/**
+ * Returns whether the skeletal structures controlling any descendant skinned mesh nodes are
+ * composed of bones that undergo only rigid transforms, relative to their nearest ancestor
+ * soft-body node.
+ *
+ * The initial value of this property is NO. It is set to YES when the ensureRigidSkeleton
+ * method is invoked on this node, or an ancestor node, and this mesh node has a skeleton
+ * (as indicated by the hasSkeleton property of this node).
+ *
+ * When the bones in a skeleton contain only rigid transforms, the vertices in the skin-mesh
+ * node can be transformed within a shader using rotations and transforms, instead of a full
+ * transform matrix. This allows for many more bones to be transferred to the shader program
+ * during a single GL draw call, which increases performance in many larger meshes.
+ *
+ * Consequently, the value of this property affects the choice of shader that will be selected
+ * automatically for this node.
+ */
+@property(nonatomic, readonly) BOOL hasRigidSkeleton;
 
 
 #pragma mark Faces

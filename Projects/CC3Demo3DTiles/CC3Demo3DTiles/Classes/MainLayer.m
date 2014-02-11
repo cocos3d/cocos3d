@@ -38,6 +38,7 @@
 #import "CC3UtilityMeshNodes.h"
 #import "CC3IOSExtensions.h"
 #import "CC3Actions.h"
+#import "CC3VertexSkinning.h"
 
 /** Scale and position the buttons so they are usable at various screen resolutions. */
 #if APPORTABLE
@@ -80,19 +81,6 @@
 	}
 	return self;
 }
-
-//-(id) initWithController: (CC3ViewController*) controller {
-//	if( (self = [super initWithController: controller]) ) {
-//		_tiles = [NSMutableArray array];
-//		_templates = [NSMutableArray array];
-//		_backdropTemplate = nil;
-//		_tilesPerSide = 1;
-//		[self initializeTemplates];
-//		[self initializeControls];
-//		[self addTiles];
-//	}
-//	return self;
-//}
 
 
 # pragma mark UI Controls
@@ -243,7 +231,9 @@
 	n = [rezNode getNodeNamed: @"Dragon.pod-SoftBody"];
 	_glideTrack = [n addAnimationFromFrame: 0 toFrame: 60];
 	_flapTrack = [n addAnimationFromFrame: 61 toFrame: 108];
-	
+
+	[n ensureRigidSkeleton];
+
 #if !CC3_GLSL
 	// The fixed pipeline of OpenGL ES 1.1 cannot make use of the tangent-space normal
 	// mapping texture that is applied to the dragon, and the result is that the dragon
