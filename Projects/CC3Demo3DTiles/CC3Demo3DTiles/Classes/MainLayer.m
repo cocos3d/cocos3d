@@ -232,7 +232,7 @@
 	_glideTrack = [n addAnimationFromFrame: 0 toFrame: 60];
 	_flapTrack = [n addAnimationFromFrame: 61 toFrame: 108];
 
-	[n ensureRigidSkeleton];
+	[n ensureRigidSkeleton];	// Dragon skeleton contains no scale, so animate as a rigid skeleton.
 
 #if !CC3_GLSL
 	// The fixed pipeline of OpenGL ES 1.1 cannot make use of the tangent-space normal

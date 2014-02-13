@@ -44,7 +44,7 @@ for the following directories within that specified directory:
     cocos2d
     CocosDenshion
     CocosDenshionExtras
-    external/kazmath		(cocos2d 2.x only)
+    external/kazmath		(cocos2d 2.1 only)
  
 OPTIONS:
    -h	this help
@@ -224,12 +224,12 @@ copy_xc_project_templates() {
 	copy_files "Projects/Common/Resources/fps_images-hd.png" "$DST_DIR"
 	copy_files "Projects/Common/Resources/fps_images-ipadhd.png" "$DST_DIR"
 
-# Copy OpenGL OSX Template (cocos2d 2.x)
+# Copy OpenGL OSX Template (cocos2d 2.1)
 	TEMPLATE="cocos3d OSX Application"
 
 	DST_DIR="$TEMPLATE_DIR""cocos3d OpenGL Application.xctemplate"
 	check_dst_dir
-	echo ...copying $TEMPLATE template files for use with OpenGL under OSX and cocos2d 2.x
+	echo ...copying $TEMPLATE template files for use with OpenGL under OSX and cocos2d 2.1
 	copy_files "Templates/Xcode/$TEMPLATE.xctemplate/" "$DST_DIR"
 
 	DST_DIR="$DST_DIR""/Resources"
@@ -268,7 +268,7 @@ link_cocos2d_libs(){
 		link_dir "$CDEN_DIST_DIR" "$CC2_DIR" "CocosDenshion"
 	fi
 
-	link_dir "$CC2_DIST_DIR/external/kazmath" "$CC2_DIR" "kazmath (cocos2d 2.x only)"
+	link_dir "$CC2_DIST_DIR/external/kazmath" "$CC2_DIR" "kazmath (cocos2d 2.1 only)"
 
 	echo done!
 }

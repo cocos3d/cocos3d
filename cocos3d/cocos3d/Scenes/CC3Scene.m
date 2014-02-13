@@ -376,7 +376,8 @@
 
 -(void) drawSceneContentWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	[self illuminateWithVisitor: visitor];		// Light up your world!
-	[visitor visit: self.backdrop];				// Draw the backdrop if it exists
+	[self drawBackdropWithVisitor: visitor];	// Draw the backdrop if it exists
+
 	[visitor visit: self];						// Draw the scene components
 	
 	// Shadows are drawn with a specialized visitor
@@ -387,6 +388,11 @@
 -(void) drawSceneContentForEnvironmentMapWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	[visitor.renderSurface clearColorAndDepthContent];
 	[self drawSceneContentWithVisitor: visitor];
+}
+
+-(void) drawBackdropWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	if (self.controller.isOverlayingDeviceCamera) return;
+	[visitor visit: self.backdrop];
 }
 
 /**

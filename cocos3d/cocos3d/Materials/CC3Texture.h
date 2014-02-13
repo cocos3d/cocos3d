@@ -34,14 +34,7 @@
 #import "CC3NodeVisitor.h"
 #import "CC3TextureUnit.h"
 
-// Macros for legacy references to removed classes and methods
-#define CC3GLTexture			CC3Texture
-#define CC3GLTexture2D			CC3Texture2D
-#define CC3GLTextureCube		CC3TextureCube
-#define CC3PVRGLTexture			CC3PVRTexture
-#define addGLTexture			addTexture
-#define getGLTextureNamed		getTextureNamed
-#define removeGLTexture			removeTexture
+@class CC3Texture2DContent;
 
 
 #pragma mark -
@@ -111,7 +104,7 @@
 	GLenum _magnifyingFunction;
 	GLenum _horizontalWrappingFunction;
 	GLenum _verticalWrappingFunction;
-	CCTexture2D* _ccTexture2D;
+	CC3Texture2DContent* _ccTexture2D;
 	BOOL _texParametersAreDirty : 1;
 	BOOL _hasMipmap : 1;
 	BOOL _isUpsideDown : 1;
@@ -1607,7 +1600,7 @@
  * The texture ID used to identify this texture to the GL engine.
  *
  * This implementation allows this property to be set, in order to permit an instance
- * to be created from CC3Textures.
+ * to be created from a CC3Texture.
  */
 @property(nonatomic,readwrite) GLuint name;
 
@@ -1672,6 +1665,15 @@
  */
 -(void) rotateHalfCircle;
 
+/** 
+ * Resizes this texture to the specified dimensions.
+ *
+ * This method changes the values of the size, width, height, maxS & maxT properties, 
+ * but does not make any changes to the texture within the GL engine. This method is
+ * invoked during the resizing of a texture that backs a surface.
+ */
+-(void) resizeTo: (CC3IntSize) size;
+
 /**
  * Deletes the texture content from main memory. This should be invoked
  * once the texture is bound to the GL engine. 
@@ -1718,4 +1720,13 @@
 +(id) textureFromCC3Texture: (CC3Texture*) texture;
 
 @end
+
+// Macros for legacy references to removed classes and methods
+#define CC3GLTexture			CC3Texture
+#define CC3GLTexture2D			CC3Texture2D
+#define CC3GLTextureCube		CC3TextureCube
+#define CC3PVRGLTexture			CC3PVRTexture
+#define addGLTexture			addTexture
+#define getGLTextureNamed		getTextureNamed
+#define removeGLTexture			removeTexture
 

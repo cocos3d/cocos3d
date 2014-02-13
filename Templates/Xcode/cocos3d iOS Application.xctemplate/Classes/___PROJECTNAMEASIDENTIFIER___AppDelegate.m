@@ -90,7 +90,7 @@
 	_window.rootViewController = _viewController;
 	[_window makeKeyAndVisible];
 	
-	// Set to YES for Augmented Reality 3D overlay on device camera.
+	// Set to YES for an Augmented Reality 3D overlay on device camera.
 	// This must be done after the window is made visible!
 //	_viewController.isOverlayingDeviceCamera = YES;
 

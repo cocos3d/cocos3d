@@ -116,8 +116,6 @@
 
 #pragma mark Binding content
 
--(void) bindEmptyContent { CC3AssertUnimplemented(@"bindEmptyContent"); }
-
 -(void) bindTextureContent: (CC3Texture2DContent*) texContent toTarget: (GLenum) target {
 	
 	[self checkTextureOrientation: texContent];
@@ -172,6 +170,22 @@
 	// Boundary is at byte level, so check it based on whether
 	// texture width is divisible by either 4 or 2.
 	return CC3IntIsEven(_size.width) ? (CC3IntIsEven(_size.width / 2) ? 4 : 2) : 1;
+}
+
+/**
+ * Returns an empty content of the same size as this texture. If this texture already has a
+ * content object already, it is resized and returned. Otherwise, a new content object, of
+ * the size, pixel format and type of this texture is created an returned.
+ */
+-(CC3Texture2DContent*) getSizedContent {
+	if (_ccTexture2D) {
+		[_ccTexture2D resizeTo: self.size];
+		return _ccTexture2D;
+	} else {
+		return [[self.textureContentClass alloc] initWithSize: self.size
+											   andPixelFormat: self.pixelFormat
+												 andPixelType: self.pixelType];
+	}
 }
 
 
@@ -489,9 +503,8 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 }
 
 -(void) resizeTo: (CC3IntSize) size {
-	if ( CC3IntSizesAreEqual(size, _size) ) return;
 	_size = size;
-	[self bindEmptyContent];
+	_hasMipmap = NO;
 }
 
 
@@ -511,7 +524,7 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
  * CCTexture2D returned by the ccTexture2D property to the CCTextureCache.
  */
 -(void) cacheCCTexture2D {
-	if (self.class.shouldCacheAssociatedCCTexture2Ds) [_ccTexture2D addToCacheWithName: _name];
+	if (self.class.shouldCacheAssociatedCCTexture2Ds) [_ccTexture2D addToCacheWithName: self.name];
 }
 
 static BOOL _shouldCacheAssociatedCCTexture2Ds = NO;
@@ -771,20 +784,23 @@ static CC3Cache* _textureCache = nil;
 
 -(Class) textureContentClass { return CC3Texture2DContent.class; }
 
+/** If the specified texture content is new to this texture, the contained content is updated. */
 -(void) bindTextureContent: (CC3Texture2DContent*) texContent toTarget: (GLenum) target {
 	[super bindTextureContent: texContent toTarget: target];
+
+	if (texContent == _ccTexture2D) return;
+
 	texContent.name = self.textureID;
 	[texContent deleteImageData];
+	_ccTexture2D.name = 0;			// Clear ID of existing so it won't delete GL texture when deallocated
 	_ccTexture2D = texContent;
 	[self cacheCCTexture2D];
 }
 
--(void) bindEmptyContent {
-	id texContent = [[self.textureContentClass alloc] initWithSize: self.size
-													andPixelFormat: self.pixelFormat
-													  andPixelType: self.pixelType];
-	[self bindTextureContent: texContent toTarget: self.textureTarget];
-	_hasMipmap = NO;
+-(void) resizeTo: (CC3IntSize) size {
+	if ( CC3IntSizesAreEqual(size, _size) ) return;
+	[super resizeTo: size];
+	[self bindTextureContent: self.getSizedContent toTarget: self.textureTarget];
 }
 
 
@@ -871,17 +887,16 @@ static ccTexParams _defaultCubeMapTextureParameters = { GL_LINEAR_MIPMAP_NEAREST
 
 +(void) setDefaultTextureParameters: (ccTexParams) texParams { _defaultCubeMapTextureParameters = texParams; }
 
--(void) bindEmptyContent {
-	id texContent = [[self.textureContentClass alloc] initWithSize: self.size
-													andPixelFormat: self.pixelFormat
-													  andPixelType: self.pixelType];
+-(void) resizeTo: (CC3IntSize) size {
+	if ( CC3IntSizesAreEqual(size, _size) ) return;
+	[super resizeTo: size];
+	CC3Texture2DContent* texContent = self.getSizedContent;
 	[self bindTextureContent: texContent toTarget: GL_TEXTURE_CUBE_MAP_POSITIVE_X];
 	[self bindTextureContent: texContent toTarget: GL_TEXTURE_CUBE_MAP_NEGATIVE_X];
 	[self bindTextureContent: texContent toTarget: GL_TEXTURE_CUBE_MAP_POSITIVE_Y];
 	[self bindTextureContent: texContent toTarget: GL_TEXTURE_CUBE_MAP_NEGATIVE_Y];
 	[self bindTextureContent: texContent toTarget: GL_TEXTURE_CUBE_MAP_POSITIVE_Z];
 	[self bindTextureContent: texContent toTarget: GL_TEXTURE_CUBE_MAP_NEGATIVE_Z];
-	_hasMipmap = NO;
 }
 
 
@@ -1433,6 +1448,14 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 	_isUpsideDown = !_isUpsideDown;		// Orientation has changed
 }
 
+-(void) resizeTo: (CC3IntSize) size {
+	CC2_TEX_SIZE = CGSizeFromCC3IntSize(size);
+	CC2_TEX_WIDTH = size.width;
+	CC2_TEX_HEIGHT = size.height;
+	CC2_TEX_MAXS = 1.0f;
+	CC2_TEX_MAXT = 1.0f;
+}
+
 
 #pragma mark Allocation and Initialization
 
@@ -1440,11 +1463,7 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 	LogTrace(@"Creating empty texture width %u height %u content size %@ format %i data %p",
 			 size.width, size.height, NSStringFromCGSize(size), pixelFormat, data);
 	if( (self = [super init]) ) {
-		CC2_TEX_SIZE = CGSizeFromCC3IntSize(size);
-		CC2_TEX_WIDTH = size.width;
-		CC2_TEX_HEIGHT = size.height;
-		CC2_TEX_MAXS = 1.0f;
-		CC2_TEX_MAXT = 1.0f;
+		[self resizeTo: size];
 		CC2_TEX_HAS_PREMULT_ALPHA = NO;
 		_imageData = NULL;
 		_isUpsideDown = NO;		// Empty texture is not upside down!

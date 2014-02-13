@@ -12,6 +12,7 @@
 #import "CC3MeshNode.h"
 #import "CC3Camera.h"
 #import "CC3Light.h"
+#import "CC3UtilityMeshNodes.h"
 
 
 @implementation ___PROJECTNAMEASIDENTIFIER___Scene
@@ -39,6 +40,10 @@
  *    application, REMOVE the POD file 'hello-world.pod' from the Resources folder of your project.
  */
 -(void) initializeScene {
+
+	// Optionally add a static solid-color, or textured, backdrop, by uncommenting one of these lines.
+//	self.backdrop = [CC3Backdrop nodeWithColor: ccc4f(0.4, 0.5, 0.9, 1.0)];
+//	self.backdrop = [CC3Backdrop nodeWithTexture: [CC3Texture textureFromFile: @"Default.png"]];
 
 	// Create the camera, place it back a bit, and add it to the scene
 	CC3Camera* cam = [CC3Camera nodeWithName: @"Camera"];
@@ -228,13 +233,6 @@
  * For more info, read the notes of this method on CC3Scene.
  */
 -(void) onOpen {
-
-	// Add additional scene content dynamically and asynchronously, on a background thread after
-	// rendering has begun on the rendering thread, using the CC3Backgrounder instance available
-	// in the backgrounder property. Asynchronous loading must be initiated after the scene has been
-	// attached to the view. It cannot be started in the initializeScene method. However, it does
-	// not need to be invoked only from the onOpen method. You can use the code here as a template
-	// for use whenever your app requires background content loading after the scene has opened.
 
 	// Add additional scene content dynamically and asynchronously, on a background thread
 	// after rendering has begun on the rendering thread, using the CC3Backgrounder singleton.

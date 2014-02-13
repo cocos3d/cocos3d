@@ -786,8 +786,9 @@ static NSObject<CC3OpenGLDelegate>* _delegate = nil;
 -(GLint) getRenderbufferParameterInteger: (GLenum) param {
 	GLint val;
 	glGetRenderbufferParameteriv(GL_RENDERBUFFER, param, &val);
-	LogGLErrorTrace(@"glGetRenderbufferParameteriv(%@, %@, %i)",
-					NSStringFromGLEnum(GL_RENDERBUFFER), NSStringFromGLEnum(param), val);
+	LogGLErrorTrace(@"glGetRenderbufferParameteriv(%@, %@, %@)",
+					NSStringFromGLEnum(GL_RENDERBUFFER), NSStringFromGLEnum(param),
+					(param == GL_RENDERBUFFER_INTERNAL_FORMAT) ? NSStringFromGLEnum(val) : [NSString stringWithFormat: @"%i", val]);
 	return val;
 }
 

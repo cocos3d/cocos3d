@@ -105,6 +105,7 @@
 		A904C54818887FD00070C47F /* TVTestCard.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A904C4EA18887FCF0070C47F /* TVTestCard.jpg */; };
 		A904C54918887FD00070C47F /* ZoomButton48x48.png in Resources */ = {isa = PBXBuildFile; fileRef = A904C4EC18887FCF0070C47F /* ZoomButton48x48.png */; };
 		A904C55B18888F220070C47F /* cocos2d-library-iOS.xcodeproj in Resources */ = {isa = PBXBuildFile; fileRef = A904C55A18888F220070C47F /* cocos2d-library-iOS.xcodeproj */; };
+		A92354D218AD4EA6009FC2AA /* configuration.json in Resources */ = {isa = PBXBuildFile; fileRef = A92354D118AD4EA6009FC2AA /* configuration.json */; };
 		A946375A18898F9D0097E355 /* Images-iOS.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A946375918898F9D0097E355 /* Images-iOS.xcassets */; };
 		A946375B188990B90097E355 /* libcocos3d-library-iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A904C55918888EC50070C47F /* libcocos3d-library-iOS.a */; };
 		A946375C188990BE0097E355 /* libcocos2d-library-iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A9D4F67A18888F9B00382DDC /* libcocos2d-library-iOS.a */; };
@@ -316,6 +317,7 @@
 		A904C4EC18887FCF0070C47F /* ZoomButton48x48.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ZoomButton48x48.png; sourceTree = "<group>"; };
 		A904C55418888EC40070C47F /* cocos3d-library-iOS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "cocos3d-library-iOS.xcodeproj"; path = "/Users/bill/Documents/Dev/iOSProjects/cocos3d/cocos3d-bh/Projects/CC3DemoMashUp/../cocos3d-library/cocos3d-library-iOS.xcodeproj"; sourceTree = "<absolute>"; };
 		A904C55A18888F220070C47F /* cocos2d-library-iOS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "cocos2d-library-iOS.xcodeproj"; path = "../cocos2d-library/cocos2d-library-iOS.xcodeproj"; sourceTree = "<group>"; };
+		A92354D118AD4EA6009FC2AA /* configuration.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = configuration.json; path = "CC3DemoMultiScene-iOS.approj/configuration.json"; sourceTree = "<group>"; };
 		A946375918898F9D0097E355 /* Images-iOS.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = "Images-iOS.xcassets"; path = "../Common/Images-iOS.xcassets"; sourceTree = "<group>"; };
 		A946376618899B250097E355 /* CC3DemoMashUpLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3DemoMashUpLayer.h; sourceTree = "<group>"; };
 		A946376718899B250097E355 /* CC3DemoMashUpLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3DemoMashUpLayer.m; sourceTree = "<group>"; };
@@ -605,6 +607,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		A92354D018AD4E83009FC2AA /* Apportable */ = {
+			isa = PBXGroup;
+			children = (
+				A92354D118AD4EA6009FC2AA /* configuration.json */,
+			);
+			name = Apportable;
+			sourceTree = "<group>";
+		};
 		A946376518899B250097E355 /* CC3DemoMashUp */ = {
 			isa = PBXGroup;
 			children = (
@@ -647,6 +657,7 @@
 				A9D4F68C1889741900382DDC /* iOS Support */,
 				A904C4ED18887FCF0070C47F /* Resources */,
 				A9D4F6D4188979F000382DDC /* GLSL */,
+				A92354D018AD4E83009FC2AA /* Apportable */,
 				A946375918898F9D0097E355 /* Images-iOS.xcassets */,
 				A9A9C43318886E8000659FAC /* Frameworks */,
 				A9A9C43218886E8000659FAC /* Products */,
@@ -967,6 +978,7 @@
 				A904C50318887FD00070C47F /* EnvMapNegY.jpg in Resources */,
 				A9D4F6E6188979F000382DDC /* CC3NoTexture.fsh in Resources */,
 				A9D4F6F0188979F000382DDC /* CC3SingleTextureReflectAlphaTest.fsh in Resources */,
+				A92354D218AD4EA6009FC2AA /* configuration.json in Resources */,
 				A904C51E18887FD00070C47F /* Icon-60@2x.png in Resources */,
 				A904C4FC18887FD00070C47F /* Dragon-normals.jpg in Resources */,
 				A904C4F218887FD00070C47F /* BeachBall.pod in Resources */,

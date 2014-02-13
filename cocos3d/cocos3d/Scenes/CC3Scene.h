@@ -790,6 +790,14 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 -(void) drawSceneContentForEnvironmentMapWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /**
+ * Template method that draws the static backdrop in the backdrop property, if it exists.
+ *
+ * The backdrop is not drawn if this scene is being drawn overlaid on the device camera image,
+ * as indicated by the isOverlayingDeviceCamera property of this scene's view controller.
+ */
+-(void) drawBackdropWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+
+/**
  * Template method that draws shadows.
  *
  * The visitor passed in here should be the specialized visitor held in the shadowVisitor property.

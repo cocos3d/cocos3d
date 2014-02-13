@@ -186,6 +186,8 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	
 	[self preloadAssets];			// Loads, compiles, links, and pre-warms all shader programs
 									// used by this scene, and certain textures.
+	
+	[self addBackdrop];				// Add a static solid sky-blue backdrop, or optional textured backdrop.
 
 	[self addGround];				// Add a ground plane to provide some perspective to the user
 	
@@ -638,12 +640,10 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 }
 
 /** 
- * If we're not overlaying the device camera, creates the clear-blue-sky backdrop.
- * Or install a textured backdrop by uncommenting the last line of this method.
- * See the notes for the backdrop property for more info.
+ * Creates a clear-blue-sky backdrop. Or install a textured backdrop by uncommenting the 
+ * second line of this method. See the notes for the backdrop property for more info.
  */
 -(void) addBackdrop {
-	if (self.cc3Layer.isOverlayingDeviceCamera) return;
 	self.backdrop = [CC3Backdrop nodeWithColor: kSkyColor];
 //	self.backdrop = [CC3Backdrop nodeWithTexture: [CC3Texture textureFromFile: kBrickTextureFile]];
 }
@@ -1646,8 +1646,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	self.fog = [CC3Fog fog];
 
 #if CC3_GLSL
-	[_fog addTexture: _preProcSurface.colorTexture];
-	[_fog addTexture: _preProcSurface.depthTexture];
+	[_fog addTexture: _postProcSurface.colorTexture];
+	[_fog addTexture: _postProcSurface.depthTexture];
 	_fog.shaderProgram = [CC3ShaderProgram programFromVertexShaderFile: @"CC3ClipSpaceTexturable.vsh"
 												 andFragmentShaderFile: @"CC3Fog.fsh"];
 #endif	// !CC3_GLSL
@@ -1984,24 +1984,24 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// with the view's surface manager, so that this surface will be resized automatically
 	// whenever the view is resized.
 	CC3GLViewSurfaceManager* surfMgr = self.viewSurfaceManager;
-	_preProcSurface = [[CC3GLFramebuffer alloc] initWithSize: surfMgr.size];	// retained
-	_preProcSurface.colorTexture = [CC3Texture textureWithPixelFormat: surfMgr.colorTexelFormat
+	_postProcSurface = [[CC3GLFramebuffer alloc] initWithSize: surfMgr.size];	// retained
+	_postProcSurface.colorTexture = [CC3Texture textureWithPixelFormat: surfMgr.colorTexelFormat
 														 andPixelType: surfMgr.colorTexelType];
-	_preProcSurface.depthTexture = [CC3Texture textureWithPixelFormat: surfMgr.depthTexelFormat
+	_postProcSurface.depthTexture = [CC3Texture textureWithPixelFormat: surfMgr.depthTexelFormat
 														 andPixelType: surfMgr.depthTexelType];
-	[_preProcSurface validate];
-	[surfMgr addSurface: _preProcSurface];
+	[_postProcSurface validate];
+	[surfMgr addSurface: _postProcSurface];
 	
 	// Create a clip-space node that will render the off-screen color texture to the screen.
 	// Load the node with shaders that convert the image into greyscale, making the scene
 	// appear as if it was filmed with black & white film.
-	_grayscaleNode = [CC3ClipSpaceNode nodeWithTexture: _preProcSurface.colorTexture];
+	_grayscaleNode = [CC3ClipSpaceNode nodeWithTexture: _postProcSurface.colorTexture];
 	[_grayscaleNode applyEffectNamed: @"Grayscale" inPFXResourceFile: kPostProcPFXFile];
 	
 	// Create a clip-space node that will render the off-screen depth texture to the screen.
 	// Load the node with shaders that convert the depth values into greyscale, visualizing
 	// the depth of field as a grayscale gradient.
-	_depthImageNode = [CC3ClipSpaceNode nodeWithTexture: _preProcSurface.depthTexture];
+	_depthImageNode = [CC3ClipSpaceNode nodeWithTexture: _postProcSurface.depthTexture];
 	[_depthImageNode applyEffectNamed: @"Depth" inPFXResourceFile: kPostProcPFXFile];
 
 #endif	// !CC3_OGLES_1
@@ -2699,13 +2699,13 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// clearing if first. Otherwise, draw to view surface directly, without clearing because
 	// it was done at the beginning of the rendering cycle.
 	if (self.isPostProcessing) {
-		visitor.renderSurface = _preProcSurface;
-		[_preProcSurface clearColorAndDepthContent];
+		visitor.renderSurface = _postProcSurface;
+		[_postProcSurface clearColorAndDepthContent];
 	} else
 		visitor.renderSurface = self.viewSurface;
 	
-	[visitor visit: self.backdrop];			// Draw the backdrop if it exists
-	[visitor visit: self];					// Draw the scene components
+	[self drawBackdropWithVisitor: visitor];	// Draw the backdrop if it exists
+	[visitor visit: self];						// Draw the scene components
 	
 	// Shadows are drawn with a specialized visitor
 	[self.shadowVisitor alignShotWith: visitor];
@@ -2735,8 +2735,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  */
 -(void) drawSceneContentForEnvironmentMapWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	[visitor.renderSurface clearColorAndDepthContent];
-	[visitor visit: self.backdrop];			// Draw the backdrop if it exists
-	[visitor visit: self];					// Draw the scene components
+	[self drawBackdropWithVisitor: visitor];	// Draw the backdrop if it exists
+	[visitor visit: self];						// Draw the scene components
 }
 
 /**
@@ -2753,7 +2753,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	_runnerLamp.visible = YES;					// Temporarily turn the runner-cam's light on
 
 	[_tvDrawingVisitor.renderSurface clearColorAndDepthContent];	// Clear color & depth of TV surface.
-	[_tvDrawingVisitor visit: self.backdrop];						// Draw the backdrop if it exists
+	[self drawBackdropWithVisitor: _tvDrawingVisitor];				// Draw the backdrop if it exists
 	[_tvDrawingVisitor visit: self];								// Draw the scene components
 
 	_runnerLamp.visible = lampOnCurr;
@@ -2867,11 +2867,6 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * entire scene, or some section of the scene, in order to troubleshoot the scene.
  */
 -(void) onOpen {
-
-	// Add a backdrop. Options include a solid sky-blue colored backdrop, or a textured backdrop.
-	// We do that here, since we need to test whether the device camera is being displayed before
-	// deciding whether to add the backdrop.
-	[self addBackdrop];
 
 	// Add post-processing capabilities, demonstrating render-to-texture and post-rendering
 	// image processing. This is performed here, rather than in initializeScene, so that
