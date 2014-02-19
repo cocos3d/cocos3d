@@ -43,9 +43,7 @@
 #pragma mark CC3Camera implementation
 
 @interface CC3Node (TemplateMethods)
--(void) transformMatrixChanged;
 -(void) notifyTransformListeners;
-@property(nonatomic, readonly) CC3Matrix* globalRotationMatrix;
 @end
 
 @implementation CC3Camera
@@ -231,8 +229,8 @@
 -(CC3Vector) globalScale { return _parent ? _parent.globalScale : kCC3VectorUnitCube; }
 
 /** Overridden to also force the frustum to be rebuilt. */
--(void) transformMatrixChanged {
-	[super transformMatrixChanged];
+-(void) globalTransformMatrixChanged {
+	[super globalTransformMatrixChanged];
 	[_frustum markDirty];
 }
 
@@ -949,27 +947,17 @@
 		_finiteProjectionMatrix = [CC3ProjectionMatrix new];
 		_infiniteProjectionMatrix = nil;
 		_isUsingParallelProjection = NO;
-		_isInfiniteProjectionDirty = YES;
-		_isProjectionDirty = YES;
 	}
 	return self;
 }
 
 +(id) frustum { return [[self alloc] init]; }
 
-// Protected properties for copying
--(BOOL) isInfiniteProjectionDirty { return _isInfiniteProjectionDirty; }
-
 -(void) populateFrom: (CC3Frustum*) another {
 	[super populateFrom: another];
-	
-	_top = another.top;
-	_bottom = another.bottom;
-	_left = another.left;
-	_right = another.right;
-	_near = another.near;
-	_far = another.far;
+
 	_isUsingParallelProjection = another.isUsingParallelProjection;
+	[self populateRight: another.right andTop: another.top andNear: another.near andFar: another.far];
 }
 
 -(void) populateRight: (GLfloat) right
@@ -978,9 +966,9 @@
 			   andFar: (GLfloat) far {
 	
 	_right = right;
-	_left = -_right;
+	_left = -right;
 	_top = top;
-	_bottom = -_top;
+	_bottom = -top;
 	_near = near;
 	_far = far;
 	
@@ -1008,11 +996,6 @@
 	}
 
 	[self populateRight: rightClip andTop: topClip andNear: nearClip andFar: farClip];
-	
-	[self markProjectionDirty];
-
-	LogTrace(@"%@ updated from FOV: %.3f, Aspect: %.3f, Near: %.3f, Far: %.3f",
-			 self, fieldOfView, nearClip, nearClip, farClip);
 }
 
 -(NSString*) description {
@@ -1046,13 +1029,13 @@
 #pragma mark Projection matrices
 
 -(void) markProjectionDirty {
-	_isProjectionDirty = YES;
-	_isInfiniteProjectionDirty = YES;
+	_finiteProjectionMatrix.isDirty = YES;
+	_infiniteProjectionMatrix.isDirty = YES;
 	[self markDirty];
 }
 
 -(CC3Matrix*) finiteProjectionMatrix {
-	if (_isProjectionDirty) {
+	if (_finiteProjectionMatrix.isDirty) {
 		if (_isUsingParallelProjection)
 			[_finiteProjectionMatrix populateOrthoFromFrustumLeft: _left andRight: _right
 														   andTop: _top andBottom: _bottom
@@ -1061,7 +1044,7 @@
 			[_finiteProjectionMatrix populateFromFrustumLeft: _left andRight: _right
 													  andTop: _top andBottom: _bottom
 													 andNear: _near andFar: _far];
-		_isProjectionDirty = NO;
+		_finiteProjectionMatrix.isDirty = NO;
 	}
 	return _finiteProjectionMatrix;
 }
@@ -1071,18 +1054,18 @@
 	// finiateProjectionMatrix has changed, and then only on demand.
 	if (!_infiniteProjectionMatrix) {
 		_infiniteProjectionMatrix = [CC3ProjectionMatrix new];
-		_isInfiniteProjectionDirty = YES;
+		_infiniteProjectionMatrix.isDirty = YES;
 	}
-	if (_isInfiniteProjectionDirty) {
+	if (_infiniteProjectionMatrix.isDirty) {
 		if (_isUsingParallelProjection)
 			[_infiniteProjectionMatrix populateOrthoFromFrustumLeft: _left andRight: _right
-															andTop: _top andBottom: _bottom
-														   andNear: _near];
+															 andTop: _top andBottom: _bottom
+															andNear: _near];
 		else
 			[_infiniteProjectionMatrix populateFromFrustumLeft: _left andRight: _right
-													   andTop: _top andBottom: _bottom
-													  andNear: _near];
-		_isInfiniteProjectionDirty = NO;
+														andTop: _top andBottom: _bottom
+													   andNear: _near];
+		_infiniteProjectionMatrix.isDirty = NO;
 	}
 	return _infiniteProjectionMatrix;
 }

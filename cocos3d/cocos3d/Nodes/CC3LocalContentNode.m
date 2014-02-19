@@ -34,7 +34,6 @@
 
 
 @interface CC3Node (TemplateMethods)
--(void) transformMatrixChanged;
 -(void) descendantDidModifySequencingCriteria: (CC3Node*) aNode;
 @end
 
@@ -64,7 +63,7 @@
 }
 
 -(CC3Vector) globalLocalContentCenterOfGeometry {
-	return [_globalTransformMatrix transformLocation: self.localContentCenterOfGeometry];
+	return [self.globalTransformMatrix transformLocation: self.localContentCenterOfGeometry];
 }
 
 -(CC3Box) globalLocalContentBoundingBox {
@@ -140,8 +139,8 @@
 #pragma mark Transformations
 
 /** Overridden to force a lazy recalculation of the globalLocalContentBoundingBox. */
--(void) transformMatrixChanged {
-	[super transformMatrixChanged];
+-(void) globalTransformMatrixChanged {
+	[super globalTransformMatrixChanged];
 	_globalLocalContentBoundingBox = kCC3BoxNull;
 }
 

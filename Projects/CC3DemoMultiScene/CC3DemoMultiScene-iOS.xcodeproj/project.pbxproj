@@ -857,6 +857,11 @@
 			attributes = {
 				LastUpgradeCheck = 0500;
 				ORGANIZATIONNAME = "The Brenwill Workshop Ltd.";
+				TargetAttributes = {
+					A9A9C43018886E8000659FAC = {
+						DevelopmentTeam = VU3TCKU48B;
+					};
+				};
 			};
 			buildConfigurationList = A9A9C42C18886E8000659FAC /* Build configuration list for PBXProject "CC3DemoMultiScene-iOS" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -1233,6 +1238,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = "$(SRCROOT)/CC3DemoMultiScene/iOS Support/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				PRODUCT_NAME = "CC3DemoMultiScene-iOS";
@@ -1245,6 +1252,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = "$(SRCROOT)/CC3DemoMultiScene/iOS Support/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				PRODUCT_NAME = "CC3DemoMultiScene-iOS";

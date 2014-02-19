@@ -260,9 +260,8 @@ typedef enum {
 	CC3Vector4 _rotationVector;
 	GLubyte _incrementalRotationCount;
 	GLubyte _rotationType : 4;
-	GLubyte _targettingConstraint : 4;				// For CC3TargettingRotator subclass
 	GLubyte _orthonormalizationStartColumnNumber : 2;
-	BOOL _isRotationDirty : 1;
+	GLubyte _targettingConstraint : 4;				// For CC3TargettingRotator subclass
 	BOOL _shouldReverseForwardDirection : 1;		// For CC3DirectionalRotator subclass
 	BOOL _isNewTarget : 1;							// For CC3TargettingRotator subclass
 	BOOL _shouldTrackTarget : 1;					// For CC3TargettingRotator subclass

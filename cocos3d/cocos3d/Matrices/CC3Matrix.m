@@ -34,37 +34,9 @@
 
 #pragma mark CC3Matrix implementation
 
-@interface CC3Matrix (TemplateMethods)
--(void) implPopulateZero;
--(void) implPopulateIdentity;
--(void) implPopulateFrom: (CC3Matrix*) aMatrix;
--(void) implPopulateFromCC3Matrix3x3: (CC3Matrix3x3*) mtx;
--(void) implPopulateFromCC3Matrix4x3: (CC3Matrix4x3*) mtx;
--(void) implPopulateFromCC3Matrix4x4: (CC3Matrix4x4*) mtx;
--(void) implPopulateFromRotation: (CC3Vector) aRotation;
--(void) implPopulateFromQuaternion: (CC3Quaternion) aQuaternion;
--(void) implPopulateFromScale: (CC3Vector) aScale;
--(void) implPopulateFromTranslation: (CC3Vector) aTranslation;
--(void) implPopulateToPointTowards: (CC3Vector) fwdDirection withUp: (CC3Vector) upDirection;
--(void) implPopulateFromFrustumLeft: (GLfloat) left andRight: (GLfloat) right andTop: (GLfloat) top  
-						  andBottom: (GLfloat) bottom andNear: (GLfloat) near andFar: (GLfloat) far;
--(void) implPopulateFromFrustumLeft: (GLfloat) left andRight: (GLfloat) right andTop: (GLfloat) top  
-						  andBottom: (GLfloat) bottom andNear: (GLfloat) near;
--(void) implPopulateOrthoFromFrustumLeft: (GLfloat) left andRight: (GLfloat) right andTop: (GLfloat) top  
-							   andBottom: (GLfloat) bottom andNear: (GLfloat) near andFar: (GLfloat) far;
--(void) implPopulateOrthoFromFrustumLeft: (GLfloat) left andRight: (GLfloat) right andTop: (GLfloat) top  
-							   andBottom: (GLfloat) bottom andNear: (GLfloat) near;
--(void) implRotateBy: (CC3Vector) aRotation;
--(void) implRotateByQuaternion: (CC3Quaternion) aQuaternion;
--(void) implScaleBy: (CC3Vector) aScale;
--(void) implTranslateBy: (CC3Vector) aTranslation;
--(void) implMultiplyBy: (CC3Matrix*) aMatrix;
--(void) implLeftMultiplyBy: (CC3Matrix*) aMatrix;
-@end
-
 @implementation CC3Matrix
 
-@synthesize isIdentity=_isIdentity, isRigid=_isRigid;
+@synthesize isIdentity=_isIdentity, isRigid=_isRigid, isDirty=_isDirty;
 
 
 #pragma mark Allocation and initialization
@@ -72,6 +44,7 @@
 -(id) init {
 	if( (self = [super init]) ) {
 		[self populateIdentity];
+		_isDirty = NO;
 	}
 	return self;
 }

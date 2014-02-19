@@ -196,9 +196,6 @@ typedef enum {
 	CC3Vector _scale;
 	GLfloat _boundingVolumePadding;
 	GLfloat _cameraDistanceProduct;
-	BOOL _isTransformDirty : 1;
-	BOOL _isTransformInvertedDirty : 1;
-	BOOL _isGlobalRotationDirty : 1;
 	BOOL _touchEnabled : 1;
 	BOOL _shouldInheritTouchability : 1;
 	BOOL _shouldAllowTouchableWhenInvisible : 1;
@@ -2510,6 +2507,22 @@ typedef enum {
  */
 @property(nonatomic, strong) CC3Matrix* globalTransformMatrix;
 
+/**
+ * Template method that is invoked automatically whenever the matrix in the globalTransformMatrix
+ * property of this node has been updated. The matrix is updated automatically when the
+ * globalTransformMatrix property is first accessed after any properties that affect the
+ * transform of the matrix, such as the location, rotation or scale properties of this node,
+ * or of any ancestor node, have been modified.
+ *
+ * This implementation updates the bounding volume of this node, if it exists, and marks the
+ * globalTransformMatrixInverted as requiring an update. Specialized subclasses will add
+ * addtional behaviour.
+ *
+ * This method is invoked automatically. The application should usually never need to invoke
+ * this method directly.
+ */
+-(void) globalTransformMatrixChanged;
+
 /** 
  * @deprecated Renamed to globalTransformMatrix.
  *
@@ -2535,6 +2548,9 @@ typedef enum {
  * Convert your code now.
  */
 @property(nonatomic, strong, readonly) CC3Matrix* transformMatrixInverted DEPRECATED_ATTRIBUTE;
+
+/** Returns a matrix representing all of the rotations that make up this node, including ancestor nodes. */
+-(CC3Matrix*) globalRotationMatrix;
 
 /**
  * Returns the global transform matrix of the parent node, or nil if this node has no parent.

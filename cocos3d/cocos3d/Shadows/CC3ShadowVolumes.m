@@ -36,7 +36,6 @@
 
 @interface CC3Node (TemplateMethods)
 -(void) processUpdateBeforeTransform: (CC3NodeUpdatingVisitor*) visitor;
--(void) transformMatrixChanged;
 @property(nonatomic, unsafe_unretained, readwrite) CC3Node* parent;
 @end
 
@@ -714,8 +713,8 @@
 	if (self.isReadyToUpdate) [super buildTransformMatrixWithVisitor: visitor];
 }
 
--(void) transformMatrixChanged {
-	[super transformMatrixChanged];
+-(void) globalTransformMatrixChanged {
+	[super globalTransformMatrixChanged];
 	_isShadowDirty = YES;
 }
 

@@ -51,6 +51,7 @@
 @interface CC3Matrix : NSObject <NSCopying> {
 	BOOL _isIdentity : 1;
 	BOOL _isRigid : 1;
+	BOOL _isDirty : 1;
 }
 
 /** 
@@ -88,6 +89,20 @@
  * those of an identity matrix by accident.
  */
 @property(nonatomic, readonly) BOOL isRigid;
+
+/**
+ * Indicates whether this matrix needs to be populated with transform data.
+ *
+ * Matrices are populated from transform data, such as translation, rotation & scale data.
+ * This property can be used to indicate that the transform data that populates this matrix
+ * has changed and this matrix needs to be re-populated in order to represent that data.
+ *
+ * This property is provided as a convenience, for managing the population of this matrix.
+ * This property is neither set, not used, by this matrix.
+ *
+ * The initial value of this property is NO.
+ */
+@property(nonatomic, assign) BOOL isDirty;
 
 
 #pragma mark Allocation and initialization

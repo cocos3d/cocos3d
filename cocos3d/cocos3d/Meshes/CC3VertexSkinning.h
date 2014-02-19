@@ -522,7 +522,6 @@
 	CC3Bone* __unsafe_unretained _bone;
 	CC3SkinMeshNode* __unsafe_unretained _skinNode;
 	CC3Matrix* _transformMatrix;
-	BOOL _isTransformDirty : 1;
 }
 
 /** Returns the bone whose transforms are being tracked. */

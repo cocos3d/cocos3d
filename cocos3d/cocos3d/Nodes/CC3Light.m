@@ -39,10 +39,6 @@
 
 #pragma mark CC3Light 
 
-@interface CC3Node (TemplateMethods)
--(void) transformMatrixChanged;
-@end
-
 @interface CC3LightCameraBridgeVolume (TemplateMethods)
 @property(nonatomic, assign) CC3Light* light;
 @end
@@ -256,8 +252,8 @@
 -(CC3Vector) globalScale { return _parent ? _parent.globalScale : kCC3VectorUnitCube; }
 
 /** Overridden to update the camera shadow frustum with the global location of this light */
--(void) transformMatrixChanged {
-	[super transformMatrixChanged];
+-(void) globalTransformMatrixChanged {
+	[super globalTransformMatrixChanged];
 	[_shadowCastingVolume markDirty];
 	[_cameraShadowVolume markDirty];
 }

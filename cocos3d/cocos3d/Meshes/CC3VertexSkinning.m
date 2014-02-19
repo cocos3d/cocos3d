@@ -40,7 +40,6 @@
 @interface CC3Node (TemplateMethods)
 -(void) copyChildrenFrom: (CC3Node*) another;
 -(void) cacheRestPoseMatrix;
--(void) transformMatrixChanged;
 @end
 
 @interface CC3Mesh (TemplateMethods)
@@ -179,8 +178,8 @@
 
 #pragma mark Transformations
 
--(void) transformMatrixChanged {
-	[super transformMatrixChanged];
+-(void) globalTransformMatrixChanged {
+	[super globalTransformMatrixChanged];
 
 	[_skeletalTransformMatrix populateFrom: self.globalTransformMatrix];
 	[_skeletalTransformMatrix leftMultiplyBy: self.softBodyNode.globalTransformMatrixInverted];
@@ -433,8 +432,8 @@
 
 #pragma mark Transformations
 
--(void) transformMatrixChanged {
-	[super transformMatrixChanged];
+-(void) globalTransformMatrixChanged {
+	[super globalTransformMatrixChanged];
 	[_skeletalTransformMatrix populateFrom: self.globalTransformMatrix];
 	[_skeletalTransformMatrix leftMultiplyBy: self.softBodyNode.globalTransformMatrixInverted];
 }
@@ -444,11 +443,11 @@
 	[_restPoseSkeletalTransformMatrixInverted populateFrom: _skeletalTransformMatrix];
 	[_restPoseSkeletalTransformMatrixInverted invert];
 	LogTrace(@"%@ with global scale %@ and rest pose %@ %@ inverted to %@",
-			 self, NSStringFromCC3Vector(self.globalScale), _globalTransformMatrix,
+			 self, NSStringFromCC3Vector(self.globalScale), _skeletalTransformMatrix,
 			 (_restPoseSkeletalTransformMatrixInverted.isRigid ? @"rigidly" : @"adjoint"), _restPoseSkeletalTransformMatrixInverted);
 	LogTrace(@"Validating right multiply: %@ \nvalidating left multiply: %@",
-			 [CC3AffineMatrix matrixByMultiplying: _globalTransformMatrix by: _restPoseSkeletalTransformMatrixInverted],
-			 [CC3AffineMatrix matrixByMultiplying: _restPoseSkeletalTransformMatrixInverted by: _globalTransformMatrix]);
+			 [CC3AffineMatrix matrixByMultiplying: _skeletalTransformMatrix by: _restPoseSkeletalTransformMatrixInverted],
+			 [CC3AffineMatrix matrixByMultiplying: _restPoseSkeletalTransformMatrixInverted by: _skeletalTransformMatrix]);
 }
 
 @end
@@ -466,15 +465,15 @@
 	[_bone removeTransformListener: self];
 }
 
--(void) markTransformDirty { _isTransformDirty = YES; }
+-(void) markTransformDirty { _transformMatrix.isDirty = YES; }
 
 -(CC3Matrix*) transformMatrix {
-	if (_isTransformDirty) {
+	if (_transformMatrix.isDirty) {
 		[_transformMatrix populateFrom: _skinNode.skeletalTransformMatrixInverted];
 		[_transformMatrix multiplyBy: _bone.skeletalTransformMatrix];
 		[_transformMatrix multiplyBy: _bone.restPoseSkeletalTransformMatrixInverted];
 		[_transformMatrix multiplyBy: _skinNode.skeletalTransformMatrix];
-		_isTransformDirty = NO;
+		_transformMatrix.isDirty = NO;
 	}
 	return _transformMatrix;
 }
@@ -501,6 +500,7 @@
 		[_bone addTransformListener: self];
 
 		_transformMatrix = [CC3AffineMatrix new];
+		[self markTransformDirty];
 	}
 	return self;
 }

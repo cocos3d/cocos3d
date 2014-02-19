@@ -1252,8 +1252,6 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
 	GLfloat _near;
 	GLfloat _far;
 	BOOL _isUsingParallelProjection : 1;
-	BOOL _isInfiniteProjectionDirty : 1;
-	BOOL _isProjectionDirty : 1;
 }
 
 /**
@@ -1303,28 +1301,28 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
 @property(nonatomic, readonly) CC3Plane farPlane;
 
 /** Returns the location of the near top left corner of this frustum, in the global coordinate system. */
-@property(nonatomic, assign, readonly) CC3Vector nearTopLeft;
+@property(nonatomic, readonly) CC3Vector nearTopLeft;
 
 /** Returns the location of the near top right corner of this frustum, in the global coordinate system. */
-@property(nonatomic, assign, readonly) CC3Vector nearTopRight;
+@property(nonatomic, readonly) CC3Vector nearTopRight;
 
 /** Returns the location of the near bottom left corner of this frustum, in the global coordinate system. */
-@property(nonatomic, assign, readonly) CC3Vector nearBottomLeft;
+@property(nonatomic, readonly) CC3Vector nearBottomLeft;
 
 /** Returns the location of the near bottom right corner of this frustum, in the global coordinate system. */
-@property(nonatomic, assign, readonly) CC3Vector nearBottomRight;
+@property(nonatomic, readonly) CC3Vector nearBottomRight;
 
 /** Returns the location of the far top left corner of this frustum, in the global coordinate system. */
-@property(nonatomic, assign, readonly) CC3Vector farTopLeft;
+@property(nonatomic, readonly) CC3Vector farTopLeft;
 
 /** Returns the location of the far top right corner of this frustum, in the global coordinate system. */
-@property(nonatomic, assign, readonly) CC3Vector farTopRight;
+@property(nonatomic, readonly) CC3Vector farTopRight;
 
 /** Returns the location of the far bottom left corner of this frustum, in the global coordinate system. */
-@property(nonatomic, assign, readonly) CC3Vector farBottomLeft;
+@property(nonatomic, readonly) CC3Vector farBottomLeft;
 
 /** Returns the location of the far bottom right corner of this frustum, in the global coordinate system. */
-@property(nonatomic, assign, readonly) CC3Vector farBottomRight;
+@property(nonatomic, readonly) CC3Vector farBottomRight;
 
 /** A finite projection matrix with the far end at the distance given by the far property. */
 @property(nonatomic, strong, readonly) CC3Matrix* finiteProjectionMatrix;

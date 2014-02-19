@@ -39,7 +39,6 @@
 @end
 
 @interface CC3Node (TemplateMethods)
--(void) transformMatrixChanged;
 -(void) processUpdateAfterTransform: (CC3NodeUpdatingVisitor*) visitor;
 @end
 
@@ -240,8 +239,8 @@
 /** Returns whether this mesh is making use of normals and lighting. */
 -(BOOL) hasIlluminatedNormals { return _mesh && _mesh.hasVertexNormals && self.shouldUseLighting; }
 
--(void) transformMatrixChanged {
-	[super transformMatrixChanged];
+-(void) globalTransformMatrixChanged {
+	[super globalTransformMatrixChanged];
 	_areParticleNormalsDirty = YES;
 }
 

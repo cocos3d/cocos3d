@@ -107,9 +107,11 @@
 
 -(BOOL) isDirectional { return NO; }
 
--(BOOL) isRotationDirty { return _isRotationDirty; }
+-(BOOL) isRotationDirty { return _rotationMatrix.isDirty; }
 
--(void) markRotationDirty { _isRotationDirty = YES; }
+-(void) markRotationDirty { _rotationMatrix.isDirty = YES; }
+
+-(void) markRotationClean { _rotationMatrix.isDirty = NO; }
 
 -(CC3Vector) rotation {
 	return (_rotationType == kCC3RotationTypeEuler)
@@ -127,7 +129,7 @@
 	[self.rotationMatrix rotateBy: CC3VectorRotationModulo(aRotation)];
 	[self autoOrthonormalize];
 	_rotationType = kCC3RotationTypeUnknown;
-	_isRotationDirty = NO;
+	[self markRotationClean];
 }
 
 -(CC3Quaternion) quaternion {
@@ -151,7 +153,7 @@
 	[self.rotationMatrix rotateByQuaternion: aQuaternion];
 	[self autoOrthonormalize];
 	_rotationType = kCC3RotationTypeUnknown;
-	_isRotationDirty = NO;
+	[self markRotationClean];
 }
 
 -(CC3Vector4) rotationAxisAngle {
@@ -189,7 +191,7 @@
 	if (aMatrix == _rotationMatrix) return;
 	_rotationMatrix = aMatrix;
 	_rotationType = kCC3RotationTypeUnknown;
-	_isRotationDirty = NO;
+	[self markRotationClean];
 }
 
 // Orthonormalize the matrix using the current starting basis vector.
@@ -227,7 +229,7 @@ static GLubyte _autoOrthonormalizeCount = 0;
 
 -(id) initOnRotationMatrix: (CC3Matrix*) aMatrix {
 	if ( (self = [super init]) ) {
-		self.rotationMatrix = aMatrix;
+		_rotationMatrix = aMatrix;
 		_rotationVector = kCC3Vector4Zero;
 		_rotationType = kCC3RotationTypeUnknown;
 		_orthonormalizationStartColumnNumber = 1;
@@ -248,24 +250,21 @@ static GLubyte _autoOrthonormalizeCount = 0;
 
 // Protected properties for copying
 -(CC3Vector4) rotationVector { return _rotationVector; }
+-(GLubyte) rotationType { return _rotationType; }
 -(GLubyte) orthonormalizationStartColumnNumber { return _orthonormalizationStartColumnNumber; }
 -(GLubyte) incrementalRotationCount { return _incrementalRotationCount; }
 
 -(void) populateFrom: (CC3Rotator*) another {
-	
-	// Copy matrix contents, then set matrix again to reset all dirty flags
-	[_rotationMatrix populateFrom: another.rotationMatrix];
-	self.rotationMatrix = self.rotationMatrix;
-	
 	// Only proceed with populating the following properties if the
 	// other instance is also a mutable rotator.
 	if( [another isKindOfClass:[CC3MutableRotator class]] ) {
 		CC3MutableRotator* anotherMR = (CC3MutableRotator*)another;
 		_rotationVector = anotherMR.rotationVector;
-		_isRotationDirty = anotherMR.isRotationDirty;
+		_rotationType = anotherMR.rotationType;
 		_orthonormalizationStartColumnNumber = anotherMR.orthonormalizationStartColumnNumber;
 		_incrementalRotationCount = anotherMR.incrementalRotationCount;
 	}
+	[self markRotationDirty];
 }
 
 -(NSString*) fullDescription {
@@ -282,7 +281,7 @@ static GLubyte _autoOrthonormalizeCount = 0;
 
 /** Recalculates the rotation matrix from the most recently set rotation property. */
 -(void) applyRotation {
-	if ( !_isRotationDirty ) return;
+	if ( !self.isRotationDirty ) return;
 
 	switch (_rotationType) {
 		case kCC3RotationTypeEuler:
@@ -295,7 +294,7 @@ static GLubyte _autoOrthonormalizeCount = 0;
 		default:
 			break;
 	}
-	_isRotationDirty = NO;
+	[self markRotationClean];
 }
 
 // Rotation matrix is built lazily if needed
@@ -383,7 +382,7 @@ static GLubyte _autoOrthonormalizeCount = 0;
 // consideration whether the foward direction should be inverted. Otherwise, invoke superclass
 // implementation to handle other types of rotation.
 -(void) applyRotation {
-	if ( !_isRotationDirty ) return;
+	if ( !self.isRotationDirty ) return;
 	
 	if (_rotationType == kCC3RotationTypeDirection) {
 		CC3Assert( !CC3VectorsAreParallel(self.forwardDirection, self.referenceUpDirection),
@@ -395,7 +394,7 @@ static GLubyte _autoOrthonormalizeCount = 0;
 									? CC3VectorNegate(self.forwardDirection)
 									: self.forwardDirection;
 		[_rotationMatrix populateToPointTowards: mtxFwdDir withUp: self.referenceUpDirection];
-		_isRotationDirty = NO;
+		[self markRotationClean];
 	} else {
 		[super applyRotation];
 	}
@@ -454,7 +453,7 @@ static GLubyte _autoOrthonormalizeCount = 0;
 	[self markRotationDirty];
 }
 
--(BOOL) isDirtyByTargetLocation { return _isRotationDirty && (_rotationType == kCC3RotationTypeLocation); }
+-(BOOL) isDirtyByTargetLocation { return self.isRotationDirty && (_rotationType == kCC3RotationTypeLocation); }
 
 -(void) rotateToTargetLocation: (CC3Vector) targLoc from: (CC3Vector) eyeLoc withUp: (CC3Vector) upDir {
 	if ( !CC3VectorsAreEqual(targLoc, eyeLoc) ) {
@@ -462,7 +461,7 @@ static GLubyte _autoOrthonormalizeCount = 0;
 								? CC3VectorDifference(eyeLoc, targLoc)
 								: CC3VectorDifference(targLoc, eyeLoc);
 		[_rotationMatrix populateToPointTowards: mtxDir withUp: upDir];
-		_isRotationDirty = NO;
+		[self markRotationClean];
 	}
 }
 

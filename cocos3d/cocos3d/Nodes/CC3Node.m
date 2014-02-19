@@ -62,8 +62,8 @@
 @synthesize shouldAutoremoveWhenEmpty=_shouldAutoremoveWhenEmpty;
 @synthesize shouldUseFixedBoundingVolume=_shouldUseFixedBoundingVolume;
 @synthesize shouldStopActionsWhenRemoved=_shouldStopActionsWhenRemoved;
-@synthesize isTransformDirty=_isTransformDirty, isRunning=_isRunning;
 @synthesize cameraDistanceProduct=_cameraDistanceProduct;
+@synthesize isRunning=_isRunning;
 
 -(void) dealloc {
 	self.target = nil;							// Removes myself as listener
@@ -77,7 +77,7 @@
 	[self markTransformDirty];
 }
 
--(CC3Vector) globalLocation { return [_globalTransformMatrix extractTranslation]; }
+-(CC3Vector) globalLocation { return [self.globalTransformMatrix extractTranslation]; }
 
 -(CC3Vector4) globalHomogeneousPosition { return CC3Vector4FromLocation(self.globalLocation); }
 
@@ -198,7 +198,7 @@
 	return self.isUniformlyScaledLocally && (_parent ? _parent.isUniformlyScaledGlobally : YES);
 }
 
--(BOOL) isTransformRigid { return _globalTransformMatrix.isRigid; }
+-(BOOL) isTransformRigid { return self.globalTransformMatrix.isRigid; }
 
 // Deprecated property
 -(GLfloat) scaleTolerance { return 0.0f; }
@@ -594,7 +594,7 @@
 }
 
 -(CC3Vector) globalCenterOfGeometry {
-	return [_globalTransformMatrix transformLocation: self.centerOfGeometry];
+	return [self.globalTransformMatrix transformLocation: self.centerOfGeometry];
 }
 
 // By default, individual nodes do not collect their own performance statistics
@@ -961,7 +961,6 @@
 		_projectedLocation = kCC3VectorZero;
 		_scale = kCC3VectorUnitCube;
 		_cameraDistanceProduct = 0.0f;
-		_isTransformDirty = YES;			// Force transform notification on first update
 		_touchEnabled = NO;
 		_shouldInheritTouchability = YES;
 		_shouldAllowTouchableWhenInvisible = NO;
@@ -1012,16 +1011,11 @@
  */
 -(void) populateFrom: (CC3Node*) another {
 	[super populateFrom: another];
-
-	[_globalTransformMatrix populateFrom: another.globalTransformMatrix];
-
-	_isTransformInvertedDirty = YES;			// create or rebuild lazily
-	_isGlobalRotationDirty = YES;				// create or rebuild lazily
 	
 	_location = another.location;
 	_projectedLocation = another.projectedLocation;
 	_scale = another.scale;
-	_isTransformDirty = another.isTransformDirty;
+	[self markTransformDirty];
 
 	_rotator = [another.rotator copy];
 	
@@ -1302,18 +1296,20 @@ static GLuint lastAssignedNodeTag;
 
 	_globalTransformMatrix = aMatrix;
 	[self markGlobalRotationDirty];
-	[self transformMatrixChanged];
+	[self globalTransformMatrixChanged];
 	[self notifyTransformListeners];
 }
+
+-(BOOL) isTransformDirty { return _globalTransformMatrix.isDirty; }
+
+/** Marks the node's globalTransformMatrix as requiring a recalculation. */
+-(void) markTransformDirty { _globalTransformMatrix.isDirty = YES; }
 
 // Deprecated
 -(CC3Matrix*) transformMatrix { return self.globalTransformMatrix; }
 -(void) setTransformMatrix: (CC3Matrix*) transformMatrix { self.globalTransformMatrix = transformMatrix; }
 -(CC3Matrix*) transformMatrixInverted { return self.globalTransformMatrixInverted; }
 -(CC3Matrix*) parentTransformMatrix { return self.parentGlobalTransformMatrix; }
-
-/** Marks the node's globalTransformMatrix as requiring a recalculation. */
--(void) markTransformDirty { _isTransformDirty = YES; }
 
 -(CC3Node*) dirtiestAncestor {
 	CC3Node* da = _parent.dirtiestAncestor;
@@ -1349,7 +1345,7 @@ static GLuint lastAssignedNodeTag;
 -(void) buildTransformMatrixWithVisitor: (CC3NodeTransformingVisitor*) visitor {
 	[_globalTransformMatrix populateFrom: [visitor parentTansformMatrixFor: self]];
 	[self applyLocalTransforms];
-	[self transformMatrixChanged];
+	[self globalTransformMatrixChanged];
 	[self notifyTransformListeners];
 }
 
@@ -1500,19 +1496,11 @@ static GLuint lastAssignedNodeTag;
 /** Template method that applies the local scale property to the transform matrix. */
 -(void) applyScaling { [_globalTransformMatrix scaleBy: CC3EnsureMinScaleVector(_scale)]; }
 
-/**
- * Template method that is invoked automatically whenever the transform matrix of this node
- * is changed. Updates the bounding volume of this node, and marks the transformInvertedMatrix
- * as dirty so it will be lazily rebuilt.
- */
--(void) transformMatrixChanged {
+-(void) globalTransformMatrixChanged {
+	_globalTransformMatrix.isDirty = NO;
 	[self transformBoundingVolume];
-	_isTransformDirty = NO;
-	_isTransformInvertedDirty = YES;
+	[self markGlobalTranformInvertedDirty];
 }
-
-/** Marks the global rotation as dirty and in need of recalculation. */
--(void) markGlobalRotationDirty { _isGlobalRotationDirty = YES; }
 
 /**
  * Returns the inverse of the globalTransformMatrix.
@@ -1523,13 +1511,13 @@ static GLuint lastAssignedNodeTag;
 -(CC3Matrix*) globalTransformMatrixInverted {
 	if (!_globalTransformMatrixInverted) {
 		_globalTransformMatrixInverted = [CC3AffineMatrix matrix];
-		_isTransformInvertedDirty = YES;
+		[self markGlobalTranformInvertedDirty];
 	}
-	if (_isTransformInvertedDirty) {
-		[_globalTransformMatrixInverted populateFrom: _globalTransformMatrix];
+	if (_globalTransformMatrixInverted.isDirty) {
+		[_globalTransformMatrixInverted populateFrom: self.globalTransformMatrix];
 		[_globalTransformMatrixInverted invert];
-		_isTransformInvertedDirty = NO;
-				
+		_globalTransformMatrixInverted.isDirty = NO;
+		
 		LogTrace(@"%@ with global scale %@ and transform: %@ %@ inverted to: %@",
 				 self, NSStringFromCC3Vector(self.globalScale), _globalTransformMatrix,
 				 (_globalTransformMatrixInverted.isRigid ? @"rigidly" : @"adjoint"), _globalTransformMatrixInverted);
@@ -1539,6 +1527,9 @@ static GLuint lastAssignedNodeTag;
 	}
 	return _globalTransformMatrixInverted;
 }
+
+/** Marks the global inverted transform as dirty and in need of recalculation. */
+-(void) markGlobalTranformInvertedDirty { _globalTransformMatrixInverted.isDirty = YES; }
 
 /**
  * Returns a matrix representing all of the rotations that make up this node,
@@ -1553,15 +1544,18 @@ static GLuint lastAssignedNodeTag;
 -(CC3Matrix*) globalRotationMatrix {
 	if (!_globalRotationMatrix) {
 		_globalRotationMatrix = [CC3LinearMatrix matrix];
-		_isGlobalRotationDirty = YES;
+		[self markGlobalRotationDirty];
 	}
-	if (_isGlobalRotationDirty) {
+	if (_globalRotationMatrix.isDirty) {
 		[_globalRotationMatrix populateFrom: _parent.globalRotationMatrix];
 		[_globalRotationMatrix multiplyBy: _rotator.rotationMatrix];
-		_isGlobalRotationDirty = NO;
+		_globalRotationMatrix.isDirty = NO;
 	}
 	return _globalRotationMatrix;
 }
+
+/** Marks the global rotation as dirty and in need of recalculation. */
+-(void) markGlobalRotationDirty { _globalRotationMatrix.isDirty = YES; }
 
 
 #pragma mark Bounding volumes
@@ -1633,7 +1627,7 @@ static GLuint lastAssignedNodeTag;
 	[gl pushModelviewMatrixStack];
 
 	LogTrace(@"%@ applying transform matrix: %@", self, _globalTransformMatrix);
-	[visitor populateModelMatrixFrom: _globalTransformMatrix];
+	[visitor populateModelMatrixFrom: self.globalTransformMatrix];
 
 	[visitor draw: self];
 
