@@ -708,14 +708,14 @@
 
 #pragma mark Transformations
 
+-(void) markTransformDirty {
+	[super markTransformDirty];
+	_isShadowDirty = YES;
+}
+
 /** Only update the transform matrix if the shadow is ready to be updated. */
 -(void) buildTransformMatrixWithVisitor: (CC3NodeTransformingVisitor*) visitor {
 	if (self.isReadyToUpdate) [super buildTransformMatrixWithVisitor: visitor];
-}
-
--(void) globalTransformMatrixChanged {
-	[super globalTransformMatrixChanged];
-	_isShadowDirty = YES;
 }
 
 /** A node that affects this shadow (generally the light) was transformed. Mark the shadow as dirty. */

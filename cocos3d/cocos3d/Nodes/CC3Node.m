@@ -77,7 +77,11 @@
 	[self markTransformDirty];
 }
 
--(CC3Vector) globalLocation { return [self.globalTransformMatrix extractTranslation]; }
+// Use parent to transform local location. Don't use this node, as globalLocation
+// can be referenced while building self.globalTransformMatrix.
+-(CC3Vector) globalLocation {
+	return [self.parentGlobalTransformMatrix transformLocation: self.location];
+}
 
 -(CC3Vector4) globalHomogeneousPosition { return CC3Vector4FromLocation(self.globalLocation); }
 
@@ -86,72 +90,69 @@
 -(CC3Vector) rotation { return _rotator.rotation; }
 
 -(void) setRotation: (CC3Vector) aRotation {
-	// This test for change avoids unnecessarily creating and transforming a mutable rotator
-	if ( !self.shouldTrackTarget && !CC3VectorsAreEqual(aRotation, _rotator.rotation) ) {
-		self.mutableRotator.rotation = aRotation;
-		[self markTransformDirty];
-	}
+	if (self.isTrackingTargetDirection || CC3VectorsAreEqual(aRotation, self.rotation) ) return;
+
+	self.mutableRotator.rotation = aRotation;
+	[self markTransformDirty];
 }
 
 -(CC3Vector) globalRotation { return [self.globalRotationMatrix extractRotation]; }
 
 -(void) rotateBy: (CC3Vector) aRotation {
-	if ( !self.shouldTrackTarget ) {
-		[self.mutableRotator rotateBy: aRotation];
-		[self markTransformDirty];
-	}
+	if (self.isTrackingTargetDirection) return;
+
+	[self.mutableRotator rotateBy: aRotation];
+	[self markTransformDirty];
 }
 
 -(CC3Quaternion) quaternion { return _rotator.quaternion; }
 
 -(void) setQuaternion: (CC3Quaternion) aQuaternion {
-	// This test for change avoids unnecessarily creating and transforming a mutable rotator
-	if ( !self.shouldTrackTarget && !CC3QuaternionsAreEqual(aQuaternion, _rotator.quaternion) ) {
-		self.mutableRotator.quaternion = aQuaternion;
-		[self markTransformDirty];
-	}
+	if (self.isTrackingTargetDirection || CC3QuaternionsAreEqual(aQuaternion, self.quaternion) ) return;
+
+	self.mutableRotator.quaternion = aQuaternion;
+	[self markTransformDirty];
 }
 
 -(void) rotateByQuaternion: (CC3Quaternion) aQuaternion {
-	if ( !self.shouldTrackTarget ) {
-		[self.mutableRotator rotateByQuaternion: aQuaternion];
-		[self markTransformDirty];
-	}
+	if (self.isTrackingTargetDirection) return;
+
+	[self.mutableRotator rotateByQuaternion: aQuaternion];
+	[self markTransformDirty];
 }
 
 -(CC3Vector) rotationAxis { return _rotator.rotationAxis; }
 
 -(void) setRotationAxis: (CC3Vector) aDirection {
-	// This test for change avoids unnecessarily creating and transforming a mutable rotator
-	if ( !self.shouldTrackTarget && !CC3VectorsAreEqual(aDirection, _rotator.rotationAxis) ) {
-		self.mutableRotator.rotationAxis = aDirection;
-		[self markTransformDirty];
-	}
+	if (self.isTrackingTargetDirection || CC3VectorsAreEqual(aDirection, self.rotationAxis) ) return;
+
+	self.mutableRotator.rotationAxis = aDirection;
+	[self markTransformDirty];
 }
 
 -(GLfloat) rotationAngle { return _rotator.rotationAngle; }
 
 -(void) setRotationAngle: (GLfloat) anAngle {
-	if ( !self.shouldTrackTarget && (anAngle != _rotator.rotationAngle) ) {
-		self.mutableRotator.rotationAngle = anAngle;
-		[self markTransformDirty];
-	}
+	if (self.isTrackingTargetDirection || (anAngle == self.rotationAngle)) return;
+
+	self.mutableRotator.rotationAngle = anAngle;
+	[self markTransformDirty];
 }
 
 -(void) rotateByAngle: (GLfloat) anAngle aroundAxis: (CC3Vector) anAxis {
-	if (!self.shouldTrackTarget) {
-		[self.mutableRotator rotateByAngle: anAngle aroundAxis: anAxis];
-		[self markTransformDirty];
-	}
+	if (self.isTrackingTargetDirection) return;
+
+	[self.mutableRotator rotateByAngle: anAngle aroundAxis: anAxis];
+	[self markTransformDirty];
 }
 
 -(CC3Vector) forwardDirection { return self.directionalRotator.forwardDirection; }
 
 -(void) setForwardDirection: (CC3Vector) aDirection {
-	if (!self.shouldTrackTarget) {
-		self.directionalRotator.forwardDirection = aDirection;
-		[self markTransformDirty];
-	}
+	if (self.isTrackingTargetDirection) return;
+
+	self.directionalRotator.forwardDirection = aDirection;
+	[self markTransformDirty];
 }
 
 -(CC3Vector) globalForwardDirection { return [self.globalRotationMatrix extractForwardDirection]; }
@@ -224,7 +225,7 @@
 #pragma mark Targetting
 
 -(CC3Vector) targetLocation {
-	CC3Vector targLoc = self.targettingRotator.targetLocation;
+	CC3Vector targLoc = _rotator.targetLocation;
 	return CC3VectorIsNull(targLoc) ? CC3VectorAdd(self.globalLocation, self.forwardDirection) : targLoc;
 }
 
@@ -258,7 +259,7 @@
 -(void) setShouldTrackTarget: (BOOL) shouldTrack {
 	BOOL wasAlreadyTracking = self.shouldTrackTarget;
 	self.targettingRotator.shouldTrackTarget = shouldTrack;
-	if ( shouldTrack && !wasAlreadyTracking) [self updateTargetLocation];
+	if ( shouldTrack && !wasAlreadyTracking) [self markTransformDirty];
 }
 
 -(BOOL) shouldAutotargetCamera { return _rotator.shouldAutotargetCamera; }
@@ -268,7 +269,7 @@
 	self.shouldTrackTarget = shouldAutotarg;
 }
 
--(CC3TargettingConstraint) targettingConstraint { return self.targettingRotator.targettingConstraint; }
+-(CC3TargettingConstraint) targettingConstraint { return _rotator.targettingConstraint; }
 
 -(void) setTargettingConstraint: (CC3TargettingConstraint) targContraint {
 	self.targettingRotator.targettingConstraint = targContraint;
@@ -278,11 +279,13 @@
 -(CC3TargettingConstraint) axisRestriction { return self.targettingConstraint; }
 -(void) setAxisRestriction: (CC3TargettingConstraint) axisRest { self.targettingConstraint = axisRest; }
 
--(BOOL) isTrackingForBumpMapping { return self.targettingRotator.isTrackingForBumpMapping; }
+-(BOOL) isTrackingForBumpMapping { return _rotator.isTrackingForBumpMapping; }
 
 -(void) setIsTrackingForBumpMapping: (BOOL) isBumpMapping {
 	self.targettingRotator.isTrackingForBumpMapping = isBumpMapping;
 }
+
+-(BOOL) isTrackingTargetDirection { return _rotator.isTrackingTargetDirection; }
 
 /**
  * Checks if the camera should be a target, and if so,
@@ -948,10 +951,11 @@
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		_transformListeners = nil;
+		_globalTransformMatrix = [CC3AffineMatrix matrix];
 		_globalTransformMatrixInverted = nil;
 		_globalRotationMatrix = nil;
-		self.rotator = [CC3Rotator rotator];
+		_rotator = [CC3Rotator rotator];
+		_transformListeners = nil;
 		_animationStates = nil;
 		_isAnimationDirty = NO;
 		_boundingVolume = nil;
@@ -972,7 +976,6 @@
 		_cascadeOpacityEnabled = YES;
 		_shouldCastShadows = YES;
 		_isBeingAdded = NO;
-		self.globalTransformMatrix = [CC3AffineMatrix matrix];		// Has side effects...so do last (globalTransformMatrixInverted is built in some subclasses)
 	}
 	return self;
 }
@@ -1250,8 +1253,8 @@ static GLuint lastAssignedNodeTag;
 	if( !_transformListeners ) _transformListeners = [CC3NodeTransformListeners listenersForNode: self];
 	[_transformListeners addTransformListener: aListener];
 	
-	// If the transform has already been calculated, notify immediately.
-	if ( !self.isTransformDirty ) [aListener nodeWasTransformed: self];
+	// Notify immediately, to ensure the listener is aware of current state.
+	[aListener nodeWasTransformed: self];
 }
 
 -(void) removeTransformListener: (id<CC3NodeTransformListenerProtocol>) aListener {
@@ -1267,7 +1270,7 @@ static GLuint lastAssignedNodeTag;
 -(void) notifyDestructionListeners { [_transformListeners notifyDestructionListeners]; }
 
 -(void) nodeWasTransformed: (CC3Node*) aNode {
-	if (aNode == self.target) [self updateTargetLocation];
+	if ( (aNode == self.target) && self.shouldUpdateToTarget ) [self markTransformDirty];
 }
 
 -(void) nodeWasDestroyed: (CC3Node*) aNode {
@@ -1277,37 +1280,30 @@ static GLuint lastAssignedNodeTag;
 	if ( [_rotator clearIfTarget: aNode] ) [self didSetTargetInDescendant: self];
 }
 
-/** Check if target location needs to be updated from target, and do so if needed. */
--(void) updateTargetLocation {
-	if (self.shouldUpdateToTarget) {
-		if (self.isTrackingForBumpMapping)
-			self.globalLightPosition = self.target.globalHomogeneousPosition;
-		else
-			self.targetLocation = self.target.globalLocation;
-	}
-}
+-(BOOL) shouldUpdateToTarget { return _rotator.shouldUpdateToTarget; }
 
--(BOOL) shouldUpdateToTarget { return self.targettingRotator.shouldUpdateToTarget; }
-
--(CC3Matrix*) globalTransformMatrix { return _globalTransformMatrix; }
-
--(void) setGlobalTransformMatrix: (CC3Matrix*) aMatrix {
-	if (_globalTransformMatrix == aMatrix) return;
-
-	_globalTransformMatrix = aMatrix;
-	[self markGlobalRotationDirty];
-	[self globalTransformMatrixChanged];
-	[self notifyTransformListeners];
+-(CC3Matrix*) globalTransformMatrix {
+	if (self.isTransformDirty) [self buildTransformMatrixWithVisitor: nil];
+	return _globalTransformMatrix;
 }
 
 -(BOOL) isTransformDirty { return _globalTransformMatrix.isDirty; }
 
-/** Marks the node's globalTransformMatrix as requiring a recalculation. */
--(void) markTransformDirty { _globalTransformMatrix.isDirty = YES; }
+-(void) markTransformDirty {
+	if (self.isTransformDirty) return;
+	
+	_globalTransformMatrix.isDirty = YES;
+	_globalTransformMatrixInverted.isDirty = YES;
+	_globalRotationMatrix.isDirty = YES;
+	[_boundingVolume markTransformDirty];
+	
+	[self notifyTransformListeners];
+	
+	for (CC3Node* child in _children) [child markTransformDirty];
+}
 
 // Deprecated
 -(CC3Matrix*) transformMatrix { return self.globalTransformMatrix; }
--(void) setTransformMatrix: (CC3Matrix*) transformMatrix { self.globalTransformMatrix = transformMatrix; }
 -(CC3Matrix*) transformMatrixInverted { return self.globalTransformMatrixInverted; }
 -(CC3Matrix*) parentTransformMatrix { return self.parentGlobalTransformMatrix; }
 
@@ -1343,10 +1339,12 @@ static GLuint lastAssignedNodeTag;
 -(CC3Matrix*) parentGlobalTransformMatrix { return _parent.globalTransformMatrix; }
 
 -(void) buildTransformMatrixWithVisitor: (CC3NodeTransformingVisitor*) visitor {
-	[_globalTransformMatrix populateFrom: [visitor parentTansformMatrixFor: self]];
+	CC3Matrix* parentMtx = (visitor
+							? [visitor parentTansformMatrixFor: self]
+							: self.parentGlobalTransformMatrix);
+	[_globalTransformMatrix populateFrom: parentMtx];
 	[self applyLocalTransforms];
-	[self globalTransformMatrixChanged];
-	[self notifyTransformListeners];
+	_globalTransformMatrix.isDirty = NO;
 }
 
 /**
@@ -1369,8 +1367,15 @@ static GLuint lastAssignedNodeTag;
  * the target depends on the transformed global location of both this node and the target location.
  */
 -(void) applyRotation {
+	[self updateTargetLocation];
 	if (self.shouldRotateToTargetLocation) [self applyTargetLocation];
 	[self applyRotator];
+}
+
+/** Check if target location needs to be updated from target, and do so if needed. */
+-(void) updateTargetLocation {
+	if (self.shouldUpdateToTarget && !self.isTrackingForBumpMapping)
+		self.targetLocation = self.target.globalLocation;
 }
 
 /**
@@ -1489,18 +1494,11 @@ static GLuint lastAssignedNodeTag;
 /** Apply the rotational state of the rotator to the transform matrix. */
 -(void) applyRotator {
 	[_rotator applyRotationTo: _globalTransformMatrix];
-	[self markGlobalRotationDirty];
 	LogTrace(@"%@ rotated to %@ %@", self, NSStringFromCC3Vector(_rotator.rotation), _globalTransformMatrix);
 }
 
 /** Template method that applies the local scale property to the transform matrix. */
 -(void) applyScaling { [_globalTransformMatrix scaleBy: CC3EnsureMinScaleVector(_scale)]; }
-
--(void) globalTransformMatrixChanged {
-	_globalTransformMatrix.isDirty = NO;
-	[self transformBoundingVolume];
-	[self markGlobalTranformInvertedDirty];
-}
 
 /**
  * Returns the inverse of the globalTransformMatrix.
@@ -1511,7 +1509,7 @@ static GLuint lastAssignedNodeTag;
 -(CC3Matrix*) globalTransformMatrixInverted {
 	if (!_globalTransformMatrixInverted) {
 		_globalTransformMatrixInverted = [CC3AffineMatrix matrix];
-		[self markGlobalTranformInvertedDirty];
+		_globalTransformMatrixInverted.isDirty = YES;
 	}
 	if (_globalTransformMatrixInverted.isDirty) {
 		[_globalTransformMatrixInverted populateFrom: self.globalTransformMatrix];
@@ -1528,9 +1526,6 @@ static GLuint lastAssignedNodeTag;
 	return _globalTransformMatrixInverted;
 }
 
-/** Marks the global inverted transform as dirty and in need of recalculation. */
--(void) markGlobalTranformInvertedDirty { _globalTransformMatrixInverted.isDirty = YES; }
-
 /**
  * Returns a matrix representing all of the rotations that make up this node,
  * including ancestor nodes.
@@ -1544,18 +1539,20 @@ static GLuint lastAssignedNodeTag;
 -(CC3Matrix*) globalRotationMatrix {
 	if (!_globalRotationMatrix) {
 		_globalRotationMatrix = [CC3LinearMatrix matrix];
-		[self markGlobalRotationDirty];
+		_globalRotationMatrix.isDirty = YES;
 	}
 	if (_globalRotationMatrix.isDirty) {
+
+		// Ensure main global transform matrix is updated as well. It is not needed here, but it
+		// tracks whether the node's transform is dirty, and it and this matrix need to be in sync.
+		[self globalTransformMatrix];
+		
 		[_globalRotationMatrix populateFrom: _parent.globalRotationMatrix];
 		[_globalRotationMatrix multiplyBy: _rotator.rotationMatrix];
 		_globalRotationMatrix.isDirty = NO;
 	}
 	return _globalRotationMatrix;
 }
-
-/** Marks the global rotation as dirty and in need of recalculation. */
--(void) markGlobalRotationDirty { _globalRotationMatrix.isDirty = YES; }
 
 
 #pragma mark Bounding volumes
@@ -1591,12 +1588,6 @@ static GLuint lastAssignedNodeTag;
 }
 
 -(CC3NodeBoundingVolume*) defaultBoundingVolume { return nil; }
-
-/**
- * Template method that marks the bounding volume as needing a transform.
- * The bounding volume will be lazily updated next time it is accessed.
- */
--(void) transformBoundingVolume { [_boundingVolume markTransformDirty]; }
 
 -(void) markBoundingVolumeDirty { if (!_shouldUseFixedBoundingVolume) [_boundingVolume markDirty]; }
 

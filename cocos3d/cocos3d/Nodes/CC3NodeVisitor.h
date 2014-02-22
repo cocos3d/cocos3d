@@ -345,7 +345,7 @@
  *
  * This visitor encapsulates the time since the previous update.
  */
-@interface CC3NodeUpdatingVisitor : CC3NodeTransformingVisitor {
+@interface CC3NodeUpdatingVisitor : CC3NodeVisitor {
 	ccTime _deltaTime;
 }
 

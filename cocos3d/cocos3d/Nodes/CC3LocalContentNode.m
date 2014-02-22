@@ -139,8 +139,8 @@
 #pragma mark Transformations
 
 /** Overridden to force a lazy recalculation of the globalLocalContentBoundingBox. */
--(void) globalTransformMatrixChanged {
-	[super globalTransformMatrixChanged];
+-(void) markTransformDirty {
+	[super markTransformDirty];
 	_globalLocalContentBoundingBox = kCC3BoxNull;
 }
 

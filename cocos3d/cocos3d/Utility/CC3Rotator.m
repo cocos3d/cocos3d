@@ -55,13 +55,23 @@
 
 -(CC3Matrix*) rotationMatrix { return nil; }
 
+-(CC3Vector) targetLocation { return kCC3VectorNull; }
+
+-(CC3TargettingConstraint) targettingConstraint { return kCC3TargettingConstraintGlobalUnconstrained; }
+
 -(CC3Node*) target { return nil; }
 
 -(BOOL) shouldTrackTarget { return NO; }
 
+-(BOOL) shouldUpdateToTarget { return NO; }
+
 -(BOOL) shouldAutotargetCamera { return NO; }
 
 -(BOOL) shouldRotateToTargetLocation { return NO; }
+
+-(BOOL) isTrackingForBumpMapping { return NO; }
+
+-(BOOL) isTrackingTargetDirection { return NO; }
 
 -(BOOL) clearIfTarget: (CC3Node*) aNode { return NO; }
 
@@ -487,6 +497,10 @@ static GLubyte _autoOrthonormalizeCount = 0;
 	return (self.isDirtyByTargetLocation || _shouldTrackTarget) && !_isTrackingForBumpMapping;
 }
 
+-(BOOL) isTrackingTargetDirection {
+	return _shouldTrackTarget && !_isTrackingForBumpMapping && (_target != nil);
+}
+
 -(BOOL) clearIfTarget: (CC3Node*) aNode {
 	if (aNode != _target) return NO;
 	_target = nil;
@@ -513,18 +527,12 @@ static GLubyte _autoOrthonormalizeCount = 0;
 
 -(void) populateFrom: (CC3Rotator*) another {
 	[super populateFrom: another];
-	
-	// Only proceed with populating the directional properties if the
-	// other instance is also a targetting rotator.
-	if( [another isKindOfClass:[CC3TargettingRotator class]] ) {
-		self.target = another.target;		// weak link...not copied
-		CC3TargettingRotator* anotherTR = (CC3TargettingRotator*)another;
-		_targettingConstraint = anotherTR.targettingConstraint;
-		_isNewTarget = anotherTR.isNewTarget;
-		_shouldTrackTarget = anotherTR.shouldTrackTarget;
-		_shouldAutotargetCamera = anotherTR.shouldAutotargetCamera;
-		_isTrackingForBumpMapping = anotherTR.isTrackingForBumpMapping;
-	}
+
+	self.target = another.target;		// weak link...not copied
+	_targettingConstraint = another.targettingConstraint;
+	_shouldTrackTarget = another.shouldTrackTarget;
+	_shouldAutotargetCamera = another.shouldAutotargetCamera;
+	_isTrackingForBumpMapping = another.isTrackingForBumpMapping;
 }
 
 -(NSString*) fullDescription {

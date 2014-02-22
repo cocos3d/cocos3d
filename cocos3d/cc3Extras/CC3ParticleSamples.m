@@ -81,14 +81,8 @@ static inline CGSize CC3DispersionAngleFromShape(CGSize anAspect) {
 					  CC3RadToDeg(2.0 * atanf(anAspect.height)));
 }
 
-@interface CC3HoseParticleNavigator (TemplateMethods)
--(void) buildNozzleMatrix;
--(void) checkNozzleParent;
-@end
-
 @implementation CC3HoseParticleNavigator
 
-@synthesize nozzleMatrix=_nozzleMatrix;
 @synthesize minParticleSpeed=_minParticleSpeed, maxParticleSpeed=_maxParticleSpeed;
 @synthesize shouldPrecalculateNozzleTangents=_shouldPrecalculateNozzleTangents;
 
@@ -169,8 +163,8 @@ static inline CGSize CC3DispersionAngleFromShape(CGSize anAspect) {
 -(void) populateFrom: (CC3HoseParticleNavigator*) another {
 	[super populateFrom: another];
 	
-	self.nozzle = another.nozzle;						// retained
-	_nozzleMatrix = [another.nozzleMatrix copy];			// retained
+	self.nozzle = another.nozzle;
+	_nozzleMatrix = [another.nozzleMatrix copy];
 	_nozzleShape = another.nozzleShape;
 	_minParticleSpeed = another.minParticleSpeed;
 	_maxParticleSpeed = another.maxParticleSpeed;
@@ -180,16 +174,21 @@ static inline CGSize CC3DispersionAngleFromShape(CGSize anAspect) {
 
 #pragma mark Updating
 
--(void) nodeWasTransformed: (CC3Node*) aNode { if (aNode == _nozzle) [self buildNozzleMatrix]; }
+-(void) nodeWasTransformed: (CC3Node*) aNode { if (aNode == _nozzle) _nozzleMatrix.isDirty = YES; }
 
 -(void) nodeWasDestroyed: (CC3Node*) aNode {}
 
--(void) buildNozzleMatrix {
-	if ( _nozzle && _nozzle.parent != _emitter ) {
-		[_nozzleMatrix populateFrom: _nozzle.globalTransformMatrix];
-		[_nozzleMatrix leftMultiplyBy: _emitter.globalTransformMatrixInverted];
-	} else
-		[_nozzleMatrix populateIdentity];
+-(CC3Matrix*) nozzleMatrix {
+	if (_nozzleMatrix.isDirty) {
+		if ( _nozzle && _nozzle.parent != _emitter ) {
+			[_nozzleMatrix populateFrom: _nozzle.globalTransformMatrix];
+			[_nozzleMatrix leftMultiplyBy: _emitter.globalTransformMatrixInverted];
+		} else
+			[_nozzleMatrix populateIdentity];
+
+		_nozzleMatrix.isDirty = NO;
+	}
+	return _nozzleMatrix;
 }
 
 /**
@@ -201,7 +200,7 @@ static inline CGSize CC3DispersionAngleFromShape(CGSize anAspect) {
 	
 	// The particle starts at the location of the nozzle, converted from the
 	// nozzle's local coordinate system to the emitter's local coordinate system.
-	aParticle.location = [_nozzleMatrix transformLocation: kCC3VectorZero];
+	aParticle.location = [self.nozzleMatrix transformLocation: kCC3VectorZero];
 	
 	// Speed of particle is randomized.
 	GLfloat emissionSpeed = CC3RandomFloatBetween(_minParticleSpeed, _maxParticleSpeed);
@@ -219,7 +218,7 @@ static inline CGSize CC3DispersionAngleFromShape(CGSize anAspect) {
 	// nozzle's local coordinates. The particle velocity is then the nozzle emission velocity
 	// transformed by the nozzleMatrix to convert it to the emitter's local coordinates.
 	CC3Vector emissionVelocity = CC3VectorScaleUniform(emissionDir, emissionSpeed);
-	aParticle.velocity = [_nozzleMatrix transformDirection: emissionVelocity];
+	aParticle.velocity = [self.nozzleMatrix transformDirection: emissionVelocity];
 }
 
 @end

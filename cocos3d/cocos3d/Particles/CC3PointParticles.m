@@ -239,8 +239,8 @@
 /** Returns whether this mesh is making use of normals and lighting. */
 -(BOOL) hasIlluminatedNormals { return _mesh && _mesh.hasVertexNormals && self.shouldUseLighting; }
 
--(void) globalTransformMatrixChanged {
-	[super globalTransformMatrixChanged];
+-(void) markTransformDirty {
+	[super markTransformDirty];
 	_areParticleNormalsDirty = YES;
 }
 

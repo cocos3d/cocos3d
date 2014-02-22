@@ -55,21 +55,6 @@
 -(void) updateParticleMeshWithVisitor: (CC3NodeUpdatingVisitor*) visitor;
 @end
 
-@interface CC3MeshParticle (TemplateMethods)
-@property(nonatomic, readonly) CC3Mesh* mesh;
-@property(nonatomic, readonly) BOOL shouldTrackTarget;
-@property(nonatomic, readonly) CC3MutableRotator* mutableRotator;
-@property(nonatomic, readonly) CC3DirectionalRotator* directionalRotator;
-@property(nonatomic, readonly) BOOL doesUseTranslationOnly;
--(void) translateVertices;
--(void) fullyTransformVertices;
--(void) applyLocalTransformsTo: (CC3Matrix4x3*) mtx;
--(void) prepareForTransform: (CC3Matrix4x3*) mtx;
--(void) applyTranslationTo: (CC3Matrix4x3*) mtx;
--(void) applyRotationTo: (CC3Matrix4x3*) mtx;
--(void) applyScalingTo: (CC3Matrix4x3*) mtx;
-@end
-
 
 #pragma mark -
 #pragma mark CC3MeshParticleEmitter
@@ -317,7 +302,7 @@
  * 
  * Subclasses may override this methods to change how this decision is made.
  */
--(BOOL) shouldTransformParticles: (CC3NodeTransformingVisitor*) visitor {
+-(BOOL) shouldTransformParticles: (CC3NodeUpdatingVisitor*) visitor {
 	if ( !self.isParticleTransformDirty ) return NO;
 	if ( !(self.visible || self.isTouchable) ) return NO;
 	if ((self.shouldUseFixedBoundingVolume || !self.shouldTransformUnseenParticles) &&

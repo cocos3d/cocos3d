@@ -38,7 +38,7 @@
 
 @interface CC3MeshNode (TemplateMethods)
 -(void) configureDrawingParameters: (CC3NodeDrawingVisitor*) visitor;
--(void) configureMaterialWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+-(void) applyMaterialWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 -(void) drawMeshWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 -(void) cleanupDrawingParameters: (CC3NodeDrawingVisitor*) visitor;
 -(void) applyShaderProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor;
@@ -510,8 +510,8 @@ static GLfloat deviceScaleFactor = 0.0f;
  * During normal drawing, establish 2D drawing environment.
  * Don't configure anything if painting for node picking.
  */
--(void) configureMaterialWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[super configureMaterialWithVisitor: visitor];
+-(void) applyMaterialWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[super applyMaterialWithVisitor: visitor];
 	if (visitor.shouldDecorateNode) {
 		CC3OpenGL* gl = visitor.gl;
 		[gl alignFor2DDrawing];

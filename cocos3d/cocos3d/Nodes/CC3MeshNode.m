@@ -42,6 +42,7 @@
 -(void) updateBoundingVolume;
 -(void) markBoundingVolumeDirty;
 @property(nonatomic, unsafe_unretained, readwrite) CC3Node* parent;
+@property(nonatomic, readonly)  BOOL shouldUpdateToTarget;
 @end
 
 @interface CC3Mesh (TemplateMethods)
@@ -716,8 +717,8 @@
  */
 -(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"Drawing %@", self);
-	[self configureDrawingParameters: visitor];		// Before material is configured.
-	[self configureMaterialWithVisitor: visitor];
+	[self configureDrawingParameters: visitor];		// Before material is applied.
+	[self applyMaterialWithVisitor: visitor];
 	[self applyShaderProgramWithVisitor: visitor];
 
 	[self drawMeshWithVisitor: visitor];
@@ -862,13 +863,15 @@
 -(void) cleanupDrawingParameters: (CC3NodeDrawingVisitor*) visitor {}
 
 /** 
- * Template method to configure the material and texture properties in the GL engine. 
+ * Template method to apply the material and texture properties to the GL engine.
  * The visitor keeps track of which texture unit is being processed, with each texture
  * incrementing the appropriate texture unit counter as it draws. GL texture units that
  * are not used by the textures are disabled.
  */
--(void) configureMaterialWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+-(void) applyMaterialWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 
+	[self updateLightPosition];
+	
 	[visitor resetTextureUnits];
 	
 	if (_material && visitor.shouldDecorateNode) {
@@ -882,6 +885,12 @@
 
 	// currentColor can be set by material, mesh node, or node picking visitor prior to this method.
 	visitor.gl.color = visitor.currentColor;
+}
+
+/** Checks if this node is tracking a global light position (for bump mapping) and update if needed. */
+-(void) updateLightPosition {
+	if (self.shouldUpdateToTarget && self.isTrackingForBumpMapping)
+		self.globalLightPosition = self.target.globalHomogeneousPosition;
 }
 
 -(void) applyShaderProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor {

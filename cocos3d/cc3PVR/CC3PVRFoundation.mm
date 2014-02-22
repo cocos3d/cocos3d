@@ -180,7 +180,7 @@ GLenum GLElementTypeFromEPVRTDataType(uint ePVRTDataType) {
 		case EPODDataUnsignedShortNorm:
 			return GL_UNSIGNED_SHORT;
 		default:
-			LogError(@"Unknown EPVRTDataType '%@'", NSStringFromEPVRTDataType(ePVRTDataType));
+			CC3AssertC(NO, @"Unexpected EPVRTDataType '%@'", NSStringFromEPVRTDataType(ePVRTDataType));
 			return GL_UNSIGNED_BYTE;
 	}
 }

@@ -80,8 +80,6 @@
 @implementation CC3SkinMeshNode
 
 @synthesize skinSections=_skinSections;
-@synthesize skeletalTransformMatrix=_skeletalTransformMatrix;
-@synthesize skeletalTransformMatrixInverted=_skeletalTransformMatrixInverted;
 
 -(CC3SkinSection*) skinSectionForVertexIndexAt: (GLint) index {
 	for (CC3SkinSection* ss in _skinSections) if ( [ss containsVertexIndex: index] ) return ss;
@@ -178,16 +176,29 @@
 
 #pragma mark Transformations
 
--(void) globalTransformMatrixChanged {
-	[super globalTransformMatrixChanged];
-
-	[_skeletalTransformMatrix populateFrom: self.globalTransformMatrix];
-	[_skeletalTransformMatrix leftMultiplyBy: self.softBodyNode.globalTransformMatrixInverted];
-	
-	[_skeletalTransformMatrixInverted populateFrom: _skeletalTransformMatrix];
-	[_skeletalTransformMatrixInverted invert];
-	
+-(void) markTransformDirty {
+	[super markTransformDirty];
+	_skeletalTransformMatrix.isDirty = YES;
+	_skeletalTransformMatrixInverted.isDirty = YES;
 	[_deformedFaces clearDeformableCaches];
+}
+
+-(CC3Matrix*) skeletalTransformMatrix {
+	if (_skeletalTransformMatrix.isDirty) {
+		[_skeletalTransformMatrix populateFrom: self.globalTransformMatrix];
+		[_skeletalTransformMatrix leftMultiplyBy: self.softBodyNode.globalTransformMatrixInverted];
+		_skeletalTransformMatrix.isDirty = NO;
+	}
+	return _skeletalTransformMatrix;
+}
+
+-(CC3Matrix*) skeletalTransformMatrixInverted {
+	if (_skeletalTransformMatrixInverted.isDirty) {
+		[_skeletalTransformMatrixInverted populateFrom: self.skeletalTransformMatrix];
+		[_skeletalTransformMatrixInverted invert];
+		_skeletalTransformMatrixInverted.isDirty = NO;
+	}
+	return _skeletalTransformMatrixInverted;
 }
 
 -(void) boneWasTransformed: (CC3Bone*) aBone { [_deformedFaces clearDeformableCaches]; }
@@ -400,7 +411,6 @@
 
 @implementation CC3Bone
 
-@synthesize skeletalTransformMatrix=_skeletalTransformMatrix;
 @synthesize restPoseSkeletalTransformMatrixInverted=_restPoseSkeletalTransformMatrixInverted;
 
 -(BOOL) hasSoftBodyContent  { return YES; }
@@ -432,15 +442,23 @@
 
 #pragma mark Transformations
 
--(void) globalTransformMatrixChanged {
-	[super globalTransformMatrixChanged];
-	[_skeletalTransformMatrix populateFrom: self.globalTransformMatrix];
-	[_skeletalTransformMatrix leftMultiplyBy: self.softBodyNode.globalTransformMatrixInverted];
+-(void) markTransformDirty {
+	[super markTransformDirty];
+	_skeletalTransformMatrix.isDirty = YES;
+}
+
+-(CC3Matrix*) skeletalTransformMatrix {
+	if (_skeletalTransformMatrix.isDirty) {
+		[_skeletalTransformMatrix populateFrom: self.globalTransformMatrix];
+		[_skeletalTransformMatrix leftMultiplyBy: self.softBodyNode.globalTransformMatrixInverted];
+		_skeletalTransformMatrix.isDirty = NO;
+	}
+	return _skeletalTransformMatrix;
 }
 
 /** Inverts the transform matrix and caches it as the inverted rest pose matrix. */
 -(void) cacheRestPoseMatrix {
-	[_restPoseSkeletalTransformMatrixInverted populateFrom: _skeletalTransformMatrix];
+	[_restPoseSkeletalTransformMatrixInverted populateFrom: self.skeletalTransformMatrix];
 	[_restPoseSkeletalTransformMatrixInverted invert];
 	LogTrace(@"%@ with global scale %@ and rest pose %@ %@ inverted to %@",
 			 self, NSStringFromCC3Vector(self.globalScale), _skeletalTransformMatrix,

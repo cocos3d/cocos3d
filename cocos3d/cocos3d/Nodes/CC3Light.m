@@ -43,6 +43,10 @@
 @property(nonatomic, assign) CC3Light* light;
 @end
 
+@interface CC3Node (TemplateMethods)
+-(void) updateTargetLocation;
+@end
+
 
 @implementation CC3Light
 
@@ -63,8 +67,9 @@
 
 // Overridden to take into consideration the isDirectionalOnly property
 -(CC3Vector4) globalHomogeneousPosition {
-	GLfloat w = self.isDirectionalOnly ? 0.0f : 1.0f;
-	return CC3Vector4FromCC3Vector(self.globalLocation, w);
+	return (self.isDirectionalOnly
+			? CC3Vector4FromDirection(self.globalLocation)
+			: CC3Vector4FromLocation(self.globalLocation));
 }
 
 /** Overridden to return NO so that the forwardDirection aligns with the negative-Z-axis. */
@@ -252,8 +257,8 @@
 -(CC3Vector) globalScale { return _parent ? _parent.globalScale : kCC3VectorUnitCube; }
 
 /** Overridden to update the camera shadow frustum with the global location of this light */
--(void) globalTransformMatrixChanged {
-	[super globalTransformMatrixChanged];
+-(void) markTransformDirty {
+	[super markTransformDirty];
 	[_shadowCastingVolume markDirty];
 	[_cameraShadowVolume markDirty];
 }

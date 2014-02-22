@@ -202,6 +202,12 @@
 
 #pragma mark Transformations
 
+/** Overridden to also force the frustum to be rebuilt. */
+-(void) markTransformDirty {
+	[super markTransformDirty];
+	[_frustum markDirty];
+}
+
 -(void) markProjectionDirty { _isProjectionDirty = YES; }
 
 /**
@@ -228,12 +234,6 @@
  */
 -(CC3Vector) globalScale { return _parent ? _parent.globalScale : kCC3VectorUnitCube; }
 
-/** Overridden to also force the frustum to be rebuilt. */
--(void) globalTransformMatrixChanged {
-	[super globalTransformMatrixChanged];
-	[_frustum markDirty];
-}
-
 -(CC3Matrix*) viewMatrix { return self.globalTransformMatrixInverted; }
 
 /**
@@ -241,21 +241,20 @@
  * projection parameters have been changed since the last rebuild.
  */
 -(void) buildProjection  {
-	if(_isProjectionDirty) {
-		CC3Assert(_viewport.h > 0 && _viewport.w > 0, @"%@ does not have a valid viewport: %@.",
-				  self, NSStringFromCC3Viewport(_viewport));
-
-		CGPoint fovAspect = [self orientedFieldOfViewAspect];
-		[_frustum populateRight: (_nearClippingDistance * fovAspect.x)
-						 andTop: (_nearClippingDistance * fovAspect.y)
-						andNear: _nearClippingDistance
-						 andFar: _farClippingDistance];
-		
-		_isProjectionDirty = NO;
-		
-		// Notify the transform listeners that the projection has changed
-		[self notifyTransformListeners];
-	}
+	if(!_isProjectionDirty) return;
+	
+	CC3Assert(_viewport.h > 0 && _viewport.w > 0, @"%@ does not have a valid viewport: %@.",
+			  self, NSStringFromCC3Viewport(_viewport));
+	
+	CGPoint fovAspect = [self orientedFieldOfViewAspect];
+	[_frustum populateRight: (_nearClippingDistance * fovAspect.x)
+					 andTop: (_nearClippingDistance * fovAspect.y)
+					andNear: _nearClippingDistance
+					 andFar: _farClippingDistance];
+	
+	_isProjectionDirty = NO;
+	
+	[self notifyTransformListeners];	// Notify the transform listeners that the projection has changed
 }
 
 /**

@@ -2505,23 +2505,7 @@ typedef enum {
  * allows the order in which drawable nodes are drawn to be independent of the node structural
  * hierarchy.
  */
-@property(nonatomic, strong) CC3Matrix* globalTransformMatrix;
-
-/**
- * Template method that is invoked automatically whenever the matrix in the globalTransformMatrix
- * property of this node has been updated. The matrix is updated automatically when the
- * globalTransformMatrix property is first accessed after any properties that affect the
- * transform of the matrix, such as the location, rotation or scale properties of this node,
- * or of any ancestor node, have been modified.
- *
- * This implementation updates the bounding volume of this node, if it exists, and marks the
- * globalTransformMatrixInverted as requiring an update. Specialized subclasses will add
- * addtional behaviour.
- *
- * This method is invoked automatically. The application should usually never need to invoke
- * this method directly.
- */
--(void) globalTransformMatrixChanged;
+@property(nonatomic, strong, readonly) CC3Matrix* globalTransformMatrix;
 
 /** 
  * @deprecated Renamed to globalTransformMatrix.
@@ -2530,7 +2514,7 @@ typedef enum {
  * behaviour in any legacy code that depends on the older functionality provided by this property.
  * Convert your code now.
  */
-@property(nonatomic, strong) CC3Matrix* transformMatrix DEPRECATED_ATTRIBUTE;
+@property(nonatomic, strong, readonly) CC3Matrix* transformMatrix DEPRECATED_ATTRIBUTE;
 
 /**
  * Returns the matrix inversion of the globalTransformMatrix.
@@ -2582,7 +2566,16 @@ typedef enum {
 @property(nonatomic, readonly) BOOL isTransformDirty;
 
 /**
- * Indicates that the transformation matrix is dirty and needs to be recalculated.
+ * Marks that the globalTransformMatrix of this node is dirty and requires recalculation.
+ *
+ * In a hierarchical structure of nodes, the transform of each node affects the transforms of
+ * all descendant nodes. Therefore, in addition to marking the transform of this node as dirty,
+ * this method also propagates to all descendant nodes, to also mark their transforms as dirty.
+ *
+ * This design assumes that if the transform of this node has already been marked as dirty, that
+ * all descendant nodes also have already been marked as dirty. Therefore, as an optimization,
+ * if the globalTransformMatrix of this node is already dirty when this method is invoked, no
+ * action is taken to mark the transforms of any descendant nodes as dirty.
  *
  * This method is invoked automatically as needed. Usually the application never needs
  * to invoke this method directly.

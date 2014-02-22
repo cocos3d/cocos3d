@@ -211,10 +211,6 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	[self addMeshHose];				// Attach a point particle hose to the hand of the animated robot.
 									// The hose is turned on and off when the robot arm is touched.
 	
-	[self addBumpMapLightTracker];	// Add a light tracker for the bump-maps in the wooden sign
-									// and floating head. This must happen after main light is
-									// loaded from the POD file (in addRobot).
-	
 	[self addSun];					// Add a cocos2d particle emitter as the sun in the sky.
 	
 	[self addSpotlight];			// Add a spotlight to the camera.
@@ -1293,20 +1289,6 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 }
 
 /**
- * Adds a wrapper node that will track the light loaded from the POD file as it moves
- * and will update the light direction of any mesh nodes that are covered with a bump-map
- * texture. This allows the normals embedded in the bump-map texture to interact with
- * the direction of the light source to create per-pixel luminosity that appears realistic.
- */
--(void) addBumpMapLightTracker {
-	_bumpMapLightTracker = [CC3Node nodeWithName: kBumpMapLightTrackerName];
-	_bumpMapLightTracker.shouldTrackTarget = YES;
-	_bumpMapLightTracker.isTrackingForBumpMapping = YES;
-	_bumpMapLightTracker.target = _robotLamp;
-	[self addChild: _bumpMapLightTracker];
-}
-
-/**
  * OpenGL ES 1.1 performs multi-texturing using a series of texture units that can be
  * configured and chained together. This provides a flexible multi-texturing environment.
  *
@@ -1355,6 +1337,12 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// extract a texture from a texture atlas, so that a single loaded texture can be used
 	// to cover multiple meshes, with each mesh covered by a different section fo the texture.
 	_woodenSign.textureRectangle = CGRectMake(0.4, 0.23, 0.35, 0.35);
+	
+	// The bump-map texture uses an object-space bump-map that uses a light direction that is held in
+	// the texture unit. The node tracks the light and sets the light direction in the texture unit.
+	_woodenSign.target = _robotLamp;
+	_woodenSign.shouldTrackTarget = YES;
+	_woodenSign.isTrackingForBumpMapping = YES;
 
 	_woodenSign.diffuseColor = kCCC4FCyan;
 	_woodenSign.specularColor = kCCC4FLightGray;
@@ -1393,7 +1381,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 
 	// Sign is added on on background thread. Configure it for the scene, and fade it in slowly.
 	[self configureForScene: _woodenSign andMaterializeWithDuration: kFadeInDuration];
-	[_bumpMapLightTracker addChild: _woodenSign];
+	[self addChild: _woodenSign];
 
 }
 #else
@@ -1475,11 +1463,18 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	_floatingHead.material.texture = _headBumpTex;		// replace the dummy texture
 	[_floatingHead.material addTexture: _headTex];
 	
+	// The bump-map texture uses an OpenGL ES 1.1-compatible object-space bump-map that uses
+	// a light direction that is held in the texture unit. The mesh node tracks the direction
+	// to the light, and sets it in the texture unit. Because of this, the mesh node cannot
+	// also track the camera, to face the camera. But that's okay, because we have already
+	// wrapped the floating head mesh node in an orienting wrapper.
+	_floatingHead.target = _robotLamp;
+	_floatingHead.shouldTrackTarget = YES;
+	_floatingHead.isTrackingForBumpMapping = YES;
+	
 	// Put the head node in an orienting wrapper so that we can orient it to face the camera.
 	// First turn the floating head to face right so that it points towards the side of the
 	// wrapper that will be kept facing the camera, and move the head to the origin of the wrapper.
-	// Add the orienting node to the bump-map light tracker so that the bump-map in the floating
-	// head will interact with the light source.
 	_floatingHead.rotation = cc3v(0, -90, 0);
 	_floatingHead.location = kCC3VectorZero;
 	CC3Node* headHolder = [_floatingHead asCameraTrackingWrapper];
@@ -1487,7 +1482,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 
 	// Head is added on on background thread. Configure it for the scene, and fade it in slowly.
 	[self configureForScene: headHolder andMaterializeWithDuration: kFadeInDuration];
-	[_bumpMapLightTracker addChild: headHolder];
+	[self addChild: headHolder];
 }
 
 /**
