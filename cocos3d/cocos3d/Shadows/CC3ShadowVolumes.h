@@ -105,6 +105,28 @@ static const GLfloat kCC3DefaultShadowVolumeVertexOffsetFactor = 0.001f;
  */
 -(void) drawToStencilWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
+/**
+ * Returns the default value to which the visible property will be set when an instance is
+ * created and initialized.
+ *
+ * The initial value of this property is NO. Normally, shadow volumes affect the contents of
+ * the stencil buffer, but are not directly visible themselves. However, during development
+ * debugging, you can set this property to YES to make the shadow volumes visible within the
+ * scene, to help visualize how the shadow volumes are interacting with the scene.
+ */
++(BOOL) defaultVisible;
+
+/**
+ * Sets the default value to which the visible property will be set when an instance is 
+ * created and initialized.
+ *
+ * The initial value of this property is NO. Normally, shadow volumes affect the contents of
+ * the stencil buffer, but are not directly visible themselves. However, during development
+ * debugging, you can set this property to YES to make the shadow volumes visible within the
+ * scene, to help visualize how the shadow volumes are interacting with the scene.
+ */
++(void) setDefaultVisible: (BOOL) defaultVisible;
+
 @end
 
 

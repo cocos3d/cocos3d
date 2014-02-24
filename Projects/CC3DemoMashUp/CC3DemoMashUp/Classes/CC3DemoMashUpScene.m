@@ -544,7 +544,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// the lighting of the scene as it moves. To turn this animation off, comment out
 	// the following line. This can be useful when reviewing shadowing.
 //	[_robotLamp disableAnimation];
-	
+
 }
 
 /**
@@ -3762,6 +3762,11 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 		[aNode removeShadowVolumesForLight: _robotLamp];
 		LogInfo(@"Removed shadow from: %@", aNode);
 	} else {
+		// Normally, shadow volumes interact with the stencil buffer, and are not visible
+		// themselves. You can change the following property to YES, to make the shadow
+		// volumes themselves during development.
+		CC3ShadowVolumeMeshNode.defaultVisible = NO;
+		
 		// Since we're already running, spawn a background threaded task to create and
 		// populate the shadow volume, in order to reduce any unwanted animation pauses.
 		[CC3Backgrounder.sharedBackgrounder runBlock: ^{

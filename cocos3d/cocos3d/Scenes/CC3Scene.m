@@ -663,8 +663,8 @@
 -(void) checkNeedShadowVisitor {
 	BOOL needsShadowVisitor = NO;
 	for (CC3Light* lgt in _lights) needsShadowVisitor |= lgt.hasShadows;
-	if (needsShadowVisitor && !_shadowVisitor) self.shadowVisitor = [CC3ShadowDrawingVisitor visitor];
-	if (!needsShadowVisitor && _shadowVisitor) self.shadowVisitor = nil;
+	if (needsShadowVisitor && !_shadowVisitor) _shadowVisitor = [CC3ShadowDrawingVisitor visitor];
+	if (!needsShadowVisitor && _shadowVisitor) _shadowVisitor = nil;
 }
 
 

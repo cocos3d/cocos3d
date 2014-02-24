@@ -160,7 +160,6 @@
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
 		_light = nil;
-		_visible = NO;
 		_isShadowDirty = YES;
 		_shouldDrawTerminator = NO;
 		_shouldShadowFrontFaces = YES;
@@ -175,7 +174,8 @@
 		self.shadowOffsetUnits = -1;
 		_shadowVolumeVertexOffsetFactor = 0;
 		_shadowExpansionLimitFactor = 100;
-		self.pureColor = kCCC4FYellow;		// For terminator lines
+		self.visible = self.class.defaultVisible;		// Use setter
+		self.pureColor = kCCC4FYellow;					// For terminator lines
 	}
 	return self;
 }
@@ -713,11 +713,6 @@
 	_isShadowDirty = YES;
 }
 
-/** Only update the transform matrix if the shadow is ready to be updated. */
--(void) buildTransformMatrixWithVisitor: (CC3NodeTransformingVisitor*) visitor {
-	if (self.isReadyToUpdate) [super buildTransformMatrixWithVisitor: visitor];
-}
-
 /** A node that affects this shadow (generally the light) was transformed. Mark the shadow as dirty. */
 -(void) nodeWasTransformed: (CC3Node*) aNode { 
 	[super nodeWasTransformed: aNode];
@@ -779,6 +774,12 @@
 	self.shouldCullBackFaces = wasCullingBackFaces;
 	self.shouldCullFrontFaces = wasCullingFrontFaces;
 }
+
+static BOOL _shadowVolumeDefaultVisible = NO;
+
++(BOOL) defaultVisible { return _shadowVolumeDefaultVisible; }
+
++(void) setDefaultVisible: (BOOL) defaultVisible { _shadowVolumeDefaultVisible = defaultVisible; }
 
 
 #pragma mark Shadows, wireframe boxes, direction markers and descriptors
@@ -1021,7 +1022,6 @@
 	NSString* svName = [NSString stringWithFormat: @"%@-SV-%@", self.name, aLight.name];
 	CC3Node<CC3ShadowProtocol>* sv = [[self shadowVolumeClass] nodeWithName: svName];
 	[sv selectShaders];
-//	sv.visible = YES;		// Uncomment to show the shadow volume itself !
 	
 	// Retain data required to build shadow volume mesh
 	[self retainVertexLocations];
