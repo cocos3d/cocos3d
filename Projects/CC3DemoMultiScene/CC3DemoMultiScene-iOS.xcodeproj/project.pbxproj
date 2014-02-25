@@ -335,7 +335,7 @@
 		A946378318899B790097E355 /* CCNodeExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CCNodeExtensions.m; sourceTree = "<group>"; };
 		A946378418899B790097E355 /* Joystick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Joystick.h; sourceTree = "<group>"; };
 		A946378518899B790097E355 /* Joystick.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Joystick.m; sourceTree = "<group>"; };
-		A9A9C43118886E8000659FAC /* CC3DemoMultiScene-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "CC3DemoMultiScene-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A9A9C43118886E8000659FAC /* CC3DemoMultiScene.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CC3DemoMultiScene.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A9A9C43418886E8000659FAC /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		A9A9C43618886E8000659FAC /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		A9A9C43818886E8000659FAC /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
@@ -669,7 +669,7 @@
 		A9A9C43218886E8000659FAC /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A9A9C43118886E8000659FAC /* CC3DemoMultiScene-iOS.app */,
+				A9A9C43118886E8000659FAC /* CC3DemoMultiScene.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -830,9 +830,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		A9A9C43018886E8000659FAC /* CC3DemoMultiScene-iOS */ = {
+		A9A9C43018886E8000659FAC /* CC3DemoMultiScene */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A9A9C46618886E8100659FAC /* Build configuration list for PBXNativeTarget "CC3DemoMultiScene-iOS" */;
+			buildConfigurationList = A9A9C46618886E8100659FAC /* Build configuration list for PBXNativeTarget "CC3DemoMultiScene" */;
 			buildPhases = (
 				A9A9C42D18886E8000659FAC /* Sources */,
 				A9A9C42E18886E8000659FAC /* Frameworks */,
@@ -844,9 +844,9 @@
 				A9D4F67F18888FBD00382DDC /* PBXTargetDependency */,
 				A9D4F68118888FBD00382DDC /* PBXTargetDependency */,
 			);
-			name = "CC3DemoMultiScene-iOS";
+			name = CC3DemoMultiScene;
 			productName = CC3DemoMultiScene;
-			productReference = A9A9C43118886E8000659FAC /* CC3DemoMultiScene-iOS.app */;
+			productReference = A9A9C43118886E8000659FAC /* CC3DemoMultiScene.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -886,7 +886,7 @@
 			);
 			projectRoot = "";
 			targets = (
-				A9A9C43018886E8000659FAC /* CC3DemoMultiScene-iOS */,
+				A9A9C43018886E8000659FAC /* CC3DemoMultiScene */,
 			);
 		};
 /* End PBXProject section */
@@ -1242,7 +1242,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = "$(SRCROOT)/CC3DemoMultiScene/iOS Support/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
-				PRODUCT_NAME = "CC3DemoMultiScene-iOS";
+				PRODUCT_NAME = CC3DemoMultiScene;
 				TARGETED_DEVICE_FAMILY = 2;
 			};
 			name = Debug;
@@ -1256,7 +1256,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = "$(SRCROOT)/CC3DemoMultiScene/iOS Support/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
-				PRODUCT_NAME = "CC3DemoMultiScene-iOS";
+				PRODUCT_NAME = CC3DemoMultiScene;
 				TARGETED_DEVICE_FAMILY = 2;
 			};
 			name = Release;
@@ -1273,7 +1273,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A9A9C46618886E8100659FAC /* Build configuration list for PBXNativeTarget "CC3DemoMultiScene-iOS" */ = {
+		A9A9C46618886E8100659FAC /* Build configuration list for PBXNativeTarget "CC3DemoMultiScene" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A9A9C46718886E8100659FAC /* Debug */,
