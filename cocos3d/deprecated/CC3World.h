@@ -41,10 +41,7 @@
 #define kCC3DefaultLightColorAmbientWorld kCC3DefaultLightColorAmbientScene
 
 DEPRECATED_ATTRIBUTE
-/**
- * Deprecated and renamed to CC3Scene.
- * @deprecated CC3World renamed to CC3Scene.
- */
+/** @deprecated CC3World renamed to CC3Scene. */
 @interface CC3World : CC3Scene
 
 /** @deprecated CC3World renamed to CC3Scene. Use CC3Scene scene instead. */

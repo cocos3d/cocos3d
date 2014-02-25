@@ -80,7 +80,7 @@
 // Use parent to transform local location. Don't use this node, as globalLocation
 // can be referenced while building self.globalTransformMatrix.
 -(CC3Vector) globalLocation {
-	return [self.parentGlobalTransformMatrix transformLocation: self.location];
+	return [self.parent.globalTransformMatrix transformLocation: self.location];
 }
 
 -(CC3Vector4) globalHomogeneousPosition { return CC3Vector4FromLocation(self.globalLocation); }
@@ -244,7 +244,6 @@
 	[self.target removeTransformListener: self];
 	self.targettingRotator.target = aNode;
 	[self.target addTransformListener: self];
-	[self didSetTargetInDescendant: self];
 }
 
 -(BOOL) hasTarget { return (self.target != nil); }
@@ -301,10 +300,8 @@
 	}
 }
 
-/** If the transform is dirty, update this node. */
--(void) trackTargetWithVisitor: (CC3NodeTransformingVisitor*) visitor {
-	if (self.isTransformDirty) [visitor visit: self];
-}
+// Deprecated
+-(void) trackTargetWithVisitor: (id) visitor {}
 
 
 #pragma mark Rotator
@@ -571,24 +568,14 @@
 	for (CC3Node* child in _children) child.decalOffsetUnits = units;
 }
 
-// Creates a specialized transforming visitor that traverses the node hierarchy below
-// this node, accumulating a bounding box that surrounds all descendant nodes.
--(CC3Box) boundingBox {
-	if ( !_children ) return kCC3BoxNull;	// Short-circuit if no children
-	CC3NodeBoundingBoxVisitor* bbVisitor = [CC3NodeBoundingBoxVisitor visitor];
-	bbVisitor.shouldLocalizeToStartingNode = YES;
-	[bbVisitor visit: self];
-	LogTrace(@"Measured %@ bounding box: %@", self, NSStringFromCC3Box(bbVisitor.boundingBox));
-	return bbVisitor.boundingBox;
-}
+-(CC3Box) boundingBox { return [self boundingBoxRelativeTo: self]; }
 
-// Creates a specialized transforming visitor that traverses the node hierarchy below
-// this node, accumulating a bounding box that surrounds all descendant nodes.
--(CC3Box) globalBoundingBox {
-	CC3NodeBoundingBoxVisitor* bbVisitor = [CC3NodeBoundingBoxVisitor visitor];
-	[bbVisitor visit: self];
-	LogTrace(@"Measured %@ global bounding box: %@", self, NSStringFromCC3Box(bbVisitor.boundingBox));
-	return bbVisitor.boundingBox;
+-(CC3Box) globalBoundingBox { return [self boundingBoxRelativeTo: nil]; }
+
+-(CC3Box) boundingBoxRelativeTo: (CC3Node*) ancestor {
+	CC3Box bb = kCC3BoxNull;
+	for (CC3Node* child in _children) bb = CC3BoxUnion(bb, [child boundingBoxRelativeTo: ancestor]);
+	return bb;
 }
 
 -(CC3Vector) centerOfGeometry {
@@ -1277,15 +1264,10 @@ static GLuint lastAssignedNodeTag;
 	// Can't retrieve target from rotator, because it might be deallocated already,
 	// and ARC will attempt to retain and autorelease it, resulting in a zombie.
 	// Maybe revisit need for this once using true weak refs under minimum iOS 5.
-	if ( [_rotator clearIfTarget: aNode] ) [self didSetTargetInDescendant: self];
+	[_rotator clearIfTarget: aNode];
 }
 
 -(BOOL) shouldUpdateToTarget { return _rotator.shouldUpdateToTarget; }
-
--(CC3Matrix*) globalTransformMatrix {
-	if (self.isTransformDirty) [self buildTransformMatrixWithVisitor: nil];
-	return _globalTransformMatrix;
-}
 
 -(BOOL) isTransformDirty { return _globalTransformMatrix.isDirty; }
 
@@ -1302,49 +1284,13 @@ static GLuint lastAssignedNodeTag;
 	for (CC3Node* child in _children) [child markTransformDirty];
 }
 
-// Deprecated
--(CC3Matrix*) transformMatrix { return self.globalTransformMatrix; }
--(CC3Matrix*) transformMatrixInverted { return self.globalTransformMatrixInverted; }
--(CC3Matrix*) parentTransformMatrix { return self.parentGlobalTransformMatrix; }
-
--(CC3Node*) dirtiestAncestor {
-	CC3Node* da = _parent.dirtiestAncestor;
-	if (da) return da;
-	return (self.isTransformDirty) ? self : nil;
-}
-
--(void) updateTransformMatrices {
-	CC3Node* da = self.dirtiestAncestor;
-	[((CC3NodeVisitor*)[[self transformVisitorClass] visitor]) visit: (da ? da : self)];
-}
-
--(void) updateTransformMatrix {
-	CC3Node* da = self.dirtiestAncestor;
-	CC3NodeTransformingVisitor* visitor = [[self transformVisitorClass] visitor];
-	visitor.shouldVisitChildren = NO;
-	[visitor visit: (da ? da : self)];
-}
-
-/**
- * Returns the class of visitor that will be instantiated in the updateScene: method,
- * and passed to the updateTransformMatrices method when the transformation matrices
- * of the nodes are being rebuilt.
- *
- * The returned class must be a subclass of CC3NodeTransformingVisitor. This implementation
- * returns CC3NodeTransformingVisitor. Subclasses may override to customized the behaviour
- * of the update visits.
- */
--(id) transformVisitorClass { return [CC3NodeTransformingVisitor class]; }
-
--(CC3Matrix*) parentGlobalTransformMatrix { return _parent.globalTransformMatrix; }
-
--(void) buildTransformMatrixWithVisitor: (CC3NodeTransformingVisitor*) visitor {
-	CC3Matrix* parentMtx = (visitor
-							? [visitor parentTansformMatrixFor: self]
-							: self.parentGlobalTransformMatrix);
-	[_globalTransformMatrix populateFrom: parentMtx];
-	[self applyLocalTransforms];
-	_globalTransformMatrix.isDirty = NO;
+-(CC3Matrix*) globalTransformMatrix {
+	if (self.isTransformDirty) {
+		[_globalTransformMatrix populateFrom: self.parent.globalTransformMatrix];
+		[self applyLocalTransforms];
+		_globalTransformMatrix.isDirty = NO;
+	}
+	return _globalTransformMatrix;
 }
 
 /**
@@ -1554,6 +1500,21 @@ static GLuint lastAssignedNodeTag;
 	return _globalRotationMatrix;
 }
 
+// Deprecated
+-(CC3Matrix*) transformMatrix { return self.globalTransformMatrix; }
+-(CC3Matrix*) transformMatrixInverted { return self.globalTransformMatrixInverted; }
+-(CC3Matrix*) parentTransformMatrix { return _parent.globalTransformMatrix; }
+-(CC3Matrix*) parentGlobalTransformMatrix { return _parent.globalTransformMatrix; }
+-(void) updateTransformMatrices {}
+-(void) updateTransformMatrix {}
+-(id) transformVisitorClass { return nil; }
+-(CC3Node*) dirtiestAncestor {
+	CC3Node* da = _parent.dirtiestAncestor;
+	if (da) return da;
+	return (self.isTransformDirty) ? self : nil;
+}
+-(void) buildTransformMatrixWithVisitor: (id) visitor {}
+
 
 #pragma mark Bounding volumes
 
@@ -1726,11 +1687,6 @@ static GLuint lastAssignedNodeTag;
 	CC3Matrix4x3 g2LMtx;
 	CC3Matrix3x3 g2LRotMtx;
 	
-	// Since this calculation depends both the parent and child transformMatrixes,
-	// make sure they are up to date.
-	[self updateTransformMatrix];
-	[aNode updateTransformMatrix];
-	
 	// Localize the child node's location by finding the right local matrix, and then translating
 	// the child node's local origin by the resulting matrix. This is what the location property
 	// does. It instructs the local matrix to move the node's origin. By transforming the origin,
@@ -1856,9 +1812,6 @@ static GLuint lastAssignedNodeTag;
 -(void) descendantDidModifySequencingCriteria: (CC3Node*) aNode {
 	[_parent descendantDidModifySequencingCriteria: aNode];
 }
-
-/** Pass indication up the ancestor chain that a node has had its target set. */
--(void) didSetTargetInDescendant: (CC3Node*) aNode { [_parent didSetTargetInDescendant: aNode]; }
 
 -(CC3Node*) getNodeNamed: (NSString*) aName {
 	// First see if it's me

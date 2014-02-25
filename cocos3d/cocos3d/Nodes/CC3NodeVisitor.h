@@ -245,98 +245,6 @@
 
 
 #pragma mark -
-#pragma mark CC3NodeTransformingVisitor
-
-/**
- * CC3NodeTransformingVisitor is a CC3NodeVisitor that is passed to a node when it is
- * visited during transformation operations.
- *
- * This visitor encapsulates whether the transformation matrix needs to be recalculated.
- * The transformation matrix needs to be recalculated if any of the node's transform properties
- * (location, rotation, scale) have changed, or if those of an ancestor node were changed.
- *
- * The transforms can be calculated from the CC3Scene or from the startingNode, depending
- * on the value of the shouldLocalizeToStartingNode property. Normally, the transforms
- * are calculated from the CC3Scene, but localizing to the startingNode can be useful for
- * determining relative transforms between ancestors and descendants.
- */
-@interface CC3NodeTransformingVisitor : CC3NodeVisitor {
-	BOOL _isTransformDirty : 1;
-	BOOL _shouldLocalizeToStartingNode : 1;
-	BOOL _shouldRestoreTransforms : 1;
-}
-
-/**
- * Indicates whether all transforms should be localized to the local coordinate system
- * of the startingNode.
- *
- * If this property is set to NO, the transforms of all ancestors of each node, all the
- * way to CC3Scene, will be included when calculating the globalTransformMatrix and global
- * properties of that node. This is the normal situation.
- *
- * If this property is set to YES the transforms of the startingNode and its ancestors,
- * right up to the CC3Scene, will be ignored. The result is that the globalTransformMatrix
- * and all global properties (globalLocation, etc) will be relative to the startingNode.
- 
- * This can be useful when you want to coordinate node positioning within a particular
- * common ancestor, by using their global properties relative to that common ancestor
- * node.
- * 
- * It is also used when determine the boundingBox property of a node, by transforming
- * all descendant nodes by all transforms between the node and each descendant, but
- * ignoring the transforms of the ancestor nodes of the node whose local bounding box
- * is being calculated.
- *
- * Setting this property to YES will force the recalculation of the globalTransformMatrix of
- * each node visited, to ensure that they are relative to the startingNode. Further,
- * once the visitation run is complete, if this property is set to YES, the close
- * method will rebuild the transformMatrices of the startingNode and its descendants,
- * to leave the transformMatrices in their normal global form.
- * 
- * The initial value of this property is NO.
- */
-@property(nonatomic, assign) BOOL shouldLocalizeToStartingNode;
-
-/**
- * This property only has effect when the shouldLocalizeToStartingNode property is set to YES.
- *
- * Indicates whether the full global transforms should be restored afte the localized
- * transforms have been calculated and consumed. Setting this to YES is useful when
- * the localized transform is being temporarily calculated for a specialized purpose
- * such as determining a local bounding box, but then the full global transform should
- * be immediately restored for further use.
- *
- * The initial value of this property is NO. However, specialized subclasses may set
- * to YES initially as appropriate.
- */
-@property(nonatomic, assign) BOOL shouldRestoreTransforms;
-
-/**
- * Returns whether the transform matrix of the node currently being visited is dirty
- * and needs to be recalculated.
- *
- * The value of this property is consistent throughout the processing of a particular
- * node. It is set before each node is visited, and is not changed until after the
- * node has finished being processed, even if the node's transform matrix is recalculated
- * during processing. This allows any post-node-processing activities, either within the
- * visitor or within the node, to know that the transform matrix was changed.
- */
-@property(nonatomic, readonly) BOOL isTransformDirty;
-
-/**
- * Returns the transform matrix to use as the parent matrix when transforming the
- * specified node.
- * 
- * This usually returns the value of the parentGlobalTransformMatrix of the specified node.
- * However, if the shouldLocalizeToStartingNode property is set to YES and the
- * startingNode is either the specified node or its parent, this method returns nil.
- */
--(CC3Matrix*) parentTansformMatrixFor: (CC3Node*) aNode;
-
-@end
-
-
-#pragma mark -
 #pragma mark CC3NodeUpdatingVisitor
 
 /**
@@ -357,40 +265,6 @@
  * maxUpdateInterval property for more information about clamping the update interval.
  */
 @property(nonatomic, assign) ccTime deltaTime;
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3NodeBoundingBoxVisitor
-
-/**
- * Specialized transforming visitor that measures the bounding box of a node and all
- * its descendants, by traversing each descendant node, ensuring each globalTransformMatrix
- * is up to date, and accumulating a bounding box that encompasses the local content
- * of the startingNode and all of its descendants.
- *
- * If the value of the shouldLocalizeToStartingNode property is YES, the bounding
- * box will be in the local coordinate system of the startingNode, otherwise it
- * will be in the global coordinate system of the 3D scene.
- */
-@interface CC3NodeBoundingBoxVisitor : CC3NodeTransformingVisitor {
-	CC3Box _boundingBox;
-}
-
-/**
- * Returns the bounding box accumulated during the visitation run.
- *
- * If the value of the shouldLocalizeToStartingNode property is YES, the bounding
- * box will be in the local coordinate system of the startingNode, otherwise it
- * will be in the global coordinate system of the 3D scene.
- *
- * If none of the startingNode or its descendants have any local content, this
- * property will return kCC3BoxNull.
- *
- * The initial value of this property will be kCC3BoxNull.
- */
-@property(nonatomic, readonly) CC3Box boundingBox;
 
 @end
 
@@ -930,5 +804,46 @@
  * which is specified in the global coordinate system.
  */
 +(id) visitorWithRay: (CC3Ray) aRay;
+
+@end
+
+
+#pragma mark -
+#pragma mark Deprecated CC3NodeTransformingVisitor
+
+DEPRECATED_ATTRIBUTE
+/** @deprecated No longer needed. CC3Node transforms are calculated lazily, without using a visitor. */
+@interface CC3NodeTransformingVisitor : CC3NodeVisitor
+
+/** @deprecated */
+@property(nonatomic, assign) BOOL shouldLocalizeToStartingNode;
+
+/** @deprecated */
+@property(nonatomic, assign) BOOL shouldRestoreTransforms;
+
+/** @deprecated */
+@property(nonatomic, readonly) BOOL isTransformDirty;
+
+/** @deprecated */
+-(CC3Matrix*) parentTansformMatrixFor: (CC3Node*) aNode;
+
+@end
+
+
+#pragma mark -
+#pragma mark Deprecated CC3NodeBoundingBoxVisitor
+
+DEPRECATED_ATTRIBUTE
+/** @deprecated Use boundingBox or globalBoundingBox properties of CC3Node, instead. */
+@interface CC3NodeBoundingBoxVisitor : CC3NodeVisitor {
+	BOOL _shouldLocalizeToStartingNode : 1;
+	CC3Box _boundingBox;
+}
+
+/** @deprecated Use boundingBox or globalBoundingBox properties of CC3Node, instead. */
+@property(nonatomic, readonly) CC3Box boundingBox DEPRECATED_ATTRIBUTE;
+
+/** @deprecated */
+@property(nonatomic, assign) BOOL shouldLocalizeToStartingNode DEPRECATED_ATTRIBUTE;
 
 @end

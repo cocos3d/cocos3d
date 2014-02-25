@@ -3406,7 +3406,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 		[self touchBeachBallAt: touchPoint];
 		
 		// For fun, uncomment the following line to draw wireframe boxes around the beachball
-//		aNode.shouldDrawWireframeBox = !aNode.shouldDrawWireframeBox;
+//	aNode.shouldDrawWireframeBox = !aNode.shouldDrawWireframeBox;
 		
 	} else if (aNode == _brickWall) {
 		[self touchBrickWallAt: touchPoint];

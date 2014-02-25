@@ -228,7 +228,6 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * property for more information.
  */
 @interface CC3Scene : CC3Node {
-	NSMutableArray* _targettingNodes;
 	NSMutableArray* _lights;
 	NSMutableArray* _billboards;
 	CC3Layer* __unsafe_unretained _cc3Layer;
@@ -240,7 +239,6 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 	CC3NodeDrawingVisitor* _viewDrawingVisitor;
 	CC3NodeDrawingVisitor* _envMapDrawingVisitor;
 	CC3NodeDrawingVisitor* _shadowVisitor;
-	CC3NodeTransformingVisitor* _transformVisitor;
 	CC3NodeSequencerVisitor* _drawingSequenceVisitor;
 	CC3MeshNode* _backdrop;
 	CC3Fog* _fog;
@@ -576,13 +574,8 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  */
 -(id) updateVisitorClass;
 
-/**
- * The visitor that is used to visit the nodes when transforming them without updating.
- *
- * This property defaults to an instance of the class returned by the transformVisitorClass
- * method. The application can set a different visitor if desired.
- */
-@property(nonatomic, strong) CC3NodeTransformingVisitor* transformVisitor;
+/** @deprecated No longer used. */
+@property(nonatomic, strong) id transformVisitor DEPRECATED_ATTRIBUTE;
 
 /**
  * The value of this property is used as the lower limit accepted by the updateScene: method.

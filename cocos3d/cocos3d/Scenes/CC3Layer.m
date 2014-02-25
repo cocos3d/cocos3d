@@ -41,8 +41,6 @@
 @synthesize cc3Scene=_cc3Scene, shouldAlwaysUpdateViewport=_shouldAlwaysUpdateViewport;
 
 - (void)dealloc {
-	// Legacy iVar cc3World is not cleared here because it is
-	// not retained and setting to nil causes deprecation warning.
 	self.cc3Scene = nil;			// Close, remove & release the scene
 	[self cc3RemoveAllGestureRecognizers];
 }

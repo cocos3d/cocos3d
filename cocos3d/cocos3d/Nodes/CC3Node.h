@@ -557,7 +557,7 @@ typedef enum {
  * Returns the smallest axis-aligned bounding box that surrounds any local content
  * of this node, plus all descendants of this node.
  *
- * The returned bounding box is specfied in the local coordinate system of this node.
+ * The returned bounding box is specified in the local coordinate system of this node.
  *
  * Returns kCC3BoxNull if this node has no local content or descendants.
  *
@@ -576,7 +576,7 @@ typedef enum {
  * Returns the smallest axis-aligned bounding box that surrounds any local content
  * of this node, plus all descendants of this node.
  *
- * The returned bounding box is specfied in the global coordinate system of the 3D scene.
+ * The returned bounding box is specified in the global coordinate system of the 3D scene.
  *
  * Returns kCC3BoxNull if this node has no local content or descendants.
  *
@@ -585,6 +585,21 @@ typedef enum {
  * by traversing all descendant nodes. This is a computationally expensive method.
  */
 @property(nonatomic, readonly) CC3Box globalBoundingBox;
+
+/**
+ * Returns the smallest axis-aligned bounding box that surrounds any local content
+ * of this node, plus all descendants of this node.
+ *
+ * The returned bounding box is specified in the coordinate system of the specified node,
+ * or in the global coordinate system of the 3D scene if the ancestor is nil.
+ *
+ * Returns kCC3BoxNull if this node has no local content or descendants.
+ *
+ * Since the bounding box of a node can change based on the locations, rotations, or
+ * scales of any descendant node, this property is measured dynamically on each access,
+ * by traversing all descendant nodes. This is a computationally expensive method.
+ */
+-(CC3Box) boundingBoxRelativeTo: (CC3Node*) ancestor;
 
 /**
  * Returns the center of geometry of this node, including any local content of
@@ -903,9 +918,6 @@ typedef enum {
  * scale transforms, you can configure this node so that it only covers a portion of the view.
  * In doing so, keep in mind that clip-space, only the X & Y values of the location and scale
  * properties are used, and that the coordinate system occupies a range between -1 and +1.
- * In addition, in most cases, these nodes will not normally be included in the normal scene
- * update cycle, so you should invoke the updateTransformMatrix method on this node after you
- * have made any transform changes (location or scale).
  *
  * Setting the value of this property sets the value of this property in all descendant nodes.
  *
@@ -2375,15 +2387,8 @@ typedef enum {
  */
 -(void) updateAfterTransform: (CC3NodeUpdatingVisitor*) visitor;
 
-/**
- * If the shouldTrackTarget property is set to YES, orients this node to point towards
- * its target, otherwise does nothing. The transform visitor is used to transform
- * this node and all its children if this node re-orients.
- *
- * This method is invoked automatically if either the target node or this node moves.
- * Usually, the application should never need to invoke this method directly.
- */
--(void) trackTargetWithVisitor: (CC3NodeTransformingVisitor*) visitor;
+/** @deprecated No longer needed. Does nothing. */
+-(void) trackTargetWithVisitor: (id) visitor DEPRECATED_ATTRIBUTE;
 
 /**
  * If the shouldUseFixedBoundingVolume property is set to NO, this method marks the bounding
@@ -2537,24 +2542,6 @@ typedef enum {
 -(CC3Matrix*) globalRotationMatrix;
 
 /**
- * Returns the global transform matrix of the parent node, or nil if this node has no parent.
- * 
- * This template property is used by this class to base the transform of this node on
- * the transform of its parent. A subclass may override to return nil if it determines
- * that it wants to ignore the parent transform when calculating its own transform.
- */
-@property(nonatomic, strong, readonly) CC3Matrix* parentGlobalTransformMatrix;
-
-/**
- * @deprecated Renamed to parentGlobalTransformMatrix.
- *
- * This property will be redefined in a future release of cocos3d, and will result in incorrect
- * behaviour in any legacy code that depends on the older functionality provided by this property.
- * Convert your code now.
- */
-@property(nonatomic, strong, readonly) CC3Matrix* parentTransformMatrix DEPRECATED_ATTRIBUTE;
-
-/**
  * Indicates whether any of the transform properties, location, rotation, or scale
  * have been changed, and so the globalTransformMatrix of this node needs to be recalculated.
  *
@@ -2582,79 +2569,26 @@ typedef enum {
  */
 -(void) markTransformDirty;
 
-/**
- * Applies the transform properties (location, rotation, scale) to the globalTransformMatrix
- * of this node, and all descendant nodes.
- *
- * To ensure that the transforms are accurately applied, this method also automatically
- * ensures that the transform matrices of any ancestor nodes are also updated, if needed,
- * before updating this node and its descendants.
- *
- * Equivalent behaviour is invoked automatically during scheduled update processing
- * between the invocations of the updateBeforeTransform: and updateAfterTransform: methods.
- *
- * Changes that you make to the transform properties within the updateBeforeTransform:
- * method will automatically be applied to the globalTransformMatrix of the node. Because of this,
- * it's best to make any changes to the transform properties in that method.
- *
- * However, if you need to make changes to the transform properties in the
- * updateAfterTransform: method of a node, after you have made all your changes to the
- * node properties, you should then invoke this method on the node, in order to have
- * those changes applied to the globalTransformMatrix.
- *
- * Similarly, if you have updated the transform properties of this node asynchronously
- * through an event callback, and want those changes to be immediately reflected in
- * the transform matrices, you can use this method to do so.
- */
--(void) updateTransformMatrices;
+/** @deprecated No longer needed. */
+-(void) updateTransformMatrices DEPRECATED_ATTRIBUTE;
 
-/**
- * Applies the transform properties (location, rotation, scale) to the globalTransformMatrix
- * of this node, but NOT to any descendant nodes.
- *
- * To ensure that the transforms are accurately applied, this method also automatically
- * ensures that the transform matrices of any ancestor nodes are also updated, if needed,
- * before updating this node and its descendants.
- *
- * Use this method only when you know that you only need the globalTransformMatrix of the
- * specific node updated, and not the matrices of the decendants of that node, or if
- * you will manually update the transformMatrices of the descendant nodes. If in doubt,
- * use the updateTransformMatrices method instead.
- */
--(void) updateTransformMatrix;
+/** @deprecated No longer needed. */
+-(void) updateTransformMatrix DEPRECATED_ATTRIBUTE;
 
-/**
- * Returns the heighest node in my ancestor hierarchy, including myself, that
- * is dirty. Returns nil if neither myself nor any of my ancestors are dirty.
- *
- * This method can be useful when deciding at what level to update a hierarchy.
- *
- * This method is invoked automatically by the updateTransformMatrices and
- * updateTransformMatrix, so in most cases, you do not need to use this method
- * directly. However, there may be special cases where you want to determine
- * beforehand whether this node or its ancestors are dirty or not before running
- * either of those methods.
- */
-@property(nonatomic, strong, readonly) CC3Node* dirtiestAncestor;
+/** @deprecated No longer needed. */
+@property(nonatomic, strong, readonly) CC3Node* dirtiestAncestor DEPRECATED_ATTRIBUTE;
 
-/**
- * Template method that recalculates the transform matrix of this node from the
- * location, rotation and scale transformation properties, using the specified visitor.
- *
- * This method is invoked automatically by the visitor. Usually the application
- * never needs to invoke this method.
- */
--(void) buildTransformMatrixWithVisitor: (CC3NodeTransformingVisitor*) visitor;
+/** @deprecated No longer needed. */
+@property(nonatomic, strong, readonly) CC3Matrix* parentGlobalTransformMatrix DEPRECATED_ATTRIBUTE;
 
-/**
- * Returns the class of visitor that will automatically be instantiated when visiting
- * this node to transform, without updating.
- *
- * The returned class must be a subclass of CC3NodeTransformingVisitor. This implementation
- * returns CC3NodeTransformingVisitor. Subclasses may override to customize the behaviour
- * of the updating visits.
- */
--(id) transformVisitorClass;
+/** @deprecated Renamed to parentGlobalTransformMatrix. No longer needed. */
+@property(nonatomic, strong, readonly) CC3Matrix* parentTransformMatrix DEPRECATED_ATTRIBUTE;
+
+/** @deprecated No longer needed. Does nothing. */
+-(void) buildTransformMatrixWithVisitor: (id) visitor;
+
+/** @deprecated No longer used. Always returns nil. */
+-(id) transformVisitorClass DEPRECATED_ATTRIBUTE;
 
 
 #pragma mark Bounding volumes

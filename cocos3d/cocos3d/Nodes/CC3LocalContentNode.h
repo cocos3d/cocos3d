@@ -60,14 +60,6 @@
 @property(nonatomic, readonly) CC3Vector localContentCenterOfGeometry;
 
 /**
- * Returns the smallest axis-aligned bounding box that surrounds the local
- * content of this node, in the local coordinate system of this node.
- *
- * If this node has no local content, returns kCC3BoxNull.
- */
-@property(nonatomic, readonly) CC3Box localContentBoundingBox;
-
-/**
  * Returns the center of geometry of the local content of this node,
  * in the global coordinate system of the 3D scene.
  *
@@ -77,6 +69,14 @@
  * localContentCenterOfGeometry property, using the globalTransformMatrix of this node.
  */
 @property(nonatomic, readonly) CC3Vector globalLocalContentCenterOfGeometry;
+
+/**
+ * Returns the smallest axis-aligned bounding box that surrounds the local
+ * content of this node, in the local coordinate system of this node.
+ *
+ * Returns kCC3BoxNull if this node has no local content.
+ */
+@property(nonatomic, readonly) CC3Box localContentBoundingBox;
 
 /**
  * Returns the smallest axis-aligned bounding box that surrounds the local
@@ -90,9 +90,23 @@
  *
  * Since all bounding boxes are axis-aligned (AABB), if this node is rotated, the
  * globalLocalContentBoundingBox will generally be significantly larger than the
- * localContentBoundingBox. 
+ * localContentBoundingBox.
  */
 @property(nonatomic, readonly) CC3Box globalLocalContentBoundingBox;
+
+/**
+ * Returns the smallest axis-aligned bounding box that surrounds any local content of this node.
+ *
+ * The returned bounding box is specified in the coordinate system of the specified node,
+ * or in the global coordinate system of the 3D scene if the ancestor is nil.
+ *
+ * Returns kCC3BoxNull if this node has no local content.
+ *
+ * Since the bounding box of a node can change based on the locations, rotations, or
+ * scales of any descendant node, this property is measured dynamically on each access,
+ * by traversing all descendant nodes. This is a computationally expensive method.
+ */
+-(CC3Box) localContentBoundingBoxRelativeTo: (CC3Node*) ancestor;
 
 /**
  * Checks that this node is in the correct drawing order relative to other nodes.

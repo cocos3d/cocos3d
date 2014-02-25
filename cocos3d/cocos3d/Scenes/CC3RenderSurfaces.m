@@ -611,7 +611,6 @@
 		// Point the camera towards the face
 		envMapCam.forwardDirection = self.cameraDirection;
 		envMapCam.referenceUpDirection = self.upDirection;
-		[envMapCam updateTransformMatrix];		// TODO - use static transform visitor!
 
 		LogTrace(@"%@ rendering face %@ by looking to %@", self, NSStringFromGLEnum(_currentFace),
 				 NSStringFromCC3Vector(envMapCam.forwardDirection));

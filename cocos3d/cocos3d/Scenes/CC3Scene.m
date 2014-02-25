@@ -46,7 +46,6 @@
 #pragma mark CC3Scene
 
 @interface CC3Node (TemplateMethods)
--(id) transformVisitorClass;
 @property(nonatomic, unsafe_unretained, readwrite) CC3Node* parent;	// Backdrop needs to have parent set
 @end
 
@@ -58,7 +57,7 @@
 @synthesize drawingSequenceVisitor=_drawingSequenceVisitor;
 @synthesize viewDrawingVisitor=_viewDrawingVisitor, shadowVisitor=_shadowVisitor;
 @synthesize envMapDrawingVisitor=_envMapDrawingVisitor;
-@synthesize updateVisitor=_updateVisitor, transformVisitor=_transformVisitor;
+@synthesize updateVisitor=_updateVisitor;
 @synthesize performanceStatistics=_performanceStatistics;
 @synthesize deltaFrameTime=_deltaFrameTime, backdrop=_backdrop, fog=_fog, lights=_lights;
 @synthesize elapsedTimeSinceOpened=_elapsedTimeSinceOpened;
@@ -104,20 +103,20 @@
 	// Ensure camera screen-rendering configuration is preserved
 	newCam.viewport = oldCam.viewport;
 	newCam.hasInfiniteDepthOfField = oldCam.hasInfiniteDepthOfField;
-
-	// For any targetting nodes that were targetted to the old camera,
-	// set the target to the new camera.
-	NSArray* targNodes = [_targettingNodes copy];
-	for (CC3Node* tn in targNodes)
-		// If the node should always target the camera, or if the target
-		// is already the old camera, set its target to the new camera.
-		if (tn.shouldAutotargetCamera || (oldCam && (tn.target == oldCam))) tn.target = newCam;
 	
-	// Move other non-target camera listeners (eg- shadow casting volumes) over
+	// Move camera listeners (eg- shadow casting volumes && nodes targetting the camera) to new camera.
+	// If the listener is a node that should always target the camera, or its target is already the old
+	// camera, set its target to the new camera. Otherwise, just transfer the listener.
 	NSSet* camListeners = oldCam.transformListeners;
 	for(id<CC3NodeTransformListenerProtocol> aListener in camListeners) {
-		[oldCam removeTransformListener: aListener];
-		[newCam addTransformListener: aListener];
+		CC3Node* tn = (CC3Node*)aListener;
+		if ([tn isKindOfClass: [CC3Node class]] &&
+			(tn.shouldAutotargetCamera || (oldCam && (tn.target == oldCam)))) {
+			tn.target = newCam;
+		} else {
+			[oldCam removeTransformListener: aListener];
+			[newCam addTransformListener: aListener];
+		}
 	}
 }
 
@@ -149,6 +148,8 @@
 -(void) setShouldClearDepthBufferBefore2D: (BOOL) shouldClear {}
 -(BOOL) shouldClearDepthBufferBefore3D { return NO; }
 -(void) setShouldClearDepthBufferBefore3D: (BOOL) shouldClear {}
+-(id) transformVisitor { return nil; }
+-(void) setTransformVisitor: (id) transformVisitor {}
 
 
 #pragma mark CCRGBAProtocol and CCBlendProtocol support
@@ -169,7 +170,6 @@
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		_targettingNodes = [NSMutableArray array];
 		_lights = [NSMutableArray array];
 		_billboards = [NSMutableArray array];
 		self.touchedNodePicker = [CC3TouchedNodePicker pickerOnScene: self];
@@ -178,7 +178,6 @@
 		self.envMapDrawingVisitor = nil;
 		self.shadowVisitor = nil;
 		self.updateVisitor = [[self updateVisitorClass] visitor];
-		self.transformVisitor = [[self transformVisitorClass] visitor];
 		self.drawingSequenceVisitor = [CC3NodeSequencerVisitor visitorWithScene: self];
 		_backdrop = nil;
 		_fog = nil;
@@ -223,7 +222,6 @@
 	self.viewDrawingVisitor = [[another.viewDrawingVisitor class] visitor];		// retained
 	self.shadowVisitor = [[another.shadowVisitor class] visitor];				// retained
 	self.updateVisitor = [[another.updateVisitor class] visitor];				// retained
-	self.transformVisitor = [[another.transformVisitor class] visitor];			// retained
 	self.drawingSequenceVisitor = [[another.drawingSequenceVisitor class] visitorWithScene: self];	// retained
 	self.touchedNodePicker = [[another.touchedNodePicker class] pickerOnScene: self];		// retained
 
@@ -283,7 +281,6 @@
 	_updateVisitor.deltaTime = _deltaFrameTime;
 	[_updateVisitor visit: self];
 	
-	[self updateTargets: _deltaFrameTime];
 	[self updateCamera: _deltaFrameTime];
 	[self updateBillboards: _deltaFrameTime];
 	[self updateShadows: _deltaFrameTime];
@@ -303,16 +300,6 @@
 -(void) updateTimes: (ccTime) dt {
 	_elapsedTimeSinceOpened = NSDate.timeIntervalSinceReferenceDate - _timeAtOpen;
 	[_performanceStatistics addUpdateTime: dt];
-}
-
-/** 
- * Template method to update the direction pointed to by any targetting nodes in this scene.
- * Iterates through all the targetting nodes in this scene, updating their target tracking.
- */
--(void) updateTargets: (ccTime) dt {
-	_transformVisitor.shouldVisitChildren = YES;
-	_transformVisitor.shouldLocalizeToStartingNode = NO;
-	for (CC3Node* tn in _targettingNodes) [tn trackTargetWithVisitor: _transformVisitor];
 }
 
 /** Template method to update the camera. */
@@ -591,9 +578,6 @@
 		// Attempt to add the node to the draw sequence sorter.
 		[_drawingSequencer add: addedNode withVisitor: _drawingSequenceVisitor];
 		
-		// If the node has a target, add it to the collection of such nodes
-		if (addedNode.hasTarget) [_targettingNodes addObject: addedNode];
-		
 		// If the node is a light, add it to the collection of lights
 		if (addedNode.isLight) [_lights addObject: addedNode];
 		
@@ -625,9 +609,6 @@
 		// Attempt to remove the node to the draw sequence sorter.
 		[_drawingSequencer remove: removedNode withVisitor: _drawingSequenceVisitor];
 		
-		// If the node has a target, remove it from the collection of such nodes
-		if (removedNode.hasTarget) [_targettingNodes removeObjectIdenticalTo: removedNode];
-		
 		// If the node is a light, remove it from the collection of lights
 		if (removedNode.isLight) [_lights removeObjectIdenticalTo: removedNode];
 		
@@ -636,23 +617,6 @@
 		
 		// If the node is a shadow, check if we need to remove the shadow visitor
 		if (removedNode.isShadowVolume) [self checkNeedShadowVisitor];
-	}
-}
-
-/** 
- * A target has been set in a descendant. If the target is not nil, add the descendant
- * to the collection of targetting nodes, if it has not been added before. If the target
- * is nil, remove the descendant node from the collection of targetting nodes.
- */
--(void) didSetTargetInDescendant: (CC3Node*) aNode {
-	if (aNode.hasTarget) {
-		if ( ![_targettingNodes containsObject: aNode] ) {
-			LogTrace(@"Adding targetting node %@ with target %@", aNode, aNode.target);
-			[_targettingNodes addObject: aNode];
-		}
-	} else {
-		LogTrace(@"Removing targetting node %@", aNode);
-		[_targettingNodes removeObjectIdenticalTo: aNode];
 	}
 }
 

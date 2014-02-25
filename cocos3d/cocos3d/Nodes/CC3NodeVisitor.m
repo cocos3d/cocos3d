@@ -236,89 +236,6 @@
 
 
 #pragma mark -
-#pragma mark CC3NodeTransformingVisitor
-
-@implementation CC3NodeTransformingVisitor
-
-@synthesize shouldLocalizeToStartingNode=_shouldLocalizeToStartingNode;
-@synthesize shouldRestoreTransforms=_shouldRestoreTransforms, isTransformDirty=_isTransformDirty;
-
--(id) init {
-	if ( (self = [super init]) ) {
-		_isTransformDirty = NO;
-		_shouldLocalizeToStartingNode = NO;
-		_shouldRestoreTransforms = NO;
-	}
-	return self;
-}
-
--(void) open {
-	[super open];
-	_isTransformDirty = _shouldLocalizeToStartingNode;
-}
-
-/**
- * As each node is visited, remember whether an ancestor was dirty, and restore that
- * indication for the benefit of other nodes that will be visited after this node.
- *
- * This flag cannot be carried by the visitor itself, because it is state associated
- * with a particular node, not the visitor, and a child node could modify it and mess
- * up later siblings of a the parent node.
- */
--(BOOL) process: (CC3Node*) aNode {
-	BOOL rslt = NO;
-
-	BOOL wasAncestorDirty = _isTransformDirty;
-	rslt = [super process: aNode];
-	_isTransformDirty = wasAncestorDirty;
-	
-	return rslt;
-}
-
-/**
- * Force a transform recalc of this node and all subsequent children if
- * either the specified node, or one of its ancestors has been changed.
- */
--(void) processBeforeChildren: (CC3Node*) aNode {
-	
-	_isTransformDirty = _isTransformDirty || aNode.isTransformDirty;
-	
-	if (_isTransformDirty) {
-		[self.performanceStatistics incrementNodesTransformed];
-		[aNode buildTransformMatrixWithVisitor: self];
-	}
-}
-
-/**
- * If the node transforms were changed to be relative to the starting node,
- * brings the transforms back to what they were by rebuilding them again,
- * this time from the normal CC3Scene perspective.
- */
--(void) close {
-	[super close];
-	if (_shouldLocalizeToStartingNode && _shouldRestoreTransforms) {
-		[_startingNode markTransformDirty];
-		[_startingNode updateTransformMatrices];
-	}
-}
-
--(CC3Matrix*) parentTansformMatrixFor: (CC3Node*) aNode {
-	CC3Node* parentNode = aNode.parent;
-	BOOL localizeToThisNode = _shouldLocalizeToStartingNode && (aNode == _startingNode ||
-															   parentNode == _startingNode);
-	return localizeToThisNode ? nil : aNode.parentGlobalTransformMatrix;
-}
-
--(NSString*) fullDescription {
-	return [NSString stringWithFormat: @"%@, localize: %@, dirty: %@",
-			[super fullDescription], NSStringFromBoolean(_shouldLocalizeToStartingNode),
-			NSStringFromBoolean(_isTransformDirty)];
-}
-
-@end
-
-
-#pragma mark -
 #pragma mark CC3NodeUpdatingVisitor
 
 @implementation CC3NodeUpdatingVisitor
@@ -342,57 +259,6 @@
 -(NSString*) fullDescription {
 	return [NSString stringWithFormat: @"%@, dt: %.3f ms",
 			[super fullDescription], _deltaTime * 1000.0f];
-}
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3NodeBoundingBoxVisitor
-
-@interface CC3Node (CC3NodeBoundingBoxVisitor)
--(BOOL) shouldContributeToParentBoundingBox;
-@end
-
-@implementation CC3NodeBoundingBoxVisitor
-
-@synthesize boundingBox=_boundingBox;
-
--(id) init {
-	if ( (self = [super init]) ) {
-		_boundingBox = kCC3BoxNull;
-		_shouldRestoreTransforms = YES;
-	}
-	return self;
-}
-
--(void) open {
-	[super open];
-	_boundingBox = kCC3BoxNull;
-}
-
--(void) processAfterChildren: (CC3Node*) aNode {
-	[super processAfterChildren: aNode];
-	if (aNode.shouldContributeToParentBoundingBox) {
-
-		// If the bounding box is being localized to the starting node, and the node
-		// is the starting node, don't apply transform to bounding box, because we want
-		// the bounding box in the local coordinate system of the startingNode
-		CC3LocalContentNode* lcNode = (CC3LocalContentNode*)aNode;
-		CC3Box nodeBox = (_shouldLocalizeToStartingNode && (aNode == _startingNode))
-									? lcNode.localContentBoundingBox
-									: lcNode.globalLocalContentBoundingBox;
-
-		// Merge the node's bounding box into the aggregate bounding box
-		LogTrace(@"Merging %@ from %@ into %@", NSStringFromCC3Box(nodeBox),
-				 aNode, NSStringFromCC3Box(_boundingBox));
-		_boundingBox = CC3BoxUnion(_boundingBox, nodeBox);
-	}
-}
-
--(NSString*) fullDescription {
-	return [NSString stringWithFormat: @"%@, box: %@",
-			[super fullDescription], NSStringFromCC3Box(_boundingBox)];
 }
 
 @end
@@ -957,5 +823,36 @@
 }
 
 +(id) visitorWithRay: (CC3Ray) aRay { return [[self alloc] initWithRay: aRay]; }
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3NodeTransformingVisitor
+
+@implementation CC3NodeTransformingVisitor
+-(BOOL) shouldLocalizeToStartingNode { return NO; }
+-(void) setShouldLocalizeToStartingNode: (BOOL) shouldLocalizeToStartingNode {}
+-(BOOL) shouldRestoreTransforms { return NO; }
+-(void) setShouldRestoreTransforms: (BOOL) shouldRestoreTransforms {}
+-(BOOL) isTransformDirty { return NO; }
+-(CC3Matrix*) parentTansformMatrixFor: (CC3Node*) aNode { return aNode.parent.globalTransformMatrix; }
+@end
+
+
+#pragma mark -
+#pragma mark Deprecated CC3NodeBoundingBoxVisitor
+
+@implementation CC3NodeBoundingBoxVisitor
+
+@synthesize boundingBox=_boundingBox;
+@synthesize shouldLocalizeToStartingNode=_shouldLocalizeToStartingNode;
+
+-(void) close {
+	_boundingBox = (_shouldLocalizeToStartingNode
+					? _startingNode.boundingBox
+					: _startingNode.globalBoundingBox);
+	[super close];
+}
 
 @end

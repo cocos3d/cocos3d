@@ -39,7 +39,6 @@
 
 @interface CC3Node (TemplateMethods)
 -(void) copyChildrenFrom: (CC3Node*) another;
--(void) cacheRestPoseMatrix;
 @end
 
 @interface CC3Mesh (TemplateMethods)
@@ -63,9 +62,6 @@
 	[super copyChildrenFrom: another];
 	[self reattachBonesFrom: self];
 }
-
-/** Release a visitor to calculate the bind pose transforms relative to this soft-body node. */
--(void) bindRestPose {[((CC3NodeVisitor*)[CC3SkeletonRestPoseBindingVisitor visitor]) visit: self]; }
 
 -(CC3SoftBodyNode*) softBodyNode { return self; }
 
@@ -456,6 +452,11 @@
 	return _skeletalTransformMatrix;
 }
 
+-(void) bindRestPose {
+	[self cacheRestPoseMatrix];
+	[super bindRestPose];
+}
+
 /** Inverts the transform matrix and caches it as the inverted rest pose matrix. */
 -(void) cacheRestPoseMatrix {
 	[_restPoseSkeletalTransformMatrixInverted populateFrom: self.skeletalTransformMatrix];
@@ -732,33 +733,6 @@
 
 
 #pragma mark -
-#pragma mark CC3SkeletonRestPoseBindingVisitor
-
-@interface CC3NodeVisitor (TemplateMethods)
--(void) processBeforeChildren: (CC3Node*) aNode;
-@end
-
-@implementation CC3SkeletonRestPoseBindingVisitor
-
-/** Initialized to localize to the starting node. */
--(id) init {
-	if ( (self = [super init]) ) {
-		_shouldLocalizeToStartingNode = YES;
-		_shouldRestoreTransforms = YES;
-	}
-	return self;
-}
-
-/** Perform transform, then tell node to cache the transform matrix. */
--(void) processBeforeChildren: (CC3Node*) aNode {
-	[super processBeforeChildren: aNode];
-	[aNode cacheRestPoseMatrix];
-}
-
-@end
-
-
-#pragma mark -
 #pragma mark CC3Node skinning extensions
 
 @implementation CC3Node (Skinning)
@@ -775,8 +749,6 @@
 }
 
 -(void) ensureRigidSkeleton { for (CC3Node* child in _children) [child ensureRigidSkeleton]; }
-
--(void) cacheRestPoseMatrix {}
 
 -(CC3SoftBodyNode*) softBodyNode { return _parent.softBodyNode; }
 
@@ -815,4 +787,11 @@
 	return [self vertexLocationAt: vertexIndex];
 }
 
+@end
+
+
+#pragma mark -
+#pragma mark Deprecated CC3SkeletonRestPoseBindingVisitor
+
+@implementation CC3SkeletonRestPoseBindingVisitor
 @end

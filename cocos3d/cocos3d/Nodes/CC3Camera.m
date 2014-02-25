@@ -564,7 +564,6 @@
 	} else {
 		self.location = newLoc;
 		self.forwardDirection = newFwdDir;
-		[self updateTransformMatrices];
 	}
 }
 
@@ -716,7 +715,6 @@
 			return CGSizeMake(_frustum.right / _frustum.near, _frustum.top / _frustum.near);
 	}
 }
-
 
 /**
  * Ensures that this camera is a direct child of its root ancestor, which in almost all

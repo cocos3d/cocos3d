@@ -52,11 +52,6 @@
 	super.zOrder = zo;
 }
 
-// Overridden to return the localContentBoundingBox if no children.
--(CC3Box) boundingBox { return _children ? super.boundingBox : self.localContentBoundingBox; }
-
--(CC3Box) localContentBoundingBox { return kCC3BoxNull; }
-
 -(CC3Vector) localContentCenterOfGeometry {
 	CC3Box bb = self.localContentBoundingBox;
 	return CC3BoxIsNull(bb) ? kCC3VectorZero : CC3BoxCenter(bb);
@@ -66,43 +61,56 @@
 	return [self.globalTransformMatrix transformLocation: self.localContentCenterOfGeometry];
 }
 
--(CC3Box) globalLocalContentBoundingBox {
-	
-	// If the global bounding box is null, rebuild it, otherwise return it.
-	if (CC3BoxIsNull(_globalLocalContentBoundingBox)) {
-		
-		// Get the mesh bounding box (in local coords). If it's null, return null.
-		CC3Box mbb = self.localContentBoundingBox;
-		if (CC3BoxIsNull(mbb)) return kCC3BoxNull;
-		
-		// The eight vertices of the transformed mesh bounding box
-		CC3Vector gbbVertices[8];
-		CC3Matrix* tMtx = self.globalTransformMatrix;
-		
-		// Get the corners of the local bounding box
-		CC3Vector bbMin = mbb.minimum;
-		CC3Vector bbMax = mbb.maximum;
-		
-		// Construct all 8 corner vertices of the local bounding box and transform each
-		// to global coordinates. The result is an oriented-bounding-box.
-		gbbVertices[0] = [tMtx transformLocation: cc3v(bbMin.x, bbMin.y, bbMin.z)];
-		gbbVertices[1] = [tMtx transformLocation: cc3v(bbMin.x, bbMin.y, bbMax.z)];
-		gbbVertices[2] = [tMtx transformLocation: cc3v(bbMin.x, bbMax.y, bbMin.z)];
-		gbbVertices[3] = [tMtx transformLocation: cc3v(bbMin.x, bbMax.y, bbMax.z)];
-		gbbVertices[4] = [tMtx transformLocation: cc3v(bbMax.x, bbMin.y, bbMin.z)];
-		gbbVertices[5] = [tMtx transformLocation: cc3v(bbMax.x, bbMin.y, bbMax.z)];
-		gbbVertices[6] = [tMtx transformLocation: cc3v(bbMax.x, bbMax.y, bbMin.z)];
-		gbbVertices[7] = [tMtx transformLocation: cc3v(bbMax.x, bbMax.y, bbMax.z)];
-		
-		// Construct the global mesh bounding box that surrounds the eight global vertices
-		for (int i = 0; i < 8; i++)
-			_globalLocalContentBoundingBox = CC3BoxEngulfLocation(_globalLocalContentBoundingBox, gbbVertices[i]);
+// Overridden to return the localContentBoundingBox if no children.
+-(CC3Box) boundingBox { return _children ? [super boundingBox] : self.localContentBoundingBox; }
 
-		LogTrace(@"%@ transformed local content bounding box: %@ to global %@ using: %@",
-				 self, NSStringFromCC3Box(mbb),
-				 NSStringFromCC3Box(_globalLocalContentBoundingBox), tMtx);
-	}
+-(CC3Box) localContentBoundingBox { return kCC3BoxNull; }
+
+-(CC3Box) globalLocalContentBoundingBox {
+	// If the global bounding box is null, rebuild it, otherwise return it.
+	if (CC3BoxIsNull(_globalLocalContentBoundingBox))
+		_globalLocalContentBoundingBox = [self localContentBoundingBoxRelativeTo: nil];
 	return _globalLocalContentBoundingBox;
+}
+
+-(CC3Box) localContentBoundingBoxRelativeTo: (CC3Node*) ancestor {
+	CC3Box lcbb = self.localContentBoundingBox;
+	if (ancestor == self) return lcbb;
+
+	CC3Matrix4x3 tMtx;
+	[self.globalTransformMatrix populateCC3Matrix4x3: &tMtx];
+	[ancestor.globalTransformMatrixInverted leftMultiplyIntoCC3Matrix4x3: &tMtx];
+	
+	// The eight vertices of the transformed local bounding box
+	CC3Vector bbVertices[8];
+	
+	// Get the corners of the local bounding box
+	CC3Vector bbMin = lcbb.minimum;
+	CC3Vector bbMax = lcbb.maximum;
+	
+	// Construct all 8 corner vertices of the local bounding box and transform each
+	// to the coordinate system of the ancestor. The result is an oriented-bounding-box.
+	bbVertices[0] = CC3Matrix4x3TransformLocation(&tMtx, cc3v(bbMin.x, bbMin.y, bbMin.z));
+	bbVertices[1] = CC3Matrix4x3TransformLocation(&tMtx, cc3v(bbMin.x, bbMin.y, bbMax.z));
+	bbVertices[2] = CC3Matrix4x3TransformLocation(&tMtx, cc3v(bbMin.x, bbMax.y, bbMin.z));
+	bbVertices[3] = CC3Matrix4x3TransformLocation(&tMtx, cc3v(bbMin.x, bbMax.y, bbMax.z));
+	bbVertices[4] = CC3Matrix4x3TransformLocation(&tMtx, cc3v(bbMax.x, bbMin.y, bbMin.z));
+	bbVertices[5] = CC3Matrix4x3TransformLocation(&tMtx, cc3v(bbMax.x, bbMin.y, bbMax.z));
+	bbVertices[6] = CC3Matrix4x3TransformLocation(&tMtx, cc3v(bbMax.x, bbMax.y, bbMin.z));
+	bbVertices[7] = CC3Matrix4x3TransformLocation(&tMtx, cc3v(bbMax.x, bbMax.y, bbMax.z));
+	
+	// Construct a transformed mesh bounding box that surrounds the eight global vertices
+	CC3Box bb = kCC3BoxNull;
+	for (int i = 0; i < 8; i++) bb = CC3BoxEngulfLocation(bb, bbVertices[i]);
+	return bb;
+}
+
+// Overridden to include local content
+-(CC3Box) boundingBoxRelativeTo: (CC3Node*) ancestor {
+	CC3Box lcbb = (self.shouldContributeToParentBoundingBox
+				   ? [self localContentBoundingBoxRelativeTo: ancestor]
+				   : kCC3BoxNull);
+	return CC3BoxUnion(lcbb, [super boundingBoxRelativeTo: ancestor]);
 }
 
 /** Notify up the ancestor chain...then check my children by invoking superclass implementation. */
@@ -122,12 +130,11 @@
 	return self;
 }
 
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
-// The globalLocalContentBoundingBox is left uncopied so that it will start at
-// kCC3BoxNull and be lazily created on next access.
 -(void) populateFrom: (CC3LocalContentNode*) another {
 	[super populateFrom: another];
+
+	// The globalLocalContentBoundingBox property is left uncopied so that
+	// it will start at kCC3BoxNull and be lazily created on next access.
 
 	// Could create a child node
 	self.shouldDrawLocalContentWireframeBox = another.shouldDrawLocalContentWireframeBox;

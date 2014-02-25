@@ -701,25 +701,6 @@
 
 
 #pragma mark -
-#pragma mark CC3SkeletonRestPoseBindingVisitor
-
-/**
- * CC3SkeletonRestPoseBindingVisitor is a CC3NodeVisitor that is passed to an assembly
- * of bone nodes (a skeleton) in order to establish the rest pose transforms for the
- * bones in the skeleton.
- *
- * The skeleton rest pose is calculated relative to the containing CC3SoftBodyNode.
- * This visitor is initialized with the shouldLocalizeToStartingNode set to YES.
- * The visit should be initialized on a CC3SoftBodyNode.
- *
- * CC3SoftBodyNode makes use of a CC3SkeletonRestPoseBindingVisitor to cause the bone
- * and skin mesh node rest pose transform matrices to be cached.
- */
-@interface CC3SkeletonRestPoseBindingVisitor : CC3NodeTransformingVisitor
-@end
-
-
-#pragma mark -
 #pragma mark CC3Node skinning extensions
 
 /** CC3Node extension to support ancestors and descendants that make use of vertex skinning. */
@@ -733,7 +714,7 @@
 
 /**
  * Binds the rest pose of any skeletons contained within the descendants of this node.
- * This method must be invoked once the initial locations and rotations of each bone
+ * This method must be invoked after the initial locations and rotations of each bone
  * in the skeletons are set.
  *
  * These initial bone orientations are those that align with the native structure of the 
@@ -986,5 +967,13 @@
  */
 -(CC3Vector) deformedVertexLocationAt: (GLuint) vertexIndex fromFaceAt: (GLuint) faceIndex;
 
+@end
+
+#pragma mark -
+#pragma mark Deprecated CC3SkeletonRestPoseBindingVisitor
+
+DEPRECATED_ATTRIBUTE
+/** @deprecated No longer used. */
+@interface CC3SkeletonRestPoseBindingVisitor : CC3NodeVisitor
 @end
 
