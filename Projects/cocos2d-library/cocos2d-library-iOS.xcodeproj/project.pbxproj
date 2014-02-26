@@ -145,8 +145,6 @@
 		A92B41E318BE25A70026B00F /* cpSweep1D.c in Sources */ = {isa = PBXBuildFile; fileRef = A92B41C418BE25A60026B00F /* cpSweep1D.c */; };
 		A92B41E418BE25A70026B00F /* cpVect.c in Sources */ = {isa = PBXBuildFile; fileRef = A92B41C518BE25A60026B00F /* cpVect.c */; };
 		A96C044918BD338A003E8F91 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9D8EEB117A601CF00FB443C /* Foundation.framework */; };
-		A96C044E18BD338A003E8F91 /* ObjectiveChipmunk.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = A96C044D18BD338A003E8F91 /* ObjectiveChipmunk.h */; };
-		A96C045018BD338A003E8F91 /* ObjectiveChipmunk.m in Sources */ = {isa = PBXBuildFile; fileRef = A96C044F18BD338A003E8F91 /* ObjectiveChipmunk.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -166,7 +164,6 @@
 			dstPath = "include/$(PRODUCT_NAME)";
 			dstSubfolderSpec = 16;
 			files = (
-				A96C044E18BD338A003E8F91 /* ObjectiveChipmunk.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -490,13 +487,7 @@
 		A92B41C718BE25A60026B00F /* LICENSE_Chipmunk.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE_Chipmunk.txt; sourceTree = "<group>"; };
 		A95B479318119BC8007A3804 /* configuration.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = configuration.json; path = "cocos2d-library-iOS.approj/configuration.json"; sourceTree = "<group>"; };
 		A96C044818BD338A003E8F91 /* libObjectiveChipmunk.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libObjectiveChipmunk.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		A96C044C18BD338A003E8F91 /* ObjectiveChipmunk-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ObjectiveChipmunk-Prefix.pch"; sourceTree = "<group>"; };
-		A96C044D18BD338A003E8F91 /* ObjectiveChipmunk.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ObjectiveChipmunk.h; sourceTree = "<group>"; };
-		A96C044F18BD338A003E8F91 /* ObjectiveChipmunk.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ObjectiveChipmunk.m; sourceTree = "<group>"; };
 		A96C045618BD338B003E8F91 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
-		A96C045F18BD338B003E8F91 /* ObjectiveChipmunkTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "ObjectiveChipmunkTests-Info.plist"; sourceTree = "<group>"; };
-		A96C046118BD338B003E8F91 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		A96C046318BD338B003E8F91 /* ObjectiveChipmunkTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ObjectiveChipmunkTests.m; sourceTree = "<group>"; };
 		A9D8ED2917A6009300FB443C /* libcocos2d-library-iOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libcocos2d-library-iOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A9D8EEAE17A601CF00FB443C /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		A9D8EEAF17A601CF00FB443C /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
@@ -1001,50 +992,12 @@
 			name = Apportable;
 			sourceTree = "<group>";
 		};
-		A96C044A18BD338A003E8F91 /* ObjectiveChipmunk */ = {
-			isa = PBXGroup;
-			children = (
-				A96C044D18BD338A003E8F91 /* ObjectiveChipmunk.h */,
-				A96C044F18BD338A003E8F91 /* ObjectiveChipmunk.m */,
-				A96C044B18BD338A003E8F91 /* Supporting Files */,
-			);
-			path = ObjectiveChipmunk;
-			sourceTree = "<group>";
-		};
-		A96C044B18BD338A003E8F91 /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				A96C044C18BD338A003E8F91 /* ObjectiveChipmunk-Prefix.pch */,
-			);
-			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		A96C045D18BD338B003E8F91 /* ObjectiveChipmunkTests */ = {
-			isa = PBXGroup;
-			children = (
-				A96C046318BD338B003E8F91 /* ObjectiveChipmunkTests.m */,
-				A96C045E18BD338B003E8F91 /* Supporting Files */,
-			);
-			path = ObjectiveChipmunkTests;
-			sourceTree = "<group>";
-		};
-		A96C045E18BD338B003E8F91 /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				A96C045F18BD338B003E8F91 /* ObjectiveChipmunkTests-Info.plist */,
-				A96C046018BD338B003E8F91 /* InfoPlist.strings */,
-			);
-			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
 		A9D8ED2017A6009300FB443C = {
 			isa = PBXGroup;
 			children = (
 				A92B401618BE259B0026B00F /* cocos2d */,
 				A92B418818BE25A60026B00F /* cocos2d-chipmunk */,
 				A95B479018119B63007A3804 /* Apportable */,
-				A96C044A18BD338A003E8F91 /* ObjectiveChipmunk */,
-				A96C045D18BD338B003E8F91 /* ObjectiveChipmunkTests */,
 				A9D8ED2B17A6009300FB443C /* Frameworks */,
 				A9D8ED2A17A6009300FB443C /* Products */,
 			);
@@ -1167,7 +1120,6 @@
 				A92B41CD18BE25A70026B00F /* cpGrooveJoint.c in Sources */,
 				A92B41D718BE25A70026B00F /* cpBBTree.c in Sources */,
 				A92B41D118BE25A70026B00F /* cpRotaryLimitJoint.c in Sources */,
-				A96C045018BD338A003E8F91 /* ObjectiveChipmunk.m in Sources */,
 				A92B41DF18BE25A70026B00F /* cpSpaceHash.c in Sources */,
 				A92B41CC18BE25A70026B00F /* cpGearJoint.c in Sources */,
 				A92B41D418BE25A70026B00F /* cpArbiter.c in Sources */,
@@ -1302,17 +1254,6 @@
 			targetProxy = A96C04E118BD3B60003E8F91 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
-
-/* Begin PBXVariantGroup section */
-		A96C046018BD338B003E8F91 /* InfoPlist.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				A96C046118BD338B003E8F91 /* en */,
-			);
-			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		A96C046518BD338B003E8F91 /* Debug */ = {
