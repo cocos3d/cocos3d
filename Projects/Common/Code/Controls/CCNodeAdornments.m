@@ -62,7 +62,7 @@
 
 +(id) adornment { return [[self alloc] init]; }
 
--(id) initWithActionDuration: (ccTime) aDuration {
+-(id) initWithActionDuration: (CCTime) aDuration {
 	if( (self = [super init]) ) {
 		actionDuration = aDuration;
 		self.zOrder = kAdornmentOverZOrder;
@@ -70,7 +70,7 @@
 	return self;
 }
 
-+(id) adornmentWithActionDuration: (ccTime) aDuration {
++(id) adornmentWithActionDuration: (CCTime) aDuration {
 	return [[self alloc] initWithActionDuration: aDuration];
 }
 
@@ -88,8 +88,7 @@
 
 @synthesize peakOpacity, adornmentNode;
 
-
--(id) initWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode peakOpacity: (GLubyte) opacity fadeDuration: (ccTime) aDuration {
+-(id) initWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode peakOpacity: (GLubyte) opacity fadeDuration: (CCTime) aDuration {
 	CC3Assert(aNode, @"CCNodeAdornment node must not be nil");
 	if( (self = [super initWithActionDuration: aDuration]) ) {
 		peakOpacity = opacity;
@@ -102,8 +101,8 @@
 	return self;
 }
 
-+(id) adornmentWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode peakOpacity: (GLubyte) opacity fadeDuration: (ccTime) aDuration {
-	return [[self alloc] initWithAdornmentNode: aNode peakOpacity: opacity fadeDuration: (ccTime) aDuration];
++(id) adornmentWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode peakOpacity: (GLubyte) opacity fadeDuration: (CCTime) aDuration {
+	return [[self alloc] initWithAdornmentNode: aNode peakOpacity: opacity fadeDuration: (CCTime) aDuration];
 }
 
 -(id) initWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode peakOpacity: (GLubyte) opacity {
@@ -162,7 +161,7 @@
 
 @synthesize activatedScale;
 
--(id) initToScaleBy: (CGSize) aScale scaleDuration: (ccTime) aDuration {
+-(id) initToScaleBy: (CGSize) aScale scaleDuration: (CCTime) aDuration {
 	if( (self = [super init]) ) {
 		self.actionDuration = aDuration;
 		activatedScale = aScale;
@@ -170,7 +169,7 @@
 	return self;
 }
 
-+(id) adornmentToScaleBy: (CGSize) aScale scaleDuration: (ccTime) aDuration {
++(id) adornmentToScaleBy: (CGSize) aScale scaleDuration: (CCTime) aDuration {
 	return [[self alloc] initToScaleBy: aScale scaleDuration: aDuration];
 }
 
@@ -182,11 +181,11 @@
 	return [[self alloc] initToScaleBy: aScale];
 }
 
--(id) initToScaleUniformlyBy: (float) aScale scaleDuration: (ccTime) aDuration {
+-(id) initToScaleUniformlyBy: (float) aScale scaleDuration: (CCTime) aDuration {
 	return [self initToScaleBy: CGSizeMake(aScale, aScale) scaleDuration: aDuration];
 }
 
-+(id) adornmentToScaleUniformlyBy: (float) aScale scaleDuration: (ccTime) aDuration {
++(id) adornmentToScaleUniformlyBy: (float) aScale scaleDuration: (CCTime) aDuration {
 	return [[self alloc] initToScaleUniformlyBy: aScale scaleDuration: aDuration];
 }
 

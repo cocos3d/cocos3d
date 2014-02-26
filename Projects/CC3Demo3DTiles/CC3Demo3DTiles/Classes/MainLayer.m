@@ -335,7 +335,7 @@
 
 		// Create the CC3Animate action to run the animation. The duration is randomized so
 		// that when multiple dragons are visible, they are not all flapping in unison.
-		ccTime flapTime = CC3RandomFloatBetween(1.0, 2.0);
+		CCTime flapTime = CC3RandomFloatBetween(1.0, 2.0);
 		CC3Animate* flap = [CC3Animate actionWithDuration: flapTime onTrack: _flapTrack];
 		[aNode runAction: [CCRepeatForever actionWithAction: flap]];
 	}
@@ -371,7 +371,7 @@
 
 #pragma mark Updating
 
--(void) update: (ccTime)dt {
+-(void) update: (CCTime)dt {
 	for (CC3Layer* tile in _tiles) [tile update: dt];
 }
 

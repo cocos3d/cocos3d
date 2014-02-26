@@ -39,10 +39,10 @@
 
 
 /** Default value of the minUpdateInterval property. */
-static const ccTime kCC3DefaultMinimumUpdateInterval = 0.0f;
+static const CCTime kCC3DefaultMinimumUpdateInterval = 0.0f;
 
 /** Default value of the maxUpdateInterval property. */
-static const ccTime kCC3DefaultMaximumUpdateInterval = (1.0f / 15.0f);
+static const CCTime kCC3DefaultMaximumUpdateInterval = (1.0f / 15.0f);
 
 /** Default color for the ambient scene light. */
 static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1.0f };
@@ -245,9 +245,9 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 	ccColor4F _ambientLight;
 	NSTimeInterval _timeAtOpen;
 	NSTimeInterval _elapsedTimeSinceOpened;
-	ccTime _minUpdateInterval;
-	ccTime _maxUpdateInterval;
-	ccTime _deltaFrameTime;
+	CCTime _minUpdateInterval;
+	CCTime _maxUpdateInterval;
+	CCTime _deltaFrameTime;
 	BOOL _shouldDisplayPickingRender : 1;
 }
 
@@ -593,7 +593,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * The behaviour described here does not apply to nodes controlled by CCActionIntervals,
  * which are not affected by the time between updates, or the value of this property.
  */
-@property(nonatomic, assign) ccTime minUpdateInterval;
+@property(nonatomic, assign) CCTime minUpdateInterval;
 
 /**
  * If the value of this property is greater than zero, it will be used as the upper limit
@@ -615,7 +615,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * The behaviour described here does not apply to nodes controlled by CCActionIntervals,
  * which are not affected by the time between updates, or the value of this property.
  */
-@property(nonatomic, assign) ccTime maxUpdateInterval;
+@property(nonatomic, assign) CCTime maxUpdateInterval;
 
 /**
  * This method is invoked periodically when the components in the CC3Scene are to be updated.
@@ -652,7 +652,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * This method is invoked automatically at each scheduled update. Usually, the application
  * never needs to invoke this method directly.
  */
--(void) updateScene: (ccTime) dt;
+-(void) updateScene: (CCTime) dt;
 
 /**
  * Invokes the updateScene: method with the value of the minUpdateInterval property.
@@ -671,7 +671,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 -(void) updateScene;
 
 /** The delta time from the most recent invocation of the updateScene: method. */
-@property(nonatomic, readonly) ccTime deltaFrameTime;
+@property(nonatomic, readonly) CCTime deltaFrameTime;
 
 /** 
  * The elapsed real-time, measured in seconds, since this scene was last opened.

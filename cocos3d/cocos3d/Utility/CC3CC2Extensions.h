@@ -33,11 +33,29 @@
 /* Base library of extensions to cocos2d to support cocos3d. */
 
 #import "CC3OSExtensions.h"
+#import "CCTextureCache.h"
 
+#if !(CC3_CC2_1 || CC3_CC2_2)
+#	import "CCNode_Private.h"
+#	import "CCDirector_Private.h"
+#	import "CCTexture_Private.h"
+#endif
 
 #pragma mark -
 #pragma mark CCGLView & CC3GLView
 
+// Backwards compatibility to renamed Cocos2D entities
+#if (CC3_CC2_1 || CC3_CC2_2)
+typedef ccTime CCTime;
+#define CCTexture CCTexture2D
+#define viewSizeInPixels winSizeInPixels
+#endif
+
+#if !(CC3_CC2_1 || CC3_CC2_2)
+@protocol CCRGBAProtocol <NSObject>
+@end
+#define CCLayer CCNode
+#endif
 
 #if CC3_IOS
 
@@ -75,21 +93,15 @@
 #endif
 
 /** Draw calls per frame are tracked as of cocos2d 2.x. */
-#if CC3_CC2_2
-#	define CC3GLDraws()		((GLuint)__ccNumberOfDraws)
-#endif
 #if CC3_CC2_1
 #	define CC3GLDraws()		0
 #	define CC_INCREMENT_GL_DRAWS(__n__)
+#else
+#	define CC3GLDraws()		((GLuint)__ccNumberOfDraws)
 #endif
 
 
-#if !CC3_IOS
-
-#pragma mark -
-#pragma mark Extensions for non-IOS environments
-
-/** Added for iOS functionality in non-iOS environment. */
+#if !CC3_IOS || !((CC3_CC2_1 || CC3_CC2_2))
 enum {
 	kCCTouchBegan,
 	kCCTouchMoved,
@@ -98,6 +110,14 @@ enum {
 	
 	kCCTouchMax,
 };
+#endif	// !CC3_IOS || !((CC3_CC2_1 || CC3_CC2_2))
+
+#if !CC3_IOS
+
+#pragma mark -
+#pragma mark Extensions for non-IOS environments
+
+/** Added for iOS functionality in non-iOS environment. */
 
 /** Add stub class for iOS functionality in non-iOS environment. */
 @interface CCTouchDispatcher : NSObject
@@ -132,13 +152,13 @@ enum {
  * Initializes this instance to change the contentSize property of the target to the specified
  * size, within the specified elapsed duration.
  */
--(id) initWithDuration: (ccTime) dur sizeTo: (CGSize) endSize;
+-(id) initWithDuration: (CCTime) dur sizeTo: (CGSize) endSize;
 
 /**
  * Allocates and initializes an autoreleased instance to change the contentSize property of
  * the target to the specified size, within the specified elapsed duration.
  */
-+(id) actionWithDuration: (ccTime) dur sizeTo: (CGSize) endSize;
++(id) actionWithDuration: (CCTime) dur sizeTo: (CGSize) endSize;
 
 @end
 
@@ -150,6 +170,11 @@ enum {
 /** Extension category to support cocos3d functionality. */
 @interface CCNode (CC3)
 
+#if (CC3_CC2_1 || CC3_CC2_2)
+/** Returns YES if the node is added to an active scene and neither it nor any of it's ancestors is paused. */
+@property(nonatomic,readonly) BOOL isRunningInActiveScene;
+#endif	// (CC3_CC2_1 || CC3_CC2_2)
+	
 #if CC3_CC2_2
 /** cocos2d 2.x compatibility with pixel-based sizing. */
 @property (nonatomic, readonly) CGSize contentSizeInPixels;
@@ -289,6 +314,8 @@ enum {
 @end
 
 
+#if (CC3_CC2_1 || CC3_CC2_2)
+
 #pragma mark -
 #pragma mark CCLayer extension
 
@@ -350,15 +377,17 @@ enum {
 #endif
 @end
 
+#endif	// (CC3_CC2_1 || CC3_CC2_2)
+
 
 #pragma mark -
-#pragma mark CCTexture2D extension
+#pragma mark CCTexture extension
 
 /** Extension category to support cocos3d functionality. */
-@interface CCTexture2D (CC3)
+@interface CCTexture (CC3)
 
 /**
- * If a CCTexture2D with the specified name does not already exist in the CCTextureCache,
+ * If a CCTexture with the specified name does not already exist in the CCTextureCache,
  * this texture is added to the CCTextureCache under that name.
  *
  * If a texture already exists in the cache under the specified name, or if the specified
@@ -382,7 +411,7 @@ enum {
  * If a texture already exists in this cache under the specified name, or if either the 
  * specified texture or specified name is nil, the texture is not added to the cache.
  */
--(void) addTexture: (CCTexture2D*) tex2D named: (NSString*) texName;
+-(void) addTexture: (CCTexture*) tex2D named: (NSString*) texName;
 
 @end
 
@@ -397,10 +426,10 @@ enum {
 @property(nonatomic, retain) CCGLView* ccGLView;
 
 /** Returns the time interval in seconds between the current render frame and the previous frame. */
--(ccTime) frameInterval;
+-(CCTime) frameInterval;
 
 /** Returns the current rendering perfromance in average frames per second. */
--(ccTime) frameRate;
+-(CCTime) frameRate;
 
 /** Returns whether this director has a CCScene either running or queued up. */
 -(BOOL) hasScene;

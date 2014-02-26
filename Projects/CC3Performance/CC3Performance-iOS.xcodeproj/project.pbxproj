@@ -54,6 +54,9 @@
 		A903C08418772DD100BDE9C1 /* CC3Texturable.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A903C05618772DD100BDE9C1 /* CC3Texturable.vsh */; };
 		A903C08518772DD100BDE9C1 /* CC3TexturableBones.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A903C05718772DD100BDE9C1 /* CC3TexturableBones.vsh */; };
 		A903C08618772DD100BDE9C1 /* CC3TexturableRigidBones.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A903C05818772DD100BDE9C1 /* CC3TexturableRigidBones.vsh */; };
+		A92B422A18BE3E960026B00F /* CCNodeAdornments.m in Sources */ = {isa = PBXBuildFile; fileRef = A92B422518BE3E960026B00F /* CCNodeAdornments.m */; };
+		A92B422B18BE3E960026B00F /* CCNodeExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = A92B422718BE3E960026B00F /* CCNodeExtensions.m */; };
+		A92B422C18BE3E960026B00F /* Joystick.m in Sources */ = {isa = PBXBuildFile; fileRef = A92B422918BE3E960026B00F /* Joystick.m */; };
 		A92DA7F71427B7870051AFFA /* ArrowUpButton48x48.png in Resources */ = {isa = PBXBuildFile; fileRef = A92DA7D41427B7870051AFFA /* ArrowUpButton48x48.png */; };
 		A92DA7F91427B7870051AFFA /* ButtonRing48x48.png in Resources */ = {isa = PBXBuildFile; fileRef = A92DA7D61427B7870051AFFA /* ButtonRing48x48.png */; };
 		A92DA7FA1427B7870051AFFA /* cocos3dMascot.png in Resources */ = {isa = PBXBuildFile; fileRef = A92DA7D71427B7870051AFFA /* cocos3dMascot.png */; };
@@ -93,9 +96,6 @@
 		A94EEA6717F60CAD005A43E7 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = A94EEA6317F60CAD005A43E7 /* Default.png */; };
 		A94EEA7417F60DF6005A43E7 /* libcocos2d-library-iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A94EEA7317F60DD3005A43E7 /* libcocos2d-library-iOS.a */; };
 		A94EEA7517F60DFA005A43E7 /* libcocos3d-library-iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A94EEA6D17F60DC4005A43E7 /* libcocos3d-library-iOS.a */; };
-		A94EEA7D17F60E2D005A43E7 /* CCNodeAdornments.m in Sources */ = {isa = PBXBuildFile; fileRef = A94EEA7817F60E2D005A43E7 /* CCNodeAdornments.m */; };
-		A94EEA7E17F60E2D005A43E7 /* CCNodeExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = A94EEA7A17F60E2D005A43E7 /* CCNodeExtensions.m */; };
-		A94EEA7F17F60E2D005A43E7 /* Joystick.m in Sources */ = {isa = PBXBuildFile; fileRef = A94EEA7C17F60E2D005A43E7 /* Joystick.m */; };
 		A94EEA9117F77E41005A43E7 /* Dragon-diffuse.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A94EEA8B17F77E41005A43E7 /* Dragon-diffuse.jpg */; };
 		A94EEA9217F77E41005A43E7 /* Dragon-eye.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A94EEA8C17F77E41005A43E7 /* Dragon-eye.jpg */; };
 		A94EEA9317F77E41005A43E7 /* Dragon-normals.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A94EEA8D17F77E41005A43E7 /* Dragon-normals.jpg */; };
@@ -119,6 +119,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		A92B422118BE3E8E0026B00F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A94EEA6E17F60DD2005A43E7 /* cocos2d-library-iOS.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = A96C044818BD338A003E8F91;
+			remoteInfo = ObjectiveChipmunk;
+		};
 		A94EEA6C17F60DC4005A43E7 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = A94EEA6817F60DC4005A43E7 /* cocos3d-library-iOS.xcodeproj */;
@@ -198,6 +205,12 @@
 		A903C05618772DD100BDE9C1 /* CC3Texturable.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3Texturable.vsh; sourceTree = "<group>"; };
 		A903C05718772DD100BDE9C1 /* CC3TexturableBones.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3TexturableBones.vsh; sourceTree = "<group>"; };
 		A903C05818772DD100BDE9C1 /* CC3TexturableRigidBones.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3TexturableRigidBones.vsh; sourceTree = "<group>"; };
+		A92B422418BE3E960026B00F /* CCNodeAdornments.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCNodeAdornments.h; sourceTree = "<group>"; };
+		A92B422518BE3E960026B00F /* CCNodeAdornments.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CCNodeAdornments.m; sourceTree = "<group>"; };
+		A92B422618BE3E960026B00F /* CCNodeExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCNodeExtensions.h; sourceTree = "<group>"; };
+		A92B422718BE3E960026B00F /* CCNodeExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CCNodeExtensions.m; sourceTree = "<group>"; };
+		A92B422818BE3E960026B00F /* Joystick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Joystick.h; sourceTree = "<group>"; };
+		A92B422918BE3E960026B00F /* Joystick.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Joystick.m; sourceTree = "<group>"; };
 		A92DA7D41427B7870051AFFA /* ArrowUpButton48x48.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ArrowUpButton48x48.png; sourceTree = "<group>"; };
 		A92DA7D61427B7870051AFFA /* ButtonRing48x48.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ButtonRing48x48.png; sourceTree = "<group>"; };
 		A92DA7D71427B7870051AFFA /* cocos3dMascot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cocos3dMascot.png; sourceTree = "<group>"; };
@@ -242,12 +255,6 @@
 		A94EEA6317F60CAD005A43E7 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
 		A94EEA6817F60DC4005A43E7 /* cocos3d-library-iOS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "cocos3d-library-iOS.xcodeproj"; path = "../cocos3d-library/cocos3d-library-iOS.xcodeproj"; sourceTree = "<group>"; };
 		A94EEA6E17F60DD2005A43E7 /* cocos2d-library-iOS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "cocos2d-library-iOS.xcodeproj"; path = "../cocos2d-library/cocos2d-library-iOS.xcodeproj"; sourceTree = "<group>"; };
-		A94EEA7717F60E2D005A43E7 /* CCNodeAdornments.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCNodeAdornments.h; sourceTree = "<group>"; };
-		A94EEA7817F60E2D005A43E7 /* CCNodeAdornments.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CCNodeAdornments.m; sourceTree = "<group>"; };
-		A94EEA7917F60E2D005A43E7 /* CCNodeExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCNodeExtensions.h; sourceTree = "<group>"; };
-		A94EEA7A17F60E2D005A43E7 /* CCNodeExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CCNodeExtensions.m; sourceTree = "<group>"; };
-		A94EEA7B17F60E2D005A43E7 /* Joystick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Joystick.h; sourceTree = "<group>"; };
-		A94EEA7C17F60E2D005A43E7 /* Joystick.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Joystick.m; sourceTree = "<group>"; };
 		A94EEA8B17F77E41005A43E7 /* Dragon-diffuse.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "Dragon-diffuse.jpg"; sourceTree = "<group>"; };
 		A94EEA8C17F77E41005A43E7 /* Dragon-eye.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "Dragon-eye.jpg"; sourceTree = "<group>"; };
 		A94EEA8D17F77E41005A43E7 /* Dragon-normals.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "Dragon-normals.jpg"; sourceTree = "<group>"; };
@@ -417,6 +424,20 @@
 			path = VertexShaders;
 			sourceTree = "<group>";
 		};
+		A92B422318BE3E960026B00F /* Controls */ = {
+			isa = PBXGroup;
+			children = (
+				A92B422418BE3E960026B00F /* CCNodeAdornments.h */,
+				A92B422518BE3E960026B00F /* CCNodeAdornments.m */,
+				A92B422618BE3E960026B00F /* CCNodeExtensions.h */,
+				A92B422718BE3E960026B00F /* CCNodeExtensions.m */,
+				A92B422818BE3E960026B00F /* Joystick.h */,
+				A92B422918BE3E960026B00F /* Joystick.m */,
+			);
+			name = Controls;
+			path = ../../../Common/Code/Controls;
+			sourceTree = "<group>";
+		};
 		A92DA7D21427B7870051AFFA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
@@ -476,9 +497,9 @@
 				A947372B140E5983006F410C /* CC3PerformanceLayer.m */,
 				A947372C140E5983006F410C /* CC3PerformanceScene.h */,
 				A947372D140E5983006F410C /* CC3PerformanceScene.m */,
-				A94EEA7617F60E2D005A43E7 /* Controls */,
 				A9473735140E5983006F410C /* NodeGrid.h */,
 				A9473736140E5983006F410C /* NodeGrid.m */,
+				A92B422318BE3E960026B00F /* Controls */,
 			);
 			name = Classes;
 			path = CC3Performance/Classes;
@@ -528,21 +549,9 @@
 			isa = PBXGroup;
 			children = (
 				A94EEA7317F60DD3005A43E7 /* libcocos2d-library-iOS.a */,
+				A92B422218BE3E8E0026B00F /* libObjectiveChipmunk.a */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		A94EEA7617F60E2D005A43E7 /* Controls */ = {
-			isa = PBXGroup;
-			children = (
-				A94EEA7717F60E2D005A43E7 /* CCNodeAdornments.h */,
-				A94EEA7817F60E2D005A43E7 /* CCNodeAdornments.m */,
-				A94EEA7917F60E2D005A43E7 /* CCNodeExtensions.h */,
-				A94EEA7A17F60E2D005A43E7 /* CCNodeExtensions.m */,
-				A94EEA7B17F60E2D005A43E7 /* Joystick.h */,
-				A94EEA7C17F60E2D005A43E7 /* Joystick.m */,
-			);
-			path = Controls;
 			sourceTree = "<group>";
 		};
 		A94EEA8A17F77E41005A43E7 /* Dragon */ = {
@@ -623,6 +632,13 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
+		A92B422218BE3E8E0026B00F /* libObjectiveChipmunk.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libObjectiveChipmunk.a;
+			remoteRef = A92B422118BE3E8E0026B00F /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		A94EEA6D17F60DC4005A43E7 /* libcocos3d-library-iOS.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -745,12 +761,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A94EEA7D17F60E2D005A43E7 /* CCNodeAdornments.m in Sources */,
-				A94EEA7E17F60E2D005A43E7 /* CCNodeExtensions.m in Sources */,
+				A92B422A18BE3E960026B00F /* CCNodeAdornments.m in Sources */,
+				A92B422B18BE3E960026B00F /* CCNodeExtensions.m in Sources */,
 				A946374518898D530097E355 /* CC3PerformanceAppDelegate.m in Sources */,
 				A947374C140E5983006F410C /* CC3PerformanceLayer.m in Sources */,
 				A947374D140E5983006F410C /* CC3PerformanceScene.m in Sources */,
-				A94EEA7F17F60E2D005A43E7 /* Joystick.m in Sources */,
+				A92B422C18BE3E960026B00F /* Joystick.m in Sources */,
 				A946374818898D530097E355 /* main.m in Sources */,
 				A9473751140E5983006F410C /* NodeGrid.m in Sources */,
 			);
@@ -780,7 +796,6 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = "CC3Performance/iOS Support/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				PRODUCT_NAME = CC3Performance;
 				PROVISIONING_PROFILE = "";
 			};
@@ -794,7 +809,6 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = "CC3Performance/iOS Support/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				PRODUCT_NAME = CC3Performance;
 				PROVISIONING_PROFILE = "";
 			};
@@ -843,7 +857,7 @@
 					"../../cocos3d/**",
 					"../../cocos2d/**",
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -893,7 +907,7 @@
 					"../../cocos3d/**",
 					"../../cocos2d/**",
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-lz",

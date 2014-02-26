@@ -310,7 +310,7 @@
 
 
 /** Update the location and direction of looking of the 3D camera */
--(void) updateCameraFromControls: (ccTime) dt {
+-(void) updateCameraFromControls: (CCTime) dt {
 	
 	CC3Camera* cam = self.activeCamera;
 	
@@ -402,7 +402,7 @@
  */
 -(void) processBeforeChildren: (CC3Node*) aNode {
 	if (self.shouldAnimateNodes && [self nodeIsFromTemplate: aNode] && !aNode.containsAnimation ) {
-		ccTime dt = self.deltaTime;
+		CCTime dt = self.deltaTime;
 		GLfloat direction = SIGN((GLfloat)(aNode.tag % 2) - 0.5);
 		GLfloat magnitude = (GLfloat)(aNode.tag % 8) + 4;
 		CC3Vector deltaRot = cc3v(direction * magnitude * 5.0 * dt,

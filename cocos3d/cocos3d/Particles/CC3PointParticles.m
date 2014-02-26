@@ -411,8 +411,8 @@ static GLfloat _deviceScaleFactor = 0.0f;
  */
 +(GLfloat) deviceScaleFactor {
 	if (_deviceScaleFactor == 0.0f) {
-		CGSize winSz = [[CCDirector sharedDirector] winSizeInPixels];
-		_deviceScaleFactor = MAX(winSz.height, winSz.width) / kCC3DeviceScaleFactorBase;
+		CGSize viewSize = CCDirector.sharedDirector.viewSizeInPixels;
+		_deviceScaleFactor = MAX(viewSize.height, viewSize.width) / kCC3DeviceScaleFactorBase;
 	}
 	return _deviceScaleFactor;
 }
@@ -449,7 +449,7 @@ static GLfloat _deviceScaleFactor = 0.0f;
 
 /** Re-declaration of deprecated methods to suppress compiler warnings within this class. */
 @protocol CC3PointParticleDeprecated
--(void) update: (ccTime) dt;
+-(void) update: (CCTime) dt;
 @end
 
 @implementation CC3PointParticle
@@ -518,7 +518,7 @@ static GLfloat _deviceScaleFactor = 0.0f;
 -(void) setIndex: (GLuint) anIdx { self.particleIndex = anIdx; }
 
 // Deprecated
--(void) update: (ccTime) dt {}
+-(void) update: (CCTime) dt {}
 
 -(void) updateBeforeTransform: (CC3NodeUpdatingVisitor*) visitor {
 	[(id<CC3PointParticleDeprecated>)self update: visitor.deltaTime];

@@ -30,7 +30,7 @@
 /** @file */	// Doxygen marker
 
 #import <Foundation/Foundation.h>
-#import "cocos2d.h"
+#import "CC3CC2Extensions.h"
 
 /**
  * Constants that can be used to set the Z-Order of an adornment
@@ -93,7 +93,7 @@
  * The implementation of activate and deactivate in this abstract class do nothing.
  */
 @interface CCNodeAdornmentBase : CCNode<CCNodeAdornmentProtocol> {
-	ccTime actionDuration;
+	CCTime actionDuration;
 }
 
 /**
@@ -110,7 +110,7 @@
  * order to animate the display or reversion of the adornment. The duration of these
  * actions is controlled by the value of this property.
  */
-@property(nonatomic, assign) ccTime actionDuration;
+@property(nonatomic, assign) CCTime actionDuration;
 
 /** Initializes this instance with a value of zero for the actionDuration property. */
 -(id) init;
@@ -122,13 +122,13 @@
 +(id) adornment;
 
 /** Initializes this instance with the specified value for the actionDuration property. */
--(id) initWithActionDuration: (ccTime) aDuration;
+-(id) initWithActionDuration: (CCTime) aDuration;
 
 /**
  * Allocates and initializes an autoreleased instance with the specified value
  * for the actionDuration property.
  */
-+(id) adornmentWithActionDuration: (ccTime) aDuration;
++(id) adornmentWithActionDuration: (CCTime) aDuration;
 
 
 @end
@@ -178,14 +178,14 @@
  * when activated, to fade the adornmentNode in from fully transparent up to the specified
  * opacity, over the specified duration.
  */
--(id) initWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode peakOpacity: (GLubyte) opacity fadeDuration: (ccTime) aDuration;
+-(id) initWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode peakOpacity: (GLubyte) opacity fadeDuration: (CCTime) aDuration;
 
 /**
  * Allocates and initializes an autoreleased instance to use the specified CCNode
  * as the visual adornmentNode and, when activated, to fade the adornmentNode in
  * from fully transparent up to the specified opacity, over the specified duration.
  */
-+(id) adornmentWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode peakOpacity: (GLubyte) opacity fadeDuration: (ccTime) aDuration;
++(id) adornmentWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode peakOpacity: (GLubyte) opacity fadeDuration: (CCTime) aDuration;
 
 /**
  * Initializes this instance to use the specified CCNode as the visual adornmentNode and,
@@ -248,14 +248,14 @@
  * the specified duration. The width and height scaling components may be set to
  * different values to cause non-uniform scaling.
  */
--(id) initToScaleBy: (CGSize) aScale scaleDuration: (ccTime) aDuration;
+-(id) initToScaleBy: (CGSize) aScale scaleDuration: (CCTime) aDuration;
 
 /**
  * Allocates and initializes an autoreleased instance to scale the adorned CCNode by
  * the specified factor over the specified duration. The width and height scaling
  * components may be set to different values to cause non-uniform scaling.
  */
-+(id) adornmentToScaleBy: (CGSize) aScale scaleDuration: (ccTime) aDuration;
++(id) adornmentToScaleBy: (CGSize) aScale scaleDuration: (CCTime) aDuration;
 
 /**
  * Initializes this instance to scale the adorned CCNode by the specified factor.
@@ -276,14 +276,14 @@
  * Initializes this instance to scale the adorned CCNode by the specified factor over
  * the specified duration. Scaling will be uniform in both width and height.
  */
--(id) initToScaleUniformlyBy: (float) aScale scaleDuration: (ccTime) aDuration;
+-(id) initToScaleUniformlyBy: (float) aScale scaleDuration: (CCTime) aDuration;
 
 /**
  * Allocates and initializes an autoreleased instance to scale the adorned CCNode by
  * the specified factor over the specified duration. Scaling will be uniform in both
  * width and height.
  */
-+(id) adornmentToScaleUniformlyBy: (float) aScale scaleDuration: (ccTime) aDuration;
++(id) adornmentToScaleUniformlyBy: (float) aScale scaleDuration: (CCTime) aDuration;
 
 /**
  * Initializes this instance to scale the adorned CCNode by the specified factor.

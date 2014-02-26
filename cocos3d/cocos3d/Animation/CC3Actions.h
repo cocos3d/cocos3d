@@ -91,13 +91,13 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * Initializes this instance to transform the target property of the node
  * by the specified vector within the specified time duration.
  */
--(id) initWithDuration: (ccTime) t differenceVector: (CC3Vector) aVector;
+-(id) initWithDuration: (CCTime) t differenceVector: (CC3Vector) aVector;
 
 /**
  * Allocates and initializes an autoreleased instance to transform the target
  * property of the node by the specified vector within the specified time duration.
  */
-+(id) actionWithDuration: (ccTime) t differenceVector: (CC3Vector) aVector;
++(id) actionWithDuration: (CCTime) t differenceVector: (CC3Vector) aVector;
 
 @end
 
@@ -124,13 +124,13 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * Initializes this instance to move the target node
  * by the specified translation amount, within the specified time duration.
  */
--(id) initWithDuration: (ccTime) t moveBy: (CC3Vector) aTranslation;
+-(id) initWithDuration: (CCTime) t moveBy: (CC3Vector) aTranslation;
 
 /**
  * Allocates and initializes an autoreleased instance to move the target node
  * by the specified translation amount, within the specified time duration.
  */
-+(id) actionWithDuration: (ccTime) t moveBy: (CC3Vector) aTranslation;
++(id) actionWithDuration: (CCTime) t moveBy: (CC3Vector) aTranslation;
 
 @end
 
@@ -145,13 +145,13 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * Initializes this instance to rotate the target node
  * by the specified rotation amount, within the specified time duration.
  */
--(id) initWithDuration: (ccTime) t rotateBy: (CC3Vector) aRotation;
+-(id) initWithDuration: (CCTime) t rotateBy: (CC3Vector) aRotation;
 
 /**
  * Allocates and initializes an autoreleased instance to rotate the target node
  * by the specified rotation amount, within the specified time duration.
  */
-+(id) actionWithDuration: (ccTime) t rotateBy: (CC3Vector) aRotation;
++(id) actionWithDuration: (CCTime) t rotateBy: (CC3Vector) aRotation;
 
 @end
 
@@ -168,25 +168,25 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * Initializes this instance to scale the target node
  * by the specified scale factor, within the specified time duration.
  */
--(id) initWithDuration: (ccTime) t scaleBy: (CC3Vector) aScale;
+-(id) initWithDuration: (CCTime) t scaleBy: (CC3Vector) aScale;
 
 /**
  * Allocates and initializes an autoreleased instance to scale the target node
  * by the specified scale factor, within the specified time duration.
  */
-+(id) actionWithDuration: (ccTime) t scaleBy: (CC3Vector) aScale;
++(id) actionWithDuration: (CCTime) t scaleBy: (CC3Vector) aScale;
 
 /**
  * Initializes this instance to scale the target node uniformly in all dimensions 
  * by the specified scale factor, within the specified time duration.
  */
--(id) initWithDuration: (ccTime) t scaleUniformlyBy: (GLfloat) aScale;
+-(id) initWithDuration: (CCTime) t scaleUniformlyBy: (GLfloat) aScale;
 
 /**
  * Allocates and initializes an autoreleased instance to scale the target node uniformly
  * in all dimensions by the specified scale factor, within the specified time duration.
  */
-+(id) actionWithDuration: (ccTime) t scaleUniformlyBy: (GLfloat) aScale;
++(id) actionWithDuration: (CCTime) t scaleUniformlyBy: (GLfloat) aScale;
 
 @end
 
@@ -203,33 +203,33 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 	CC3Vector _rotationAxis;
 	CC3Vector _activeRotationAxis;
 	GLfloat _diffAngle;
-	ccTime _prevTime;
+	CCTime _prevTime;
 }
 
 /**
  * Initializes this instance to rotate the target node by the specified angle
  * around the existing rotationAxis of the node, within the specified time duration.
  */
--(id) initWithDuration: (ccTime) t rotateByAngle: (GLfloat) anAngle;
+-(id) initWithDuration: (CCTime) t rotateByAngle: (GLfloat) anAngle;
 
 /**
  * Allocates and initializes an autoreleased instance to rotate the target node
  * by the specified angle around the existing rotationAxis of the node, within
  * the specified time duration.
  */
-+(id) actionWithDuration: (ccTime) t rotateByAngle: (GLfloat) anAngle;
++(id) actionWithDuration: (CCTime) t rotateByAngle: (GLfloat) anAngle;
 
 /**
  * Initializes this instance to rotate the target node by the specified angle
  * around the specified axis, within the specified time duration.
  */
--(id) initWithDuration: (ccTime) t rotateByAngle: (GLfloat) anAngle aroundAxis: (CC3Vector) anAxis;
+-(id) initWithDuration: (CCTime) t rotateByAngle: (GLfloat) anAngle aroundAxis: (CC3Vector) anAxis;
 
 /**
  * Allocates and initializes an autoreleased instance to rotate the target node by
  * the specified angle around the specified axis, within the specified time duration.
  */
-+(id) actionWithDuration: (ccTime) t rotateByAngle: (GLfloat) anAngle aroundAxis: (CC3Vector) anAxis;
++(id) actionWithDuration: (CCTime) t rotateByAngle: (GLfloat) anAngle aroundAxis: (CC3Vector) anAxis;
 
 @end
 
@@ -250,13 +250,13 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * Initializes this instance to transform the target property of the node
  * to the specified vector, within the specified time duration.
  */
--(id) initWithDuration: (ccTime) t endVector: (CC3Vector) aVector;
+-(id) initWithDuration: (CCTime) t endVector: (CC3Vector) aVector;
 
 /**
  * Allocates and initializes an autoreleased instance to transform the target
  * property of the node to the specified vector, within the specified time duration.
  */
-+(id) actionWithDuration: (ccTime) t endVector: (CC3Vector) aVector;
++(id) actionWithDuration: (CCTime) t endVector: (CC3Vector) aVector;
 
 @end
 
@@ -271,13 +271,13 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * Initializes this instance to move the target node
  * to the specified location, within the specified time duration.
  */
--(id) initWithDuration: (ccTime) t moveTo: (CC3Vector) aLocation;
+-(id) initWithDuration: (CCTime) t moveTo: (CC3Vector) aLocation;
 
 /**
  * Allocates and initializes an autoreleased instance to move the target node
  * to the specified location, within the specified time duration.
  */
-+(id) actionWithDuration: (ccTime) t moveTo: (CC3Vector) aLocation;
++(id) actionWithDuration: (CCTime) t moveTo: (CC3Vector) aLocation;
 
 @end
 
@@ -298,13 +298,13 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * Initializes this instance to move the target node
  * to the specified rotation, within the specified time duration.
  */
--(id) initWithDuration: (ccTime) t rotateTo: (CC3Vector) aRotation;
+-(id) initWithDuration: (CCTime) t rotateTo: (CC3Vector) aRotation;
 
 /**
  * Allocates and initializes an autoreleased instance to rotate the target node
  * to the specified rotation, within the specified time duration.
  */
-+(id) actionWithDuration: (ccTime) t rotateTo: (CC3Vector) aRotation;
++(id) actionWithDuration: (CCTime) t rotateTo: (CC3Vector) aRotation;
 
 @end
 
@@ -319,25 +319,25 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * Initializes this instance to scale the target node
  * to the specified scale, within the specified time duration.
  */
--(id) initWithDuration: (ccTime) t scaleTo: (CC3Vector) aScale;
+-(id) initWithDuration: (CCTime) t scaleTo: (CC3Vector) aScale;
 
 /**
  * Allocates and initializes an autoreleased instance to scale the target node
  * to the specified scale, within the specified time duration.
  */
-+(id) actionWithDuration: (ccTime) t scaleTo: (CC3Vector) aScale;
++(id) actionWithDuration: (CCTime) t scaleTo: (CC3Vector) aScale;
 
 /**
  * Initializes this instance to scale the target node uniformly in all
  * dimensions to the specified uniformScale, within the specified time duration.
  */
--(id) initWithDuration: (ccTime) t scaleUniformlyTo: (GLfloat) aScale;
+-(id) initWithDuration: (CCTime) t scaleUniformlyTo: (GLfloat) aScale;
 
 /**
  * Allocates and initializes an autoreleased instance to scale the target node uniformly
  * in all dimensions to the specified uniformScale, within the specified time duration.
  */
-+(id) actionWithDuration: (ccTime) t scaleUniformlyTo: (GLfloat) aScale;
++(id) actionWithDuration: (CCTime) t scaleUniformlyTo: (GLfloat) aScale;
 
 @end
 
@@ -367,13 +367,13 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * Initializes this instance to move the target node to the
  * specified rotation angle, within the specified time duration.
  */
--(id) initWithDuration: (ccTime) t rotateToAngle: (GLfloat) anAngle;
+-(id) initWithDuration: (CCTime) t rotateToAngle: (GLfloat) anAngle;
 
 /**
  * Allocates and initializes an autoreleased instance to rotate the target node
  * to the specified rotation angle, within the specified time duration.
  */
-+(id) actionWithDuration: (ccTime) t rotateToAngle: (GLfloat) anAngle;
++(id) actionWithDuration: (CCTime) t rotateToAngle: (GLfloat) anAngle;
 
 @end
 
@@ -391,13 +391,13 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * Initializes this instance to rotate the target node to look towards
  * the specified dirction. within the specified time duration.
  */
--(id) initWithDuration: (ccTime) t forwardDirection: (CC3Vector) aDirection;
+-(id) initWithDuration: (CCTime) t forwardDirection: (CC3Vector) aDirection;
 
 /**
  * Allocates and initializes an autoreleased instance to rotate the target node
  * to look towards the specified dirction. within the specified time duration.
  */
-+(id) actionWithDuration: (ccTime) t forwardDirection: (CC3Vector) aDirection;
++(id) actionWithDuration: (CCTime) t forwardDirection: (CC3Vector) aDirection;
 
 @end
 
@@ -415,13 +415,13 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * Initializes this instance to rotate the target node to look at
  * the specified location. within the specified time duration.
  */
--(id) initWithDuration: (ccTime) t targetLocation: (CC3Vector) aLocation;
+-(id) initWithDuration: (CCTime) t targetLocation: (CC3Vector) aLocation;
 
 /**
  * Allocates and initializes an autoreleased instance to rotate the target node
  * to look at the specified location. within the specified time duration.
  */
-+(id) actionWithDuration: (ccTime) t targetLocation: (CC3Vector) aLocation;
++(id) actionWithDuration: (CCTime) t targetLocation: (CC3Vector) aLocation;
 
 @end
 
@@ -442,7 +442,7 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * movement by overriding the targetDirection property.
  */
 @interface CC3MoveDirectionallyBy : CCActionInterval <NSCopying> {
-	ccTime _prevTime;
+	CCTime _prevTime;
 	GLfloat	_distance;
 }
 
@@ -457,7 +457,7 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * is also being rotated over time, this action will follow the change in
  * direction of movement of the node.
  */
--(id) initWithDuration: (ccTime) t moveBy: (GLfloat) aDistance;
+-(id) initWithDuration: (CCTime) t moveBy: (GLfloat) aDistance;
 
 /**
  * Allocates and initializes an autoreleased instance  to move the target node
@@ -471,7 +471,7 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * is also being rotated over time, this action will follow the change in
  * direction of movement of the node.
  */
-+(id) actionWithDuration: (ccTime) t moveBy: (GLfloat) aDistance;
++(id) actionWithDuration: (CCTime) t moveBy: (GLfloat) aDistance;
 
 /**
  * The direction of movement.
@@ -565,13 +565,13 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * Initializes this instance to change a color property of the target
  * node to the specified color, within the specified time duration.
  */
--(id) initWithDuration: (ccTime) t colorTo: (ccColor4F) aColor;
+-(id) initWithDuration: (CCTime) t colorTo: (ccColor4F) aColor;
 
 /**
  * Allocates and initializes an autoreleased instance to change a color property
  * of the target node to the specified color, within the specified time duration.
  */
-+(id) actionWithDuration:(ccTime) t colorTo: (ccColor4F) aColor;
++(id) actionWithDuration:(CCTime) t colorTo: (ccColor4F) aColor;
 
 @end
 
@@ -657,25 +657,25 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * Initializes this instance to animate animation track zero on the target node,
  * over the specified time duration.
  */
--(id) initWithDuration: (ccTime) t;
+-(id) initWithDuration: (CCTime) t;
 
 /**
  * Allocates and initializes an autoreleased instance to animate animation track zero
  * on the target node, over the specified time duration.
  */
-+(id) actionWithDuration: (ccTime) t;
++(id) actionWithDuration: (CCTime) t;
 
 /**
  * Initializes this instance to animate the specified animation track on the target node,
  * over the specified time duration.
  */
--(id) initWithDuration: (ccTime) t onTrack: (GLuint) trackID;
+-(id) initWithDuration: (CCTime) t onTrack: (GLuint) trackID;
 
 /**
  * Allocates and initializes an autoreleased instance to animate the specified animation
  * track on the target node, over the specified time duration.
  */
-+(id) actionWithDuration: (ccTime) t onTrack: (GLuint) trackID;
++(id) actionWithDuration: (CCTime) t onTrack: (GLuint) trackID;
 
 /**
  * Allocates and initializes an autoreleased instance to animate animation track zero on the
@@ -693,7 +693,7 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * at relative positions 0.67 and 0.78 respectively within the full animation, setting
  * those two values here will result in an animation containing only the punch.
  */
-+(id) actionWithDuration: (ccTime) t limitFrom: (GLfloat) startOfRange to: (GLfloat) endOfRange;
++(id) actionWithDuration: (CCTime) t limitFrom: (GLfloat) startOfRange to: (GLfloat) endOfRange;
 
 /**
  * Allocates and initializes an autoreleased instance to animate the specified animation track on
@@ -711,7 +711,7 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * at relative positions 0.67 and 0.78 respectively within the full animation, setting
  * those two values here will result in an animation containing only the punch.
  */
-+(id) actionWithDuration: (ccTime) t onTrack: (GLuint) trackID limitFrom: (GLfloat) startOfRange to: (GLfloat) endOfRange;
++(id) actionWithDuration: (CCTime) t onTrack: (GLuint) trackID limitFrom: (GLfloat) startOfRange to: (GLfloat) endOfRange;
 
 /**
  * Wraps this instance in an autoreleased CC3ActionRangeLimit instance that maps the normal
@@ -753,13 +753,13 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * Initializes this instance to fade the animation blending weight of the specified animation
  * track on the target node to the specified value, over the specified time duration.
  */
--(id) initWithDuration: (ccTime) t onTrack: (GLuint) trackID blendingWeight: (GLfloat) blendingWeight;
+-(id) initWithDuration: (CCTime) t onTrack: (GLuint) trackID blendingWeight: (GLfloat) blendingWeight;
 
 /**
  * Allocates and initializes an autoreleased instance to fade the animation blending weight of the
  * specified animation track on the target node to the specified value, over the specified time duration.
  */
-+(id) actionWithDuration: (ccTime) t onTrack: (GLuint) trackID blendingWeight: (GLfloat) blendingWeight;
++(id) actionWithDuration: (CCTime) t onTrack: (GLuint) trackID blendingWeight: (GLfloat) blendingWeight;
 
 @end
 
@@ -785,7 +785,7 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * Initializes this instance to fade from the specified track to the specified track, over
  * the specified time duration, and leaving the final track with a blending weight of one.
  */
--(id) initWithDuration: (ccTime) t
+-(id) initWithDuration: (CCTime) t
 			 fromTrack: (GLuint) fromTrackID
 			   toTrack: (GLuint) toTrackID;
 
@@ -793,7 +793,7 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * Initializes this instance to fade from the specified track to the specified track, over the
  * specified time duration, and leaving the final track with the specified blending weight.
  */
--(id) initWithDuration: (ccTime) t
+-(id) initWithDuration: (CCTime) t
 			 fromTrack: (GLuint) fromTrackID
 			   toTrack: (GLuint) toTrackID
 	withBlendingWeight: (GLfloat) toBlendingWeight;
@@ -803,7 +803,7 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * the specified track, over the specified time duration, and leaving the final track with
  *  a blending weight of one.
  */
-+(id) actionWithDuration: (ccTime) t
++(id) actionWithDuration: (CCTime) t
 			   fromTrack: (GLuint) fromTrackID
 				 toTrack: (GLuint) toTrackID;
 
@@ -812,7 +812,7 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * the specified track, over the specified time duration, and leaving the final track with
  * the specified blending weight.
  */
-+(id) actionWithDuration: (ccTime) t
++(id) actionWithDuration: (CCTime) t
 			   fromTrack: (GLuint) fromTrackID
 				 toTrack: (GLuint) toTrackID
 	  withBlendingWeight: (GLfloat) toBlendingWeight;

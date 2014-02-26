@@ -455,11 +455,11 @@
 				checkScene: checkScene];
 }
 
--(void) moveWithDuration: (ccTime) t toShowAllOf: (CC3Node*) aNode {
+-(void) moveWithDuration: (CCTime) t toShowAllOf: (CC3Node*) aNode {
 	[self moveWithDuration: t toShowAllOf: aNode withPadding: kCC3DefaultFrustumFitPadding];
 }
 
--(void) moveWithDuration: (ccTime) t
+-(void) moveWithDuration: (CCTime) t
 			 toShowAllOf: (CC3Node*) aNode
 			 withPadding: (GLfloat) padding {
 	[self ensureSceneUpdated: YES];
@@ -472,7 +472,7 @@
 				checkScene: NO];
 }
 
--(void) moveWithDuration: (ccTime) t
+-(void) moveWithDuration: (CCTime) t
 			 toShowAllOf: (CC3Node*) aNode
 		   fromDirection: (CC3Vector) aDirection {
 	[self moveWithDuration: t
@@ -481,7 +481,7 @@
 			   withPadding: kCC3DefaultFrustumFitPadding];
 }
 
--(void) moveWithDuration: (ccTime) t
+-(void) moveWithDuration: (CCTime) t
 			 toShowAllOf: (CC3Node*) aNode
 		   fromDirection: (CC3Vector) aDirection
 			 withPadding: (GLfloat) padding {
@@ -493,7 +493,7 @@
 				checkScene: YES ];
 }
 
--(void) moveWithDuration: (ccTime) t
+-(void) moveWithDuration: (CCTime) t
 		  whileLookingAt: (CC3Vector) targetLoc
 			 toShowAllOf: (CC3Node*) aNode {
 	[self moveWithDuration: t
@@ -502,7 +502,7 @@
 			   withPadding: kCC3DefaultFrustumFitPadding];
 }
 
--(void) moveWithDuration: (ccTime) t
+-(void) moveWithDuration: (CCTime) t
 			 toShowAllOf: (CC3Node*) aNode
 		  whileLookingAt: (CC3Vector) targetLoc
 			 withPadding: (GLfloat) padding {
@@ -516,7 +516,7 @@
 				checkScene: NO];
 }
 
--(void) moveWithDuration: (ccTime) t
+-(void) moveWithDuration: (CCTime) t
 			 toShowAllOf: (CC3Node*) aNode
 		  whileLookingAt: (CC3Vector) targetLoc
 		   fromDirection: (CC3Vector) aDirection {
@@ -527,7 +527,7 @@
 			   withPadding: kCC3DefaultFrustumFitPadding];
 }
 
--(void) moveWithDuration: (ccTime) t
+-(void) moveWithDuration: (CCTime) t
 			 toShowAllOf: (CC3Node*) aNode
 		  whileLookingAt: (CC3Vector) targetLoc
 		   fromDirection: (CC3Vector) aDirection
@@ -540,7 +540,7 @@
 				checkScene: YES ];
 }
 
--(void) moveWithDuration: (ccTime) t
+-(void) moveWithDuration: (CCTime) t
 			 toShowAllOf: (CC3Node*) aNode
 		  whileLookingAt: (CC3Vector) targetLoc
 		   fromDirection: (CC3Vector) aDirection

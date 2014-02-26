@@ -39,7 +39,6 @@
 #import "CC3ModelSampleFactory.h"
 #import "CCLabelTTF.h"
 #import "CGPointExtension.h"
-#import "CCTouchDispatcher.h"
 #import "CC3PODNode.h"
 #import "CC3PODResourceNode.h"
 #import "CC3BoundingVolumes.h"
@@ -562,7 +561,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
  * materialization fading will be applied to the entire node tree. The specified node can even
  * be the entire scene itself.
  */
--(void) configureForScene: (CC3Node*) aNode andMaterializeWithDuration: (ccTime) duration {
+-(void) configureForScene: (CC3Node*) aNode andMaterializeWithDuration: (CCTime) duration {
 	
 	// This scene is quite complex, containing many objects. As the user moves the camera
 	// around the scene, objects move in and out of the camera's field of view. At any time,
@@ -1925,10 +1924,10 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	
 	_isTVOn = NO;		// Indicate TV is displaying test card
 	
-	// Demonstrate the ability to extract a CCTexture2D from a CC3Texture.
-	// For some interesting fun, extract a cocos2d CCTexture2D instance from the texture
+	// Demonstrate the ability to extract a CCTexture from a CC3Texture.
+	// For some interesting fun, extract a cocos2d CCTexture instance from the texture
 	// underpinning the TV surface, and replace the cocos2d label node in the billboard held
-	// by the robot arm with a CCSprite holding the CCTexture2D. The robot arm ends up holding
+	// by the robot arm with a CCSprite holding the CCTexture. The robot arm ends up holding
 	// a smaller version of the TV screen. You have to touch the TV screen to activate it.
 	// Because the TV screen is only updated with new rendered content when the big-screen
 	// TV is viewable by the active camera, the portable TV held by the robot arm will only
@@ -2958,7 +2957,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 }
 
 /** Update the location and direction of looking of the 3D camera */
--(void) updateCameraFromControls: (ccTime) dt {
+-(void) updateCameraFromControls: (CCTime) dt {
 	CC3Camera* cam = self.activeCamera;
 	
 	// Update the location of the player (the camera)
@@ -3290,7 +3289,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	gettimeofday(&now, NULL);
 
 	// Time since last event
-	ccTime dt = (now.tv_sec - _lastTouchEventTime.tv_sec) + (now.tv_usec - _lastTouchEventTime.tv_usec) / 1000000.0f;
+	CCTime dt = (now.tv_sec - _lastTouchEventTime.tv_sec) + (now.tv_usec - _lastTouchEventTime.tv_usec) / 1000000.0f;
 
 	switch (touchType) {
 		case kCCTouchBegan:
@@ -3335,7 +3334,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * To allow freewheeling after the finger is lifted, we set the spin speed and spin axis
  * in the node. We indicate for now that the node is not freewheeling.
  */
--(void) rotate: (SpinningNode*) aNode fromSwipeAt: (CGPoint) touchPoint interval: (ccTime) dt {
+-(void) rotate: (SpinningNode*) aNode fromSwipeAt: (CGPoint) touchPoint interval: (CCTime) dt {
 	
 	CC3Camera* cam = self.activeCamera;
 

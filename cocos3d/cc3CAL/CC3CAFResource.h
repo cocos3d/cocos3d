@@ -42,7 +42,7 @@
  */
 @interface CC3CAFResource : CC3NodesResource {
 	int _nodeCount;
-	ccTime _animationDuration;
+	CCTime _animationDuration;
 	int _fileVersion;
 	int _flags;
 	BOOL _isCompressed : 1;
@@ -60,7 +60,7 @@
 @property(nonatomic, readonly) int flags;
 
 /** Returns the animation duration in seconds. */
-@property(nonatomic, readonly) ccTime animationDuration;
+@property(nonatomic, readonly) CCTime animationDuration;
 
 /**
  * Indicates whether the Y & Z elements of animated locations and quaternions loaded by this

@@ -54,7 +54,7 @@
 		if(!aBool || self.isDeviceCameraAvailable) {
 
 			// Before switching, if the CCNode is running, send it onExit to stop it
-			BOOL nodeRunning = _controlledNode.isRunning;
+			BOOL nodeRunning = _controlledNode.isRunningInActiveScene;
 			if(nodeRunning) [_controlledNode onExit];
 
 			// Let subclasses of this controller know about the pending change

@@ -85,9 +85,9 @@
 
 -(BOOL) isFull { return (_particleCount == _maximumParticleCapacity); }
 
--(ccTime) emissionInterval { return _emissionInterval; }
+-(CCTime) emissionInterval { return _emissionInterval; }
 
--(void) setEmissionInterval: (ccTime) anInterval {
+-(void) setEmissionInterval: (CCTime) anInterval {
 	_emissionInterval = MAX(anInterval, 0.0);		// Force it to non-negative.
 }
 
@@ -168,7 +168,7 @@
 -(void) processUpdateBeforeTransform: (CC3NodeUpdatingVisitor*) visitor {
 	[super processUpdateBeforeTransform: visitor];
 	
-	ccTime dt = visitor.deltaTime;
+	CCTime dt = visitor.deltaTime;
 	LogTrace(@"Updating after %.1f ms: %@", (dt * 1000.0f), self);
 	
 	// If configured to update particles before the node is transformed, do so here.
@@ -204,7 +204,7 @@
 }
 
 /** Template method that checks if its time to quit emitting. */
--(void) checkDuration: (ccTime) dt {
+-(void) checkDuration: (CCTime) dt {
 	if (_isEmitting && (_emissionDuration != kCC3ParticleInfiniteInterval)) {
 		_elapsedTime += dt;
 		if (_elapsedTime >= _emissionDuration) [self pause];
@@ -215,7 +215,7 @@
  * Template method that checks if its time to emit a particle,
  * and if so, invokes the emitParticle method to emit the particle.
  */
--(void) checkEmission: (ccTime) dt {
+-(void) checkEmission: (CCTime) dt {
 	if ( !_isEmitting ) return;
 	_timeSinceEmission += dt;
 	while ( !self.isFull && (_timeSinceEmission >= _emissionInterval) ) {

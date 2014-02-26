@@ -23,6 +23,7 @@ project.xcworkspace/
 
 # cocos2d - use trailing star for symlinks
 cocos2d/*
+cocos2d-chipmunk/*
 
 # Apportable
 .scons*

@@ -74,7 +74,7 @@ typedef enum {
  *   - loading 3D models from a POD file converted from a Collada file created in a 3D editor (Blender)
  *   - assembling nodes into a hierarchical parent-child structual assembly.
  *   - programatic creation of spherical, box and plane meshes using parametric definitions.
- *   - texturing a 3D mesh from a CCTexture2D image
+ *   - texturing a 3D mesh from a CCTexture image
  *   - transparency and alpha-blending
  *   - translucent and transparent textures
  *   - coloring a mesh with a per-vertex color blend

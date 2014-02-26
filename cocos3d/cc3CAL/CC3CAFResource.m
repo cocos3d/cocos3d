@@ -204,7 +204,7 @@ static BOOL _defaultShouldSwapYZ = YES;
 	//		rotation w             4       float
 
 	// Allocate the animation content arrays
-	ccTime* frameTimes = anim.allocateFrameTimes;
+	CCTime* frameTimes = anim.allocateFrameTimes;
 	CC3Vector* locations = anim.allocateLocations;
 	CC3Quaternion* quaternions = anim.allocateQuaternions;
 

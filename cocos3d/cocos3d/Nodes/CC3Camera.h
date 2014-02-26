@@ -805,7 +805,7 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
  * the entire scene, or a particular node, a good place to invoke this method is in
  * the onOpen callback method of your customized CC3Scene.
  */
--(void) moveWithDuration: (ccTime) t toShowAllOf: (CC3Node*) aNode;
+-(void) moveWithDuration: (CCTime) t toShowAllOf: (CC3Node*) aNode;
 
 /**
  * Moves this camera to a location along a line between the center of the specified
@@ -847,7 +847,7 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
  * the entire scene, or a particular node, a good place to invoke this method is in
  * the onOpen callback method of your customized CC3Scene.
  */
--(void) moveWithDuration: (ccTime) t
+-(void) moveWithDuration: (CCTime) t
 			 toShowAllOf: (CC3Node*) aNode
 			 withPadding: (GLfloat) padding;
 
@@ -879,7 +879,7 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
  * contentSize. This is necessary so that the frustum of the camera has been set from
  * the contentSize of the CC3Layer.
  */
--(void) moveWithDuration: (ccTime) t
+-(void) moveWithDuration: (CCTime) t
 			 toShowAllOf: (CC3Node*) aNode
 		   fromDirection: (CC3Vector) aDirection;
 
@@ -918,7 +918,7 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
  * contentSize. This is necessary so that the frustum of the camera has been set from
  * the contentSize of the CC3Layer.
  */
--(void) moveWithDuration: (ccTime) t
+-(void) moveWithDuration: (CCTime) t
 			 toShowAllOf: (CC3Node*) aNode
 		   fromDirection: (CC3Vector) aDirection
 			 withPadding: (GLfloat) padding;
@@ -959,7 +959,7 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
  * the entire scene, or a particular node, a good place to invoke this method is in
  * the onOpen callback method of your customized CC3Scene.
  */
--(void) moveWithDuration: (ccTime) t
+-(void) moveWithDuration: (CCTime) t
 		  whileLookingAt: (CC3Vector) targetLoc
 			 toShowAllOf: (CC3Node*) aNode;
 
@@ -1001,7 +1001,7 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
  * the entire scene, or a particular node, a good place to invoke this method is in
  * the onOpen callback method of your customized CC3Scene.
  */
--(void) moveWithDuration: (ccTime) t
+-(void) moveWithDuration: (CCTime) t
 			 toShowAllOf: (CC3Node*) aNode
 		  whileLookingAt: (CC3Vector) targetLoc
 			 withPadding: (GLfloat) padding;
@@ -1032,7 +1032,7 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
  * contentSize. This is necessary so that the frustum of the camera has been set from
  * the contentSize of the CC3Layer.
  */
--(void) moveWithDuration: (ccTime) t
+-(void) moveWithDuration: (CCTime) t
 			 toShowAllOf: (CC3Node*) aNode
 		  whileLookingAt: (CC3Vector) targetLoc
 		   fromDirection: (CC3Vector) aDirection;
@@ -1070,7 +1070,7 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
  * contentSize. This is necessary so that the frustum of the camera has been set from
  * the contentSize of the CC3Layer.
  */
--(void) moveWithDuration: (ccTime) t
+-(void) moveWithDuration: (CCTime) t
 			 toShowAllOf: (CC3Node*) aNode
 		  whileLookingAt: (CC3Vector) targetLoc
 		   fromDirection: (CC3Vector) aDirection

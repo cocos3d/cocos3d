@@ -53,8 +53,8 @@
 	 _cc3Scene.cc3Layer = nil;					// Detach this layer from old scene.
 
 	 _cc3Scene = aScene;
-	 _cc3Scene.cc3Layer = self;					// Point the scene back here
-	 if (self.isRunning) [self openCC3Scene];	// If already running, open the new scene right away
+	 _cc3Scene.cc3Layer = self;								// Point the scene back here
+	 if (self.isRunningInActiveScene) [self openCC3Scene];	// If already running, open the new scene right away
 }
 
 
@@ -142,7 +142,7 @@
 /** Invoked automatically either from onExit, or if old scene removed and layer is running. */
 -(void) closeCC3Scene { [_cc3Scene close]; }
 
--(void) update: (ccTime)dt { [_cc3Scene updateScene: dt]; }
+-(void) update: (CCTime)dt { [_cc3Scene updateScene: dt]; }
 
 // Lazily initialized
 -(NSArray*) cc3GestureRecognizers {
@@ -186,12 +186,12 @@
 }
 
 -(void) updateViewport {
-	CGSize winSz = CCDirector.sharedDirector.winSizeInPixels;
+	CGSize viewSize = CCDirector.sharedDirector.viewSizeInPixels;
 	CGRect gbb = self.globalBoundingBoxInPixels;
 	
 	// Check whether the viewport covers the full UIView.
 	BOOL isFullView = (CGPointEqualToPoint(gbb.origin, CGPointZero) &&
-					   CGSizeEqualToSize(gbb.size, winSz));
+					   CGSizeEqualToSize(gbb.size, viewSize));
 
 	CC3Camera* cam = self.cc3Scene.activeCamera;
 	cam.viewport = CC3ViewportFromCGRect(gbb);

@@ -69,6 +69,9 @@
 		A924D160171307500061DDA0 /* tex_arm.pvr in Resources */ = {isa = PBXBuildFile; fileRef = A924D15D171307500061DDA0 /* tex_arm.pvr */; };
 		A924D161171307500061DDA0 /* tex_base.bmp in Resources */ = {isa = PBXBuildFile; fileRef = A924D15E171307500061DDA0 /* tex_base.bmp */; };
 		A924D162171307500061DDA0 /* tex_base.pvr in Resources */ = {isa = PBXBuildFile; fileRef = A924D15F171307500061DDA0 /* tex_base.pvr */; };
+		A92B424318BE3ED60026B00F /* CCNodeAdornments.m in Sources */ = {isa = PBXBuildFile; fileRef = A92B423E18BE3ED60026B00F /* CCNodeAdornments.m */; };
+		A92B424418BE3ED60026B00F /* CCNodeExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = A92B424018BE3ED60026B00F /* CCNodeExtensions.m */; };
+		A92B424518BE3ED60026B00F /* Joystick.m in Sources */ = {isa = PBXBuildFile; fileRef = A92B424218BE3ED60026B00F /* Joystick.m */; };
 		A968802D17A72580007FA5F0 /* libcocos2d-library-OSX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A968802817A7251E007FA5F0 /* libcocos2d-library-OSX.a */; };
 		A968802E17A72580007FA5F0 /* libcocos3d-library-OSX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A968802217A72516007FA5F0 /* libcocos3d-library-OSX.a */; };
 		A96E0CCE170DC8060044CA2A /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A96E0CCD170DC8060044CA2A /* QuartzCore.framework */; };
@@ -123,9 +126,6 @@
 		A9742E07170DD72B001FD5A2 /* ZoomButton48x48.png in Resources */ = {isa = PBXBuildFile; fileRef = A9742DD1170DD72B001FD5A2 /* ZoomButton48x48.png */; };
 		A9743101170DD7BF001FD5A2 /* CC3DemoMashUpLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = A97430F1170DD7BF001FD5A2 /* CC3DemoMashUpLayer.m */; };
 		A9743102170DD7BF001FD5A2 /* CC3DemoMashUpScene.m in Sources */ = {isa = PBXBuildFile; fileRef = A97430F3170DD7BF001FD5A2 /* CC3DemoMashUpScene.m */; };
-		A9743103170DD7BF001FD5A2 /* CCNodeAdornments.m in Sources */ = {isa = PBXBuildFile; fileRef = A97430F6170DD7BF001FD5A2 /* CCNodeAdornments.m */; };
-		A9743104170DD7BF001FD5A2 /* CCNodeExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = A97430F8170DD7BF001FD5A2 /* CCNodeExtensions.m */; };
-		A9743105170DD7BF001FD5A2 /* Joystick.m in Sources */ = {isa = PBXBuildFile; fileRef = A97430FA170DD7BF001FD5A2 /* Joystick.m */; };
 		A9743106170DD7BF001FD5A2 /* HUDLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = A97430FC170DD7BF001FD5A2 /* HUDLayer.m */; };
 		A9743107170DD7BF001FD5A2 /* HUDScene.m in Sources */ = {isa = PBXBuildFile; fileRef = A97430FE170DD7BF001FD5A2 /* HUDScene.m */; };
 		A9743108170DD7BF001FD5A2 /* Models.m in Sources */ = {isa = PBXBuildFile; fileRef = A9743100170DD7BF001FD5A2 /* Models.m */; };
@@ -247,6 +247,12 @@
 		A924D15D171307500061DDA0 /* tex_arm.pvr */ = {isa = PBXFileReference; lastKnownFileType = file; name = tex_arm.pvr; path = ../Common/Resources/tex_arm.pvr; sourceTree = "<group>"; };
 		A924D15E171307500061DDA0 /* tex_base.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; name = tex_base.bmp; path = ../Common/Resources/tex_base.bmp; sourceTree = "<group>"; };
 		A924D15F171307500061DDA0 /* tex_base.pvr */ = {isa = PBXFileReference; lastKnownFileType = file; name = tex_base.pvr; path = ../Common/Resources/tex_base.pvr; sourceTree = "<group>"; };
+		A92B423D18BE3ED60026B00F /* CCNodeAdornments.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCNodeAdornments.h; sourceTree = "<group>"; };
+		A92B423E18BE3ED60026B00F /* CCNodeAdornments.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CCNodeAdornments.m; sourceTree = "<group>"; };
+		A92B423F18BE3ED60026B00F /* CCNodeExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCNodeExtensions.h; sourceTree = "<group>"; };
+		A92B424018BE3ED60026B00F /* CCNodeExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CCNodeExtensions.m; sourceTree = "<group>"; };
+		A92B424118BE3ED60026B00F /* Joystick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Joystick.h; sourceTree = "<group>"; };
+		A92B424218BE3ED60026B00F /* Joystick.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Joystick.m; sourceTree = "<group>"; };
 		A968801D17A72516007FA5F0 /* cocos3d-library-OSX.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "cocos3d-library-OSX.xcodeproj"; path = "../cocos3d-library/cocos3d-library-OSX.xcodeproj"; sourceTree = "<group>"; };
 		A968802317A7251E007FA5F0 /* cocos2d-library-OSX.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "cocos2d-library-OSX.xcodeproj"; path = "../cocos2d-library/cocos2d-library-OSX.xcodeproj"; sourceTree = "<group>"; };
 		A96E0CCA170DC8060044CA2A /* CC3DemoMashUp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CC3DemoMashUp.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -306,12 +312,6 @@
 		A97430F1170DD7BF001FD5A2 /* CC3DemoMashUpLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3DemoMashUpLayer.m; sourceTree = "<group>"; };
 		A97430F2170DD7BF001FD5A2 /* CC3DemoMashUpScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3DemoMashUpScene.h; sourceTree = "<group>"; };
 		A97430F3170DD7BF001FD5A2 /* CC3DemoMashUpScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3DemoMashUpScene.m; sourceTree = "<group>"; };
-		A97430F5170DD7BF001FD5A2 /* CCNodeAdornments.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCNodeAdornments.h; sourceTree = "<group>"; };
-		A97430F6170DD7BF001FD5A2 /* CCNodeAdornments.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CCNodeAdornments.m; sourceTree = "<group>"; };
-		A97430F7170DD7BF001FD5A2 /* CCNodeExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCNodeExtensions.h; sourceTree = "<group>"; };
-		A97430F8170DD7BF001FD5A2 /* CCNodeExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CCNodeExtensions.m; sourceTree = "<group>"; };
-		A97430F9170DD7BF001FD5A2 /* Joystick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Joystick.h; sourceTree = "<group>"; };
-		A97430FA170DD7BF001FD5A2 /* Joystick.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Joystick.m; sourceTree = "<group>"; };
 		A97430FB170DD7BF001FD5A2 /* HUDLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HUDLayer.h; sourceTree = "<group>"; };
 		A97430FC170DD7BF001FD5A2 /* HUDLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HUDLayer.m; sourceTree = "<group>"; };
 		A97430FD170DD7BF001FD5A2 /* HUDScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HUDScene.h; sourceTree = "<group>"; };
@@ -475,6 +475,20 @@
 			path = ../Common/Resources/TV;
 			sourceTree = "<group>";
 		};
+		A92B423C18BE3ED60026B00F /* Controls */ = {
+			isa = PBXGroup;
+			children = (
+				A92B423D18BE3ED60026B00F /* CCNodeAdornments.h */,
+				A92B423E18BE3ED60026B00F /* CCNodeAdornments.m */,
+				A92B423F18BE3ED60026B00F /* CCNodeExtensions.h */,
+				A92B424018BE3ED60026B00F /* CCNodeExtensions.m */,
+				A92B424118BE3ED60026B00F /* Joystick.h */,
+				A92B424218BE3ED60026B00F /* Joystick.m */,
+			);
+			name = Controls;
+			path = ../../../Common/Code/Controls;
+			sourceTree = "<group>";
+		};
 		A968801E17A72516007FA5F0 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -628,23 +642,10 @@
 				A97430FC170DD7BF001FD5A2 /* HUDLayer.m */,
 				A97430FD170DD7BF001FD5A2 /* HUDScene.h */,
 				A97430FE170DD7BF001FD5A2 /* HUDScene.m */,
-				A97430F4170DD7BF001FD5A2 /* Controls */,
+				A92B423C18BE3ED60026B00F /* Controls */,
 			);
 			name = Classes;
 			path = CC3DemoMashUp/Classes;
-			sourceTree = "<group>";
-		};
-		A97430F4170DD7BF001FD5A2 /* Controls */ = {
-			isa = PBXGroup;
-			children = (
-				A97430F5170DD7BF001FD5A2 /* CCNodeAdornments.h */,
-				A97430F6170DD7BF001FD5A2 /* CCNodeAdornments.m */,
-				A97430F7170DD7BF001FD5A2 /* CCNodeExtensions.h */,
-				A97430F8170DD7BF001FD5A2 /* CCNodeExtensions.m */,
-				A97430F9170DD7BF001FD5A2 /* Joystick.h */,
-				A97430FA170DD7BF001FD5A2 /* Joystick.m */,
-			);
-			path = Controls;
 			sourceTree = "<group>";
 		};
 		A99204FB1726E58F005E96CE /* EnvMap */ = {
@@ -894,9 +895,9 @@
 				A9742D9A170DD6A8001FD5A2 /* main.m in Sources */,
 				A9743101170DD7BF001FD5A2 /* CC3DemoMashUpLayer.m in Sources */,
 				A9743102170DD7BF001FD5A2 /* CC3DemoMashUpScene.m in Sources */,
-				A9743103170DD7BF001FD5A2 /* CCNodeAdornments.m in Sources */,
-				A9743104170DD7BF001FD5A2 /* CCNodeExtensions.m in Sources */,
-				A9743105170DD7BF001FD5A2 /* Joystick.m in Sources */,
+				A92B424318BE3ED60026B00F /* CCNodeAdornments.m in Sources */,
+				A92B424518BE3ED60026B00F /* Joystick.m in Sources */,
+				A92B424418BE3ED60026B00F /* CCNodeExtensions.m in Sources */,
 				A9743106170DD7BF001FD5A2 /* HUDLayer.m in Sources */,
 				A9743107170DD7BF001FD5A2 /* HUDScene.m in Sources */,
 				A9743108170DD7BF001FD5A2 /* Models.m in Sources */,

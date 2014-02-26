@@ -33,7 +33,7 @@
 
 /** Re-declaration of deprecated methods to suppress compiler warnings within this class. */
 @protocol CC3MortalPointParticleDeprecated
--(void) updateLife: (ccTime) dt;
+-(void) updateLife: (CCTime) dt;
 @end
 
 
@@ -44,13 +44,13 @@
 
 @synthesize lifeSpan=_lifeSpan, timeToLive=_timeToLive;
 
--(void) setLifeSpan: (ccTime) anInterval {
+-(void) setLifeSpan: (CCTime) anInterval {
 	_lifeSpan = anInterval;
 	_timeToLive = _lifeSpan;
 }
 
 -(void) updateBeforeTransform: (CC3NodeUpdatingVisitor*) visitor {
-	ccTime dt = visitor.deltaTime;
+	CCTime dt = visitor.deltaTime;
 	_timeToLive -= dt;
 	if (_timeToLive <= 0.0)
 		self.isAlive = NO;
@@ -70,7 +70,7 @@
 }
 
 // Deprecated
--(void) updateLife: (ccTime) dt {}
+-(void) updateLife: (CCTime) dt {}
 
 @end
 
@@ -95,15 +95,15 @@
 
 -(CC3RandomMortalParticleNavigator*) mortalParticleNavigator { return (CC3RandomMortalParticleNavigator*)_particleNavigator; }
 
--(ccTime) minParticleLifeSpan { return self.mortalParticleNavigator.minParticleLifeSpan; }
+-(CCTime) minParticleLifeSpan { return self.mortalParticleNavigator.minParticleLifeSpan; }
 
--(void) setMinParticleLifeSpan: (ccTime) minLifeSpan {
+-(void) setMinParticleLifeSpan: (CCTime) minLifeSpan {
 	self.mortalParticleNavigator.minParticleLifeSpan = minLifeSpan;
 }
 
--(ccTime) maxParticleLifeSpan { return self.mortalParticleNavigator.maxParticleLifeSpan; }
+-(CCTime) maxParticleLifeSpan { return self.mortalParticleNavigator.maxParticleLifeSpan; }
 
--(void) setMaxParticleLifeSpan: (ccTime) maxLifeSpan {
+-(void) setMaxParticleLifeSpan: (CCTime) maxLifeSpan {
 	self.mortalParticleNavigator.maxParticleLifeSpan = maxLifeSpan;
 }
 
@@ -168,7 +168,7 @@
 	[super updateBeforeTransform: visitor];
 	if( !self.isAlive ) return;
 	
-	ccTime dt = visitor.deltaTime;
+	CCTime dt = visitor.deltaTime;
 	
 	if (self.hasSize) self.size = self.size + (_sizeVelocity * dt);
 	

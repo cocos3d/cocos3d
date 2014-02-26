@@ -52,14 +52,14 @@
 
 @implementation CC3TransformVectorAction
 
--(id) initWithDuration: (ccTime) t differenceVector: (CC3Vector) aVector {
+-(id) initWithDuration: (CCTime) t differenceVector: (CC3Vector) aVector {
 	if( (self = [super initWithDuration: t]) ) {
 		_diffVector = aVector;
 	}
 	return self;
 }
 
-+(id) actionWithDuration: (ccTime) t differenceVector: (CC3Vector) aVector {
++(id) actionWithDuration: (CCTime) t differenceVector: (CC3Vector) aVector {
 	return [[self alloc] initWithDuration: t differenceVector: aVector];
 }
 
@@ -76,7 +76,7 @@
 	_startVector = self.targetVector;
 }
 
--(void) update: (ccTime) t {	
+-(void) update: (CCTime) t {	
 	self.targetVector = CC3VectorAdd(_startVector, CC3VectorScaleUniform(_diffVector, t));
 }
 
@@ -104,11 +104,11 @@
 
 @implementation CC3MoveBy
 
--(id) initWithDuration: (ccTime) t moveBy: (CC3Vector) aTranslation {
+-(id) initWithDuration: (CCTime) t moveBy: (CC3Vector) aTranslation {
 	return [self initWithDuration: t differenceVector: aTranslation];
 }
 
-+(id) actionWithDuration: (ccTime) t moveBy: (CC3Vector) aTranslation {
++(id) actionWithDuration: (CCTime) t moveBy: (CC3Vector) aTranslation {
 	return [self actionWithDuration: t differenceVector: aTranslation];
 }
 
@@ -124,11 +124,11 @@
 
 @implementation CC3RotateBy
 
--(id) initWithDuration: (ccTime) t rotateBy: (CC3Vector) aRotation {
+-(id) initWithDuration: (CCTime) t rotateBy: (CC3Vector) aRotation {
 	return [self initWithDuration: t differenceVector: aRotation];
 }
 
-+(id) actionWithDuration: (ccTime) t rotateBy: (CC3Vector) aRotation {
++(id) actionWithDuration: (CCTime) t rotateBy: (CC3Vector) aRotation {
 	return [self actionWithDuration: t differenceVector: aRotation];
 }
 
@@ -155,23 +155,23 @@
 	_scaledDiffVector = CC3VectorDifference(endVector, _startVector);
 }
 
--(id) initWithDuration: (ccTime) t scaleBy: (CC3Vector) aScale {
+-(id) initWithDuration: (CCTime) t scaleBy: (CC3Vector) aScale {
 	return [self initWithDuration: t differenceVector: aScale];
 }
 
-+(id) actionWithDuration: (ccTime) t scaleBy: (CC3Vector) aScale {
++(id) actionWithDuration: (CCTime) t scaleBy: (CC3Vector) aScale {
 	return [self actionWithDuration: t differenceVector: aScale];
 }
 
--(id) initWithDuration: (ccTime) t scaleUniformlyBy: (GLfloat) aScale {
+-(id) initWithDuration: (CCTime) t scaleUniformlyBy: (GLfloat) aScale {
 	return [self initWithDuration: t scaleBy: cc3v(aScale, aScale, aScale)];
 }
 
-+(id) actionWithDuration: (ccTime) t scaleUniformlyBy: (GLfloat) aScale {
++(id) actionWithDuration: (CCTime) t scaleUniformlyBy: (GLfloat) aScale {
 	return [self actionWithDuration: t scaleBy: cc3v(aScale, aScale, aScale)];
 }
 
--(void) update: (ccTime) t {	
+-(void) update: (CCTime) t {	
 	self.targetVector = CC3VectorAdd(_startVector, CC3VectorScaleUniform(_scaledDiffVector, t));
 }
 
@@ -187,15 +187,15 @@
 
 @implementation CC3RotateByAngle
 
--(id) initWithDuration: (ccTime) t rotateByAngle: (GLfloat) anAngle {
+-(id) initWithDuration: (CCTime) t rotateByAngle: (GLfloat) anAngle {
 	return [self initWithDuration: t rotateByAngle: anAngle aroundAxis: kCC3VectorNull];
 }
 
-+(id) actionWithDuration: (ccTime) t rotateByAngle: (GLfloat) anAngle {
++(id) actionWithDuration: (CCTime) t rotateByAngle: (GLfloat) anAngle {
 	return [[self alloc] initWithDuration: t rotateByAngle: anAngle];
 }
 
--(id) initWithDuration: (ccTime) t rotateByAngle: (GLfloat) anAngle aroundAxis: (CC3Vector) anAxis {
+-(id) initWithDuration: (CCTime) t rotateByAngle: (GLfloat) anAngle aroundAxis: (CC3Vector) anAxis {
 	if( (self = [super initWithDuration: t]) ) {
 		_diffAngle = anAngle;
 		_rotationAxis = anAxis;
@@ -203,7 +203,7 @@
 	return self;
 }
 
-+(id) actionWithDuration: (ccTime) t rotateByAngle: (GLfloat) anAngle aroundAxis: (CC3Vector) anAxis {
++(id) actionWithDuration: (CCTime) t rotateByAngle: (GLfloat) anAngle aroundAxis: (CC3Vector) anAxis {
 	return [[self alloc] initWithDuration: t rotateByAngle: anAngle aroundAxis: anAxis];
 }
 
@@ -226,7 +226,7 @@
 	_prevTime = 0;
 }
 
--(void) update: (ccTime) t {
+-(void) update: (CCTime) t {
 	GLfloat deltaTime = t - _prevTime;
 	GLfloat deltaAngle = _diffAngle * deltaTime;
 	[self.targetCC3Node rotateByAngle: deltaAngle aroundAxis: _activeRotationAxis];
@@ -246,14 +246,14 @@
 
 @implementation CC3TransformTo
 
--(id) initWithDuration: (ccTime) t endVector: (CC3Vector) aVector {
+-(id) initWithDuration: (CCTime) t endVector: (CC3Vector) aVector {
 	if( (self = [super initWithDuration: t]) ) {
 		_endVector = aVector;
 	}
 	return self;
 }
 
-+(id) actionWithDuration: (ccTime) t endVector: (CC3Vector) aVector {
++(id) actionWithDuration: (CCTime) t endVector: (CC3Vector) aVector {
 	return [[self alloc] initWithDuration: t endVector: aVector];
 }
 
@@ -285,11 +285,11 @@
 
 @implementation CC3MoveTo
 
--(id) initWithDuration: (ccTime) t moveTo: (CC3Vector) aLocation {
+-(id) initWithDuration: (CCTime) t moveTo: (CC3Vector) aLocation {
 	return [self initWithDuration: t endVector: aLocation];
 }
 
-+(id) actionWithDuration: (ccTime) t moveTo: (CC3Vector) aLocation {
++(id) actionWithDuration: (CCTime) t moveTo: (CC3Vector) aLocation {
 	return [self actionWithDuration: t endVector: aLocation];
 }
 
@@ -305,11 +305,11 @@
 
 @implementation CC3RotateTo
 
--(id) initWithDuration: (ccTime) t rotateTo: (CC3Vector) aRotation {
+-(id) initWithDuration: (CCTime) t rotateTo: (CC3Vector) aRotation {
 	return [self initWithDuration: t endVector: aRotation];
 }
 
-+(id) actionWithDuration: (ccTime) t rotateTo: (CC3Vector) aRotation {
++(id) actionWithDuration: (CCTime) t rotateTo: (CC3Vector) aRotation {
 	return [self actionWithDuration: t endVector: aRotation];
 }
 
@@ -334,19 +334,19 @@
 
 @implementation CC3ScaleTo
 
--(id) initWithDuration: (ccTime) t scaleTo: (CC3Vector) aScale {
+-(id) initWithDuration: (CCTime) t scaleTo: (CC3Vector) aScale {
 	return [self initWithDuration: t endVector: aScale];
 }
 
-+(id) actionWithDuration: (ccTime) t scaleTo: (CC3Vector) aScale {
++(id) actionWithDuration: (CCTime) t scaleTo: (CC3Vector) aScale {
 	return [self actionWithDuration: t endVector: aScale];
 }
 
--(id) initWithDuration: (ccTime) t scaleUniformlyTo: (GLfloat) aScale {
+-(id) initWithDuration: (CCTime) t scaleUniformlyTo: (GLfloat) aScale {
 	return [self initWithDuration: t scaleTo: cc3v(aScale, aScale, aScale)];
 }
 
-+(id) actionWithDuration: (ccTime) t scaleUniformlyTo: (GLfloat) aScale {
++(id) actionWithDuration: (CCTime) t scaleUniformlyTo: (GLfloat) aScale {
 	return [self actionWithDuration: t scaleTo: cc3v(aScale, aScale, aScale)];
 }
 
@@ -362,14 +362,14 @@
 
 @implementation CC3RotateToAngle
 
--(id) initWithDuration: (ccTime) t rotateToAngle: (GLfloat) anAngle {
+-(id) initWithDuration: (CCTime) t rotateToAngle: (GLfloat) anAngle {
 	if( (self = [super initWithDuration: t]) ) {
 		_endAngle = anAngle;
 	}
 	return self;
 }
 
-+(id) actionWithDuration: (ccTime) t rotateToAngle: (GLfloat) anAngle {
++(id) actionWithDuration: (CCTime) t rotateToAngle: (GLfloat) anAngle {
 	return [[self alloc] initWithDuration: t rotateToAngle: anAngle];
 }
 
@@ -392,7 +392,7 @@
 	_diffAngle = CC3SemiCyclicAngle(_endAngle - _startAngle);
 }
 
--(void) update: (ccTime) t {	
+-(void) update: (CCTime) t {	
 	self.targetCC3Node.rotationAngle = _startAngle + (_diffAngle * t);
 }
 
@@ -409,11 +409,11 @@
 
 @implementation CC3RotateToLookTowards
 
--(id) initWithDuration: (ccTime) t forwardDirection: (CC3Vector) aDirection {
+-(id) initWithDuration: (CCTime) t forwardDirection: (CC3Vector) aDirection {
 	return [self initWithDuration: t endVector: CC3VectorNormalize(aDirection)];
 }
 
-+(id) actionWithDuration: (ccTime) t forwardDirection: (CC3Vector) aDirection {
++(id) actionWithDuration: (CCTime) t forwardDirection: (CC3Vector) aDirection {
 	return [self actionWithDuration: t endVector: CC3VectorNormalize(aDirection)];
 }
 
@@ -430,11 +430,11 @@
 
 @implementation CC3RotateToLookAt
 
--(id) initWithDuration: (ccTime) t targetLocation: (CC3Vector) aLocation {
+-(id) initWithDuration: (CCTime) t targetLocation: (CC3Vector) aLocation {
 	return [self initWithDuration: t endVector: aLocation];
 }
 
-+(id) actionWithDuration: (ccTime) t targetLocation: (CC3Vector) aLocation {
++(id) actionWithDuration: (CCTime) t targetLocation: (CC3Vector) aLocation {
 	return [self actionWithDuration: t endVector: aLocation];
 }
 
@@ -455,14 +455,14 @@
 
 @implementation CC3MoveDirectionallyBy
 
--(id) initWithDuration: (ccTime) t moveBy: (GLfloat) aDistance {
+-(id) initWithDuration: (CCTime) t moveBy: (GLfloat) aDistance {
 	if( (self = [super initWithDuration: t]) ) {
 		_distance = aDistance;
 	}
 	return self;
 }
 
-+(id) actionWithDuration: (ccTime) t moveBy: (GLfloat) aDistance {
++(id) actionWithDuration: (CCTime) t moveBy: (GLfloat) aDistance {
 	return [(CC3MoveDirectionallyBy*)[self alloc] initWithDuration: t moveBy: aDistance];
 }
 
@@ -482,7 +482,7 @@
 	_prevTime = 0;
 }
 
--(void) update: (ccTime) t {
+-(void) update: (CCTime) t {
 	GLfloat deltaTime = t - _prevTime;
 	GLfloat deltaDist = _distance * deltaTime;
 	CC3Vector moveDir = CC3VectorNormalize(self.targetDirection);
@@ -559,14 +559,14 @@
 	CC3Assert(NO, @"%@ is abstract. Property targetColor must be implemented in a concrete subclass", self);
 }
 
--(id) initWithDuration: (ccTime) t colorTo: (ccColor4F) aColor {
+-(id) initWithDuration: (CCTime) t colorTo: (ccColor4F) aColor {
 	if( (self = [super initWithDuration: t]) ) {
 		_endColor = aColor;
 	}
 	return self;
 }
 
-+(id) actionWithDuration:(ccTime) t colorTo: (ccColor4F) aColor {
++(id) actionWithDuration:(CCTime) t colorTo: (ccColor4F) aColor {
 	return [[self alloc] initWithDuration: t colorTo: aColor];
 }
 
@@ -579,7 +579,7 @@
 	_startColor = self.targetColor;
 }
 
--(void) update: (ccTime) t {
+-(void) update: (CCTime) t {
 	self.targetColor = CCC4FBlend(_startColor, _endColor, t);
 }
 
@@ -641,11 +641,11 @@
 
 @synthesize trackID = _trackID, isReversed=_isReversed;
 
--(id) initWithDuration: (ccTime) t { return [self initWithDuration: t onTrack: 0]; }
+-(id) initWithDuration: (CCTime) t { return [self initWithDuration: t onTrack: 0]; }
 
-+(id) actionWithDuration: (ccTime) t { return [self actionWithDuration: t onTrack: 0]; }
++(id) actionWithDuration: (CCTime) t { return [self actionWithDuration: t onTrack: 0]; }
 
--(id) initWithDuration: (ccTime) t onTrack: (GLuint) trackID {
+-(id) initWithDuration: (CCTime) t onTrack: (GLuint) trackID {
 	if ( (self = [super initWithDuration: t]) ) {
 		_trackID = trackID;
 		_isReversed = NO;
@@ -653,15 +653,15 @@
 	return self;
 }
 
-+(id) actionWithDuration: (ccTime) t onTrack: (GLuint) trackID {
++(id) actionWithDuration: (CCTime) t onTrack: (GLuint) trackID {
 	return [[self alloc] initWithDuration: t onTrack: trackID];
 }
 
-+(id) actionWithDuration: (ccTime) t limitFrom: (GLfloat) startOfRange to: (GLfloat) endOfRange {
++(id) actionWithDuration: (CCTime) t limitFrom: (GLfloat) startOfRange to: (GLfloat) endOfRange {
 	return [self actionWithDuration: t onTrack: 0 limitFrom: startOfRange to: endOfRange];
 }
 
-+(id) actionWithDuration: (ccTime) t onTrack: (GLuint) trackID limitFrom: (GLfloat) startOfRange to: (GLfloat) endOfRange {
++(id) actionWithDuration: (CCTime) t onTrack: (GLuint) trackID limitFrom: (GLfloat) startOfRange to: (GLfloat) endOfRange {
 	return [[self actionWithDuration: t onTrack: trackID] asActionLimitedFrom: startOfRange to: endOfRange];
 }
 
@@ -669,7 +669,7 @@
 	return [CC3ActionRangeLimit actionWithAction: self limitFrom: startOfRange to: endOfRange];
 }
 
--(void) update: (ccTime) t {
+-(void) update: (CCTime) t {
 	[self.targetCC3Node establishAnimationFrameAt: (_isReversed ? (1.0 - t) : t) onTrack: _trackID];
 }
 
@@ -680,7 +680,7 @@
 }
 
 -(id) copyWithZone: (NSZone*) zone {
-	CC3Animate* newAnim = [[[self class] allocWithZone:zone] initWithDuration: self.duration];
+	CC3Animate* newAnim = [(CC3Animate*)([[self class] allocWithZone:zone]) initWithDuration: self.duration];
 	newAnim.isReversed = self.isReversed;
 	return newAnim;
 }
@@ -695,7 +695,7 @@
 
 @synthesize trackID=_trackID;
 
--(id) initWithDuration: (ccTime) t onTrack: (GLuint) trackID blendingWeight: (GLfloat) blendingWeight {
+-(id) initWithDuration: (CCTime) t onTrack: (GLuint) trackID blendingWeight: (GLfloat) blendingWeight {
 	if ( (self = [super initWithDuration: t]) ) {
 		_trackID = trackID;
 		_endWeight = blendingWeight;
@@ -703,7 +703,7 @@
 	return self;
 }
 
-+(id) actionWithDuration: (ccTime) t onTrack: (GLuint) trackID blendingWeight: (GLfloat) blendingWeight {
++(id) actionWithDuration: (CCTime) t onTrack: (GLuint) trackID blendingWeight: (GLfloat) blendingWeight {
 	return [[self alloc] initWithDuration: t onTrack: trackID blendingWeight: blendingWeight];
 }
 
@@ -712,7 +712,7 @@
 	_startWeight = [aTarget animationBlendingWeightOnTrack: _trackID];
 }
 
--(void) update: (ccTime) t {
+-(void) update: (CCTime) t {
 	[self.targetCC3Node setAnimationBlendingWeight: (_startWeight + (t * (_endWeight - _startWeight)))
 										  onTrack: _trackID];
 }
@@ -735,13 +735,13 @@
 
 @synthesize fromTrackID=_fromTrackID, toTrackID=_toTrackID;
 
--(id) initWithDuration: (ccTime) t
+-(id) initWithDuration: (CCTime) t
 			 fromTrack: (GLuint) fromTrackID
 			   toTrack: (GLuint) toTrackID {
 	return [self initWithDuration: t fromTrack: fromTrackID toTrack: toTrackID withBlendingWeight: 1.0f];
 }
 
--(id) initWithDuration: (ccTime) t
+-(id) initWithDuration: (CCTime) t
 			 fromTrack: (GLuint) fromTrackID
 			   toTrack: (GLuint) toTrackID
 	withBlendingWeight: (GLfloat) toBlendingWeight {
@@ -753,13 +753,13 @@
 	return self;
 }
 
-+(id) actionWithDuration: (ccTime) t
++(id) actionWithDuration: (CCTime) t
 			   fromTrack: (GLuint) fromTrackID
 				 toTrack: (GLuint) toTrackID {
 	return [self actionWithDuration: t fromTrack: fromTrackID toTrack: toTrackID withBlendingWeight: 1.0f];
 }
 
-+(id) actionWithDuration: (ccTime) t
++(id) actionWithDuration: (CCTime) t
 			   fromTrack: (GLuint) fromTrackID
 				 toTrack: (GLuint) toTrackID
 	  withBlendingWeight: (GLfloat) toBlendingWeight {
@@ -774,7 +774,7 @@
 	_startWeight = [aTarget animationBlendingWeightOnTrack: _fromTrackID];
 }
 
--(void) update: (ccTime) t {
+-(void) update: (CCTime) t {
 	CC3Node* node = self.targetCC3Node;
 	[node setAnimationBlendingWeight: ((1 - t) * _startWeight) onTrack: _fromTrackID];
 	[node setAnimationBlendingWeight: (t * _endWeight) onTrack: _toTrackID];
@@ -816,7 +816,7 @@
 	return [[self alloc] initOnTrack: trackID blendingWeight: blendingWeight];
 }
 
--(void) update: (ccTime) t {
+-(void) update: (CCTime) t {
 	[self.targetCC3Node setAnimationBlendingWeight: _endWeight onTrack: _trackID];
 }
 
@@ -839,7 +839,7 @@
 
 +(id) actionOnTrack: (GLuint) trackID { return [[self alloc] initOnTrack: trackID]; }
 
--(void) update: (ccTime) t { [self.targetCC3Node enableAllAnimationOnTrack: _trackID]; }
+-(void) update: (CCTime) t { [self.targetCC3Node enableAllAnimationOnTrack: _trackID]; }
 
 @end
 
@@ -860,7 +860,7 @@
 
 +(id) actionOnTrack: (GLuint) trackID { return [[self alloc] initOnTrack: trackID]; }
 
--(void) update: (ccTime) t { [self.targetCC3Node disableAllAnimationOnTrack: _trackID]; }
+-(void) update: (CCTime) t { [self.targetCC3Node disableAllAnimationOnTrack: _trackID]; }
 
 @end
 
@@ -887,7 +887,7 @@
 	return [[self alloc] initWithAction: action limitFrom: startOfRange to: endOfRange];
 }
 
--(void) update: (ccTime) t { [self.inner update: (_rangeStart + (_rangeSpan * t))]; }
+-(void) update: (CCTime) t { [self.inner update: (_rangeStart + (_rangeSpan * t))]; }
 
 - (CCActionInterval *) reverse {
 	return [[self class] actionWithAction: self.inner limitFrom: (_rangeStart + _rangeSpan) to: _rangeStart];
@@ -911,6 +911,6 @@
 
 @implementation CC3Remove
 
--(void) update: (ccTime) t { [self.targetCC3Node remove]; }
+-(void) update: (CCTime) t { [self.targetCC3Node remove]; }
 
 @end

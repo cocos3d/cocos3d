@@ -254,7 +254,7 @@
  * This visitor encapsulates the time since the previous update.
  */
 @interface CC3NodeUpdatingVisitor : CC3NodeVisitor {
-	ccTime _deltaTime;
+	CCTime _deltaTime;
 }
 
 /**
@@ -264,7 +264,7 @@
  * of this property may be clamped to an upper limit. See the description of the CC3Scene
  * maxUpdateInterval property for more information about clamping the update interval.
  */
-@property(nonatomic, assign) ccTime deltaTime;
+@property(nonatomic, assign) CCTime deltaTime;
 
 @end
 
@@ -305,7 +305,7 @@
 	GLuint _textureUnitCount;
 	GLuint _current2DTextureUnit;
 	GLuint _currentCubeTextureUnit;
-	ccTime _deltaTime;
+	CCTime _deltaTime;
 	BOOL _shouldDecorateNode : 1;
 	BOOL _isDrawingEnvironmentMap : 1;
 	BOOL _isVPMtxDirty : 1;
@@ -375,7 +375,7 @@
  * See the description of the CC3Scene minUpdateInterval and maxUpdateInterval properties
  * for more information about clamping the update interval.
  */
-@property(nonatomic, assign) ccTime deltaTime;
+@property(nonatomic, assign) CCTime deltaTime;
 
 /**
  * Indicates whether nodes should decorate themselves with their configured material, textures,

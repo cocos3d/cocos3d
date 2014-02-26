@@ -51,7 +51,7 @@
  *
  * This property should be set once during initialization, prior to emission.
  */
-@property(nonatomic, assign) ccTime lifeSpan;
+@property(nonatomic, assign) CCTime lifeSpan;
 
 /**
  * Indicates the remaining time the particle has to live.
@@ -59,7 +59,7 @@
  * This property is automatically decremented as the particle ages. Once this property
  * reaches zero, the particle will automatically expire itself.
  */
-@property(nonatomic, readonly) ccTime timeToLive;
+@property(nonatomic, readonly) CCTime timeToLive;
 
 @end
 
@@ -79,8 +79,8 @@
  * minParticleLifeSpan and maxParticleLifeSpan properties of this navigator.
  */
 @interface CC3RandomMortalParticleNavigator : CC3ParticleNavigator {
-	ccTime _minParticleLifeSpan;
-	ccTime _maxParticleLifeSpan;
+	CCTime _minParticleLifeSpan;
+	CCTime _maxParticleLifeSpan;
 }
 
 /**
@@ -91,7 +91,7 @@
  *
  * The initial value of this property is zero.
  */
-@property(nonatomic, assign) ccTime minParticleLifeSpan;
+@property(nonatomic, assign) CCTime minParticleLifeSpan;
 
 /**
  * Indicates the upper limit of the range of possible particle life spans.
@@ -101,7 +101,7 @@
  *
  * The initial value of this property is zero.
  */
-@property(nonatomic, assign) ccTime maxParticleLifeSpan;
+@property(nonatomic, assign) CCTime maxParticleLifeSpan;
 
 @end
 

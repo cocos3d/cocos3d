@@ -366,7 +366,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	CC3Matrix4x3 m4x3,  mRslt4x3, tfmMtx, *pm4x3;
 	CC3Matrix3x3 m3x3;
 	CC3Viewport vp;
-	ccTime sceneTime;
+	CCTime sceneTime;
 	GLuint boneCnt = 0, tuCnt = 0, texCnt = 0;
 	BOOL isInverted = NO, isPtEmitter = NO;
 	

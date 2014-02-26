@@ -51,7 +51,7 @@ DEPRECATED_ATTRIBUTE
 -(void) initializeWorld DEPRECATED_ATTRIBUTE;
 
 /** @deprecated Renamed to updateScene:. */
--(void) updateWorld: (ccTime)dt DEPRECATED_ATTRIBUTE;
+-(void) updateWorld: (CCTime)dt DEPRECATED_ATTRIBUTE;
 
 /** @deprecated Renamed to updateScene. */
 -(void) updateWorld DEPRECATED_ATTRIBUTE;

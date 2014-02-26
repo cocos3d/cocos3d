@@ -262,7 +262,7 @@
  * If needed, clamps the specified interval value, then invokes a sequence of template methods.
  * Does nothing except update times if this instance is not running.
  */
--(void) updateScene: (ccTime) dt {
+-(void) updateScene: (CCTime) dt {
 	[self updateTimes: dt];
 
 	if( !self.isRunning) return;
@@ -297,22 +297,22 @@
 }
 
 /** Updates various scene timing values. */
--(void) updateTimes: (ccTime) dt {
+-(void) updateTimes: (CCTime) dt {
 	_elapsedTimeSinceOpened = NSDate.timeIntervalSinceReferenceDate - _timeAtOpen;
 	[_performanceStatistics addUpdateTime: dt];
 }
 
 /** Template method to update the camera. */
--(void) updateCamera: (ccTime) dt {}
+-(void) updateCamera: (CCTime) dt {}
 
 /** Template method to update shadows cast by the lights. */
--(void) updateShadows: (ccTime) dt { for (CC3Light* lgt in _lights) [lgt updateShadows]; }
+-(void) updateShadows: (CCTime) dt { for (CC3Light* lgt in _lights) [lgt updateShadows]; }
 
 /**
  * Template method to update any billboards.
  * Iterates through all billboards, instructing them to align with the camera if needed.
  */
--(void) updateBillboards: (ccTime) dt {
+-(void) updateBillboards: (CCTime) dt {
 	for (CC3Billboard* bb in _billboards) [bb alignToCamera: _activeCamera];
 	LogTrace(@"%@ updated %u billboards", self, _billboards.count);
 }
@@ -419,8 +419,8 @@
 	[self closeDepthTestWithVisitor: visitor];
 	
 	// Reset the viewport to the 2D canvas and disable scissor clipping to the viewport.
-	CGSize winSz = CCDirector.sharedDirector.winSizeInPixels;
-	gl.viewport = CC3ViewportMake(0, 0, winSz.width, winSz.height);
+	CGSize viewSize = CCDirector.sharedDirector.viewSizeInPixels;
+	gl.viewport = CC3ViewportMake(0, 0, viewSize.width, viewSize.height);
 	[gl enableScissorTest: NO];
 
 	// Disable lights and fog. Done outside alignFor2DDrawing: because they apply to billboards

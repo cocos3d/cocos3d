@@ -31,8 +31,10 @@
 
 #import "CC3ViewController.h"
 #import "CC3OSExtensions.h"
-#import "CCLayer.h"
 
+#if (CC3_CC2_1 || CC3_CC2_2)
+#import "CCLayer.h"
+#endif
 
 /**
  * A CCLayer that keeps track of the CC3ViewController that is controlling the CC3GLView,

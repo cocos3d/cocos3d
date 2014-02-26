@@ -248,17 +248,53 @@ if [[ -d "$1" ]]; then
 fi
 }
 
+#If it exists, copies the file $1 from source directory $2 to dest directory $3
+copy_file() {
+if [[ -e "$2/$1" ]]; then
+	echo "...copying $1"
+	cp "$2/$1" "$3"
+fi
+}
+
 link_cocos2d_libs(){
 	echo
 	echo "Linking to cocos2d distribution libraries in '$CC2_DIST_DIR'."
 
 	CC2_DIR=cocos2d
 
+	# Remove current symbolic links and re-create new link directory
 	rm -rf "$CC2_DIR"
 	mkdir -p "$CC2_DIR"
 
+	# Primary cocos2d codebase
 	link_dir "$CC2_DIST_DIR/cocos2d" "$CC2_DIR" "cocos2d"
 
+	# cocos2d UI code (cocos2d 3.x only)
+	link_dir "$CC2_DIST_DIR/cocos2d-ui" "$CC2_DIR" "cocos2d-ui"
+
+	copy_file "LICENSE_cocos2d.txt" "$CC2_DIST_DIR" "$CC2_DIR"
+
+	# Kazmath library (cocos2d 2.1/3.x only)
+	link_dir "$CC2_DIST_DIR/external/kazmath" "$CC2_DIR" "kazmath"
+	copy_file "LICENSE_Kazmath.txt" "$CC2_DIST_DIR" "$CC2_DIR"
+
+	# Chipmunk library (cocos2d 3.x only)
+	CHPMK_DIR=cocos2d-chipmunk
+	rm -rf   "$CHPMK_DIR"
+	CHIPMUNK_DIST_DIR="$CC2_DIST_DIR/external/Chipmunk"
+	if [[ -d "$CHIPMUNK_DIST_DIR" ]]; then
+		mkdir -p "$CHPMK_DIR"
+		mkdir -p "$CHPMK_DIR/chipmunk"
+		link_dir "$CHIPMUNK_DIST_DIR/include" "$CHPMK_DIR/chipmunk" "Chipmunk includes"
+		link_dir "$CHIPMUNK_DIST_DIR/src" "$CHPMK_DIR/chipmunk" "Chipmunk source"
+		link_dir "$CHIPMUNK_DIST_DIR/objectivec" "$CHPMK_DIR" "Objective Chipmunk"
+	fi
+	copy_file "LICENSE_Chipmunk.txt" "$CC2_DIST_DIR" "$CHPMK_DIR"
+
+	# ObjectAL  (cocos2d 3.x only)
+	link_dir "$CC2_DIST_DIR/external/ObjectAL" "$CC2_DIR" "ObjectAL"
+
+	# CocosDenshion (pre cocos2d v3)
 	# Depending on cocos2d release, CocosDenshion might be in subdirectory
 	CDEN_DIST_DIR="$CC2_DIST_DIR/CocosDenshion"
 	if [[ -d "$CDEN_DIST_DIR/CocosDenshion" ]]; then
@@ -267,8 +303,6 @@ link_cocos2d_libs(){
 	else
 		link_dir "$CDEN_DIST_DIR" "$CC2_DIR" "CocosDenshion"
 	fi
-
-	link_dir "$CC2_DIST_DIR/external/kazmath" "$CC2_DIR" "kazmath (cocos2d 2.1 only)"
 
 	echo done!
 }

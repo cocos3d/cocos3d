@@ -51,11 +51,11 @@
 
 -(BOOL) hasVariableFrameTiming { return NO; }
 
-static ccTime _interpolationEpsilon = 0.1f;
+static CCTime _interpolationEpsilon = 0.1f;
 
-+(ccTime) interpolationEpsilon { return _interpolationEpsilon; }
++(CCTime) interpolationEpsilon { return _interpolationEpsilon; }
 
-+(void) setInterpolationEpsilon: (ccTime) epsilon { _interpolationEpsilon = epsilon; }
++(void) setInterpolationEpsilon: (CCTime) epsilon { _interpolationEpsilon = epsilon; }
 
 
 #pragma mark Allocation and initialization
@@ -85,9 +85,9 @@ static ccTime _interpolationEpsilon = 0.1f;
 #pragma mark Animating
 
 // Deprecated
--(void) establishFrameAt: (ccTime) t forNode: (CC3Node*) aNode { [aNode.animationState establishFrameAt: t]; }
+-(void) establishFrameAt: (CCTime) t forNode: (CC3Node*) aNode { [aNode.animationState establishFrameAt: t]; }
 
--(void) establishFrameAt: (ccTime) t inNodeAnimationState: (CC3NodeAnimationState*) animState {
+-(void) establishFrameAt: (CCTime) t inNodeAnimationState: (CC3NodeAnimationState*) animState {
 	LogTrace(@"%@ animating frame at %.4f", self, t);
 	CC3Assert(t >= 0.0 && t <= 1.0, @"%@ animation frame time %f must be between 0.0 and 1.0", self, t);
 	
@@ -100,9 +100,9 @@ static ccTime _interpolationEpsilon = 0.1f;
 	// We only bother interpolating if difference is large enough. If close enough to this frame
 	// or the next frame, just use the appropriate frame outright.
 	if (_shouldInterpolate && (frameIndex < _frameCount - 1)) {
-		ccTime frameTime = [self timeAtFrame: frameIndex];
-		ccTime nextFrameTime = [self timeAtFrame: frameIndex + 1];
-		ccTime frameDur = nextFrameTime - frameTime;
+		CCTime frameTime = [self timeAtFrame: frameIndex];
+		CCTime nextFrameTime = [self timeAtFrame: frameIndex + 1];
+		CCTime frameDur = nextFrameTime - frameTime;
 		if (frameDur != 0.0f) frameInterpolation = (t - frameTime) / frameDur;
 		if (frameInterpolation < _interpolationEpsilon) {
 			frameInterpolation = 0.0f;		// use this frame
@@ -173,7 +173,7 @@ static ccTime _interpolationEpsilon = 0.1f;
 									frameInterpolation);
 }
 
--(ccTime) timeAtFrame: (GLuint) frameIndex {
+-(CCTime) timeAtFrame: (GLuint) frameIndex {
 	GLfloat thisIdx = frameIndex;					// floatify
 	GLfloat lastIdx = MAX(_frameCount - 1, 1);		// floatify & ensure not zero
 	return CLAMP(thisIdx / lastIdx, 0.0f, 1.0f);
@@ -184,7 +184,7 @@ static ccTime _interpolationEpsilon = 0.1f;
  * The specified time will lie between the time of the animation frame at the returned index
  * and the time of the animation frame following that frame.
  */
--(GLuint) frameIndexAt: (ccTime) t { return (_frameCount - 1) * t; }
+-(GLuint) frameIndexAt: (CCTime) t { return (_frameCount - 1) * t; }
 
 /**
  * Template method that returns the location at the specified animation frame.
@@ -260,7 +260,7 @@ static ccTime _interpolationEpsilon = 0.1f;
 #pragma mark Accessing frame data
 
 // All times should be in range between zero and one
--(ccTime) timeAtFrame: (GLuint) frameIndex {
+-(CCTime) timeAtFrame: (GLuint) frameIndex {
 	if (!_frameTimes) return [super timeAtFrame: frameIndex];
 	return _frameTimes[MIN(frameIndex, _frameCount - 1)];
 }
@@ -268,7 +268,7 @@ static ccTime _interpolationEpsilon = 0.1f;
 // Iterate backwards through the frames looking for the first frame whose time is at or before
 // the specified frame time, and return that frame. If the specified frame is before the first
 // frame, return the first frame.
--(GLuint) frameIndexAt: (ccTime) t {
+-(GLuint) frameIndexAt: (CCTime) t {
 	if (!_frameTimes) return [super frameIndexAt: t];
 	for (GLint fIdx = _frameCount - 1; fIdx >= 0; fIdx--)	// start at last frame
 		if (_frameTimes[fIdx] <= t) return fIdx;			// return frame
@@ -290,7 +290,7 @@ static ccTime _interpolationEpsilon = 0.1f;
 	return _animatedScales[MIN(frameIndex, _frameCount - 1)];
 }
 
--(void) setFrameTimes: (ccTime*) frameTimes {
+-(void) setFrameTimes: (CCTime*) frameTimes {
 	[self deallocateFrameTimes];			// get rid of any existing array
 	_frameTimes = frameTimes;
 }
@@ -313,9 +313,9 @@ static ccTime _interpolationEpsilon = 0.1f;
 
 #pragma mark Allocation of managed arrays
 
--(ccTime*) allocateFrameTimes {
+-(CCTime*) allocateFrameTimes {
 	if (_frameCount) {
-		self.frameTimes = calloc(_frameCount, sizeof(ccTime));
+		self.frameTimes = calloc(_frameCount, sizeof(CCTime));
 		_frameTimesAreRetained = YES;
 		LogTrace(@"%@ allocated space for %u frame times", self, _frameCount);
 	}
@@ -412,7 +412,7 @@ static ccTime _interpolationEpsilon = 0.1f;
 
 #pragma mark Animating
 
--(void) establishFrameAt: (ccTime) t inNodeAnimationState: (CC3NodeAnimationState*) animState {
+-(void) establishFrameAt: (CCTime) t inNodeAnimationState: (CC3NodeAnimationState*) animState {
 	CC3Assert(t >= 0.0 && t <= 1.0, @"%@ animation frame time %f must be between 0.0 and 1.0", self, t);
 
 	if(animState.isAnimatingLocation) animState.location = self.location;
@@ -498,7 +498,7 @@ static ccTime _interpolationEpsilon = 0.1f;
 	return [[self alloc] initOnAnimation: baseAnimation];
 }
 
--(id) initOnAnimation: (CC3NodeAnimation*) baseAnimation from: (ccTime) startTime to: (ccTime) endTime {
+-(id) initOnAnimation: (CC3NodeAnimation*) baseAnimation from: (CCTime) startTime to: (CCTime) endTime {
 	CC3Assert(baseAnimation, @"%@ cannot be initialized without a base animation", self);
 	if ( (self = [super initWithFrameCount: 0]) ) {
 		_baseAnimation = baseAnimation;
@@ -508,7 +508,7 @@ static ccTime _interpolationEpsilon = 0.1f;
 	return self;
 }
 
-+(id) animationOnAnimation: (CC3NodeAnimation*) baseAnimation from: (ccTime) startTime to: (ccTime) endTime {
++(id) animationOnAnimation: (CC3NodeAnimation*) baseAnimation from: (CCTime) startTime to: (CCTime) endTime {
 	return [[self alloc] initOnAnimation: baseAnimation from: startTime to: endTime];
 }
 
@@ -542,12 +542,12 @@ static ccTime _interpolationEpsilon = 0.1f;
  * and endTime properties, and then to retrieve the corresponding frame index from the base
  * animation.
  */
--(GLuint) frameIndexAt: (ccTime) t {
-	ccTime adjTime = _startTime + ((_endTime - _startTime) * t);
+-(GLuint) frameIndexAt: (CCTime) t {
+	CCTime adjTime = _startTime + ((_endTime - _startTime) * t);
 	return [_baseAnimation frameIndexAt: adjTime];
 }
 
--(ccTime) timeAtFrame: (GLuint) frameIndex { return [_baseAnimation timeAtFrame: frameIndex]; }
+-(CCTime) timeAtFrame: (GLuint) frameIndex { return [_baseAnimation timeAtFrame: frameIndex]; }
 
 -(CC3Vector) locationAtFrame: (GLuint) frameIndex {
 	return [_baseAnimation locationAtFrame: frameIndex];
@@ -632,7 +632,7 @@ static ccTime _interpolationEpsilon = 0.1f;
   
 #pragma mark Animating
 
--(void) establishFrameAt: (ccTime) t {
+-(void) establishFrameAt: (CCTime) t {
 	_animationTime = t;
 	if (self.isEnabled) [_animation establishFrameAt: t inNodeAnimationState: self];
 }
@@ -695,16 +695,16 @@ static GLuint _lastTrackID = 0;
 	return desc;
 }
 
--(NSString*) describeStateForFrames: (GLuint) frameCount fromTime: (ccTime) startTime toTime: (ccTime) endTime {
+-(NSString*) describeStateForFrames: (GLuint) frameCount fromTime: (CCTime) startTime toTime: (CCTime) endTime {
 	startTime = CLAMP(startTime, 0.0f, 1.0f);
 	endTime = CLAMP(endTime, 0.0f, 1.0f);
 
 	// Generating the description changes current state, so cache it for resortation below
-	ccTime currTime = _animationTime;
+	CCTime currTime = _animationTime;
 	BOOL wasCurrentlyEnabled = self.isEnabled;
 	self.isEnabled = YES;
 	
-	ccTime frameDur = 0.0f;
+	CCTime frameDur = 0.0f;
 	if (frameCount > 1) frameDur = (endTime - startTime) / (GLfloat)(frameCount - 1);
 	NSMutableString* desc = [NSMutableString stringWithCapacity: (kAnimStateDescLen * frameCount + 200)];
 	[desc appendFormat: @"%@ animated state on track %u over %u frames from %.4f to %.4f:", _node, _trackID, frameCount, startTime, endTime];
@@ -771,24 +771,24 @@ static GLuint _lastTrackID = 0;
 																		forNode: self]];
 }
 
--(GLuint) addAnimationFrom: (ccTime) startTime to: (ccTime) endTime {
+-(GLuint) addAnimationFrom: (CCTime) startTime to: (CCTime) endTime {
 	return [self addAnimationFrom: startTime to: endTime ofBaseTrack: 0];
 }
 
--(GLuint) addAnimationFrom: (ccTime) startTime
-						to: (ccTime) endTime
+-(GLuint) addAnimationFrom: (CCTime) startTime
+						to: (CCTime) endTime
 			   ofBaseTrack: (GLuint) baseTrackID {
 	GLuint trackID = [CC3NodeAnimationState generateTrackID];
 	[self addAnimationFrom: startTime to: endTime ofBaseTrack: baseTrackID asTrack: trackID];
 	return trackID;
 }
 
--(void) addAnimationFrom: (ccTime) startTime to: (ccTime) endTime asTrack: (GLuint) trackID {
+-(void) addAnimationFrom: (CCTime) startTime to: (CCTime) endTime asTrack: (GLuint) trackID {
 	[self addAnimationFrom: startTime to: endTime ofBaseTrack: 0 asTrack: trackID];
 }
 
--(void) addAnimationFrom: (ccTime) startTime
-					  to: (ccTime) endTime
+-(void) addAnimationFrom: (CCTime) startTime
+					  to: (CCTime) endTime
 			 ofBaseTrack: (GLuint) baseTrackID
 				 asTrack: (GLuint) trackID {
 	
@@ -890,11 +890,11 @@ static GLuint _lastTrackID = 0;
 	return NO;
 }
 
--(ccTime) animationTimeOnTrack: (GLuint) trackID {
+-(CCTime) animationTimeOnTrack: (GLuint) trackID {
 	CC3NodeAnimationState* as = [self getAnimationStateOnTrack: trackID];
 	if (as) return as.animationTime;
 	for (CC3Node* child in _children) {
-		ccTime animTime = [child animationTimeOnTrack: trackID];
+		CCTime animTime = [child animationTimeOnTrack: trackID];
 		if (animTime) return animTime;
 	}
 	return 0.0f;
@@ -1035,7 +1035,7 @@ static GLuint _lastTrackID = 0;
 
 #pragma mark Establishing an animation frame
 
--(void) establishAnimationFrameAt: (ccTime) t onTrack: (GLuint) trackID {
+-(void) establishAnimationFrameAt: (CCTime) t onTrack: (GLuint) trackID {
 	[[self getAnimationStateOnTrack: trackID] establishFrameAt: t];
 	for (CC3Node* child in _children) [child establishAnimationFrameAt: t onTrack: trackID];
 }
@@ -1099,7 +1099,7 @@ static GLuint _lastTrackID = 0;
 	return desc;
 }
 
--(NSString*) describeAnimationStateForFrames: (GLuint) frameCount fromTime: (ccTime) startTime toTime: (ccTime) endTime {
+-(NSString*) describeAnimationStateForFrames: (GLuint) frameCount fromTime: (CCTime) startTime toTime: (CCTime) endTime {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: (_animationStates.count * kAnimStateDescLen * frameCount + 200)];
 	for (CC3NodeAnimationState* as in _animationStates)
 		[desc appendFormat: @"\n%@ ", [as describeStateForFrames: frameCount fromTime: startTime toTime: endTime]];
@@ -1114,6 +1114,6 @@ static GLuint _lastTrackID = 0;
 #pragma mark Deprecated functionality
 
 -(GLuint) animationFrameCount { return self.animation.frameCount; }
--(void) establishAnimationFrameAt: (ccTime) t { [self establishAnimationFrameAt: t onTrack: 0]; }
+-(void) establishAnimationFrameAt: (CCTime) t { [self establishAnimationFrameAt: t onTrack: 0]; }
 
 @end

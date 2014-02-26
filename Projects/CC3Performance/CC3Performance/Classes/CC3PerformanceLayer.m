@@ -175,8 +175,8 @@
 
 // Add several labels that display performance statistics.
 -(void) addStatsLabels {
-	CCTexture2DPixelFormat currentFormat = [CCTexture2D defaultAlphaPixelFormat];
-	[CCTexture2D setDefaultAlphaPixelFormat: kCCTexture2DPixelFormat_RGBA4444];
+	CCTexture2DPixelFormat currentFormat = [CCTexture defaultAlphaPixelFormat];
+	[CCTexture setDefaultAlphaPixelFormat: kCCTexture2DPixelFormat_RGBA4444];
 	
 	_nodeNameLabel = [self addStatsLabel: @""];
 	_nodeNameLabel.anchorPoint = ccp(0.5, 0.0);
@@ -198,7 +198,7 @@
 	_drawCallsLabel = [self addStatsLabel: @"0"];
 	_facesPresentedLabel = [self addStatsLabel: @"0"];
 
-	[CCTexture2D setDefaultAlphaPixelFormat: currentFormat];
+	[CCTexture setDefaultAlphaPixelFormat: currentFormat];
 
 	[self positionStatsLabels];
 }
@@ -282,7 +282,7 @@
  * Updates the player (camera) direction and location from the joystick controls
  * and then updates the 3D scene.
  */
--(void) update: (ccTime)dt {
+-(void) update: (CCTime)dt {
 	
 	// Update the player direction and position in the scene from the joystick velocities
 	self.performanceScene.playerDirectionControl = _directionJoystick.velocity;

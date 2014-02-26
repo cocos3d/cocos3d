@@ -453,7 +453,7 @@ static const CC3VertexContent kCC3PointParticleContentSize DEPRECATED_ATTRIBUTE 
 @property(nonatomic, assign) GLuint index DEPRECATED_ATTRIBUTE;
 
 /** @deprecated Replaced by the updateBeforeTransform: method. */
--(void) update: (ccTime) dt DEPRECATED_ATTRIBUTE;
+-(void) update: (CCTime) dt DEPRECATED_ATTRIBUTE;
 
 /** @deprecated Use the init method instead, and set emitter property directly. */
 -(id) initFromEmitter: (CC3PointParticleEmitter*) anEmitter;

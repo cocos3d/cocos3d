@@ -654,7 +654,7 @@ static GLfloat directionMarkerMinimumLength = 0;
 // Deprecated
 -(ccColor4F) floatColor { return self.diffuseColor; }
 -(void) setFloatColor: (ccColor4F) floatColor { self.diffuseColor = floatColor; }
--(void) update: (ccTime)dt {}
+-(void) update: (CCTime)dt {}
 
 @end
 

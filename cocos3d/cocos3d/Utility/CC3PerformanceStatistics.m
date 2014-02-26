@@ -46,7 +46,7 @@
 
 #pragma mark Accumulated update statistics
 
--(void) addUpdateTime: (ccTime) deltaTime {
+-(void) addUpdateTime: (CCTime) deltaTime {
 	_updatesHandled++;
 	_accumulatedUpdateTime += deltaTime;
 }
@@ -62,7 +62,7 @@
 
 #pragma mark Accumulated frame drawing statistics
 
--(void) addFrameTime: (ccTime) deltaTime {
+-(void) addFrameTime: (CCTime) deltaTime {
 	_framesHandled++;
 	_accumulatedFrameTime += deltaTime;
 }
@@ -194,14 +194,14 @@
 
 -(GLint*) frameRateHistogram { return _frameRateHistogram; }
 
--(GLint) getIndexOfInterval: (ccTime) deltaTime {
+-(GLint) getIndexOfInterval: (CCTime) deltaTime {
 	return CLAMP((GLint)(1.0 / deltaTime), 0, kCC3RateHistogramSize - 1);
 }
 
 
 #pragma mark Accumulated update statistics
 
--(void) addUpdateTime: (ccTime) deltaTime {
+-(void) addUpdateTime: (CCTime) deltaTime {
 	[super addUpdateTime: deltaTime];
 	_updateRateHistogram[[self getIndexOfInterval: deltaTime]]++;
 }
@@ -209,7 +209,7 @@
 
 #pragma mark Accumulated frame drawing statistics
 
--(void) addFrameTime: (ccTime) deltaTime {
+-(void) addFrameTime: (CCTime) deltaTime {
 	[super addFrameTime: deltaTime];
 	_frameRateHistogram[[self getIndexOfInterval: deltaTime]]++;
 }

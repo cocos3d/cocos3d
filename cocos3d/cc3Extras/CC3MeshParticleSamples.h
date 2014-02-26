@@ -46,8 +46,8 @@
  * check the isAlive property before spending time making any further modifications.
  */
 @interface  CC3MortalMeshParticle  : CC3ScalableMeshParticle <CC3MortalParticleProtocol> {
-	ccTime _lifeSpan;
-	ccTime _timeToLive;
+	CCTime _lifeSpan;
+	CCTime _timeToLive;
 }
 
 /**

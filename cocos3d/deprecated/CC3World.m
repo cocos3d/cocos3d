@@ -34,7 +34,7 @@
 /** Re-declaration of deprecated methods to suppress compiler warnings within this class. */
 @protocol CC3WorldDeprecated
 -(void) initializeWorld;
--(void) updateWorld: (ccTime)dt;
+-(void) updateWorld: (CCTime)dt;
 -(void) updateWorld;
 -(void) drawWorld;
 @end
@@ -50,11 +50,11 @@
 -(void) initializeWorld {}
 
 // Delegate to legacy in case it has been overridden.
--(void) updateScene: (ccTime) dt { [(id<CC3WorldDeprecated>)self updateWorld: dt]; }
+-(void) updateScene: (CCTime) dt { [(id<CC3WorldDeprecated>)self updateWorld: dt]; }
 -(void) updateScene { [(id<CC3WorldDeprecated>)self updateWorld]; }
 
 // Forward to superclass, in case apps invoke it.
--(void) updateWorld: (ccTime) dt { [super updateScene: dt]; }
+-(void) updateWorld: (CCTime) dt { [super updateScene: dt]; }
 -(void) updateWorld { [super updateScene]; }
 
 // Delegate to legacy in case it has been overridden.

@@ -57,8 +57,8 @@
 -(void) ensureGLTexture { if (!_textureID) _textureID = CC3OpenGL.sharedGL.generateTexture; }
 
 /**
- * If the GL texture is not also tracked by a CCTexture2D, delete the GL texture, 
- * otherwise, let the CCTexture2D take care of it when it is deallocated.
+ * If the GL texture is not also tracked by a CCTexture, delete the GL texture, 
+ * otherwise, let the CCTexture take care of it when it is deallocated.
  */
 -(void) deleteGLTexture {
 	if (!_ccTexture2D) [CC3OpenGL.sharedGL deleteTexture: _textureID];
@@ -508,9 +508,9 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 }
 
 
-#pragma mark Associated CCTexture2D
+#pragma mark Associated CCTexture
 
--(CCTexture2D*) ccTexture2D {
+-(CCTexture*) ccTexture2D {
 	if (!_ccTexture2D) {
 		_ccTexture2D = [CC3Texture2DContent textureFromCC3Texture: self];
 		[self cacheCCTexture2D];
@@ -519,9 +519,9 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 }
 
 /**
- * If the class-side shouldCacheAssociatedCCTexture2Ds propery is set to YES, and a CCTexture2D
+ * If the class-side shouldCacheAssociatedCCTexture2Ds propery is set to YES, and a CCTexture
  * with the same name as this texture does not already exist in the CCTextureCache, adds the
- * CCTexture2D returned by the ccTexture2D property to the CCTextureCache.
+ * CCTexture returned by the ccTexture2D property to the CCTextureCache.
  */
 -(void) cacheCCTexture2D {
 	if (self.class.shouldCacheAssociatedCCTexture2Ds) [_ccTexture2D addToCacheWithName: self.name];
@@ -536,7 +536,7 @@ static BOOL _shouldCacheAssociatedCCTexture2Ds = NO;
 }
 
 // Deprecated
--(CCTexture2D*) asCCTexture2D { return self.ccTexture2D; }
+-(CCTexture*) asCCTexture2D { return self.ccTexture2D; }
 
 
 #pragma mark Allocation and initialization

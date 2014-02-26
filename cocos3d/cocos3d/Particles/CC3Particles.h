@@ -241,7 +241,7 @@
  *
  * This can be used with the emissionDuration and emissionInterval properties.
  */
-static const ccTime kCC3ParticleInfiniteInterval = kCC3MaxGLfloat;
+static const CCTime kCC3ParticleInfiniteInterval = kCC3MaxGLfloat;
 
 /**
  * Constant representing an infinite rate of emission.
@@ -249,7 +249,7 @@ static const ccTime kCC3ParticleInfiniteInterval = kCC3MaxGLfloat;
  * This can be used with the emissionRate property, and indicates
  * that all particles should be emitted at once.
  */
-static const ccTime kCC3ParticleInfiniteEmissionRate = kCC3MaxGLfloat;
+static const CCTime kCC3ParticleInfiniteEmissionRate = kCC3MaxGLfloat;
 
 /**
  * Constant representing an unlimited number of particles.
@@ -387,10 +387,10 @@ static const GLuint kCC3ParticlesNoMax = UINT_MAX;
 	GLuint _maximumParticleCapacity;
 	GLuint _particleCapacityExpansionIncrement;
 	GLuint _particleCount;
-	ccTime _emissionDuration;
-	ccTime _elapsedTime;
-	ccTime _emissionInterval;
-	ccTime _timeSinceEmission;
+	CCTime _emissionDuration;
+	CCTime _elapsedTime;
+	CCTime _emissionInterval;
+	CCTime _timeSinceEmission;
 	BOOL _shouldRemoveOnFinish : 1;
 	BOOL _isEmitting : 1;
 	BOOL _wasStarted : 1;
@@ -471,7 +471,7 @@ static const GLuint kCC3ParticlesNoMax = UINT_MAX;
  *
  * The initial value is kCC3ParticleInfiniteDuration.
  */
-@property(nonatomic, assign) ccTime emissionDuration;
+@property(nonatomic, assign) CCTime emissionDuration;
 
 /**
  * For emitters with a finite emissionDuration, indicates the length of time that this
@@ -480,7 +480,7 @@ static const GLuint kCC3ParticlesNoMax = UINT_MAX;
  * When the value of this property exceeds the value of the emissionDuration property,
  * the pause method is automatically invoked to cease the emission of particles.
  */
-@property(nonatomic, readonly) ccTime elapsedTime;
+@property(nonatomic, readonly) CCTime elapsedTime;
 
 /**
  * The rate that particles will be emitted, expressed in particles per second.
@@ -512,7 +512,7 @@ static const GLuint kCC3ParticlesNoMax = UINT_MAX;
  * determine that you want to emit a particle, or you may use the emitParticle: method to add
  * a particle that you have created outside the emitter.
  */
-@property(nonatomic, assign) ccTime emissionInterval;
+@property(nonatomic, assign) CCTime emissionInterval;
 
 /**
  * Indicates that this emitter should automatically be removed from its parent, and

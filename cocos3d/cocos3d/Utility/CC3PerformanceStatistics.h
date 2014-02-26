@@ -31,6 +31,7 @@
 
 
 #import "CC3Foundation.h"
+#import "CC3CC2Extensions.h"
 
 
 #pragma mark -
@@ -47,12 +48,12 @@
  */
 @interface CC3PerformanceStatistics : NSObject <NSCopying> {
 	GLuint _updatesHandled;
-	ccTime _accumulatedUpdateTime;
+	CCTime _accumulatedUpdateTime;
 	GLuint _nodesUpdated;
 	GLuint _nodesTransformed;
 	
 	GLuint _framesHandled;
-	ccTime _accumulatedFrameTime;
+	CCTime _accumulatedFrameTime;
 	GLuint _nodesVisitedForDrawing;
 	GLuint _nodesDrawn;
 	GLuint _drawingCallsMade;
@@ -66,13 +67,13 @@
 @property(nonatomic, readonly) GLuint updatesHandled;
 
 /** The total time accumulated for updates since the reset method was last invoked. */
-@property(nonatomic, readonly) ccTime accumulatedUpdateTime;
+@property(nonatomic, readonly) CCTime accumulatedUpdateTime;
 
 /**
  * Adds the specified single-update delta-time to the accumulated update time,
  * and increments the count of updates handled by one.
  */
--(void) addUpdateTime: (ccTime) deltaTime;
+-(void) addUpdateTime: (CCTime) deltaTime;
 
 /** The total number of nodes updated since the reset method was last invoked. */
 @property(nonatomic, readonly) GLuint nodesUpdated;
@@ -102,13 +103,13 @@
 @property(nonatomic, readonly) GLuint framesHandled;
 
 /** The total time accumulated for frames since the reset method was last invoked. */
-@property(nonatomic, readonly) ccTime accumulatedFrameTime;
+@property(nonatomic, readonly) CCTime accumulatedFrameTime;
 
 /**
  * Adds the specified single-frame delta-time to the accumulated frame time,
  * and increments the count of frame handled by one.
  */
--(void) addFrameTime: (ccTime) deltaTime;
+-(void) addFrameTime: (CCTime) deltaTime;
 
 /**
  * The total number of nodes visited for drawing since the reset method was last invoked.

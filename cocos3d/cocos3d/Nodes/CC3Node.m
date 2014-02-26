@@ -1187,7 +1187,7 @@ static GLuint lastAssignedNodeTag;
 #pragma mark Updating
 
 // Deprecated legacy method - supported for backwards compatibility
--(void) update: (ccTime)dt {}
+-(void) update: (CCTime)dt {}
 
 // Deprecated legacy method - supported for backwards compatibility
 -(void) updateBeforeChildren: (CC3NodeUpdatingVisitor*) visitor {}

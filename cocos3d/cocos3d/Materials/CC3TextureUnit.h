@@ -31,6 +31,7 @@
 
 #import "CC3NodeVisitor.h"
 #import "CCProtocols.h"
+#import	"CC3CC2Extensions.h"
 
 /**
  * In a bump-map configuration, indicates how the XYZ coordinates of each per-pixel

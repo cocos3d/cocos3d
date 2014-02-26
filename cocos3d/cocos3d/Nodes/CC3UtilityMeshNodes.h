@@ -608,7 +608,7 @@
 @property(nonatomic, assign) ccColor4F floatColor DEPRECATED_ATTRIBUTE;
 
 /** @deprecated Use CCActions to control the fog characteristics. */
--(void) update: (ccTime)dt DEPRECATED_ATTRIBUTE;
+-(void) update: (CCTime)dt DEPRECATED_ATTRIBUTE;
 
 @end
 

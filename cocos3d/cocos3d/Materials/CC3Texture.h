@@ -33,6 +33,7 @@
 #import "CC3Identifiable.h"
 #import "CC3NodeVisitor.h"
 #import "CC3TextureUnit.h"
+#import "CC3CC2Extensions.h"
 
 @class CC3Texture2DContent;
 
@@ -593,22 +594,22 @@
 -(void) resizeTo: (CC3IntSize) size;
 
 
-#pragma mark Associated CCTexture2D
+#pragma mark Associated CCTexture
 
 /** 
  * Returns a cocos2d-compatible 2D texture, that references the same GL texture.
  *
  * The value of the class-side shouldCacheAssociatedCCTexture2Ds property determines whether
- * the CCTexture2D returned by this method will automatically be added to the CCTextureCache.
+ * the CCTexture returned by this method will automatically be added to the CCTextureCache.
  *
  * With the class-side shouldCacheAssociatedCCTexture2Ds property set to NO, you can still 
- * add any CCTexture2D retrieved from this property to the CCTextureCache using the 
+ * add any CCTexture retrieved from this property to the CCTextureCache using the 
  * CCTextureCache addTexture:named: method.
  *
- * Although a CCTexture2D can be retrieved for any type of CC3Texture, including cube-maps,
+ * Although a CCTexture can be retrieved for any type of CC3Texture, including cube-maps,
  * using a cube-mapped texture as a cocos2d texture may lead to unexpected behavour.
  */
-@property(nonatomic, strong, readonly) 	CCTexture2D* ccTexture2D;
+@property(nonatomic, strong, readonly) 	CCTexture* ccTexture2D;
 
 /**
  * Indicates whether the associated cocos2d CCTexture, available through the ccTexture2D 
@@ -617,8 +618,8 @@
  * The initial value of this property is NO. If you intend to share many of the same textures
  * between cocos3d and cocos2d objects, you may want to set this property to YES.
  *
- * With this property set to NO, you can still add any CCTexture2D retrieved from the ccTexture2D
- * property to the CCTextureCache using the CCTexture2D addToCacheWithName: method.
+ * With this property set to NO, you can still add any CCTexture retrieved from the ccTexture2D
+ * property to the CCTextureCache using the CCTexture addToCacheWithName: method.
  */
 +(BOOL) shouldCacheAssociatedCCTexture2Ds;
 
@@ -629,13 +630,13 @@
  * The initial value of this property is NO. If you intend to share many of the same textures
  * between cocos3d and cocos2d objects, you may want to set this property to YES.
  *
- * With this property set to NO, you can still add any CCTexture2D retrieved from the ccTexture2D
- * property to the CCTextureCache using the CCTexture2D addToCacheWithName: method.
+ * With this property set to NO, you can still add any CCTexture retrieved from the ccTexture2D
+ * property to the CCTextureCache using the CCTexture addToCacheWithName: method.
  */
 +(void) setShouldCacheAssociatedCCTexture2Ds: (BOOL) shouldCache;
 
 /** @deprecated Use the ccTexture2D property instead. */
--(CCTexture2D*) asCCTexture2D DEPRECATED_ATTRIBUTE;
+-(CCTexture*) asCCTexture2D DEPRECATED_ATTRIBUTE;
 
 
 #pragma mark Allocation and Initialization
@@ -1584,12 +1585,12 @@
 #pragma mark CC3Texture2DContent
 
 /**
- * A CCTexture2D subclass used by the CC3Texture class cluster during the loading of a 2D
- * texture, and when extracting a CCTexture2D from the CC3Texture ccTexture2D property.
+ * A CCTexture subclass used by the CC3Texture class cluster during the loading of a 2D
+ * texture, and when extracting a CCTexture from the CC3Texture ccTexture2D property.
  *
  * PVR texture files cannot be loaded using this class.
  */
-@interface CC3Texture2DContent : CCTexture2D {
+@interface CC3Texture2DContent : CCTexture {
 	const GLvoid* _imageData;
 	GLenum _pixelGLFormat;
 	GLenum _pixelGLType;

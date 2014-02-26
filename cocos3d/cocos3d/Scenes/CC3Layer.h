@@ -338,7 +338,7 @@
  * This method is invoked asynchronously to the frame rendering animation loop, to keep the
  * processing of model updates separate from OpenGL ES drawing.
  */
--(void) update: (ccTime)dt;
+-(void) update: (CCTime)dt;
 
 /**
  * Updates the viewport of the contained CC3Scene instance with the dimensions of this layer.

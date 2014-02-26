@@ -346,7 +346,7 @@
  * Updates the player (camera) direction and location from the joystick controls
  * and then updates the 3D scene.
  */
--(void) update: (ccTime)dt {
+-(void) update: (CCTime)dt {
 	
 	// Update the player direction and position in the scene from the joystick velocities
 	self.mashUpScene.playerDirectionControl = directionJoystick.velocity;

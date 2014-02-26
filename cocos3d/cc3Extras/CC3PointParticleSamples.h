@@ -46,8 +46,8 @@
  * check the isAlive property before spending time making any further modifications.
  */
 @interface  CC3MortalPointParticle  : CC3PointParticle <CC3MortalParticleProtocol> {
-	ccTime _lifeSpan;
-	ccTime _timeToLive;
+	CCTime _lifeSpan;
+	CCTime _timeToLive;
 }
 
 /**
@@ -69,7 +69,7 @@
  * Override the updateBeforeTransform: method, invoke the superclass implementation, and then
  * test the isAlive property of this particle before any further modifications.
  */
--(void) updateLife: (ccTime) dt DEPRECATED_ATTRIBUTE;
+-(void) updateLife: (CCTime) dt DEPRECATED_ATTRIBUTE;
 
 @end
 
@@ -85,10 +85,10 @@
 @interface CC3MortalPointParticleEmitterDeprecated : CC3PointParticleEmitter {}
 
 /** @deprecated Replaced by minParticleLifeSpan property on the CC3RandomMortalParticleNavigator attached to this instance. */
-@property(nonatomic, assign) ccTime minParticleLifeSpan;
+@property(nonatomic, assign) CCTime minParticleLifeSpan;
 
 /** @deprecated Replaced by maxParticleLifeSpan property on the CC3RandomMortalParticleNavigator attached to this instance. */
-@property(nonatomic, assign) ccTime maxParticleLifeSpan;
+@property(nonatomic, assign) CCTime maxParticleLifeSpan;
 
 /** @deprecated Life-span and trajectory now initialized by the CC3RandomMortalParticleNavigator attached to this instance. */
 -(void) initializeMortalParticle: (CC3MortalPointParticle*) aParticle;

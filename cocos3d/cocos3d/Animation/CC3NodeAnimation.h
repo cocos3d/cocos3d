@@ -124,7 +124,7 @@
  *
  * The value of this class-side property affects all animation.
  */
-+(ccTime) interpolationEpsilon;
++(CCTime) interpolationEpsilon;
 
 /**
  * Indicates a fractional value of a frame below which interpolation will not be performed.
@@ -144,7 +144,7 @@
  *
  * The value of this class-side property affects all animation.
  */
-+(void) setInterpolationEpsilon: (ccTime) epsilon;
++(void) setInterpolationEpsilon: (CCTime) epsilon;
 
 
 #pragma mark Allocation and initialization
@@ -170,10 +170,10 @@
  * If the shouldInterpolate property is set to YES, linear interpolation of the frame
  * data is performed, based on the frameCount and the specified time.
  */
--(void) establishFrameAt: (ccTime) t inNodeAnimationState: (CC3NodeAnimationState*) animState;
+-(void) establishFrameAt: (CCTime) t inNodeAnimationState: (CC3NodeAnimationState*) animState;
 
 /** @deprecated Use establishFrameAt:inNodeAnimationState: instead. */
--(void) establishFrameAt: (ccTime) t forNode: (CC3Node*) aNode DEPRECATED_ATTRIBUTE;
+-(void) establishFrameAt: (CCTime) t forNode: (CC3Node*) aNode DEPRECATED_ATTRIBUTE;
 
 /**
  * Returns the time at which the frame at the specified index occurs. The returned time
@@ -185,7 +185,7 @@
  * the range between zero and one. Subclasses that allow variable times between frames will
  * override to return the appropriate value.
  */
--(ccTime) timeAtFrame: (GLuint) frameIndex;
+-(CCTime) timeAtFrame: (GLuint) frameIndex;
 
 @end
 
@@ -228,7 +228,7 @@
  *     care of releasing the arrays when appropriate.
  */
 @interface CC3ArrayNodeAnimation : CC3NodeAnimation {
-	ccTime* _frameTimes;
+	CCTime* _frameTimes;
 	CC3Vector* _animatedLocations;
 	CC3Quaternion* _animatedQuaternions;
 	CC3Vector* _animatedScales;
@@ -239,7 +239,7 @@
 }
 
 /**
- * An array of frame times. Each ccTime in the array indicates the time for one frame. All values
+ * An array of frame times. Each CCTime in the array indicates the time for one frame. All values
  * must be within the range from zero and one inclusive. For accurate animation, the value of
  * the first element of this array should be zero, and the value of the last element should be one.
  * The array must have at least frameCount elements.
@@ -252,7 +252,7 @@
  *
  * The initial value of this property is NULL, indicating that the frames are equally spaced.
  */
-@property(nonatomic, assign) ccTime* frameTimes;
+@property(nonatomic, assign) CCTime* frameTimes;
 
 /**
  * An array of animated location content. Each CC3Vector in the array holds the location content
@@ -299,13 +299,13 @@
 /**
  * Allocates underlying memory for an array of frame times.
  * All elements of the array are initialized to zero.
- * The amount of memory allocated will be (frameCount * sizeof(ccTime)) bytes.
+ * The amount of memory allocated will be (frameCount * sizeof(CCTime)) bytes.
  *
  * It is safe to invoke this method more than once, but understand that any previously
  * allocated memory will be safely freed prior to the allocation of the new memory.
  * The memory allocated earlier will therefore be lost and should not be referenced.
  */
--(ccTime*) allocateFrameTimes;
+-(CCTime*) allocateFrameTimes;
 
 /**
  * Allocates underlying memory for an array of location vectors.
@@ -495,8 +495,8 @@
  */
 @interface CC3NodeAnimationSegment : CC3NodeAnimation {
 	CC3NodeAnimation* _baseAnimation;
-	ccTime _startTime;
-	ccTime _endTime;
+	CCTime _startTime;
+	CCTime _endTime;
 }
 
 /** The CC3NodeAnimation containing the underlying animation data. */
@@ -512,7 +512,7 @@
  * See the class notes for more information about how to set the values of the startTime and
  * endTime properties to create an animation segment from the underlying animation data.
  */
-@property(nonatomic, assign) ccTime startTime;
+@property(nonatomic, assign) CCTime startTime;
 
 /**
  * The time within the underlying animation data that corresponds to the last frame of animation
@@ -524,7 +524,7 @@
  * See the class notes for more information about how to set the values of the startTime and
  * endTime properties to create an animation segment from the underlying animation data.
  */
-@property(nonatomic, assign) ccTime endTime;
+@property(nonatomic, assign) CCTime endTime;
 
 /**
  * The index of the first frame that will be animated from the underlying animation data.
@@ -587,16 +587,16 @@
  * the startTime and endTime properties set to the specified value.
  */
 -(id) initOnAnimation: (CC3NodeAnimation*) baseAnimation
-				 from: (ccTime) startTime
-				   to: (ccTime) endTime;
+				 from: (CCTime) startTime
+				   to: (CCTime) endTime;
 
 /**
  * Allocates and initializes an autoreleased instance to animate a segment of the specified
  * base animation, and with the startTime and endTime properties set to the specified value.
  */
 +(id) animationOnAnimation: (CC3NodeAnimation*) baseAnimation
-					  from: (ccTime) startTime
-						to: (ccTime) endTime;
+					  from: (CCTime) startTime
+						to: (CCTime) endTime;
 
 /**
  * Initializes this instance to animate a segment of the specified base animation, and with
@@ -632,7 +632,7 @@
 @interface CC3NodeAnimationState : NSObject {
 	CC3Node* __unsafe_unretained _node;
 	CC3NodeAnimation* _animation;
-	ccTime _animationTime;
+	CCTime _animationTime;
 	CC3Vector _location;
 	CC3Quaternion _quaternion;
 	CC3Vector _scale;
@@ -718,7 +718,7 @@
  * Returns the current animation time. This is the value submitted to the most recent invocation
  * of the establishFrameAt: method, or zero if that method has not yet been invoked.
  */
-@property(nonatomic, readonly) ccTime animationTime;
+@property(nonatomic, readonly) CCTime animationTime;
 
 /**
  * The current animated location.
@@ -794,7 +794,7 @@
  * be a value between zero and one, with zero indicating the first animation frame, and one
  * indicating the last animation frame.
  */
--(void) establishFrameAt: (ccTime) t;
+-(void) establishFrameAt: (CCTime) t;
 
 
 #pragma mark Allocation and initialization
@@ -841,7 +841,7 @@
  * Returns a description of the state at each of frameCount frames between the specified
  * start and end times, which should each be in the range between zero and one.
  */
--(NSString*) describeStateForFrames: (GLuint) frameCount fromTime: (ccTime) startTime toTime: (ccTime) endTime;
+-(NSString*) describeStateForFrames: (GLuint) frameCount fromTime: (CCTime) startTime toTime: (CCTime) endTime;
 
 @end
 
@@ -941,8 +941,8 @@
  * This method is automatically propagated to all descendant nodes, so you only need to invoke
  * this method on a single ancestor node (eg- the root node of your character).
  */
--(GLuint) addAnimationFrom: (ccTime) startTime
-						to: (ccTime) endTime;
+-(GLuint) addAnimationFrom: (CCTime) startTime
+						to: (CCTime) endTime;
 
 /**
  * Many animated characters require the animation of multiple distinct movements. For example, a
@@ -977,8 +977,8 @@
  * This method is automatically propagated to all descendant nodes, so you only need to invoke
  * this method on a single ancestor node (eg- the root node of your character).
  */
--(GLuint) addAnimationFrom: (ccTime) startTime
-						to: (ccTime) endTime
+-(GLuint) addAnimationFrom: (CCTime) startTime
+						to: (CCTime) endTime
 			   ofBaseTrack: (GLuint) baseTrackID;
 
 /**
@@ -1014,8 +1014,8 @@
  * This method is automatically propagated to all descendant nodes, so you only need to invoke
  * this method on a single ancestor node (eg- the root node of your character).
  */
--(void) addAnimationFrom: (ccTime) startTime
-					  to: (ccTime) endTime
+-(void) addAnimationFrom: (CCTime) startTime
+					  to: (CCTime) endTime
 				 asTrack: (GLuint) trackID;
 
 /**
@@ -1051,8 +1051,8 @@
  * This method is automatically propagated to all descendant nodes, so you only need to invoke
  * this method on a single ancestor node (eg- the root node of your character).
  */
--(void) addAnimationFrom: (ccTime) startTime
-					  to: (ccTime) endTime
+-(void) addAnimationFrom: (CCTime) startTime
+					  to: (CCTime) endTime
 			 ofBaseTrack: (GLuint) baseTrackID
 				 asTrack: (GLuint) trackID;
 
@@ -1237,7 +1237,7 @@
  * node that contains animation and has a non-zero animation time. Returns zero if no descendant
  * nodes contain animation, or all descendant animation times are zero.
  */
--(ccTime) animationTimeOnTrack: (GLuint) trackID;
+-(CCTime) animationTimeOnTrack: (GLuint) trackID;
 
 /**
  * Returns the animation blending weight for the animation on the specified track.
@@ -1541,7 +1541,7 @@
  * This method is invoked automatically from an instance of CC3Animate that is animating
  * this node. Usually, the application never needs to invoke this method directly.
  */
--(void) establishAnimationFrameAt: (ccTime) t onTrack: (GLuint) trackID;
+-(void) establishAnimationFrameAt: (CCTime) t onTrack: (GLuint) trackID;
 
 
 #pragma mark Developer support
@@ -1556,7 +1556,7 @@
  * Returns a description of the state at each of frameCount animation frames between the
  * specified start and end times, which should each be in the range between zero and one.
  */
--(NSString*) describeAnimationStateForFrames: (GLuint) frameCount fromTime: (ccTime) startTime toTime: (ccTime) endTime;
+-(NSString*) describeAnimationStateForFrames: (GLuint) frameCount fromTime: (CCTime) startTime toTime: (CCTime) endTime;
 
 
 #pragma mark Deprecated functionality
@@ -1567,6 +1567,6 @@
 @property(nonatomic, readonly) GLuint animationFrameCount DEPRECATED_ATTRIBUTE;
 
 /** @deprecated Replaced with establishAnimationFrameAt:onTrack:. */
--(void) establishAnimationFrameAt: (ccTime) t DEPRECATED_ATTRIBUTE;
+-(void) establishAnimationFrameAt: (CCTime) t DEPRECATED_ATTRIBUTE;
 
 @end

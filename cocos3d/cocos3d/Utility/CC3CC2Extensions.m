@@ -110,14 +110,14 @@
 
 @implementation CC3CCSizeTo
 
--(id) initWithDuration: (ccTime) dur sizeTo: (CGSize) endSize {
+-(id) initWithDuration: (CCTime) dur sizeTo: (CGSize) endSize {
 	if( (self = [super initWithDuration: dur]) ) {
 		endSize_ = endSize;
 	}
 	return self;
 }
 
-+(id) actionWithDuration: (ccTime) dur sizeTo: (CGSize) endSize {
++(id) actionWithDuration: (CCTime) dur sizeTo: (CGSize) endSize {
 	return [[self alloc] initWithDuration: dur sizeTo: endSize];
 }
 
@@ -134,7 +134,7 @@
 	sizeChange_ = CGSizeMake(endSize_.width - startSize_.width, endSize_.height - startSize_.height);
 }
 
--(void) update: (ccTime) t {
+-(void) update: (CCTime) t {
 	CCNode* tNode = (CCNode*)self.target;
 	tNode.contentSize = CGSizeMake(startSize_.width + (sizeChange_.width * t),
 								   startSize_.height + (sizeChange_.height * t));
@@ -152,6 +152,10 @@
 #pragma mark CCNode extension
 
 @implementation CCNode (CC3)
+
+#if (CC3_CC2_1 || CC3_CC2_2)
+-(BOOL) isRunningInActiveScene { return self.isRunning; }
+#endif	// (CC3_CC2_1 || CC3_CC2_2)
 
 #if CC3_CC2_2
 -(CGSize) contentSizeInPixels { return CC_SIZE_POINTS_TO_PIXELS(self.contentSize); }
@@ -220,10 +224,10 @@
 	
 	if (self.isTouchEnabled &&
 		self.visible &&
-		self.isRunning &&
+		self.isRunningInActiveScene &&
 		[self cc3ContainsTouchPoint: viewPoint] ) return YES;
 	
-	CCArray* myKids = self.children;
+	id myKids = self.children;		// Covers both NSArray & CCArray
 	for (CCNode* child in myKids)
 		if ( [child cc3WillConsumeTouchEventAt: viewPoint] ) return YES;
 
@@ -272,6 +276,8 @@
 @end
 
 
+#if (CC3_CC2_1 || CC3_CC2_2)
+
 #pragma mark -
 #pragma mark CCLayer extension
 
@@ -305,7 +311,7 @@
 @implementation CCMenu (CC3)
 
 -(BOOL) cc3ContainsTouchPoint: (CGPoint) viewPoint {
-	CCArray* myKids = self.children;
+	id myKids = self.children;		// Covers both NSArray & CCArray
 	for (CCNode* child in myKids)
 		if ( [child cc3ContainsTouchPoint: viewPoint] ) return YES;
 	return NO;
@@ -328,11 +334,13 @@
 #endif
 @end
 
+#endif	// (CC3_CC2_1 || CC3_CC2_2)
+
 
 #pragma mark -
-#pragma mark CCTexture2D extension
+#pragma mark CCTexture extension
 
-@implementation CCTexture2D (CC3)
+@implementation CCTexture (CC3)
 
 -(void) addToCacheWithName: (NSString*) texName {
 	[CCTextureCache.sharedTextureCache addTexture: self named: texName];
@@ -355,7 +363,7 @@
 #	define CC2_TEX_DICT			_textures
 #endif	// COCOS2D_VERSION < 0x020100
 
--(void) addTexture: (CCTexture2D*) tex2D named: (NSString*) texName {
+-(void) addTexture: (CCTexture*) tex2D named: (NSString*) texName {
 	if ( !tex2D || !texName ) return;
 	
 	dispatch_sync(CC2_DICT_QUEUE, ^{
@@ -370,7 +378,7 @@
 #	define CC2_DICT_LOCK		dictLock_
 #	define CC2_TEX_DICT			textures_
 
--(void) addTexture: (CCTexture2D*) tex2D named: (NSString*) texName {
+-(void) addTexture: (CCTexture*) tex2D named: (NSString*) texName {
 	if ( !tex2D ) return;
 
 	[CC2_DICT_LOCK lock];
@@ -392,9 +400,9 @@
 
 -(void) setCcGLView: (CCGLView*) ccGLView { self.view = ccGLView; }
 
--(ccTime) frameInterval { return CC2_DT; }
+-(CCTime) frameInterval { return CC2_DT; }
 
--(ccTime) frameRate { return CC2_FRAME_RATE; }
+-(CCTime) frameRate { return CC2_FRAME_RATE; }
 
 -(BOOL) hasScene { return !((CC2_RUNNING_SCENE == nil) && (CC2_NEXT_SCENE == nil)); }
 
@@ -446,10 +454,10 @@
 
 #if CC_DIRECTOR_FAST_FPS
     if (!FPSLabel_) {
-		CCTexture2DPixelFormat currentFormat = [CCTexture2D defaultAlphaPixelFormat];
-		[CCTexture2D setDefaultAlphaPixelFormat:kCCTexture2DPixelFormat_RGBA4444];
+		CCTexture2DPixelFormat currentFormat = [CCTexture defaultAlphaPixelFormat];
+		[CCTexture setDefaultAlphaPixelFormat:kCCTexture2DPixelFormat_RGBA4444];
 		FPSLabel_ = [CCLabelAtlas labelWithString:@"00.0" charMapFile:@"fps_images_1.png" itemWidth:16 itemHeight:24 startCharMap:'.'];
-		[CCTexture2D setDefaultAlphaPixelFormat:currentFormat];
+		[CCTexture setDefaultAlphaPixelFormat:currentFormat];
 	}
 #endif	// CC_DIRECTOR_FAST_FPS
 

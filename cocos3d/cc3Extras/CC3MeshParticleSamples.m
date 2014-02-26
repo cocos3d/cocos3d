@@ -40,7 +40,7 @@
 
 @synthesize lifeSpan=_lifeSpan, timeToLive=_timeToLive;
 
--(void) setLifeSpan: (ccTime) anInterval {
+-(void) setLifeSpan: (CCTime) anInterval {
 	_lifeSpan = anInterval;
 	_timeToLive = _lifeSpan;
 }
@@ -153,7 +153,7 @@
 	[super updateBeforeTransform: visitor];
 	if( !self.isAlive ) return;
 	
-	ccTime dt = visitor.deltaTime;
+	CCTime dt = visitor.deltaTime;
 	
 	switch (_rotationVelocityType) {
 		case kCC3RotationTypeEuler: {
