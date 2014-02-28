@@ -63,18 +63,6 @@
 	free(value_GL_TEXTURE_BINDING_CUBE_MAP);
 }
 
-static NSThread* _renderThread = nil;
-
-/**
- * Retrieve from CCDirector, and cache for fast access, and to allow CCDirector to be shut
- * down, but the render thread to still be accessible for any outstanding background loading
- * that occurs before GL is shut down.
- */
-+(NSThread*) renderThread {
-	if (!_renderThread) _renderThread = CCDirector.sharedDirector.runningThread;
-	return _renderThread;
-}
-
 static NSObject<CC3OpenGLDelegate>* _delegate = nil;
 
 +(NSObject<CC3OpenGLDelegate>*) delegate { return _delegate; }
@@ -1205,13 +1193,28 @@ static CC3OpenGL* _bgGL = nil;
 -(BOOL) isRenderingContext { return (self == _renderGL); }
 
 +(CC3OpenGL*) sharedGL {
-	if (NSThread.isRenderingThread) {
+	if (self.isRenderThread) {
 		if (!_renderGL) _renderGL = [[self alloc] initWithName: @"Rendering Engine"];
 		return _renderGL;
 	} else {
 		if (!_bgGL) _bgGL = [[self alloc] initWithName: @"Background Engine"];
 		return _bgGL;
 	}
+}
+
+static NSThread* _renderThread = nil;
+
++(NSThread*) renderThread {
+	// Retrieve from CCDirector, and cache for fast access, and to allow CCDirector to be shut
+	// down, but the render thread to still be accessible for any outstanding background loading
+	// that occurs before GL is shut down.
+	if (!_renderThread) _renderThread = CCDirector.sharedDirector.runningThread;
+	return _renderThread;
+}
+
++(BOOL) isRenderThread {
+	if (!_renderThread) [self renderThread];
+	return (NSThread.currentThread == _renderThread) || NSThread.isMainThread;
 }
 
 +(void) terminateOpenGL {

@@ -122,9 +122,6 @@
  */
 -(void) runBlock: (void (^)(void))block after: (NSTimeInterval) seconds;
 
-/** Returns whether the current thread is the thread on which OpenGL rendering is occurring. */
-+(BOOL) isRenderingThread;
-
 @end
 
 

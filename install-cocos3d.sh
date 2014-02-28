@@ -303,6 +303,7 @@ link_cocos2d_libs(){
 	else
 		link_dir "$CDEN_DIST_DIR" "$CC2_DIR" "CocosDenshion"
 	fi
+	copy_file "LICENSE_CocosDenshion.txt" "$CC2_DIST_DIR" "$CC2_DIR"
 
 	echo done!
 }

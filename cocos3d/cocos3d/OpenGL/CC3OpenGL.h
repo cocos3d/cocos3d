@@ -229,9 +229,6 @@ typedef struct {
  */
 @property(nonatomic, readonly) BOOL isRenderingContext;
 
-/** Returns the thread that is being used for primary rendering. */
-+(NSThread*) renderThread;
-
 /**
  * Returns the CC3OpenGLDelegate delegate that will receive callback notifications for
  * asynchronous OpenGL activities.
@@ -1271,6 +1268,12 @@ typedef struct {
  * one for a single background thread that can be used for loading resources, textures, and shaders.
  */
 +(CC3OpenGL*) sharedGL;
+
+/** Returns the thread that is being used for primary rendering. */
++(NSThread*) renderThread;
+
+/** Returns whether the current thread is being used for primary rendering. */
++(BOOL) isRenderThread;
 
 /** 
  * Terminates the current use of OpenGL by this application.

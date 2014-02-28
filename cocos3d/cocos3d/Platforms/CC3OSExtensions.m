@@ -102,11 +102,6 @@
 
 -(void) runBlockNow: (void (^)(void)) block { @autoreleasepool { block(); } }
 
-+(BOOL) isRenderingThread {
-	NSThread* currThread = self.currentThread;
-	return ((currThread == CC3OpenGL.renderThread) || currThread.isMainThread);
-}
-
 @end
 
 
