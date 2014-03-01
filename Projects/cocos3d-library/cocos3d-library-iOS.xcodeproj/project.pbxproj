@@ -76,7 +76,7 @@
 		A9BC917D189C776C000FB28C /* CC3MeshNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC907E189C776B000FB28C /* CC3MeshNode.m */; };
 		A9BC917E189C776C000FB28C /* CC3Node.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC9080189C776B000FB28C /* CC3Node.m */; };
 		A9BC917F189C776C000FB28C /* CC3NodeListeners.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC9082189C776C000FB28C /* CC3NodeListeners.m */; };
-		A9BC9180189C776C000FB28C /* CC3NodeVisitor.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC9084189C776C000FB28C /* CC3NodeVisitor.m */; };
+		A9BC9180189C776C000FB28C /* CC3NodeVisitor.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC9084189C776C000FB28C /* CC3NodeVisitor.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A9BC9181189C776C000FB28C /* CC3ParametricMeshNodes.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC9086189C776C000FB28C /* CC3ParametricMeshNodes.m */; };
 		A9BC9182189C776C000FB28C /* CC3UtilityMeshNodes.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC9088189C776C000FB28C /* CC3UtilityMeshNodes.m */; };
 		A9BC9183189C776C000FB28C /* CC3OpenGL.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC908C189C776C000FB28C /* CC3OpenGL.m */; };

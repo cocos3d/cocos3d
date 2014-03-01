@@ -499,7 +499,7 @@
  * The shouldUseStrongReferenceToTexture property determines whether the texture in this 
  * property will be held by a strong, or weak, reference.
  */
-@property(nonatomic) CC3Texture* texture;
+@property(nonatomic, assign) CC3Texture* texture;
 
 /** 
  * The target face within the texture into which rendering is to occur.

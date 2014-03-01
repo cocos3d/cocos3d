@@ -1469,7 +1469,7 @@ static CC3Cache* _shaderSourceCodeCache = nil;
 	
 	// Release visitor state so it won't interfere with later deallocations
 	pwVisitor.renderSurface = nil;
-	pwVisitor.gl = nil;
+	[pwVisitor clearGL];
 	
 	pwNode.shaderProgram = nil;	// Release the program immediately, since it is only used once.
 	[program resetGLState];		// Reset GL state. Needed if pre-warming in background context...
