@@ -71,7 +71,7 @@
  * uniform... methods, and will clear the pureColorProgram so that a new pureColorProgram
  * will be matched to the new program on next access.
  */
-@property(nonatomic, strong) CC3ShaderProgram* program;
+@property(nonatomic, retain) CC3ShaderProgram* program;
 
 /** 
  * Returns the program to use to render this node in a pure color, such as used when rendering
@@ -83,7 +83,7 @@
  * the program property, but has a fragment shader that paints in a single color. By using
  * the same vertex shader, the vertices are guaranteed to be rendered in the same locations.
  */
-@property(nonatomic, strong) CC3ShaderProgram* pureColorProgram;
+@property(nonatomic, retain) CC3ShaderProgram* pureColorProgram;
 
 /**
  * Indicates whether this context should ensure that all uniforms with an unknown semantic

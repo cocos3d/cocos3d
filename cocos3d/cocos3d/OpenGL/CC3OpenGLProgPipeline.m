@@ -29,6 +29,10 @@
  * See header file CC3OpenGLProgPipeline.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3OpenGLProgPipeline.h"
 #import "CC3ShaderMatcher.h"
 #import "CC3NodeVisitor.h"
@@ -57,6 +61,13 @@
 
 
 @implementation CC3OpenGLProgPipeline
+
+-(void) dealloc {
+	[value_GL_SHADING_LANGUAGE_VERSION release];
+	[_shaderProgramPrewarmer release];
+	[super dealloc];
+}
+
 
 #pragma mark Vertex attribute arrays
 
@@ -198,7 +209,9 @@
 -(CC3ShaderPrewarmer*) shaderProgramPrewarmer { return _shaderProgramPrewarmer; }
 
 -(void) setShaderProgramPrewarmer: (CC3ShaderPrewarmer*) shaderProgramPrewarmer {
-	_shaderProgramPrewarmer = shaderProgramPrewarmer;
+	if (shaderProgramPrewarmer == _shaderProgramPrewarmer) return;
+	[_shaderProgramPrewarmer release];
+	_shaderProgramPrewarmer = [shaderProgramPrewarmer retain];
 }
 
 -(GLuint) createShader: (GLenum) shaderType {
@@ -391,7 +404,7 @@
 	value_GL_MAX_VERTEX_ATTRIBS = [self getInteger: GL_MAX_VERTEX_ATTRIBS];
 	LogInfoIfPrimary(@"Maximum vertex attributes: %u", value_GL_MAX_VERTEX_ATTRIBS);
 
-	value_GL_SHADING_LANGUAGE_VERSION = [self getString: GL_SHADING_LANGUAGE_VERSION];
+	value_GL_SHADING_LANGUAGE_VERSION = [[self getString: GL_SHADING_LANGUAGE_VERSION] retain];
 	LogInfoIfPrimary(@"GLSL version: %@", value_GL_SHADING_LANGUAGE_VERSION);
 	
 	value_GL_MAX_CLIP_PLANES = kCC3MaxGLSLClipPlanes;
@@ -444,7 +457,7 @@
 	_location = glGetAttribLocation(_program.programID, cName);
 	LogGLErrorTrace(@"glGetAttribLocation(%u, \"%s\")", _program.programID, cName);
 
-	_name = [NSString stringWithUTF8String: cName];
+	_name = [[NSString stringWithUTF8String: cName] retain];
 }
 
 @end
@@ -467,7 +480,7 @@
 	_location = glGetUniformLocation(_program.programID, cName);
 	LogGLErrorTrace(@"glGetUniformLocation(%u, \"%s\")", _program.programID, cName);
 	
-	_name = [NSString stringWithUTF8String: cName];
+	_name = [[NSString stringWithUTF8String: cName] retain];
 }
 
 /** Set the value of this uniform in the GL engine, based on the content type. */

@@ -29,6 +29,10 @@
  * See header file CC3ShaderContext.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3ShaderContext.h"
 #import "CC3ShaderMatcher.h"
 
@@ -41,12 +45,25 @@
 @synthesize shouldEnforceCustomOverrides=_shouldEnforceCustomOverrides;
 @synthesize shouldEnforceVertexAttributes=_shouldEnforceVertexAttributes;
 
+-(void) dealloc {
+	[_program release];
+	[_pureColorProgram release];
+	[_uniforms release];
+	[_uniformsByName release];
+	
+	[super dealloc];
+}
+
 -(CC3ShaderProgram*) program { return _program; }
 
 -(void) setProgram:(CC3ShaderProgram*) program {
 	if (program == _program) return;
-	_program = program;
-	_pureColorProgram = nil;
+
+	[_program release];
+	_program = [program retain];
+	
+	self.pureColorProgram = nil;
+	
 	[self removeAllOverrides];
 }
 
@@ -62,7 +79,8 @@
 
 -(void) setPureColorProgram:(CC3ShaderProgram*) program {
 	if (program == _pureColorProgram) return;
-	_pureColorProgram = program;
+	[_pureColorProgram release];
+	_pureColorProgram = [program retain];
 }
 
 
@@ -90,15 +108,15 @@
 }
 
 -(CC3GLSLUniform*)	addUniformOverrideFor: (CC3GLSLUniform*) uniform {
-	return [self addUniformOverride: [uniform copyAsClass: CC3GLSLUniformOverride.class]];
+	return [[self addUniformOverride: [uniform copyAsClass: CC3GLSLUniformOverride.class]] autorelease];
 }
 
 -(CC3GLSLUniformOverride*) addUniformOverride: (CC3GLSLUniformOverride*) uniformOverride {
 	if( !uniformOverride ) return nil;
 	
-	if ( !_uniforms ) _uniforms = [NSMutableArray array];
-	if ( !_uniformsByName ) _uniformsByName = [NSMutableDictionary new];
-	
+	if ( !_uniforms ) _uniforms = [NSMutableArray new];						// retained
+	if ( !_uniformsByName ) _uniformsByName = [NSMutableDictionary new];	// retained
+		
 	[_uniformsByName setObject: uniformOverride forKey: uniformOverride.name];
 	[_uniforms addObject: uniformOverride];
 
@@ -114,7 +132,9 @@
 }
 
 -(void) removeAllOverrides {
+	[_uniformsByName release];
 	_uniformsByName = nil;
+	[_uniforms release];
 	_uniforms = nil;
 }
 
@@ -158,7 +178,7 @@
 	return self;
 }
 
-+(id) context { return [[self alloc] init]; }
++(id) context { return [[[self alloc] init] autorelease]; }
 
 -(id) copyWithZone: (NSZone*) zone {
 	CC3ShaderContext* aCopy = [[[self class] allocWithZone: zone] init];
@@ -171,12 +191,16 @@
 -(CC3ShaderProgram*) rawPureColorProgram { return _pureColorProgram; }
 
 -(void) populateFrom: (CC3ShaderContext*) another {
-	_program = another.program;
-	_pureColorProgram = another.rawPureColorProgram;
+	[_program release];
+	_program = [another.program retain];
+	
+	[_pureColorProgram release];
+	_pureColorProgram = [another.rawPureColorProgram retain];
+
 	_shouldEnforceCustomOverrides = another.shouldEnforceCustomOverrides;
 	_shouldEnforceVertexAttributes = another.shouldEnforceVertexAttributes;
 
-	for (CC3GLSLUniformOverride* uo in another.uniforms) [self addUniformOverride: [uo copy]];
+	for (CC3GLSLUniformOverride* uo in another.uniforms) [self addUniformOverride: [uo autoreleasedCopy]];
 }
 
 -(NSString*) description {

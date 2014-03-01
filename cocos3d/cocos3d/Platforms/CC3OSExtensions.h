@@ -80,8 +80,12 @@
 /** Extension category to support cocos3d functionality. */
 @interface NSObject (CC3) <CC3Object>
 
-/** @deprecated Not required with ARC. */
--(id) autoreleasedCopy DEPRECATED_ATTRIBUTE;
+/** 
+ * Returns an autoreleased copy of this object.
+ *
+ * This is a convenience method that simply invokes [[self copy] autorelease]. 
+ */
+-(id) autoreleasedCopy;
 
 /** @deprecated Renamed to autoreleasedCopy to satisfy naming paradigm for copy... methods. */
 -(id) copyAutoreleased DEPRECATED_ATTRIBUTE;

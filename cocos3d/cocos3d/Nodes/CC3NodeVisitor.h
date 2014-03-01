@@ -139,7 +139,7 @@
  * This implementation returns the activeCamera property of the starting node.
  * Subclasses may override.
  */
-@property(nonatomic, readonly) CC3Camera* defaultCamera;
+@property(nonatomic, retain, readonly) CC3Camera* defaultCamera;
 
 /**
  * The CC3Node that is currently being visited.

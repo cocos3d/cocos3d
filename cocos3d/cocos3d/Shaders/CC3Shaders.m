@@ -29,6 +29,10 @@
  * See header file CC3Shaders.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3Shaders.h"
 #import "CC3ShaderContext.h"
 #import "CC3ShaderMatcher.h"
@@ -49,6 +53,9 @@
 -(void) dealloc {
 	[self remove];		// remove this instance from the cache
 	[self deleteGLShader];
+	[_shaderPreamble release];
+	
+	[super dealloc];
 }
 
 -(GLuint) shaderID {
@@ -70,8 +77,8 @@
 
 -(void) setShaderPreambleString: (NSString*) shaderPreambleString {
 	NSString* preambleName = [NSString stringWithFormat: @"%@-Preamble", self.name];
-	_shaderPreamble = [CC3ShaderSourceCode shaderSourceCodeWithName: preambleName
-												 fromSourceCodeString: shaderPreambleString];
+	self.shaderPreamble = [CC3ShaderSourceCode shaderSourceCodeWithName: preambleName
+												   fromSourceCodeString: shaderPreambleString];
 }
 
 -(NSString*) defaultShaderPreambleString { return CC3OpenGL.sharedGL.defaultShaderPreamble; }
@@ -80,8 +87,8 @@ static CC3ShaderSourceCode* _defaultShaderPreamble = nil;
 
 -(CC3ShaderSourceCode*) defaultShaderPreamble {
 	if ( !_defaultShaderPreamble ) {
-		_defaultShaderPreamble = [CC3ShaderSourceCode shaderSourceCodeWithName: @"DefaultShaderPreamble"
-														  fromSourceCodeString: self.defaultShaderPreambleString];
+		_defaultShaderPreamble = [[CC3ShaderSourceCode shaderSourceCodeWithName: @"DefaultShaderPreamble"
+														   fromSourceCodeString: self.defaultShaderPreambleString] retain];
 	}
 	return _defaultShaderPreamble;
 }
@@ -97,12 +104,12 @@ static CC3ShaderSourceCode* _defaultShaderPreamble = nil;
 	_wasLoadedFromFile = shSrcCode.wasLoadedFromFile;
 
 	// Allocate an array of source code strings
-	GLuint scCnt = _shaderPreamble.sourceStringCount + shSrcCode.sourceStringCount;
+	GLuint scCnt = self.shaderPreamble.sourceStringCount + shSrcCode.sourceStringCount;
 	const GLchar* scStrings[scCnt];
 
 	// Populate the source code strings from the preamble and specified source code
 	CC3ShaderSourceCodeCompilationStringVisitor* visitor = [CC3ShaderSourceCodeCompilationStringVisitor visitorWithCompilationStrings: scStrings];
-	[_shaderPreamble accumulateSourceCompilationStringsWithVisitor: visitor];
+	[self.shaderPreamble accumulateSourceCompilationStringsWithVisitor: visitor];
 	[shSrcCode accumulateSourceCompilationStringsWithVisitor: visitor];
 	
 	// Double-check the accummulation logic
@@ -175,7 +182,7 @@ static CC3ShaderSourceCode* _defaultShaderPreamble = nil;
 			if (isErrLine && fieldIdx == lineNumFieldIdx) {
 				CC3ShaderSourceCodeLineNumberLocalizingVisitor* visitor;
 				visitor = [CC3ShaderSourceCodeLineNumberLocalizingVisitor visitorWithLineNumber: [field intValue]];
-				if ([_shaderPreamble localizeLineNumberWithVisitor: visitor] ||
+				if ([self.shaderPreamble localizeLineNumberWithVisitor: visitor] ||
 					[shSrcCode localizeLineNumberWithVisitor: visitor])
 					[localizedLogTxt appendFormat: @"(at %@)", visitor.description];
 			}
@@ -217,7 +224,7 @@ static CC3ShaderSourceCode* _defaultShaderPreamble = nil;
 	id shader = [self getShaderNamed: shSrcCode.name];
 	if (shader) return shader;
 	
-	shader = [[self alloc] initFromSourceCode: shSrcCode];
+	shader = [[[self alloc] initFromSourceCode: shSrcCode] autorelease];
 	[self addShader: shader];
 	return shader;
 }
@@ -234,7 +241,7 @@ static CC3ShaderSourceCode* _defaultShaderPreamble = nil;
 	id shader = [self getShaderNamed: name];
 	if (shader) return shader;
 	
-	shader = [[self alloc] initWithName: name fromSourceCode: srcCodeString];
+	shader = [[[self alloc] initWithName: name fromSourceCode: srcCodeString] autorelease];
 	[self addShader: shader];
 	return shader;
 }
@@ -250,7 +257,7 @@ static CC3ShaderSourceCode* _defaultShaderPreamble = nil;
 	id shader = [self getShaderNamed: [CC3ShaderSourceCode shaderSourceCodeNameFromFilePath: aFilePath]];
 	if (shader) return shader;
 	
-	shader = [[self alloc] initFromSourceCodeFile: aFilePath];
+	shader = [[[self alloc] initFromSourceCodeFile: aFilePath] autorelease];
 	[self addShader: shader];
 	return shader;
 }
@@ -285,7 +292,7 @@ static GLuint _lastAssignedShaderTag = 0;
 static CC3Cache* _shaderCache = nil;
 
 +(void) ensureCache {
-	if ( !_shaderCache ) _shaderCache = [CC3Cache weakCacheForType: @"shader"];
+	if ( !_shaderCache ) _shaderCache = [[CC3Cache weakCacheForType: @"shader"] retain];
 }
 
 +(void) addShader: (CC3Shader*) shader {
@@ -358,9 +365,19 @@ static CC3Cache* _shaderCache = nil;
 
 -(void) dealloc {
 	[self remove];					// remove this instance from the cache
+
+	[self deleteGLProgram];
+
 	self.vertexShader = nil;		// use setter to detach shader from program
 	self.fragmentShader = nil;		// use setter to detach shader from program
-	[self deleteGLProgram];
+	self.semanticDelegate = nil;
+	
+	[_attributes release];
+	[_uniformsSceneScope release];
+	[_uniformsNodeScope release];
+	[_uniformsDrawScope release];
+
+	[super dealloc];
 }
 
 -(GLuint) programID {
@@ -379,7 +396,10 @@ static CC3Cache* _shaderCache = nil;
 	if (vertexShader == _vertexShader) return;
 	
 	[self detachShader: _vertexShader];
-	_vertexShader = vertexShader;
+	
+	[_vertexShader release];
+	_vertexShader = [vertexShader retain];
+	
 	[self attachShader: _vertexShader];
 }
 
@@ -389,7 +409,10 @@ static CC3Cache* _shaderCache = nil;
 	if (fragmentShader == _fragmentShader) return;
 	
 	[self detachShader: _fragmentShader];
-	_fragmentShader = fragmentShader;
+	
+	[_fragmentShader release];
+	_fragmentShader = [fragmentShader retain];
+
 	[self attachShader: _fragmentShader];
 }
 
@@ -619,9 +642,7 @@ static BOOL _defaultShouldAllowDefaultVariableValues = NO;
 -(void) clearAttributes { [_attributes removeAllObjects]; }
 
 /** Let the delegate configure the attribute. */
--(void) configureAttribute: (CC3GLSLAttribute*) var {
-	[_semanticDelegate configureVariable: var];
-}
+-(void) configureAttribute: (CC3GLSLAttribute*) var { [_semanticDelegate configureVariable: var]; }
 
 /** Adds the specified attribute to the internal collection. */
 -(void) addAttribute: (CC3GLSLAttribute*) var { [_attributes addObject: var]; }
@@ -699,10 +720,10 @@ static BOOL _defaultShouldAllowDefaultVariableValues = NO;
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	CC3Assert(aName, @"%@ cannot be created without a name", [self class]);
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		_uniformsSceneScope = [NSMutableArray array];
-		_uniformsNodeScope = [NSMutableArray array];
-		_uniformsDrawScope = [NSMutableArray array];
-		_attributes = [NSMutableArray array];
+		_attributes = [NSMutableArray new];				// retained
+		_uniformsSceneScope = [NSMutableArray new];		// retained
+		_uniformsNodeScope = [NSMutableArray new];		// retained
+		_uniformsDrawScope = [NSMutableArray new];		// retained
 		_vertexShader = nil;
 		_fragmentShader = nil;
 		_maxUniformNameLength = 0;
@@ -767,9 +788,9 @@ static BOOL _defaultShouldAllowDefaultVariableValues = NO;
 	id program = [self getProgramNamed: progName];
 	if (program) return program;
 	
-	program = [[self alloc] initWithSemanticDelegate: semanticDelegate
-									withVertexShader: vertexShader
-								   andFragmentShader: fragmentShader];
+	program = [[[self alloc] initWithSemanticDelegate: semanticDelegate
+									 withVertexShader: vertexShader
+									andFragmentShader: fragmentShader] autorelease];
 	[self addProgram: program];
 	return program;
 }
@@ -830,7 +851,7 @@ static GLuint _lastAssignedProgramTag = 0;
 static CC3Cache* _programCache = nil;
 
 +(void) ensureCache {
-	if ( !_programCache ) _programCache = [CC3Cache weakCacheForType: @"shader program"];
+	if ( !_programCache ) _programCache = [[CC3Cache weakCacheForType: @"shader program"] retain];
 }
 
 +(void) addProgram: (CC3ShaderProgram*) program {
@@ -894,14 +915,18 @@ static BOOL _shouldAutomaticallyPreloadMatchingPureColorPrograms = YES;
 
 #pragma mark Program matching
 
-static id<CC3ShaderMatcher> _programMatcher = nil;
+static id<CC3ShaderMatcher> _shaderMatcher = nil;
 
 +(id<CC3ShaderMatcher>) shaderMatcher {
-	if ( !_programMatcher ) _programMatcher = [CC3ShaderMatcherBase new];
-	return _programMatcher;
+	if ( !_shaderMatcher ) self.shaderMatcher = [[CC3ShaderMatcherBase new] autorelease];
+	return _shaderMatcher;
 }
 
-+(void) setShaderMatcher: (id<CC3ShaderMatcher>) shaderMatcher { _programMatcher = shaderMatcher; }
++(void) setShaderMatcher: (id<CC3ShaderMatcher>) shaderMatcher {
+	if (shaderMatcher == _shaderMatcher) return;
+	[_shaderMatcher release];
+	_shaderMatcher = [shaderMatcher retain];
+}
 
 // Deprecated
 +(id<CC3ShaderMatcher>) programMatcher { return [self shaderMatcher]; }
@@ -919,6 +944,7 @@ static id<CC3ShaderMatcher> _programMatcher = nil;
 
 -(void) dealloc {
 	[self remove];		// remove this instance from the cache
+	[super dealloc];
 }
 
 -(GLuint) lineCount {
@@ -986,7 +1012,7 @@ static id<CC3ShaderMatcher> _programMatcher = nil;
 	
 	MarkRezActivityStart();
 
-	CC3ShaderSourceCodeGroup* srcGroup = [[CC3ShaderSourceCodeGroup alloc] initWithName: name];
+	CC3ShaderSourceCodeGroup* srcGroup = [[[CC3ShaderSourceCodeGroup alloc] initWithName: name] autorelease];
 	CC3ShaderSourceCode* srcSection = nil;
 
 	GLuint lineCount = 1;			// Running count of the lines parsed
@@ -1007,7 +1033,7 @@ static id<CC3ShaderMatcher> _programMatcher = nil;
 		} else {
 			if ( !srcSection ) {
 				NSString* sectionName = [name stringByAppendingFormat: @"-Section-%u", ++sectionCount];
-				srcSection = [[self.sourceCodeSubsectionClass alloc] initWithName: sectionName];
+				srcSection = [[[self.sourceCodeSubsectionClass alloc] initWithName: sectionName] autorelease];
 			}
 			[srcSection appendSourceCodeString: srcLine];
 		}
@@ -1017,10 +1043,10 @@ static id<CC3ShaderMatcher> _programMatcher = nil;
 	// Add the source code read since the final import directive
 	[srcGroup addSubsection: srcSection];
 	
-	LogRez(@"Parsed GLSL source named %@ in %.3f ms", name, GetRezActivityDuration() * 1000);
-	
 	// Add extracted source code group to the cache and return it.
 	[self addShaderSourceCode: srcGroup];
+	
+	LogRez(@"Parsed GLSL source named %@ in %.3f ms", name, GetRezActivityDuration() * 1000);
 	
 	return srcGroup;
 }
@@ -1055,15 +1081,17 @@ static id<CC3ShaderMatcher> _programMatcher = nil;
 
 +(NSString*) shaderSourceCodeNameFromFilePath: (NSString*) aFilePath { return aFilePath.lastPathComponent; }
 
-static Class _sourceCodeSubsectionClass;
+static Class _sourceCodeSubsectionClass = nil;
 
 +(Class) sourceCodeSubsectionClass {
-	if ( !_sourceCodeSubsectionClass ) _sourceCodeSubsectionClass = CC3ShaderSourceCodeString.class;
+	if ( !_sourceCodeSubsectionClass ) self.sourceCodeSubsectionClass = CC3ShaderSourceCodeString.class;
 	return _sourceCodeSubsectionClass;
 }
 
 +(void) setSourceCodeSubsectionClass: (Class) sourceCodeSubsectionClass {
-	_sourceCodeSubsectionClass = sourceCodeSubsectionClass;
+	if (sourceCodeSubsectionClass == _sourceCodeSubsectionClass) return;
+	[_sourceCodeSubsectionClass release];
+	_sourceCodeSubsectionClass = [sourceCodeSubsectionClass retain];
 }
 
 -(NSString*) constructorDescription {
@@ -1078,7 +1106,7 @@ static Class _sourceCodeSubsectionClass;
 static CC3Cache* _shaderSourceCodeCache = nil;
 
 +(void) ensureCache {
-	if ( !_shaderSourceCodeCache ) _shaderSourceCodeCache = [CC3Cache weakCacheForType: @"shader source"];
+	if ( !_shaderSourceCodeCache ) _shaderSourceCodeCache = [[CC3Cache weakCacheForType: @"shader source"] retain];
 }
 
 +(void) addShaderSourceCode: (CC3ShaderSourceCode*) shSrcCode {
@@ -1121,6 +1149,11 @@ static CC3Cache* _shaderSourceCodeCache = nil;
 
 @implementation CC3ShaderSourceCodeString
 
+-(void) dealloc {
+	[_sourceCodeString release];
+	[super dealloc];
+}
+
 -(NSString*) sourceCodeString { return _sourceCodeString; }
 
 -(GLuint) lineCount { return (GLuint)_sourceCodeString.lineCount; }
@@ -1145,7 +1178,7 @@ static CC3Cache* _shaderSourceCodeCache = nil;
 
 -(id) initWithTag: (GLuint) tag withName: (NSString*) name {
 	if ( (self = [super initWithTag: tag withName: name]) ) {
-		_sourceCodeString = [NSMutableString string];
+		_sourceCodeString = [NSMutableString new];		// retained
 	}
 	return self;
 }
@@ -1161,6 +1194,11 @@ static CC3Cache* _shaderSourceCodeCache = nil;
 #pragma mark CC3ShaderSourceCodeLines
 
 @implementation CC3ShaderSourceCodeLines
+
+-(void) dealloc {
+	[_sourceCodeLines release];
+	[super dealloc];
+}
 
 -(NSString*) sourceCodeString {
 	NSMutableString* srcCodeString = [NSMutableString stringWithCapacity: 1000];
@@ -1194,7 +1232,7 @@ static CC3Cache* _shaderSourceCodeCache = nil;
 
 -(id) initWithTag: (GLuint) tag withName: (NSString*) name {
 	if ( (self = [super initWithTag: tag withName: name]) ) {
-		_sourceCodeLines = [NSMutableArray array];
+		_sourceCodeLines = [NSMutableArray new];	// retained
 	}
 	return self;
 }
@@ -1210,6 +1248,11 @@ static CC3Cache* _shaderSourceCodeCache = nil;
 #pragma mark CC3ShaderSourceCodeGroup
 
 @implementation CC3ShaderSourceCodeGroup
+
+-(void) dealloc {
+	[_subsections release];
+	[super dealloc];
+}
 
 -(NSArray*) subsections { return _subsections; }
 
@@ -1231,9 +1274,10 @@ static CC3Cache* _shaderSourceCodeCache = nil;
 }
 
 -(void) appendSourceCodeString: (NSString*) srcCode {
-	CC3ShaderSourceCode* sscs = [[CC3ShaderSourceCodeString alloc] init];
+	CC3ShaderSourceCode* sscs = [[CC3ShaderSourceCodeString alloc] init];	// release below
 	[sscs appendSourceCodeString: srcCode];
 	[self addSubsection: sscs];
+	[sscs release];
 }
 
 
@@ -1280,7 +1324,7 @@ static CC3Cache* _shaderSourceCodeCache = nil;
 
 -(id) initWithTag: (GLuint) tag withName: (NSString*) name {
 	if ( (self = [super initWithTag: tag withName: name]) ) {
-		_subsections = [NSMutableArray array];
+		_subsections = [NSMutableArray new];	// retained
 	}
 	return self;
 }
@@ -1297,6 +1341,11 @@ static CC3Cache* _shaderSourceCodeCache = nil;
 
 @implementation CC3ShaderSourceCodeVisitor
 
+-(void) dealloc {
+	[_sourceCodeNamesTraversed release];
+	[super dealloc];
+}
+
 -(BOOL) hasAlreadyVisited: (CC3ShaderSourceCode*) srcCode {
 	NSString* ssName = srcCode.name;
 	if ( !ssName || [_sourceCodeNamesTraversed containsObject: ssName] ) return YES;
@@ -1309,12 +1358,12 @@ static CC3Cache* _shaderSourceCodeCache = nil;
 
 -(id) init {
 	if ( (self = [super init]) ) {
-		_sourceCodeNamesTraversed = [NSMutableSet set];
+		_sourceCodeNamesTraversed = [NSMutableSet new];		// retained
 	}
 	return self;
 }
 
-+(id) visitor { return [[self alloc] init]; }
++(id) visitor { return [[[self alloc] init] autorelease]; }
 
 @end
 
@@ -1365,7 +1414,7 @@ static CC3Cache* _shaderSourceCodeCache = nil;
 }
 
 +(id) visitorWithCompilationStrings: (const GLchar**) sourceCompilationStrings {
-	return [[self alloc] initWithCompilationStrings: sourceCompilationStrings];
+	return [[[self alloc] initWithCompilationStrings: sourceCompilationStrings] autorelease];
 }
 
 @end
@@ -1377,6 +1426,12 @@ static CC3Cache* _shaderSourceCodeCache = nil;
 @implementation CC3ShaderSourceCodeLineNumberLocalizingVisitor
 
 @synthesize lineNumber=_lineNumber, localizedSourceCode=_localizedSourceCode;
+
+-(void) dealloc {
+	[_localizedSourceCode release];
+	[_lineNumberOffsets release];
+	[super dealloc];
+}
 
 -(GLuint) lineNumberOffset { return ((NSNumber*)_lineNumberOffsets.lastObject).unsignedIntValue; }
 
@@ -1398,14 +1453,14 @@ static CC3Cache* _shaderSourceCodeCache = nil;
 -(id) initWithLineNumber: (GLuint) lineNumber {
 	if ( (self = [super init]) ) {
 		_lineNumber = lineNumber;
-		_lineNumberOffsets = [NSMutableArray array];
-		[self pushLineNumberOffset: 0];		// Init stack with a base value
+		_lineNumberOffsets = [NSMutableArray new];		// retained
+		[self pushLineNumberOffset: 0];					// Init stack with a base value
 	}
 	return self;
 }
 
 +(id) visitorWithLineNumber: (GLuint) lineNumber {
-	return [[self alloc] initWithLineNumber: lineNumber];
+	return [[[self alloc] initWithLineNumber: lineNumber] autorelease];
 }
 
 -(NSString*) description {
@@ -1423,6 +1478,13 @@ static CC3Cache* _shaderSourceCodeCache = nil;
 @synthesize prewarmingSurface=_prewarmingSurface;
 @synthesize prewarmingMeshNode=_prewarmingMeshNode;
 @synthesize drawingVisitor=_drawingVisitor;
+
+-(void) dealloc {
+	[_prewarmingSurface release];
+	[_prewarmingMeshNode release];
+	[_drawingVisitor release];
+	[super dealloc];
+}
 
 -(id<CC3RenderSurface>) prewarmingSurface {
 	if ( !_prewarmingSurface ) {
@@ -1479,7 +1541,18 @@ static CC3Cache* _shaderSourceCodeCache = nil;
 
 #pragma mark Allocation and initialization
 
-+(id) prewarmerWithName: (NSString*) name { return [[self alloc] initWithName: name]; }
+-(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
+	if ( (self = [super initWithTag: aTag withName: aName]) ) {
+		_prewarmingSurface = nil;
+		_prewarmingMeshNode = nil;
+		_drawingVisitor = nil;
+	}
+	return self;
+}
+
++(id) prewarmerWithName: (NSString*) name {
+	return [[[self alloc] initWithName: name] autorelease];
+}
 
 @end
 

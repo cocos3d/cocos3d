@@ -1,5 +1,5 @@
 /*
- * CC3ShaderProgramMatchers.m
+ * CC3ShaderMatcher.m
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -29,6 +29,10 @@
  * See header file CC3ShaderMatcher.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3ShaderMatcher.h"
 #import "CC3VertexSkinning.h"
 
@@ -39,6 +43,11 @@
 @implementation CC3ShaderMatcherBase
 
 @synthesize semanticDelegate=_semanticDelegate;
+
+-(void) dealloc {
+	[_semanticDelegate release];
+	[super dealloc];
+}
 
 -(CC3ShaderProgram*) programForMeshNode: (CC3MeshNode*) aMeshNode {
 	return [CC3ShaderProgram programWithSemanticDelegate: self.semanticDelegate
@@ -113,7 +122,7 @@
 -(void) initSemanticDelegate {
 	CC3ShaderSemanticsByVarName* sd = [CC3ShaderSemanticsByVarName new];
 	[sd populateWithDefaultVariableNameMappings];
-	_semanticDelegate = sd;
+	_semanticDelegate = sd;			// retained from new
 }
 
 @end

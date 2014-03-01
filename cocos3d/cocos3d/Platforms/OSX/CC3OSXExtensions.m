@@ -29,6 +29,10 @@
  * See header file CC3OSXExtensions.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3OSXExtensions.h"
 #import	"CC3Logging.h"
 
@@ -47,8 +51,8 @@
 
 -(CC3GLContext*) asSharedContext {
 	CC3Assert(self.view, @"%@ has no view and cannot be the source of a shared context.", self);
-	return [[self.class alloc] initWithFormat: ((NSOpenGLView*)self.view).pixelFormat
-								 shareContext: self];
+	return [[[self.class alloc] initWithFormat: ((NSOpenGLView*)self.view).pixelFormat
+								  shareContext: self] autorelease];
 }
 
 @end

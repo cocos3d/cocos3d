@@ -60,10 +60,6 @@ cocos3d 2.0.0 - 2014/03/31
 - Added support for Android via the Apportable SDK.
 	- Add demo apps and cocos3d Application template apps can be built and deployed using the Apportable SDK
 
-- cocos3d library, demo apps, and Xcode project templates are now fully compliant with Apple's Automatic Reference Counting (ARC) feature.
-	- [API change] CC3Identifiable userData property must now be an object.
-	- [API change] NSObject autoreleasedCopy method is now deprecated.
-
 - Added support for multi-pass rendering, render-to-texture, and dynamic environment maps:
 	- Added CC3RenderSurface classes to provide both on-screen and off-screen framebuffer surfaces as rendering targets
 		- CC3GLView now uses underlying CC3GLViewSurfaceManager to manage framebuffers.
@@ -230,6 +226,8 @@ cocos3d 2.0.0 - 2014/03/31
 - CC3PODNode userData and podUserDataSize properties now populated from user data in POD files.
 
 - [API change] Removed CC3ViewportManager class and moved remaining reduced functionality to CC3Layer updateViewport and CC3Camera.
+
+- [API change] CC3Identifiable userData property must now be an object.
 
 - Fixes to Shadow Volumes
 	- shadows volumes and stencils now available when multisampling active

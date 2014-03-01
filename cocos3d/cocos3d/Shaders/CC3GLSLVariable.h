@@ -68,7 +68,7 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope);
  * or an array of any of those types, as indicated by the type and size properties.
  */
 @interface CC3GLSLVariable : NSObject <NSCopying> {
-	CC3ShaderProgram* __unsafe_unretained _program;
+	CC3ShaderProgram* _program;
 	NSString* _name;
 	GLenum _type;
 	GLenum _semantic;
@@ -81,22 +81,22 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope);
 }
 
 /** The GL program object containing this variable. */
-@property(nonatomic, unsafe_unretained, readonly) CC3ShaderProgram* program;
+@property(nonatomic, readonly) CC3ShaderProgram* program;
 
 /**
  * The index of this variable within the GL program object.
  * This is distinct from the location property.
  */
-@property(nonatomic, assign, readonly) GLuint index;
+@property(nonatomic, readonly) GLuint index;
 
 /** 
  * The location of this variable within the GL program object.
  * This is distinct from the index property.
  */
-@property(nonatomic, assign, readonly) GLint location;
+@property(nonatomic, readonly) GLint location;
 
 /** The name of this variable in the GLSL shader source code. */
-@property(nonatomic, strong, readonly) NSString* name;
+@property(nonatomic, retain, readonly) NSString* name;
 
 /**
  * Returns a symbolic constant indicating the type of content held by this variable.

@@ -61,8 +61,8 @@
  * created. Typically, the application does not create instances of CC3Shader directly.
  */
 @interface CC3Shader : CC3Identifiable {
-	GLuint _shaderID;
 	CC3ShaderSourceCode* _shaderPreamble;
+	GLuint _shaderID;
 	BOOL _wasLoadedFromFile : 1;
 }
 
@@ -103,7 +103,7 @@
  * choose to use, if the same file is imported or included more than once (perhaps through nesting),
  * the loader will ensure that only one copy of each source file is loaded.
  */
-@property(nonatomic, strong) CC3ShaderSourceCode* shaderPreamble;
+@property(nonatomic, retain) CC3ShaderSourceCode* shaderPreamble;
 
 /**
  * A string containing GLSL source code to be used as a preamble for the source code of this shader.
@@ -126,7 +126,7 @@
  * property. If you change this property, you should usually concatenate the value of the
  * defaultShaderPreambleString property to the additional preamble content that you require.
  */
-@property(nonatomic, strong) NSString* shaderPreambleString;
+@property(nonatomic, retain) NSString* shaderPreambleString;
 
 /**
  * Returns the shader source object containing GLSL source code to be used as a default
@@ -150,7 +150,7 @@
  * choose to use, if the same file is imported or included more than once (perhaps through nesting),
  * the loader will ensure that only one copy of each source file is loaded.
  */
-@property(nonatomic, strong, readonly) CC3ShaderSourceCode* defaultShaderPreamble;
+@property(nonatomic, retain, readonly) CC3ShaderSourceCode* defaultShaderPreamble;
 
 /**
  * Returns a string containing GLSL source code to be used as a default preamble for the
@@ -173,7 +173,7 @@
  * choose to use, if the same file is imported or included more than once (perhaps through nesting),
  * the loader will ensure that only one copy of each source file is loaded.
  */
-@property(nonatomic, strong, readonly) NSString* defaultShaderPreambleString;
+@property(nonatomic, retain, readonly) NSString* defaultShaderPreambleString;
 
 
 #pragma mark Allocation and initialization
@@ -477,10 +477,10 @@
 	CC3VertexShader* _vertexShader;
 	CC3FragmentShader* _fragmentShader;
 	id<CC3ShaderSemanticsDelegate> _semanticDelegate;
+	NSMutableArray* _attributes;
 	NSMutableArray* _uniformsSceneScope;
 	NSMutableArray* _uniformsNodeScope;
 	NSMutableArray* _uniformsDrawScope;
-	NSMutableArray* _attributes;
 	GLuint _programID;
 	GLint _maxUniformNameLength;
 	GLint _maxAttributeNameLength;
@@ -500,7 +500,7 @@
  * you must invoke the link method, and optionally, the prewarm method, once both shaders
  * have been set via this property and the fragmentShader property.
  */
-@property(nonatomic, strong) CC3VertexShader* vertexShader;
+@property(nonatomic, retain) CC3VertexShader* vertexShader;
 
 /**
  * The fragment shader used by this program.
@@ -509,7 +509,7 @@
  * you must invoke the link method, and optionally, the prewarm method, once both shaders
  * have been set via this property and the vertexShader property.
  */
-@property(nonatomic, strong) CC3FragmentShader* fragmentShader;
+@property(nonatomic, retain) CC3FragmentShader* fragmentShader;
 
 /**
  * On each render loop, this CC3ShaderProgram delegates to this object to populate
@@ -517,7 +517,7 @@
  *
  * This property must be set prior to the program being compiled.
  */
-@property(nonatomic, strong) id<CC3ShaderSemanticsDelegate> semanticDelegate;
+@property(nonatomic, retain) id<CC3ShaderSemanticsDelegate> semanticDelegate;
 
 /** Returns the length of the largest uniform name in this program. */
 @property(nonatomic, readonly) GLint maxUniformNameLength;
@@ -529,7 +529,7 @@
 @property(nonatomic, readonly) GLuint uniformCount;
 
 /** Returns a read-only array of the GLSL uniforms declared and used by this shader program. */
-@property(nonatomic, strong, readonly) NSArray* uniforms;
+@property(nonatomic, retain, readonly) NSArray* uniforms;
 
 /** Returns the number of memory storage elements consumed by the uniform variables used by this program. */
 @property(nonatomic, readonly) GLuint uniformStorageElementCount;
@@ -1663,7 +1663,7 @@
  * The value of this property will be nil until the visitation run has finished, after which
  * it will contain the source code group that contains the error.
  */
-@property(nonatomic, strong) CC3ShaderSourceCode* localizedSourceCode;
+@property(nonatomic, retain) CC3ShaderSourceCode* localizedSourceCode;
 
 /**
  * The line number of the source code line that originated the error.
@@ -1760,7 +1760,7 @@
  * If not set directly, this property will be initialized to a minimal off-screen surface that
  * contains only a color buffer, with no depth buffer.
  */
-@property(nonatomic, strong) id<CC3RenderSurface> prewarmingSurface;
+@property(nonatomic, retain) id<CC3RenderSurface> prewarmingSurface;
 
 /** 
  * The mesh node that is rendered to the prewarmingSurface in order to pre-warm a shader program.
@@ -1768,14 +1768,14 @@
  * If not set directly, this property will be lazily initialized to a minimal mesh consisting
  * of a single triangular face containing only location content in the verticies.
  */
-@property(nonatomic, strong) CC3MeshNode* prewarmingMeshNode;
+@property(nonatomic, retain) CC3MeshNode* prewarmingMeshNode;
 
 /** 
  * The drawing visitor used to render the prewarmingMeshNode to the prewarmingSurface.
  *
  * If not set directly, this property will be lazily initialized to a a basic drawing visitor.
  */
-@property(nonatomic, strong) CC3NodeDrawingVisitor* drawingVisitor;
+@property(nonatomic, retain) CC3NodeDrawingVisitor* drawingVisitor;
 
 /** Pre-warms the specified shader program by rendering the prewarmingMeshNode to the prewarmingSurface. */
 -(void) prewarmShaderProgram: (CC3ShaderProgram*) program;

@@ -29,6 +29,10 @@
  * See header file CC3ShaderSemantics.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3ShaderSemantics.h"
 #import "CC3GLSLVariable.h"
 #import "CC3NodeVisitor.h"
@@ -230,6 +234,11 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 
 @synthesize name=_name, semantic=_semantic, semanticIndex=_semanticIndex;
 
+-(void) dealloc {
+	[_name release];
+	[super dealloc];
+}
+
 -(id) init {
 	if ( (self = [super init]) ) {
 		_name = nil;
@@ -247,7 +256,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 
 @implementation CC3ShaderSemanticsBase
 
-+(id) semanticsDelegate { return [[self alloc] init]; }
++(id) semanticsDelegate { return [[[self alloc] init] autorelease]; }
 
 -(NSString*) nameOfSemantic: (GLenum) semantic { return NSStringFromCC3Semantic(semantic); }
 
@@ -1128,6 +1137,10 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 
 @implementation CC3ShaderSemanticsByVarName
 
+-(void) dealloc {
+	[_varConfigsByName release];
+	[super dealloc];
+}
 
 #pragma mark Allocation and initialization
 
@@ -1166,6 +1179,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	varConfig.semantic = semantic;
 	varConfig.semanticIndex = semanticIndex;
 	[self addVariableConfiguration: varConfig];
+	[varConfig release];
 }
 
 -(void) mapVarName: (NSString*) name toSemantic: (GLenum) semantic {

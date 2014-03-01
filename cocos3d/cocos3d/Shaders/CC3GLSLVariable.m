@@ -29,6 +29,10 @@
  * See header file CC3GLSLVariable.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3GLSLVariable.h"
 #import "CC3Shaders.h"
 #import "CC3NodeVisitor.h"
@@ -57,6 +61,12 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 @synthesize program=_program, index=_index, location=_location, name=_name;
 @synthesize type=_type, size=_size, semantic=_semantic, semanticIndex=_semanticIndex;
 @synthesize scope=_scope, isGLStateKnown=_isGLStateKnown;
+
+-(void) dealloc {
+	_program = nil;			// not retained
+	[_name release];
+	[super dealloc];
+}
 
 -(GLuint) typeStorageElementCount {
 	switch (_type) {	// 17
@@ -121,14 +131,14 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 -(id) initInProgram: (CC3ShaderProgram*) program atIndex: (GLuint) index {
 	if ( (self = [self init]) ) {
 		_index = index;
-		_program = program;
+		_program = program;				// not retained
 		[self populateFromProgram];
 	}
 	return self;
 }
 
 +(id) variableInProgram: (CC3ShaderProgram*) program atIndex: (GLuint) index {
-	return [[self alloc] initInProgram: program atIndex: index];
+	return [[[self alloc] initInProgram: program atIndex: index] autorelease];
 }
 
 -(id) copyWithZone: (NSZone*) zone { return [self copyWithZone: zone asClass: self.class]; }
@@ -142,9 +152,12 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 }
 
 -(void) populateFrom: (CC3GLSLVariable*) another {
-	_program = another.program;		// Not copied
+	_program = another.program;		// Not copied or retained
+
+	[_name release];
+	_name = [another.name retain];
+	
 	_index = another.index;
-	_name = another.name;
 	_location = another.location;
 	_type = another.type;
 	_size = another.size;
@@ -176,7 +189,8 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 	if (( [_name characterAtIndex: subStartIdx] == '[' ) &&
 		( [_name characterAtIndex: (subStartIdx + 1)] == '0' )) {
 		NSString* name = [_name substringToIndex: subStartIdx];
-		_name = name;		// retained
+		[_name release];
+		_name = [name retain];		// retained
 	} else {
 		// We have a non-zero subscript. This variable is redundant to the zero-subscript
 		// variable, so mark it as such, but don't remove the subscript from the name.
@@ -223,6 +237,7 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 -(void) dealloc {
 	free(_varValue);
 	free(_glVarValue);
+	[super dealloc];
 }
 
 -(GLenum) type { return super.type; }	// Keep compiler happy

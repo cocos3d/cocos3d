@@ -88,7 +88,12 @@
  */
 -(CC3ShaderProgram*) pureColorProgramMatching: (CC3ShaderProgram*) shaderProgram;
 
-/** The semantic delegate that will be attached to any program created by this matcher. */
+/** 
+ * The semantic delegate that will be attached to any program created by this matcher.
+ *
+ * The initial value of this property is an instance of CC3ShaderSemanticsByVarName that has
+ * been populated with default semantics by the populateWithDefaultVariableNameMappings method.
+ */
 @property(nonatomic, retain) id<CC3ShaderSemanticsDelegate> semanticDelegate;
 
 @end

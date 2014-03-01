@@ -29,6 +29,10 @@
  * See header file CC3IOSExtensions.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3IOSExtensions.h"
 #import "CC3Foundation.h"
 
@@ -166,7 +170,7 @@ NSString* NSStringFromUIDeviceOrientation(UIDeviceOrientation deviceOrientation)
 +(void) clearCurrentContext { self.currentContext = nil; }
 
 -(CC3GLContext*) asSharedContext {
-	return [[self.class alloc] initWithAPI: self.API sharegroup: self.sharegroup];
+	return [[[self.class alloc] initWithAPI: self.API sharegroup: self.sharegroup] autorelease];
 }
 
 @end
