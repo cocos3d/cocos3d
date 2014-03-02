@@ -29,6 +29,10 @@
  * See header file CC3Matrix4x3.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3Matrix4x3.h"
 
 

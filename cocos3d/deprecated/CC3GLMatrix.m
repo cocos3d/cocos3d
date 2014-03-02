@@ -29,6 +29,10 @@
  * See header file CC3GLMatrix.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3GLMatrix.h"
 
 
@@ -60,7 +64,7 @@
 	return self;
 }
 
-+(id) matrix { return [[self alloc] init]; }
++(id) matrix { return [[[self alloc] init] autorelease]; }
 
 -(id) initIdentity {
 	if( (self = [self initParent]) ) {
@@ -69,7 +73,7 @@
 	return self;
 }
 
-+(id) identity { return [[self alloc] initIdentity]; }
++(id) identity { return [[[self alloc] initIdentity] autorelease]; }
 
 -(id) initFromGLMatrix: (GLfloat*) aGLMtx {
 	if( (self = [self initParent]) ) {
@@ -79,7 +83,7 @@
 }
 
 +(id) matrixFromGLMatrix: (GLfloat*) aGLMtx {
-	return [[self alloc] initFromGLMatrix: aGLMtx];
+	return [[[self alloc] initFromGLMatrix: aGLMtx] autorelease];
 }
 
 -(id) initWithFirstElement: (GLfloat) e00 remainingElements: (va_list) args {
@@ -123,7 +127,7 @@
 }
 
 +(id) matrixOnGLMatrix: (GLfloat*) aGLMtx {
-	return [[self alloc] initOnGLMatrix: aGLMtx];
+	return [[[self alloc] initOnGLMatrix: aGLMtx] autorelease];
 }
 
 @end
@@ -154,6 +158,7 @@
 
 // Instantiate the appropriate concrete cluster class.
 -(id) init {
+	[self release];
 	return [[CC3GLArrayMatrix alloc] init];
 }
 
@@ -162,16 +167,16 @@
 
 // Instantiate the appropriate concrete cluster class.
 -(id) initIdentity {
+	[self release];
 	return [[CC3GLArrayMatrix alloc] initIdentity];
 }
 
 // Instantiate the appropriate concrete cluster class.
-+(id) identity {
-	return [CC3GLArrayMatrix identity];
-}
++(id) identity { return [CC3GLArrayMatrix identity]; }
 
 // Instantiate the appropriate concrete cluster class.
 -(id) initFromGLMatrix: (GLfloat*) aGLMtx {
+	[self release];
 	return [[CC3GLArrayMatrix alloc] initFromGLMatrix: aGLMtx];
 }
 
@@ -188,6 +193,7 @@
 
 // Instantiate the appropriate concrete cluster class.
 -(id) initWithFirstElement: (GLfloat) e00 remainingElements: (va_list) args {
+	[self release];
 	return [[CC3GLArrayMatrix alloc] initWithFirstElement: e00 remainingElements: args];
 }
 
@@ -206,11 +212,12 @@
 	va_start(args, e00);
 	CC3GLMatrixDeprecated* mtx = [[CC3GLArrayMatrix alloc] initWithFirstElement: e00 remainingElements: args];
 	va_end(args);
-	return mtx;
+	return [mtx autorelease];
 }
 
 // Instantiate the appropriate concrete cluster class.
 -(id) initOnGLMatrix: (GLfloat*) aGLMtx {
+	[self release];
 	return [[CC3GLPointerMatrix alloc] initOnGLMatrix: aGLMtx];
 }
 
@@ -219,8 +226,8 @@
 	return [CC3GLPointerMatrix matrixOnGLMatrix: aGLMtx];
 }
 
-- (id) copyWithZone: (NSZone*) zone {
-	return [CC3GLArrayMatrix matrixFromGLMatrix: self.glMatrix];
+-(id) copyWithZone: (NSZone*) zone {
+	return [[CC3GLArrayMatrix alloc] initFromGLMatrix: self.glMatrix];
 }
 
 -(NSString*) description {
@@ -244,29 +251,7 @@
 	[desc appendFormat: @"%.12f]", m[15]];
 	return desc;
 }
-/*
--(NSString*) description {
-	GLfloat* m = self.glMatrix;
-	NSMutableString* desc = [NSMutableString stringWithCapacity: 200];
-	[desc appendFormat: @"\n\t[%.6f, ", m[0]];
-	[desc appendFormat: @"%.6f, ", m[4]];
-	[desc appendFormat: @"%.6f, ", m[8]];
-	[desc appendFormat: @"%.6f,\n\t ", m[12]];
-	[desc appendFormat: @"%.6f, ", m[1]];
-	[desc appendFormat: @"%.6f, ", m[5]];
-	[desc appendFormat: @"%.6f, ", m[9]];
-	[desc appendFormat: @"%.6f,\n\t ", m[13]];
-	[desc appendFormat: @"%.6f, ", m[2]];
-	[desc appendFormat: @"%.6f, ", m[6]];
-	[desc appendFormat: @"%.6f, ", m[10]];
-	[desc appendFormat: @"%.6f,\n\t ", m[14]];
-	[desc appendFormat: @"%.6f, ", m[3]];
-	[desc appendFormat: @"%.6f, ", m[7]];
-	[desc appendFormat: @"%.6f, ", m[11]];
-	[desc appendFormat: @"%.6f]", m[15]];
-	return desc;
-}
-*/
+
 
 #pragma mark -
 #pragma mark Instance population

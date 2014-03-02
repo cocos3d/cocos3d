@@ -29,6 +29,10 @@
  * See header file CC3Matrix.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3Matrix.h"
 
 
@@ -49,12 +53,12 @@
 	return self;
 }
 
-+(id) matrix { return [[self alloc] init]; }
++(id) matrix { return [[[self alloc] init] autorelease]; }
 
 +(id) matrixByMultiplying: (CC3Matrix*) mL by: (CC3Matrix*) mR {
 	CC3Matrix* m = [mL copy];
 	[m multiplyBy: mR];
-	return m;
+	return [m autorelease];
 }
 
 -(id) copyWithZone: (NSZone*) zone {
