@@ -60,8 +60,8 @@
 @synthesize shouldVisitChildren=_shouldVisitChildren, camera=_camera;
 
 -(void) dealloc {
-	_startingNode = nil;			// not retained
-	_currentNode = nil;				// not retained
+	_startingNode = nil;			// weak reference
+	_currentNode = nil;				// weak reference
 	[_camera release];
 	[_pendingRemovals release];
 	[super dealloc];
@@ -288,9 +288,9 @@
 @synthesize currentColor=_currentColor;
 
 -(void) dealloc {
-	_drawingSequencer = nil;				// not retained
-	_currentSkinSection = nil;				// not retained
-	_gl = nil;								// not retained
+	_drawingSequencer = nil;				// weak reference
+	_currentSkinSection = nil;				// weak reference
+	_gl = nil;								// weak reference
 	[_renderSurface release];
 	[_boneMatricesGlobal release];
 	[_boneMatricesEyeSpace release];
@@ -304,7 +304,7 @@
 	return _gl;
 }
 
--(void) clearGL { _gl = nil; }		// not retained
+-(void) clearGL { _gl = nil; }		// weak reference
 
 -(id<CC3RenderSurface>) renderSurface {
 	if ( !_renderSurface ) self.renderSurface = self.defaultRenderSurface;

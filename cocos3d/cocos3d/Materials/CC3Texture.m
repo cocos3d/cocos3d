@@ -29,6 +29,10 @@
  * See header file CC3Texture.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3Texture.h"
 #import "CC3PVRTexture.h"
 #import "CC3CC2Extensions.h"
@@ -50,8 +54,11 @@
 @synthesize shouldFlipHorizontallyOnLoad=_shouldFlipHorizontallyOnLoad;
 
 -(void) dealloc {
-	[self remove];		// remove this instance from the cache
+	[self remove];				// remove this instance from the cache
 	[self deleteGLTexture];
+	[_ccTextureContent release];
+
+	[super dealloc];
 }
 
 -(void) ensureGLTexture { if (!_textureID) _textureID = CC3OpenGL.sharedGL.generateTexture; }
@@ -61,7 +68,7 @@
  * otherwise, let the CCTexture take care of it when it is deallocated.
  */
 -(void) deleteGLTexture {
-	if (!_ccTexture2D) [CC3OpenGL.sharedGL deleteTexture: _textureID];
+	if (!_ccTextureContent) [CC3OpenGL.sharedGL deleteTexture: _textureID];
 	_textureID = 0;
 }
 
@@ -178,13 +185,13 @@
  * the size, pixel format and type of this texture is created an returned.
  */
 -(CC3Texture2DContent*) getSizedContent {
-	if (_ccTexture2D) {
-		[_ccTexture2D resizeTo: self.size];
-		return _ccTexture2D;
+	if (_ccTextureContent) {
+		[_ccTextureContent resizeTo: self.size];
+		return _ccTextureContent;
 	} else {
-		return [[self.textureContentClass alloc] initWithSize: self.size
-											   andPixelFormat: self.pixelFormat
-												 andPixelType: self.pixelType];
+		return [[[self.textureContentClass alloc] initWithSize: self.size
+												andPixelFormat: self.pixelFormat
+												  andPixelType: self.pixelType] autorelease];
 	}
 }
 
@@ -366,6 +373,7 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 	}
 	
 	[self bindTextureContent: content toTarget: target];
+	[content release];		// Could be big, so get rid of it immediately
 	
 	LogRez(@"%@ loaded from file %@ in %.3f ms", self, aFilePath, GetRezActivityDuration() * 1000);
 	return YES;
@@ -510,39 +518,48 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 
 #pragma mark Associated CCTexture
 
--(CCTexture*) ccTexture2D {
-	if (!_ccTexture2D) {
-		_ccTexture2D = [CC3Texture2DContent textureFromCC3Texture: self];
-		[self cacheCCTexture2D];
-	}
-	return _ccTexture2D;
+-(CCTexture*) ccTexture {
+	if (!_ccTextureContent) self.ccTexture = [CC3Texture2DContent textureFromCC3Texture: self];
+	return _ccTextureContent;
 }
+
+/** Sets the CCTexture content. */
+-(void) setCcTexture: (CC3Texture2DContent*) texContent {
+	if (texContent == _ccTextureContent) return;
+	
+	[_ccTextureContent release];
+	_ccTextureContent = [texContent retain];
+	[self cacheCCTexture2D];
+}
+
 
 /**
- * If the class-side shouldCacheAssociatedCCTexture2Ds propery is set to YES, and a CCTexture
+ * If the class-side shouldCacheAssociatedCCTextures propery is set to YES, and a CCTexture
  * with the same name as this texture does not already exist in the CCTextureCache, adds the
- * CCTexture returned by the ccTexture2D property to the CCTextureCache.
+ * CCTexture returned by the ccTexture property to the CCTextureCache.
  */
 -(void) cacheCCTexture2D {
-	if (self.class.shouldCacheAssociatedCCTexture2Ds) [_ccTexture2D addToCacheWithName: self.name];
+	if (self.class.shouldCacheAssociatedCCTextures) [_ccTextureContent addToCacheWithName: self.name];
 }
 
-static BOOL _shouldCacheAssociatedCCTexture2Ds = NO;
+static BOOL _shouldCacheAssociatedCCTextures = NO;
 
-+(BOOL) shouldCacheAssociatedCCTexture2Ds { return _shouldCacheAssociatedCCTexture2Ds; }
++(BOOL) shouldCacheAssociatedCCTextures { return _shouldCacheAssociatedCCTextures; }
 
-+(void) setShouldCacheAssociatedCCTexture2Ds: (BOOL) shouldCache {
-	_shouldCacheAssociatedCCTexture2Ds = shouldCache;
++(void) setShouldCacheAssociatedCCTextures: (BOOL) shouldCache {
+	_shouldCacheAssociatedCCTextures = shouldCache;
 }
 
 // Deprecated
--(CCTexture*) asCCTexture2D { return self.ccTexture2D; }
+-(CCTexture*) ccTexture2D { return self.ccTexture; }
+-(CCTexture*) asCCTexture2D { return self.ccTexture; }
 
 
 #pragma mark Allocation and initialization
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
+		_ccTextureContent = nil;
 		_textureID = 0;
 		_size = CC3IntSizeMake(0, 0);
 		_coverage = CGSizeZero;
@@ -578,11 +595,15 @@ static BOOL _shouldCacheAssociatedCCTexture2Ds = NO;
 -(id) initFromFile: (NSString*) aFilePath {
 	Class texClz = [self.class textureClassForFile: aFilePath];
 	if (self.class != texClz) {
+		[self release];
 		return [[texClz alloc] initFromFile: aFilePath];
 	}
 	
 	if ( (self = [self init]) ) {
-		if ( ![self loadFromFile: aFilePath] ) return nil;
+		if ( ![self loadFromFile: aFilePath] ) {
+			[self release];
+			return nil;
+		}
 	}
 	return self;
 }
@@ -591,10 +612,9 @@ static BOOL _shouldCacheAssociatedCCTexture2Ds = NO;
 	id tex = [self getTextureNamed: [self textureNameFromFilePath: aFilePath]];
 	if (tex) return tex;
 	
-	Class texClz = [self textureClassForFile: aFilePath];
-	tex = [[texClz alloc] initFromFile: aFilePath];
+	tex = [[[self textureClassForFile: aFilePath] alloc] initFromFile: aFilePath];
 	[self addTexture: tex];
-	return tex;
+	return [tex autorelease];
 }
 
 +(NSString*) textureNameFromFilePath: (NSString*) aFilePath { return aFilePath.lastPathComponent; }
@@ -602,32 +622,32 @@ static BOOL _shouldCacheAssociatedCCTexture2Ds = NO;
 +(Class) textureClassForCGImage { return CC3Texture2D.class; }
 
 -(id) initWithCGImage: (CGImageRef) cgImg {
+	[self release];
 	return [[[self.class textureClassForCGImage] alloc] initWithCGImage: cgImg];
 }
 
 +(id) textureWithCGImage: (CGImageRef) cgImg {
-	return [[[self textureClassForCGImage] alloc] initWithCGImage: cgImg];
+	return [[[[self textureClassForCGImage] alloc] initWithCGImage: cgImg] autorelease];
 }
 
 +(Class) textureClassForEmpty2D { return CC3Texture2D.class; }
 
 -(id) initWithPixelFormat: (GLenum) format andPixelType: (GLenum) type {
+	[self release];
 	return [[[self.class textureClassForEmpty2D] alloc] initWithPixelFormat: format andPixelType: type];
 }
 
 +(id) textureWithPixelFormat: (GLenum) format andPixelType: (GLenum) type {
-	return [[[self textureClassForEmpty2D] alloc] initWithPixelFormat: format andPixelType: type];
+	return [[[[self textureClassForEmpty2D] alloc] initWithPixelFormat: format andPixelType: type] autorelease];
 }
 
 -(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
-	if ( (self = [self initWithPixelFormat: format andPixelType: type]) ) {
-		[self resizeTo: size];
-	}
-	return self;
+	[self release];
+	return [[[self.class textureClassForEmpty2D] alloc] initWithSize: size andPixelFormat: format andPixelType: type];
 }
 
 +(id) textureWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
-	return [[[self textureClassForEmpty2D] alloc] initWithSize: size andPixelFormat: format andPixelType: type];
+	return [[[[self textureClassForEmpty2D] alloc] initWithSize: size andPixelFormat: format andPixelType: type] autorelease];
 }
 
 +(Class) textureClassForCube { return CC3TextureCube.class; }
@@ -635,11 +655,10 @@ static BOOL _shouldCacheAssociatedCCTexture2Ds = NO;
 -(id) initCubeFromFilesPosX: (NSString*) posXFilePath negX: (NSString*) negXFilePath
 					   posY: (NSString*) posYFilePath negY: (NSString*) negYFilePath
 					   posZ: (NSString*) posZFilePath negZ: (NSString*) negZFilePath {
-
-	Class texClz = [self.class textureClassForCube];
-	return [[texClz alloc] initCubeFromFilesPosX: posXFilePath negX: negXFilePath
-											 posY: posYFilePath negY: negYFilePath
-											 posZ: posZFilePath negZ: negZFilePath];
+	[self release];
+	return [[[self.class textureClassForCube] alloc] initCubeFromFilesPosX: posXFilePath negX: negXFilePath
+																	  posY: posYFilePath negY: negYFilePath
+																	  posZ: posZFilePath negZ: negZFilePath];
 }
 
 +(id) textureCubeFromFilesPosX: (NSString*) posXFilePath negX: (NSString*) negXFilePath
@@ -649,15 +668,15 @@ static BOOL _shouldCacheAssociatedCCTexture2Ds = NO;
 	id tex = [self getTextureNamed: [self textureNameFromFilePath: posXFilePath]];
 	if (tex) return tex;
 	
-	Class texClz = [self.class textureClassForCube];
-	tex = [[texClz alloc] initCubeFromFilesPosX: posXFilePath negX: negXFilePath
-										   posY: posYFilePath negY: negYFilePath
-										   posZ: posZFilePath negZ: negZFilePath];
+	tex = [[[self.class textureClassForCube] alloc] initCubeFromFilesPosX: posXFilePath negX: negXFilePath
+																	 posY: posYFilePath negY: negYFilePath
+																	 posZ: posZFilePath negZ: negZFilePath];
 	[self addTexture: tex];
-	return tex;
+	return [tex autorelease];
 }
 
 -(id) initCubeFromFilePattern: (NSString*) aFilePathPattern {
+	[self release];
 	return [[[self.class textureClassForCube] alloc] initCubeFromFilePattern: aFilePathPattern];
 }
 
@@ -669,29 +688,25 @@ static BOOL _shouldCacheAssociatedCCTexture2Ds = NO;
 	
 	tex = [[[self textureClassForCube] alloc] initCubeFromFilePattern: aFilePathPattern];
 	[self addTexture: tex];
-	return tex;
+	return [tex autorelease];
 }
 
 -(id) initCubeWithPixelFormat: (GLenum) format andPixelType: (GLenum) type {
-	Class texClz = [self.class textureClassForCube];
-	return [[texClz alloc] initCubeWithPixelFormat: format andPixelType: type];
+	[self release];
+	return [[[self.class textureClassForCube] alloc] initCubeWithPixelFormat: format andPixelType: type];
 }
 
 +(id) textureCubeWithPixelFormat: (GLenum) format andPixelType: (GLenum) type {
-	Class texClz = [self.class textureClassForCube];
-	return [[texClz alloc] initCubeWithPixelFormat: format andPixelType: type];
+	return [[[[self textureClassForCube] alloc] initCubeWithPixelFormat: format andPixelType: type] autorelease];
 }
 
 -(id) initCubeWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
-	if ( (self = [self initCubeWithPixelFormat: format andPixelType: type]) ) {
-		[self resizeTo: size];
-	}
-	return self;
+	[self release];
+	return [[[self.class textureClassForCube] alloc] initCubeWithSize: size andPixelFormat: format andPixelType: type];
 }
 
 +(id) textureCubeWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
-	Class texClz = [self.class textureClassForCube];
-	return [[texClz alloc] initCubeWithSize: size andPixelFormat: format andPixelType: type];
+	return [[[[self textureClassForCube] alloc] initCubeWithSize: size andPixelFormat: format andPixelType: type] autorelease];
 }
 
 -(NSString*) fullDescription {
@@ -733,7 +748,7 @@ static GLuint _lastAssignedTextureTag;
 static CC3Cache* _textureCache = nil;
 
 +(void) ensureCache {
-	if ( !_textureCache ) _textureCache = [CC3Cache weakCacheForType: @"texture"];
+	if ( !_textureCache ) _textureCache = [[CC3Cache weakCacheForType: @"texture"] retain];
 }
 
 +(void) addTexture: (CC3Texture*) texture {
@@ -788,13 +803,13 @@ static CC3Cache* _textureCache = nil;
 -(void) bindTextureContent: (CC3Texture2DContent*) texContent toTarget: (GLenum) target {
 	[super bindTextureContent: texContent toTarget: target];
 
-	if (texContent == _ccTexture2D) return;
+	if (texContent == _ccTextureContent) return;
 
 	texContent.name = self.textureID;
 	[texContent deleteImageData];
-	_ccTexture2D.name = 0;			// Clear ID of existing so it won't delete GL texture when deallocated
-	_ccTexture2D = texContent;
-	[self cacheCCTexture2D];
+	_ccTextureContent.name = 0;			// Clear ID of existing so it won't delete GL texture when deallocated
+	
+	self.ccTexture = texContent;		// Keep track of the 2D texture content
 }
 
 -(void) resizeTo: (CC3IntSize) size {
@@ -848,6 +863,7 @@ static BOOL _defaultShouldFlip2DHorizontallyOnLoad = NO;
 	if ( (self = [self init]) ) {
 		id texContent = [[self.textureContentClass alloc] initWithCGImage: cgImg];
 		[self bindTextureContent: texContent toTarget: self.textureTarget];
+		[texContent release];		// Could be big, so get rid of it immediately
 		if (self.class.shouldGenerateMipmaps) [self generateMipmap];
 	}
 	return self;
@@ -858,6 +874,13 @@ static BOOL _defaultShouldFlip2DHorizontallyOnLoad = NO;
 		self.shouldFlipVerticallyOnLoad = NO;	// Nothing to flip
 		_pixelFormat = format;
 		_pixelType = type;
+	}
+	return self;
+}
+
+-(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
+	if ( (self = [self initWithPixelFormat: format andPixelType: type]) ) {
+		[self resizeTo: size];
 	}
 	return self;
 }
@@ -910,6 +933,7 @@ static ccTexParams _defaultCubeMapTextureParameters = { GL_LINEAR_MIPMAP_NEAREST
 -(void) loadCubeFace: (GLenum) faceTarget fromCGImage: (CGImageRef) cgImg {
 	id texContent = [[self.textureContentClass alloc] initWithCGImage: cgImg];
 	[self bindTextureContent: texContent toTarget: faceTarget];
+	[texContent release];		// Could be big, so get rid of it immediately
 }
 
 -(BOOL) loadCubeFace: (GLenum) faceTarget fromFile: (NSString*) aFilePath {
@@ -993,13 +1017,19 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 	if ( (self = [self init]) )
 		if ( ![self loadFromFilesPosX: posXFilePath negX: negXFilePath
 								 posY: posYFilePath negY: negYFilePath
-								 posZ: posZFilePath negZ: negZFilePath] ) return nil;
+								 posZ: posZFilePath negZ: negZFilePath] ) {
+			[self release];
+			return nil;
+		}
 	return self;
 }
 
 -(id) initCubeFromFilePattern: (NSString*) aFilePathPattern {
 	if ( (self = [self init]) )
-		if ( ![self loadFromFilePattern: aFilePathPattern] ) return nil;
+		if ( ![self loadFromFilePattern: aFilePathPattern] ) {
+			[self release];
+			return nil;
+		}
 	return self;
 }
 
@@ -1008,6 +1038,13 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 		self.shouldFlipVerticallyOnLoad = NO;	// Nothing to flip
 		_pixelFormat = format;
 		_pixelType = type;
+	}
+	return self;
+}
+
+-(id) initCubeWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
+	if ( (self = [self initCubeWithPixelFormat: format andPixelType: type]) ) {
+		[self resizeTo: size];
 	}
 	return self;
 }
@@ -1026,11 +1063,21 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 
 @synthesize textureUnit=_textureUnit;
 
+-(void) dealloc {
+	[_texture release];
+	[_textureUnit release];
+	
+	[super dealloc];
+}
+
 -(CC3Texture*) texture { return _texture; }
 
 -(void) setTexture: (CC3Texture*) texture {
 	if (texture == _texture) return;
-	_texture = texture;
+	
+	[_texture release];
+	_texture = [texture retain];
+	
 	if (!_name) self.name = texture.name;
 }
 
@@ -1179,7 +1226,7 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 }
 
 +(id) textureWithTexture: (CC3Texture*) texture {
-	return [((CC3TextureUnitTexture*)[self alloc]) initWithTexture: texture];
+	return [[((CC3TextureUnitTexture*)[self alloc]) initWithTexture: texture] autorelease];
 }
 
 -(id) initFromFile: (NSString*) aFilePath {
@@ -1187,7 +1234,7 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 }
 
 +(id) textureFromFile: (NSString*) aFilePath {
-	return [[self alloc] initFromFile: aFilePath];
+	return [[[self alloc] initFromFile: aFilePath] autorelease];
 }
 
 -(id) initWithCGImage: (CGImageRef) cgImg {
@@ -1195,7 +1242,7 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 }
 
 +(id) textureWithCGImage: (CGImageRef) cgImg {
-	return [[self alloc] initWithCGImage: cgImg];
+	return [[[self alloc] initWithCGImage: cgImg] autorelease];
 }
 
 -(id) initWithPixelFormat: (GLenum) format andPixelType: (GLenum) type {
@@ -1203,7 +1250,7 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 }
 
 +(id) textureWithPixelFormat: (GLenum) format andPixelType: (GLenum) type {
-	return [[self alloc] initWithPixelFormat: format andPixelType: type];
+	return [[[self alloc] initWithPixelFormat: format andPixelType: type] autorelease];
 }
 
 -(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
@@ -1211,7 +1258,7 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 }
 
 +(id) textureWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
-	return [[self alloc] initWithSize: size andPixelFormat: format andPixelType: type];
+	return [[[self alloc] initWithSize: size andPixelFormat: format andPixelType: type] autorelease];
 }
 
 -(id) initCubeFromFilesPosX: (NSString*) posXFilePath negX: (NSString*) negXFilePath
@@ -1225,9 +1272,9 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 +(id) textureCubeFromFilesPosX: (NSString*) posXFilePath negX: (NSString*) negXFilePath
 						  posY: (NSString*) posYFilePath negY: (NSString*) negYFilePath
 						  posZ: (NSString*) posZFilePath negZ: (NSString*) negZFilePath {
-	return [[self alloc] initCubeFromFilesPosX: posXFilePath negX: negXFilePath
-										   posY: posYFilePath negY: negYFilePath
-										   posZ: posZFilePath negZ: negZFilePath];
+	return [[[self alloc] initCubeFromFilesPosX: posXFilePath negX: negXFilePath
+											posY: posYFilePath negY: negYFilePath
+											posZ: posZFilePath negZ: negZFilePath] autorelease];
 }
 
 -(id) initCubeFromFilePattern: (NSString*) aFilePathPattern {
@@ -1235,7 +1282,7 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 }
 
 +(id) textureCubeFromFilePattern: (NSString*) aFilePathPattern {
-	return [[self alloc] initCubeFromFilePattern: aFilePathPattern];
+	return [[[self alloc] initCubeFromFilePattern: aFilePathPattern] autorelease];
 }
 
 -(id) initCubeWithPixelFormat: (GLenum) format andPixelType: (GLenum) type {
@@ -1243,7 +1290,7 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 }
 
 +(id) textureCubeWithPixelFormat: (GLenum) format andPixelType: (GLenum) type {
-	return [[self alloc] initCubeWithPixelFormat: format andPixelType: type];
+	return [[[self alloc] initCubeWithPixelFormat: format andPixelType: type] autorelease];
 }
 
 -(id) initCubeWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
@@ -1251,14 +1298,15 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 }
 
 +(id) textureCubeWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
-	return [[self alloc] initCubeWithSize: size andPixelFormat: format andPixelType: type];
+	return [[[self alloc] initCubeWithSize: size andPixelFormat: format andPixelType: type] autorelease];
 }
 
 /** Don't invoke super, because normal textures are not copyable */
 -(void) populateFrom: (CC3TextureUnitTexture*) another {
-	[self copyUserDataFrom: another];			// From CC3Identifiable
-	_texture = another.texture;					// Shared across copies
-	_textureUnit = [another.textureUnit copy];
+	[self copyUserDataFrom: another];					// From CC3Identifiable
+	
+	self.texture = another.texture;						// Shared across copies
+	self.textureUnit = [another.textureUnit autoreleasedCopy];
 }
 
 -(NSString*) fullDescription {
@@ -1301,6 +1349,7 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 
 -(void) dealloc {
 	[self deleteImageData];
+	[super dealloc];
 }
 
 /** Deletes the texture content from main memory. */
@@ -1692,6 +1741,8 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 	return self;
 }
 
-+(id) textureFromCC3Texture: (CC3Texture*) texture { return [[self alloc] initFromCC3Texture: texture]; }
++(id) textureFromCC3Texture: (CC3Texture*) texture {
+	return [[[self alloc] initFromCC3Texture: texture] autorelease];
+}
 
 @end

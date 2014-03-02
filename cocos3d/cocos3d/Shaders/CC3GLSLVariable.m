@@ -63,7 +63,7 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 @synthesize scope=_scope, isGLStateKnown=_isGLStateKnown;
 
 -(void) dealloc {
-	_program = nil;			// not retained
+	_program = nil;			// weak reference
 	[_name release];
 	[super dealloc];
 }
@@ -131,7 +131,7 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 -(id) initInProgram: (CC3ShaderProgram*) program atIndex: (GLuint) index {
 	if ( (self = [self init]) ) {
 		_index = index;
-		_program = program;				// not retained
+		_program = program;				// weak reference
 		[self populateFromProgram];
 	}
 	return self;
@@ -152,7 +152,7 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 }
 
 -(void) populateFrom: (CC3GLSLVariable*) another {
-	_program = another.program;		// Not copied or retained
+	_program = another.program;		// weak reference
 
 	[_name release];
 	_name = [another.name retain];

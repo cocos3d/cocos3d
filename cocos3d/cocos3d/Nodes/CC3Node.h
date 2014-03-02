@@ -2425,9 +2425,9 @@ typedef enum {
  * collection stored in this node. You can safely invoke the addTransformListener: or 
  * removeTransformListener: methods while iterating the returned collection.
  *
- * Transform listeners are not retained. Each listener should know who it has subscribed
- * to, and must remove itself as a listener (using the removeTransformListener: method)
- * when appropriate, such as when being deallocated.
+ * Transform listeners are weakly referenced. Each listener should know who it has subscribed
+ * to, and must remove itself as a listener (using the removeTransformListener: method) when
+ * appropriate, such as when being deallocated.
  *
  * For the same reason, transform listeners are not automatically copied when a node is
  * copied. If you copy a node and want its listeners to also listen to the copied node,
@@ -2453,9 +2453,9 @@ typedef enum {
  * It is safe to invoke this method more than once for the same listener, or
  * with a nil listener. In either case, this method simply ignores the request.
  *
- * Transform listeners are not retained. Each listener should know who it has subscribed
- * to, and must remove itself as a listener (using the removeTransformListener: method)
- * when appropriate, such as when being deallocated.
+ * Transform listeners are weakly referenced. Each listener should know who it has subscribed
+ * to, and must remove itself as a listener (using the removeTransformListener: method) when
+ * appropriate, such as when being deallocated.
  *
  * For the same reason, transform listeners are not automatically copied when a node is
  * copied. If you copy a node and want its listeners to also listen to the copied node,

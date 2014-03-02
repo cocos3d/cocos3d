@@ -29,6 +29,10 @@
  * See header file CC3Material.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3Material.h"
 #import "CC3ShaderMatcher.h"
 #import "CC3CC2Extensions.h"
@@ -42,6 +46,13 @@
 @synthesize shouldUseLighting=_shouldUseLighting;
 @synthesize blendFuncRGB=_blendFuncRGB, blendFuncAlpha=_blendFuncAlpha;
 @synthesize alphaTestFunction=_alphaTestFunction, alphaTestReference=_alphaTestReference;
+
+-(void) dealloc {
+	[_texture release];
+	[_textureOverlays release];
+
+	[super dealloc];
+}
 
 -(NSString*) nameSuffix { return @"Material"; }
 
@@ -244,7 +255,10 @@ static ccBlendFunc _defaultBlendFunc = {GL_ONE, GL_ZERO};
 
 -(void) setTexture: (CC3Texture*) aTexture {
 	if (aTexture == _texture) return;
-	_texture = aTexture;
+	
+	[_texture release];
+	_texture = [aTexture retain];
+	
 	[self texturesHaveChanged];
 }
 
@@ -255,7 +269,7 @@ static ccBlendFunc _defaultBlendFunc = {GL_ONE, GL_ZERO};
 		self.texture = aTexture;
 	} else {
 		CC3Assert(aTexture, @"%@ cannot add a nil overlay texture", self);
-		if(!_textureOverlays) _textureOverlays = [NSMutableArray array];
+		if(!_textureOverlays) _textureOverlays = [NSMutableArray new];		// retained
 
 		GLuint maxTexUnits = CC3OpenGL.sharedGL.maxNumberOfTextureUnits;
 		if (self.textureCount < maxTexUnits) {
@@ -271,13 +285,16 @@ static ccBlendFunc _defaultBlendFunc = {GL_ONE, GL_ZERO};
 // If it's the texture property, clear it, otherwise remove the overlay.
 -(void) removeTexture: (CC3Texture*) aTexture {
 	LogTrace(@"Removing %@ from %@", aTexture, self);
-	if (_texture == aTexture) {
+	if (aTexture == _texture) {
 		self.texture = nil;
 	} else {
 		if (_textureOverlays && aTexture) {
 			[_textureOverlays removeObjectIdenticalTo: aTexture];
 			[self texturesHaveChanged];
-			if (_textureOverlays.count == 0) _textureOverlays = nil;
+			if (_textureOverlays.count == 0) {
+				[_textureOverlays release];
+				_textureOverlays = nil;
+			}
 		}
 	}
 }
@@ -290,6 +307,7 @@ static ccBlendFunc _defaultBlendFunc = {GL_ONE, GL_ZERO};
 	if (_textureOverlays) {
 		NSArray* myOTs = [_textureOverlays copy];
 		for (CC3Texture* ot in myOTs) [self removeTexture: ot];
+		[myOTs release];
 	}
 }
 
@@ -425,14 +443,14 @@ static ccBlendFunc _defaultBlendFunc = {GL_ONE, GL_ZERO};
 	return self;
 }
 
-+(id) material { return [[self alloc] init]; }
++(id) material { return [[[self alloc] init] autorelease]; }
 
-+(id) materialWithTag: (GLuint) aTag { return [[self alloc] initWithTag: aTag]; }
++(id) materialWithTag: (GLuint) aTag { return [[[self alloc] initWithTag: aTag] autorelease]; }
 
-+(id) materialWithName: (NSString*) aName { return [[self alloc] initWithName: aName]; }
++(id) materialWithName: (NSString*) aName { return [[[self alloc] initWithName: aName] autorelease]; }
 
 +(id) materialWithTag: (GLuint) aTag withName: (NSString*) aName {
-	return [[self alloc] initWithTag: aTag withName: aName];
+	return [[[self alloc] initWithTag: aTag withName: aName] autorelease];
 }
 
 +(id) shiny {
@@ -451,8 +469,6 @@ static ccBlendFunc _defaultBlendFunc = {GL_ONE, GL_ZERO};
 // Protected properties for copying
 -(NSArray*) textureOverlays { return _textureOverlays; }
 
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3Material*) another {
 	[super populateFrom: another];
 
@@ -468,12 +484,13 @@ static ccBlendFunc _defaultBlendFunc = {GL_ONE, GL_ZERO};
 	_alphaTestReference = another.alphaTestReference;
 	_shouldUseLighting = another.shouldUseLighting;
 	
-	_texture = another.texture;			// retained - don't want to trigger texturesHaveChanged
+	[_texture release];
+	_texture = [another.texture retain];	// retained - don't want to trigger texturesHaveChanged
 	
 	// Remove any existing overlays and add the overlays from the other material.
 	[_textureOverlays removeAllObjects];
 	NSArray* otherOTs = another.textureOverlays;
-	for (CC3Texture* ot in otherOTs) [self addTexture: ot];	// retained by collection
+	for (CC3Texture* ot in otherOTs) [self addTexture: ot];		// retained by collection
 }
 
 -(NSString*) fullDescription {

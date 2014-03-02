@@ -77,8 +77,8 @@ typedef enum {
  * configuration properties associated with the GL_COMBINE texture environment mode.
  */
 @interface CC3TextureUnit : NSObject <NSCopying, CCRGBAProtocol> {
-	GLenum _textureEnvironmentMode;
 	ccColor4F _constantColor;
+	GLenum _textureEnvironmentMode;
 	CC3DOT3RGB _rgbNormalMap : 4;
 }
 

@@ -835,7 +835,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	NSString* texPath = [docDir stringByAppendingPathComponent: kGlobeTextureFile];
 	
 	// Configure the rotating globe
-	_globe = [CC3SphereNode nodeWithName: kGlobeName];		// not retained
+	_globe = [CC3SphereNode nodeWithName: kGlobeName];		// weak reference
 	[_globe populateAsSphereWithRadius: 1.0f andTessellation: CC3TessellationMake(32, 32)];
 	_globe.texture = [CC3Texture textureFromFile: texPath];
 	_globe.location = cc3v(150.0, 200.0, -150.0);
@@ -1936,7 +1936,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// back towards the big TV so that you can see both TV's displaying live video. You can
 	// also change the optimization line in the drawSceneContentWithVisitor: method, and invoke
 	// the drawToTVScreen method on each loop, to have both TV's show live video at all times.
-//	CCSprite* portableTV = [CCSprite spriteWithTexture: [tvSurface.colorTexture ccTexture2D]];
+//	CCSprite* portableTV = [CCSprite spriteWithTexture: [tvSurface.colorTexture ccTexture]];
 //	portableTV.flipY = YES;
 //	CC3Billboard* bb = (CC3Billboard*)[self getNodeNamed: kBillboardName];
 //	bb.uniformScale = 0.1;

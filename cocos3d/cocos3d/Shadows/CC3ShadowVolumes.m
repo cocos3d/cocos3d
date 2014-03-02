@@ -189,7 +189,7 @@
 -(void) populateFrom: (CC3ShadowVolumeMeshNode*) another {
 	[super populateFrom: another];
 	
-	self.light = another.light;						// not retained
+	self.light = another.light;						// weak reference
 	_isShadowDirty = another.isShadowDirty;
 	_shouldShadowFrontFaces = another.shouldShadowFrontFaces;
 	_shouldShadowBackFaces = another.shouldShadowBackFaces;

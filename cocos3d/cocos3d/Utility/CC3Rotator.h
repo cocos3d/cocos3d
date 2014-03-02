@@ -254,7 +254,7 @@ typedef enum {
  * the target of this rotator is set to nil.
  *
  * This method is required in order to be able to clear the target without retrieving it
- * outside this object to test if it is nil. Since the target is not retained, it may be
+ * outside this object to test if it is nil. Since the target is weakly referenced, it may be
  * deallocated while this rotator still maintains a reference to it. Any subsequent attempt
  * to retrieve the target reference will result in ARC attempting to retain and autorelease
  * it, which will create a zombie object error.

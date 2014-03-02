@@ -75,7 +75,7 @@
 	[self notifyDestructionListeners];			// Must do before releasing listeners.
 	
 	[_children release];
-	_parent = nil;								// not retained
+	_parent = nil;								// weak reference
 	[_globalTransformMatrix release];
 	[_globalTransformMatrixInverted release];
 	[_globalRotationMatrix release];
@@ -1021,8 +1021,10 @@
 	_scale = another.scale;
 	[self markTransformDirty];
 
+	[_rotator release];
 	_rotator = [another.rotator copy];					// retained
 	
+	[_boundingVolume release];
 	_boundingVolume = [another.boundingVolume copy];	// retained
 	_boundingVolume.node = self;
 	_boundingVolumePadding = another.boundingVolumePadding;
@@ -1624,12 +1626,12 @@ static GLuint lastAssignedNodeTag;
 
 /**
  * When assigned to a new parent, ensure that the transform will be recalculated,
- * since it changes this child's overall transform. Parent is not retained.
+ * since it changes this child's overall transform. Parent is weakly referenced.
  */
 -(void) setParent: (CC3Node*) aNode {
 	if (aNode == _parent) return;
 	
-	_parent = aNode;					// not retained.
+	_parent = aNode;					// weak reference.
 	self.isRunning = aNode.isRunning;
 	[self markTransformDirty];
 }

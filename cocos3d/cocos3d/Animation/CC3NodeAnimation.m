@@ -649,7 +649,7 @@ static CCTime _interpolationEpsilon = 0.1f;
 	CC3Assert(animation, @"%@ must be created with a valid animation.", [self class]);
 	CC3Assert(node, @"%@ must be created with a valid node.", [self class]);
 	if ( (self = [super init]) ) {
-		_node = node;						// not retained
+		_node = node;						// weak reference
 		_animation = animation;
 		_trackID = trackID;
 		_blendingWeight = 1.0f;

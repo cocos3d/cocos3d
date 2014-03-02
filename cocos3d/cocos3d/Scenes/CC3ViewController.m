@@ -87,7 +87,7 @@
 }
 
 -(void) endDirector {
-	CC3Texture.shouldCacheAssociatedCCTexture2Ds = NO;
+	CC3Texture.shouldCacheAssociatedCCTextures = NO;
 	[CCDirector.sharedDirector end];
 }
 

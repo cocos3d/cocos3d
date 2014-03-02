@@ -83,7 +83,7 @@ extern "C" {
 	if ( (self = [super init]) ) {
 		_effectsByName = [NSMutableDictionary new];		// retained
 		_texturesByName = [NSMutableDictionary new];	// retained
-		_semanticDelegateClass = [self class].defaultSemanticDelegateClass;	// not retained
+		_semanticDelegateClass = [self class].defaultSemanticDelegateClass;	// weak reference
 	}
 	return self;
 }

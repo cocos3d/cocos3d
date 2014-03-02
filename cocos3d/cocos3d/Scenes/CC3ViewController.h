@@ -145,7 +145,7 @@
  * must wait for one OpenGL session to terminate before starting another.
  *
  * Note that, in order to ensure that OpenGL is free to shutdown, this method forces the
- * CC3Texture shouldCacheAssociatedCCTexture2Ds class-side property to NO, so that any
+ * CC3Texture shouldCacheAssociatedCCTextures class-side property to NO, so that any
  * background loading that is currently occurring will not cache cocos2d textures. 
  * If you had set this property to YES, and intend to restart OpenGL at some point, then
  * you might want to set it back to YES before reloading 3D resources again.

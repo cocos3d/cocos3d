@@ -563,7 +563,7 @@ static GLfloat _deviceScaleFactor = 0.0f;
 // Deprecated
 -(id) initFromEmitter: (CC3PointParticleEmitter*) anEmitter {
 	if ( (self = [self init]) ) {
-		self.emitter = anEmitter;			// not retained
+		self.emitter = anEmitter;			// weak reference
 	}
 	return self;
 }

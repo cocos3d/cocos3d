@@ -29,6 +29,10 @@
  * See header file CC3PVRTexture.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3PVRTexture.h"
 #import "CC3PVRTTexture.h"
 #import "CC3ShaderSemantics.h"

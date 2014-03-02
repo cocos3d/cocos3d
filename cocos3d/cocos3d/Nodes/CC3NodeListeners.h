@@ -113,9 +113,9 @@
  * collection stored in this node. You can safely invoke the addTransformListener: or
  * removeTransformListener: methods while iterating the returned collection.
  *
- * Transform listeners are not retained. Each listener should know who it has subscribed
- * to, and must remove itself as a listener (using the removeTransformListener: method)
- * when appropriate, such as when being deallocated.
+ * Transform listeners are weakly referenced. Each listener should know who it has subscribed
+ * to, and must remove itself as a listener (using the removeTransformListener: method) when
+ * appropriate, such as when being deallocated.
  */
 @property(nonatomic, strong, readonly) NSSet* transformListeners;
 
@@ -125,9 +125,9 @@
  * It is safe to invoke this method more than once for the same listener, or
  * with a nil listener. In either case, this method simply ignores the request.
  *
- * Transform listeners are not retained. Each listener should know who it has subscribed
- * to, and must remove itself as a listener (using the removeTransformListener: method)
- * when appropriate, such as when being deallocated.
+ * Transform listeners are weakly referenced. Each listener should know who it has subscribed
+ * to, and must remove itself as a listener (using the removeTransformListener: method) when
+ * appropriate, such as when being deallocated.
  */
 -(void) addTransformListener: (id<CC3NodeTransformListenerProtocol>) aListener;
 

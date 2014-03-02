@@ -105,7 +105,7 @@
 	GLenum _magnifyingFunction;
 	GLenum _horizontalWrappingFunction;
 	GLenum _verticalWrappingFunction;
-	CC3Texture2DContent* _ccTexture2D;
+	CC3Texture2DContent* _ccTextureContent;
 	BOOL _texParametersAreDirty : 1;
 	BOOL _hasMipmap : 1;
 	BOOL _isUpsideDown : 1;
@@ -245,7 +245,7 @@
  * make use of this property. When making use of texture units, be sure to instantiate
  * an instance of a subclass that supports texture units, such as CC3TextureUnitTexture.
  */
-@property(nonatomic, strong) CC3TextureUnit* textureUnit;
+@property(nonatomic, retain) CC3TextureUnit* textureUnit;
 
 /**
  * The direction, in local node coordinates, of the light source that is to interact
@@ -282,7 +282,7 @@
  * This property provides polymorphic compatibility with CC3Texture subclasses, notably
  * CC3TextureUnitTexture, that contain another, underlying texture.
  */
-@property(nonatomic, strong, readonly) CC3Texture* texture;
+@property(nonatomic, retain, readonly) CC3Texture* texture;
 
 
 #pragma mark Texture transformations
@@ -599,43 +599,46 @@
 /** 
  * Returns a cocos2d-compatible 2D texture, that references the same GL texture.
  *
- * The value of the class-side shouldCacheAssociatedCCTexture2Ds property determines whether
+ * The value of the class-side shouldCacheAssociatedCCTextures property determines whether
  * the CCTexture returned by this method will automatically be added to the CCTextureCache.
  *
- * With the class-side shouldCacheAssociatedCCTexture2Ds property set to NO, you can still 
+ * With the class-side shouldCacheAssociatedCCTextures property set to NO, you can still 
  * add any CCTexture retrieved from this property to the CCTextureCache using the 
  * CCTextureCache addTexture:named: method.
  *
  * Although a CCTexture can be retrieved for any type of CC3Texture, including cube-maps,
  * using a cube-mapped texture as a cocos2d texture may lead to unexpected behavour.
  */
-@property(nonatomic, strong, readonly) 	CCTexture* ccTexture2D;
+@property(nonatomic, retain, readonly) 	CCTexture* ccTexture;
 
 /**
- * Indicates whether the associated cocos2d CCTexture, available through the ccTexture2D 
+ * Indicates whether the associated cocos2d CCTexture, available through the ccTexture 
  * property, should be automatically added to the cocos2d CCTextureCache.
  *
  * The initial value of this property is NO. If you intend to share many of the same textures
  * between cocos3d and cocos2d objects, you may want to set this property to YES.
  *
- * With this property set to NO, you can still add any CCTexture retrieved from the ccTexture2D
+ * With this property set to NO, you can still add any CCTexture retrieved from the ccTexture
  * property to the CCTextureCache using the CCTexture addToCacheWithName: method.
  */
-+(BOOL) shouldCacheAssociatedCCTexture2Ds;
++(BOOL) shouldCacheAssociatedCCTextures;
 
 /**
- * Indicates whether the associated cocos2d CCTexture, available through the ccTexture2D
+ * Indicates whether the associated cocos2d CCTexture, available through the ccTexture
  * property, should be automatically added to the cocos2d CCTextureCache.
  *
  * The initial value of this property is NO. If you intend to share many of the same textures
  * between cocos3d and cocos2d objects, you may want to set this property to YES.
  *
- * With this property set to NO, you can still add any CCTexture retrieved from the ccTexture2D
+ * With this property set to NO, you can still add any CCTexture retrieved from the ccTexture
  * property to the CCTextureCache using the CCTexture addToCacheWithName: method.
  */
-+(void) setShouldCacheAssociatedCCTexture2Ds: (BOOL) shouldCache;
++(void) setShouldCacheAssociatedCCTextures: (BOOL) shouldCache;
 
-/** @deprecated Use the ccTexture2D property instead. */
+/** @deprecated Renamed to ccTexture. */
+@property(nonatomic, retain, readonly) 	CCTexture* ccTexture2D DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Use the ccTexture property instead. */
 -(CCTexture*) asCCTexture2D DEPRECATED_ATTRIBUTE;
 
 
@@ -1540,7 +1543,7 @@
  *
  * This property is populated automatically during instance creation and loading.
  */
-@property(nonatomic, strong, readonly) CC3Texture* texture;
+@property(nonatomic, retain, readonly) CC3Texture* texture;
 
 /**
  * The texture environment settings that are applied to the texture unit that draws this
@@ -1559,7 +1562,7 @@
  * CC3ConfigurableTextureUnit provides complete flexibility in setting texture environment
  * settings.
  */
-@property(nonatomic, strong) CC3TextureUnit* textureUnit;
+@property(nonatomic, retain) CC3TextureUnit* textureUnit;
 
 
 #pragma mark Allocation and Initialization
@@ -1586,7 +1589,7 @@
 
 /**
  * A CCTexture subclass used by the CC3Texture class cluster during the loading of a 2D
- * texture, and when extracting a CCTexture from the CC3Texture ccTexture2D property.
+ * texture, and when extracting a CCTexture from the CC3Texture ccTexture property.
  *
  * PVR texture files cannot be loaded using this class.
  */

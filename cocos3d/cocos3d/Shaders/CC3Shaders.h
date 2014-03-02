@@ -366,8 +366,8 @@
 +(CC3Shader*) getShaderNamed: (NSString*) name;
 
 /** 
- * Removes the specified shader from the shader cache. If the shader is
- * not retained elsewhere, it will be deallocated, and will be removed from the GL engine.
+ * Removes the specified shader from the shader cache. If the shader is not strongly referenced
+ * elsewhere, it will be deallocated, and will be removed from the GL engine.
  *
  * Removing a shader from the GL engine does not affect the operation of shaders that have
  * been linked into a CC3ShaderProgram. It is common to remove shaders after you have created
@@ -376,9 +376,8 @@
 +(void) removeShader: (CC3Shader*) shader;
 
 /**
- * Removes the shader with the specified name from the shader cache.
- * If the shader is not retained elsewhere, it will be deallocated, and will be removed
- * from the GL engine.
+ * Removes the shader with the specified name from the shader cache. If the shader is not
+ * strongly referenced elsewhere, it will be deallocated, and will be removed from the GL engine.
  *
  * Removing a shader from the GL engine does not affect the operation of that shader if
  * it has been linked into a CC3ShaderProgram. It is common to remove shaders after you have 
@@ -1400,8 +1399,8 @@
 +(CC3ShaderSourceCode*) getShaderSourceCodeNamed: (NSString*) name;
 
 /**
- * Removes the specified shader source from the shader cache. If the shader source is
- * not retained elsewhere, it will be deallocated, and will be removed from the GL engine.
+ * Removes the specified shader source from the shader cache. If the shader source is not 
+ * strongly referenced elsewhere, it will be deallocated, and will be removed from the GL engine.
  *
  * Removing a shader from the GL engine does not affect the operation of shaders that have
  * been linked into a CC3ShaderProgram. It is common to remove shaders after you have created
@@ -1410,9 +1409,8 @@
 +(void) removeShaderSourceCode: (CC3ShaderSourceCode*) shader;
 
 /**
- * Removes the shader source with the specified name from the shader source cache.
- * If the shader is not retained elsewhere, it will be deallocated, and will be removed
- * from the GL engine.
+ * Removes the shader source with the specified name from the shader source cache. If the shader is
+ * not strongly referenced elsewhere, it will be deallocated, and will be removed from the GL engine.
  *
  * Removing a shader from the GL engine does not affect the operation of that shader if
  * it has been linked into a CC3ShaderProgram. It is common to remove shaders after you have

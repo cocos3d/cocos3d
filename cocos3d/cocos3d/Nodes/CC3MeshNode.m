@@ -585,8 +585,13 @@
 	[super populateFrom: another];
 	
 	// Don't use setters, to avoid side effects, including to bounding volume and tex coords.
+	[_mesh release];
 	_mesh = [another.mesh retain];					// retained - Mesh shared between original and copy
+
+	[_material release];
 	_material = [another.material copy];			// retained
+	
+	[_shaderContext release];
 	_shaderContext = [another.shaderContext copy];	// retained
 	
 	_pureColor = another.pureColor;

@@ -29,6 +29,10 @@
  * See header file CC3TextureUnit.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3TextureUnit.h"
 
 #pragma mark -
@@ -146,7 +150,7 @@
 	return self;
 }
 
-+(id) textureUnit { return [[self alloc] init]; }
++(id) textureUnit { return [[[self alloc] init] autorelease]; }
 
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.

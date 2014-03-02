@@ -676,10 +676,10 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
 +(void) setDefaultBlendFunc: (ccBlendFunc) aBlendFunc;
 
 /** @deprecated Moved to CC3MeshNode. */
-@property(nonatomic, strong) CC3ShaderContext* shaderContext DEPRECATED_ATTRIBUTE;
+@property(nonatomic, retain) CC3ShaderContext* shaderContext DEPRECATED_ATTRIBUTE;
 
 /** @deprecated Moved to CC3MeshNode. */
-@property(nonatomic, strong) CC3ShaderProgram* shaderProgram DEPRECATED_ATTRIBUTE;
+@property(nonatomic, retain) CC3ShaderProgram* shaderProgram DEPRECATED_ATTRIBUTE;
 
 
 #pragma mark Textures
@@ -721,7 +721,7 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
  * file types as well. See the notes for the CC3STBImage useForFileExtensions class-side
  * property for more info.
  */
-@property(nonatomic, strong) CC3Texture* texture;
+@property(nonatomic, retain) CC3Texture* texture;
 
 /**
  * In most situations, the material will use a single CC3Texture in the texture property.
@@ -847,7 +847,7 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
  *
  * This is a convenience property that returns the first cube-map texture that was added.
  */
-@property(nonatomic, strong, readonly) CC3Texture* textureCube;
+@property(nonatomic, retain, readonly) CC3Texture* textureCube;
 
 /** 
  * Returns whether this material contains a texture that is a six-sided cube-map texture.

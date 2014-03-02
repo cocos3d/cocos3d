@@ -1574,7 +1574,7 @@ static GLuint lastAssignedMeshTag;
 @synthesize mesh=_mesh, shouldCacheFaces=_shouldCacheFaces;
 
 -(void) dealloc {
-	_mesh = nil;					// not retained
+	_mesh = nil;					// weak reference
 	[self deallocateIndices];
 	[self deallocateCenters];
 	[self deallocateNormals];
@@ -1589,7 +1589,7 @@ static GLuint lastAssignedMeshTag;
  * on next access using the new mesh data.
  */
 -(void) setMesh: (CC3Mesh*) aMesh {
-	_mesh = aMesh;		// not retained
+	_mesh = aMesh;		// weak reference
 	[self deallocateIndices];
 	[self deallocateCenters];
 	[self deallocateNormals];
@@ -1667,7 +1667,7 @@ static GLuint lastAssignedMeshTag;
 -(void) populateFrom: (CC3FaceArray*) another {
 	[super populateFrom: another];
 	
-	_mesh = another.mesh;		// not retained
+	_mesh = another.mesh;		// weak reference
 	
 	_shouldCacheFaces = another.shouldCacheFaces;
 	
