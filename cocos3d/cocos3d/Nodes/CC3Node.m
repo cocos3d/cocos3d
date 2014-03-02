@@ -29,6 +29,10 @@
  * See header file CC3Node.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3Scene.h"
 #import "CC3BoundingVolumes.h"
 #import "CC3NodeAnimation.h"
@@ -69,6 +73,18 @@
 	self.target = nil;							// Removes myself as listener
 	[self removeAllChildren];
 	[self notifyDestructionListeners];			// Must do before releasing listeners.
+	
+	[_children release];
+	_parent = nil;								// not retained
+	[_globalTransformMatrix release];
+	[_globalTransformMatrixInverted release];
+	[_globalRotationMatrix release];
+	[_rotator release];
+	[_boundingVolume release];
+	[_transformListeners release];
+	[_animationStates release];
+	
+	[super dealloc];
 }
 
 // If tracking target, set the location anyway
@@ -938,10 +954,10 @@
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		_globalTransformMatrix = [CC3AffineMatrix matrix];
+		_globalTransformMatrix = [CC3AffineMatrix new];		// retained
 		_globalTransformMatrixInverted = nil;
 		_globalRotationMatrix = nil;
-		_rotator = [CC3Rotator rotator];
+		_rotator = [CC3Rotator new];						// retained
 		_transformListeners = nil;
 		_animationStates = nil;
 		_isAnimationDirty = NO;
@@ -967,20 +983,18 @@
 	return self;
 }
 
-+(id) node { return [[self alloc] init]; }
++(id) node { return [[[self alloc] init] autorelease]; }
 
-+(id) nodeWithTag: (GLuint) aTag { return [[self alloc] initWithTag: aTag]; }
++(id) nodeWithTag: (GLuint) aTag { return [[[self alloc] initWithTag: aTag] autorelease]; }
 
-+(id) nodeWithName: (NSString*) aName { return [[self alloc] initWithName: aName]; }
++(id) nodeWithName: (NSString*) aName { return [[[self alloc] initWithName: aName] autorelease]; }
 
 +(id) nodeWithTag: (GLuint) aTag withName: (NSString*) aName {
-	return [[self alloc] initWithTag: aTag withName: aName];
+	return [[[self alloc] initWithTag: aTag withName: aName] autorelease];
 }
 
 // Protected properties for copying
 -(BOOL) rawVisible { return _visible; }
-
-// Protected property for copying
 -(NSArray*) animationStates { return _animationStates; }
 
 /**
@@ -992,7 +1006,7 @@
  * be treated independently.
  * 
  * Child nodes are not copied in this method. Once this node has been populated with
- * configuration content by this method, invoke the copyChildrenFrom: method to copy
+ * configuration content by this method, invoke the addCopiesOfChildrenFrom: method to copy
  * the child nodes from the other node.
  * 
  * Subclasses that extend copying should extend this method, and honour the deep copy
@@ -1007,9 +1021,9 @@
 	_scale = another.scale;
 	[self markTransformDirty];
 
-	_rotator = [another.rotator copy];
+	_rotator = [another.rotator copy];					// retained
 	
-	_boundingVolume = [another.boundingVolume copy];
+	_boundingVolume = [another.boundingVolume copy];	// retained
 	_boundingVolume.node = self;
 	_boundingVolumePadding = another.boundingVolumePadding;
 	_shouldUseFixedBoundingVolume = another.shouldUseFixedBoundingVolume;
@@ -1044,7 +1058,7 @@
  */
 -(id) copyWithZone: (NSZone*) zone withName: (NSString*) aName asClass: (Class) aClass {
 	CC3Node* aCopy = (CC3Node*)[super copyWithZone: zone withName: aName asClass: aClass];
-	[aCopy copyChildrenFrom: self];
+	[aCopy addCopiesOfChildrenFrom: self];
 	return aCopy;
 }
 
@@ -1054,10 +1068,15 @@
  * The children from the other node are added to the children that already exist in this node
  * (which were possibly added during instantiation init).
  */
--(void) copyChildrenFrom: (CC3Node*) another {
+-(void) addCopiesOfChildrenFrom: (CC3Node*) another {
 	NSArray* otherKids = another.children;
-	for (CC3Node* otherKid in otherKids)
-		if (otherKid.shouldIncludeInDeepCopy) [self addChild: [otherKid copy]];
+	for (CC3Node* otherKid in otherKids) {
+		if (otherKid.shouldIncludeInDeepCopy) {
+			CC3Node* myKid = [otherKid copy];
+			[self addChild: myKid];
+			[myKid release];
+		}
+	}
 }
 
 // Implementations to keep compiler happy so this method can be included in interface for documentation.
@@ -1237,7 +1256,7 @@ static GLuint lastAssignedNodeTag;
 	if (!aListener) return;
 	
 	// Lazily create the transform listeners cache, and add the listener
-	if( !_transformListeners ) _transformListeners = [CC3NodeTransformListeners listenersForNode: self];
+	if( !_transformListeners ) _transformListeners = [[CC3NodeTransformListeners listenersForNode: self] retain];
 	[_transformListeners addTransformListener: aListener];
 	
 	// Notify immediately, to ensure the listener is aware of current state.
@@ -1247,7 +1266,10 @@ static GLuint lastAssignedNodeTag;
 -(void) removeTransformListener: (id<CC3NodeTransformListenerProtocol>) aListener {
 	// Remove the listener, then remove the transform listeners cache if no further listeners
 	[_transformListeners removeTransformListener: aListener];
-	if (_transformListeners.isEmpty) _transformListeners = nil;
+	if (_transformListeners.isEmpty) {
+		[_transformListeners release];
+		_transformListeners = nil;
+	}
 }
 
 -(void) removeAllTransformListeners { [_transformListeners removeAllTransformListeners]; }
@@ -1454,7 +1476,7 @@ static GLuint lastAssignedNodeTag;
  */
 -(CC3Matrix*) globalTransformMatrixInverted {
 	if (!_globalTransformMatrixInverted) {
-		_globalTransformMatrixInverted = [CC3AffineMatrix matrix];
+		_globalTransformMatrixInverted = [CC3AffineMatrix new];		// retained
 		_globalTransformMatrixInverted.isDirty = YES;
 	}
 	if (_globalTransformMatrixInverted.isDirty) {
@@ -1484,7 +1506,7 @@ static GLuint lastAssignedNodeTag;
  */
 -(CC3Matrix*) globalRotationMatrix {
 	if (!_globalRotationMatrix) {
-		_globalRotationMatrix = [CC3LinearMatrix matrix];
+		_globalRotationMatrix = [CC3LinearMatrix new];		// retained
 		_globalRotationMatrix.isDirty = YES;
 	}
 	if (_globalRotationMatrix.isDirty) {
@@ -1522,7 +1544,9 @@ static GLuint lastAssignedNodeTag;
 	if (aBoundingVolume == _boundingVolume) return;
 	
 	aBoundingVolume.shouldIgnoreRayIntersection = _boundingVolume.shouldIgnoreRayIntersection;
-	_boundingVolume = aBoundingVolume;
+	
+	[_boundingVolume release];
+	_boundingVolume = [aBoundingVolume retain];
 	
 	// If the bounding volume has not been assigned to a node yet, this node will be the primary
 	// node of the bounding volume. Otherwise, this node is a secondary node, is tracking the
@@ -1600,10 +1624,12 @@ static GLuint lastAssignedNodeTag;
 
 /**
  * When assigned to a new parent, ensure that the transform will be recalculated,
- * since it changes this child's overall transform.
+ * since it changes this child's overall transform. Parent is not retained.
  */
 -(void) setParent: (CC3Node*) aNode {
-	_parent = aNode;
+	if (aNode == _parent) return;
+	
+	_parent = aNode;					// not retained.
 	self.isRunning = aNode.isRunning;
 	[self markTransformDirty];
 }
@@ -1642,7 +1668,7 @@ static GLuint lastAssignedNodeTag;
 	[aNode remove];		// Remove node from its existing parent
 
 	// Lazily create the children array, if needed, and add the node to it
-	if(!_children) _children = [NSMutableArray array];
+	if(!_children) _children = [NSMutableArray new];	// retained
 	[_children addObject: aNode];
 
 	aNode.parent = self;
@@ -1747,9 +1773,26 @@ static GLuint lastAssignedNodeTag;
 	NSUInteger indx = [_children indexOfObjectIdenticalTo: aNode];
 	if (indx == NSNotFound) return;
 
+	// If the children collection is the only thing referencing the child node, the
+	// child node will be deallocated as soon as it is removed, and will be invalid
+	// when passed to the didRemoveDescendant: method, or to other activities that
+	// it may be subject to in the processing loop. To avoid problems, retain it for
+	// the duration of this processing loop, so that it will still be valid until
+	// we're done with it.
+	
+	// If the children collection is the only thing referencing the child node, the child
+	// node will be deallocated as soon as it is removed, and will be invalid when passed
+	// to the didRemoveDescendant: method, or to other activities that it may be subject
+	// to in the processing loop. To avoid problems, retain it for the duration of this
+	// processing loop, so that it will still be valid until we're done with it.
+	[[aNode retain] autorelease];
+	
 	aNode.parent = nil;
 	[_children removeObjectAtIndex: indx];
-	if (_children.count == 0) _children = nil;
+	if (_children.count == 0) {
+		[_children release];
+		_children = nil;
+	}
 
 	[aNode wasRemoved];						// Invoke before didRemoveDesc notification
 	[self didRemoveDescendant: aNode];
@@ -1766,6 +1809,7 @@ static GLuint lastAssignedNodeTag;
 -(void) removeAllChildren {
 	NSArray* myKids = [_children copy];
 	for (CC3Node* child in myKids) [self removeChild: child];
+	[myKids release];
 }
 
 -(void) remove { [_parent removeChild: self]; }

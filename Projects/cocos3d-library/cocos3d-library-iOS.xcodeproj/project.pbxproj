@@ -72,9 +72,9 @@
 		A9BC9179189C776C000FB28C /* CC3BoundingVolumes.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC9076189C776B000FB28C /* CC3BoundingVolumes.m */; };
 		A9BC917A189C776C000FB28C /* CC3Camera.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC9078189C776B000FB28C /* CC3Camera.m */; };
 		A9BC917B189C776C000FB28C /* CC3Light.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC907A189C776B000FB28C /* CC3Light.m */; };
-		A9BC917C189C776C000FB28C /* CC3LocalContentNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC907C189C776B000FB28C /* CC3LocalContentNode.m */; };
-		A9BC917D189C776C000FB28C /* CC3MeshNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC907E189C776B000FB28C /* CC3MeshNode.m */; };
-		A9BC917E189C776C000FB28C /* CC3Node.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC9080189C776B000FB28C /* CC3Node.m */; };
+		A9BC917C189C776C000FB28C /* CC3LocalContentNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC907C189C776B000FB28C /* CC3LocalContentNode.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		A9BC917D189C776C000FB28C /* CC3MeshNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC907E189C776B000FB28C /* CC3MeshNode.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		A9BC917E189C776C000FB28C /* CC3Node.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC9080189C776B000FB28C /* CC3Node.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A9BC917F189C776C000FB28C /* CC3NodeListeners.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC9082189C776C000FB28C /* CC3NodeListeners.m */; };
 		A9BC9180189C776C000FB28C /* CC3NodeVisitor.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC9084189C776C000FB28C /* CC3NodeVisitor.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A9BC9181189C776C000FB28C /* CC3ParametricMeshNodes.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC9086189C776C000FB28C /* CC3ParametricMeshNodes.m */; };
@@ -122,7 +122,7 @@
 		A9BC91AB189C776C000FB28C /* CC3CC2Extensions.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90EA189C776C000FB28C /* CC3CC2Extensions.m */; };
 		A9BC91AC189C776C000FB28C /* CC3DataArray.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90EC189C776C000FB28C /* CC3DataArray.m */; };
 		A9BC91AD189C776C000FB28C /* CC3Foundation.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90EE189C776C000FB28C /* CC3Foundation.m */; };
-		A9BC91AE189C776C000FB28C /* CC3Identifiable.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90F0189C776C000FB28C /* CC3Identifiable.m */; };
+		A9BC91AE189C776C000FB28C /* CC3Identifiable.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90F0189C776C000FB28C /* CC3Identifiable.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A9BC91AF189C776C000FB28C /* CC3PerformanceStatistics.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90F4189C776C000FB28C /* CC3PerformanceStatistics.m */; };
 		A9BC91B0189C776D000FB28C /* CC3Rotator.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90F6189C776C000FB28C /* CC3Rotator.m */; };
 		A9BC91B1189C776D000FB28C /* CC3GLMatrix.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90FA189C776C000FB28C /* CC3GLMatrix.m */; };

@@ -183,7 +183,7 @@ typedef enum {
  */
 @interface CC3Node : CC3Identifiable <CCRGBAProtocol, CCBlendProtocol, CC3NodeTransformListenerProtocol> {
 	NSMutableArray* _children;
-	CC3Node* __unsafe_unretained _parent;
+	CC3Node* _parent;
 	CC3Matrix* _globalTransformMatrix;
 	CC3Matrix* _globalTransformMatrixInverted;
 	CC3Matrix* _globalRotationMatrix;
@@ -256,7 +256,7 @@ typedef enum {
  * accessed or changed, this property will return a CC3DirectionalRotator. The creation
  * of the type of rotator required to support the various rotations is automatic.
  */
-@property(nonatomic, strong) CC3Rotator* rotator;
+@property(nonatomic, retain) CC3Rotator* rotator;
 
 /**
  * The rotational orientation of the node in 3D space, relative to the parent of this node.
@@ -761,7 +761,7 @@ typedef enum {
  * if needed. This node will receive a nodeWasDestroyed: reference if the target node is removed
  * and deallocated. The default implementation of that method is to set this target property to nil.
  */
-@property(nonatomic, unsafe_unretained) CC3Node* target;
+@property(nonatomic, assign) CC3Node* target;
 
 /**
  * Indicates whether this node is tracking the location of a target node.
@@ -1368,7 +1368,7 @@ typedef enum {
  * and setting this property has no effect. Subclasses that performance support
  * statistics collection will override to allow the property to be get and set.
  */
-@property(nonatomic, strong) CC3PerformanceStatistics* performanceStatistics;
+@property(nonatomic, retain) CC3PerformanceStatistics* performanceStatistics;
 
 /**
  * Returns a description of the structure of this node and its descendants,
@@ -1378,7 +1378,7 @@ typedef enum {
  * The description of each node appears on a separate line and is indented
  * according to its depth in the structural hierarchy, starting at this node.
  */
-@property(nonatomic, strong, readonly) NSString* structureDescription;
+@property(nonatomic, retain, readonly) NSString* structureDescription;
 
 /**
  * Appends the description of this node to the specified mutable string, on a new line
@@ -1471,7 +1471,7 @@ typedef enum {
  * Setting the value of this property sets the same property in all descendant mesh nodes.
  * Querying the value of this property returns the first non-nil texture from a descendant mesh node.
  */
-@property(nonatomic, strong) CC3Texture* texture;
+@property(nonatomic, retain) CC3Texture* texture;
 
 /**
  * Convenience method for adding a texture covering all descendant mesh nodes.
@@ -1530,7 +1530,7 @@ typedef enum {
  *
  * This property is used only when running under OpenGL ES 2.
  */
-@property(nonatomic, strong) CC3ShaderContext* shaderContext;
+@property(nonatomic, retain) CC3ShaderContext* shaderContext;
 
 /**
  * The GLSL program (vertex & fragment shaders) used to decorate the descendant mesh nodes.
@@ -1551,7 +1551,7 @@ typedef enum {
  *
  * This property is used only when running under OpenGL ES 2.
  */
-@property(nonatomic, strong) CC3ShaderProgram* shaderProgram;
+@property(nonatomic, retain) CC3ShaderProgram* shaderProgram;
 
 /**
  * Selects an appropriate shaders for each descendant mesh node.
@@ -2433,7 +2433,7 @@ typedef enum {
  * copied. If you copy a node and want its listeners to also listen to the copied node,
  * you must deliberately add them to the new node.
  */
-@property(nonatomic, strong, readonly) NSSet* transformListeners;
+@property(nonatomic, retain, readonly) NSSet* transformListeners;
 
 /**
  * Indicates that the specified listener object wishes to be notified whenever
@@ -2510,7 +2510,7 @@ typedef enum {
  * allows the order in which drawable nodes are drawn to be independent of the node structural
  * hierarchy.
  */
-@property(nonatomic, strong, readonly) CC3Matrix* globalTransformMatrix;
+@property(nonatomic, retain, readonly) CC3Matrix* globalTransformMatrix;
 
 /** 
  * @deprecated Renamed to globalTransformMatrix.
@@ -2519,7 +2519,7 @@ typedef enum {
  * behaviour in any legacy code that depends on the older functionality provided by this property.
  * Convert your code now.
  */
-@property(nonatomic, strong, readonly) CC3Matrix* transformMatrix DEPRECATED_ATTRIBUTE;
+@property(nonatomic, retain, readonly) CC3Matrix* transformMatrix DEPRECATED_ATTRIBUTE;
 
 /**
  * Returns the matrix inversion of the globalTransformMatrix.
@@ -2527,7 +2527,7 @@ typedef enum {
  * This can be useful for converting global transform properties, such as global
  * location, rotation and scale to the local coordinate system of the node.
  */
-@property(nonatomic, strong, readonly) CC3Matrix* globalTransformMatrixInverted;
+@property(nonatomic, retain, readonly) CC3Matrix* globalTransformMatrixInverted;
 
 /**
  * @deprecated Renamed to globalTransformMatrixInverted.
@@ -2536,7 +2536,7 @@ typedef enum {
  * behaviour in any legacy code that depends on the older functionality provided by this property.
  * Convert your code now.
  */
-@property(nonatomic, strong, readonly) CC3Matrix* transformMatrixInverted DEPRECATED_ATTRIBUTE;
+@property(nonatomic, retain, readonly) CC3Matrix* transformMatrixInverted DEPRECATED_ATTRIBUTE;
 
 /** Returns a matrix representing all of the rotations that make up this node, including ancestor nodes. */
 -(CC3Matrix*) globalRotationMatrix;
@@ -2576,13 +2576,13 @@ typedef enum {
 -(void) updateTransformMatrix DEPRECATED_ATTRIBUTE;
 
 /** @deprecated No longer needed. */
-@property(nonatomic, strong, readonly) CC3Node* dirtiestAncestor DEPRECATED_ATTRIBUTE;
+@property(nonatomic, retain, readonly) CC3Node* dirtiestAncestor DEPRECATED_ATTRIBUTE;
 
 /** @deprecated No longer needed. */
-@property(nonatomic, strong, readonly) CC3Matrix* parentGlobalTransformMatrix DEPRECATED_ATTRIBUTE;
+@property(nonatomic, retain, readonly) CC3Matrix* parentGlobalTransformMatrix DEPRECATED_ATTRIBUTE;
 
 /** @deprecated Renamed to parentGlobalTransformMatrix. No longer needed. */
-@property(nonatomic, strong, readonly) CC3Matrix* parentTransformMatrix DEPRECATED_ATTRIBUTE;
+@property(nonatomic, retain, readonly) CC3Matrix* parentTransformMatrix DEPRECATED_ATTRIBUTE;
 
 /** @deprecated No longer needed. Does nothing. */
 -(void) buildTransformMatrixWithVisitor: (id) visitor;
@@ -2625,7 +2625,7 @@ typedef enum {
  * and shape of a manually-assigned bounding volume, such as those assigned to skinned mesh nodes
  * as described above.
  */
-@property(nonatomic, strong) CC3NodeBoundingVolume* boundingVolume;
+@property(nonatomic, retain) CC3NodeBoundingVolume* boundingVolume;
 
 /** 
  * If this node has no bounding volume, sets the boundingVolume property
@@ -2794,14 +2794,14 @@ typedef enum {
  * To change the contents of this array, use the addChild: and removeChild:
  * methods of this class. Do not manipulate the contents of this array directly.
  */
-@property(nonatomic, strong, readonly) NSArray* children;
+@property(nonatomic, retain, readonly) NSArray* children;
 
 /**
  * The parent node of this node, in a node structural hierarchy.
  *
  * This property will be nil if this node has not been added as a child to a parent node.
  */
-@property(nonatomic, unsafe_unretained, readonly) CC3Node* parent;
+@property(nonatomic, assign, readonly) CC3Node* parent;
 
 /**
  * Returns the root ancestor of this node, in the node structural hierarchy,
@@ -2814,7 +2814,7 @@ typedef enum {
  * Reading this property traverses up the node hierarchy. If this property
  * is accessed frequently, it is recommended that it be cached.
  */
-@property(nonatomic, unsafe_unretained, readonly) CC3Node* rootAncestor;
+@property(nonatomic, assign, readonly) CC3Node* rootAncestor;
 
 /**
  * If this node has been added to the 3D scene, either directly, or as part
@@ -2824,10 +2824,10 @@ typedef enum {
  * Reading this property traverses up the node hierarchy. If this property
  * is accessed frequently, it is recommended that it be cached.
  */
-@property(nonatomic, unsafe_unretained, readonly) CC3Scene* scene;
+@property(nonatomic, assign, readonly) CC3Scene* scene;
 
 /** @deprecated Renamed to scene. */
-@property(nonatomic, unsafe_unretained, readonly) CC3Scene* world DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign, readonly) CC3Scene* world DEPRECATED_ATTRIBUTE;
 
 /**
  * If this node has been added to the 3D scene, either directly, or as part
@@ -2837,7 +2837,7 @@ typedef enum {
  * Reading this property traverses up the node hierarchy. If this property
  * is accessed frequently, it is recommended that it be cached.
  */
-@property(nonatomic, strong, readonly) CC3Camera* activeCamera;
+@property(nonatomic, retain, readonly) CC3Camera* activeCamera;
 
 /**
  * Indicates whether this instance should automatically remove itself from its parent
@@ -3276,7 +3276,7 @@ typedef enum {
  * property of the car structural node, or each wheel node. This allows the user to
  * touch a wheel, but still have the car identified as the object of interest.
  */
-@property(nonatomic, unsafe_unretained, readonly) CC3Node* touchableNode;
+@property(nonatomic, assign, readonly) CC3Node* touchableNode;
 
 /**
  * Indicates whether this node should automatically be considered touchable if this
@@ -3543,7 +3543,7 @@ typedef enum {
  * If the shouldDrawDescriptor is set to YES, returns the child node
  * that draws the descriptor text on this node. Otherwise, returns nil.
  */
-@property(nonatomic, strong, readonly) CC3NodeDescriptor* descriptorNode;
+@property(nonatomic, retain, readonly) CC3NodeDescriptor* descriptorNode;
 
 /**
  * Indicates the state of the shouldDrawDescriptor property of this node and all
@@ -3607,7 +3607,7 @@ typedef enum {
  * If the shouldDrawWireframeBox is set to YES, returns the child node
  * that draws the wireframe box around this node. Otherwise, returns nil.
  */
-@property(nonatomic, strong, readonly) CC3WireframeBoundingBoxNode* wireframeBoxNode;
+@property(nonatomic, retain, readonly) CC3WireframeBoundingBoxNode* wireframeBoxNode;
 
 /**
  * Returns the color that wireframe bounding boxes will be drawn in when created
@@ -3747,7 +3747,7 @@ typedef enum {
  * Returns an array of all the direction marker child nodes that were previously added
  * using the addDirectionMarkerColored:inDirection: and addDirectionMarker methods.
  */
-@property(nonatomic, strong, readonly) NSArray* directionMarkers;
+@property(nonatomic, retain, readonly) NSArray* directionMarkers;
 
 /**
  * Returns the color that direction marker lines will be drawn in when created

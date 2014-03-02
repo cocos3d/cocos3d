@@ -163,7 +163,7 @@
  * If the shouldDrawLocalContentWireframeBox is set to YES, returns the child node that
  * draws the wireframe around the local content of this node. Otherwise, returns nil.
  */
-@property(nonatomic, strong, readonly) CC3WireframeBoundingBoxNode* localContentWireframeBoxNode;
+@property(nonatomic, retain, readonly) CC3WireframeBoundingBoxNode* localContentWireframeBoxNode;
 
 /**
  * Returns the color that local content wireframe bounding boxes will be drawn

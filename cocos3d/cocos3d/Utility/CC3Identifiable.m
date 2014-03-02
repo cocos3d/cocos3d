@@ -29,6 +29,10 @@
  * See header file CC3Identifiable.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3Identifiable.h"
 
 @implementation CC3Identifiable
@@ -39,6 +43,11 @@ static GLint instanceCount = 0;
 
 -(void) dealloc {
 	instanceCount--;
+
+	[_name release];
+	[_userData release];
+	
+	[super dealloc];
 }
 
 -(BOOL) deriveNameFrom: (CC3Identifiable*) another {

@@ -38,7 +38,7 @@
 
 
 @interface CC3Node (TemplateMethods)
--(void) copyChildrenFrom: (CC3Node*) another;
+-(void) addCopiesOfChildrenFrom: (CC3Node*) another;
 @end
 
 @interface CC3Mesh (TemplateMethods)
@@ -58,8 +58,8 @@
 @implementation CC3SoftBodyNode
 
 /** Attaches any contained skin sections to the new skeleton copy under this soft body node. */
--(void) copyChildrenFrom: (CC3Node*) another {
-	[super copyChildrenFrom: another];
+-(void) addCopiesOfChildrenFrom: (CC3Node*) another {
+	[super addCopiesOfChildrenFrom: another];
 	[self reattachBonesFrom: self];
 }
 

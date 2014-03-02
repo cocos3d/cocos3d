@@ -29,6 +29,10 @@
  * See header file CC3MeshNode.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3MeshNode.h"
 #import "CC3BoundingVolumes.h"
 #import "CC3Mesh.h"
@@ -55,6 +59,14 @@
 @synthesize mesh=_mesh, material=_material, pureColor=_pureColor, lineWidth=_lineWidth;
 @synthesize shouldSmoothLines=_shouldSmoothLines, lineSmoothingHint=_lineSmoothingHint;
 
+-(void) dealloc {
+	[_mesh release];
+	[_material release];
+	[_shaderContext release];
+
+	[super dealloc];
+}
+
 -(void) setName: (NSString*) aName {
 	super.name = aName;
 	[_mesh deriveNameFrom: self];
@@ -64,7 +76,10 @@
 // Sets the name of the mesh if needed and marks the bounding volume as dirty.
 -(void) setMesh:(CC3Mesh *) aMesh {
 	if (aMesh == _mesh) return;
-	_mesh = aMesh;
+	
+	[_mesh release];
+	_mesh = [aMesh retain];
+	
 	[_mesh deriveNameFrom: self];
 
 	if ( !_mesh.hasVertexNormals ) _material.shouldUseLighting = NO;	// Only if material exists
@@ -93,7 +108,11 @@
  * texture in the material.
  */
 -(void) setMaterial: (CC3Material*) aMaterial {
-	_material = aMaterial;
+	if (aMaterial == _material) return;
+	
+	[_material release];
+	_material = [aMaterial retain];
+
 	[_material deriveNameFrom: self];
 
 	if ( !_mesh.hasVertexNormals ) _material.shouldUseLighting = NO;
@@ -288,13 +307,18 @@
 #pragma mark Shaders
 
 -(CC3ShaderContext*) shaderContext {
-	if ( !_shaderContext ) _shaderContext = [CC3ShaderContext context];
+	if ( !_shaderContext ) _shaderContext = [CC3ShaderContext new];		// retained
 	return _shaderContext;
 }
 
+// Set shader context if not the same, and pass along to descendants
 -(void) setShaderContext: (CC3ShaderContext*) shaderContext {
-	_shaderContext = shaderContext;
-	super.shaderContext = shaderContext;	// pass along to any children
+	if (shaderContext != _shaderContext) {
+		[_shaderContext release];
+		_shaderContext = [shaderContext retain];
+	}
+
+	[super setShaderContext: shaderContext];	// pass along to any children
 }
 
 #if CC3_GLSL
@@ -561,9 +585,9 @@
 	[super populateFrom: another];
 	
 	// Don't use setters, to avoid side effects, including to bounding volume and tex coords.
-	_mesh = another.mesh;					// Mesh shared between original and copy
-	_material = [another.material copy];
-	_shaderContext = [another.shaderContext copy];
+	_mesh = [another.mesh retain];					// retained - Mesh shared between original and copy
+	_material = [another.material copy];			// retained
+	_shaderContext = [another.shaderContext copy];	// retained
 	
 	_pureColor = another.pureColor;
 	_shouldUseSmoothShading = another.shouldUseSmoothShading;

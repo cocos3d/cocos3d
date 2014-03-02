@@ -46,9 +46,9 @@
  * initializer, initWithTag:withName:.
  */
 @interface CC3Identifiable : NSObject <CC3Cacheable, NSCopying> {
-	GLuint _tag;
 	NSString* _name;
-	GLvoid* _userData;
+	NSObject* _userData;
+	GLuint _tag;
 }
 
 /**
@@ -69,7 +69,7 @@
  * Some subclasses are designed so that their instances can be cached. For instances of those
  * subclasses, the name is required, and must be unique.
  */
-@property(nonatomic, strong) NSString* name;
+@property(nonatomic, retain) NSString* name;
 
 /**
  * If this instance does not already have a name, it is derived from the name of the specified
@@ -110,7 +110,7 @@
  * override this property to return a useful identifiable name suffix. A subclass can return
  * nil from this property to indicate that automatic naming should not be performed.
  */
-@property(nonatomic, strong, readonly) NSString* nameSuffix;
+@property(nonatomic, retain, readonly) NSString* nameSuffix;
 
 
 #pragma mark User data
@@ -141,7 +141,7 @@
  * categories to the concrete subclasses of CC3Identifiable, (CC3Node, CC3Mesh, CC3Material,
  * CC3Texture, etc.), to copy the userData object and assign it to the new instance.
  */
-@property(nonatomic, strong) NSObject* userData;
+@property(nonatomic, retain) NSObject* userData;
 
 /**
  * Invoked automatically from the init* family of methods to initialize the userData property
@@ -177,10 +177,9 @@
 -(void) releaseUserData DEPRECATED_ATTRIBUTE;
 
 /**
- * @deprecated Use userData instead.
- * Under ARC, the userData and sharedUserData properties have identical functionality.
+ * @deprecated Use userData instead. The userData and sharedUserData properties are now the same.
  */
-@property(nonatomic, strong) NSObject* sharedUserData DEPRECATED_ATTRIBUTE;
+@property(nonatomic, retain) NSObject* sharedUserData DEPRECATED_ATTRIBUTE;
 
 
 #pragma mark Allocation and initialization

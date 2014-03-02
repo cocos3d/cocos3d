@@ -128,10 +128,10 @@
  * of this node is set to NO, and if the mesh does not have texture coordinates, the texture
  * property of this node is set to nil.
  */
-@property(nonatomic, strong) CC3Mesh* mesh;
+@property(nonatomic, retain) CC3Mesh* mesh;
 
 /** @deprecated CC3MeshModel renamed to CC3Mesh. Use mesh property instead. */
-@property(nonatomic, strong) CC3Mesh* meshModel DEPRECATED_ATTRIBUTE;
+@property(nonatomic, retain) CC3Mesh* meshModel DEPRECATED_ATTRIBUTE;
 
 /**
  * If a mesh does not yet exist, this method invokes the makeMesh method to create
@@ -188,7 +188,7 @@
  * The material will automatically be created if either the isOpaque or
  * shouldUseLighting property is set, but not if they are simply read.
  */
-@property(nonatomic, strong) CC3Material* material;
+@property(nonatomic, retain) CC3Material* material;
 
 /**
  * The pure, solid color used to paint the mesh if no material is established for this node.
@@ -341,7 +341,7 @@
  *
  * This property is used only when running under OpenGL ES 2.
  */
-@property(nonatomic, strong) CC3ShaderContext* shaderContext;
+@property(nonatomic, retain) CC3ShaderContext* shaderContext;
 
 /**
  * The GLSL program (vertex & fragment shaders) used to draw this node.
@@ -359,7 +359,7 @@
  *
  * This property is used only when running under OpenGL ES 2.
  */
-@property(nonatomic, strong) CC3ShaderProgram* shaderProgram;
+@property(nonatomic, retain) CC3ShaderProgram* shaderProgram;
 
 /**
  * Selects an appropriate shader program for this mesh node, and returns that shader program.
@@ -547,7 +547,7 @@
  * file types as well. See the notes for the CC3STBImage useForFileExtensions class-side
  * property for more info.
  */
-@property(nonatomic, strong) CC3Texture* texture;
+@property(nonatomic, retain) CC3Texture* texture;
 
 /**
  * In most situations, the material will use a single CC3Texture in the texture property.
