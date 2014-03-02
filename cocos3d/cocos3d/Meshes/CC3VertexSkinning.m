@@ -30,6 +30,10 @@
  * See header file CC3VertexSkinning.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3VertexSkinning.h"
 #import "CC3Camera.h"
 #import "CC3Scene.h"
@@ -76,6 +80,15 @@
 @implementation CC3SkinMeshNode
 
 @synthesize skinSections=_skinSections;
+
+-(void) dealloc {
+	[_skinSections release];
+	[_skeletalTransformMatrix release];
+	[_skeletalTransformMatrixInverted release];
+	[_deformedFaces release];
+
+	[super dealloc];
+}
 
 -(CC3SkinSection*) skinSectionForVertexIndexAt: (GLint) index {
 	for (CC3SkinSection* ss in _skinSections) if ( [ss containsVertexIndex: index] ) return ss;
@@ -136,9 +149,9 @@
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		_skinSections = [NSMutableArray array];
-		_skeletalTransformMatrix = [CC3AffineMatrix new];
-		_skeletalTransformMatrixInverted = [CC3AffineMatrix new];
+		_skinSections = [NSMutableArray new];						// retained
+		_skeletalTransformMatrix = [CC3AffineMatrix new];			// retained
+		_skeletalTransformMatrixInverted = [CC3AffineMatrix new];	// retained
 		_deformedFaces = nil;
 	}
 	return self;
@@ -154,7 +167,7 @@
 	[_skinSections removeAllObjects];
 	NSArray* otherSkinSections = another.skinSections;
 	for (CC3SkinSection* ss in otherSkinSections)
-		[_skinSections addObject: [ss copyForNode: self]];		// retained in array
+		[_skinSections addObject: [[ss copyForNode: self] autorelease]];	// retained in array
 }
 
 -(void) reattachBonesFrom: (CC3Node*) aNode {
@@ -255,6 +268,13 @@
 
 @synthesize vertexStart=_vertexStart, vertexCount=_vertexCount;
 
+-(void) dealloc {
+	_node = nil;				// weak reference
+	[_skinnedBones release];
+	
+	[super dealloc];
+}
+
 -(BOOL) hasSkeleton { return self.boneCount > 0; }
 
 -(GLuint) boneCount { return (GLuint)_skinnedBones.count; }
@@ -323,8 +343,8 @@
 
 -(id) initForNode: (CC3SkinMeshNode*) aNode {
 	if ( (self = [super init]) ) {
-		_node = aNode;							// not retained
-		_skinnedBones = [NSMutableArray array];
+		_node = aNode;							// weak reference
+		_skinnedBones = [NSMutableArray new];	// retained
 		_vertexStart = 0;
 		_vertexCount = 0;
 	}
@@ -409,6 +429,13 @@
 
 @synthesize restPoseSkeletalTransformMatrixInverted=_restPoseSkeletalTransformMatrixInverted;
 
+-(void) dealloc {
+	[_skeletalTransformMatrix release];
+	[_restPoseSkeletalTransformMatrixInverted release];
+	
+	[super dealloc];
+}
+
 -(BOOL) hasSoftBodyContent  { return YES; }
 
 -(void) ensureRigidSkeleton {
@@ -422,8 +449,8 @@
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		_skeletalTransformMatrix = [CC3AffineMatrix new];
-		_restPoseSkeletalTransformMatrixInverted = [CC3AffineMatrix new];
+		_skeletalTransformMatrix = [CC3AffineMatrix new];					// retained
+		_restPoseSkeletalTransformMatrixInverted = [CC3AffineMatrix new];	// retained
 	}
 	return self;
 }
@@ -481,7 +508,14 @@
 
 -(void) dealloc {
 	[_skinNode removeTransformListener: self];
+	_skinNode = nil;								// weak reference
+
 	[_bone removeTransformListener: self];
+	_bone = nil;									// weak reference
+	
+	[_transformMatrix release];
+
+	[super dealloc];
 }
 
 -(void) markTransformDirty { _transformMatrix.isDirty = YES; }
@@ -512,13 +546,13 @@
 	CC3Assert(aBone, @"%@ must be initialized with a bone.", self.class);
 	if ( (self = [super init]) ) {
 
-		_skinNode = aNode;
+		_skinNode = aNode;							// weak reference
 		[_skinNode addTransformListener: self];
 
-		_bone = aBone;
+		_bone = aBone;								// weak reference
 		[_bone addTransformListener: self];
 
-		_transformMatrix = [CC3AffineMatrix new];
+		_transformMatrix = [CC3AffineMatrix new];	// retained
 		[self markTransformDirty];
 	}
 	return self;
@@ -529,7 +563,7 @@
  * applies the specified bone to the specified mesh node.
  */
 +(id) skinnedBoneWithSkin: (CC3SkinMeshNode*) aNode onBone: (CC3Bone*) aBone {
-	return [[self alloc] initWithSkin: aNode onBone: aBone];
+	return [[[self alloc] initWithSkin: aNode onBone: aBone] autorelease];
 }
 
 /** Either the bone or skin node were transformed. Mark the transforms of this skinned bone dirty. */
@@ -543,8 +577,8 @@
  * listener disappears before I do, clear the reference to it.
  */
 -(void) nodeWasDestroyed: (CC3Node*) aNode {
-	if (aNode == _skinNode) _skinNode = nil;
-	if (aNode == _bone) _bone = nil;
+	if (aNode == _skinNode) _skinNode = nil;	// weak reference
+	if (aNode == _bone) _bone = nil;			// weak reference
 }
 
 @end
@@ -558,8 +592,10 @@
 @synthesize node=_node;
 
 -(void) dealloc {
-	self.node = nil;		// Will clear this object as a listener to the existing node.
+	_node = nil;								// weak reference
 	[self deallocateDeformedVertexLocations];
+
+	[super dealloc];
 }
 
 /**
@@ -567,7 +603,7 @@
  * on next access using the new mesh data.
  */
 -(void) setNode: (CC3SkinMeshNode*) aNode {
-	_node = aNode;							// Weak link
+	_node = aNode;								// weak reference
 	self.mesh = aNode.mesh;
 	[self deallocateDeformedVertexLocations];
 }
@@ -627,7 +663,7 @@
 -(void) populateFrom: (CC3DeformedFaceArray*) another {
 	[super populateFrom: another];
 	
-	_node = another.node;		// not retained
+	_node = another.node;		// weak reference
 	
 	// If deformed vertex locations should be retained, allocate memory and copy the data over.
 	[self deallocateDeformedVertexLocations];

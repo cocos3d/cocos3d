@@ -197,7 +197,7 @@
 }
 
 /** The collection of CC3SkinSections that are managed by this node. */
-@property(nonatomic,strong, readonly) NSArray* skinSections;
+@property(nonatomic, retain, readonly) NSArray* skinSections;
 
 /**
  * Returns the skin section that deforms the specified vertex.
@@ -229,10 +229,10 @@
  * of the skeleton that influences the vertices of this mesh node. The root of the skeleton
  * is the nearest ancestor CC3SoftBodyNode.
  */
-@property(nonatomic, strong, readonly) CC3Matrix* skeletalTransformMatrix;
+@property(nonatomic, retain, readonly) CC3Matrix* skeletalTransformMatrix;
 
 /** Returns the inverse of the matrix in the skeletalTransformMatrix property. */
-@property(nonatomic, strong, readonly) CC3Matrix* skeletalTransformMatrixInverted;
+@property(nonatomic, retain, readonly) CC3Matrix* skeletalTransformMatrixInverted;
 
 /**
  * Callback method indicating the specified bone has been transformed.
@@ -268,7 +268,7 @@
  * vertex array in the vertexWeights property of the mesh.
  */
 @interface CC3SkinSection : NSObject <NSCopying> {
-	CC3SkinMeshNode* __unsafe_unretained _node;
+	CC3SkinMeshNode* _node;
 	NSMutableArray* _skinnedBones;
 	GLint _vertexStart;
 	GLint _vertexCount;
@@ -309,7 +309,7 @@
  * The array returned by this property is created anew for each access. Do not add or remove
  * bones from the returned array directly. To add a bone, use the addBone: method.
  */
-@property(nonatomic, strong, readonly) NSArray* bones;
+@property(nonatomic, retain, readonly) NSArray* bones;
 
 /** Returns the bone node at the specified index. */
 -(CC3Bone*) boneAt: (GLuint) boneIdx;
@@ -480,7 +480,7 @@
  * Returns the transform matrix of this bone, relative to the coordinate system of the skeleton
  * of which this bone is a part. The root of the skeleton is the nearest ancestor CC3SoftBodyNode.
  */
-@property(nonatomic, strong, readonly) CC3Matrix* skeletalTransformMatrix;
+@property(nonatomic, retain, readonly) CC3Matrix* skeletalTransformMatrix;
 
 /**
  * Returns the inverse of the transform matrix of this bone, relative to the coordinate system
@@ -496,7 +496,7 @@
  * The value of this property is set from the value of the skeletalTransformMatrix whenever the
  * bindRestPose method is invoked.
  */
-@property(nonatomic, strong, readonly) CC3Matrix* restPoseSkeletalTransformMatrixInverted;
+@property(nonatomic, retain, readonly) CC3Matrix* restPoseSkeletalTransformMatrixInverted;
  
 @end
 
@@ -519,16 +519,16 @@
  * whenever the transform of either the bone or the skin mesh node changes.
  */
 @interface CC3SkinnedBone : NSObject <CC3NodeTransformListenerProtocol> {
-	CC3Bone* __unsafe_unretained _bone;
-	CC3SkinMeshNode* __unsafe_unretained _skinNode;
+	CC3SkinMeshNode* _skinNode;
+	CC3Bone* _bone;
 	CC3Matrix* _transformMatrix;
 }
 
 /** Returns the bone whose transforms are being tracked. */
-@property(nonatomic, unsafe_unretained, readonly) CC3Bone* bone;
+@property(nonatomic, assign, readonly) CC3Bone* bone;
 
 /** Returns the skin mesh node whose transforms are being tracked. */
-@property(nonatomic, unsafe_unretained, readonly) CC3SkinMeshNode* skinNode;
+@property(nonatomic, assign, readonly) CC3SkinMeshNode* skinNode;
 
 /**
  * Returns the transform matrix used to draw the deformed vertices during mesh rendering.
@@ -564,7 +564,7 @@
  * These steps are performed because the soft-body node represents the common root of the
  * skin mesh nodes and the bones in the skeleton.
  */
-@property(nonatomic, strong, readonly) CC3Matrix* transformMatrix;
+@property(nonatomic, retain, readonly) CC3Matrix* transformMatrix;
 
 /**
  * Marks the transform matrix as dirty.
@@ -601,7 +601,7 @@
  * so that the faces can be rebuilt if the skin mesh node or any of the bones move.
  */
 @interface CC3DeformedFaceArray : CC3FaceArray {
-	CC3SkinMeshNode* __unsafe_unretained _node;
+	CC3SkinMeshNode* _node;
 	CC3Vector* _deformedVertexLocations;
 	BOOL _deformedVertexLocationsAreRetained : 1;
 	BOOL _deformedVertexLocationsAreDirty : 1;
@@ -614,7 +614,7 @@
  * deformedVertexLocations, centers, normals, planes and neighbours properties
  * to be deallocated and then re-built on the next access.
  */
-@property(nonatomic, unsafe_unretained) CC3SkinMeshNode* node;
+@property(nonatomic, assign) CC3SkinMeshNode* node;
 
 /**
  * Indicates the number of vertices in the deformedVertexLocations array, as retrieved from the mesh.
