@@ -29,6 +29,10 @@
  * See header file CC3VertexArrays.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3VertexArrays.h"
 #import "CC3Mesh.h"
 #import "CC3OpenGLUtility.h"
@@ -74,6 +78,8 @@
 	[self deleteGLBuffer];
 	self.allocatedVertexCapacity = 0;
 //	[_vertexContent release];
+
+	[super dealloc];
 }
 
 -(GLvoid*) vertices { return _vertices; }
@@ -167,7 +173,7 @@
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-//		vertexContent = [CC3VertexArrayContent new];
+//		vertexContent = [CC3VertexArrayContent new];		// retained
 		_vertices = NULL;
 		_vertexCount = 0;
 		_allocatedVertexCapacity = 0;
@@ -185,14 +191,14 @@
 	return self;
 }
 
-+(id) vertexArray { return [[self alloc] init]; }
++(id) vertexArray { return [[[self alloc] init] autorelease]; }
 
-+(id) vertexArrayWithTag: (GLuint) aTag { return [[self alloc] initWithTag: aTag]; }
++(id) vertexArrayWithTag: (GLuint) aTag { return [[[self alloc] initWithTag: aTag] autorelease]; }
 
-+(id) vertexArrayWithName: (NSString*) aName { return [[self alloc] initWithName: aName]; }
++(id) vertexArrayWithName: (NSString*) aName { return [[[self alloc] initWithName: aName] autorelease]; }
 
 +(id) vertexArrayWithTag: (GLuint) aTag withName: (NSString*) aName {
-	return [[self alloc] initWithTag: aTag withName: aName];
+	return [[[self alloc] initWithTag: aTag withName: aName] autorelease];
 }
 
 -(GLvoid*) interleaveWith: (CC3VertexArray*) otherVtxArray usingOffset: (GLuint) elemOffset {
@@ -528,6 +534,7 @@ static GLuint lastAssignedVertexArrayTag;
 
 -(void) dealloc {
 	[self deallocateStripLengths];
+	[super dealloc];
 }
 
 // Deprecated

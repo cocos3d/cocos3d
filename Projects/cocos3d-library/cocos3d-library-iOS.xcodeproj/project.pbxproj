@@ -63,9 +63,9 @@
 		A9BC9170189C776C000FB28C /* CC3Matrix4x3.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC9062189C776B000FB28C /* CC3Matrix4x3.m */; };
 		A9BC9171189C776C000FB28C /* CC3Matrix4x4.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC9064189C776B000FB28C /* CC3Matrix4x4.m */; };
 		A9BC9172189C776C000FB28C /* CC3ProjectionMatrix.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC9066189C776B000FB28C /* CC3ProjectionMatrix.m */; };
-		A9BC9173189C776C000FB28C /* CC3Mesh.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC9069189C776B000FB28C /* CC3Mesh.m */; };
-		A9BC9174189C776C000FB28C /* CC3ParametricMeshes.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC906B189C776B000FB28C /* CC3ParametricMeshes.m */; };
-		A9BC9175189C776C000FB28C /* CC3VertexArrays.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC906D189C776B000FB28C /* CC3VertexArrays.m */; };
+		A9BC9173189C776C000FB28C /* CC3Mesh.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC9069189C776B000FB28C /* CC3Mesh.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		A9BC9174189C776C000FB28C /* CC3ParametricMeshes.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC906B189C776B000FB28C /* CC3ParametricMeshes.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		A9BC9175189C776C000FB28C /* CC3VertexArrays.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC906D189C776B000FB28C /* CC3VertexArrays.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A9BC9176189C776C000FB28C /* CC3VertexSkinning.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC906F189C776B000FB28C /* CC3VertexSkinning.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A9BC9177189C776C000FB28C /* CC3Billboard.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC9072189C776B000FB28C /* CC3Billboard.m */; };
 		A9BC9178189C776C000FB28C /* CC3BitmapLabelNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC9074189C776B000FB28C /* CC3BitmapLabelNode.m */; };

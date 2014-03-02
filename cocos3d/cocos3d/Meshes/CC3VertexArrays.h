@@ -1087,7 +1087,7 @@
 #pragma mark CC3VertexNormals
 
 /** A CC3VertexArray that manages the normal aspect of an array of vertices. */
-@interface CC3VertexNormals : CC3VertexArray {}
+@interface CC3VertexNormals : CC3VertexArray
 
 /**
  * Returns the normal element at the specified index in the underlying vertex content.
@@ -1122,7 +1122,7 @@
 #pragma mark CC3VertexTangents
 
 /** A CC3VertexArray that manages the tangent or bitangent aspect of an array of vertices. */
-@interface CC3VertexTangents : CC3VertexArray {}
+@interface CC3VertexTangents : CC3VertexArray
 
 /**
  * Returns the tangent element at the specified index in the underlying vertex content.
@@ -1154,7 +1154,7 @@
 #pragma mark CC3VertexColors
 
 /** A CC3VertexArray that manages the per-vertex color aspect of an array of vertices. */
-@interface CC3VertexColors : CC3VertexArray {}
+@interface CC3VertexColors : CC3VertexArray
 
 /**
  * Returns the color element at the specified index in the underlying vertex content.
@@ -1622,7 +1622,7 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
  * the content underlying a CC3VertexIndices is never interleaved and shared with the content
  * underlying the other vertex arrays in a mesh.
  */
-@interface CC3VertexIndices : CC3DrawableVertexArray {}
+@interface CC3VertexIndices : CC3DrawableVertexArray
 
 /** @deprecated Use allocatedVertexCapacity property instead. */
 -(GLuint*) allocateTriangles: (GLuint) triangleCount;
@@ -1769,7 +1769,7 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
 #pragma mark CC3VertexPointSizes
 
 /** A CC3VertexArray that manages the point sizes aspect of an array of point sprite vertices. */
-@interface CC3VertexPointSizes : CC3VertexArray {}
+@interface CC3VertexPointSizes : CC3VertexArray
 
 /**
  * Returns the point size element at the specified index in the underlying vertex content.

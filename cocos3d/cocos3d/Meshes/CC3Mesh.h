@@ -272,7 +272,6 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * meshes from different sources and third-party libraries.
  */
 @interface CC3Mesh : CC3Identifiable {
-	CC3FaceArray* _faces;
 	CC3VertexLocations* _vertexLocations;
 	CC3VertexNormals* _vertexNormals;
 	CC3VertexTangents* _vertexTangents;
@@ -280,10 +279,11 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
 	CC3VertexColors* _vertexColors;
 	CC3VertexTextureCoordinates* _vertexTextureCoordinates;
 	NSMutableArray* _overlayTextureCoordinates;
-	CC3VertexBoneIndices* _vertexBoneIndices;
 	CC3VertexBoneWeights* _vertexBoneWeights;
+	CC3VertexBoneIndices* _vertexBoneIndices;
 	CC3VertexPointSizes* _vertexPointSizes;
 	CC3VertexIndices* _vertexIndices;
+	CC3FaceArray* _faces;
 	GLfloat _capacityExpansionFactor;
 	BOOL _shouldInterleaveVertices : 1;
 }
@@ -292,7 +292,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
 #pragma mark Vertex arrays
 
 /** The vertex array instance managing the positional content for the vertices. */
-@property(nonatomic, strong) CC3VertexLocations* vertexLocations;
+@property(nonatomic, retain) CC3VertexLocations* vertexLocations;
 
 /** Returns whether this mesh contains content for vertex locations. */
 @property(nonatomic, readonly) BOOL hasVertexLocations;
@@ -302,7 +302,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  *
  * Setting this property is optional. Not all meshes require normals.
  */
-@property(nonatomic, strong) CC3VertexNormals* vertexNormals;
+@property(nonatomic, retain) CC3VertexNormals* vertexNormals;
 
 /** Returns whether this mesh contains content for vertex normals. */
 @property(nonatomic, readonly) BOOL hasVertexNormals;
@@ -315,7 +315,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  *
  * Setting this property is optional. Not all meshes require tangents.
  */
-@property(nonatomic, strong) CC3VertexTangents* vertexTangents;
+@property(nonatomic, retain) CC3VertexTangents* vertexTangents;
 
 /** Returns whether this mesh contains content for vertex tangents. */
 @property(nonatomic, readonly) BOOL hasVertexTangents;
@@ -325,7 +325,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  *
  * Setting this property is optional. Not all meshes require bitangents.
  */
-@property(nonatomic, strong) CC3VertexTangents* vertexBitangents;
+@property(nonatomic, retain) CC3VertexTangents* vertexBitangents;
 
 /** Returns whether this mesh contains content for vertex bitangents. */
 @property(nonatomic, readonly) BOOL hasVertexBitangents;
@@ -335,7 +335,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  *
  * Setting this property is optional. Many meshes do not require per-vertex coloring.
  */
-@property(nonatomic, strong) CC3VertexColors* vertexColors;
+@property(nonatomic, retain) CC3VertexColors* vertexColors;
 
 /** Returns whether this mesh contains content for vertex colors.  */
 @property(nonatomic, readonly) BOOL hasVertexColors;
@@ -363,7 +363,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * be larger than the maximum number of available bone influences allowed by the platform, 
  * which can be retreived from CC3OpenGL.sharedGL.maxNumberOfBoneInfluencesPerVertex.
  */
-@property(nonatomic,strong) CC3VertexBoneIndices* vertexBoneIndices;
+@property(nonatomic,retain) CC3VertexBoneIndices* vertexBoneIndices;
 
 /** Indicates whether this mesh contains content for vertex bone indices. */
 @property(nonatomic, readonly) BOOL hasVertexBoneIndices;
@@ -380,7 +380,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * be larger than the maximum number of available bone influences allowed by the platform,
  * which can be retreived from CC3OpenGL.sharedGL.maxNumberOfBoneInfluencesPerVertex.
  */
-@property(nonatomic,strong) CC3VertexBoneWeights* vertexBoneWeights;
+@property(nonatomic,retain) CC3VertexBoneWeights* vertexBoneWeights;
 
 /** Indicates whether this mesh contains content for vertex bone weights. */
 @property(nonatomic, readonly) BOOL hasVertexBoneWeights;
@@ -391,7 +391,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * Setting this property is optional. It is used for point particle systems, and even then,
  * particle systems often do not require individual sizing for each particle.
  */
-@property(nonatomic, strong) CC3VertexPointSizes* vertexPointSizes;
+@property(nonatomic, retain) CC3VertexPointSizes* vertexPointSizes;
 
 /** Indicates whether this mesh contains content for vertex point sizes. */
 @property(nonatomic, readonly) BOOL hasVertexPointSizes;
@@ -402,7 +402,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * Setting this property is optional. If vertex index data is not provided, the vertices
  * will be drawn in linear order as they appear in the vertexLocations property.
  */
-@property(nonatomic, strong) CC3VertexIndices* vertexIndices;
+@property(nonatomic, retain) CC3VertexIndices* vertexIndices;
 
 /** Returns whether this mesh uses index vertices. */
 @property(nonatomic, readonly) BOOL hasVertexIndices;
@@ -419,7 +419,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * will be placed in this property. This can simplify configurations in that all
  * texture coordinate arrays can be treated the same.
  */
-@property(nonatomic, strong) CC3VertexTextureCoordinates* vertexTextureCoordinates;
+@property(nonatomic, retain) CC3VertexTextureCoordinates* vertexTextureCoordinates;
 
 /**
  * Returns the number of texture coordinate arrays used by this mesh, regardless of whether
@@ -1424,7 +1424,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * will share a reference to the same face array instance. If you need to create separate
  * copies of the faces array when copying a mesh, you must explicitly create a copy.
  */
-@property(nonatomic, strong) CC3FaceArray* faces;
+@property(nonatomic, retain) CC3FaceArray* faces;
 
 /**
  * Indicates whether information about the faces of this mesh should be cached.
@@ -2472,13 +2472,13 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
 #pragma mark Deprecated methods
 
 /** *@deprecated Renamed to vertexBoneIndices. */
-@property(nonatomic,strong) CC3VertexBoneIndices* vertexMatrixIndices DEPRECATED_ATTRIBUTE;
+@property(nonatomic,retain) CC3VertexBoneIndices* vertexMatrixIndices DEPRECATED_ATTRIBUTE;
 
 /** *@deprecated Renamed to hasVertexBoneIndices. */
 @property(nonatomic, readonly) BOOL hasVertexMatrixIndices DEPRECATED_ATTRIBUTE;
 
 /** *@deprecated Renamed to vertexBoneWeights. */
-@property(nonatomic,strong) CC3VertexBoneWeights* vertexWeights DEPRECATED_ATTRIBUTE;
+@property(nonatomic,retain) CC3VertexBoneWeights* vertexWeights DEPRECATED_ATTRIBUTE;
 
 /** *@deprecated Renamed to hasVertexBoneWeights. */
 @property(nonatomic, readonly) BOOL hasVertexWeights DEPRECATED_ATTRIBUTE;
@@ -2551,7 +2551,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * a face normal or plane is explicitly requested.
  */
 @interface CC3FaceArray : CC3Identifiable {
-	CC3Mesh* __unsafe_unretained _mesh;
+	CC3Mesh* _mesh;
 	CC3FaceIndices* _indices;
 	CC3Vector* _centers;
 	CC3Vector* _normals;
@@ -2576,7 +2576,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * Setting this property will cause the centers, normals, planes and neighbours
  * properties to be deallocated and then re-built on the next access.
  */
-@property(nonatomic, unsafe_unretained) CC3Mesh* mesh;
+@property(nonatomic, assign) CC3Mesh* mesh;
 
 /**
  * Indicates the number of faces in this array, as retrieved from the mesh.
