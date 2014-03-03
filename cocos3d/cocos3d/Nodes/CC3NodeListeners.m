@@ -29,6 +29,10 @@
  * See header file CC3NodeListeners.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3NodeListeners.h"
 
 
@@ -38,7 +42,12 @@
 @implementation CC3NodeTransformListeners
 
 -(void) dealloc {
+	_node = nil;							// weak reference
+	[_transformListenerWrappers release];
+
 	[self deleteLock];
+	
+	[super dealloc];
 }
 
 
@@ -117,14 +126,14 @@
 
 -(id) initForNode: (CC3Node*) node {
 	if ( (self = [super init]) ) {
-		_node = node;
-		_transformListenerWrappers = [NSMutableSet set];
+		_node = node;		// weak reference
+		_transformListenerWrappers = [NSMutableSet new];	// retained
 		[self initLock];
 	}
 	return self;
 }
 
-+(id) listenersForNode: (CC3Node*) node { return [[self alloc] initForNode: node]; }
++(id) listenersForNode: (CC3Node*) node { return [[[self alloc] initForNode: node] autorelease]; }
 
 @end
 

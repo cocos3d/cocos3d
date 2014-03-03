@@ -29,6 +29,10 @@
  * See header file CC3Backgrounder.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3Backgrounder.h"
 
 /** The default backgrounder task queue name. */
@@ -41,6 +45,7 @@
 
 -(void) dealloc {
 	[self deleteTaskQueue];
+	[super dealloc];
 }
 
 
@@ -114,7 +119,7 @@
 static CC3Backgrounder* _singleton;
 
 +(CC3Backgrounder*) sharedBackgrounder {
-	if (!_singleton) _singleton = [self new];
+	if (!_singleton) _singleton = [self new];		// retained
 	return _singleton;
 }
 

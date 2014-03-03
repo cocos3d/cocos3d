@@ -29,6 +29,10 @@
  * See header file CC3DataArray.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3DataArray.h"
 
 
@@ -38,6 +42,11 @@
 
 @synthesize isReady=_isReady;
 
+-(void) dealloc {
+	[_data release];
+	[super dealloc];
+}
+	
 -(NSUInteger) elementSize { return MAX(_elementSize, 1); }
 
 -(void) setElementSize: (NSUInteger) elementSize {
@@ -80,7 +89,7 @@
 }
 
 +(id) dataArrayWithElementSize: (NSUInteger) elementSize {
-	return [[self alloc] initWithElementSize: elementSize];
+	return [[[self alloc] initWithElementSize: elementSize] autorelease];
 }
 
 @end

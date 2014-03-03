@@ -29,6 +29,10 @@
  * See header file CC3Foundation.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3Foundation.h"
 #import "CC3Matrix3x3.h"
 #import "CGPointExtension.h"
@@ -36,9 +40,8 @@
 
 NSString* NSStringFromCC3Vectors(CC3Vector* vectors, GLuint vectorCount) {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: (vectorCount * 8)];
-	for (GLuint vIdx = 0; vIdx < vectorCount; vIdx++) {
+	for (GLuint vIdx = 0; vIdx < vectorCount; vIdx++)
 		[desc appendFormat: @"\n\t%@", NSStringFromCC3Vector(vectors[vIdx])];
-	}
 	return desc;
 }
 

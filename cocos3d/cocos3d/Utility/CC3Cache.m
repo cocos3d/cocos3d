@@ -29,6 +29,10 @@
  * See header file CC3Cache.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3Cache.h"
 
 
@@ -39,7 +43,12 @@
 @synthesize isWeak=_isWeak, typeName=_typeName;
 
 -(void) dealloc {
+	[_objectsByName release];
+	[_typeName release];
+	
 	[self deleteLock];
+
+	[super dealloc];
 }
 
 -(void) addObject: (id<CC3Cacheable>) obj {
@@ -154,20 +163,20 @@
 
 -(id) initAsWeakCache: (BOOL) isWeak forType: (NSString*) typeName {
 	if ( (self = [super init]) ) {
-		_objectsByName = [NSMutableDictionary new];
+		_objectsByName = [NSMutableDictionary new];		// retained
+		_typeName = [typeName retain];					// retained
 		_isWeak = isWeak;
-		_typeName = typeName;
 		[self initLock];
 	}
 	return self;
 }
 
 +(id) weakCacheForType: (NSString*) typeName {
-	return [[self alloc] initAsWeakCache: YES forType: typeName];
+	return [[[self alloc] initAsWeakCache: YES forType: typeName] autorelease];
 }
 
 +(id) strongCacheForType: (NSString*) typeName {
-	return [[self alloc] initAsWeakCache: NO forType: typeName];
+	return [[[self alloc] initAsWeakCache: NO forType: typeName] autorelease];
 }
 
 @end

@@ -29,6 +29,10 @@
  * See header file CC3PerformanceStatistics.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3PerformanceStatistics.h"
 
 
@@ -132,9 +136,7 @@
 	return self;
 }
 
-+(id) statistics {
-	return [[self alloc] init];
-}
++(id) statistics { return [[[self alloc] init] autorelease]; }
 
 -(void) reset {
 	_updatesHandled = 0;
@@ -150,8 +152,6 @@
 	_facesPresented = 0;
 }
 
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3PerformanceStatistics*) another {
 	_updatesHandled = another.updatesHandled;
 	_accumulatedUpdateTime = another.accumulatedUpdateTime;

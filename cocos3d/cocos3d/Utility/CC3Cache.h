@@ -46,7 +46,7 @@
 @protocol CC3Cacheable <CC3Object>
 
 /** A unique name to be used by the cache to store and retrieve this object. */
-@property(nonatomic, strong, readonly) NSString* name;
+@property(nonatomic, retain, readonly) NSString* name;
 
 @end
 
@@ -145,7 +145,7 @@
 -(NSArray*) objectsSortedByName;
 
 /** A descriptive name of the type of object being cached. */
-@property(nonatomic, strong, readonly) NSString* typeName;
+@property(nonatomic, retain, readonly) NSString* typeName;
 
 /** 
  * Indicates whether this cache holds weak references to the objects within.

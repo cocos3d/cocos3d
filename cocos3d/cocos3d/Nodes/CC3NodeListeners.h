@@ -86,8 +86,8 @@
 
 /** Manages a collection of transform listeners on behalf of a CC3Node. */
 @interface CC3NodeTransformListeners : NSObject <NSLocking> {
+	CC3Node* _node;
 	NSMutableSet* _transformListenerWrappers;
-	CC3Node* __unsafe_unretained _node;
 	pthread_mutex_t _mutex;
 }
 
@@ -117,7 +117,7 @@
  * to, and must remove itself as a listener (using the removeTransformListener: method) when
  * appropriate, such as when being deallocated.
  */
-@property(nonatomic, strong, readonly) NSSet* transformListeners;
+@property(nonatomic, retain, readonly) NSSet* transformListeners;
 
 /**
  * Adds the specified object as a transform listener.

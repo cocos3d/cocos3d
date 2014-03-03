@@ -29,6 +29,10 @@
  * See header file CC3CC2Extensions.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3CC2Extensions.h"
 #import "CC3Logging.h"
 #import "uthash.h"
@@ -55,11 +59,11 @@
 		depthFormat: (GLenum) depthFormat
  preserveBackbuffer: (BOOL) isRetained
 	numberOfSamples: (GLuint) sampleCount {
-	return [[self alloc] initWithFrame: frame
-						   pixelFormat: colorFormat
-						   depthFormat: depthFormat
-					preserveBackbuffer: isRetained
-					   numberOfSamples: sampleCount];
+	return [[[self alloc] initWithFrame: frame
+							pixelFormat: colorFormat
+							depthFormat: depthFormat
+					 preserveBackbuffer: isRetained
+						numberOfSamples: sampleCount] autorelease];
 }
 
 @end
@@ -118,7 +122,7 @@
 }
 
 +(id) actionWithDuration: (CCTime) dur sizeTo: (CGSize) endSize {
-	return [[self alloc] initWithDuration: dur sizeTo: endSize];
+	return [[[self alloc] initWithDuration: dur sizeTo: endSize] autorelease];
 }
 
 -(id) copyWithZone: (NSZone*) zone {

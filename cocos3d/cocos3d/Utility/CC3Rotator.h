@@ -93,7 +93,7 @@ typedef enum {
  * rotating to look at a particular target location or node, and optionally track that target
  * location or node as it or the node of the rotator move around.
  */
-@interface CC3Rotator : NSObject <NSCopying> {}
+@interface CC3Rotator : NSObject <NSCopying>
 
 /**
  * Indicates whether this rotator supports changing rotation properties, including rotation,
@@ -133,7 +133,7 @@ typedef enum {
  *
  * This base class always returns nil. Subclasses that support changing rotation will override.
  */
-@property(nonatomic, strong, readonly) CC3Matrix* rotationMatrix;
+@property(nonatomic, retain, readonly) CC3Matrix* rotationMatrix;
 
 /**
  * The rotational orientation of the node in 3D space, relative to the parent of the
@@ -194,7 +194,7 @@ typedef enum {
  *
  * Always returns nil. Subclasses that support target tracking will override.
  */
-@property(nonatomic, unsafe_unretained, readonly) CC3Node* target;
+@property(nonatomic, assign, readonly) CC3Node* target;
 
 /**
  * Indicates whether the node should track the node set in the target
@@ -256,8 +256,8 @@ typedef enum {
  * This method is required in order to be able to clear the target without retrieving it
  * outside this object to test if it is nil. Since the target is weakly referenced, it may be
  * deallocated while this rotator still maintains a reference to it. Any subsequent attempt
- * to retrieve the target reference will result in ARC attempting to retain and autorelease
- * it, which will create a zombie object error.
+ * to retrieve the target reference may result in attempting to retain and autorelease it,
+ * particularly under ARC, which will create a zombie object error.
  */
 -(BOOL) clearIfTarget: (CC3Node*) aNode;
 
@@ -349,7 +349,7 @@ typedef enum {
  * The rotation matrix for each instance is local to the node and does not include rotational
  * information about the node's ancestors.
  */
-@property(nonatomic, strong, readwrite) CC3Matrix* rotationMatrix;
+@property(nonatomic, retain, readwrite) CC3Matrix* rotationMatrix;
 
 /**
  * The rotational orientation of the node in 3D space, relative to the parent of the
@@ -604,7 +604,7 @@ typedef enum {
  * as the target node, or the node using this rotator, move.
  */
 @interface CC3TargettingRotator : CC3DirectionalRotator {
-	CC3Node* __unsafe_unretained _target;
+	CC3Node* _target;
 }
 
 /**
@@ -653,7 +653,7 @@ typedef enum {
  * The target is held as a weak reference. If you destroy the target node, you must
  * remove it as the target of this rotator.
  */
-@property(nonatomic, unsafe_unretained, readwrite) CC3Node* target;
+@property(nonatomic, assign, readwrite) CC3Node* target;
 
 /**
  * Indicates whether the node should track the node set in the target property

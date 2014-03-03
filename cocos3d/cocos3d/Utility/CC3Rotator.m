@@ -29,6 +29,10 @@
  * See header file CC3Rotator.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3Rotator.h"
 #import "CC3Node.h"
 #import "CC3LinearMatrix.h"
@@ -78,7 +82,7 @@
 
 #pragma mark Allocation and initialization
 
-+(id) rotator { return [[self alloc] init]; }
++(id) rotator { return [[[self alloc] init] autorelease]; }
 
 -(id) copyWithZone: (NSZone*) zone {
 	CC3Rotator* aCopy = [[[self class] allocWithZone: zone] init];
@@ -105,13 +109,12 @@
 #pragma mark -
 #pragma mark CC3MutableRotator
 
-@interface CC3MutableRotator (TemplateMethods)
--(CC3Vector4) rotationAxisAngle;
--(void) autoOrthonormalize;
--(void) applyRotation;
-@end
-
 @implementation CC3MutableRotator
+
+-(void) dealloc {
+	[_rotationMatrix release];
+	[super dealloc];
+}
 
 -(BOOL) isMutable { return YES; }
 
@@ -199,7 +202,10 @@
 
 -(void) setRotationMatrix:(CC3Matrix*) aMatrix {
 	if (aMatrix == _rotationMatrix) return;
-	_rotationMatrix = aMatrix;
+	
+	[_rotationMatrix release];
+	_rotationMatrix = [aMatrix retain];
+	
 	_rotationType = kCC3RotationTypeUnknown;
 	[self markRotationClean];
 }
@@ -239,23 +245,16 @@ static GLubyte _autoOrthonormalizeCount = 0;
 
 -(id) initOnRotationMatrix: (CC3Matrix*) aMatrix {
 	if ( (self = [super init]) ) {
-		_rotationMatrix = aMatrix;
-		_rotationVector = kCC3Vector4Zero;
-		_rotationType = kCC3RotationTypeUnknown;
 		_orthonormalizationStartColumnNumber = 1;
 		_incrementalRotationCount = 0;
+		_rotationVector = kCC3Vector4Zero;
+		self.rotationMatrix = aMatrix;		// also sets rotation type
 	}
 	return self;
 }
-
+	
 +(id) rotatorOnRotationMatrix: (CC3Matrix*) aMatrix {
-	return [[self alloc] initOnRotationMatrix: aMatrix];
-}
-
--(id) copyWithZone: (NSZone*) zone {
-	CC3Rotator* aCopy = [[[self class] allocWithZone: zone] init];
-	[aCopy populateFrom: self];
-	return aCopy;
+	return [[[self alloc] initOnRotationMatrix: aMatrix] autorelease];
 }
 
 // Protected properties for copying
@@ -264,16 +263,17 @@ static GLubyte _autoOrthonormalizeCount = 0;
 -(GLubyte) orthonormalizationStartColumnNumber { return _orthonormalizationStartColumnNumber; }
 -(GLubyte) incrementalRotationCount { return _incrementalRotationCount; }
 
--(void) populateFrom: (CC3Rotator*) another {
-	// Only proceed with populating the following properties if the
-	// other instance is also a mutable rotator.
+-(void) populateFrom: (CC3MutableRotator*) another {
+	[super populateFrom: another];
+	
+	// Only populate the following if the other instance is also a mutable rotator.
 	if( [another isKindOfClass:[CC3MutableRotator class]] ) {
-		CC3MutableRotator* anotherMR = (CC3MutableRotator*)another;
-		_rotationVector = anotherMR.rotationVector;
-		_rotationType = anotherMR.rotationType;
-		_orthonormalizationStartColumnNumber = anotherMR.orthonormalizationStartColumnNumber;
-		_incrementalRotationCount = anotherMR.incrementalRotationCount;
+		_rotationVector = another.rotationVector;
+		_rotationType = another.rotationType;
+		_orthonormalizationStartColumnNumber = another.orthonormalizationStartColumnNumber;
+		_incrementalRotationCount = another.incrementalRotationCount;
 	}
+
 	[self markRotationDirty];
 }
 
@@ -376,15 +376,13 @@ static GLubyte _autoOrthonormalizeCount = 0;
 	}
 	return self;
 }
--(void) populateFrom: (CC3Rotator*) another {
+-(void) populateFrom: (CC3DirectionalRotator*) another {
 	[super populateFrom: another];
 
-	// Only proceed with populating the directional properties if the
-	// other instance is also a directional rotator.
+	// Only populate the following if the other instance is also a directional rotator.
 	if( [another isKindOfClass:[CC3DirectionalRotator class]] ) {
-		CC3DirectionalRotator* anotherDR = (CC3DirectionalRotator*)another;
-		_referenceUpDirection = anotherDR.referenceUpDirection;
-		_shouldReverseForwardDirection = anotherDR.shouldReverseForwardDirection;
+		_referenceUpDirection = another.referenceUpDirection;
+		_shouldReverseForwardDirection = another.shouldReverseForwardDirection;
 	}
 }
 
@@ -424,11 +422,12 @@ static GLubyte _autoOrthonormalizeCount = 0;
 #pragma mark -
 #pragma mark CC3TargettingRotator
 
-@interface CC3TargettingRotator (TemplateMethods)
-@property(nonatomic, readonly) BOOL isDirtyByTargetLocation;
-@end
-
 @implementation CC3TargettingRotator
+	
+-(void) dealloc {
+	_target = nil;		// weak reference
+	[super dealloc];
+}
 
 -(BOOL) isTrackingForBumpMapping { return _isTrackingForBumpMapping; }
 
@@ -488,7 +487,7 @@ static GLubyte _autoOrthonormalizeCount = 0;
  */
 -(void) setTarget: (CC3Node*) aNode {
 	if (aNode != _target) _isNewTarget = YES;
-	_target = aNode;
+	_target = aNode;		// weak reference
 }
 
 -(BOOL) shouldUpdateToTarget { return _target && (_isNewTarget || _shouldTrackTarget); }
@@ -503,7 +502,7 @@ static GLubyte _autoOrthonormalizeCount = 0;
 
 -(BOOL) clearIfTarget: (CC3Node*) aNode {
 	if (aNode != _target) return NO;
-	_target = nil;
+	_target = nil;		// weak reference
 	return YES;
 }
 
@@ -528,7 +527,7 @@ static GLubyte _autoOrthonormalizeCount = 0;
 -(void) populateFrom: (CC3Rotator*) another {
 	[super populateFrom: another];
 
-	self.target = another.target;		// weak link...not copied
+	self.target = another.target;		// weak reference...not copied
 	_targettingConstraint = another.targettingConstraint;
 	_shouldTrackTarget = another.shouldTrackTarget;
 	_shouldAutotargetCamera = another.shouldAutotargetCamera;
