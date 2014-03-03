@@ -190,7 +190,7 @@ typedef enum {
 	CC3Rotator* _rotator;
 	CC3NodeBoundingVolume* _boundingVolume;
 	CC3NodeTransformListeners* _transformListeners;
-	NSMutableArray* _animationStates;
+	NSMutableArray* _animationStates;		// used by Animation category extension
 	CC3Vector _location;
 	CC3Vector _projectedLocation;
 	CC3Vector _scale;

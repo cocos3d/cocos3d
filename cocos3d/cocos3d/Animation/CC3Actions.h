@@ -110,7 +110,7 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * parent of subclasses that transform the location, rotation, or scale of a target
  * CC3Node by some amount in some way.
  */
-@interface CC3TransformBy : CC3TransformVectorAction {}
+@interface CC3TransformBy : CC3TransformVectorAction
 @end
 
 
@@ -118,7 +118,7 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 #pragma mark CC3MoveBy
 
 /** CC3MoveBy is a CCActionInterval that moves a target CC3Node by a specific translation amount. */
-@interface CC3MoveBy : CC3TransformBy {}
+@interface CC3MoveBy : CC3TransformBy
 
 /**
  * Initializes this instance to move the target node
@@ -139,7 +139,7 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 #pragma mark CC3RotateBy
 
 /** CC3RotateBy is a CCActionInterval that rotates a target CC3Node by a specific rotation amount. */
-@interface CC3RotateBy : CC3TransformBy {}
+@interface CC3RotateBy : CC3TransformBy
 
 /**
  * Initializes this instance to rotate the target node
@@ -265,7 +265,7 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 #pragma mark CC3MoveTo
 
 /** CC3MoveTo is a CCActionInterval that moves a target CC3Node to a specific location. */
-@interface CC3MoveTo : CC3TransformTo {}
+@interface CC3MoveTo : CC3TransformTo
 
 /**
  * Initializes this instance to move the target node
@@ -292,7 +292,7 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * of rotation. For exmaple, a rotation from 10 degrees to 350 degrees in any axis should
  * travel -20 degrees, not the +340 degrees that would result from simple subtraction.
  */
-@interface CC3RotateTo : CC3TransformTo {}
+@interface CC3RotateTo : CC3TransformTo
 
 /**
  * Initializes this instance to move the target node
@@ -313,7 +313,7 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 #pragma mark CC3ScaleTo
 
 /** CC3ScaleTo is a CCActionInterval that scales a target CC3Node to a specific scale. */
-@interface CC3ScaleTo : CC3TransformTo {}
+@interface CC3ScaleTo : CC3TransformTo
 
 /**
  * Initializes this instance to scale the target node
@@ -385,7 +385,7 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * CC3RotateToLookTowards is a CCActionInterval that rotates a target CC3Node
  * to look towards a specific direction.
  */
-@interface CC3RotateToLookTowards : CC3TransformTo {}
+@interface CC3RotateToLookTowards : CC3TransformTo
 
 /**
  * Initializes this instance to rotate the target node to look towards
@@ -409,7 +409,7 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * CC3RotateToLookAt is a CCActionInterval that rotates a target CC3Node
  * to look at a specific location.
  */
-@interface CC3RotateToLookAt : CC3RotateToLookTowards {}
+@interface CC3RotateToLookAt : CC3RotateToLookTowards
 
 /**
  * Initializes this instance to rotate the target node to look at
@@ -959,7 +959,8 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * of action has completed. For example, you might create a CCSequence containing a CCFadeOut
  * and a CC3Remove, to fade a node away and then remove it from the scene.
  */
-@interface CC3Remove : CCActionInstant {}
+@interface CC3Remove : CCActionInstant
+	
 @end
 
 

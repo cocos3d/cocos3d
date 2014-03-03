@@ -49,8 +49,8 @@
 		A9BC9162189C776C000FB28C /* PVRTTrans.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A9BC9042189C776B000FB28C /* PVRTTrans.cpp */; };
 		A9BC9163189C776C000FB28C /* PVRTVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A9BC9044189C776B000FB28C /* PVRTVector.cpp */; };
 		A9BC9164189C776C000FB28C /* PVRTVertex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A9BC9046189C776B000FB28C /* PVRTVertex.cpp */; };
-		A9BC9165189C776C000FB28C /* CC3Actions.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC904B189C776B000FB28C /* CC3Actions.m */; };
-		A9BC9166189C776C000FB28C /* CC3NodeAnimation.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC904D189C776B000FB28C /* CC3NodeAnimation.m */; };
+		A9BC9165189C776C000FB28C /* CC3Actions.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC904B189C776B000FB28C /* CC3Actions.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		A9BC9166189C776C000FB28C /* CC3NodeAnimation.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC904D189C776B000FB28C /* CC3NodeAnimation.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A9BC9167189C776C000FB28C /* CC3Material.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC9050189C776B000FB28C /* CC3Material.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A9BC9168189C776C000FB28C /* CC3STBImage.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC9052189C776B000FB28C /* CC3STBImage.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A9BC9169189C776C000FB28C /* CC3Texture.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC9054189C776B000FB28C /* CC3Texture.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };

@@ -630,7 +630,7 @@
  * on a particular track, and keeps track of the animation state on behalf of the node.
  */
 @interface CC3NodeAnimationState : NSObject {
-	CC3Node* __unsafe_unretained _node;
+	CC3Node* _node;
 	CC3NodeAnimation* _animation;
 	CCTime _animationTime;
 	CC3Vector _location;
@@ -645,7 +645,7 @@
 }
 
 /** The node whose animation state is being tracked by this instance.  */
-@property (nonatomic, unsafe_unretained, readonly) CC3Node* node;
+@property (nonatomic, assign, readonly) CC3Node* node;
 
 /** The animation whose state is being tracked by this instance. */
 @property (nonatomic, strong, readonly) CC3NodeAnimation* animation;
