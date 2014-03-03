@@ -415,7 +415,7 @@
  * method on a common ancestor node of all the affected skin mesh nodes.
  */
 @interface CC3NodeBoundingVolume : CC3BoundingVolume {
-	CC3Node* __unsafe_unretained _node;
+	CC3Node* _node;
 	CC3Vector _centerOfGeometry;
 	CC3Vector _globalCenterOfGeometry;
 	BOOL _shouldBuildFromMesh : 1;
@@ -425,7 +425,7 @@
 }
 
 /** The node whose boundary this instance is keeping track of. */
-@property(nonatomic, unsafe_unretained) CC3Node* node;
+@property(nonatomic, assign) CC3Node* node;
 
 /** 
  * Indicates whether this instance should build its bounds from the vertex locations within
@@ -816,12 +816,20 @@
 /** 
  * Initializes this instance from the specified sphere,
  * and sets the shouldBuildFromMesh property to NO.
+ *
+ * The sphere dimensions are specified in the coordinate system of the node. The resulting bounding
+ * volume is fixed to the sizes provided, and will not take into consideration the vertices of the
+ * mesh. It will, however, transform along with the node, as the node is transformed.
  */
 -(id) initFromSphere: (CC3Sphere) sphere;
 
 /** 
  * Allocates and initializes an autoreleased instance from the specified sphere,
  * and sets the shouldBuildFromMesh property to NO.
+ *
+ * The sphere dimensions are specified in the coordinate system of the node. The resulting bounding
+ * volume is fixed to the sizes provided, and will not take into consideration the vertices of the
+ * mesh. It will, however, transform along with the node, as the node is transformed.
  */
 +(id) boundingVolumeFromSphere: (CC3Sphere) sphere;
 
@@ -887,12 +895,20 @@
 /** 
  * Initializes this instance from the specified bounding box,
  * and sets the shouldBuildFromMesh property to NO.
+ *
+ * The box dimensions are specified in the coordinate system of the node. The resulting bounding
+ * volume is fixed to the sizes provided, and will not take into consideration the vertices of
+ * the mesh. It will, however, transform along with the node, as the node is transformed.
  */
 -(id) initFromBox: (CC3Box) box;
 
 /** 
  * Allocates and initializes an autoreleased instance from the specified bounding box,
  * and sets the shouldBuildFromMesh property to NO.
+ *
+ * The box dimensions are specified in the coordinate system of the node. The resulting bounding
+ * volume is fixed to the sizes provided, and will not take into consideration the vertices of
+ * the mesh. It will, however, transform along with the node, as the node is transformed.
  */
 +(id) boundingVolumeFromBox: (CC3Box) box;
 
@@ -944,7 +960,7 @@ DEPRECATED_ATTRIBUTE
  * When testing for instersection, the contained bounding volumes will be traversed
  * in the order they appear in this array.
  */
-@property(nonatomic, strong, readonly) NSArray* boundingVolumes;
+@property(nonatomic, retain, readonly) NSArray* boundingVolumes;
 
 /** Adds the specified bounding volume to the end of the array of contained bounding volumes. */
 -(void) addBoundingVolume: (CC3NodeBoundingVolume*) aBoundingVolume;
@@ -1063,21 +1079,30 @@ DEPRECATED_ATTRIBUTE
 #pragma mark CC3NodeSphereThenBoxBoundingVolume interface
 
 /**
- * CC3NodeSphereThenBoxBoundingVolume is a CC3NodeTighteningBoundingVolumeSequence that contains
- * a single CC3NodeSphericalBoundingVolume and a single CC3NodeBoxBoundingVolume, in that order.
+ * CC3NodeSphereThenBoxBoundingVolume is a CC3NodeBoundingVolume that contains a 
+ * CC3NodeSphericalBoundingVolume and a CC3NodeBoxBoundingVolume. The effective spacial
+ * volume defined by this bounding volume is the intersection space of the spherical and
+ * box volumes. Therefore, a point must lie within BOTH the sphere and the box to be 
+ * considered contained within this bounding volume.
  *
  * The spherical bounding volume is tested first, and if it passes, the bounding box volume is
  * tested next. This combination benefits from the fast testing capabilities of the spherical
- * bounding volume to reject obvious intersection failures, and benefits from the bounding box's
- * more accurate volume coverage on most meshes.
+ * bounding volume to reject obvious intersection failures, and from the bounding box's more
+ * accurate volume coverage on most meshes.
  */
-@interface CC3NodeSphereThenBoxBoundingVolume : CC3NodeTighteningBoundingVolumeSequence
+@interface CC3NodeSphereThenBoxBoundingVolume : CC3NodeBoundingVolume {
+	CC3NodeSphericalBoundingVolume* _sphericalBoundingVolume;
+	CC3NodeBoxBoundingVolume* _boxBoundingVolume;
+}
 
 /** The spherical bounding volume that is tested first. */
-@property(nonatomic, strong, readonly) CC3NodeSphericalBoundingVolume* sphericalBoundingVolume;
+@property(nonatomic, retain, readonly) CC3NodeSphericalBoundingVolume* sphericalBoundingVolume;
 
 /** The box bounding volume that is tested only if the test against the spherical bounding volume passes. */
-@property(nonatomic, strong, readonly) CC3NodeBoxBoundingVolume* boxBoundingVolume;
+@property(nonatomic, retain, readonly) CC3NodeBoxBoundingVolume* boxBoundingVolume;
+
+
+#pragma mark Allocation and initialization
 
 /**
  * Allocates and initializes an autoreleased instance containing a standard
@@ -1085,21 +1110,46 @@ DEPRECATED_ATTRIBUTE
  */
 +(id) boundingVolume;
 
+/** Initializes this instance containing the specified bounding volumes. */
+-(id) initWithSphereVolume: (CC3NodeSphericalBoundingVolume*) sphereBV
+			  andBoxVolume: (CC3NodeBoxBoundingVolume*) boxBV;
+
 /** Allocates and returns an autoreleased instance containing the specified bounding volumes. */
 +(id) boundingVolumeWithSphereVolume: (CC3NodeSphericalBoundingVolume*) sphereBV
 						andBoxVolume: (CC3NodeBoxBoundingVolume*) boxBV;
 
-/** 
+/**
  * Allocates and returns an autoreleased instance containing spherical and box bounding
  * volumes created from the specified sphere and box, respectively.
+ *
+ * The sphere and box dimensions are specified in the coordinate system of the node.
+ * The resulting bounding volume is fixed to the sizes provided, and will not take into
+ * consideration the vertices of the mesh. It will, however, transform along with the
+ * node, as the node is transformed.
  */
-+(id) boundingVolumeFromSphere: (CC3Sphere) sphere
-						andBox: (CC3Box) box;
+-(id) initFromSphere: (CC3Sphere) sphere andBox: (CC3Box) box;
+
+/** 
+ * Initializes this instance containing spherical and box bounding
+ * volumes created from the specified sphere and box, respectively. 
+ *
+ * The sphere and box dimensions are specified in the coordinate system of the node.
+ * The resulting bounding volume is fixed to the sizes provided, and will not take into
+ * consideration the vertices of the mesh. It will, however, transform along with the
+ * node, as the node is transformed.
+ */
++(id) boundingVolumeFromSphere: (CC3Sphere) sphere andBox: (CC3Box) box;
+
+/**
+ * Initializes this instance containing spherical and box bounding volumes created from
+ * the specified box. The spherical bounding volume is created by circumscribing the box.
+ */
+-(id) initByCircumscribingBox: (CC3Box) box;
 
 /**
  * Allocates and returns an autoreleased instance containing spherical and box bounding
  * volumes created from the specified box. The spherical bounding volume is created by
- * circumscribine the box.
+ * circumscribing the box.
  */
 +(id) boundingVolumeCircumscribingBox: (CC3Box) box;
 
