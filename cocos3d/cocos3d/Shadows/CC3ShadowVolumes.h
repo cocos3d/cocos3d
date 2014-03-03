@@ -70,7 +70,7 @@ static const GLfloat kCC3DefaultShadowVolumeVertexOffsetFactor = 0.001f;
  * viewWithFrame:pixelFormat:depthFormat:preserveBackbuffer:sharegroup:multiSampling:numberOfSamples:.
  */
 @interface CC3ShadowVolumeMeshNode : CC3MeshNode <CC3ShadowProtocol> {
-	CC3Light* __unsafe_unretained _light;
+	CC3Light* _light;
 	GLushort _shadowLagFactor;
 	GLushort _shadowLagCount;
 	GLfloat _shadowVolumeVertexOffsetFactor;

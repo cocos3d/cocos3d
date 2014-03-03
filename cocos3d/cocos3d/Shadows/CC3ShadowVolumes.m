@@ -29,6 +29,10 @@
  * See header file CC3ShadowVolumes.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3ShadowVolumes.h"
 #import "CC3Scene.h"
 #import "CC3ParametricMeshNodes.h"
@@ -57,6 +61,9 @@
 -(void) dealloc {
 	[_light removeShadow: self];		// Will also set light to nil
 	LogTrace(@"Removed %@ from %@ leaving %i shadows", self, _light, _light.shadows.count);
+
+	_light = nil;			// weak reference
+	[super dealloc];
 }
 
 -(BOOL) isShadowVolume { return YES; }
@@ -184,8 +191,6 @@
 -(BOOL) isShadowDirty { return _isShadowDirty; }
 -(BOOL) useDepthFailAlgorithm { return _useDepthFailAlgorithm; }
 
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3ShadowVolumeMeshNode*) another {
 	[super populateFrom: another];
 	

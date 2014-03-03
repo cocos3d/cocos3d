@@ -70,8 +70,8 @@
 		A9BC9177189C776C000FB28C /* CC3Billboard.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC9072189C776B000FB28C /* CC3Billboard.m */; };
 		A9BC9178189C776C000FB28C /* CC3BitmapLabelNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC9074189C776B000FB28C /* CC3BitmapLabelNode.m */; };
 		A9BC9179189C776C000FB28C /* CC3BoundingVolumes.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC9076189C776B000FB28C /* CC3BoundingVolumes.m */; };
-		A9BC917A189C776C000FB28C /* CC3Camera.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC9078189C776B000FB28C /* CC3Camera.m */; };
-		A9BC917B189C776C000FB28C /* CC3Light.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC907A189C776B000FB28C /* CC3Light.m */; };
+		A9BC917A189C776C000FB28C /* CC3Camera.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC9078189C776B000FB28C /* CC3Camera.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		A9BC917B189C776C000FB28C /* CC3Light.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC907A189C776B000FB28C /* CC3Light.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A9BC917C189C776C000FB28C /* CC3LocalContentNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC907C189C776B000FB28C /* CC3LocalContentNode.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A9BC917D189C776C000FB28C /* CC3MeshNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC907E189C776B000FB28C /* CC3MeshNode.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A9BC917E189C776C000FB28C /* CC3Node.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC9080189C776B000FB28C /* CC3Node.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
@@ -116,7 +116,7 @@
 		A9BC91A5189C776C000FB28C /* CC3ShaderMatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90DC189C776C000FB28C /* CC3ShaderMatcher.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A9BC91A6189C776C000FB28C /* CC3Shaders.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90DE189C776C000FB28C /* CC3Shaders.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A9BC91A7189C776C000FB28C /* CC3ShaderSemantics.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90E0189C776C000FB28C /* CC3ShaderSemantics.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		A9BC91A8189C776C000FB28C /* CC3ShadowVolumes.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90E3189C776C000FB28C /* CC3ShadowVolumes.m */; };
+		A9BC91A8189C776C000FB28C /* CC3ShadowVolumes.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90E3189C776C000FB28C /* CC3ShadowVolumes.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A9BC91A9189C776C000FB28C /* CC3Backgrounder.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90E6189C776C000FB28C /* CC3Backgrounder.m */; };
 		A9BC91AA189C776C000FB28C /* CC3Cache.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90E8189C776C000FB28C /* CC3Cache.m */; };
 		A9BC91AB189C776C000FB28C /* CC3CC2Extensions.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90EA189C776C000FB28C /* CC3CC2Extensions.m */; };

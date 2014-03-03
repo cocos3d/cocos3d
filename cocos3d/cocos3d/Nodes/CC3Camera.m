@@ -29,6 +29,10 @@
  * See header file CC3Camera.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3Camera.h"
 #import "CC3Scene.h"
 #import "CC3ProjectionMatrix.h"
@@ -51,6 +55,11 @@
 @synthesize hasInfiniteDepthOfField=_hasInfiniteDepthOfField, isOpen=_isOpen;
 @synthesize shouldClipToViewport=_shouldClipToViewport;
 
+-(void) dealloc {
+	[_frustum release];
+	[super dealloc];
+}
+
 -(BOOL) isCamera { return YES; }
 
 /** Overridden to return NO so that the forwardDirection aligns with the negative-Z-axis. */
@@ -64,7 +73,9 @@
 /** Establish backpointer from frustum. */
 -(void) setFrustum: (CC3Frustum*) frustum {
 	if (frustum == _frustum) return;
-	_frustum = frustum;
+	
+	[_frustum release];
+	_frustum = [frustum retain];
 	_frustum.camera = self;
 }
 
@@ -159,7 +170,7 @@
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		self.frustum = [CC3Frustum frustum];
+		self.frustum = [CC3Frustum frustum];		// use setter for backpointer
 		_isProjectionDirty = YES;
 		_fieldOfView = kCC3DefaultFieldOfView;
 		_fieldOfViewOrientation = CC3FieldOfViewOrientationDiagonal;
@@ -178,12 +189,10 @@
 -(BOOL) isProjectionDirty { return _isProjectionDirty; }
 -(CC3Frustum*) rawFrustum { return _frustum; }
 
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3Camera*) another {
 	[super populateFrom: another];
 	
-	self.frustum = [another.rawFrustum copy];
+	self.frustum = [another.rawFrustum autoreleasedCopy];
 
 	_fieldOfView = another.fieldOfView;
 	_fieldOfViewOrientation = another.fieldOfViewOrientation;
@@ -871,6 +880,14 @@
 @synthesize top=_top, bottom=_bottom, left=_left, right=_right, near=_near, far=_far;
 @synthesize camera=_camera, isUsingParallelProjection=_isUsingParallelProjection;
 
+-(void) dealloc {
+	_camera = nil;			// weak reference
+	[_finiteProjectionMatrix release];
+	[_infiniteProjectionMatrix release];
+
+	[super dealloc];
+}
+
 -(void) setTop: (GLfloat) aValue {
 	_top = aValue;
 	[self markProjectionDirty];
@@ -940,15 +957,16 @@
 
 -(id) init {
 	if ( (self = [super init]) ) {
+		_camera = nil;
 		_top = _bottom = _left = _right = _near = _far = 0.0f;
-		_finiteProjectionMatrix = [CC3ProjectionMatrix new];
+		_finiteProjectionMatrix = [CC3ProjectionMatrix new];	// retained
 		_infiniteProjectionMatrix = nil;
 		_isUsingParallelProjection = NO;
 	}
 	return self;
 }
 
-+(id) frustum { return [[self alloc] init]; }
++(id) frustum { return [[[self alloc] init] autorelease]; }
 
 -(void) populateFrom: (CC3Frustum*) another {
 	[super populateFrom: another];
@@ -1050,7 +1068,7 @@
 	// Since this matrix is not commonly used, it is only calculated when the
 	// finiateProjectionMatrix has changed, and then only on demand.
 	if (!_infiniteProjectionMatrix) {
-		_infiniteProjectionMatrix = [CC3ProjectionMatrix new];
+		_infiniteProjectionMatrix = [CC3ProjectionMatrix new];		// retained
 		_infiniteProjectionMatrix.isDirty = YES;
 	}
 	if (_infiniteProjectionMatrix.isDirty) {

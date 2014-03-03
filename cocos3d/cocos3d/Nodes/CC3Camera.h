@@ -1240,7 +1240,7 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
  * locations, rays, shapes, and other bounding volumes intersect the volume of the frustum.
  */
 @interface CC3Frustum : CC3BoundingVolume {
-	CC3Camera* __unsafe_unretained _camera;
+	CC3Camera* _camera;
 	CC3Matrix* _finiteProjectionMatrix;
 	CC3Matrix* _infiniteProjectionMatrix;
 	CC3Plane _planes[6];
@@ -1262,7 +1262,7 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
  *
  * This is a weak reference to avoid a retain cycle between the camera and the frustum.
  */
-@property(nonatomic, unsafe_unretained) CC3Camera* camera;
+@property(nonatomic, assign) CC3Camera* camera;
 
 /** The distance from view center to the top of this frustum at the near clipping plane. */
 @property(nonatomic, readonly) GLfloat top;

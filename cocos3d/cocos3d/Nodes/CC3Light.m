@@ -29,6 +29,10 @@
  * See header file CC3Light.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3Light.h"
 #import "CC3Camera.h"
 #import "CC3ShadowVolumes.h"
@@ -54,13 +58,12 @@
 @synthesize ambientColor=_ambientColor, diffuseColor=_diffuseColor, specularColor=_specularColor;
 @synthesize spotExponent=_spotExponent, spotCutoffAngle=_spotCutoffAngle;
 @synthesize attenuation=_attenuation, isDirectionalOnly=_isDirectionalOnly;
-@synthesize shadowCastingVolume=_shadowCastingVolume, cameraShadowVolume=_cameraShadowVolume;
 @synthesize shadows=_shadows, shadowIntensityFactor=_shadowIntensityFactor;
-@synthesize stencilledShadowPainter=_stencilledShadowPainter;
 
 -(void) dealloc {
 	[self cleanupShadows];		// Includes releasing the shadows array, camera shadow volume & shadow painter
 	[self returnLightIndex: _lightIndex];
+	[super dealloc];
 }
 
 -(BOOL) isLight { return YES; }
@@ -178,23 +181,23 @@
 }
 
 +(id) nodeWithLightIndex: (GLuint) ltIndx {
-	return [[self alloc] initWithLightIndex: ltIndx];
+	return [[[self alloc] initWithLightIndex: ltIndx] autorelease];
 }
 
 +(id) lightWithLightIndex: (GLuint) ltIndx {
-	return [[self alloc] initWithLightIndex: ltIndx];
+	return [[[self alloc] initWithLightIndex: ltIndx] autorelease];
 }
 
 +(id) lightWithTag: (GLuint) aTag withLightIndex: (GLuint) ltIndx {
-	return [[self alloc] initWithTag: aTag withLightIndex: ltIndx];
+	return [[[self alloc] initWithTag: aTag withLightIndex: ltIndx] autorelease];
 }
 
 +(id) lightWithName: (NSString*) aName withLightIndex: (GLuint) ltIndx {
-	return [[self alloc] initWithName: aName withLightIndex: ltIndx];
+	return [[[self alloc] initWithName: aName withLightIndex: ltIndx] autorelease];
 }
 
 +(id) lightWithTag: (GLuint) aTag withName: (NSString*) aName withLightIndex: (GLuint) ltIndx {
-	return [[self alloc] initWithTag: aTag withName: aName withLightIndex: ltIndx];
+	return [[[self alloc] initWithTag: aTag withName: aName withLightIndex: ltIndx] autorelease];
 }
 
 // Keep the compiler happy with additional declaration for documentation purposes
@@ -354,13 +357,13 @@
 
 /** Adds the specified shadow to this light without queuing. */
 -(void) addShadowNow: (id<CC3ShadowProtocol>) aShadowNode {
-	CC3Assert(aShadowNode, @"Shadow cannot be nil");		// Don't add if child is nil
+	CC3Assert(aShadowNode, @"Shadow cannot be nil");		// Don't add if shadow is nil
 	
-	if(!_shadows) _shadows = [NSMutableArray array];
+	if(!_shadows) _shadows = [NSMutableArray new];			// retained
 	[_shadows addObject: aShadowNode];
 	aShadowNode.light = self;
-
 	[self addTransformListener: aShadowNode];	// Update the shadow when this light moves.
+	
 	[self checkShadowCastingVolume];			// Make sure we have the shadow casting volume
 	[self checkCameraShadowVolume];				// Make sure we have the camera shadow volume
 	[self checkStencilledShadowPainter];		// Make sure we have the shadow painter
@@ -388,6 +391,7 @@
 	[_shadows removeObjectIdenticalTo: aShadowNode];
 	aShadowNode.light = nil;					// So it can't call back here if I'm gone
 	if (_shadows && _shadows.count == 0) {
+		[_shadows release];
 		_shadows = nil;
 		[self checkShadowCastingVolume];		// Remove the shadow casting volume
 		[self checkCameraShadowVolume];			// Remove the camera shadow volume
@@ -400,14 +404,17 @@
 
 -(void) updateShadows { for (id<CC3ShadowProtocol> sv in _shadows) [sv updateShadow]; }
 
+-(CC3ShadowCastingVolume*) shadowCastingVolume { return _shadowCastingVolume; }
+
 /** Detaches old as camera listener, attaches new as camera listener, and attaches light. */
 -(void) setShadowCastingVolume: (CC3ShadowCastingVolume*) scVolume {
 	if (scVolume == _shadowCastingVolume) return;
 
 	CC3Camera* cam = self.activeCamera;
 	[cam removeTransformListener: _shadowCastingVolume];
+	[_shadowCastingVolume release];
 	
-	_shadowCastingVolume = scVolume;
+	_shadowCastingVolume = [scVolume retain];
 	_shadowCastingVolume.light = self;
 	[cam addTransformListener: _shadowCastingVolume];
 }
@@ -422,26 +429,26 @@
  * and remove the shadow casting volume.
  */
 -(void) checkShadowCastingVolume {
-	if (_shadows) {
-		if (!_shadowCastingVolume)
-			self.shadowCastingVolume = [CC3ShadowCastingVolume boundingVolume];
+	if (self.hasShadows) {
+		if (!_shadowCastingVolume) self.shadowCastingVolume = [CC3ShadowCastingVolume boundingVolume];
 	} else {
-		[self.activeCamera removeTransformListener: _shadowCastingVolume];
-		_shadowCastingVolume = nil;
+		self.shadowCastingVolume = nil;
 	}
 }
 
+-(CC3CameraShadowVolume*) cameraShadowVolume { return _cameraShadowVolume; }
+
 /** Detaches old as camera listener, attaches new as camera listener, and attaches light. */
 -(void) setCameraShadowVolume: (CC3CameraShadowVolume*) csVolume {
-	if (csVolume != _cameraShadowVolume) {
+	if (csVolume == _cameraShadowVolume) return;
 		
-		CC3Camera* cam = self.activeCamera;
-		[cam removeTransformListener: _cameraShadowVolume];
-		
-		_cameraShadowVolume = csVolume;
-		_cameraShadowVolume.light = self;
-		[cam addTransformListener: _cameraShadowVolume];
-	}
+	CC3Camera* cam = self.activeCamera;
+	[cam removeTransformListener: _cameraShadowVolume];
+	[_cameraShadowVolume release];
+	
+	_cameraShadowVolume = [csVolume retain];
+	_cameraShadowVolume.light = self;
+	[cam addTransformListener: _cameraShadowVolume];
 }
 
 /**
@@ -453,15 +460,22 @@
  * and remove the camera shadow volume.
  */
 -(void) checkCameraShadowVolume {
-	if (_shadows) {
-		if (!_cameraShadowVolume) {
-			self.cameraShadowVolume = [CC3CameraShadowVolume boundingVolume];
-			[self.activeCamera addTransformListener: _cameraShadowVolume];
-		}
+	if (self.hasShadows) {
+		if (!_cameraShadowVolume) self.cameraShadowVolume = [CC3CameraShadowVolume boundingVolume];
 	} else {
-		[self.activeCamera removeTransformListener: _cameraShadowVolume];
-		_cameraShadowVolume = nil;
+		self.cameraShadowVolume = nil;
 	}
+}
+
+-(CC3StencilledShadowPainterNode*) stencilledShadowPainter { return _stencilledShadowPainter; }
+
+-(void) setStencilledShadowPainter: (CC3StencilledShadowPainterNode*) sspNode {
+	if (sspNode == _stencilledShadowPainter) return;
+	
+	[_stencilledShadowPainter release];
+	_stencilledShadowPainter = [sspNode retain];
+
+	[self.scene updateRelativeLightIntensities];	//  Must be done after the ivar is set.
 }
 
 /**
@@ -471,13 +485,12 @@
  * of this light relative to the intensity of all other illumination in the scene.
  */
 -(void) checkStencilledShadowPainter {
-	if (_shadows) {
-		if (!_stencilledShadowPainter) {
+	if (self.hasShadows) {
+		if (!_stencilledShadowPainter)
 			self.stencilledShadowPainter = [CC3StencilledShadowPainterNode nodeWithColor: kCCC4FBlack];
-			[self.scene updateRelativeLightIntensities];	//  Must be done after the ivar is set.
-		}
-	} else
-		_stencilledShadowPainter = nil;
+	} else {
+		self.stencilledShadowPainter = nil;
+	}
 }
 
 -(void) updateRelativeIntensityFrom: (ccColor4F) totalLight {
@@ -549,6 +562,7 @@
 -(void) cleanupShadows {
 	NSArray* myShadows = [_shadows copy];
 	for (CC3Node* sv in myShadows) [sv remove];
+	[myShadows release];
 }
 
 
@@ -621,13 +635,18 @@ static GLuint lightPoolStartIndex = 0;
 
 @implementation CC3LightCameraBridgeVolume
 
+-(void) dealloc {
+	_light = nil;		// weak reference
+	[super dealloc];
+}
+
 // Included to satisfy compiler because property appears in interface for documentation purposes
 -(GLuint) vertexCount { return super.vertexCount; }
 
 -(CC3Light*) light { return _light; }
 
 -(void) setLight: (CC3Light*) aLight {
-	_light = aLight;			// Not retained
+	_light = aLight;			// weak reference
 	[self markDirty];
 }
 
@@ -649,12 +668,10 @@ static GLuint lightPoolStartIndex = 0;
 	return self;
 }
 
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3LightCameraBridgeVolume*) another {
 	[super populateFrom: another];
 	
-	_light = another.light;		// Not retained
+	_light = another.light;		// weak reference
 }
 
 

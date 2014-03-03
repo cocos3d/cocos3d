@@ -442,7 +442,7 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
  *
  * If this light is casting no shadows, this property will be nil.
  */
-@property(nonatomic, strong, readonly) NSArray* shadows;
+@property(nonatomic, retain, readonly) NSArray* shadows;
 
 /**
  * Adds a shadow to the shadows cast by this light.
@@ -482,7 +482,7 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
  * If not set directly, this property is lazily created when a shadow is added.
  * If no shadow has been added, this property will return nil.
  */
-@property(nonatomic, strong) CC3ShadowCastingVolume* shadowCastingVolume;
+@property(nonatomic, retain) CC3ShadowCastingVolume* shadowCastingVolume;
 
 /**
  * A specialized bounding volume that encloses a pyramidal volume between the
@@ -496,7 +496,7 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
  * If not set directly, this property is lazily created when a shadow is added.
  * If no shadow has been added, this property will return nil.
  */
-@property(nonatomic, strong) CC3CameraShadowVolume* cameraShadowVolume;
+@property(nonatomic, retain) CC3CameraShadowVolume* cameraShadowVolume;
 
 /**
  * The mesh node used to draw the shadows cast by any shadow volumes that have
@@ -509,7 +509,7 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
  * If not set directly, this property is lazily created when a shadow is added.
  * If no shadow has been added, this property will return nil.
  */
-@property(nonatomic, strong) CC3StencilledShadowPainterNode* stencilledShadowPainter;
+@property(nonatomic, retain) CC3StencilledShadowPainterNode* stencilledShadowPainter;
 
 /**
  * This property is used to adjust the shadow intensity as calculated when the 
