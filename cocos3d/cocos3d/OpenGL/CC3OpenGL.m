@@ -29,6 +29,10 @@
  * See header file CC3OpenGL.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3OpenGL.h"
 #import "CC3OpenGLES2.h"
 #import "CC3OpenGLES1.h"
@@ -58,16 +62,30 @@
 
 -(void) dealloc {
 	LogInfo(@"Deallocating %@ and closing OpenGL on %@.", self, NSThread.currentThread);
+
+	[_context release];
+	[_extensions release];
+	[value_GL_VENDOR release];
+	[value_GL_RENDERER release];
+	[value_GL_VERSION release];
+	
 	free(vertexAttributes);
 	free(value_GL_TEXTURE_BINDING_2D);
 	free(value_GL_TEXTURE_BINDING_CUBE_MAP);
+	
+	[super dealloc];
 }
 
 static NSObject<CC3OpenGLDelegate>* _delegate = nil;
 
 +(NSObject<CC3OpenGLDelegate>*) delegate { return _delegate; }
 
-+(void) setDelegate: (NSObject<CC3OpenGLDelegate>*) delegate { _delegate = delegate; }
++(void) setDelegate: (NSObject<CC3OpenGLDelegate>*) delegate {
+	if (delegate == _delegate) return;
+
+	[_delegate release];
+	_delegate = [delegate retain];
+}
 
 
 #pragma mark Capabilities
@@ -935,7 +953,7 @@ static NSObject<CC3OpenGLDelegate>* _delegate = nil;
 
 -(NSSet*) extensions {
 	if ( !_extensions ) {
-		_extensions = [NSMutableSet set];
+		_extensions = [NSMutableSet new];		// retained
 		NSArray* rawExts = [[self getString: GL_EXTENSIONS]
 							componentsSeparatedByCharactersInSet:
 							[NSCharacterSet whitespaceCharacterSet]];
@@ -1102,9 +1120,6 @@ static NSObject<CC3OpenGLDelegate>* _delegate = nil;
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		// Ensure _renderGL is set, so isRenderingContext property will work during init
-		// The rendering instance must be created first !!
-		if (!_renderGL) _renderGL = self;
 		LogInfoIfPrimary(@"Third dimension provided by %@", NSStringFromCC3Version());
 		LogInfo(@"Starting GL context %@ on %@", self, NSThread.currentThread);
 		[self initDeletionDelay];
@@ -1143,13 +1158,13 @@ static NSObject<CC3OpenGLDelegate>* _delegate = nil;
 
 /** Template method to retrieve the GL platform limits. */
 -(void) initPlatformLimits {
-	value_GL_VENDOR = [self getString: GL_VENDOR];
+	value_GL_VENDOR = [[self getString: GL_VENDOR] retain];
 	LogInfoIfPrimary(@"GL vendor: %@", value_GL_VENDOR);
 
-	value_GL_RENDERER = [self getString: GL_RENDERER];
+	value_GL_RENDERER = [[self getString: GL_RENDERER] retain];
 	LogInfoIfPrimary(@"GL engine: %@", value_GL_RENDERER);
 	
-	value_GL_VERSION = [self getString: GL_VERSION];
+	value_GL_VERSION = [[self getString: GL_VERSION] retain];
 	LogInfoIfPrimary(@"GL version: %@", value_GL_VERSION);
 	
 	value_GL_MAX_TEXTURE_SIZE = [self getInteger: GL_MAX_TEXTURE_SIZE];
@@ -1193,11 +1208,19 @@ static CC3OpenGL* _bgGL = nil;
 -(BOOL) isRenderingContext { return (self == _renderGL); }
 
 +(CC3OpenGL*) sharedGL {
+	// The unconventional separation of alloc & init here is required so the static var is set
+	// before the init is run, since several init operations require access to the static var.
 	if (self.isRenderThread) {
-		if (!_renderGL) _renderGL = [[self alloc] initWithName: @"Rendering Engine"];
+		if (!_renderGL) {
+			_renderGL = [self alloc];		// retained
+			[_renderGL initWithName: @"Rendering Engine"];
+		}
 		return _renderGL;
 	} else {
-		if (!_bgGL) _bgGL = [[self alloc] initWithName: @"Background Engine"];
+		if (!_bgGL) {
+			_bgGL = [self alloc];			// retained
+			[_bgGL initWithName: @"Background Engine"];
+		}
 		return _bgGL;
 	}
 }
@@ -1208,7 +1231,7 @@ static NSThread* _renderThread = nil;
 	// Retrieve from CCDirector, and cache for fast access, and to allow CCDirector to be shut
 	// down, but the render thread to still be accessible for any outstanding background loading
 	// that occurs before GL is shut down.
-	if (!_renderThread) _renderThread = CCDirector.sharedDirector.runningThread;
+	if (!_renderThread) _renderThread = CCDirector.sharedDirector.runningThread;	// weak reference
 	return _renderThread;
 }
 
@@ -1225,8 +1248,8 @@ static NSThread* _renderThread = nil;
 
 -(void) terminate {
 	if (self.isRenderingContext) {
-		[NSThread.mainThread runBlockAsync: ^{ [self clearOpenGLResourceCaches]; } ];
-		[NSThread.mainThread runBlockAsync: ^{ [self terminateSoon]; } ];
+		[self.class.renderThread runBlockAsync: ^{ [self clearOpenGLResourceCaches]; } ];
+		[self.class.renderThread runBlockAsync: ^{ [self terminateSoon]; } ];
 	} else {
 		[CC3Backgrounder.sharedBackgrounder runBlock: ^{ [self clearOpenGLResourceCaches]; }];
 		[CC3Backgrounder.sharedBackgrounder runBlock: ^{ [self terminateSoon]; }];
@@ -1236,7 +1259,7 @@ static NSThread* _renderThread = nil;
 -(void) terminateSoon {
 	LogInfo(@"Requesting deletion of %@ on thread %@.", self, NSThread.currentThread);
 	if (self.isRenderingContext) {
-		[NSThread.mainThread runBlock: ^{ [self terminateNow]; } after: _deletionDelay ];
+		[self.class.renderThread runBlock: ^{ [self terminateNow]; } after: _deletionDelay ];
 	} else {
 		[CC3Backgrounder.sharedBackgrounder runBlock: ^{ [self terminateNow]; } after: _deletionDelay];
 	}
@@ -1246,8 +1269,14 @@ static NSThread* _renderThread = nil;
 	LogInfo(@"Deleting %@ now on thread %@.", self, NSThread.currentThread);
 	[self finish];
 	
-	if (self == _renderGL) _renderGL = nil;
-	if (self == _bgGL) _bgGL = nil;
+	if (self == _renderGL) {
+		[_renderGL release];
+		_renderGL = nil;
+	}
+	if (self == _bgGL) {
+		[_bgGL release];
+		_bgGL = nil;
+	}
 	
 	[self.class checkClearRenderThread];
 	[self.class checkTerminationNotify];
@@ -1255,7 +1284,7 @@ static NSThread* _renderThread = nil;
 
 /** If BOTH the render context AND the background context have been deleted, release the render thread. */
 +(void) checkClearRenderThread {
-	if (!_renderGL && !_bgGL) _renderThread = nil;
+	if (!_renderGL && !_bgGL) _renderThread = nil;		// weak reference
 }
 
 /** If BOTH the render context AND the background context have been deleted, notify the delegate. */

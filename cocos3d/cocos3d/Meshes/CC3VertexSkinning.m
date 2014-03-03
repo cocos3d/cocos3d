@@ -128,7 +128,11 @@
 }
 
 -(void) setDeformedFaces: (CC3DeformedFaceArray*) aFaceArray {
-	_deformedFaces = aFaceArray;
+	if (aFaceArray == _deformedFaces) return;
+	
+	[_deformedFaces release];
+	_deformedFaces = [aFaceArray retain];
+
 	_deformedFaces.node = self;
 }
 

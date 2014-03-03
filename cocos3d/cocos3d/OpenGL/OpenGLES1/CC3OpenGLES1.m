@@ -29,6 +29,10 @@
  * See header file CC3OpenGLES1.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3OpenGLES1.h"
 #import "CC3ShaderSemantics.h"
 
@@ -206,7 +210,7 @@
 -(CC3GLContext*) makeRenderingGLContext {
 	CC3GLContext* context = [[CC3GLContext alloc] initWithAPI: kEAGLRenderingAPIOpenGLES1 sharegroup: nil];
 	CC3Assert(context, @"Could not create CC3GLContext. OpenGL ES 1.1 is required.");
-	return context;
+	return [context autorelease];
 }
 
 -(void) initPlatformLimits {

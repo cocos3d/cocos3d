@@ -71,7 +71,7 @@ static inline NSString* NSStringFromCC3Version() {
 	vMajor = (vFull >> 16) & 0xFF;
 	vMinor = (vFull >> 8) & 0xFF;
 	vBuild = vFull & 0xFF;
-	return [NSString stringWithFormat: @"cocos3d v%i.%i.%i", vMajor, vMinor, vBuild];
+	return [NSString stringWithFormat: @"Cocos3D v%i.%i.%i", vMajor, vMinor, vBuild];
 }
 
 

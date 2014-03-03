@@ -29,6 +29,10 @@
  * See header file CC3GLView-GL.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3GLView-GL.h"
 #import "CC3Logging.h"
 
@@ -41,6 +45,11 @@
 
 @synthesize surfaceManager=_surfaceManager;
 @synthesize colorFormat=_colorFormat, depthFormat=_depthFormat;
+
+-(void) dealloc {
+	[_surfaceManager release];
+	[super dealloc];
+}
 
 -(GLuint) requestedSamples { return 1; }
 
@@ -67,7 +76,8 @@
 	_depthFormat = CC3GLDepthFormatFromBitPlanes(depthSize, stencilSize);
 	
 	CC3OpenGL.sharedGL.context = self.context;	// Set the primary GL context from this view
-	_surfaceManager = [[CC3GLViewSurfaceManager alloc] initWithView: self];
+	
+	_surfaceManager = [[CC3GLViewSurfaceManager alloc] initWithView: self];		// retained
 }
 
 -(void) reshape {

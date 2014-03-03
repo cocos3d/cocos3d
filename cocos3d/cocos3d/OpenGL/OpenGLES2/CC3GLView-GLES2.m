@@ -29,6 +29,10 @@
  * See header file CC3GLView-GLES2.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3GLView-GLES2.h"
 
 #if CC3_OGLES_2
@@ -64,6 +68,11 @@
 
 @synthesize surfaceManager=_surfaceManager;
 
+-(void) dealloc {
+	[_surfaceManager release];
+	[super dealloc];
+}
+
 -(CC3GLContext*) context { return (CC3GLContext*)CC2_CONTEXT; }
 
 -(CAEAGLLayer*) layer { return (CAEAGLLayer*)super.layer; }
@@ -84,8 +93,9 @@
 									 CC2_PIXEL_FORMAT,
 									 kEAGLDrawablePropertyColorFormat,
 									 nil];
-	CC2_CONTEXT = CC3OpenGL.sharedGL.context;
-	_surfaceManager = [[CC3GLViewSurfaceManager alloc] initWithView: self];
+	CC2_CONTEXT = [CC3OpenGL.sharedGL.context retain];
+	_surfaceManager = [[CC3GLViewSurfaceManager alloc] initWithView: self];		// retained
+	
 	return YES;
 }
 

@@ -85,7 +85,7 @@
 	[self lock];
 
 #if LOGGING_REZLOAD
-	id obj = [_objectsByName objectForKey: name];
+	id obj = [[[_objectsByName objectForKey: name] retain] autorelease];	// Retain long enough to log
 #endif
 	
 	[_objectsByName removeObjectForKey: name];

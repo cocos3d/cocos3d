@@ -221,7 +221,7 @@ typedef struct {
  * (isRenderingContext property is YES), and will be initialized to a shared GL context
  * for background instances (isRenderingContext property is NO).
  */
-@property(nonatomic, strong) CC3GLContext* context;
+@property(nonatomic, retain) CC3GLContext* context;
 
 /**
  * Returns whether this instance is tracking state for the primary rendering GL context
@@ -1090,7 +1090,7 @@ typedef struct {
 #pragma mark GL Extensions
 
 /** Returns a collection of names of the GL extensions supported by the platform. */
-@property(nonatomic, strong, readonly) NSSet* extensions;
+@property(nonatomic, retain, readonly) NSSet* extensions;
 
 /**
  * Returns whether this platform supports the GL extension with the specified name, which
@@ -1187,7 +1187,7 @@ typedef struct {
  * This prewarmer can be used to force that first draw call to be made immediately,
  * and to an off-screen surface, so it won't be visible.
  */
-@property(nonatomic, strong) CC3ShaderPrewarmer* shaderProgramPrewarmer;
+@property(nonatomic, retain) CC3ShaderPrewarmer* shaderProgramPrewarmer;
 
 /** Returns whether the specified shader was successfully linked. */
 -(BOOL) getShaderProgramWasLinked: (GLuint) programID;

@@ -29,6 +29,10 @@
  * See header file CC3OpenGLES2.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3OpenGLES2.h"
 
 #if CC3_OGLES_2
@@ -147,7 +151,7 @@
 -(CC3GLContext*) makeRenderingGLContext {
 	CC3GLContext* context = [[CC3GLContext alloc] initWithAPI: kEAGLRenderingAPIOpenGLES2 sharegroup: nil];
 	CC3Assert(context, @"Could not create CC3GLContext. OpenGL ES 2.0 is required.");
-	return context;
+	return [context autorelease];
 }
 
 -(void) initPlatformLimits {

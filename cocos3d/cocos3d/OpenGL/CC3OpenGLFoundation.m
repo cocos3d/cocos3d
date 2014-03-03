@@ -29,6 +29,10 @@
  * See header file CC3OpenGLFoundation.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3OpenGLFoundation.h"
 #import "CC3OpenGLUtility.h"
 #import "CC3Logging.h"
@@ -104,9 +108,12 @@ void DoLogGLErrorState(NSString* fmt, ...) {
 				  @"%@ To disable this assertion and just log the GL error, set the preprocessor macro GL_ERROR_ASSERTION_ENABLED=0 in your project build settings.\n",
 				  errText);
 		printf("%s\n", [errText UTF8String]);
+		[glTxt release];
+		[errText release];
 	} else if (_shouldLogGLCalls) {
 		NSString* glTxt = [[NSString alloc] initWithFormat: fmt arguments: args];
 		printf("%s\n", [glTxt UTF8String]);
+		[glTxt release];
 	}
 	va_end(args);
 }

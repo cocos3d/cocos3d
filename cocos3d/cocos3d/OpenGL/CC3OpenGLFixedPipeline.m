@@ -29,6 +29,10 @@
  * See header file CC3OpenGLFixedPipeline.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3OpenGLFixedPipeline.h"
 #import "CC3ShaderSemantics.h"
 #import "CC3UtilityMeshNodes.h"
@@ -48,6 +52,7 @@
 -(void) dealloc {
 	free(values_GL_TEXTURE_ENV_MODE);
 	free(values_GL_TEXTURE_ENV_COLOR);
+	[super dealloc];
 }
 
 

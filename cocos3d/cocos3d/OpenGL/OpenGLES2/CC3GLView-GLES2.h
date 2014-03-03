@@ -60,13 +60,13 @@
 }
 
 /** The OpenGL context used by this view. */
-@property(nonatomic,readonly) CC3GLContext* context;
+@property(nonatomic, retain, readonly) CC3GLContext* context;
 
 /** This class requires a layer of type CAEAGLLayer. */
-@property(nonatomic, strong, readonly) CAEAGLLayer* layer;
+@property(nonatomic, retain, readonly) CAEAGLLayer* layer;
 
 /** The underlying view rendering surface. */
-@property(nonatomic, strong, readonly) CC3GLViewSurfaceManager* surfaceManager;
+@property(nonatomic, retain, readonly) CC3GLViewSurfaceManager* surfaceManager;
 
 /** Returns the GL color format of the pixels. */
 @property(nonatomic, readonly) GLenum colorFormat;

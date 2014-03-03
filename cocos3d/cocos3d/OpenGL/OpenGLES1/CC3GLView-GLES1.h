@@ -62,10 +62,10 @@
 }
 
 /** The OpenGL context used by this view. */
-@property(nonatomic,readonly) CC3GLContext* context;
+@property(nonatomic, retain, readonly) CC3GLContext* context;
 
 /** This class requires a layer of type CAEAGLLayer. */
-@property(nonatomic, readonly, retain) CAEAGLLayer* layer;
+@property(nonatomic, retain, readonly) CAEAGLLayer* layer;
 
 /** The underlying view rendering surface. */
 @property(nonatomic, retain, readonly) CC3GLViewSurfaceManager* surfaceManager;
