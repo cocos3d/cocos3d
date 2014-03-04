@@ -29,6 +29,10 @@
  * See header file CC3CSFResource.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3CSFResource.h"
 #import "CC3DataStreams.h"
 
@@ -38,6 +42,11 @@
 @implementation CC3CSFResource
 
 @synthesize fileVersion=_fileVersion, allNodes=_allNodes, ambientLight=_ambientLight;
+
+-(void) dealloc {
+	[_allNodes release];
+	[super dealloc];
+}
 
 -(CC3CALNode*) getNodeWithCALIndex: (GLint) calIndex {
 	for (CC3CALNode* calNode in _allNodes) if (calNode.calIndex == calIndex) return calNode;
@@ -49,7 +58,7 @@
 
 -(id) init {
 	if ( (self = [super init]) ) {
-		_allNodes = [NSMutableArray array];
+		_allNodes = [NSMutableArray new];		// retained
 		_fileVersion = -1;
 		_nodeCount = 0;
 		_ambientLight = kCCC4FBlack;

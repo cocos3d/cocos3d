@@ -7,9 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A9BC913B189C776C000FB28C /* CC3CAFResource.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC8FE4189C776B000FB28C /* CC3CAFResource.m */; };
-		A9BC913C189C776C000FB28C /* CC3CALNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC8FE6189C776B000FB28C /* CC3CALNode.m */; };
-		A9BC913D189C776C000FB28C /* CC3CSFResource.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC8FE8189C776B000FB28C /* CC3CSFResource.m */; };
+		A9BC913B189C776C000FB28C /* CC3CAFResource.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC8FE4189C776B000FB28C /* CC3CAFResource.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		A9BC913C189C776C000FB28C /* CC3CALNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC8FE6189C776B000FB28C /* CC3CALNode.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		A9BC913D189C776C000FB28C /* CC3CSFResource.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC8FE8189C776B000FB28C /* CC3CSFResource.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A9BC913E189C776C000FB28C /* CC3MeshParticleSamples.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC8FEB189C776B000FB28C /* CC3MeshParticleSamples.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A9BC913F189C776C000FB28C /* CC3ModelSampleFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC8FED189C776B000FB28C /* CC3ModelSampleFactory.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A9BC9140189C776C000FB28C /* CC3ParticleSamples.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC8FEF189C776B000FB28C /* CC3ParticleSamples.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };

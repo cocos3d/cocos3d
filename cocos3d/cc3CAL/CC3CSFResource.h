@@ -52,7 +52,7 @@
  * A collection of all of the nodes extracted from the CSF file.
  * This is the equivalent of flattening the nodes array.
  */
-@property(nonatomic, strong, readonly) NSArray* allNodes;
+@property(nonatomic, retain, readonly) NSArray* allNodes;
 
 /**
  * Retrieves the first node found with the specified calIndex, anywhere in the nodes contained
