@@ -29,6 +29,10 @@
  * See header file CC3Billboard.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3Billboard.h"
 #import "CC3UtilityMeshNodes.h"
 #import "CC3Scene.h"
@@ -56,6 +60,7 @@
 
 -(void) dealloc {
 	self.billboard = nil;		// Use setter to cleanup and release the 2D billboard.
+	[super dealloc];
 }
 
 -(BOOL) isBillboard { return YES; }
@@ -66,9 +71,10 @@
 	// Old 2D billboard
 	[_billboard onExit];				// Turn off running state and pause activity.
 	[_billboard cleanup];				// Detach billboard from scheduler and actions.
+	[_billboard release];
 
 	// New 2D billboard
-	_billboard = aCCNode;
+	_billboard = [aCCNode retain];
 	_billboard.visible = self.visible;
 	// Retrieve the blend function from the 2D node and align this 3D node's material with it.
 	if ([_billboard conformsToProtocol: @protocol(CCBlendProtocol)]) {
@@ -238,7 +244,7 @@
 }
 
 +(id) nodeWithBillboard: (CCNode*) a2DNode {
-	return [[self alloc] initWithBillboard: a2DNode];
+	return [[[self alloc] initWithBillboard: a2DNode] autorelease];
 }
 
 -(id) initWithName: (NSString*) aName withBillboard: (CCNode*) a2DNode {
@@ -249,29 +255,23 @@
 }
 
 +(id) nodeWithName: (NSString*) aName withBillboard: (CCNode*) a2DNode {
-	return [[self alloc] initWithName: aName withBillboard: a2DNode];
+	return [[[self alloc] initWithName: aName withBillboard: a2DNode] autorelease];
 }
 
 // Protected properties for copying
 -(BOOL) billboardIsPaused { return _billboardIsPaused; }
 
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3Billboard*) another {
 	[super populateFrom: another];
 	
 	// Since the billboard can be any kind of CCNode, check if it supports NSCopying.
-	// If it does...copy it...otherwise don't attach it.
-	// Attaching a single CCNode to multiple CC3Billboards is fraught with peril,
-	// because the position and scale of the CCNode will be set by multiple CC3Billboards,
-	// and the last one to do so is where the CCNode will be drawn (but over and over,
-	// once per CC3Billboard that references it).
+	// If it does...copy it...otherwise don't attach it. Attaching a single CCNode to multiple
+	// CC3Billboards is fraught with peril, because the position and scale of the CCNode will
+	// be set by multiple CC3Billboards, and the last one to do so is where the CCNode will be
+	// drawn (but over and over, once per CC3Billboard that references it).
 	CCNode* bb = another.billboard;
-	if ([bb conformsToProtocol: @protocol(NSCopying)])
-		_billboard = [bb copy];				// retained
-	else
-		_billboard = nil;
-
+	self.billboard = [bb conformsToProtocol: @protocol(NSCopying)] ? [bb autoreleasedCopy] : nil;
+	
 	_billboardBoundingRect = another.billboardBoundingRect;
 	_offsetPosition = another.offsetPosition;
 	_unityScaleDistance = another.unityScaleDistance;
@@ -789,8 +789,6 @@ static GLfloat deviceScaleFactor = 0.0f;
 	return self;
 }
 
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3ParticleSystemBillboard*) another {
 	[super populateFrom: another];
 	

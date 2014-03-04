@@ -82,7 +82,7 @@ typedef struct {
 }
 
 /** The name of the font atlas texture. */
-@property (nonatomic, strong, readonly) NSString* atlasName;
+@property (nonatomic, retain, readonly) NSString* atlasName;
 
 /** Returns the nominal font size. */
 @property (nonatomic, readonly) GLfloat fontSize;
@@ -264,7 +264,7 @@ typedef struct {
  *
  * This property can be changed at any time to display a different text string.
  */
-@property(nonatomic, strong) NSString* labelString;
+@property(nonatomic, retain) NSString* labelString;
 
 /**
  * Indicates the name of the bitmap font file that contains the specifications of the font used
@@ -272,7 +272,7 @@ typedef struct {
  *
  * This property can be changed at any time.
  */
-@property(nonatomic, strong) NSString* fontFileName;
+@property(nonatomic, retain) NSString* fontFileName;
 
 /**
  * The line height in the local coordinate system of this node.

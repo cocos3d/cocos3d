@@ -29,6 +29,10 @@
  * See header file CC3BitmapLabelNode.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3BitmapLabelNode.h"
 #import "CC3CC2Extensions.h"
 #import "CC3ParametricMeshNodes.h"
@@ -46,6 +50,10 @@
 -(void) dealloc {
 	[self purgeCharDefDictionary];
 	[self purgeKerningDictionary];
+	[_characterSet release];
+	[_atlasName release];
+
+	[super dealloc];
 }
 
 -(void) purgeCharDefDictionary {
@@ -94,7 +102,7 @@
 		_charDefDictionary = NULL;
 		NSString *validChars = [self parseConfigFile: fontFile];
 		if( !validChars ) return nil;
-		_characterSet = [NSCharacterSet characterSetWithCharactersInString: validChars];
+		_characterSet = [[NSCharacterSet characterSetWithCharactersInString: validChars] retain];
 	}
 	return self;
 }
@@ -105,12 +113,13 @@ static NSMutableDictionary* _fontConfigurations = nil;
 	CC3BitmapFontConfiguration *fontConfig = nil;
 	
 	if( _fontConfigurations == nil )
-		_fontConfigurations = [NSMutableDictionary dictionaryWithCapacity: 4];
+		_fontConfigurations = [[NSMutableDictionary alloc] initWithCapacity: 4];	// retained
 	
 	fontConfig = [_fontConfigurations objectForKey: fontFile];
-	if(!fontConfig) {
+	if( !fontConfig ) {
 		fontConfig = [[self alloc] initFromFontFile: fontFile];
 		if (fontConfig) [_fontConfigurations setObject: fontConfig forKey: fontFile];
+		[fontConfig release];
 	}
 	return fontConfig;
 }
@@ -130,17 +139,17 @@ static NSMutableDictionary* _fontConfigurations = nil;
 
 /** Parses the configuration file, line by line. */
 -(NSString*) parseConfigFile: (NSString*) fontFile {
-	NSString *fullpath = [CCFileUtils.sharedFileUtils fullPathFromRelativePath: fontFile];
-	NSError *error;
-	NSMutableString *validCharsString = [NSMutableString stringWithCapacity: 512];
+	NSString* fullpath = [CCFileUtils.sharedFileUtils fullPathFromRelativePath: fontFile];
+	NSError* error;
+	NSMutableString* validCharsString = [NSMutableString stringWithCapacity: 512];
 	
-	NSString *contents = [NSString stringWithContentsOfFile: fullpath encoding: NSUTF8StringEncoding error: &error];
+	NSString* contents = [NSString stringWithContentsOfFile: fullpath encoding: NSUTF8StringEncoding error: &error];
 	CC3Assert(contents, @"Could not load font file %@ because %@", fullpath, error);
     
 	// Separate the lines into an array and create an enumerator on it
-	NSArray *lines = [[NSArray alloc] initWithArray: [contents componentsSeparatedByString:@"\n"]];
-	NSEnumerator *nse = [lines objectEnumerator];
-	NSString *line;
+	NSArray* lines = [[NSArray alloc] initWithArray: [contents componentsSeparatedByString:@"\n"]];
+	NSEnumerator* nse = [lines objectEnumerator];
+	NSString* line;
     
 	// Loop through all the lines in the lines array processing each one based on its first chars
 	while( (line = [nse nextObject]) ) {
@@ -151,6 +160,7 @@ static NSMutableDictionary* _fontConfigurations = nil;
 		else if([line hasPrefix:@"page"]) [self parseImageFileName: line fntFile: fontFile];
 		else if([line hasPrefix:@"chars count"]) {}
 	}
+	[lines release];	// Finished with lines so release it
 	
 	return validCharsString;
 }
@@ -318,7 +328,8 @@ static NSMutableDictionary* _fontConfigurations = nil;
     
 	// Supports subdirectories
 	NSString *dir = [fontFile stringByDeletingLastPathComponent];
-	_atlasName = [dir stringByAppendingPathComponent: propertyValue];	// retained
+	[_atlasName release];
+	_atlasName = [[dir stringByAppendingPathComponent: propertyValue] retain];	// retained
 }
 
 @end
@@ -368,6 +379,13 @@ static NSMutableDictionary* _fontConfigurations = nil;
 
 @implementation CC3BitmapLabelNode
 
+-(void) dealloc {
+	[_labelString release];
+	[_fontFileName release];
+	[_fontConfig release];
+	[super dealloc];
+}
+
 -(GLfloat) lineHeight { return _lineHeight ? _lineHeight : _fontConfig.commonHeight; }
 
 -(void) setLineHeight: (GLfloat) lineHt {
@@ -380,47 +398,53 @@ static NSMutableDictionary* _fontConfigurations = nil;
 -(NSString*) labelString { return _labelString; }
 
 -(void) setLabelString: (NSString*) aString {
-	if ( ![aString isEqualToString: _labelString] ) {
-		_labelString = aString;
-		[self populateLabelMesh];
-	}
+	if ( [aString isEqualToString: _labelString] ) return;
+	
+	[_labelString release];
+	_labelString = [aString retain];
+	
+	[self populateLabelMesh];
 }
 
 -(NSString*) fontFileName { return _fontFileName; }
 
 -(void) setFontFileName: (NSString*) aFileName {
-	if ( ![aFileName isEqualToString: _fontFileName] ) {
-		_fontFileName = aFileName;
-		_fontConfig = [CC3BitmapFontConfiguration configurationFromFontFile: _fontFileName];
-		[self populateLabelMesh];
-	}
+	if ( [aFileName isEqualToString: _fontFileName] ) return;
+
+	[_fontFileName release];
+	_fontFileName = [aFileName retain];
+
+	[_fontConfig release];
+	_fontConfig = [[CC3BitmapFontConfiguration configurationFromFontFile: _fontFileName] retain];
+	
+	[self populateLabelMesh];
 }
 
 -(NSTextAlignment) textAlignment { return _textAlignment; }
 
 -(void) setTextAlignment: (NSTextAlignment) alignment {
-	if (alignment != _textAlignment) {
-		_textAlignment = alignment;
-		[self populateLabelMesh];
-	}
+	if (alignment == _textAlignment) return;
+
+	_textAlignment = alignment;
+	[self populateLabelMesh];
 }
 
 -(CGPoint) relativeOrigin { return _relativeOrigin; }
 
 -(void) setRelativeOrigin: (CGPoint) relOrigin {
-	if ( !CGPointEqualToPoint(relOrigin, _relativeOrigin) ) {
-		_relativeOrigin = relOrigin;
-		[self populateLabelMesh];
-	}
+	if ( CGPointEqualToPoint(relOrigin, _relativeOrigin) ) return;
+	
+	_relativeOrigin = relOrigin;
+	[self populateLabelMesh];
 }
 
 -(CC3Tessellation) tessellation { return _tessellation; }
 
 -(void) setTessellation: (CC3Tessellation) aGrid {
-	if ( !((aGrid.x == _tessellation.x) && (aGrid.y == _tessellation.y)) ) {
-		_tessellation = aGrid;
-		[self populateLabelMesh];
-	}
+	if ( (aGrid.x == _tessellation.x) && (aGrid.y == _tessellation.y) ) return;
+
+	_tessellation = aGrid;
+	[self populateLabelMesh];
 }
 
 -(GLfloat) fontSize { return _fontConfig ? _fontConfig.fontSize : 0; }
@@ -458,7 +482,7 @@ static NSMutableDictionary* _fontConfigurations = nil;
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		_labelString = @"hello, world";		// Fail-safe to display if nothing set
+		self.labelString = @"hello, world";		// Fail-safe to display if nothing set
 		_fontFileName = nil;
 		_fontConfig = nil;
 		_lineHeight = 0;

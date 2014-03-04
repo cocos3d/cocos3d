@@ -29,8 +29,13 @@
  * See header file CC3UtilityMeshNodes.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3UtilityMeshNodes.h"
 #import "CC3Scene.h"
+
 
 // Expose CC3Node parent property as writeable, so subclasses can propagate to superclass.
 @interface CC3Node (TemplateMethods)
@@ -359,8 +364,6 @@
 	return self;
 }
 
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3WireframeBoundingBoxNode*) another {
 	[super populateFrom: another];
 	
@@ -469,8 +472,6 @@
 	return self;
 }
 
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3DirectionMarkerNode*) another {
 	[super populateFrom: another];
 	
@@ -636,7 +637,7 @@ static GLfloat directionMarkerMinimumLength = 0;
 	return self;
 }
 
-+(id) fog { return [[self alloc] init]; }
++(id) fog { return [[[self alloc] init] autorelease]; }
 
 -(void) populateFrom: (CC3Fog*) another {
 	[super populateFrom: another];
