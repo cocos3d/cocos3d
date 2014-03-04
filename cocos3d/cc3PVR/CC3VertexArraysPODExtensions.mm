@@ -29,6 +29,10 @@
  * See header file CC3VertexArraysPODExtensions.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 extern "C" {
 	#import "CC3Foundation.h"	// extern must be first, since foundation also imported via other imports
 }
@@ -64,7 +68,7 @@ extern "C" {
 }
 
 +(id) arrayFromCPODData: (PODClassPtr) aCPODData fromSPODMesh: (PODStructPtr) aSPODMesh {
-	return [[self alloc] initFromCPODData: aCPODData fromSPODMesh: aSPODMesh];
+	return [[[self alloc] initFromCPODData: aCPODData fromSPODMesh: aSPODMesh] autorelease];
 }
 
 /** Template method extracts the vertex data from the specified SPODMesh and CPODData structures.  */
@@ -149,7 +153,7 @@ extern "C" {
 }
 
 +(id) arrayFromSPODMesh: (PODStructPtr) aSPODMesh forTextureUnit: (GLuint) texUnit {
-	return [[self alloc] initFromSPODMesh: aSPODMesh forTextureUnit: texUnit];
+	return [[[self alloc] initFromSPODMesh: aSPODMesh forTextureUnit: texUnit] autorelease];
 }
 
 @end

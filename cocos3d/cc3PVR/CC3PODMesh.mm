@@ -29,6 +29,10 @@
  * See header file CC3PODMesh.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3PODMesh.h"
 #import "CC3PVRTModelPOD.h"
 #import "CC3VertexArraysPODExtensions.h"
@@ -82,7 +86,7 @@
 }
 
 +(id) meshAtIndex: (GLint) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
-	return [[self alloc] initAtIndex: aPODIndex fromPODResource: aPODRez];
+	return [[[self alloc] initAtIndex: aPODIndex fromPODResource: aPODRez] autorelease];
 }
 
 @end
@@ -96,8 +100,6 @@
 
 -(void) setPodIndex: (GLint) aPODIndex { _podIndex = aPODIndex; }
 
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3PODMesh*) another {
 	[super populateFrom: another];
 	

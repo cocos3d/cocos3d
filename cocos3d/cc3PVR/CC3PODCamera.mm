@@ -29,6 +29,10 @@
  * See header file CC3PODCamera.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3PODCamera.h"
 #import "CC3PVRTModelPOD.h"
 #import "CC3Math.h"
@@ -146,8 +150,6 @@
 	LogRez(@"%@ adjusted %i rotation quaternions by %@", self, qCnt, NSStringFromCC3Quaternion(offsetQuat));
 }
 
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3PODCamera*) another {
 	[super populateFrom: another];
 

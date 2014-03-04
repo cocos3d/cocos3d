@@ -29,6 +29,10 @@
  * See header file CC3PODLight.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 extern "C" {
 	#import "CC3Foundation.h"	// extern must be first, since foundation also imported via other imports
 }
@@ -94,8 +98,6 @@ extern "C" {
 	return [aPODRez lightNodePODStructAtIndex: aPODIndex];
 }
 
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3PODLight*) another {
 	[super populateFrom: another];
 

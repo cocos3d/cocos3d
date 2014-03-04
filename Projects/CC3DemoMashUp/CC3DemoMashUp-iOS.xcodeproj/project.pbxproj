@@ -143,6 +143,7 @@
 		A99CD83815866E1C00B5BAC3 /* BallBoxTexture.png in Resources */ = {isa = PBXBuildFile; fileRef = A99CD83715866E1C00B5BAC3 /* BallBoxTexture.png */; };
 		A9AAF0081525E41000E1620A /* Bricks-Red.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A9AAF0071525E41000E1620A /* Bricks-Red.jpg */; };
 		A9AE3D7D14E46118002805DA /* Stamp.png in Resources */ = {isa = PBXBuildFile; fileRef = A9AE3D7C14E46118002805DA /* Stamp.png */; };
+		A9BC697418C5586100B67E11 /* Head_diffuse.bmp in Resources */ = {isa = PBXBuildFile; fileRef = A9BC697318C5586100B67E11 /* Head_diffuse.bmp */; };
 		A9BC8FDE189C7610000FB28C /* TestRedTextureShort.png in Resources */ = {isa = PBXBuildFile; fileRef = A9BC8FDC189C7610000FB28C /* TestRedTextureShort.png */; };
 		A9BC8FDF189C7610000FB28C /* TestRedTextureShort.ppng in Resources */ = {isa = PBXBuildFile; fileRef = A9BC8FDD189C7610000FB28C /* TestRedTextureShort.ppng */; };
 		A9C94ABE1451924700CE6BAD /* mallet.png in Resources */ = {isa = PBXBuildFile; fileRef = A9C94ABC1451924700CE6BAD /* mallet.png */; };
@@ -163,7 +164,6 @@
 		A9FF6E15170DF79D00FC35C8 /* Stamp-nm.png in Resources */ = {isa = PBXBuildFile; fileRef = A9FF6E14170DF79D00FC35C8 /* Stamp-nm.png */; };
 		A9FF6E18170DF7B100FC35C8 /* tex_arm.png in Resources */ = {isa = PBXBuildFile; fileRef = A9FF6E16170DF7B100FC35C8 /* tex_arm.png */; };
 		A9FF6E19170DF7B100FC35C8 /* tex_base.png in Resources */ = {isa = PBXBuildFile; fileRef = A9FF6E17170DF7B100FC35C8 /* tex_base.png */; };
-		A9FF6E1B170E0C2C00FC35C8 /* Head_diffuse.bmp in Resources */ = {isa = PBXBuildFile; fileRef = A9FF6E1A170E0C2C00FC35C8 /* Head_diffuse.bmp */; };
 		DC6640030F83B3EA000B3E49 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC6640020F83B3EA000B3E49 /* AudioToolbox.framework */; };
 		DC6640050F83B3EA000B3E49 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC6640040F83B3EA000B3E49 /* OpenAL.framework */; };
 		DCCBF1B70F6022AE0040855A /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DCCBF1B60F6022AE0040855A /* CoreGraphics.framework */; };
@@ -360,6 +360,7 @@
 		A99CD83715866E1C00B5BAC3 /* BallBoxTexture.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = BallBoxTexture.png; sourceTree = "<group>"; };
 		A9AAF0071525E41000E1620A /* Bricks-Red.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "Bricks-Red.jpg"; sourceTree = "<group>"; };
 		A9AE3D7C14E46118002805DA /* Stamp.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Stamp.png; sourceTree = "<group>"; };
+		A9BC697318C5586100B67E11 /* Head_diffuse.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; path = Head_diffuse.bmp; sourceTree = "<group>"; };
 		A9BC8FDC189C7610000FB28C /* TestRedTextureShort.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = TestRedTextureShort.png; path = "../../../../../../Models & Textures/TestRedTextureShort.png"; sourceTree = "<group>"; };
 		A9BC8FDD189C7610000FB28C /* TestRedTextureShort.ppng */ = {isa = PBXFileReference; lastKnownFileType = file; name = TestRedTextureShort.ppng; path = "../../../../../../Models & Textures/TestRedTextureShort.ppng"; sourceTree = "<group>"; };
 		A9C94ABC1451924700CE6BAD /* mallet.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = mallet.png; sourceTree = "<group>"; };
@@ -381,7 +382,6 @@
 		A9FF6E14170DF79D00FC35C8 /* Stamp-nm.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Stamp-nm.png"; sourceTree = "<group>"; };
 		A9FF6E16170DF7B100FC35C8 /* tex_arm.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = tex_arm.png; sourceTree = "<group>"; };
 		A9FF6E17170DF7B100FC35C8 /* tex_base.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = tex_base.png; sourceTree = "<group>"; };
-		A9FF6E1A170E0C2C00FC35C8 /* Head_diffuse.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; path = Head_diffuse.bmp; sourceTree = "<group>"; };
 		DC6640020F83B3EA000B3E49 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		DC6640040F83B3EA000B3E49 /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
 		DCCBF1B60F6022AE0040855A /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -617,7 +617,7 @@
 				A92DA79A1427B5980051AFFA /* GridButton48x48.png */,
 				A92DA79B1427B5980051AFFA /* Head.pod */,
 				A9FF6E10170DF78600FC35C8 /* Head_clonespace.png */,
-				A9FF6E1A170E0C2C00FC35C8 /* Head_diffuse.bmp */,
+				A9BC697318C5586100B67E11 /* Head_diffuse.bmp */,
 				A9FF6E11170DF78600FC35C8 /* Head_diffuse.png */,
 				A94EF4C717C65E5A00FA969E /* Icons */,
 				A92DA7A61427B5980051AFFA /* IntroducingPOD_float.pod */,
@@ -896,6 +896,7 @@
 				A94EF4F717C66D6900FA969E /* Default-568h@2x.png in Resources */,
 				A95A5C5714E45AC00013359F /* Crate.png in Resources */,
 				A94EF4E017C65E5A00FA969E /* Icon-72.png in Resources */,
+				A9BC697418C5586100B67E11 /* Head_diffuse.bmp in Resources */,
 				A9AE3D7D14E46118002805DA /* Stamp.png in Resources */,
 				A9F78F5A189EA362001AE65E /* OrangeRing.png in Resources */,
 				A96B35A014EF2689002A7363 /* GrassCloseUp.jpg in Resources */,
@@ -970,7 +971,6 @@
 				A903C1291877329300BDE9C1 /* CC3ClipSpaceNoTexture.fsh in Resources */,
 				A9FF6E19170DF7B100FC35C8 /* tex_base.png in Resources */,
 				A903C13F1877329400BDE9C1 /* CC3LibSingleTexture.vsh in Resources */,
-				A9FF6E1B170E0C2C00FC35C8 /* Head_diffuse.bmp in Resources */,
 				A903C12C1877329300BDE9C1 /* CC3NoTexture.fsh in Resources */,
 				A924D15A171306F20061DDA0 /* tex_arm.pvr in Resources */,
 				A903C12F1877329300BDE9C1 /* CC3NoTextureReflectAlphaTest.fsh in Resources */,

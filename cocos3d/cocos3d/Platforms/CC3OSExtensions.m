@@ -36,10 +36,13 @@
 #import "CC3OSExtensions.h"
 #import "CC3OpenGL.h"
 
+
 #pragma mark -
 #pragma mark NSObject extensions
 
 @implementation NSObject (CC3)
+
+-(BOOL) isNull { return NO; }
 
 -(NSString*) fullDescription { return [self description]; }
 
@@ -50,6 +53,16 @@
 // Deprecated
 -(id) autoreleasedCopy { return [[self copy] autorelease]; }
 -(id) copyAutoreleased { return [self autoreleasedCopy]; }
+
+@end
+
+
+#pragma mark -
+#pragma mark NSNull extensions
+
+@implementation NSNull (CC3)
+
+-(BOOL) isNull { return YES; }
 
 @end
 

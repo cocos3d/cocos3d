@@ -30,6 +30,10 @@
  * See header file CC3PODVertexSkinning.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3PODVertexSkinning.h"
 #import "CC3PODMesh.h"
 #import "CC3VertexSkinning.h"
@@ -85,8 +89,6 @@
 	return self; 
 }
 
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3PODSkinMeshNode*) another {
 	[super populateFrom: another];
 	
@@ -147,7 +149,7 @@
 +(id) skinSectionFromBatchAtIndex: (GLint) aBatchIndex
 					 fromSPODMesh: (PODStructPtr) aSPODMesh
 						  forNode: (CC3SkinMeshNode*) aNode {
-	return [[self alloc] initFromBatchAtIndex: aBatchIndex fromSPODMesh: aSPODMesh forNode: aNode];
+	return [[[self alloc] initFromBatchAtIndex: aBatchIndex fromSPODMesh: aSPODMesh forNode: aNode] autorelease];
 
 }
 
@@ -186,10 +188,6 @@
 -(GLint) podParentIndex { return _podParentIndex; }
 
 -(void) setPodParentIndex: (GLint) aPODIndex { _podParentIndex = aPODIndex; }
-
-//-(GLuint) podUserDataSize { return _podUserDataSize; }
-
-//-(void) setPodUserDataSize: (GLuint) podUserDataSize { _podUserDataSize = podUserDataSize; }
 
 -(void) populateFrom: (CC3PODNode*) another {
 	[super populateFrom: another];

@@ -81,6 +81,13 @@
 @interface NSObject (CC3) <CC3Object>
 
 /** 
+ * Returns whether this object represents the standard null object retrieved from [NSNull null].
+ *
+ * Returns NO. The NSNull subclass returns YES.
+ */
+@property(nonatomic, readonly) BOOL isNull;
+
+/** 
  * Returns an autoreleased copy of this object.
  *
  * This is a convenience method that simply invokes [[self copy] autorelease]. 

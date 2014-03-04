@@ -29,6 +29,10 @@
  * See header file CC3PODMaterial.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 extern "C" {
 	#import "CC3Foundation.h"	// extern must be first, since foundation also imported via other imports
 }
@@ -101,7 +105,7 @@ static GLfloat shininessExpansionFactor = 128.0f;
 }
 
 +(id) materialAtIndex: (GLint) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
-	return [[self alloc] initAtIndex: aPODIndex fromPODResource: aPODRez];
+	return [[[self alloc] initAtIndex: aPODIndex fromPODResource: aPODRez] autorelease];
 }
 
 -(void) populateFrom: (CC3PODMaterial*) another {
@@ -115,9 +119,8 @@ static GLfloat shininessExpansionFactor = 128.0f;
  * and adds it to this material.
  */
 -(void) addTexture: (GLint) aPODTexIndex fromPODResource: (CC3PODResource*) aPODRez {
-	if (aPODTexIndex >= 0 && aPODTexIndex < (GLint)aPODRez.textureCount) {
+	if (aPODTexIndex >= 0 && aPODTexIndex < (GLint)aPODRez.textureCount)
 		[self addTexture: [aPODRez textureAtIndex: aPODTexIndex]];
-	}
 }
 
 /**

@@ -29,6 +29,10 @@
  * See header file CC3PODResource.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 extern "C" {
 	#import "CC3Foundation.h"	// extern must be first, since foundation also imported via other imports
 }
@@ -45,12 +49,6 @@ extern "C" {
 #import "CC3CC2Extensions.h"
 
 
-/**
- * A placeholder object used to mark places in arrays where valid input is not present
- * Arrays may not hold nil, therefore this singleton placeholder object is used instead.
- */
-static const id placeHolder = [NSObject new];
-
 @implementation CC3PODResource
 
 @synthesize pvrtModel=_pvrtModel, allNodes=_allNodes, meshes=_meshes;
@@ -60,7 +58,14 @@ static const id placeHolder = [NSObject new];
 @synthesize animationFrameCount=_animationFrameCount, animationFrameRate=_animationFrameRate;
 
 -(void) dealloc {
+	[_allNodes release];
+	[_meshes release];
+	[_materials release];
+	[_textures release];
+
 	[self deleteCPVRTModelPOD];
+
+	[super dealloc];
 }
 
 -(CPVRTModelPOD*) pvrtModelImpl { return (CPVRTModelPOD*)_pvrtModel; }
@@ -78,10 +83,10 @@ static const id placeHolder = [NSObject new];
 -(id) init {
 	if ( (self = [super init]) ) {
 		_pvrtModel = NULL;
-		_allNodes = [NSMutableArray array];
-		_meshes = [NSMutableArray array];
-		_materials = [NSMutableArray array];
-		_textures = [NSMutableArray array];
+		_allNodes = [NSMutableArray new];		// retain
+		_meshes = [NSMutableArray new];			// retain
+		_materials = [NSMutableArray new];		// retain
+		_textures = [NSMutableArray new];		// retain
 		_textureParameters = [CC3Texture defaultTextureParameters];
 		_shouldAutoBuild = YES;
 	}
@@ -489,8 +494,8 @@ static const id placeHolder = [NSObject new];
 -(GLuint) textureCount { return _pvrtModel ? self.pvrtModelImpl->nNumTexture : 0; }
 
 -(CC3Texture*) textureAtIndex: (GLuint) textureIndex {
-	id tex = [_textures objectAtIndex: textureIndex];
-	return (tex != placeHolder) ? (CC3Texture*)tex : nil;
+	NSObject* tex = [_textures objectAtIndex: textureIndex];
+	return (tex.isNull) ? nil : (CC3Texture*)tex;
 }
 
 -(void) buildTextures {
@@ -499,8 +504,8 @@ static const id placeHolder = [NSObject new];
 	// Build the array containing all textures in the PVRT structure
 	for (GLuint i = 0; i < tCount; i++) {
 		CC3Texture* tex = [self buildTextureAtIndex: i];
-		// Add the texture, or if it couldn't be built, an empty texture
-		[_textures addObject: (tex ? tex : placeHolder)];
+		// Add the texture, or if it couldn't be built, an null placeholder
+		[_textures addObject: (tex ? tex : NSNull.null)];
 	}
 }
 

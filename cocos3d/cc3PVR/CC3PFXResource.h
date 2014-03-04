@@ -80,7 +80,7 @@
  *
  * The initial value is set from the class-side defaultSemanticDelegateClass property.
  */
-@property(nonatomic, assign) Class semanticDelegateClass;
+@property(nonatomic, retain) Class semanticDelegateClass;
 
 /**
  * The default class used to instantiate the semantic delegate for the GLSL programs created
@@ -120,22 +120,22 @@
 }
 
 /** Returns the name of this effect. */
-@property(nonatomic, strong, readonly) NSString* name;
+@property(nonatomic, retain, readonly) NSString* name;
 
 /** The shader program used to render this effect. */
-@property(nonatomic, strong, readonly) CC3ShaderProgram* shaderProgram;
+@property(nonatomic, retain, readonly) CC3ShaderProgram* shaderProgram;
 
 /**
  * The textures used in this effect. Each element of this array is an instance of CC3PFXEffectTexture
  * that contains the texture and the index of the texture unit to which the texture should be applied.
  */
-@property(nonatomic, strong, readonly) NSArray* textures;
+@property(nonatomic, retain, readonly) NSArray* textures;
 
 /**
  * This array contains a configuration spec for each attribute and uniform variable used in
  * the shaders. Each element of this array is an instance of CC3PFXGLSLVariableConfiguration.
  */
-@property(nonatomic, strong, readonly) NSArray* variables;
+@property(nonatomic, retain, readonly) NSArray* variables;
 
 /** Populates the specfied mesh node with the shader program in this effect. */
 -(void) populateMeshNode: (CC3MeshNode*) meshNode;
@@ -167,7 +167,7 @@
 }
 
 /** The semantic name as retrieved from the PFX effect. */
-@property(nonatomic, strong) NSString* pfxSemanticName;
+@property(nonatomic, retain) NSString* pfxSemanticName;
 
 @end
 
@@ -242,10 +242,10 @@
 }
 
 /** The texture being linked to a particular texture unit. */
-@property(nonatomic, strong) CC3Texture* texture;
+@property(nonatomic, retain) CC3Texture* texture;
 
 /** The name of the texture as declared in the PFX file. */
-@property(nonatomic, strong) NSString* name;
+@property(nonatomic, retain) NSString* name;
 
 /** The index of the texture unit to which the texture should be applied. */
 @property(nonatomic, assign) NSUInteger textureUnitIndex;

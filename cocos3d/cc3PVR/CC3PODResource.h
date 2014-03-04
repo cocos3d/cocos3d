@@ -119,7 +119,7 @@
  * A collection of all of the nodes extracted from the POD file.
  * This is the equivalent of flattening the nodes array.
  */
-@property(nonatomic, strong, readonly) NSArray* allNodes;
+@property(nonatomic, retain, readonly) NSArray* allNodes;
 
 /**
  * The number of mesh nodes in the POD file.
@@ -154,7 +154,7 @@
 @property(nonatomic, readonly) uint meshCount;
 
 /** A collection of the CC3Meshs extracted from  the POD file. */
-@property(nonatomic, strong, readonly) NSArray* meshes;
+@property(nonatomic, retain, readonly) NSArray* meshes;
 
 /**
  * The number of materials in the POD file.
@@ -165,7 +165,7 @@
 @property(nonatomic, readonly) uint materialCount;
 
 /** A collection of the CC3Materials extracted from  the POD file. */
-@property(nonatomic, strong, readonly) NSArray* materials;
+@property(nonatomic, retain, readonly) NSArray* materials;
 
 /**
  * The number of textures in the POD file.
@@ -176,7 +176,7 @@
 @property(nonatomic, readonly) uint textureCount;
 
 /** A collection of the CC3Textures extracted from  the POD file. */
-@property(nonatomic, strong, readonly) NSArray* textures;
+@property(nonatomic, retain, readonly) NSArray* textures;
 
 /** @deprecated Use the CC3Texture class-side property defaultTextureParameters instead. */
 @property(nonatomic, assign) ccTexParams textureParameters DEPRECATED_ATTRIBUTE;

@@ -29,6 +29,10 @@
  * See header file CC3PFXResource.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 extern "C" {
 	#import "CC3Foundation.h"	// extern must be first, since foundation also imported via other imports
 }
@@ -45,6 +49,14 @@ extern "C" {
 @implementation CC3PFXResource
 
 @synthesize semanticDelegateClass=_semanticDelegateClass;
+
+-(void) dealloc {
+	[_texturesByName release];
+	[_effectsByName release];
+	[_semanticDelegateClass release];
+	
+	[super dealloc];
+}
 
 -(CC3PFXEffect*) getEffectNamed: (NSString*) effectName {
 	if ( !effectName ) return nil;
@@ -83,7 +95,7 @@ extern "C" {
 	if ( (self = [super init]) ) {
 		_effectsByName = [NSMutableDictionary new];		// retained
 		_texturesByName = [NSMutableDictionary new];	// retained
-		_semanticDelegateClass = [self class].defaultSemanticDelegateClass;	// weak reference
+		_semanticDelegateClass = [self.class.defaultSemanticDelegateClass retain];		// retained
 	}
 	return self;
 }
@@ -154,6 +166,7 @@ extern "C" {
 																	fromPFXParser: pfxParser
 																	inPFXResource: self];
 		[_effectsByName setObject: effect forKey: effect.name];
+		[effect release];
 	}
 }
 
@@ -190,7 +203,10 @@ static Class _defaultSemanticDelegateClass = nil;
 	return _defaultSemanticDelegateClass;
 }
 
-+(void) setDefaultSemanticDelegateClass: (Class) aClass { _defaultSemanticDelegateClass = aClass; }
++(void) setDefaultSemanticDelegateClass: (Class) aClass {
+	[_defaultSemanticDelegateClass release];
+	_defaultSemanticDelegateClass = [aClass retain];
+}
 
 @end
 
@@ -201,6 +217,15 @@ static Class _defaultSemanticDelegateClass = nil;
 @implementation CC3PFXEffect
 
 @synthesize name=_name, shaderProgram=_shaderProgram, textures=_textures, variables=_variables;
+
+-(void) dealloc {
+	[_name release];
+	[_shaderProgram release];
+	[_textures release];
+	[_variables release];
+	
+	[super dealloc];
+}
 
 
 #pragma mark Populating materials
@@ -241,7 +266,7 @@ static Class _defaultSemanticDelegateClass = nil;
 	if ( (self = [self init]) ) {
 		CPVRTPFXParser* pfxParser = (CPVRTPFXParser*)pCPVRTPFXParser;
 		SPVRTPFXParserEffect* pfxEffect = (SPVRTPFXParserEffect*)pSPVRTPFXParserEffect;
-		_name = [NSString stringWithUTF8String: pfxEffect->Name.c_str()];	// retained
+		_name = [[NSString alloc] initWithUTF8String: pfxEffect->Name.c_str()];		// retained
 		[self initTexturesForPFXEffect: pfxEffect fromPFXParser: pfxParser inPFXResource: pfxRez];
 		[self initVariablesForPFXEffect: pfxEffect fromPFXParser: pfxParser inPFXResource: pfxRez];
 		[self initShaderProgramForPFXEffect: pfxEffect fromPFXParser: pfxParser inPFXResource: pfxRez];
@@ -253,7 +278,7 @@ static Class _defaultSemanticDelegateClass = nil;
 -(void) initTexturesForPFXEffect: (SPVRTPFXParserEffect*) pfxEffect
 				   fromPFXParser: (CPVRTPFXParser*) pfxParser
 				   inPFXResource: (CC3PFXResource*) pfxRez  {
-	_textures = [NSMutableArray array];
+	_textures = [NSMutableArray new];	// retained
 	
 	CPVRTArray<SPVRTPFXParserEffectTexture> effectTextures = pfxEffect->Textures;
 	GLuint texCount = effectTextures.GetSize();
@@ -271,6 +296,7 @@ static Class _defaultSemanticDelegateClass = nil;
 			effectTex.name = texName;
 			effectTex.textureUnitIndex = tuIdx;
 			[_textures addObject: effectTex];
+			[effectTex release];
 		} else {
 			LogError(@"%@ could not find texture named %@ in %@", self, texName, pfxRez);
 		}
@@ -281,7 +307,7 @@ static Class _defaultSemanticDelegateClass = nil;
 -(void) initVariablesForPFXEffect: (SPVRTPFXParserEffect*) pfxEffect
 					fromPFXParser: (CPVRTPFXParser*) pfxParser
 					inPFXResource: (CC3PFXResource*) pfxRez  {
-	_variables = [NSMutableArray array];
+	_variables = [NSMutableArray new];		// retained
 	[self addVariablesFrom: pfxEffect->Attributes];
 	[self addVariablesFrom: pfxEffect->Uniforms];
 }
@@ -295,6 +321,7 @@ static Class _defaultSemanticDelegateClass = nil;
 		varConfig.pfxSemanticName = [NSString stringWithUTF8String: pfxVariables[varIdx].pszValue];
 		varConfig.semanticIndex = pfxVariables[varIdx].nIdx;
 		[_variables addObject: varConfig];
+		[varConfig release];
 	}
 }
 
@@ -319,9 +346,9 @@ static Class _defaultSemanticDelegateClass = nil;
 															  fromPFXParser: pfxParser
 															  inPFXResource: pfxRez];
 
-	_shaderProgram = [self.shaderProgramClass programWithSemanticDelegate: semanticDelegate
-														 withVertexShader: vtxShader
-														andFragmentShader: fragShader];
+	_shaderProgram = [[self.shaderProgramClass alloc] initWithSemanticDelegate: semanticDelegate
+															  withVertexShader: vtxShader
+															 andFragmentShader: fragShader];	// retained
 #endif	// CC3_GLSL
 }
 
@@ -333,11 +360,11 @@ static Class _defaultSemanticDelegateClass = nil;
 
 /** Template method to create, populate, and return the semantic delegate to use in the GL program. */
 -(CC3PFXShaderSemantics*) semanticDelegateFrom: (SPVRTPFXParserEffect*) pfxEffect
-									fromPFXParser: (CPVRTPFXParser*) pfxParser
-									inPFXResource: (CC3PFXResource*) pfxRez {
+								 fromPFXParser: (CPVRTPFXParser*) pfxParser
+								 inPFXResource: (CC3PFXResource*) pfxRez {
 	CC3PFXShaderSemantics* semanticDelegate = [pfxRez.semanticDelegateClass new];
 	[semanticDelegate populateWithVariableNameMappingsFromPFXEffect: self];
-	return semanticDelegate;
+	return [semanticDelegate autorelease];
 }
 
 /** Returns the PFX vertex shader that was assigned the specified name in the PFX resource file. */
@@ -380,6 +407,12 @@ static Class _defaultSemanticDelegateClass = nil;
 
 @synthesize texture=_texture, name=_name, textureUnitIndex=_textureUnitIndex;
 
+-(void) dealloc {
+	[_texture release];
+	[_name release];
+	[super dealloc];
+}
+
 @end
 
 
@@ -389,6 +422,11 @@ static Class _defaultSemanticDelegateClass = nil;
 @implementation CC3PFXGLSLVariableConfiguration
 
 @synthesize pfxSemanticName=_pfxSemanticName;
+
+-(void) dealloc {
+	[_pfxSemanticName release];
+	[super dealloc];
+}
 
 -(id) init {
 	if ( (self = [super init]) ) {
