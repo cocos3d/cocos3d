@@ -36,9 +36,6 @@
 #pragma mark Deprecated CC3MeshModel
 
 DEPRECATED_ATTRIBUTE
-/**
- * Deprecated.
- * @deprecated CC3MeshModel renamed to CC3Mesh.
- */
+/** @deprecated CC3MeshModel renamed to CC3Mesh. */
 @interface CC3MeshModel : CC3Mesh
 @end

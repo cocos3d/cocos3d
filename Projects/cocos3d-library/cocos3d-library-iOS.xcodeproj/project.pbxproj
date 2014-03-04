@@ -126,11 +126,11 @@
 		A9BC91AF189C776C000FB28C /* CC3PerformanceStatistics.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90F4189C776C000FB28C /* CC3PerformanceStatistics.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A9BC91B0189C776D000FB28C /* CC3Rotator.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90F6189C776C000FB28C /* CC3Rotator.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A9BC91B1189C776D000FB28C /* CC3GLMatrix.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90FA189C776C000FB28C /* CC3GLMatrix.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		A9BC91B2189C776D000FB28C /* CC3MeshModel.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90FD189C776C000FB28C /* CC3MeshModel.m */; };
-		A9BC91B3189C776D000FB28C /* CC3TargettingNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90FF189C776C000FB28C /* CC3TargettingNode.m */; };
-		A9BC91B4189C776D000FB28C /* CC3VertexArrayMesh.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC9101189C776C000FB28C /* CC3VertexArrayMesh.m */; };
-		A9BC91B5189C776D000FB28C /* CC3VertexArrayMeshModel.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC9103189C776C000FB28C /* CC3VertexArrayMeshModel.m */; };
-		A9BC91B6189C776D000FB28C /* CC3World.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC9105189C776C000FB28C /* CC3World.m */; };
+		A9BC91B2189C776D000FB28C /* CC3MeshModel.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90FD189C776C000FB28C /* CC3MeshModel.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		A9BC91B3189C776D000FB28C /* CC3TargettingNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90FF189C776C000FB28C /* CC3TargettingNode.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		A9BC91B4189C776D000FB28C /* CC3VertexArrayMesh.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC9101189C776C000FB28C /* CC3VertexArrayMesh.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		A9BC91B5189C776D000FB28C /* CC3VertexArrayMeshModel.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC9103189C776C000FB28C /* CC3VertexArrayMeshModel.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		A9BC91B6189C776D000FB28C /* CC3World.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC9105189C776C000FB28C /* CC3World.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
