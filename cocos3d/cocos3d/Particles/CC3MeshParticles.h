@@ -223,7 +223,7 @@
  * This property must be set prior to this emitter emitting any particles. It is possible to
  * change the value of this property during emission.
  */
-@property(nonatomic, strong) CC3Mesh* particleTemplateMesh;
+@property(nonatomic, retain) CC3Mesh* particleTemplateMesh;
 
 /**
  * Configures this emitter to emit particles as defined by the specified template mesh node.
@@ -418,7 +418,7 @@
  * accessed or changed, this property will return a CC3DirectionalRotator. The creation
  * of the type of rotator required to support the various rotations is automatic.
  */
-@property(nonatomic, strong) CC3Rotator* rotator;
+@property(nonatomic, retain) CC3Rotator* rotator;
 
 
 #pragma mark Transformation properties

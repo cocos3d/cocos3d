@@ -29,6 +29,10 @@
  * See header file CC3Particles.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3Particles.h"
 #import "CC3UtilityMeshNodes.h"
 #import "CC3CC2Extensions.h"
@@ -45,6 +49,14 @@
 @end
 
 @implementation CC3ParticleEmitter
+
+-(void) dealloc {
+	[_particles release];
+	[_particleNavigator release];
+	[_particleClass release];
+
+	[super dealloc];
+}
 
 @synthesize particles=_particles, particleCount=_particleCount;
 @synthesize currentParticleCapacity=_currentParticleCapacity;
@@ -67,7 +79,9 @@
 	CC3Assert(!aParticleClass || !_particleNavigator || [aParticleClass conformsToProtocol: _particleNavigator.requiredParticleProtocol],
 			  @"%@ does not conform to the %@ protocol. All particles configured by %@ must conform to that protocol.", aParticleClass,
 			  [NSString stringWithUTF8String: protocol_getName(_particleNavigator.requiredParticleProtocol)], _particleNavigator);
-	_particleClass = aParticleClass;
+
+	[_particleClass release];
+	_particleClass = [aParticleClass retain];
 }
 
 -(CC3ParticleNavigator*) particleNavigator { return _particleNavigator; }
@@ -78,8 +92,12 @@
 	CC3Assert(!_particleClass || !aNavigator || [_particleClass conformsToProtocol: aNavigator.requiredParticleProtocol],
 			  @"%@ does not conform to the %@ protocol. All particles configured by %@ must conform to that protocol.", _particleClass,
 			  [NSString stringWithUTF8String: protocol_getName(aNavigator.requiredParticleProtocol)], aNavigator);
+
 	_particleNavigator.emitter = nil;
-	_particleNavigator = aNavigator;
+	
+	[_particleNavigator release];
+	_particleNavigator = [aNavigator retain];
+	
 	_particleNavigator.emitter = self;
 }
 
@@ -111,7 +129,7 @@
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		_particles = [NSMutableArray array];
+		_particles = [NSMutableArray new];		// retained
 		_particleNavigator = nil;
 		_maximumParticleCapacity = kCC3ParticlesNoMax;
 		_particleCapacityExpansionIncrement = 100;
@@ -134,9 +152,9 @@
 -(void) populateFrom: (CC3ParticleEmitter*) another {
 	[super populateFrom: another];
 
-	self.mesh = nil;											// Emitters can't share meshes
-	self.vertexContentTypes = another.vertexContentTypes;		// Use setter to establish a new mesh
-	self.particleNavigator = [another.particleNavigator copy];	// Use setter to retain & link back
+	self.mesh = nil;														// Emitters can't share meshes
+	self.vertexContentTypes = another.vertexContentTypes;					// Use setter to establish a new mesh
+	self.particleNavigator = [another.particleNavigator autoreleasedCopy];	// Use setter to retain & link back here
 	
 	_maximumParticleCapacity = another.maximumParticleCapacity;
 	_particleCapacityExpansionIncrement = another.particleCapacityExpansionIncrement;
@@ -466,6 +484,11 @@
 
 @synthesize emitter=_emitter;
 
+-(void) dealloc {
+	_emitter = nil;			// weak reference
+	[super dealloc];
+}
+
 -(Protocol*) requiredParticleProtocol { return @protocol(CC3ParticleProtocol); }
 
 -(void) initializeParticle: (id<CC3ParticleProtocol>) aParticle {}
@@ -480,7 +503,7 @@
 	return self;
 }
 
-+(id) navigator { return [[self alloc] init]; }
++(id) navigator { return [[[self alloc] init] autorelease]; }
 
 -(id) copyWithZone: (NSZone*) zone {
 	CC3ParticleNavigator* aCopy = [[[self class] allocWithZone: zone] init];
@@ -816,6 +839,11 @@
 
 @synthesize emitter=_emitter;
 
+-(void) dealloc {
+	_emitter = nil;			// weak reference
+	[super dealloc];
+}
+
 // Alloc iVar in subclases to consolidate storage
 -(BOOL) isAlive {
 	CC3Assert(NO, @"%@ does not implement the isAlive property", self);
@@ -907,7 +935,7 @@
 	return self;
 }
 
-+(id) particle { return [[self alloc] init]; }
++(id) particle { return [[[self alloc] init] autorelease]; }
 
 -(id) copyWithZone: (NSZone*) zone {
 	CC3ParticleBase* aCopy = [[[self class] allocWithZone: zone] init];
@@ -916,7 +944,7 @@
 }
 
 -(void) populateFrom: (CC3ParticleBase*) another {
-	_emitter = another.emitter;
+	self.emitter = another.emitter;
 	self.isAlive = another.isAlive;
 }
 

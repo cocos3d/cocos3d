@@ -29,6 +29,10 @@
  * See header file CC3ParticleSamples.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3ParticleSamples.h"
 #import "CC3AffineMatrix.h"
 
@@ -50,8 +54,6 @@
 	return self;
 }
 
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3RandomMortalParticleNavigator*) another {
 	[super populateFrom: another];
 	
@@ -88,6 +90,9 @@ static inline CGSize CC3DispersionAngleFromShape(CGSize anAspect) {
 
 -(void) dealloc {
 	self.nozzle = nil;			// Setter clears listener and releases nozzle
+	[_nozzleMatrix release];
+	
+	[super dealloc];
 }
 
 -(void) setEmitter: (CC3ParticleEmitter*) anEmitter {
@@ -103,7 +108,9 @@ static inline CGSize CC3DispersionAngleFromShape(CGSize anAspect) {
 	[_nozzle removeTransformListener: self];
 	if (_nozzle.parent == _emitter) [_nozzle remove];
 
-	_nozzle = aNode;
+	[_nozzle release];
+	_nozzle = [aNode retain];
+	
 	[_nozzle addTransformListener: self];
 	[self checkNozzleParent];
 }
@@ -149,7 +156,7 @@ static inline CGSize CC3DispersionAngleFromShape(CGSize anAspect) {
 -(id) init {
 	if ( (self = [super init]) ) {
 		self.nozzle = [CC3Node node];
-		_nozzleMatrix = [CC3AffineMatrix new];
+		_nozzleMatrix = [CC3AffineMatrix new];				// retained
 		_shouldPrecalculateNozzleTangents = YES;
 		self.dispersionAngle = CGSizeMake(15.0, 15.0);		// Set after so it will precalc
 		_minParticleSpeed = 0.0f;
@@ -164,7 +171,7 @@ static inline CGSize CC3DispersionAngleFromShape(CGSize anAspect) {
 	[super populateFrom: another];
 	
 	self.nozzle = another.nozzle;
-	_nozzleMatrix = [another.nozzleMatrix copy];
+	[_nozzleMatrix populateFrom: another.nozzleMatrix];
 	_nozzleShape = another.nozzleShape;
 	_minParticleSpeed = another.minParticleSpeed;
 	_maxParticleSpeed = another.maxParticleSpeed;

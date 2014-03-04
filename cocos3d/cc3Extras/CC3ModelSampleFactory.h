@@ -44,14 +44,14 @@
  * application unnecessarily.
  */
 @interface CC3ModelSampleFactory : NSObject {
-	CC3VertexLocations* teapotVertexLocations;
-	CC3VertexNormals* teapotVertexNormals;
-	CC3VertexIndices* teapotVertexIndices;
-	CC3VertexTextureCoordinates* teapotVertexTextureCoordinates;
-	CC3VertexColors* teapotVertexColors;
-	CC3Mesh* texturedTeapotMesh;
-	CC3Mesh* multicoloredTeapotMesh;
-	CC3Mesh* unicoloredTeapotMesh;
+	CC3VertexLocations* _teapotVertexLocations;
+	CC3VertexNormals* _teapotVertexNormals;
+	CC3VertexIndices* _teapotVertexIndices;
+	CC3VertexTextureCoordinates* _teapotVertexTextureCoordinates;
+	CC3VertexColors* _teapotVertexColors;
+	CC3Mesh* _texturedTeapotMesh;
+	CC3Mesh* _multicoloredTeapotMesh;
+	CC3Mesh* _unicoloredTeapotMesh;
 }
 
 /** Returns the singleton instance. */
@@ -61,13 +61,13 @@
 +(void) deleteFactory;
 
 /** An instance of a teapot mesh that includes a texture coordinate map. */
-@property(nonatomic, strong, readonly) CC3Mesh* texturedTeapotMesh;
+@property(nonatomic, retain, readonly) CC3Mesh* texturedTeapotMesh;
 
 /** An instance of a teapot mesh that will be covered in a single color. */
-@property(nonatomic, strong, readonly) CC3Mesh* unicoloredTeapotMesh;
+@property(nonatomic, retain, readonly) CC3Mesh* unicoloredTeapotMesh;
 
 /** An instance of a teapot mesh that includes a vertex color array. */
-@property(nonatomic, strong, readonly) CC3Mesh* multicoloredTeapotMesh;
+@property(nonatomic, retain, readonly) CC3Mesh* multicoloredTeapotMesh;
 
 #pragma mark Factory methods
 

@@ -29,6 +29,10 @@
  * See header file CC3MeshParticleSamples.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3MeshParticleSamples.h"
 #import "CC3CC2Extensions.h"
 
@@ -65,6 +69,7 @@
 
 -(void) populateFrom: (CC3MortalMeshParticle*) another {
 	[super populateFrom: another];
+	
 	_lifeSpan = another.lifeSpan;
 	_timeToLive = another.timeToLive;
 }
@@ -202,6 +207,7 @@
 
 -(void) populateFrom: (CC3UniformlyEvolvingMeshParticle*) another {
 	[super populateFrom: another];
+	
 	_rotationVelocity = another.rotationVelocity;
 	_rotationVelocityType = another.rotationVelocityType;
 	_colorVelocity = another.colorVelocity;
@@ -221,6 +227,11 @@
 @implementation CC3MultiTemplateMeshParticleEmitter
 
 @synthesize particleTemplateMeshes=_particleTemplateMeshes;
+
+-(void) dealloc {
+	[_particleTemplateMeshes release];
+	[super dealloc];
+}
 
 -(void) addParticleTemplateMesh: (CC3Mesh*) aVtxArrayMesh {
 	[_particleTemplateMeshes addObject: aVtxArrayMesh];
@@ -248,7 +259,7 @@
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		_particleTemplateMeshes = [NSMutableArray array];
+		_particleTemplateMeshes = [NSMutableArray new];			// retained
 	}
 	return self;
 }

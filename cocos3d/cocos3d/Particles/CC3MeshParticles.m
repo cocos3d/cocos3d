@@ -29,6 +29,10 @@
  * See header file CC3MeshParticles.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3MeshParticles.h"
 #import "CC3Camera.h"
 #import "CC3OSExtensions.h"
@@ -64,6 +68,11 @@
 @synthesize isParticleTransformDirty=_isParticleTransformDirty;
 @synthesize shouldTransformUnseenParticles=_shouldTransformUnseenParticles;
 
+-(void) dealloc {
+	[_particleTemplateMesh release];
+	[super dealloc];
+}
+
 -(Protocol*) requiredParticleProtocol { return @protocol(CC3MeshParticleProtocol); }
 
 -(CC3Mesh*) particleTemplateMesh { return _particleTemplateMesh; }
@@ -71,13 +80,15 @@
 -(void) setParticleTemplateMesh: (CC3Mesh*) aMesh {
 	if (aMesh == _particleTemplateMesh) return;
 	
-	_particleTemplateMesh = aMesh;
+	[_particleTemplateMesh release];
+	_particleTemplateMesh = [aMesh retain];
 
 	// Add vertex content if not already set, and align the drawing mode
 	if (self.vertexContentTypes == kCC3VertexContentNone)
 		self.vertexContentTypes = aMesh.vertexContentTypes;
 
-		self.drawingMode = aMesh.drawingMode;
+	self.drawingMode = aMesh.drawingMode;
+
 	LogTrace(@"Particle template mesh of %@ set to %@ drawing %@ with %i vertices and %i vertex indices",
 			 self, aMesh, NSStringFromGLEnum(self.drawingMode),
 			 aMesh.vertexCount, aMesh.vertexIndexCount);
@@ -87,7 +98,7 @@
 
 -(void) setParticleTemplate: (CC3MeshNode*) aParticleTemplate {
 	self.particleTemplateMesh = aParticleTemplate.mesh;
-	self.material = [aParticleTemplate.material copy];
+	self.material = [aParticleTemplate.material autoreleasedCopy];
 }
 
 
@@ -332,11 +343,17 @@
 @synthesize isTransformDirty=_isTransformDirty, rotator=_rotator;
 @synthesize templateMesh=_templateMesh, isColorDirty=_isColorDirty;
 
+-(void) dealloc {
+	[_rotator release];
+	[_templateMesh release];
+	[super dealloc];
+}
+
 -(CC3MeshParticleEmitter*) emitter { return (CC3MeshParticleEmitter*)_emitter; }
 
 -(void) setEmitter: (CC3MeshParticleEmitter*) anEmitter {
 	CC3Assert([anEmitter isKindOfClass: [CC3MeshParticleEmitter class]], @"%@ may only be emitted by a CC3MeshParticleEmitter.", self);
-	super.emitter = anEmitter;
+	[super setEmitter: anEmitter];
 }
 
 -(CC3Mesh*) mesh { return self.emitter.mesh; }
@@ -811,8 +828,9 @@
 
 -(void) populateFrom: (CC3MeshParticle*) another {
 	[super populateFrom: another];
-	self.rotator = [another.rotator copy];
-	_templateMesh = another.templateMesh;
+	
+	self.rotator = [another.rotator autoreleasedCopy];
+	self.templateMesh = another.templateMesh;
 	_location = another.location;
 	_firstVertexOffset = another.firstVertexOffset;
 	_firstVertexIndexOffset = another.firstVertexIndexOffset;

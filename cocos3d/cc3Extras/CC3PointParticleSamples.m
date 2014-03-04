@@ -29,7 +29,12 @@
  * See header file CC3PointParticleSamples.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3PointParticleSamples.h"
+
 
 /** Re-declaration of deprecated methods to suppress compiler warnings within this class. */
 @protocol CC3MortalPointParticleDeprecated
@@ -60,6 +65,7 @@
 
 -(void) populateFrom: (CC3MortalPointParticle*) another {
 	[super populateFrom: another];
+	
 	_lifeSpan = another.lifeSpan;
 	_timeToLive = another.timeToLive;
 }
@@ -185,6 +191,7 @@
 
 -(void) populateFrom: (CC3UniformlyEvolvingPointParticle*) another {
 	[super populateFrom: another];
+	
 	_sizeVelocity = another.sizeVelocity;
 	_colorVelocity = another.colorVelocity;
 }

@@ -29,6 +29,10 @@
  * See header file CC3ModelSampleFactory.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3ModelSampleFactory.h"
 #import "teapot.h"
 
@@ -37,33 +41,45 @@
 
 @synthesize unicoloredTeapotMesh, multicoloredTeapotMesh, texturedTeapotMesh;
 
+-(void) dealloc {
+	[_teapotVertexLocations release];
+	[_teapotVertexNormals release];
+	[_teapotVertexIndices release];
+	[_teapotVertexTextureCoordinates release];
+	[_teapotVertexColors release];
+	[_texturedTeapotMesh release];
+	[_multicoloredTeapotMesh release];
+	[_unicoloredTeapotMesh release];
+
+	[super dealloc];
+}
 
 #pragma mark Allocation and initialization
 
-// Initialize static teapot vertex arrays that can be reused in many teapots.
+// Initialize teapot vertex arrays that can be reused in many teapots.
 -(void) initTeapotVertexArrays {
 	
 	// Vertex locations come from the teapot.h header file
-	teapotVertexLocations = [CC3VertexLocations vertexArrayWithName: @"TeapotVertices"];
-	teapotVertexLocations.vertexCount = num_teapot_vertices;
-	teapotVertexLocations.vertices = teapot_vertices;
+	_teapotVertexLocations = [[CC3VertexLocations vertexArrayWithName: @"TeapotVertices"] retain];
+	_teapotVertexLocations.vertexCount = num_teapot_vertices;
+	_teapotVertexLocations.vertices = teapot_vertices;
 	
 	// Vertex normals come from the teapot.h header file
-	teapotVertexNormals = [CC3VertexNormals vertexArrayWithName: @"TeapotNormals"];
-	teapotVertexNormals.vertexCount = num_teapot_normals;
-	teapotVertexNormals.vertices = teapot_normals;
+	_teapotVertexNormals = [[CC3VertexNormals vertexArrayWithName: @"TeapotNormals"] retain];
+	_teapotVertexNormals.vertexCount = num_teapot_normals;
+	_teapotVertexNormals.vertices = teapot_normals;
 	
 	// Vertex indices populated from the run-length array in the teapot.h header file
-	teapotVertexIndices = [CC3VertexIndices vertexArrayWithName: @"TeapotIndicies"];
-	[teapotVertexIndices populateFromRunLengthArray: (GLushort*)new_teapot_indicies
+	_teapotVertexIndices = [[CC3VertexIndices vertexArrayWithName: @"TeapotIndicies"] retain];
+	[_teapotVertexIndices populateFromRunLengthArray: (GLushort*)new_teapot_indicies
 										   ofLength: num_teapot_indices];
-	teapotVertexIndices.drawingMode = GL_TRIANGLE_STRIP;
+	_teapotVertexIndices.drawingMode = GL_TRIANGLE_STRIP;
 	
 	// Scan vertex location array to find the min & max of each vertex dimension.
 	// This can be used below to create both simple color gradient and texture wraps for the mesh.
 	CC3Vector vl, vlMin, vlMax, vlRange;
-	CC3Vector* vLocs = (CC3Vector*)teapotVertexLocations.vertices;
-	GLuint vCount = teapotVertexLocations.vertexCount;
+	CC3Vector* vLocs = (CC3Vector*)_teapotVertexLocations.vertices;
+	GLuint vCount = _teapotVertexLocations.vertexCount;
 	vl = vLocs[0];
 	vlMin = vl;
 	vlMax = vl;
@@ -80,9 +96,9 @@
 	// Create a color array to assign colors to each vertex in a simple gradient pattern.
 	// This would never happen in practice. Normally, the color array would be applied
 	// and extracted as part of the creation of a mesh in a visual editor.
-	teapotVertexColors = [CC3VertexColors vertexArrayWithName: @"TeapotColors"];
-	teapotVertexColors.allocatedVertexCapacity = vCount;
-	ccColor4B* vCols = (ccColor4B*)teapotVertexColors.vertices;
+	_teapotVertexColors = [[CC3VertexColors vertexArrayWithName: @"TeapotColors"] retain];
+	_teapotVertexColors.allocatedVertexCapacity = vCount;
+	ccColor4B* vCols = (ccColor4B*)_teapotVertexColors.vertices;
 	for (GLuint i=0; i < vCount; i++) {
 		vCols[i].r = 255 * (vLocs[i].x - vlMin.x) / vlRange.x;
 		vCols[i].g = 255 * (vLocs[i].y - vlMin.y) / vlRange.y;
@@ -93,31 +109,31 @@
 	// Progamatically create a texture array to map an arbitrary texture to the mesh vertices
 	// in the X-Y plane. This would never happen in practice. Normally, the texture array would
 	// be painted and extracted as part of the creation of a mesh in a 3D visual editor.
-	teapotVertexTextureCoordinates = [CC3VertexTextureCoordinates vertexArrayWithName: @"TeapotTexture"];
-	teapotVertexTextureCoordinates.allocatedVertexCapacity = vCount;
-	ccTex2F* vTexCoord = (ccTex2F*)teapotVertexTextureCoordinates.vertices;
+	_teapotVertexTextureCoordinates = [[CC3VertexTextureCoordinates vertexArrayWithName: @"TeapotTexture"] retain];
+	_teapotVertexTextureCoordinates.allocatedVertexCapacity = vCount;
+	ccTex2F* vTexCoord = (ccTex2F*)_teapotVertexTextureCoordinates.vertices;
 	for (GLuint i=0; i < vCount; i++) {
 		vTexCoord[i].u = (vLocs[i].x - vlMin.x) / vlRange.x;
 		vTexCoord[i].v = (vLocs[i].y - vlMin.y) / vlRange.y;
 	}
 }
 
-// Initialize several static teapot meshes that can be reused in many teapots.
+// Initialize several teapot meshes that can be reused in many teapots.
 -(void) initTeapotMeshes {
 	
 	// Set up the vertex arrays that will be shared by all teapots
 	[self initTeapotVertexArrays];
 	
 	// Mesh to support a teapot with single-colored material
-	unicoloredTeapotMesh = [self makeTeapotMeshNamed: @"UnicoloredTeapot"];
+	_unicoloredTeapotMesh = [[self makeTeapotMeshNamed: @"UnicoloredTeapot"] retain];
 	
 	// Mesh to support a teapot with separately colored vertices
-	multicoloredTeapotMesh = [self makeTeapotMeshNamed: @"MulticolorTeapot"];
-	multicoloredTeapotMesh.vertexColors = teapotVertexColors;
+	_multicoloredTeapotMesh = [[self makeTeapotMeshNamed: @"MulticolorTeapot"] retain];
+	_multicoloredTeapotMesh.vertexColors = _teapotVertexColors;
 	
 	// Mesh to support a teapot with a textured surface
-	texturedTeapotMesh = [self makeTeapotMeshNamed: @"TexturedTeapot"];
-	texturedTeapotMesh.vertexTextureCoordinates = teapotVertexTextureCoordinates;
+	_texturedTeapotMesh = [[self makeTeapotMeshNamed: @"TexturedTeapot"] retain];
+	_texturedTeapotMesh.vertexTextureCoordinates = _teapotVertexTextureCoordinates;
 }
 
 -(id) init {
@@ -127,10 +143,10 @@
 	return self;
 }
 
-static CC3ModelSampleFactory* _factory;
+static CC3ModelSampleFactory* _factory = nil;
 
 +(CC3ModelSampleFactory*) factory {
-	if (!_factory) _factory = [self new];
+	if (!_factory) _factory = [self new];		// retained
 	return _factory;
 }
 
@@ -142,9 +158,9 @@ static CC3ModelSampleFactory* _factory;
 -(CC3Mesh*) makeTeapotMeshNamed: (NSString*) aName {
 	CC3Mesh* mesh = [CC3Mesh meshWithName: aName];
 	mesh.shouldInterleaveVertices = NO;
-	mesh.vertexLocations = teapotVertexLocations;
-	mesh.vertexNormals = teapotVertexNormals;
-	mesh.vertexIndices = teapotVertexIndices;
+	mesh.vertexLocations = _teapotVertexLocations;
+	mesh.vertexNormals = _teapotVertexNormals;
+	mesh.vertexIndices = _teapotVertexIndices;
 	return mesh;
 }
 

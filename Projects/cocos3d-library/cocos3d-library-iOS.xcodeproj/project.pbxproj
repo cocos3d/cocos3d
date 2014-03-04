@@ -10,10 +10,10 @@
 		A9BC913B189C776C000FB28C /* CC3CAFResource.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC8FE4189C776B000FB28C /* CC3CAFResource.m */; };
 		A9BC913C189C776C000FB28C /* CC3CALNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC8FE6189C776B000FB28C /* CC3CALNode.m */; };
 		A9BC913D189C776C000FB28C /* CC3CSFResource.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC8FE8189C776B000FB28C /* CC3CSFResource.m */; };
-		A9BC913E189C776C000FB28C /* CC3MeshParticleSamples.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC8FEB189C776B000FB28C /* CC3MeshParticleSamples.m */; };
-		A9BC913F189C776C000FB28C /* CC3ModelSampleFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC8FED189C776B000FB28C /* CC3ModelSampleFactory.m */; };
-		A9BC9140189C776C000FB28C /* CC3ParticleSamples.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC8FEF189C776B000FB28C /* CC3ParticleSamples.m */; };
-		A9BC9141189C776C000FB28C /* CC3PointParticleSamples.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC8FF1189C776B000FB28C /* CC3PointParticleSamples.m */; };
+		A9BC913E189C776C000FB28C /* CC3MeshParticleSamples.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC8FEB189C776B000FB28C /* CC3MeshParticleSamples.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		A9BC913F189C776C000FB28C /* CC3ModelSampleFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC8FED189C776B000FB28C /* CC3ModelSampleFactory.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		A9BC9140189C776C000FB28C /* CC3ParticleSamples.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC8FEF189C776B000FB28C /* CC3ParticleSamples.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		A9BC9141189C776C000FB28C /* CC3PointParticleSamples.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC8FF1189C776B000FB28C /* CC3PointParticleSamples.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A9BC9142189C776C000FB28C /* CC3IdentifiablePODExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC8FF5189C776B000FB28C /* CC3IdentifiablePODExtensions.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A9BC9143189C776C000FB28C /* CC3NodePODExtensions.mm in Sources */ = {isa = PBXBuildFile; fileRef = A9BC8FF7189C776B000FB28C /* CC3NodePODExtensions.mm */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A9BC9144189C776C000FB28C /* CC3PFXResource.mm in Sources */ = {isa = PBXBuildFile; fileRef = A9BC8FF9189C776B000FB28C /* CC3PFXResource.mm */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
@@ -92,9 +92,9 @@
 		A9BC918D189C776C000FB28C /* CC3GLView-GLES2.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90A4189C776C000FB28C /* CC3GLView-GLES2.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A9BC918E189C776C000FB28C /* CC3OpenGLES2.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90A6189C776C000FB28C /* CC3OpenGLES2.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A9BC918F189C776C000FB28C /* CC3OpenGLES2Utility.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90A8189C776C000FB28C /* CC3OpenGLES2Utility.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		A9BC9190189C776C000FB28C /* CC3MeshParticles.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90AB189C776C000FB28C /* CC3MeshParticles.m */; };
-		A9BC9191189C776C000FB28C /* CC3Particles.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90AD189C776C000FB28C /* CC3Particles.m */; };
-		A9BC9192189C776C000FB28C /* CC3PointParticles.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90AF189C776C000FB28C /* CC3PointParticles.m */; };
+		A9BC9190189C776C000FB28C /* CC3MeshParticles.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90AB189C776C000FB28C /* CC3MeshParticles.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		A9BC9191189C776C000FB28C /* CC3Particles.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90AD189C776C000FB28C /* CC3Particles.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		A9BC9192189C776C000FB28C /* CC3PointParticles.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90AF189C776C000FB28C /* CC3PointParticles.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A9BC9193189C776C000FB28C /* CC3OSExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90B3189C776C000FB28C /* CC3OSExtensions.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A9BC9194189C776C000FB28C /* CC3DeviceCameraOverlayUIViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90B6189C776C000FB28C /* CC3DeviceCameraOverlayUIViewController.m */; };
 		A9BC9195189C776C000FB28C /* CC3IOSExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90B8189C776C000FB28C /* CC3IOSExtensions.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };

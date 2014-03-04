@@ -29,14 +29,13 @@
  * See header file CC3PointParticles.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3PointParticles.h"
 #import "CCDirector.h"
 
-
-@interface CC3PointParticle (TemplateMethods)
-/** @deprecated Use emitter instead. */
-@property(nonatomic, readonly) CC3PointParticleEmitter* pointEmitter DEPRECATED_ATTRIBUTE;
-@end
 
 @interface CC3Node (TemplateMethods)
 -(void) processUpdateAfterTransform: (CC3NodeUpdatingVisitor*) visitor;
@@ -96,11 +95,10 @@
 }
 
 -(void) setUnityScaleDistance: (GLfloat) aDistance {
-	if (aDistance > 0.0) {
+	if (aDistance > 0.0)
 		_particleSizeAttenuation = (CC3AttenuationCoefficients){0.0, 0.0, 1.0 / (aDistance * aDistance)};
-	} else {
+	else
 		_particleSizeAttenuation = kCC3AttenuationNone;
-	}
 }
 
 // Deprecated
@@ -473,9 +471,6 @@ static GLfloat _deviceScaleFactor = 0.0f;
 	[_emitter setVertexIndex: anIndex at: anIndex];	// Ignored if not using indexed drawing
 }
 
-// Deprecated
--(CC3PointParticleEmitter*) pointEmitter { return self.emitter; }
-
 -(GLuint) vertexCount { return 1; }
 
 -(NSRange) vertexRange { return NSMakeRange(_particleIndex, self.vertexCount); }
@@ -531,15 +526,9 @@ static GLfloat _deviceScaleFactor = 0.0f;
 - (NSString*) fullDescription {
 	NSMutableString *desc = [NSMutableString stringWithFormat:@"%@", [self description]];
 	[desc appendFormat:@"\n\tlocation: %@", NSStringFromCC3Vector(self.location)];
-	if (self.hasColor) {
-		[desc appendFormat:@", colored: %@", NSStringFromCCC4F(self.color4F)];
-	}
-	if (self.hasNormal) {
-		[desc appendFormat:@", normal: %@", NSStringFromCC3Vector(self.normal)];
-	}
-	if (self.hasSize) {
-		[desc appendFormat:@", size: %.3f", self.size];
-	}
+	if (self.hasColor) [desc appendFormat:@", colored: %@", NSStringFromCCC4F(self.color4F)];
+	if (self.hasNormal) [desc appendFormat:@", normal: %@", NSStringFromCC3Vector(self.normal)];
+	if (self.hasSize) [desc appendFormat:@", size: %.3f", self.size];
 	return desc;
 }
 
@@ -570,7 +559,7 @@ static GLfloat _deviceScaleFactor = 0.0f;
 
 // Deprecated
 +(id) particleFromEmitter: (CC3PointParticleEmitter*) anEmitter {
-	return [[self alloc] initFromEmitter: anEmitter];
+	return [[[self alloc] initFromEmitter: anEmitter] autorelease];
 }
 
 -(void) populateFrom: (CC3PointParticle*) another {

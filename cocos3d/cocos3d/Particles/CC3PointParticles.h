@@ -163,7 +163,7 @@ static const CC3VertexContent kCC3PointParticleContentSize DEPRECATED_ATTRIBUTE 
 }
 
 /** @deprecated Use the mesh property. */
-@property(nonatomic, strong, readonly) CC3PointParticleMesh* particleMesh DEPRECATED_ATTRIBUTE;
+@property(nonatomic, retain, readonly) CC3PointParticleMesh* particleMesh DEPRECATED_ATTRIBUTE;
 
 /** @deprecated Replaced by the more generic vertexContentTypes. */
 @property(nonatomic, readonly) CC3VertexContent particleContentTypes DEPRECATED_ATTRIBUTE;
