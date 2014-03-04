@@ -42,7 +42,7 @@
  * device orientation.
  */
 @interface CC3ControllableLayer : CCLayer {
-	CC3ViewController* __unsafe_unretained _controller;
+	CC3ViewController* _controller;
 }
 
 
@@ -128,7 +128,7 @@
  * returns the value of the same property from the parent of this CCNode, or returns nil if this
  * node has no parent.
  */
-@property(nonatomic, unsafe_unretained) CC3ViewController* controller;
+@property(nonatomic, assign) CC3ViewController* controller;
 
 /**
  * Invoked automatically by a CC3UIViewController when the orientation of the view (portrait,

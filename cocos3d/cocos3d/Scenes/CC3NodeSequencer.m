@@ -29,6 +29,10 @@
  * See header file CC3NodeSequencer.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3NodeSequencer.h"
 #import "CC3MeshNode.h"
 #import "CC3BoundingVolumes.h"
@@ -42,11 +46,8 @@
 
 -(BOOL) evaluate: (CC3Node*) aNode { return NO; }
 
-+(id) evaluator { return [[self alloc] init]; }
++(id) evaluator { return [[[self alloc] init] autorelease]; }
 
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
-// Subclasses that extend copying will override this method.
 -(void) populateFrom: (CC3NodeEvaluator*) another {}
 
 -(id) copyWithZone: (NSZone*) zone {
@@ -129,6 +130,11 @@
 
 @synthesize evaluator=_evaluator, allowSequenceUpdates=_allowSequenceUpdates;
 
+-(void) dealloc {
+	[_evaluator release];
+	[super dealloc];
+}
+
 -(NSArray*) nodes { return [NSArray array]; }
 
 -(BOOL) shouldUseOnlyForwardDistance { return NO; }
@@ -140,7 +146,7 @@
 
 -(id) init { return [self initWithEvaluator: nil]; }
 
-+(id) sequencer { return [[self alloc] init]; }
++(id) sequencer { return [[[self alloc] init] autorelease]; }
 
 -(id) initWithEvaluator: (CC3NodeEvaluator*) anEvaluator {
 	if ( (self = [super init]) ) {
@@ -151,22 +157,19 @@
 }
 
 +(id) sequencerWithEvaluator: (CC3NodeEvaluator*) anEvaluator {
-	return [[self alloc] initWithEvaluator: anEvaluator];
+	return [[[self alloc] initWithEvaluator: anEvaluator] autorelease];
 }
 
 
 #pragma mark Sequencing nodes
 
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
-// Subclasses that extend copying will override this method.
 -(void) populateFrom: (CC3NodeSequencer*) another {
 	_allowSequenceUpdates = another.allowSequenceUpdates;
 }
 
 -(id) copyWithZone: (NSZone*) zone {
 	CC3NodeSequencer* aCopy = [[[self class] allocWithZone: zone]
-									initWithEvaluator: [_evaluator copy]];
+							   initWithEvaluator: [_evaluator autoreleasedCopy]];
 	[aCopy populateFrom: self];
 	return aCopy;
 }
@@ -210,21 +213,24 @@
 
 @synthesize sequencers=_sequencers;
 
+-(void) dealloc {
+	[_sequencers release];
+	[super dealloc];
+}
+
 -(id) initWithEvaluator: (CC3NodeEvaluator*) anEvaluator {
 	if ( (self = [super initWithEvaluator: anEvaluator]) ) {
-		_sequencers = [NSMutableArray array];
+		_sequencers = [NSMutableArray new];		// retained
 	}
 	return self;
 }
 
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3BTreeNodeSequencer*) another {
 	[super populateFrom: another];
 
 	NSArray* otherChildren = another.sequencers;
 	for (CC3NodeSequencer* otherChild in otherChildren)
-		[self addSequencer: [otherChild copy]];
+		[self addSequencer: [otherChild autoreleasedCopy]];
 }
 
 -(void) addSequencer: (CC3NodeSequencer*) aNodeSequencer {
@@ -311,11 +317,16 @@
 
 @implementation CC3NodeArraySequencer
 
+-(void) dealloc {
+	[_nodes release];
+	[super dealloc];
+}
+
 -(NSArray*) nodes { return [NSArray arrayWithArray: _nodes]; }
 
 -(id) initWithEvaluator: (CC3NodeEvaluator*) anEvaluator {
 	if ( (self = [super initWithEvaluator: anEvaluator]) ) {
-		_nodes = [NSMutableArray array];
+		_nodes = [NSMutableArray new];		// retained
 	}
 	return self;
 }
@@ -397,8 +408,6 @@
 	return self;
 }
 
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3NodeArrayZOrderSequencer*) another {
 	[super populateFrom: another];
 	_shouldUseOnlyForwardDistance = another.shouldUseOnlyForwardDistance;
@@ -566,18 +575,24 @@
 
 @synthesize scene=_scene, misplacedNodes=_misplacedNodes;
 
+-(void) dealloc {
+	_scene = nil;		// weak reference
+	[_misplacedNodes release];
+	[super dealloc];
+}
+
 -(id) init { return [self initWithScene: nil]; }
 
 -(id) initWithScene: (CC3Scene*) aCC3Scene {
 	if ( (self = [super init]) ) {
-		_scene = aCC3Scene;
-		_misplacedNodes = [NSMutableArray array];
+		_scene = aCC3Scene;							// weak reference
+		_misplacedNodes = [NSMutableArray new];		// retained
 	}
 	return self;
 }
 
 +(id) visitorWithScene: (CC3Scene*) aCC3Scene {
-	return [[self alloc] initWithScene: aCC3Scene];
+	return [[[self alloc] initWithScene: aCC3Scene] autorelease];
 }
 
 -(BOOL) hasMisplacedNodes { return (_misplacedNodes.count > 0); }

@@ -29,6 +29,10 @@
  * See header file CC3Scene.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3Scene.h"
 #import "CC3Layer.h"
 #import "CC3MeshNode.h"
@@ -69,11 +73,24 @@
  */
 -(void) dealloc {
 	LogInfo(@"Deallocating %@ on thread %@", self, NSThread.currentThread);
+	
 	self.drawingSequencer = nil;			// Use setter to release and make nil
 	self.activeCamera = nil;				// Use setter to release and make nil
-	self.fog = nil;							// Use setter to stop any actions
 	self.backdrop = nil;					// Use setter to stop any actions
+	self.fog = nil;							// Use setter to stop any actions
 	
+	_cc3Layer = nil;						// weak reference
+	[_lights release];
+	[_billboards release];
+	[_touchedNodePicker release];
+	[_performanceStatistics release];
+	[_updateVisitor release];
+	[_viewDrawingVisitor release];
+	[_envMapDrawingVisitor release];
+	[_shadowVisitor release];
+	[_drawingSequenceVisitor release];
+
+	[super dealloc];
 }
 
 -(BOOL) isScene { return YES; }
@@ -84,9 +101,11 @@
 
 -(void) setActiveCamera: (CC3Camera*) aCamera {
 	if (aCamera == _activeCamera) return;
+	
 	CC3Camera* oldCam = _activeCamera;
-	_activeCamera = aCamera;
+	_activeCamera = [aCamera retain];
 	[self activeCameraChangedFrom: oldCam];
+	[oldCam release];
 }
 
 /** The active camera has changed. Update whoever cares. */
@@ -122,15 +141,23 @@
 
 -(void) setBackdrop: (CC3MeshNode*) backdrop {
 	if (backdrop == _backdrop) return;
+	
 	[_backdrop stopAllActions];		// Ensure all actions stopped before releasing
-	_backdrop = backdrop;
+	
+	[_backdrop release];
+	_backdrop = [backdrop retain];
+	
 	_backdrop.parent = self;		// Ensure shaders can access scene content
 }
 
 -(void) setFog: (CC3Fog*) fog {
 	if (fog == _fog) return;
+	
 	[_fog stopAllActions];			// Ensure all actions stopped before releasing
-	_fog = fog;
+
+	[_fog release];
+	_fog = [fog retain];
+
 	_fog.parent = self;				// Ensure shaders can access scene content
 }
 
@@ -170,18 +197,20 @@
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		_lights = [NSMutableArray array];
-		_billboards = [NSMutableArray array];
-		self.touchedNodePicker = [CC3TouchedNodePicker pickerOnScene: self];
+		_lights = [NSMutableArray new];			// retained
+		_billboards = [NSMutableArray new];		// retained
+		self.drawingSequenceVisitor = [CC3NodeSequencerVisitor visitorWithScene: self];
 		self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirst];
 		self.viewDrawingVisitor = [[self viewDrawVisitorClass] visitor];
 		self.envMapDrawingVisitor = nil;
 		self.shadowVisitor = nil;
 		self.updateVisitor = [[self updateVisitorClass] visitor];
-		self.drawingSequenceVisitor = [CC3NodeSequencerVisitor visitorWithScene: self];
+		self.touchedNodePicker = [CC3TouchedNodePicker pickerOnScene: self];
+		_cc3Layer = nil;
 		_backdrop = nil;
 		_fog = nil;
 		_activeCamera = nil;
+		_performanceStatistics = nil;
 		_ambientLight = kCC3DefaultLightColorAmbientScene;
 		_minUpdateInterval = kCC3DefaultMinimumUpdateInterval;
 		_maxUpdateInterval = kCC3DefaultMaximumUpdateInterval;
@@ -203,10 +232,8 @@
 // Default does nothing. Subclasses will customize.
 -(void) initializeScene {}
 
-+(id) scene { return [self new]; }
++(id) scene { return [[self new] autorelease]; }
 
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3Scene*) another {
 	[super populateFrom: another];
 	
@@ -214,9 +241,8 @@
 	// plus activeCamera will be populated as children are added.
 	// No need to configure node picker.
 	
-	_drawingSequencer = [another.drawingSequencer copy];						// retained
-	
-	_performanceStatistics = [another.performanceStatistics copy];				// retained
+	self.drawingSequencer = [another.drawingSequencer autoreleasedCopy];
+	self.performanceStatistics = [another.performanceStatistics autoreleasedCopy];
 
 	// Env map visitor is created lazily
 	self.viewDrawingVisitor = [[another.viewDrawingVisitor class] visitor];		// retained
@@ -225,8 +251,8 @@
 	self.drawingSequenceVisitor = [[another.drawingSequenceVisitor class] visitorWithScene: self];	// retained
 	self.touchedNodePicker = [[another.touchedNodePicker class] pickerOnScene: self];		// retained
 
-	self.backdrop = [another.backdrop copy];
-	self.fog = [another.fog copy];
+	self.backdrop = [another.backdrop autoreleasedCopy];
+	self.fog = [another.fog autoreleasedCopy];
 	
 	_ambientLight = another.ambientLight;
 	_minUpdateInterval = another.minUpdateInterval;
@@ -528,7 +554,8 @@
 -(void) setDrawingSequencer:(CC3NodeSequencer*) aNodeSequencer {
 	if (aNodeSequencer == _drawingSequencer) return;
 	
-	_drawingSequencer = aNodeSequencer;
+	[_drawingSequencer release];
+	_drawingSequencer = [aNodeSequencer retain];
 	
 	if (_drawingSequencer) {
 		NSArray* allNodes = [self flatten];
@@ -627,8 +654,8 @@
 -(void) checkNeedShadowVisitor {
 	BOOL needsShadowVisitor = NO;
 	for (CC3Light* lgt in _lights) needsShadowVisitor |= lgt.hasShadows;
-	if (needsShadowVisitor && !_shadowVisitor) _shadowVisitor = [CC3ShadowDrawingVisitor visitor];
-	if (!needsShadowVisitor && _shadowVisitor) _shadowVisitor = nil;
+	if (needsShadowVisitor && !_shadowVisitor) self.shadowVisitor = [CC3ShadowDrawingVisitor visitor];
+	if (!needsShadowVisitor && _shadowVisitor) self.shadowVisitor = nil;
 }
 
 
@@ -678,8 +705,15 @@
 
 @implementation CC3TouchedNodePicker
 
-@synthesize pickVisitor=_pickVisitor, touchPoint=_touchPoint;
+@synthesize pickVisitor=_pickVisitor, touchPoint=_touchPoint, pickedNode=_pickedNode;
 
+-(void) dealloc {
+	_scene = nil;				// weak reference
+	[_pickVisitor release];
+	[_pickedNode release];
+	
+	[super dealloc];
+}
 
 #pragma mark Touch handling
 
@@ -711,7 +745,7 @@
 	// Draw the scene for node picking. Don't bother drawing the backdrop.
 	[_pickVisitor visit: _scene];
 	
-	_pickedNode = _pickVisitor.pickedNode;
+	self.pickedNode = _pickVisitor.pickedNode;
 }
 
 -(void) dispatchPickedNode {
@@ -734,7 +768,8 @@
 				 NSStringFromCGPoint(_touchPoint), NSStringFromCGPoint(self.glTouchPoint), _pickedNode);
 		[_scene nodeSelected: _pickedNode.touchableNode byTouchEvent: _touchQueue[i] at: _touchPoint];
 	}
-	_pickedNode = nil;	// Clear the node once it has been dispatched
+	
+	self.pickedNode = nil;	// Clear the node once it has been dispatched
 }
 
 
@@ -744,7 +779,7 @@
 
 -(id) initOnScene: (CC3Scene*) aCC3Scene {
 	if ( (self = [super init]) ) {
-		_scene = aCC3Scene;
+		_scene = aCC3Scene;					// weak reference
 		self.pickVisitor = [[_scene pickVisitorClass] visitor];
 		_touchPoint = CGPointZero;
 		_wasTouched = NO;
@@ -755,7 +790,7 @@
 	return self;
 }
 
-+(id) pickerOnScene: (CC3Scene*) aCC3Scene { return [[self alloc] initOnScene: aCC3Scene]; }
++(id) pickerOnScene: (CC3Scene*) aCC3Scene { return [[[self alloc] initOnScene: aCC3Scene] autorelease]; }
 
 -(NSString*) description { return [NSString stringWithFormat: @"%@", [self class]]; }
 

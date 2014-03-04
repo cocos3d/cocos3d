@@ -29,6 +29,10 @@
  * See header file CC3Layer.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3Layer.h"
 #import "CC3OpenGLFoundation.h"
 #import "CC3Environment.h"
@@ -43,6 +47,8 @@
 - (void)dealloc {
 	self.cc3Scene = nil;			// Close, remove & release the scene
 	[self cc3RemoveAllGestureRecognizers];
+	[_cc3GestureRecognizers release];
+	[super dealloc];
 }
 
  -(void) setCc3Scene: (CC3Scene*) aScene {
@@ -52,7 +58,9 @@
 	 [_cc3Scene wasRemoved];					// Stop actions in old scene (if shouldStopActionsWhenRemoved set).
 	 _cc3Scene.cc3Layer = nil;					// Detach this layer from old scene.
 
-	 _cc3Scene = aScene;
+	 [_cc3Scene release];
+	 _cc3Scene = [aScene retain];
+
 	 _cc3Scene.cc3Layer = self;								// Point the scene back here
 	 if (self.isRunningInActiveScene) [self openCC3Scene];	// If already running, open the new scene right away
 }
@@ -146,7 +154,7 @@
 
 // Lazily initialized
 -(NSArray*) cc3GestureRecognizers {
-	if ( !_cc3GestureRecognizers ) _cc3GestureRecognizers = [NSMutableArray array];
+	if ( !_cc3GestureRecognizers ) _cc3GestureRecognizers = [NSMutableArray new];	// retained
 	return _cc3GestureRecognizers;
 }
 
@@ -163,6 +171,7 @@
 -(void) cc3RemoveAllGestureRecognizers {
 	NSArray* myGRs = [_cc3GestureRecognizers copy];
 	for (UIGestureRecognizer* gr in myGRs) [self cc3RemoveGestureRecognizer: gr];
+	[myGRs release];
 }
 
 

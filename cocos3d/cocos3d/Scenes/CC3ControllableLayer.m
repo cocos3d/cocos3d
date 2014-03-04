@@ -29,6 +29,10 @@
  * See header file CC3ControllableLayer.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3ControllableLayer.h"
 #import "CC3CC2Extensions.h"
 #import "CC3OpenGL.h"
@@ -37,26 +41,34 @@
 
 @implementation CC3ControllableLayer
 
+-(void) dealloc {
+	_controller = nil;		// weak reference
+	[super dealloc];
+}
+
 /** If not set directly, try to retrieve it from an ancestor controllable node. */
 -(CC3ViewController*) controller {
-	if (!_controller) _controller = super.controller;
+	if (!_controller) self.controller = super.controller;
 	CC3Assert(_controller, @"%@ requires a controller.", self);
 	return _controller;
 }
 
--(void) setController: (CC3ViewController*) aController { _controller = aController; }
+-(void) setController: (CC3ViewController*) aController {
+	_controller = aController;		// weak reference
+}
 
 
 #pragma mark Allocation and initialization
 
 -(id) init {
 	if( (self = [super init]) ) {
+		_controller = nil;
 		[self initInitialState];		// Deprecated legacy
 	}
 	return self;
 }
 
-+(id) layer { return [[self alloc] init]; }
++(id) layer { return [[[self alloc] init] autorelease]; }
 
 -(NSString*) description { return [NSString stringWithFormat: @"%@", [self class]]; }
 
@@ -89,7 +101,7 @@
 -(BOOL) alignContentSizeWithDeviceOrientation { return NO; }
 -(void) setAlignContentSizeWithDeviceOrientation: (BOOL) alignContentSizeWithDeviceOrientation {}
 -(id) initWithColor: (ccColor4B) color { return [self init]; }
-+(id) layerWithColor: (ccColor4B) color { return [[self alloc] init]; }
++(id) layerWithColor: (ccColor4B) color { return [[[self alloc] init] autorelease]; }
 -(void) initInitialState {}
 -(BOOL) isColored { return NO; }
 -(id) initWithController: (CC3ViewController*) controller {
@@ -99,7 +111,7 @@
 	return self;
 }
 +(id) layerWithController: (CC3ViewController*) controller {
-	return [[self alloc] initWithController: controller];
+	return [[[self alloc] initWithController: controller] autorelease];
 }
 
 

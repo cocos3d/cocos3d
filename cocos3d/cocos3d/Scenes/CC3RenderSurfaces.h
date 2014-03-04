@@ -409,7 +409,7 @@
  * In this class, the implementation of the resizeTo: method does not allocate storage within
  * the GL engine, and sets the pixelFormat property by retrieving the value from the GL engine.
  */
-@interface CC3IOSOnScreenGLRenderbuffer : CC3GLRenderbuffer {}
+@interface CC3IOSOnScreenGLRenderbuffer : CC3GLRenderbuffer
 
 /**
  * Sets the size and retreives the pixelFormat property from the GL engine.
@@ -429,7 +429,7 @@
  * Represents the virtual OpenGL framebuffer attachments with renderbufferID = 0,
  * used by some systems to present to a window.
  */
-@interface CC3SystemOnScreenGLRenderbuffer : CC3GLRenderbuffer {}
+@interface CC3SystemOnScreenGLRenderbuffer : CC3GLRenderbuffer
 
 /** The ID used to identify the renderbuffer to the GL engine. Always returns zero. */
 @property(nonatomic, readonly) GLuint renderbufferID;
@@ -441,7 +441,7 @@
 #pragma mark CC3OSXOnScreenGLRenderbuffer
 
 /** Represents the virtual OpenGL framebuffer attachments used by OSX to present to a window. */
-@interface CC3OSXOnScreenGLRenderbuffer : CC3SystemOnScreenGLRenderbuffer {}
+@interface CC3OSXOnScreenGLRenderbuffer : CC3SystemOnScreenGLRenderbuffer
 @end
 
 
@@ -449,7 +449,7 @@
 #pragma mark CC3AndroidOnScreenGLRenderbuffer
 
 /** Represents the virtual OpenGL framebuffer attachments used by Android to present to a window. */
-@interface CC3AndroidOnScreenGLRenderbuffer : CC3SystemOnScreenGLRenderbuffer {}
+@interface CC3AndroidOnScreenGLRenderbuffer : CC3SystemOnScreenGLRenderbuffer
 @end
 
 
@@ -611,7 +611,7 @@
  * To save memory, attachments can be shared between surfaces of the same size, if the contents
  * of the attachment are only required for the duration of the rendering to each surface.
  */
-@property(nonatomic, strong) id<CC3FramebufferAttachment> colorAttachment;
+@property(nonatomic, retain) id<CC3FramebufferAttachment> colorAttachment;
 
 /**
  * The attachment to which depth data is rendered.
@@ -631,7 +631,7 @@
  * instance, the same depth attachment might be used when rendering to several different color
  * attachments on different surfaces.
  */
-@property(nonatomic, strong) id<CC3FramebufferAttachment> depthAttachment;
+@property(nonatomic, retain) id<CC3FramebufferAttachment> depthAttachment;
 
 /**
  * The attachment to which stencil data is rendered.
@@ -646,7 +646,7 @@
  * To save memory, attachments can be shared between surfaces of the same size, if the contents
  * of the attachment are only required for the duration of the rendering to each surface.
  */
-@property(nonatomic, strong) id<CC3FramebufferAttachment> stencilAttachment;
+@property(nonatomic, retain) id<CC3FramebufferAttachment> stencilAttachment;
 
 /**
  * If color content is being rendered to a texture, this property can be used to access
@@ -666,7 +666,7 @@
  * To save memory, textures can be shared between surfaces of the same size, if the contents
  * of the texture are only required for the duration of the rendering to each surface.
  */
-@property(nonatomic, strong) CC3Texture* colorTexture;
+@property(nonatomic, retain) CC3Texture* colorTexture;
 
 /**
  * If depth content is being rendered to a texture, this property can be used to access
@@ -687,7 +687,7 @@
  * To save memory, textures can be shared between surfaces of the same size, if the contents
  * of the texture are only required for the duration of the rendering to each surface.
  */
-@property(nonatomic, strong) CC3Texture* depthTexture;
+@property(nonatomic, retain) CC3Texture* depthTexture;
 
 /** 
  * The size of this framebuffer surface in pixels.
@@ -875,7 +875,7 @@
 -(void) generateSnapshotOfScene: (CC3Scene*) scene fromGlobalLocation: (CC3Vector) location;
 
 /** Returns the surface to which the environment will be rendered. */
-@property(nonatomic, strong, readonly) CC3GLFramebuffer* renderSurface;
+@property(nonatomic, retain, readonly) CC3GLFramebuffer* renderSurface;
 
 
 #pragma mark Allocation and initialization
@@ -960,17 +960,17 @@
 }
 
 /** The GL view whose surface is being managed by this instance. */
-@property(nonatomic, strong, readonly) CC3GLView* view;
+@property(nonatomic, assign, readonly) CC3GLView* view;
 
 /** The on-screen surface attached to the underlying core animation layer. */
-@property(nonatomic, strong) CC3GLFramebuffer* viewSurface;
+@property(nonatomic, retain) CC3GLFramebuffer* viewSurface;
 
 /**
  * The surface used for off-screen multisample rendering.
  *
  * The value of this property may be nil if multisampleing is not in use.
  */
-@property(nonatomic, strong) CC3GLFramebuffer* multisampleSurface;
+@property(nonatomic, retain) CC3GLFramebuffer* multisampleSurface;
 
 /**
  * The surface to which rendering should be directed.
@@ -978,7 +978,7 @@
  * If multisampling is in use, this property returns the framebuffer in the multisampleSurface
  * property, otherwise it returns the framebuffer in the viewSurface property.
  */
-@property(nonatomic, strong, readonly) CC3GLFramebuffer* renderingSurface;
+@property(nonatomic, retain, readonly) CC3GLFramebuffer* renderingSurface;
 
 /**
  * The surface to which rendering for picking should be directed.
@@ -989,7 +989,7 @@
  *
  * Lazy initialization is used in case touch picking is never actually used by the app.
  */
-@property(nonatomic, strong) CC3GLFramebuffer* pickingSurface;
+@property(nonatomic, retain) CC3GLFramebuffer* pickingSurface;
 
 /**
  * Returns whether a dedicated surface should be created by the pickingSurface property.
@@ -1070,7 +1070,7 @@
 @property(nonatomic, readonly) GLenum depthTexelType;
 
 /** The renderbuffer that is the colorAttachment to the framebuffer in the viewSurface property. */
-@property(nonatomic, strong, readonly) CC3GLRenderbuffer* viewColorBuffer;
+@property(nonatomic, retain, readonly) CC3GLRenderbuffer* viewColorBuffer;
 
 /** 
  * Returns the number of samples used to define each pixel.
@@ -1104,7 +1104,7 @@
 -(void) resolveMultisampling;
 
 /** @deprecated Property moved to [CC3Backgrounder sharedBackgrounder] singleton. */
-@property(nonatomic, strong) CC3Backgrounder* backgrounder DEPRECATED_ATTRIBUTE;
+@property(nonatomic, retain) CC3Backgrounder* backgrounder DEPRECATED_ATTRIBUTE;
 
 
 #pragma mark Resizing surfaces

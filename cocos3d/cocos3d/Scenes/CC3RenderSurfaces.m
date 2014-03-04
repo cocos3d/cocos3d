@@ -29,6 +29,10 @@
  * See header file CC3RenderSurfaces.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3RenderSurfaces.h"
 #import "CC3OpenGL.h"
 #import "CC3CC2Extensions.h"
@@ -47,6 +51,7 @@
 
 -(void) dealloc {
 	[self deleteGLRenderbuffer];
+	[super dealloc];
 }
 
 -(GLuint) renderbufferID {
@@ -99,7 +104,7 @@
 	return self;
 }
 
-+(id) renderbuffer { return [[self alloc] init]; }
++(id) renderbuffer { return [[[self alloc] init] autorelease]; }
 
 -(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format {
 	if ( (self = [self initWithPixelFormat: format]) ) {
@@ -109,7 +114,7 @@
 }
 
 +(id) renderbufferWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format {
-	return [((CC3GLRenderbuffer*)[self alloc]) initWithSize: size andPixelFormat: format];
+	return [[((CC3GLRenderbuffer*)[self alloc]) initWithSize: size andPixelFormat: format] autorelease];
 }
 
 -(id) initWithPixelFormat: (GLenum) format {
@@ -117,7 +122,7 @@
 }
 
 +(id) renderbufferWithPixelFormat: (GLenum) format {
-	return [[self alloc] initWithPixelFormat: format];
+	return [[[self alloc] initWithPixelFormat: format] autorelease];
 }
 
 -(id) initWithPixelFormat: (GLenum) format andPixelSamples: (GLuint) samples {
@@ -129,7 +134,7 @@
 }
 
 +(id) renderbufferWithPixelFormat: (GLenum) format andPixelSamples: (GLuint) samples {
-	return [[self alloc] initWithPixelFormat: format andPixelSamples: samples];
+	return [[[self alloc] initWithPixelFormat: format andPixelSamples: samples] autorelease];
 }
 
 -(NSString*) description { return [NSString stringWithFormat: @"%@ %u", self.class, _rbID]; }
@@ -198,6 +203,11 @@
 @synthesize face=_face, mipmapLevel=_mipmapLevel;
 @synthesize shouldUseStrongReferenceToTexture=_shouldUseStrongReferenceToTexture;
 
+-(void) dealloc {
+	[_texObj release];
+	[super dealloc];
+}
+
 -(CC3Texture*) texture { return (CC3Texture*)_texObj.resolveWeakReference; }
 
 -(void) setTexture: (CC3Texture*) texture {
@@ -224,7 +234,11 @@
  * a weak reference, which is then assigned to the strongly referenced _texObj iVar.
  */
 -(void) setTexObj: (CC3Texture*) texture {
-	_texObj = self.shouldUseStrongReferenceToTexture ? texture : [texture asWeakReference];
+	NSObject* newTexObj = self.shouldUseStrongReferenceToTexture ? texture : [texture asWeakReference];
+	if (newTexObj == _texObj) return;
+	
+	[_texObj release];
+	_texObj = [newTexObj retain];
 }
 
 -(CC3IntSize) size { return self.texture.size; }
@@ -258,14 +272,14 @@
 
 -(id) init { return [self initWithTexture: nil]; }
 
-+(id) attachment { return [[self alloc] init]; }
++(id) attachment { return [[[self alloc] init] autorelease]; }
 
 -(id) initWithTexture: (CC3Texture*) texture {
 	return [self initWithTexture: texture usingFace: texture.initialAttachmentFace];
 }
 
 +(id) attachmentWithTexture: (CC3Texture*) texture {
-	return [((CC3TextureFramebufferAttachment*)[self alloc]) initWithTexture: texture];
+	return [[((CC3TextureFramebufferAttachment*)[self alloc]) initWithTexture: texture] autorelease];
 }
 
 -(id) initWithTexture: (CC3Texture*) texture usingFace: (GLenum) face {
@@ -273,7 +287,7 @@
 }
 
 +(id) attachmentWithTexture: (CC3Texture*) texture usingFace: (GLenum) face {
-	return [[self alloc] initWithTexture: texture usingFace: face ];
+	return [[[self alloc] initWithTexture: texture usingFace: face] autorelease];
 }
 
 -(id) initWithTexture: (CC3Texture*) texture usingFace: (GLenum) face andLevel: (GLint) mipmapLevel {
@@ -287,7 +301,7 @@
 }
 
 +(id) attachmentWithTexture: (CC3Texture*) texture usingFace: (GLenum) face andLevel: (GLint) mipmapLevel {
-	return [[self alloc] initWithTexture: texture usingFace: face andLevel: mipmapLevel];
+	return [[[self alloc] initWithTexture: texture usingFace: face andLevel: mipmapLevel] autorelease];
 }
 
 -(NSString*) description { return [NSString stringWithFormat: @"%@ on %@", self.class, self.texture]; }
@@ -302,6 +316,12 @@
 
 -(void) dealloc {
 	[self deleteGLFramebuffer];
+	
+	[_colorAttachment release];
+	[_depthAttachment release];
+	[_stencilAttachment release];
+	
+	[super dealloc];
 }
 
 -(GLuint) framebufferID {
@@ -319,22 +339,33 @@
 -(id<CC3FramebufferAttachment>) colorAttachment { return _colorAttachment; }
 
 -(void) setColorAttachment: (id<CC3FramebufferAttachment>) colorAttachment {
-	if (_colorAttachment == colorAttachment) return;
-	[self ensureSizeOfAttachment: colorAttachment];
+	if (colorAttachment == _colorAttachment) return;
+		
+	[self ensureSizeOfAttachment: colorAttachment];		// must be done before attaching
+
 	[_colorAttachment unbindFromFramebuffer: self.framebufferID asAttachment: GL_COLOR_ATTACHMENT0];
-	_colorAttachment = colorAttachment;
+	
+	[_colorAttachment release];
+	_colorAttachment = [colorAttachment retain];
+	
 	[_colorAttachment bindToFramebuffer: self.framebufferID asAttachment: GL_COLOR_ATTACHMENT0];
 }
 
 -(id<CC3FramebufferAttachment>) depthAttachment { return _depthAttachment; }
 
 -(void) setDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment {
-	if (_depthAttachment == depthAttachment) return;
-	[self ensureSizeOfAttachment: depthAttachment];
+	if (depthAttachment == _depthAttachment) return;
+	
+	[self ensureSizeOfAttachment: depthAttachment];		// must be done before attaching
+	
 	[_depthAttachment unbindFromFramebuffer: self.framebufferID asAttachment: GL_DEPTH_ATTACHMENT];
-	_depthAttachment = depthAttachment;
+
+	[_depthAttachment release];
+	_depthAttachment = [depthAttachment retain];
+	
 	[_depthAttachment bindToFramebuffer: self.framebufferID asAttachment: GL_DEPTH_ATTACHMENT];
 
+	// Check for combined depth and stencil buffer
 	if ( CC3DepthFormatIncludesStencil(_depthAttachment.pixelFormat) )
 		self.stencilAttachment = _depthAttachment;
 }
@@ -342,10 +373,15 @@
 -(id<CC3FramebufferAttachment>) stencilAttachment { return _stencilAttachment; }
 
 -(void) setStencilAttachment: (id<CC3FramebufferAttachment>) stencilAttachment {
-	if (_stencilAttachment == stencilAttachment) return;
-	[self ensureSizeOfAttachment: stencilAttachment];
+	if (stencilAttachment == _stencilAttachment) return;
+	
+	[self ensureSizeOfAttachment: stencilAttachment];		// must be done before attaching
+		
 	[_stencilAttachment unbindFromFramebuffer: self.framebufferID asAttachment: GL_STENCIL_ATTACHMENT];
-	_stencilAttachment = stencilAttachment;
+
+	[_stencilAttachment release];
+	_stencilAttachment = [stencilAttachment retain];
+	
 	[_stencilAttachment bindToFramebuffer: self.framebufferID asAttachment: GL_STENCIL_ATTACHMENT];
 }
 
@@ -491,10 +527,10 @@
 	return self;
 }
 
-+(id) surface { return [[self alloc] init]; }
++(id) surface { return [[[self alloc] init] autorelease]; }
 
 +(id) surfaceWithSize: (CC3IntSize) size {
-	return [((CC3GLFramebuffer*)[self alloc]) initWithSize: size];
+	return [[((CC3GLFramebuffer*)[self alloc]) initWithSize: size] autorelease];
 }
 
 -(NSString*) description { return [NSString stringWithFormat: @"%@ %u", self.class, _fbID]; }
@@ -566,6 +602,11 @@
 
 @synthesize renderSurface=_renderSurface;
 @synthesize numberOfFacesPerSnapshot=_numberOfFacesPerSnapshot;
+
+-(void) dealloc {
+	[_renderSurface release];
+	[super dealloc];
+}
 
 
 #pragma mark Drawing
@@ -754,7 +795,7 @@
 }
 
 +(id) textureCubeWithDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment {
-	return [[self alloc] initCubeWithDepthAttachment: depthAttachment];
+	return [[[self alloc] initCubeWithDepthAttachment: depthAttachment] autorelease];
 }
 
 -(id) initCubeWithColorPixelFormat: (GLenum) colorFormat
@@ -764,7 +805,7 @@
 		_faceCount = 0.0f;
 		_numberOfFacesPerSnapshot = 1.0f;
 		_currentFace = GL_ZERO;
-		_renderSurface = [CC3GLFramebuffer new];
+		_renderSurface = [CC3GLFramebuffer new];			// retained
 		_renderSurface.depthAttachment = depthAttachment;
 
 		// Create the texture attachment, based on this texture. Since this texture holds the rendering surface,
@@ -781,9 +822,9 @@
 +(id) textureCubeWithColorPixelFormat: (GLenum) colorFormat
 					andColorPixelType: (GLenum) colorType
 				   andDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment {
-	return [[self alloc] initCubeWithColorPixelFormat: colorFormat
+	return [[[self alloc] initCubeWithColorPixelFormat: colorFormat
 									 andColorPixelType: colorType
-									andDepthAttachment: depthAttachment];
+									andDepthAttachment: depthAttachment] autorelease];
 }
 
 @end
@@ -796,22 +837,40 @@
 
 @synthesize view=_view, shouldUseDedicatedPickingSurface=__shouldUseDedicatedPickingSurface;
 
+-(void) dealloc {
+	_view = nil;					// weak reference
+	[_resizeableSurfaces release];
+	[_viewSurface release];
+	[_multisampleSurface release];
+	[_pickingSurface release];
+	
+	[super dealloc];
+}
+
 -(CC3GLFramebuffer*) viewSurface { return _viewSurface; }
 
 -(void) setViewSurface: (CC3GLFramebuffer*) surface {
 	if (surface == _viewSurface) return;
+	
 	[self removeSurface: _viewSurface];
-	_viewSurface = surface;
-	[self addSurface: surface];
+	
+	[_viewSurface release];
+	_viewSurface = [surface retain];
+	
+	[self addSurface: _viewSurface];
 }
 
 -(CC3GLFramebuffer*) multisampleSurface { return _multisampleSurface; }
 
 -(void) setMultisampleSurface: (CC3GLFramebuffer*) surface {
 	if (surface == _multisampleSurface) return;
+	
 	[self removeSurface: _multisampleSurface];
-	_multisampleSurface = surface;
-	[self addSurface: surface];
+	
+	[_multisampleSurface release];
+	_multisampleSurface = [surface retain];
+	
+	[self addSurface: _multisampleSurface];
 }
 
 -(CC3GLFramebuffer*) renderingSurface {
@@ -855,9 +914,13 @@
 
 -(void) setPickingSurface: (CC3GLFramebuffer*) surface {
 	if (surface == _pickingSurface) return;
+	
 	[self removeSurface: _pickingSurface];
-	_pickingSurface = surface;
-	[self addSurface: surface];
+	
+	[_pickingSurface release];
+	_pickingSurface = [surface retain];
+	
+	[self addSurface: _pickingSurface];
 }
 
 -(void) resetPickingSurface { self.pickingSurface = nil; }
@@ -990,7 +1053,7 @@
 
 -(id) init {
     if ( (self = [super init]) ) {
-		_resizeableSurfaces = [NSMutableArray array];
+		_resizeableSurfaces = [NSMutableArray new];		// retained
 	}
     return self;
 }
@@ -998,7 +1061,7 @@
 -(id) initWithView: (CC3GLView*) view {
     if ( (self = [self init]) ) {
 		
-		_view = view;
+		_view = view;		// weak reference
 		
 		// Limit pixel samples to what the platform will support
 		GLuint requestedSamples = _view.requestedSamples;

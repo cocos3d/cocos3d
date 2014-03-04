@@ -230,7 +230,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 @interface CC3Scene : CC3Node {
 	NSMutableArray* _lights;
 	NSMutableArray* _billboards;
-	CC3Layer* __unsafe_unretained _cc3Layer;
+	CC3Layer* _cc3Layer;
 	CC3Camera* _activeCamera;
 	CC3NodeSequencer* _drawingSequencer;
 	CC3TouchedNodePicker* _touchedNodePicker;
@@ -260,7 +260,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * This property is set automatically when this scene is assigned to the CC3Layer.
  * The application should not set this property directly.
  */
-@property(nonatomic, unsafe_unretained) CC3Layer* cc3Layer;
+@property(nonatomic, assign) CC3Layer* cc3Layer;
 
 /**
  * The controller that is controlling the view displaying this scene.
@@ -268,7 +268,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * This property is retrieved from the same property on the CC3Layer holding this scene,
  * and is made available to support delegation from this 3D scene.
  */
-@property(nonatomic, strong, readonly) CC3ViewController* controller;
+@property(nonatomic, retain, readonly) CC3ViewController* controller;
 
 /**
  * The 3D camera that is currently displaying the scene of this scene.
@@ -299,7 +299,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * The initial value is nil. You must add at least one CC3Camera to your 3D scene to
  * make it viewable.
  */
-@property(nonatomic, strong, readwrite) CC3Camera* activeCamera;
+@property(nonatomic, retain) CC3Camera* activeCamera;
 
 /**
  * Returns the lights currently illuminating this scene.
@@ -309,7 +309,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * node (or the scene itself) using the addChild: method. To remove a light from the scene,
  * invoke the remove method on the light itself, or the removeChild: method on its parent.
  */
-@property(nonatomic, strong, readonly) NSArray* lights;
+@property(nonatomic, retain, readonly) NSArray* lights;
 
 /**
  * To create a backdrop for this scene, set this to a CC3Backdrop instance, covered with
@@ -321,7 +321,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * a backdrop. You can create a skybox using a spherical or cube mesh, and applying a
  * cube-mapped texture to it.
  */
-@property(nonatomic, strong) CC3MeshNode* backdrop;
+@property(nonatomic, retain) CC3MeshNode* backdrop;
 
 /**
  * If set, creates fog within the CC3Scene. Fog has a color and blends with the
@@ -330,7 +330,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  *
  * The initial value is nil, indicating that the scene will contain no fog.
  */
-@property(nonatomic, strong) CC3Fog* fog;
+@property(nonatomic, retain) CC3Fog* fog;
 
 /**
  * The touchedNodePicker picks the node under the point at which a touch event occurred.
@@ -338,7 +338,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * Touch events are forwarded to the touchedNodePicker from the touchEvent:at:
  * method when a node is to be picked from a particular touch event.
  */
-@property(nonatomic, strong) CC3TouchedNodePicker* touchedNodePicker;
+@property(nonatomic, retain) CC3TouchedNodePicker* touchedNodePicker;
 
 /** 
  * Returns whether this scene is illuminated.
@@ -399,7 +399,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * complexity and capabilities of your application, you should reset the performance
  * statistics at least every few seconds.
  */
-@property(nonatomic, strong) CC3PerformanceStatistics* performanceStatistics;
+@property(nonatomic, retain) CC3PerformanceStatistics* performanceStatistics;
 
 
 #pragma mark CCRGBAProtocol and CCBlendProtocol support
@@ -562,7 +562,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * This property defaults to an instance of the class returned by the updateVisitorClass method.
  * The application can set a different visitor if desired.
  */
-@property(nonatomic, strong) CC3NodeUpdatingVisitor* updateVisitor;
+@property(nonatomic, retain) CC3NodeUpdatingVisitor* updateVisitor;
 
 /**
  * Returns the class of visitor that will automatically be instantiated into the
@@ -575,7 +575,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 -(id) updateVisitorClass;
 
 /** @deprecated No longer used. */
-@property(nonatomic, strong) id transformVisitor DEPRECATED_ATTRIBUTE;
+@property(nonatomic, retain) id transformVisitor DEPRECATED_ATTRIBUTE;
 
 /**
  * The value of this property is used as the lower limit accepted by the updateScene: method.
@@ -842,7 +842,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * The default drawing sequencer includes only nodes with local content, and groups
  * them so that opaque nodes are drawn first, then nodes with blending.
  */
-@property(nonatomic, strong) CC3NodeSequencer* drawingSequencer;
+@property(nonatomic, retain) CC3NodeSequencer* drawingSequencer;
 
 /** Returns whether this instance is using a drawing sequencer. */
 @property(nonatomic, readonly) BOOL isUsingDrawingSequence;
@@ -857,7 +857,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * You can access this property from the onOpen method of this scene, or any time after.
  * This property is not valid before that time.
  */
-@property(nonatomic, strong, readonly) CC3GLViewSurfaceManager* viewSurfaceManager;
+@property(nonatomic, retain, readonly) CC3GLViewSurfaceManager* viewSurfaceManager;
 
 /**
  * The render surface being used to draw to the view on the screen.
@@ -867,7 +867,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  *
  * The value of this property is retrieved from the surface manager in the viewSurfaceManager property.
  */
-@property(nonatomic, strong, readonly) id<CC3RenderSurface> viewSurface;
+@property(nonatomic, retain, readonly) id<CC3RenderSurface> viewSurface;
 
 /**
  * The visitor that is used to visit the nodes to draw them to the view on the screen.
@@ -875,7 +875,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * This property defaults to an instance of the class returned by the viewDrawVisitorClass method.
  * The application can set a different visitor if desired.
  */
-@property(nonatomic, strong) CC3NodeDrawingVisitor* viewDrawingVisitor;
+@property(nonatomic, retain) CC3NodeDrawingVisitor* viewDrawingVisitor;
 
 /**
  * Returns the class of visitor that will automatically be instantiated into the
@@ -894,15 +894,17 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * The isDrawingEnvironmentMap property of that visitor is set to YES, and the camera 
  * property is set to a new camera whose fieldOfView property is set to 90 degrees.
  */
-@property(nonatomic, strong) CC3NodeDrawingVisitor* envMapDrawingVisitor;
+@property(nonatomic, retain) CC3NodeDrawingVisitor* envMapDrawingVisitor;
 
 /**
  * The visitor that is used to visit shadow nodes to draw them to the GL engine.
  *
+ * This property is set automatically when a shadow is added somewhere in the scene,
+ * and is cleared when the all shadows have been removed from the scene.
  * This property defaults to an instance of the CC3ShadowDrawingVisitor class.
- * The application can set a different visitor if desired.
+ * The application can set a different visitor if desired. 
  */
-@property(nonatomic, strong) CC3NodeDrawingVisitor* shadowVisitor;
+@property(nonatomic, retain) CC3NodeDrawingVisitor* shadowVisitor;
 
 /**
  * The sequencer visitor used to visit the drawing sequencer during operations
@@ -911,7 +913,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * This property defaults to an instance of the CC3NodeSequencerVisitor class.
  * The application can set a different visitor if desired.
  */
-@property(nonatomic, strong) CC3NodeSequencerVisitor* drawingSequenceVisitor;
+@property(nonatomic, retain) CC3NodeSequencerVisitor* drawingSequenceVisitor;
 
 /** @deprecated Depth clearing is now handled by app in drawSceneContentWithVisitor:. */
 @property(nonatomic, assign) BOOL shouldClearDepthBuffer;
@@ -1150,7 +1152,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * events. To avoid these artifacts, you can set the shouldUseDedicatedPickingSurface property
  * of the viewSurfaceManager to YES, at any time.
  */
-@property(nonatomic, strong, readonly) id<CC3RenderSurface> pickingSurface;
+@property(nonatomic, retain, readonly) id<CC3RenderSurface> pickingSurface;
 
 /**
  * When set to YES, the scene will be displayed on the screen as rendered while picking a
@@ -1202,7 +1204,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  */
 @interface CC3TouchedNodePicker : NSObject {
 	CC3NodePickingVisitor* _pickVisitor;
-	CC3Scene* __unsafe_unretained _scene;
+	CC3Scene* _scene;
 	CC3Node* _pickedNode;
 	uint _touchQueue[kCC3TouchQueueLength];
 	uint _queuedTouchCount;
@@ -1217,10 +1219,19 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * This property defaults to an instance of the class returned by the pickVisitorClass method of the
  * CC3Scene. The application can set a different visitor if desired.
  */
-@property(nonatomic, strong) CC3NodePickingVisitor* pickVisitor;
+@property(nonatomic, retain) CC3NodePickingVisitor* pickVisitor;
 
 /** The most recent touch point in cocos2d coordinates. */
 @property(nonatomic, readonly) CGPoint touchPoint;
+
+/**
+ * The currently picked node.
+ *
+ * The value of this property is ephemeral, and contains a non-nil value only during node
+ * picking from touch handling. The value is set by the pickTouchedNode method, and is 
+ * cleared by the dispatchPickedNode method.
+ */
+@property(nonatomic, retain) CC3Node* pickedNode;
 
 /**
  * Indicates that a node should be picked for the touch event of the specified
