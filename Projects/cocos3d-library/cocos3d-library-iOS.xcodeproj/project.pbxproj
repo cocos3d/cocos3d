@@ -101,10 +101,10 @@
 		A9BC9196189C776C000FB28C /* CC3UIViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90BA189C776C000FB28C /* CC3UIViewController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A9BC9197189C776C000FB28C /* CC3NSViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90BD189C776C000FB28C /* CC3NSViewController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A9BC9198189C776C000FB28C /* CC3OSXExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90BF189C776C000FB28C /* CC3OSXExtensions.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		A9BC9199189C776C000FB28C /* CC3DataStreams.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90C2189C776C000FB28C /* CC3DataStreams.m */; };
-		A9BC919A189C776C000FB28C /* CC3NodesResource.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90C4189C776C000FB28C /* CC3NodesResource.m */; };
-		A9BC919B189C776C000FB28C /* CC3Resource.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90C6189C776C000FB28C /* CC3Resource.m */; };
-		A9BC919C189C776C000FB28C /* CC3ResourceNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90C8189C776C000FB28C /* CC3ResourceNode.m */; };
+		A9BC9199189C776C000FB28C /* CC3DataStreams.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90C2189C776C000FB28C /* CC3DataStreams.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		A9BC919A189C776C000FB28C /* CC3NodesResource.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90C4189C776C000FB28C /* CC3NodesResource.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		A9BC919B189C776C000FB28C /* CC3Resource.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90C6189C776C000FB28C /* CC3Resource.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		A9BC919C189C776C000FB28C /* CC3ResourceNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90C8189C776C000FB28C /* CC3ResourceNode.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A9BC919D189C776C000FB28C /* CC3ControllableLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90CB189C776C000FB28C /* CC3ControllableLayer.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A9BC919E189C776C000FB28C /* CC3Layer.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90CD189C776C000FB28C /* CC3Layer.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A9BC919F189C776C000FB28C /* CC3NodeSequencer.m in Sources */ = {isa = PBXBuildFile; fileRef = A9BC90CF189C776C000FB28C /* CC3NodeSequencer.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };

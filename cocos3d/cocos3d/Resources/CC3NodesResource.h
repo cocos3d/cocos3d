@@ -103,7 +103,7 @@
  * A collection of the root nodes of the node assembly extracted from the file.
  * Each of these nodes will usually contain child nodes.
  */
-@property(nonatomic, strong, readonly) NSArray* nodes;
+@property(nonatomic, retain, readonly) NSArray* nodes;
 
 /**
  * Returns a node from the hierarchy under the nodes in the nodes array, that matches the

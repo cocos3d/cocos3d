@@ -78,7 +78,7 @@
  * The application may set this property to a different directory if appropriate,
  * but must do so before the loadFromFile: method is invoked.
  */
-@property(nonatomic, strong) NSString* directory;
+@property(nonatomic, retain) NSString* directory;
 
 /**
  * Indicates whether the resource has been successfully loaded.
@@ -333,7 +333,7 @@
 #pragma mark Deprecated functionality
 
 /** @deprecated Property moved to CC3NodesResource subclass. */
-@property( nonatomic, strong, readonly) NSArray* nodes DEPRECATED_ATTRIBUTE;
+@property( nonatomic, retain, readonly) NSArray* nodes DEPRECATED_ATTRIBUTE;
 
 /** @deprecated Property moved to CC3NodesResource subclass. */
 @property(nonatomic, assign) BOOL expectsVerticallyFlippedTextures DEPRECATED_ATTRIBUTE;

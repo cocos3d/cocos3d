@@ -29,6 +29,10 @@
  * See header file CC3Resource.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3Resource.h"
 #import "CC3NodesResource.h"
 
@@ -39,6 +43,8 @@
 
 -(void) dealloc {
 	[self remove];		// remove this instance from the cache
+	[_directory release];
+	[super dealloc];
 }
 
 -(BOOL) loadFromFile: (NSString*) aFilePath {
@@ -89,7 +95,7 @@
 	return self;
 }
 
-+(id) resource { return [[self alloc] init]; }
++(id) resource { return [[[self alloc] init] autorelease]; }
 
 -(id) initFromFile: (NSString*) aFilePath {
 	if ( (self = [self init]) ) {		// Use self so subclasses will init properly
@@ -104,7 +110,7 @@
 
 	rez = [[self alloc] initFromFile: aFilePath];
 	[self addResource: rez];
-	return rez;
+	return [rez autorelease];
 }
 
 +(NSString*) resourceNameFromFilePath: (NSString*) aFilePath { return aFilePath.lastPathComponent; }
@@ -123,7 +129,7 @@
 static CC3Cache* _resourceCache = nil;
 
 +(void) ensureCache {
-	if ( !_resourceCache ) _resourceCache = [CC3Cache weakCacheForType: @"resource"];	// retained
+	if ( !_resourceCache ) _resourceCache = [[CC3Cache weakCacheForType: @"resource"] retain];	// retained
 }
 
 +(void) addResource: (CC3Resource*) resource {

@@ -29,12 +29,21 @@
  * See header file CC3NodesResource.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3NodesResource.h"
 
 @implementation CC3NodesResource
 
 @synthesize nodes=_nodes, expectsVerticallyFlippedTextures=_expectsVerticallyFlippedTextures;
 @synthesize shouldFreezeInanimateNodes=_shouldFreezeInanimateNodes;
+
+-(void) dealloc {
+	[_nodes release];
+	[super dealloc];
+}
 
 -(CC3Node*) getNodeMatching: (CC3Node*) node {
 	NSString* nodeName = node.name;
@@ -54,7 +63,7 @@
 
 -(id) init {
 	if ( (self = [super init]) ) {
-		_nodes = [NSMutableArray array];
+		_nodes = [NSMutableArray new];		// retained
 		_expectsVerticallyFlippedTextures = self.class.defaultExpectsVerticallyFlippedTextures;
 		_shouldFreezeInanimateNodes = self.class.defaultShouldFreezeInanimateNodes;
 	}

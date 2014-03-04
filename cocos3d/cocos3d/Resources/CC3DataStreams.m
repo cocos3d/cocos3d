@@ -29,6 +29,10 @@
  * See header file CC3DataStreams.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3DataStreams.h"
 
 
@@ -36,6 +40,10 @@
 
 @synthesize data=_data, isBigEndian=_isBigEndian, wasReadBeyondEOF=_wasReadBeyondEOF;
 
+-(void) dealloc {
+	[_data release];
+	[super dealloc];
+}
 
 #pragma mark Allocation and initialization
 
@@ -46,7 +54,7 @@
 
 -(id) initOnData: (NSData*) data {
 	if ( (self = [super init]) ) {
-		_data = data;
+		_data = [data retain];
 		_readRange = NSMakeRange(0, 0);
 		_isBigEndian = NO;
 		_wasReadBeyondEOF = NO;

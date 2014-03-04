@@ -29,6 +29,10 @@
  * See header file CC3ResourceNode.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3ResourceNode.h"
 
 
@@ -79,7 +83,7 @@
 }
 
 +(id) nodeFromFile: (NSString*) aFilepath {
-	return [[self alloc] initFromFile: aFilepath];
+	return [[[self alloc] initFromFile: aFilepath] autorelease];
 }
 
 -(id) initFromFile: (NSString*) aFilepath expectsVerticallyFlippedTextures: (BOOL) flipped {
@@ -90,7 +94,7 @@
 }
 
 +(id) nodeFromFile: (NSString*) aFilepath expectsVerticallyFlippedTextures: (BOOL) flipped {
-	return [[self alloc] initFromFile: aFilepath expectsVerticallyFlippedTextures: flipped];
+	return [[[self alloc] initFromFile: aFilepath expectsVerticallyFlippedTextures: flipped] autorelease];
 }
 
 -(id) initWithName: (NSString*) aName fromFile: (NSString*) aFilepath {
@@ -101,7 +105,7 @@
 }
 
 +(id) nodeWithName: (NSString*) aName fromFile: (NSString*) aFilepath {
-	return [[self alloc] initWithName: aName fromFile: aFilepath];
+	return [[[self alloc] initWithName: aName fromFile: aFilepath] autorelease];
 }
 
 

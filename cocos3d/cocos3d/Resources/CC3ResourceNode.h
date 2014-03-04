@@ -69,7 +69,7 @@
  * The initialization and loading methods have an option to pass an indication of whether
  * the texture coordinates have already been flipped.
  */
-@interface CC3ResourceNode : CC3Node {}
+@interface CC3ResourceNode : CC3Node
 
 /**
  * Returns the class of the CC3NodesResource instance used to load 3D content files.
@@ -229,7 +229,7 @@
  * @deprecated Use the populateFromResource: method instead. Setting this property invokes
  * the populateFromResource: method. Querying this property always returns nil.
  */
-@property(nonatomic, strong) CC3NodesResource* resource DEPRECATED_ATTRIBUTE;
+@property(nonatomic, retain) CC3NodesResource* resource DEPRECATED_ATTRIBUTE;
 
 /** @deprecated Setting this property has no effect. Querying this property always returns NO. */
 @property(nonatomic, assign) BOOL expectsVerticallyFlippedTextures DEPRECATED_ATTRIBUTE;

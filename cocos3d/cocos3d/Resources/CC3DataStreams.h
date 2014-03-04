@@ -52,7 +52,7 @@
 }
 
 /** Returns the encapsulated data object. */
-@property(nonatomic, strong, readonly) NSData* data;
+@property(nonatomic, retain, readonly) NSData* data;
 
 /** Returns the current position in the stream. */
 @property(nonatomic, readonly) NSUInteger position;
