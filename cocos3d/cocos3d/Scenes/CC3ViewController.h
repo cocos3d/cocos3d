@@ -57,7 +57,7 @@
  * The application should keep this property synchronized with changes in the running scene of the
  * shared CCDirector.
  */
-@property(nonatomic, strong) CCNode* controlledNode;
+@property(nonatomic, retain) CCNode* controlledNode;
 
 /**
  * Indicates whether this controller is overlaying the view of the device camera.
@@ -69,7 +69,7 @@
 @property(nonatomic, assign) BOOL isOverlayingDeviceCamera;
 
 /** The view of a CC3ViewController must be of type CC3GLView. */
-@property(nonatomic, strong) CC3GLView* view;
+@property(nonatomic, retain) CC3GLView* view;
 
 /**
  * Starts the cocos2d/3d animation.

@@ -69,9 +69,6 @@
 
 #pragma mark View management
 
-/** The view of a CC3UIViewController must be of type CC3GLView. */
-//@property(nonatomic, retain) CC3GLView* view;
-
 /**
  * Invoked automatically the first time the view property is requested, and is currently nil.
  *
@@ -97,7 +94,7 @@
  * prior to accessing the view property for the first time. Once the view property has been established,
  * reading this property returns the class property of the view itself.
  */
-@property(nonatomic, assign) Class viewClass;
+@property(nonatomic, retain) Class viewClass;
 
 /**
  * Indicates the bounds of the view.
@@ -138,7 +135,7 @@
  * of the view itself. Prior to the view being established, reading this property returns the value to
  * which it has been set. The initial value of this property is kEAGLColorFormatRGBA8.
  */
-@property(nonatomic, strong) NSString* viewColorFormat;
+@property(nonatomic, retain) NSString* viewColorFormat;
 
 /**
  * Indicates the depth format of the view.

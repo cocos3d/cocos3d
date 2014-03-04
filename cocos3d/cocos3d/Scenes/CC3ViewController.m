@@ -29,6 +29,10 @@
  * See header file CC3ViewController.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3ViewController.h"
 #import "CC3ControllableLayer.h"
 #import "CC3Logging.h"
@@ -37,6 +41,11 @@
 @implementation CC3ViewController
 
 @synthesize controlledNode=_controlledNode;
+
+-(void) dealloc {
+	[_controlledNode release];
+	[super dealloc];
+}
 
 -(BOOL) isOverlayingDeviceCamera { return NO; }
 
@@ -53,7 +62,10 @@
 
 -(void) setControlledNode: (CCNode*) aNode {
 	if (aNode == _controlledNode) return;
-	_controlledNode = aNode;
+	
+	[_controlledNode release];
+	_controlledNode = [aNode retain];
+	
 	aNode.controller = self;
 }
 

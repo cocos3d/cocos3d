@@ -29,6 +29,10 @@
  * See header file CC3DeviceCameraOverlayUIViewController.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3DeviceCameraOverlayUIViewController.h"
 
 #if CC3_IOS
@@ -46,6 +50,11 @@
 #pragma mark CC3DeviceCameraOverlayUIViewController
 
 @implementation CC3DeviceCameraOverlayUIViewController
+
+-(void) dealloc {
+	[_deviceCameraView release];
+	[super dealloc];
+}
 
 -(BOOL) isOverlayingDeviceCamera { return _isOverlayingDeviceCamera; }
 
@@ -100,15 +109,17 @@
 
 -(CC3AVCameraView*) deviceCameraView {
 	if ( !_deviceCameraView && self.isDeviceCameraAvailable ) {
+		
 		AVCaptureDevice* camDevice = [AVCaptureDevice defaultDeviceWithMediaType: AVMediaTypeVideo];
 		AVCaptureInput* avInput = [AVCaptureDeviceInput deviceInputWithDevice: camDevice error: nil];
-		AVCaptureSession* avSession = [[AVCaptureSession alloc] init];
+		AVCaptureSession* avSession = [[[AVCaptureSession alloc] init] autorelease];
 		[avSession addInput: avInput];
 		
-		_deviceCameraView = [[CC3AVCameraView alloc] initWithFrame: self.view.frame];
+		_deviceCameraView = [[CC3AVCameraView alloc] initWithFrame: self.view.frame];	// retained
+		
 		AVCaptureVideoPreviewLayer* avLayer = _deviceCameraView.layer;
-		avLayer.session = avSession;
 		avLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
+		avLayer.session = avSession;
 	}
 	return _deviceCameraView;
 }
@@ -124,13 +135,16 @@
 	return self;
 }
 
-+(id) controller { return [[self alloc] init]; }
++(id) controller { return [[[self alloc] init] autorelease]; }
 
 -(void) didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
 	
 	// If overlay view exists, and we're not currently overlaying the device camera, release it
-	if( !self.isOverlayingDeviceCamera ) _deviceCameraView = nil;
+	if( !self.isOverlayingDeviceCamera ) {
+		[_deviceCameraView release];
+		_deviceCameraView = nil;
+	}
 }
 
 @end

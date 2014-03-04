@@ -29,6 +29,10 @@
  * See header file CC3UIViewController.h for full API documentation.
  */
 
+// -fno-objc-arc
+// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
+// Target -> Build Phases -> Compile Sources list in the Xcode project config.
+
 #import "CC3UIViewController.h"
 #import "CC3ControllableLayer.h"
 #import "CC3Logging.h"
@@ -42,6 +46,12 @@
 @synthesize viewColorFormat=_viewColorFormat, viewDepthFormat=_viewDepthFormat;
 @synthesize viewBounds=_viewBounds, viewPixelSamples=_viewPixelSamples, viewClass=_viewClass;
 
+-(void) dealloc {
+	[_viewClass release];
+	[_viewColorFormat release];
+	
+	[super dealloc];
+}
 
 #pragma mark View management
 
@@ -64,7 +74,7 @@
 
 /** Ensure that retina display is established if required. */
 -(void) setView:(CC3GLView *)view {
-	super.view = view;
+	[super setView: view];
 	[self checkRetinaDisplay];
 }
 
@@ -221,7 +231,7 @@ CC3_POP_NOSELECTOR
 	return self;
 }
 
-+(id) controller { return [[self alloc] init]; }
++(id) controller { return [[[self alloc] init] autorelease]; }
 
 -(NSString*) description { return [NSString stringWithFormat: @"%@", self.class]; }
 
