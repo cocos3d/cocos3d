@@ -29,10 +29,6 @@
  * See header file CC3Camera.h for full API documentation.
  */
 
-// -fno-objc-arc
-// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
-// Target -> Build Phases -> Compile Sources list in the Xcode project config.
-
 #import "CC3Camera.h"
 #import "CC3Scene.h"
 #import "CC3ProjectionMatrix.h"

@@ -29,10 +29,6 @@
  * See header file CC3PFXResource.h for full API documentation.
  */
 
-// -fno-objc-arc
-// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
-// Target -> Build Phases -> Compile Sources list in the Xcode project config.
-
 extern "C" {
 	#import "CC3Foundation.h"	// extern must be first, since foundation also imported via other imports
 }

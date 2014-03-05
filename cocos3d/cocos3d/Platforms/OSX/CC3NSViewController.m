@@ -29,10 +29,6 @@
  * See header file CC3NSViewController.h for full API documentation.
  */
 
-// -fno-objc-arc
-// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
-// Target -> Build Phases -> Compile Sources list in the Xcode project config.
-
 #import "CC3NSViewController.h"
 
 #if CC3_OSX

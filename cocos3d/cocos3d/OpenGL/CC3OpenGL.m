@@ -29,10 +29,6 @@
  * See header file CC3OpenGL.h for full API documentation.
  */
 
-// -fno-objc-arc
-// This file uses MRC. Add the -fno-objc-arc compiler setting to this file in the
-// Target -> Build Phases -> Compile Sources list in the Xcode project config.
-
 #import "CC3OpenGL.h"
 #import "CC3OpenGLES2.h"
 #import "CC3OpenGLES1.h"
