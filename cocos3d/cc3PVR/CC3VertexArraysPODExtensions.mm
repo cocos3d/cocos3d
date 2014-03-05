@@ -50,15 +50,18 @@ extern "C" {
 	SPODMesh* psm = (SPODMesh*)aSPODMesh;
 	if ( (self = [super init]) ) {
 		GLint elemSize = pcd->n;
-		LogRez(@"\t%@ %@ from: %@", ((elemSize == 0) ? @"Skipping" : @"Creating"), [self class], NSStringFromCPODData(pcd));
-		if (elemSize == 0) return nil;
-			
-		self.elementType = GLElementTypeFromEPVRTDataType(pcd->eType);
-		self.shouldNormalizeContent = CC3ShouldNormalizeEPVRTDataType(pcd->eType);
-		self.elementSize = elemSize;
-		self.vertexStride = pcd->nStride;
-		self.vertexCount = psm->nNumVertex;
-		[self setElementsFromCPODData: pcd fromSPODMesh: psm];
+		LogRez(@"\t%@ %@ from: %@", (elemSize ? @"Creating" : @"Skipping"), [self class], NSStringFromCPODData(pcd));
+		if (elemSize) {
+			self.elementType = GLElementTypeFromEPVRTDataType(pcd->eType);
+			self.shouldNormalizeContent = CC3ShouldNormalizeEPVRTDataType(pcd->eType);
+			self.elementSize = elemSize;
+			self.vertexStride = pcd->nStride;
+			self.vertexCount = psm->nNumVertex;
+			[self setElementsFromCPODData: pcd fromSPODMesh: psm];
+		} else {
+			[self release];
+			return nil;
+		}
 	}
 	return self;
 }
@@ -94,9 +97,8 @@ extern "C" {
 		self.drawingMode = GLDrawingModeForSPODMesh(aSPODMesh);
 
 		[self allocateStripLengths: psm->nNumStrips];
-		for (uint i = 0; i < psm->nNumStrips; i++) {
+		for (uint i = 0; i < psm->nNumStrips; i++)
 			_stripLengths[i] = [self vertexIndexCountFromFaceCount: (psm->pnStripLength[i])];
-		}
 	}
 	return self;
 }

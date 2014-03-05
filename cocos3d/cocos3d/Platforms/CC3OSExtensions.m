@@ -113,7 +113,12 @@
 	}];
 }
 
--(void) runBlockNow: (void (^)(void)) block { @autoreleasepool { block(); } }
+-(void) runBlockNow: (void (^)(void)) block {
+	@autoreleasepool {
+		block();
+		[block release];
+	}
+}
 
 @end
 
@@ -131,7 +136,12 @@
 					modes: [NSArray arrayWithObject: NSDefaultRunLoopMode]];
 }
 
--(void) runBlockNow: (void (^)(void)) block { @autoreleasepool { block(); } }
+-(void) runBlockNow: (void (^)(void)) block {
+	@autoreleasepool {
+		block();
+		[block release];
+	}
+}
 
 @end
 

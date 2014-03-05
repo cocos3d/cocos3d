@@ -112,6 +112,8 @@
  *
  * This method returns immediately once the specified block is queued for execution on the run
  * loop of this thread. This method does not wait for the execution of the block to complete.
+ *
+ * This method copies the block and releases the copy it once it has been executed.
  */
 -(void) runBlockAsync: (void (^)(void)) block;
 
@@ -121,6 +123,8 @@
  *
  * This method returns only after the the specified block has completed execution. 
  * The current thread will halt (block) until then.
+ *
+ * This method copies the block and releases the copy it once it has been executed.
  */
 -(void) runBlockSync: (void (^)(void)) block;
 
@@ -130,6 +134,8 @@
  *
  * This method returns immediately once the specified block is queued for execution on the run
  * loop of this thread. This method does not wait for the execution of the block to complete.
+ *
+ * This method copies the block and releases the copy it once it has been executed.
  */
 -(void) runBlock: (void (^)(void))block after: (NSTimeInterval) seconds;
 
@@ -152,6 +158,8 @@
  *
  * This method returns immediately once the specified block is queued for execution on
  * this run loop. This method does not wait for the execution of the block to complete.
+ *
+ * This method copies the block and releases the copy it once it has been executed.
  */
 -(void) runBlockOnNextIteration: (void (^)(void)) block;
 

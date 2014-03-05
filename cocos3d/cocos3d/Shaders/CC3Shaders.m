@@ -362,11 +362,11 @@ static CC3Cache* _shaderCache = nil;
 -(void) dealloc {
 	[self remove];					// remove this instance from the cache
 
-	[self deleteGLProgram];
-
 	self.vertexShader = nil;		// use setter to detach shader from program
 	self.fragmentShader = nil;		// use setter to detach shader from program
 	self.semanticDelegate = nil;
+	
+	[self deleteGLProgram];
 	
 	[_attributes release];
 	[_uniformsSceneScope release];

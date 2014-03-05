@@ -342,9 +342,9 @@ static Class _defaultSemanticDelegateClass = nil;
 															  fromPFXParser: pfxParser
 															  inPFXResource: pfxRez];
 
-	_shaderProgram = [[self.shaderProgramClass alloc] initWithSemanticDelegate: semanticDelegate
-															  withVertexShader: vtxShader
-															 andFragmentShader: fragShader];	// retained
+	_shaderProgram = [[self.shaderProgramClass programWithSemanticDelegate: semanticDelegate
+														 withVertexShader: vtxShader
+														andFragmentShader: fragShader] retain];
 #endif	// CC3_GLSL
 }
 

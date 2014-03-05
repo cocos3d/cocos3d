@@ -35,7 +35,9 @@
 
 @implementation CC3ModelSampleFactory
 
-@synthesize unicoloredTeapotMesh, multicoloredTeapotMesh, texturedTeapotMesh;
+@synthesize unicoloredTeapotMesh=_unicoloredTeapotMesh;
+@synthesize multicoloredTeapotMesh=_multicoloredTeapotMesh;
+@synthesize texturedTeapotMesh=_texturedTeapotMesh;
 
 -(void) dealloc {
 	[_teapotVertexLocations release];
@@ -49,6 +51,40 @@
 
 	[super dealloc];
 }
+
+
+#pragma mark Factory methods
+
+-(CC3Mesh*) makeTeapotMeshNamed: (NSString*) aName {
+	CC3Mesh* mesh = [CC3Mesh meshWithName: aName];
+	mesh.shouldInterleaveVertices = NO;
+	mesh.vertexLocations = _teapotVertexLocations;
+	mesh.vertexNormals = _teapotVertexNormals;
+	mesh.vertexIndices = _teapotVertexIndices;
+	return mesh;
+}
+
+-(CC3MeshNode*) makeUniColoredTeapotNamed: (NSString*) aName withColor: (ccColor4F) color {
+	CC3MeshNode* teapot = [CC3MeshNode nodeWithName: aName];
+	teapot.mesh = self.unicoloredTeapotMesh;
+	teapot.material = [CC3Material shiny];
+	teapot.diffuseColor = color;
+	return teapot;
+}
+
+-(CC3MeshNode*) makeMultiColoredTeapotNamed: (NSString*) aName {
+	CC3MeshNode* teapot = [CC3MeshNode nodeWithName: aName];
+	teapot.mesh = self.multicoloredTeapotMesh;
+	teapot.material = [CC3Material shiny];
+	return teapot;
+}
+
+-(CC3MeshNode*) makeTexturableTeapotNamed: (NSString*) aName {
+	CC3MeshNode* teapot = [CC3MeshNode nodeWithName: aName];
+	teapot.mesh = self.texturedTeapotMesh;
+	return teapot;
+}
+
 
 #pragma mark Allocation and initialization
 
@@ -147,38 +183,5 @@ static CC3ModelSampleFactory* _factory = nil;
 }
 
 +(void) deleteFactory { _factory = nil; }
-
-
-#pragma mark Factory methods
-
--(CC3Mesh*) makeTeapotMeshNamed: (NSString*) aName {
-	CC3Mesh* mesh = [CC3Mesh meshWithName: aName];
-	mesh.shouldInterleaveVertices = NO;
-	mesh.vertexLocations = _teapotVertexLocations;
-	mesh.vertexNormals = _teapotVertexNormals;
-	mesh.vertexIndices = _teapotVertexIndices;
-	return mesh;
-}
-
--(CC3MeshNode*) makeUniColoredTeapotNamed: (NSString*) aName withColor: (ccColor4F) color {
-	CC3MeshNode* teapot = [CC3MeshNode nodeWithName: aName];
-	teapot.mesh = unicoloredTeapotMesh;
-	teapot.material = [CC3Material shiny];
-	teapot.diffuseColor = color;	
-	return teapot;
-}
-
--(CC3MeshNode*) makeMultiColoredTeapotNamed: (NSString*) aName {
-	CC3MeshNode* teapot = [CC3MeshNode nodeWithName: aName];
-	teapot.mesh = multicoloredTeapotMesh;
-	teapot.material = [CC3Material shiny];
-	return teapot;
-}
-
--(CC3MeshNode*) makeTexturableTeapotNamed: (NSString*) aName {
-	CC3MeshNode* teapot = [CC3MeshNode nodeWithName: aName];
-	teapot.mesh = texturedTeapotMesh;
-	return teapot;
-}
 
 @end

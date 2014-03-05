@@ -303,16 +303,16 @@
 #pragma mark Shaders
 
 -(CC3ShaderContext*) shaderContext {
-	if ( !_shaderContext ) _shaderContext = [CC3ShaderContext new];		// retained
+	if ( !_shaderContext ) _shaderContext = [CC3ShaderContext new];		// retained - don't use setter
 	return _shaderContext;
 }
 
 // Set shader context if not the same, and pass along to descendants
 -(void) setShaderContext: (CC3ShaderContext*) shaderContext {
-	if (shaderContext != _shaderContext) {
-		[_shaderContext release];
-		_shaderContext = [shaderContext retain];
-	}
+	if (shaderContext == _shaderContext) return;
+
+	[_shaderContext release];
+	_shaderContext = [shaderContext retain];
 
 	[super setShaderContext: shaderContext];	// pass along to any children
 }

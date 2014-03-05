@@ -67,18 +67,17 @@
 
 -(void) dealloc {
 	self.target = nil;							// Removes myself as listener
-	[self removeAllChildren];
+	[self removeAllChildren];					// Also releases & nils the _children array
 	[self notifyDestructionListeners];			// Must do before releasing listeners.
 	
-	[_children release];
 	_parent = nil;								// weak reference
 	[_globalTransformMatrix release];
 	[_globalTransformMatrixInverted release];
 	[_globalRotationMatrix release];
 	[_rotator release];
 	[_boundingVolume release];
-	[_transformListeners release];
 	[_animationStates release];
+	[_transformListeners release];
 	
 	[super dealloc];
 }

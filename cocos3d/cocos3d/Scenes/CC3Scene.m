@@ -70,22 +70,24 @@
 -(void) dealloc {
 	LogInfo(@"Deallocating %@ on thread %@", self, NSThread.currentThread);
 	
-	self.drawingSequencer = nil;			// Use setter to release and make nil
-	self.activeCamera = nil;				// Use setter to release and make nil
+	self.cc3Layer = nil;					// Use setter to make nil
 	self.backdrop = nil;					// Use setter to stop any actions
 	self.fog = nil;							// Use setter to stop any actions
+	self.activeCamera = nil;				// Use setter to release and make nil
+	self.drawingSequencer = nil;			// Use setter to release and make nil
+	self.drawingSequenceVisitor = nil;		// Use setter to release and make nil
+	self.viewDrawingVisitor = nil;			// Use setter to release and make nil
+	self.envMapDrawingVisitor = nil;		// Use setter to release and make nil
+	self.updateVisitor = nil;				// Use setter to release and make nil
+	self.shadowVisitor = nil;				// Use setter to release and make nil
+	self.touchedNodePicker = nil;			// Use setter to release and make nil
+	self.performanceStatistics = nil;		// Use setter to release and make nil
 	
-	_cc3Layer = nil;						// weak reference
 	[_lights release];
+	_lights = nil;							// Make nil so won't be referenced during parent dealloc
 	[_billboards release];
-	[_touchedNodePicker release];
-	[_performanceStatistics release];
-	[_updateVisitor release];
-	[_viewDrawingVisitor release];
-	[_envMapDrawingVisitor release];
-	[_shadowVisitor release];
-	[_drawingSequenceVisitor release];
-
+	_billboards = nil;						// Make nil so won't be referenced during parent dealloc
+	
 	[super dealloc];
 }
 

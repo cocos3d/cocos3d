@@ -1290,7 +1290,10 @@
 -(void) populateFrom: (CC3NodeSphereThenBoxBoundingVolume*) another {
 	[super populateFrom: another];
 	
+	[_sphericalBoundingVolume release];
 	_sphericalBoundingVolume = [another.sphericalBoundingVolume copy];	// retained
+
+	[_boxBoundingVolume release];
 	_boxBoundingVolume = [another.boxBoundingVolume copy];				// retained
 }
 

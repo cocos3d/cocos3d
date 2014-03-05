@@ -54,12 +54,6 @@
 	CC3Mesh* _unicoloredTeapotMesh;
 }
 
-/** Returns the singleton instance. */
-+(CC3ModelSampleFactory*) factory;
-
-/** Deletes the factory singleton, to clear items from memory. */
-+(void) deleteFactory;
-
 /** An instance of a teapot mesh that includes a texture coordinate map. */
 @property(nonatomic, retain, readonly) CC3Mesh* texturedTeapotMesh;
 
@@ -68,6 +62,7 @@
 
 /** An instance of a teapot mesh that includes a vertex color array. */
 @property(nonatomic, retain, readonly) CC3Mesh* multicoloredTeapotMesh;
+
 
 #pragma mark Factory methods
 
@@ -79,5 +74,14 @@
 
 /** Returns an allocated, initialized, autoreleased instance of a teapot suitable for covering with a texture. */
 -(CC3MeshNode*) makeTexturableTeapotNamed: (NSString*) aName;
+
+
+#pragma mark Allocation and initialization
+
+/** Returns the singleton instance. */
++(CC3ModelSampleFactory*) factory;
+
+/** Deletes the factory singleton, to clear items from memory. */
++(void) deleteFactory;
 
 @end
