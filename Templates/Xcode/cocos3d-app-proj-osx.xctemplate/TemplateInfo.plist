@@ -3,9 +3,13 @@
 <plist version="1.0">
 <dict>
 	<key>Identifier</key>
-	<string>org.cocos3d.cocos3dBaseOSX</string>
+	<string>org.cocos3d.cocos3dAppProjOSX</string>
 	<key>Kind</key>
 	<string>Xcode.Xcode3.ProjectTemplateUnitKind</string>
+	<key>Ancestors</key>
+	<array>
+		<string>org.cocos3d.cocos3dAppProj</string>
+	</array>
 	<key>Platforms</key>
 	<array>
 		<string>com.apple.platform.macosx</string>
@@ -20,19 +24,5 @@
 			<string>10.7</string>
 		</dict>
 	</dict>
-	<key>Targets</key>
-	<array>
-		<dict>
-			<key>Frameworks</key>
-			<array>
-				<string>QuartzCore</string>
-				<string>OpenGL</string>
-				<string>OpenAL</string>
-				<string>AudioToolbox</string>
-				<string>AppKit</string>
-				<string>Foundation</string>
-			</array>
-		</dict>
-	</array>
 </dict>
 </plist>

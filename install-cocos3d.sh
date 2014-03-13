@@ -82,19 +82,40 @@ if [[ ! -d "$CC2_DIST_DIR" ]];  then
 	exit 1
 fi
 
-copy_files(){
-	rsync -r --exclude=.svn "$1" "$2"
-}
-
-check_dst_dir(){
-	if [[ ! -d $DST_DIR ]];  then
-		echo ...creating destination directory: $DST_DIR
-		mkdir -p "$DST_DIR"
+#If it exists, copies the file $1 from source directory $2 to dest directory $3
+copy_file() {
+	if [[ -e "$2/$1" ]]; then
+		echo "...copying $1"
+		check_dir "$3"
+		cp "$2/$1" "$3"
 	fi
 }
 
-rm_dst_dir(){
-	rm -rf "$DST_DIR"
+copy_files(){
+	check_dir "$2"
+	rsync -r --exclude=.svn "$1" "$2"
+}
+
+check_dir(){
+	if [[ ! -d "$1" ]];  then
+		echo ...creating destination directory: "$1"
+		mkdir -p "$1"
+	fi
+}
+
+# If it exists, creates a symbolic link inside the dest directory $2 to the source directory $1
+# The third arg is just a description that is echoed
+link_dir() {
+	if [[ -d "$1" ]]; then
+		echo "...linking $3"
+		ln -s "$1" "$2"
+	fi
+}
+
+copy_template_files(){
+	DST_DIR="$TEMPLATE_DIR""$TEMPLATE"".xctemplate"
+	echo ...copying $TEMPLATE template files
+	copy_files "Templates/Xcode/$TEMPLATE.xctemplate/" "$DST_DIR"
 }
 
 print_template_banner(){
@@ -112,148 +133,95 @@ copy_xc_project_templates() {
 	TEMPLATE_DIR="${BASE_TEMPLATE_4_DIR}/${COCOS3D_TEMPLATE_4_DIR}/"
 
 # Delete the existing cocos3d template directory, and recreate it
-	DST_DIR="$TEMPLATE_DIR"
-	rm_dst_dir
+	rm -rf "$TEMPLATE_DIR"
 
-# Copy cocos2d-v1 iOS static library project settings
-	TEMPLATE="cocos2d iOS Static Library"
-	DST_DIR="$TEMPLATE_DIR""cocos2d-v1 iOS Static Library.xctemplate"
-	check_dst_dir
-	echo ...copying $TEMPLATE template files
-	copy_files "Templates/Xcode/$TEMPLATE.xctemplate/" "$DST_DIR"
+# Copy cocos2d-v1 iOS static library settings
+	TEMPLATE="cocos2d iOS OpenGL ES 1.1 Static Library"
+	copy_template_files
 
-	mv "$DST_DIR/TemplateInfo1.plist" "$DST_DIR/TemplateInfo.plist"
-	rm "$DST_DIR/TemplateInfo2.plist"
+# Copy cocos2d-v2 iOS static library settings
+	TEMPLATE="cocos2d iOS OpenGL ES 2.0 Static Library"
+	copy_template_files
 
-# Copy cocos2d-v2 iOS static library project settings
-	TEMPLATE="cocos2d iOS Static Library"
-	DST_DIR="$TEMPLATE_DIR""cocos2d-v2 iOS Static Library.xctemplate"
-	check_dst_dir
-	echo ...copying $TEMPLATE template files
-	copy_files "Templates/Xcode/$TEMPLATE.xctemplate/" "$DST_DIR"
-
-	mv "$DST_DIR/TemplateInfo2.plist" "$DST_DIR/TemplateInfo.plist"
-	rm "$DST_DIR/TemplateInfo1.plist"
-
-# Copy cocos2d OSX static library project settings
-	TEMPLATE="cocos2d OSX Static Library"
-	DST_DIR="$TEMPLATE_DIR""$TEMPLATE.xctemplate"
-	check_dst_dir
-	echo ...copying $TEMPLATE template files
-	copy_files "Templates/Xcode/$TEMPLATE.xctemplate/" "$DST_DIR"
+# Copy cocos2d OSX static library settings
+	TEMPLATE="cocos2d OSX OpenGL Static Library"
+	copy_template_files
 
 # Copy cocos3d library files references
 	TEMPLATE="cocos3d-lib"
-	DST_DIR="$TEMPLATE_DIR""$TEMPLATE.xctemplate"
-	check_dst_dir
-	echo ...copying $TEMPLATE template files
-	copy_files "Templates/Xcode/$TEMPLATE.xctemplate/" "$DST_DIR"
-
-	echo ...copying cocos3d files to $TEMPLATE template
+	copy_template_files
 	copy_files "cocos3d" "$DST_DIR"
 
-# Copy base cocos3d project settings
+# Copy cocos3d GLSL files references
+	TEMPLATE="cocos3d-glsl"
+	copy_template_files
+	copy_files "cocos3d-GLSL" "$DST_DIR"
+
+# Copy base cocos3d settings
 	TEMPLATE="cocos3d-base"
-	DST_DIR="$TEMPLATE_DIR""$TEMPLATE.xctemplate"
-	check_dst_dir
-	echo ...copying $TEMPLATE template files
-	copy_files "Templates/Xcode/$TEMPLATE.xctemplate/" "$DST_DIR"
+	copy_template_files
 
-# Copy base cocos3d iOS project settings
-	TEMPLATE="cocos3d-base-ios"
-	DST_DIR="$TEMPLATE_DIR""$TEMPLATE.xctemplate"
-	check_dst_dir
-	echo ...copying $TEMPLATE template files
-	copy_files "Templates/Xcode/$TEMPLATE.xctemplate/" "$DST_DIR"
+# Copy cocos3d static library settings
+	TEMPLATE="cocos3d Static Library"
+	copy_template_files
+	copy_file "LICENSE_cocos3d.txt" "." "$DST_DIR"
 
-	DST_DIR="$DST_DIR""/Resources"
-	copy_files "Projects/Common/Resources/Icons/" "$DST_DIR"
-	copy_files "Projects/Common/Resources/LaunchImages/" "$DST_DIR"
-
-# Copy base cocos3d OSX project settings
-	TEMPLATE="cocos3d-base-osx"
-	DST_DIR="$TEMPLATE_DIR""$TEMPLATE.xctemplate"
-	check_dst_dir
-	echo ...copying $TEMPLATE template files
-	copy_files "Templates/Xcode/$TEMPLATE.xctemplate/" "$DST_DIR"
-
-# Copy application base cocos3d project settings
+# Copy application base cocos3d settings
 	TEMPLATE="cocos3d-app-base"
-	DST_DIR="$TEMPLATE_DIR""$TEMPLATE.xctemplate"
-	check_dst_dir
-	echo ...copying $TEMPLATE template files
-	copy_files "Templates/Xcode/$TEMPLATE.xctemplate/" "$DST_DIR"
+	copy_template_files
+	copy_file "hello-world.pod" "Models/Hello World" "$DST_DIR""/Resources"
 
-	DST_DIR="$DST_DIR""/Resources"
-	check_dst_dir
-	copy_files "Models/Hello World/hello-world.pod" "$DST_DIR"
+# Copy base cocos3d iOS app settings
+	TEMPLATE="cocos3d-app-ios"
+	copy_template_files
+	copy_files "Projects/Common/Resources/Icons/" "$DST_DIR""/Resources"
+	copy_files "Projects/Common/Resources/LaunchImages/" "$DST_DIR""/Resources"
+
+# Copy base cocos3d OSX settings
+	TEMPLATE="cocos3d-app-osx"
+	copy_template_files
+
+# Copy base cocos3d app project settings
+	TEMPLATE="cocos3d-app-proj"
+	copy_template_files
+
+# Copy base cocos3d iOS app project settings
+	TEMPLATE="cocos3d-app-proj-ios"
+	copy_template_files
+
+# Copy base cocos3d OSX app project settings
+	TEMPLATE="cocos3d-app-proj-osx"
+	copy_template_files
 
 # Copy OpenGL ES 1 Template
-	TEMPLATE="cocos3d iOS Application"
-	DST_DIR="$TEMPLATE_DIR""cocos3d OpenGL ES 1.1 Application.xctemplate"
-	check_dst_dir
-	echo ...copying $TEMPLATE template files for use with OpenGL ES 1.1
-	copy_files "Templates/Xcode/$TEMPLATE.xctemplate/" "$DST_DIR"
+	TEMPLATE="cocos3d-app-ogles1"
+	copy_template_files
+	copy_file "fps_images_1.png" "Projects/Common/Resources" "$DST_DIR""/Resources"
 
-	mv "$DST_DIR/TemplateInfo1.plist" "$DST_DIR/TemplateInfo.plist"
-	rm "$DST_DIR/TemplateInfo2.plist"
-
-	mv "$DST_DIR/Apportable/configuration1.json" "$DST_DIR/Apportable/configuration.json"
-	rm "$DST_DIR/Apportable/configuration2.json"
-
-	DST_DIR="$DST_DIR""/Resources"
-	check_dst_dir
-	copy_files "Projects/Common/Resources/fps_images_1.png" "$DST_DIR"
+# Copy Concrete OpenGL ES 1 Application Template
+	TEMPLATE="cocos3d iOS OpenGL ES 1.1 Application"
+	copy_template_files
 
 # Copy OpenGL ES 2 Template
-	TEMPLATE="cocos3d iOS Application"
-	DST_DIR="$TEMPLATE_DIR""cocos3d OpenGL ES 2.0 Application.xctemplate"
-	check_dst_dir
-	echo ...copying $TEMPLATE template files for use with OpenGL ES 2.0
-	copy_files "Templates/Xcode/$TEMPLATE.xctemplate/" "$DST_DIR"
+	TEMPLATE="cocos3d-app-ogles2"
+	copy_template_files
+	copy_file "fps_images.png" "Projects/Common/Resources" "$DST_DIR""/Resources"
+	copy_file "fps_images-hd.png" "Projects/Common/Resources" "$DST_DIR""/Resources"
+	copy_file "fps_images-ipadhd.png" "Projects/Common/Resources" "$DST_DIR""/Resources"
 
-	mv "$DST_DIR/TemplateInfo2.plist" "$DST_DIR/TemplateInfo.plist"
-	rm "$DST_DIR/TemplateInfo1.plist"
-
-	mv "$DST_DIR/Apportable/configuration2.json" "$DST_DIR/Apportable/configuration.json"
-	rm "$DST_DIR/Apportable/configuration1.json"
-
-	DST_DIR="$DST_DIR""/Resources"
-	check_dst_dir
-	copy_files "Projects/Common/Resources/fps_images.png" "$DST_DIR"
-	copy_files "Projects/Common/Resources/fps_images-hd.png" "$DST_DIR"
-	copy_files "Projects/Common/Resources/fps_images-ipadhd.png" "$DST_DIR"
+# Copy Concrete OpenGL ES 2 Application Template
+	TEMPLATE="cocos3d iOS OpenGL ES 2.0 Application"
+	copy_template_files
 
 # Copy OpenGL OSX Template (cocos2d 2.1)
-	TEMPLATE="cocos3d OSX Application"
+	TEMPLATE="cocos3d-app-ogl"
+	copy_template_files
+	copy_file "fps_images.png" "Projects/Common/Resources" "$DST_DIR""/Resources"
 
-	DST_DIR="$TEMPLATE_DIR""cocos3d OpenGL Application.xctemplate"
-	check_dst_dir
-	echo ...copying $TEMPLATE template files for use with OpenGL under OSX and cocos2d 2.1
-	copy_files "Templates/Xcode/$TEMPLATE.xctemplate/" "$DST_DIR"
+# Copy Concrete OSX OpenGL Application Template
+	TEMPLATE="cocos3d OSX OpenGL Application"
+	copy_template_files
 
-	DST_DIR="$DST_DIR""/Resources"
-	check_dst_dir
-	copy_files "Projects/Common/Resources/fps_images.png" "$DST_DIR"
-
-	echo Done!
-}
-
-# If it exists, creates a symbolic link inside the dest directory $2 to the source directory $1
-# The third arg is just a description that is echoed
-link_dir() {
-if [[ -d "$1" ]]; then
-	echo "...linking $3"
-	ln -s "$1" "$2"
-fi
-}
-
-#If it exists, copies the file $1 from source directory $2 to dest directory $3
-copy_file() {
-if [[ -e "$2/$1" ]]; then
-	echo "...copying $1"
-	cp "$2/$1" "$3"
-fi
 }
 
 link_cocos2d_libs(){
@@ -281,15 +249,17 @@ link_cocos2d_libs(){
 	# Chipmunk library (cocos2d 3.x only)
 	CHPMK_DIR=cocos2d-chipmunk
 	rm -rf   "$CHPMK_DIR"
-	CHIPMUNK_DIST_DIR="$CC2_DIST_DIR/external/Chipmunk"
-	if [[ -d "$CHIPMUNK_DIST_DIR" ]]; then
-		mkdir -p "$CHPMK_DIR"
-		mkdir -p "$CHPMK_DIR/chipmunk"
-		link_dir "$CHIPMUNK_DIST_DIR/include" "$CHPMK_DIR/chipmunk" "Chipmunk includes"
-		link_dir "$CHIPMUNK_DIST_DIR/src" "$CHPMK_DIR/chipmunk" "Chipmunk source"
-		link_dir "$CHIPMUNK_DIST_DIR/objectivec" "$CHPMK_DIR" "Objective Chipmunk"
+	if [[ -d "$CC2_DIST_DIR/cocos2d-ui" ]]; then	# test for cocos2d 3.x
+		CHIPMUNK_DIST_DIR="$CC2_DIST_DIR/external/Chipmunk"
+		if [[ -d "$CHIPMUNK_DIST_DIR" ]]; then
+			mkdir -p "$CHPMK_DIR"
+			mkdir -p "$CHPMK_DIR/chipmunk"
+			link_dir "$CHIPMUNK_DIST_DIR/include" "$CHPMK_DIR/chipmunk" "Chipmunk includes"
+			link_dir "$CHIPMUNK_DIST_DIR/src" "$CHPMK_DIR/chipmunk" "Chipmunk source"
+			link_dir "$CHIPMUNK_DIST_DIR/objectivec" "$CHPMK_DIR" "Objective Chipmunk"
+		fi
+		copy_file "LICENSE_Chipmunk.txt" "$CC2_DIST_DIR" "$CHPMK_DIR"
 	fi
-	copy_file "LICENSE_Chipmunk.txt" "$CC2_DIST_DIR" "$CHPMK_DIR"
 
 	# ObjectAL  (cocos2d 3.x only)
 	link_dir "$CC2_DIST_DIR/external/ObjectAL" "$CC2_DIR" "ObjectAL"
@@ -305,10 +275,12 @@ link_cocos2d_libs(){
 	fi
 	copy_file "LICENSE_CocosDenshion.txt" "$CC2_DIST_DIR" "$CC2_DIR"
 
-	echo done!
+	echo Finished linking cocos2d.
 }
 
 link_cocos2d_libs
 
 copy_xc_project_templates
+
+echo Done!
 

@@ -210,20 +210,6 @@ menu selection, and select the *cocos3d OpenGL Application* project template fro
 in the OS X section. The *cocos3d OpenGL Application* template uses the OpenGL programmable pipeline and
 your cocos3d installation must be linked to the `cocos2d 2.1` version, as described above.
 
-With either the iOS or Mac OSX template project, if you are linking to `cocos2d 2.1` or `cocos2d 1.1`,
-once the template application opens up, you must add the `cocos2d` target within your project as a 
-dependency of the main app target. This is because `cocos2d 2.1` and `cocos2d 1.1` do not use Automatic
-Reference Counting (ARC), and must be compiled separately in its own target.
-
-To add the `cocos2d` target as a dependency of your main app target, follow these steps:
-
-1. Open the template project in Xcode.
-2. In the Xcode Project Navigator pane, select the project.
-3. Select the main app target in the Project Editor pane.
-4. Click on the Build Phases tab.
-5. Open the Target Dependencies section,
-6. Click the + button, select the `cocos2d` item in the list, and click the *Add* button
-
 The template project starts with a working 3D variation on the familiar *hello, world*
 application, and you can use it as a starting point for your own application.
 
@@ -240,6 +226,13 @@ You can add these static library projects as sub-projects of your Xcode app proj
 for adding a static library to your app project are available through Apple's documentation, or
 can be found by searching the web. You can also reference how these static libraries have been
 added to the demo apps, also available in the `Projects` folder in the cocos3d distribution.
+
+When adding cocos3d files to your project, either as a static library, or as individual files, be 
+aware that, to ensure the highest performance, the cocos3d libraries do not use Automatic Reference
+Counting (ARC). However, you can seamlessly use the cocos3d library within an ARC-enabled application.
+The cocos3d static library project provided with the cocos3d distribution is already configured to 
+bypass ARC, and you can simply include this static library project as subproject to your application
+project, regardless of whether your application uses ARC or Manual Reference Counting (MRC).
 
 Like any static library, the compiled cocos3d static library includes only executable code, and does
 not include the standard cocos3d GLSL shader files. If you use the cocos3d static library in your

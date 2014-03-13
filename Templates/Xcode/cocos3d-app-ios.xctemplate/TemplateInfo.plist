@@ -3,90 +3,30 @@
 <plist version="1.0">
 <dict>
 	<key>Identifier</key>
-	<string>org.cocos3d.cocos3dBaseIOS</string>
+	<string>org.cocos3d.cocos3dAppIOS</string>
 	<key>Kind</key>
 	<string>Xcode.Xcode3.ProjectTemplateUnitKind</string>
-	<key>Options</key>
+	<key>Ancestors</key>
 	<array>
-		<dict>
-			<key>Default</key>
-			<string>Universal</string>
-			<key>Description</key>
-			<string>What device family to create a project for.</string>
-			<key>Identifier</key>
-			<string>universalDeviceFamily</string>
-			<key>Name</key>
-			<string>Device Family</string>
-			<key>SortOrder</key>
-			<integer>1</integer>
-			<key>Type</key>
-			<string>popup</string>
-			<key>Units</key>
-			<dict>
-				<key>Universal</key>
-				<dict>
-					<key>Project</key>
-					<dict>
-						<key>SharedSettings</key>
-						<dict>
-							<key>TARGETED_DEVICE_FAMILY</key>
-							<string>1,2</string>
-						</dict>
-					</dict>
-				</dict>
-				<key>iPad</key>
-				<dict>
-					<key>Project</key>
-					<dict>
-						<key>SharedSettings</key>
-						<dict>
-							<key>TARGETED_DEVICE_FAMILY</key>
-							<string>2</string>
-						</dict>
-					</dict>
-				</dict>
-				<key>iPhone</key>
-				<dict>
-					<key>Project</key>
-					<dict>
-						<key>SharedSettings</key>
-						<dict>
-							<key>TARGETED_DEVICE_FAMILY</key>
-							<string>1</string>
-						</dict>
-					</dict>
-				</dict>
-			</dict>
-		</dict>
-	</array>
-	<key>Platforms</key>
-	<array>
-		<string>com.apple.platform.iphoneos</string>
+		<string>org.cocos3d.cocos3dAppBase</string>
 	</array>
 	<key>Project</key>
 	<dict>
 		<key>SDK</key>
 		<string>iphoneos</string>
-		<key>SharedSettings</key>
-		<dict>
-			<key>IPHONEOS_DEPLOYMENT_TARGET</key>
-			<string>4.0</string>
-			<key>CODE_SIGN_IDENTITY</key>
-			<string>iPhone Developer</string>
-		</dict>
 	</dict>
 	<key>Targets</key>
 	<array>
 		<dict>
 			<key>Frameworks</key>
 			<array>
+				<string>Foundation</string>
 				<string>QuartzCore</string>
+				<string>UIKit</string>
 				<string>OpenGLES</string>
 				<string>OpenAL</string>
 				<string>AudioToolbox</string>
 				<string>AVFoundation</string>
-				<string>UIKit</string>
-				<string>Foundation</string>
 				<string>CoreGraphics</string>
 				<string>CoreText</string>
 				<string>GameKit</string>
@@ -95,6 +35,44 @@
 	</array>
 	<key>Definitions</key>
 	<dict>
+		<key>Classes/___PROJECTNAMEASIDENTIFIER___AppDelegate.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>Classes</string>
+			</array>
+			<key>Path</key>
+			<string>Classes/___PROJECTNAMEASIDENTIFIER___AppDelegate.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>Classes/___PROJECTNAMEASIDENTIFIER___AppDelegate.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>Classes</string>
+			</array>
+			<key>Path</key>
+			<string>Classes/___PROJECTNAMEASIDENTIFIER___AppDelegate.m</string>
+		</dict>
+		<key>main.m</key>
+		<dict>
+			<key>Group</key>
+			<string>Supporting Files</string>
+			<key>Path</key>
+			<string>main.m</string>
+		</dict>
+		<key>Resources/Info.plist</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>Resources</string>
+			</array>
+			<key>Path</key>
+			<string>Resources/Info.plist</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
 		<key>Resources/Icon-29.png</key>
 		<dict>
 			<key>Group</key>
@@ -278,6 +256,10 @@
 	</dict>
 	<key>Nodes</key>
 	<array>
+		<string>Classes/___PROJECTNAMEASIDENTIFIER___AppDelegate.h</string>
+		<string>Classes/___PROJECTNAMEASIDENTIFIER___AppDelegate.m</string>
+		<string>main.m</string>
+		<string>Resources/Info.plist</string>
 		<string>Resources/Icon-29.png</string>
 		<string>Resources/Icon-29@2x.png</string>
 		<string>Resources/Icon-40.png</string>

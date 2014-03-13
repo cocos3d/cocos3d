@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Identifier</key>
+	<string>org.cocos3d.cocos3dAppOGL</string>
+	<key>Kind</key>
+	<string>Xcode.Xcode3.ProjectTemplateUnitKind</string>
+	<key>Ancestors</key>
+	<array>
+		<string>org.cocos3d.cocos3dAppOSX</string>
+		<string>org.cocos3d.cocos3dGLSL</string>
+	</array>
+	<key>Definitions</key>
+	<dict>
+		<key>Resources/fps_images.png</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>Resources</string>
+			</array>
+			<key>Path</key>
+			<string>Resources/fps_images.png</string>
+		</dict>
+	</dict>
+	<key>Nodes</key>
+	<array>
+		<string>Resources/fps_images.png</string>
+	</array>
+</dict>
+</plist>

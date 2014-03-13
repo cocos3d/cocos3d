@@ -436,7 +436,7 @@
 @end
 
 
-#if CC3_IOS
+#if CC3_OGLES_1
 
 #pragma mark -
 #pragma mark CCDirectorIOS extension
@@ -456,7 +456,11 @@
     if (!FPSLabel_) {
 		CCTexture2DPixelFormat currentFormat = [CCTexture defaultAlphaPixelFormat];
 		[CCTexture setDefaultAlphaPixelFormat:kCCTexture2DPixelFormat_RGBA4444];
-		FPSLabel_ = [CCLabelAtlas labelWithString:@"00.0" charMapFile:@"fps_images_1.png" itemWidth:16 itemHeight:24 startCharMap:'.'];
+		FPSLabel_ = [[CCLabelAtlas labelWithString: @"00.0"
+									   charMapFile: @"fps_images_1.png"
+										 itemWidth: 16
+										itemHeight: 24
+									  startCharMap:'.'] retain];
 		[CCTexture setDefaultAlphaPixelFormat:currentFormat];
 	}
 #endif	// CC_DIRECTOR_FAST_FPS
@@ -466,7 +470,7 @@
 
 @end
 
-#endif		// CC3_IOS
+#endif		// CC3_OGLES_1
 
 
 #if CC3_OSX

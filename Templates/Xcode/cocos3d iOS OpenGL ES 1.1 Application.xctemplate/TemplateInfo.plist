@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Identifier</key>
+	<string>org.cocos3d.cocos3dAppOGLES1Concrete</string>
+	<key>Description</key>
+	<string>You can use this as the starting point for any cocos3d application that uses OpenGL ES 1.1 on an iOS or Android device. This template requires that cocos2d 1.x is installed.</string>
+	<key>Kind</key>
+	<string>Xcode.Xcode3.ProjectTemplateUnitKind</string>
+	<key>Concrete</key>
+	<true/>
+	<key>SortOrder</key>
+	<integer>1</integer>
+	<key>Ancestors</key>
+	<array>
+		<string>org.cocos3d.cocos3dAppProjIOS</string>
+	</array>
+	<key>Components</key>
+	<array>
+		<dict>
+			<key>Identifier</key>
+			<string>org.cocos3d.cocos2d-v1iOSStatLib</string>
+			<key>Name</key>
+			<string>cocos2d</string>
+		</dict>
+		<dict>
+			<key>Identifier</key>
+			<string>org.cocos3d.cocos3dStatLib</string>
+			<key>Name</key>
+			<string>cocos3d</string>
+		</dict>
+		<dict>
+			<key>Identifier</key>
+			<string>org.cocos3d.cocos3dAppOGLES1</string>
+			<key>Name</key>
+			<string>___PACKAGENAME___</string>
+		</dict>
+	</array>
+</dict>
+</plist>

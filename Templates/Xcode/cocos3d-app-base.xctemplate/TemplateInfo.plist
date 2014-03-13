@@ -8,7 +8,6 @@
 	<string>Xcode.Xcode3.ProjectTemplateUnitKind</string>
 	<key>Ancestors</key>
 	<array>
-		<string>org.cocos3d.cocos3dLib</string>
 		<string>org.cocos3d.cocos3dBase</string>
 	</array>
 	<key>Targets</key>
@@ -19,14 +18,25 @@
 			<key>Dependencies</key>
 			<array>
 				<integer>0</integer>
+				<integer>1</integer>
 			</array>
 			<key>SharedSettings</key>
 			<dict>
+				<key>INFOPLIST_FILE</key>
+				<string>___PACKAGENAME___/Resources/Info.plist</string>
+				<key>HEADER_SEARCH_PATHS</key>
+				<array>
+					<string>cocos3d/**</string>
+					<string>cocos2d/**</string>
+				</array>
+				<key>CLANG_ENABLE_OBJC_ARC</key>
+				<string>YES</string>
 				<key>OTHER_LDFLAGS</key>
 				<array>
 					<string>-ObjC</string>
 					<string>-lz</string>
 					<string>-lstdc++</string>
+					<string>-lcocos3d</string>
 					<string>-lcocos2d</string>
 				</array>
 			</dict>
@@ -93,7 +103,6 @@
 	</dict>
 	<key>Nodes</key>
 	<array>
-		<string>main.m</string>
 		<string>Classes/___PROJECTNAMEASIDENTIFIER___Layer.h</string>
 		<string>Classes/___PROJECTNAMEASIDENTIFIER___Layer.m</string>
 		<string>Classes/___PROJECTNAMEASIDENTIFIER___Scene.h</string>

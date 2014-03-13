@@ -17,6 +17,6 @@
       location = "group:CHANGELOG">
    </FileRef>
    <FileRef
-      location = "group:LICENSE">
+      location = "group:LICENSE_cocos3d.txt">
    </FileRef>
 </Workspace>
