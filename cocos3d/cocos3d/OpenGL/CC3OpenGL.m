@@ -529,8 +529,12 @@ static NSObject<CC3OpenGLDelegate>* _delegate = nil;
 	glDeleteTextures(1, &texID);
 	LogGLErrorTrace(@"glDeleteTextures(%i, %u)", 1, texID);
 
-	// If the deleted texture is currently bound to a texture unit, the GL engine will automatically
+    // If the deleted texture is currently bound to a texture unit, the GL engine will automatically
 	// bind the default texture ID (0) to that texture unit. Update the state tracking accordingly.
+    [self clearTextureBinding: texID];
+}
+
+-(void) clearTextureBinding: (GLuint) texID {
 	GLuint maxTexUnits = value_MaxTextureUnitsUsed;
 	for (GLuint tuIdx = 0; tuIdx < maxTexUnits; tuIdx++) {
 		if (value_GL_TEXTURE_BINDING_2D[tuIdx] == texID)

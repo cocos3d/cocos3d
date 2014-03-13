@@ -614,6 +614,18 @@ typedef struct {
 /** Deletes the texture with the specified ID from the GL engine. */
 -(void) deleteTexture: (GLuint) texID;
 
+/** 
+ * Clears the tracking of the specified texture.
+ *
+ * For each texture unit whose state tracking indicates that it is bound to the specified
+ * texture, sets the tracking state for that texture unit to the default texture ID (0),
+ * to ensure that the state tracking no longer expects to be bound to that texture.
+ *
+ * This method is invoked automatically whenever a GL texture is deleted, or whenever a 
+ * GL texture is removed from cocos3d, but may still be in use by cocos2d.
+ */
+-(void) clearTextureBinding: (GLuint) texID;
+
 /**
  * Loads the specified texture image data, with the specified characteristics,
  * into the specified target at the specified texture unit, in GL memory.

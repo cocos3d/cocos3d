@@ -60,11 +60,16 @@
 -(void) ensureGLTexture { if (!_textureID) _textureID = CC3OpenGL.sharedGL.generateTexture; }
 
 /**
- * If the GL texture is not also tracked by a CCTexture, delete the GL texture, 
- * otherwise, let the CCTexture take care of it when it is deallocated.
+ * If the GL texture is also tracked by a CCTexture, the CCTexture will delete the GL texture
+ * when it is deallocated, but we must tell the 3D state engine to stop tracking this texture.
+ * Otherwise, if no CCTexture is tracking the GL texture, delete it from the GL engine now.
  */
 -(void) deleteGLTexture {
-	if (!_ccTextureContent) [CC3OpenGL.sharedGL deleteTexture: _textureID];
+	if (_ccTextureContent)
+		[CC3OpenGL.sharedGL clearTextureBinding: _textureID];
+    else
+		[CC3OpenGL.sharedGL deleteTexture: _textureID];
+	
 	_textureID = 0;
 }
 
