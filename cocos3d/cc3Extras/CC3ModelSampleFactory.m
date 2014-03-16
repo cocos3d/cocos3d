@@ -182,6 +182,9 @@ static CC3ModelSampleFactory* _factory = nil;
 	return _factory;
 }
 
-+(void) deleteFactory { _factory = nil; }
++(void) deleteFactory {
+	[_factory release];
+	_factory = nil;
+}
 
 @end

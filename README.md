@@ -184,7 +184,8 @@ changing the version of `cocos2d` that is linked, by following these steps withi
 3. Add the newly linked cocos2d files to the project by dragging the `cocos2d` folder from
    the cocos3d distribution folder to the Xcode Project Navigator panel. If you are using the
    cocos2d static library, you will drag the folder into the `cocos2d-library-iOS` or
-   `cocos2d-library-OSX` project.
+   `cocos2d-library-OSX` project. When prompted for the target to add the source code to, 
+   select the `cocos2d-library-iOS` target.
 
 At the time of this release, the current stable version of cocos2d is `2.1`, and by default,
 the demo apps within the cocos3d distribution are pre-configured to use that version. To build

@@ -89,7 +89,7 @@
 	wasRead = wasRead && [self readHeaderFrom: reader];
 	CC3Assert(wasRead, @"%@ file type or version is invalid", self);
 
-	for (NSInteger nIdx = 0; nIdx < _nodeCount; nIdx++)
+	for (int nIdx = 0; nIdx < _nodeCount; nIdx++)
 		wasRead = wasRead && [self readNode: nIdx from: reader];
 	
 	return wasRead;
@@ -131,7 +131,7 @@
 }
 
 /** Reads a single node, with the specified index, from the content. */
--(BOOL)	readNode: (NSInteger) nodeIdx from: (CC3DataReader*) reader {
+-(BOOL)	readNode: (int) nodeIdx from: (CC3DataReader*) reader {
 	//	[nodes]
 	//		length of bone name      4       integer
 	//		bone name                var     string
@@ -160,7 +160,7 @@
 
 	// Retrieve the name chars into a buffer, create an NSString from it, and release the buffer.
 	NSString* nodeName = nil;
-	NSUInteger nameLen = (NSUInteger)reader.readInteger;
+	int nameLen = reader.readInteger;
 	if (nameLen > 0) {
 		char cNodeName[nameLen];
 		[reader readAll: nameLen bytes: cNodeName];
@@ -193,7 +193,7 @@
 	vtxQuaternion.z = reader.readFloat;
 	vtxQuaternion.w = reader.readFloat;
 	
-	NSInteger parentIndex = reader.readInteger;
+	int parentIndex = reader.readInteger;
 	
 	// Create the node and populate it with content extracted from the reader.
 	CC3CALNode* calNode = [CC3CALNode nodeWithName: nodeName];

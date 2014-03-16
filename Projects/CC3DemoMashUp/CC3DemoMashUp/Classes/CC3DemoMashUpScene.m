@@ -3670,7 +3670,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	[_floatingHead removeLocalShaders];
 	
 	// Demonstrate the use of application-specific data attached to a node, by logging the data.
-	if (_floatingHead.userData) LogInfo(@"%@ says '%@'", _floatingHead, _floatingHead.userData);
+	if (_floatingHead.userData) {
+		LogInfo(@"%@ says '%@'", _floatingHead, _floatingHead.userData);
+	}
 }
 
 /**

@@ -721,11 +721,11 @@
 	[super acceptParticle: aParticle];
 
 	NSRange vtxRange = aParticle.vertexRange;
-	self.vertexCount = NSMaxRange(vtxRange);
+	self.vertexCount = (GLuint)NSMaxRange(vtxRange);
 	[self addDirtyVertexRange: vtxRange];
 
 	NSRange vtxIdxRange = aParticle.vertexIndexRange;
-	self.vertexIndexCount = NSMaxRange(vtxIdxRange);
+	self.vertexIndexCount = (GLuint)NSMaxRange(vtxIdxRange);
 	[self addDirtyVertexIndexRange: vtxIdxRange];
 	
 	LogTrace(@"%@ accepting particle %@ at %i. Vertex count %i and vertex index count %i",

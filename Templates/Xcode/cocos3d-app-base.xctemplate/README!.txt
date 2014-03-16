@@ -56,7 +56,8 @@ to this project by following these steps within Xcode:
 1. Delete the reference to the cocos2d group in the Xcode Project Navigator panel.
 2. Run the install_cocos3d script and identify the new version of cocos2d to be linked.
 3. Add the newly linked cocos2d files to the project by dragging the cocos2d folder from
-   the cocos3d distribution folder to the Xcode Project Navigator panel.
+   the cocos3d distribution folder to the Xcode Project Navigator panel. When prompted for
+   the target to add the source code to, select the `cocos2d` target.
 
 
 Creating POD 3D Model Files

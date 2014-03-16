@@ -376,8 +376,9 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 
 -(void) setShouldInterleaveVertices: (BOOL) shouldInterleave {
 	_shouldInterleaveVertices = shouldInterleave;
-	if (!_shouldInterleaveVertices)
+	if (!_shouldInterleaveVertices) {
 		LogInfo(@"%@ has been configured to use non-interleaved vertex content. To improve performance, it is recommended that you interleave all vertex content, unless you need to frequently update one type of vertex content without updating the others.", self);
+	}
 }
 
 -(CC3VertexContent) vertexContentTypes {
@@ -689,7 +690,9 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 
 -(void) setVertexCount: (GLuint) vCount {
 	// If we're attempting to set too many vertices for indexed drawing, log an error, but don't abort.
-	if(_vertexIndices && (vCount > (kCC3MaxGLushort + 1))) LogError(@"Setting vertexCount property of %@ to %i vertices. This mesh uses indexed drawing, which is limited by OpenGL ES to %i vertices. Vertices beyond that limit will not be drawn.", self, vCount, (kCC3MaxGLushort + 1));
+	if(_vertexIndices && (vCount > (kCC3MaxGLushort + 1)))
+		LogError(@"Setting vertexCount property of %@ to %i vertices. This mesh uses indexed drawing, which is limited by OpenGL ES to %i vertices."
+				 @" Vertices beyond that limit will not be drawn.", self, vCount, (kCC3MaxGLushort + 1));
 	
 	_vertexLocations.vertexCount = vCount;
 	_vertexNormals.vertexCount = vCount;

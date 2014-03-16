@@ -703,7 +703,7 @@
 		A96E0CC2170DC8060044CA2A /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0500;
+				LastUpgradeCheck = 0510;
 			};
 			buildConfigurationList = A96E0CC5170DC8060044CA2A /* Build configuration list for PBXProject "CC3DemoMashUp-OSX" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -1041,6 +1041,7 @@
 		A96E0FE9170DC8100044CA2A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = "CC3DemoMashUp/OSX Support/Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -1049,6 +1050,7 @@
 		A96E0FEA170DC8100044CA2A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = "CC3DemoMashUp/OSX Support/Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

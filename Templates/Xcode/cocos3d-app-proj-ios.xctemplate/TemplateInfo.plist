@@ -75,8 +75,18 @@
 		<dict>
 			<key>IPHONEOS_DEPLOYMENT_TARGET</key>
 			<string>4.0</string>
+			<key>VALID_ARCHS</key>
+			<string>$(ARCHS_STANDARD_32_BIT)</string>
 			<key>CODE_SIGN_IDENTITY</key>
 			<string>iPhone Developer</string>
+		</dict>
+		<key>Configurations</key>
+		<dict>
+			<key>Debug</key>
+			<dict>
+				<key>ONLY_ACTIVE_ARCH</key>
+				<string>NO</string>
+			</dict>
 		</dict>
 	</dict>
 </dict>
