@@ -779,12 +779,12 @@
 
 -(CGPoint) glPointFromCC2Point: (CGPoint) cc2Point {
 	// Scale from points to pixels, then add the viewport corner.
-	return ccpAdd(ccpMult(cc2Point, CC_CONTENT_SCALE_FACTOR()), ccp(_viewport.x, _viewport.y));
+	return ccpAdd(ccpMult(cc2Point, CCDirector.sharedDirector.contentScaleFactor), ccp(_viewport.x, _viewport.y));
 }
 
 -(CGPoint) cc2PointFromGLPoint: (CGPoint) glPoint {
 	// Subtract the viewport corner, then scale from pixels to points.
-	return ccpMult(ccpSub(glPoint, ccp(_viewport.x, _viewport.y)), 1.0f / CC_CONTENT_SCALE_FACTOR());
+	return ccpMult(ccpSub(glPoint, ccp(_viewport.x, _viewport.y)), 1.0f / CCDirector.sharedDirector.contentScaleFactor);
 }
 
 -(CC3Vector) projectNode: (CC3Node*) aNode {
@@ -796,8 +796,8 @@
 
 -(CC3Ray) unprojectPoint: (CGPoint) cc2Point {
 
-	// CC_CONTENT_SCALE_FACTOR = 2.0 if Retina display active, or 1.0 otherwise.
-	CGPoint glPoint = ccpMult(cc2Point, CC_CONTENT_SCALE_FACTOR());
+	// Scale from UI points to GL points
+	CGPoint glPoint = ccpMult(cc2Point, CCDirector.sharedDirector.contentScaleFactor);
 	
 	// Express the glPoint X & Y as proportion of the viewport dimensions.
 	CC3Viewport vp = self.viewport;

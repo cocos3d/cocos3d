@@ -39,7 +39,7 @@
 #	define kControlSizeScale		(MAX(UIScreen.mainScreen.bounds.size.width, UIScreen.mainScreen.bounds.size.height) / 1024.0f)
 #	define kControlPositionScale	kControlSizeScale
 #else
-#	define kControlSizeScale		CC_CONTENT_SCALE_FACTOR()
+#	define kControlSizeScale		CCDirector.sharedDirector.contentScaleFactor
 #	define kControlPositionScale	1.0
 #endif	// APPORTABLE
 

@@ -143,7 +143,7 @@ download and unzip both cocos2d and cocos3d. You'll end up with a directory stru
 
 	MyCocosDev
 		cocos2d-iphone
-		cocos3d-2.0.0
+		cocos3d-2.1
 
 First, in a Terminal session, install cocos2d by navigating to the `cocos2d-iphone` directory
 and running:
@@ -158,34 +158,53 @@ Then, navigate to the `cocos3d-2.0.0` directory and install cocos3d by running:
 cocos2d & OpenGL Version Compatibility
 -----------------------------------------
 
-cocos3d under iOS and Android is compatible with `cocos2d` `2.1`, for using programmable-pipeline
-OpenGL ES 2.0, and is compatible with `cocos2d` `1.1`, for using fixed-pipeline OpenGL ES 1.1.
+cocos3d under iOS and Android is compatible with `cocos2d` `3.x` and `cocos2d` `2.1`, for 
+using programmable-pipeline OpenGL ES 2.0, and is compatible with `cocos2d` `1.1`, for 
+using fixed-pipeline OpenGL ES 1.1.
 
-cocos3d under OSX is compatible with `cocos2d` `2.1`, for using programmable-pipeline
-OpenGL (OSX). cocos3d is not compatible with `cocos2d` `1.1` under OSX.
+cocos3d under OSX is compatible with `cocos2d` `3.x` and `cocos2d` `2.1`, for using 
+programmable-pipeline OpenGL (OSX). cocos3d is not compatible with `cocos2d` `1.1` under OSX.
 
 When linking to a cocos2d library version, keep in mind that if you want to use shaders and a
 programmable pipeline using OpenGL ES 2.0 (iOS & Android) or OpenGL (OSX), you must use the
-`cocos2d 2.1` version, and if you want to use a fixed pipeline using OpenGL ES 1.1 (iOS & Android),
-you must use the `cocos2d 1.1` version.
+`cocos2d` `3.x` or `cocos2d 2.1` version, and if you want to use a fixed pipeline using
+OpenGL ES 1.1 (iOS & Android), you must use the `cocos2d 1.1` version.
 
 Because of this, you cannot mix the use of fixed and programmable pipelines within a single app.
 However, you can easily change whether an app uses a programmable or fixed rendering pipeline by
 changing the version of `cocos2d` that is linked, by following these steps within any Xcode project
 (including the included `cocos2d-library-iOS` and `cocos2d-library-OSX` static library projects):
 
-1. Delete the reference to the *cocos2d* group in the Xcode Project Navigator panel. If you are
-   using the cocos2d static library, you will find this group in the `cocos2d-library-iOS` or
-   `cocos2d-library-OSX` project.
+1. Delete the reference to the *cocos2d* and *cocos2d-chipmunk* groups in the Xcode Project 
+   Navigator panel. If you are using the cocos2d static library, you will find these groups 
+   in the `cocos2d-library-iOS` or `cocos2d-library-OSX` project.
 2. Run the `install-cocos3d.sh` script again and identify the new version of cocos2d to be linked.
-   Keep in mind that you must link `cocos2d 2.1` if you want to use OpenGL ES 2.0 (iOS) or
-   OpenGL (OSX) with a programmable rendering pipeline, and you must link `cocos2d 1.1` if
-   you want to use OpenGL ES 1.1 (iOS & Android) with a fixed rendering pipeline.
-3. Add the newly linked cocos2d files to the project by dragging the `cocos2d` folder from
-   the cocos3d distribution folder to the Xcode Project Navigator panel. If you are using the
-   cocos2d static library, you will drag the folder into the `cocos2d-library-iOS` or
-   `cocos2d-library-OSX` project. When prompted for the target to add the source code to, 
-   select the `cocos2d-library-iOS` target.
+   Keep in mind that you must link `cocos2d` `3.x` or `cocos2d 2.1` if you want to use 
+   OpenGL ES 2.0 (iOS) or OpenGL (OSX) with a programmable rendering pipeline, and you must link
+   `cocos2d 1.1` if you want to use OpenGL ES 1.1 (iOS & Android) with a fixed rendering pipeline.
+3. Add the newly linked cocos2d files to the project by dragging the `cocos2d` folder from the 
+   cocos3d distribution folder to the Xcode Project Navigator panel. If you are using the cocos2d
+   static library, you will drag the folder into the `cocos2d-library-iOS` or `cocos2d-library-OSX` 
+   project. When prompted for the target to add the source code to, select the `cocos2d-library-iOS` 
+   or `cocos2d-library-OSX` target.
+4. Add the newly linked cocos2d-chipmunk files to the project by dragging the `cocos2d-chipmunk`
+   folder from the cocos3d distribution folder to the Xcode Project Navigator panel. If you are
+   using the cocos2d static library, you will drag the folder into the `cocos2d-library-iOS` or
+   `cocos2d-library-OSX` project. When prompted for the target to add the source code to, select
+   the `ObjectiveChipmunk` target.
+6. `cocos2d` `3.x` uses ARC. `cocos2d` `2.1` and `cocos2d` `1.1` do not. You must set the
+   approprite compiler build setting to ensure the compiler will use the correct technique.
+	1. Select the `cocos2d` target in your project settings. If you are using the cocos2d
+	   static library, you will find the `cocos2d` target in the `cocos2d-library-iOS` or
+	   `cocos2d-library-OSX` project. 
+	2. Select the `Build Settings` tab.
+	3. Locate the **Objective-C Automatic Reference Counting** (aka `CLANG_ENABLE_OBJC_ARC`)
+	   setting for the `cocos2d` target. If you are now linking to `cocos2d` `3.x`, set this
+	   property to `YES`. If you are now linking to `cocos2d` `2.1` or `cocos2d` `1.1`, set 
+	   this property to NO. Make sure you change only the setting for the `cocos2d` target 
+	   within your project. Do not change the setting for the Xcode project itself.
+7. If you have already built the app using the old version of `cocos2d`, delete the contents
+   of your `~/Library/Developer/Xcode/DerivedData` folder, and restart Xcode.
 
 At the time of this release, the current stable version of cocos2d is `2.1`, and by default,
 the demo apps within the cocos3d distribution are pre-configured to use that version. To build

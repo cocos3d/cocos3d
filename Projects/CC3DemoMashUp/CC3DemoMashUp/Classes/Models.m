@@ -214,22 +214,23 @@
 				// it horizontally. In either case, the rate of motion is randomized so
 				// that each invader moves at its own speed.
 				CCActionInterval* invaderAction;
-				if (invader.containsAnimation) {
+				if (invader.containsAnimation)
 					invaderAction = [CC3Animate actionWithDuration: CC3RandomFloatBetween(2.5, 10.0)];
-				} else {
+				else
 					invaderAction = [CC3RotateBy actionWithDuration: 1.0
 														   rotateBy: cc3v(0.0, CC3RandomFloatBetween(30.0, 90.0), 0.0)];
-				}
-				CCActionInterval* groundAction = [CCRepeat actionWithAction: invaderAction times: kCC3MaxGLuint];
+				
+				CCActionInterval* groundAction = [CCActionRepeat actionWithAction: invaderAction
+																			times: kCC3MaxGLuint];
 				
 				// Create a landing action that is a bouncing drop of random duration, to simulate raining down.
 				CC3Vector landingLocation = cc3v(invader.location.x, 0.0, invader.location.z);
-				CCActionInterval* landingAction = [CCEaseBounceOut actionWithAction:
-												   [CC3MoveTo actionWithDuration: CC3RandomFloatBetween(1.0, 2.0) 
-																		  moveTo: landingLocation]];
+				CCActionInterval* landingAction = [CCActionEaseBounceOut actionWithAction:
+														[CC3MoveTo actionWithDuration: CC3RandomFloatBetween(1.0, 2.0)
+																			   moveTo: landingLocation]];
 				
 				// Set up a sequence on the invader...first drop, and then animate or rotate
-				[invader runAction: [CCSequence actionOne: landingAction two: groundAction]];
+				[invader runAction: [CCActionSequence actionOne: landingAction two: groundAction]];
 				[invader runAction: landingAction];
 				
 				[self addChild: invader];		// Add the child to the landing craft
@@ -248,10 +249,10 @@
 			self, [CC3Identifiable instanceCount], [CCDirector.sharedDirector.actionManager numberOfRunningActions]);
 }
 
-/** Uses a CCSequence action to first fade the army away and then remove it. */
+/** Uses a CCActionSequence action to first fade the army away and then remove it. */
 -(void) evaporate {
-	[self runAction: [CCSequence actionOne: [CCFadeOut actionWithDuration: 1.0]
-									   two: [CC3Remove action]]];
+	[self runAction: [CCActionSequence actionOne: [CCActionFadeOut actionWithDuration: 1.0]
+											 two: [CC3Remove action]]];
 }
 
 @end

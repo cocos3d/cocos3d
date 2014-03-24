@@ -955,9 +955,9 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 /**
  * CC3Remove removes a CC3Node from the scene, by invoking the remove method on the CC3Node.
  *
- * This action can be used as part of a CCSequence to remove a node after some other kind
- * of action has completed. For example, you might create a CCSequence containing a CCFadeOut
- * and a CC3Remove, to fade a node away and then remove it from the scene.
+ * This action can be used as part of a CCActionSequence to remove a node after some other 
+ * kind of action has completed. For example, you might create a CCActionSequence containing 
+ * a CCActionFadeOut and a CC3Remove, to fade a node away and then remove it from the scene.
  */
 @interface CC3Remove : CCActionInstant
 	

@@ -33,8 +33,7 @@
 
 /** @file */	// Doxygen marker
 
-#import <Foundation/Foundation.h>
-#import "cocos2d.h"
+#import "CC3CC2Extensions.h"
 
 /** Specifies a 2D position using an angular coordinate axes. */
 typedef struct {
@@ -59,11 +58,11 @@ static const AngularPoint AngularPointZero = {0.0, 0.0};
  * property, or angular coordinates via the angularVelocity property.
  */
 @interface Joystick : CCLayer {
-	CCNode *thumbNode;
-	BOOL isTracking;
-	CGPoint velocity;
-	AngularPoint angularVelocity;
-	CGPoint travelLimit;
+	CCNode* _thumbNode;
+	BOOL _isTracking;
+	CGPoint _velocity;
+	AngularPoint _angularVelocity;
+	CGPoint _travelLimit;
 }
 
 /**

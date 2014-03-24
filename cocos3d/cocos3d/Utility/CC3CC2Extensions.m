@@ -33,6 +33,14 @@
 #import "CC3Logging.h"
 #import "uthash.h"
 
+#if !CC3_CC2_CLASSIC
+
+// Dummy class for backwards compatibility
+@implementation CCLayer
+@end
+
+#endif	// !CC3_CC2_CLASSIC
+
 #if CC3_IOS
 @implementation CCGLView (CC3)
 
@@ -153,10 +161,32 @@
 
 @implementation CCNode (CC3)
 
-#if (CC3_CC2_1 || CC3_CC2_2)
+#if CC3_CC2_CLASSIC
 -(BOOL) isRunningInActiveScene { return self.isRunning; }
-#endif	// (CC3_CC2_1 || CC3_CC2_2)
 
+-(BOOL) paused { return self.isRunning; }
+
+-(void) setPaused: (BOOL) shouldPause {
+	if (!shouldPause && !self.isRunning)
+		[self onEnter];
+	else if (shouldPause && self.isRunning)
+		[self onExit];
+}
+#endif	// CC3_CC2_CLASSIC
+
+#if !CC3_CC2_CLASSIC
+-(void) scheduleUpdate {}
+#endif	// !CC3_CC2_CLASSIC
+
+#if CC3_CC2_3
+-(CGSize) contentSizeInPixels {
+	return CC_SIZE_SCALE(self.contentSize, CCDirector.sharedDirector.contentScaleFactor);
+}
+
+-(CGRect) boundingBoxInPixels {
+	return CC_RECT_SCALE(self.boundingBox, CCDirector.sharedDirector.contentScaleFactor);
+}
+#endif	// CC3_CC2_3
 #if CC3_CC2_2
 -(CGSize) contentSizeInPixels { return CC_SIZE_POINTS_TO_PIXELS(self.contentSize); }
 
@@ -165,6 +195,14 @@
 
 -(BOOL) isTouchEnabled { return NO; }
 
+#if CC3_CC2_3
+-(CGRect) globalBoundingBoxInPixels {
+	CGSize cs = self.contentSize;
+	CGRect rect = CGRectMake(0, 0, cs.width, cs.height);
+	rect = CGRectApplyAffineTransform(rect, [self nodeToWorldTransform]);
+	return CC_RECT_SCALE(rect, CCDirector.sharedDirector.contentScaleFactor);
+}
+#endif	// CC3_CC2_2
 #if CC3_CC2_2
 -(CGRect) globalBoundingBoxInPixels {
 	CGSize cs = self.contentSize;
@@ -178,8 +216,8 @@
 	CGSize cs = self.contentSize;
 	CGRect rect = CGRectMake(0, 0, cs.width, cs.height);
 	rect = CGRectApplyAffineTransform(rect, [self nodeToWorldTransform]);
-	rect.size.width *= CC_CONTENT_SCALE_FACTOR();
-	rect.size.height *= CC_CONTENT_SCALE_FACTOR();
+	rect.size.width *= CCDirector.sharedDirector.contentScaleFactor;
+	rect.size.height *= CCDirector.sharedDirector.contentScaleFactor;
 	return rect;
 }
 #endif	// CC3_CC2_1
@@ -276,7 +314,7 @@
 @end
 
 
-#if (CC3_CC2_1 || CC3_CC2_2)
+#if CC3_CC2_CLASSIC
 
 #pragma mark -
 #pragma mark CCLayer extension
@@ -334,7 +372,7 @@
 #endif
 @end
 
-#endif	// (CC3_CC2_1 || CC3_CC2_2)
+#endif	// CC3_CC2_CLASSIC
 
 
 #pragma mark -
@@ -346,6 +384,14 @@
 	[CCTextureCache.sharedTextureCache addTexture: self named: texName];
 }
 
+#if CC3_CC2_CLASSIC
+-(NSUInteger) pixelWidth { return self.pixelsWide; }
+
+/** Legacy name for pixelHeight. */
+-(NSUInteger) pixelHeight { return self.pixelsHigh; }
+
+#endif	// CC3_CC2_CLASSIC
+
 @end
 
 
@@ -354,7 +400,19 @@
 
 @implementation CCTextureCache (CC3)
 
-#if CC3_CC2_2
+#if CC3_CC2_1
+#	define CC2_DICT_LOCK		dictLock_
+#	define CC2_TEX_DICT			textures_
+
+-(void) addTexture: (CCTexture*) tex2D named: (NSString*) texName {
+	if ( !tex2D ) return;
+
+	[CC2_DICT_LOCK lock];
+	[CC2_TEX_DICT setObject: tex2D forKey: texName];
+	[CC2_DICT_LOCK unlock];
+}
+
+#else	// CC2 2 and above
 #	define CC2_DICT_QUEUE		_dictQueue
 
 #if COCOS2D_VERSION < 0x020100
@@ -372,21 +430,7 @@
 	});
 }
 
-#endif	// CC3_CC2_2
-
-#if CC3_CC2_1
-#	define CC2_DICT_LOCK		dictLock_
-#	define CC2_TEX_DICT			textures_
-
--(void) addTexture: (CCTexture*) tex2D named: (NSString*) texName {
-	if ( !tex2D ) return;
-
-	[CC2_DICT_LOCK lock];
-	[CC2_TEX_DICT setObject: tex2D forKey: texName];
-	[CC2_DICT_LOCK unlock];
-}
-
-#endif	// CC3_CC2_2
+#endif	// CC3_CC2_1
 
 @end
 
@@ -429,9 +473,15 @@
 
 #endif	// CC3_CC2_1
 
-#if CC3_CC2_2 || CC3_OSX
+#if !CC3_CC2_1
 -(UIDeviceOrientation) deviceOrientation { return UIDeviceOrientationPortrait; }
-#endif
+#endif	// !CC3_CC2_1
+
+#if CC3_CC2_CLASSIC
+
+-(CGFloat) contentScaleFactor { return CC_CONTENT_SCALE_FACTOR(); }
+
+#endif	//CC3_CC2_CLASSIC
 
 @end
 
@@ -510,6 +560,20 @@
 //		LogDebug(@"Slow scene update and draw in %.3f ms (%.1f fps)",
 //				 drawDur * 1000.0, 1.0 / drawDur);
 //}
+
+@end
+
+
+#pragma mark -
+#pragma mark CCScheduler extension
+
+@implementation CCScheduler (CC3)
+
+#if !CC3_CC2_CLASSIC
+-(void) pauseTarget:(id)target { [self setPaused: YES target: target]; }
+
+-(void) resumeTarget:(id)target { [self setPaused: NO target: target]; }
+#endif	// !CC3_CC2_CLASSIC
 
 @end
 

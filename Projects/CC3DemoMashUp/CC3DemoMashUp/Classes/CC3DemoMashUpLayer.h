@@ -28,59 +28,7 @@
  */
 
 
-#import "CC3Layer.h"
-#import "Joystick.h"
-#import "CCNodeAdornments.h"
+/** Imports the version of CC3DemoMashUpLayer suitable for the platform environment. */
 
-
-/**
- * A sample application-specific CC3Layer subclass that allows the user to interact with
- * the 3D scene using either gestures or overlay controls such as joysticks and buttons.
- * 
- * Under iOS, by default, this layer uses gestures to interact with the 3D nodes. You can 
- * turn gestures off by setting the touchEnabled property to YES in the initializeControls
- * method of this class. Gesture support under Android is less sophisticated, so by default,
- * gestures are turned off when running under Android.
- *
- * With touchEnabled set to YES, gestures are turned off, and this layer and scene revert to
- * using basic touch events to interact with the 3D scene. Normally, you would use one or the
- * other technique. Both are provided in this app to demonstrate user interaction using either
- * gestures or touch events.
- */
-@interface CC3DemoMashUpLayer : CC3Layer {
-	Joystick* directionJoystick;
-	Joystick* locationJoystick;
-	AdornableMenuItemImage* switchViewMI;
-	AdornableMenuItemImage* invasionMI;
-	AdornableMenuItemImage* sunlightMI;
-	AdornableMenuItemImage* zoomMI;
-	AdornableMenuItemImage* shadowMI;
-	CC3Layer* hudLayer;
-}
-
-/**
- * Opens a secondary heads-up-display CC3Layer that holds a CC3Scene that
- * contains only the globe. The opening of this secondary layer is animated.
- */
--(void) openGlobeHUDFromTouchAt: (CGPoint) touchPoint;
-
-/** Closes the secondary HUD layer. The closing is animated. */
--(void) closeGlobeHUDFromTouchAt: (CGPoint) touchPoint;
-
-/**
- * If the HUD window is not open, opens it by invoking the openGlobeHUDFromTouchAt:
- * method. If the HUD window is already open, closes it by invoking the
- * closeGlobeHUDFromTouchAt: method.
- *
- * This is invoked from a touch-handing event when the globe is touched.
- */
--(void) toggleGlobeHUDFromTouchAt: (CGPoint) touchPoint;
-
-/**
- * Removes the secondary HUD window from this layer once it has closed.
- *
- * This is invoked automatically from the CCAction that animates the closing of the HUD window.
- */
--(void) removeGlobeHUD;
-
-@end
+#import "CC3DemoMashUpLayer-Classic.h"
+#import "CC3DemoMashUpLayer-v3.h"

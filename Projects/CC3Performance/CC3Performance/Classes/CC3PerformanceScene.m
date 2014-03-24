@@ -291,7 +291,7 @@
 
 	if (_shouldAnimateNodes) {
 		CC3Animate* flap = [CC3Animate actionWithDuration: 1.5 onTrack: _flapTrack];
-		[self runAction: [CCRepeatForever actionWithAction: flap]];
+		[self runAction: [CCActionRepeatForever actionWithAction: flap]];
 	} else {
 		[self stopAllActions];
 	}

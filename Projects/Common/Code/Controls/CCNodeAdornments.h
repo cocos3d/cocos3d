@@ -32,6 +32,10 @@
 #import <Foundation/Foundation.h>
 #import "CC3CC2Extensions.h"
 
+#if !CC3_CC2_CLASSIC
+#	import "CCButton.h"
+#endif	// !CC3_CC2_CLASSIC
+
 /**
  * Constants that can be used to set the Z-Order of an adornment
  * to place it under or over the base node.
@@ -93,7 +97,7 @@
  * The implementation of activate and deactivate in this abstract class do nothing.
  */
 @interface CCNodeAdornmentBase : CCNode<CCNodeAdornmentProtocol> {
-	CCTime actionDuration;
+	CCTime _actionDuration;
 }
 
 /**
@@ -151,8 +155,8 @@
  * will look like. That child may be any CCNode.
  */
 @interface CCNodeAdornmentOverlayFader : CCNodeAdornmentBase {
-	CCNode<CCRGBAProtocol>* adornmentNode;
-	GLubyte peakOpacity;
+	CCNode<CCRGBAProtocol>* _adornmentNode;
+	GLubyte _peakOpacity;
 }
 
 /**
@@ -229,8 +233,8 @@
  * larger or smaller and, when deactivated, will return the adorned CCNode to its original scale.
  */
 @interface CCNodeAdornmentScaler : CCNodeAdornmentBase {
-	CGSize activatedScale;
-	CGSize originalScale;
+	CGSize _activatedScale;
+	CGSize _originalScale;
 }
 
 /**
@@ -302,7 +306,9 @@
 @end
 
 
-#pragma mark AdornableMenuItemToggle CCMenuItemToggle extention interface
+#if CC3_CC2_CLASSIC
+
+#pragma mark AdornableMenuItemToggle
 
 /**
  * A concrete subclass of CCMenuItemToggle that supports a visual adornment via the 
@@ -310,13 +316,13 @@
  * activated, and when the item is deselected by the user, the adornment will be deactivated.
  */
 @interface AdornableMenuItemToggle : CCMenuItemToggle<AdornableCCNodeProtocol> {
-	CCNode<CCNodeAdornmentProtocol>* adornment;
+	CCNode<CCNodeAdornmentProtocol>* _adornment;
 }
 
 @end
 
 
-#pragma mark AdornableMenuItemImage CCMenuItemImage extention interface
+#pragma mark AdornableMenuItemImage
 
 /**
  * A concrete subclass of CCMenuItemImage that supports a visual adornment via the
@@ -324,10 +330,27 @@
  * activated, and when the item is deselected by the user, the adornment will be deactivated.
  */
 @interface AdornableMenuItemImage : CCMenuItemImage<AdornableCCNodeProtocol> {
-	CCNode<CCNodeAdornmentProtocol>* adornment;
+	CCNode<CCNodeAdornmentProtocol>* _adornment;
 }
 
 @end
+
+#else
+
+#pragma mark AdornableButton
+
+/**
+ * A concrete subclass of CCButton that supports a visual adornment via the AdornableCCNodeProtocol.
+ * When the button is selected by the user, the adornment will be activated, and when the item is
+ * deselected by the user, the adornment will be deactivated.
+ */
+@interface AdornableButton : CCButton<AdornableCCNodeProtocol> {
+	CCNode<CCNodeAdornmentProtocol>* _adornment;
+}
+
+@end
+
+#endif	// CC3_CC2_CLASSIC
 
 
 

@@ -76,10 +76,12 @@
  *
  * Either or both of these features can be turned on or off.
  *
- * To make use of the standard cocos2d model updatating functionality to update and animate
- * the 3D scene, use the scheduleUpdate or schedule:interval: methods of CC3Layer to invoke
- * periodic callbacks to the update: method of the CC3Layer instance. The update: method
- * forwards these callbacks to the CC3Scene instance held by the CC3Layer.
+ * When compiling with versions of cocos2d prior to 3.0, to make use of the standard cocos2d
+ * model updatating functionality to update and animate the 3D scene, use the scheduleUpdate
+ * method of CC3Layer to invoke periodic callbacks to the update: method of the CC3Layer 
+ * instance. The update: method forwards these callbacks to the CC3Scene instance held by 
+ * the CC3Layer. When compiling with versions of cocos2d 3.0 or higher, these callbacks will
+ * happen automatically, and you do not need to invoke the scheduleUpdate method.
  *
  * To enable simple single-touch event handling for this layer, set the isTouchEnabled
  * property to YES. Once enabled, single-touch events will automatically be forwarded to
@@ -126,8 +128,8 @@
  *   -# Instantiate your CC3Scene class, including creating or loading 3D file resources
  *      in the initializeScene method.
  *   -# Attach your CC3Scene to the cc3Scene property of your CC3Layer.
- *   -# Schedule regular updates in your CC3Layer instance by invoking either the
- *      scheduleUpdate or schedule:interval: method.
+ *   -# When compiling with versions of cocos2d prior to 3.0, schedule regular updates in
+ *      your CC3Layer instance by invoking the scheduleUpdate method.
  */
 @interface CC3Layer : CC3ControllableLayer {
 	CC3Scene* _cc3Scene;
@@ -331,9 +333,10 @@
  * this layer, but should be sure to invoke this superclass implementation, or to invoke
  * updateScene: on the CC3Scene directly.
  *
- * Typcially this method is scheduled to be invoked automatically at a periodic interval by
- * using the scheduleUpdate or schedule:interval: methods of this instance, but may also be
- * invoked by some other periodic operation, or even directly by the application.
+ * Typcially this method is scheduled to be invoked automatically at a periodic interval.
+ * When compiling with versions of cocos2d 3.0 or higher, this will happen automatically.
+ * When compiling with versions of cocos2d prior to 3.0, you can do so by invoking the
+ * scheduleUpdate method on this instance from the initializeControls method.
  *
  * This method is invoked asynchronously to the frame rendering animation loop, to keep the
  * processing of model updates separate from OpenGL ES drawing.

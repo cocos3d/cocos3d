@@ -1,5 +1,5 @@
 /*
- * CC3DemoMashUpLayer.m
+ * CC3DemoMashUpLayer-v3.m
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -26,10 +26,16 @@
  *
  * http://en.wikipedia.org/wiki/MIT_License
  * 
- * See header file CC3DemoMashUpLayer.h for full API documentation.
+ * See header file CC3DemoMashUpLayer-v3.h for full API documentation.
  */
 
-#import "CC3DemoMashUpLayer.h"
+#import "CC3DemoMashUpLayer-v3.h"
+
+/** This implementation of CC3DemoMashUpLayer is used when compiling with cocos2d v1 and above. */
+
+
+#if !CC3_CC2_CLASSIC
+
 #import "CC3DemoMashUpScene.h"
 #import "CC3Actions.h"
 #import "CC3CC2Extensions.h"
@@ -43,7 +49,7 @@
 #	define kControlSizeScale		(MAX(UIScreen.mainScreen.bounds.size.width, UIScreen.mainScreen.bounds.size.height) / 1024.0f)
 #	define kControlPositionScale	kControlSizeScale
 #else
-#	define kControlSizeScale		CC_CONTENT_SCALE_FACTOR()
+#	define kControlSizeScale		CCDirector.sharedDirector.contentScaleFactor
 #	define kControlPositionScale	1.0
 #endif	// APPORTABLE
 
@@ -84,10 +90,9 @@
 
 -(void) initializeControls {
 	
-	// Set the touchEnabled property to NO to control the scene using iOS gestures,
-	// and to YES to control the scene using lower-level touch events.
-	self.touchEnabled = kShouldAvoidGestures;
-	self.mouseEnabled = YES;	// Under OSX, use mouse events since gestures are not supported.
+	// Set the userInteractionEnabled property to NO to control the scene using gestures,
+	// and to YES to control the scene using lower-level touch and mouse events.
+	self.userInteractionEnabled = kShouldAvoidGestures;
 	
 	[self addJoysticks];
 	[self addSwitchViewButton];
@@ -95,7 +100,7 @@
 	[self addSunlightButton];
 	[self addZoomButton];
 	[self addShadowButton];
-	[self scheduleUpdate];		// Schedule updates on each frame
+	[self positionButtons];
 }
 
 /** Creates the two joysticks that control the 3D camera direction and location. */
@@ -103,62 +108,55 @@
 	CCSprite* jsThumb;
 
 	// The joystick that controls the player's (camera's) direction
-	jsThumb = [CCSprite spriteWithFile: kJoystickThumbFileName];
+	jsThumb = [CCSprite spriteWithImageNamed: kJoystickThumbFileName];
 	jsThumb.scale = kControlSizeScale;
 	
-	directionJoystick = [Joystick joystickWithThumb: jsThumb
-											andSize: CGSizeMake(kJoystickSideLength, kJoystickSideLength)];
+	_directionJoystick = [Joystick joystickWithThumb: jsThumb
+											 andSize: CGSizeMake(kJoystickSideLength, kJoystickSideLength)];
 	
 	// If you want to see the size of the Joystick backdrop, comment out the line above
 	// and uncomment the three lines below. This just adds a simple bland colored backdrop
 	// to demonstrate that the thumb and backdrop can be any CCNode, but normally you
 	// would use a nice graphical CCSprite for the Joystick backdrop.
-// CCLayer* jsBackdrop = [CCLayerColor layerWithColor: ccc4(255, 255, 255, 63) 
-// 											 width: kJoystickSideLength height: kJoystickSideLength];
+// CCLayer* jsBackdrop = [CCLayerColor layerWithColor: ccc4(255, 255, 255, 63)
+//											  width: kJoystickSideLength height: kJoystickSideLength];
 //	jsBackdrop.isRelativeAnchorPoint = YES;
-//	directionJoystick = [Joystick joystickWithThumb: jsThumb andBackdrop: jsBackdrop];
+//	_directionJoystick = [Joystick joystickWithThumb: jsThumb andBackdrop: jsBackdrop];
 	
-	directionJoystick.position = ccp(kJoystickPadding, kJoystickPadding);
-	[self addChild: directionJoystick];
+	_directionJoystick.position = ccp(kJoystickPadding, kJoystickPadding);
+	[self addChild: _directionJoystick];
 	
 	// The joystick that controls the player's (camera's) location
-	jsThumb = [CCSprite spriteWithFile: kJoystickThumbFileName];
+	jsThumb = [CCSprite spriteWithImageNamed: kJoystickThumbFileName];
 	jsThumb.scale = kControlSizeScale;
 	
-	locationJoystick = [Joystick joystickWithThumb: jsThumb
-										   andSize: CGSizeMake(kJoystickSideLength, kJoystickSideLength)];
+	_locationJoystick = [Joystick joystickWithThumb: jsThumb
+											andSize: CGSizeMake(kJoystickSideLength, kJoystickSideLength)];
+	[self addChild: _locationJoystick];
 	[self positionLocationJoystick];
-	[self addChild: locationJoystick];
 }
 
-/**
- * Creates a button (actually a single-item menu) in the bottom center of the layer that will
- * allow the user to switch between four different views of the 3D scene.
- */
+/** Creates a button that will allow the user to switch between different views of the 3D scene. */
 -(void) addSwitchViewButton {
+	_switchViewButton = [AdornableButton buttonWithTitle: nil
+											 spriteFrame: [CCSpriteFrame frameWithImageNamed: kSwitchViewButtonFileName]];
+	[_switchViewButton setTarget: self selector: @selector(switchViewSelected:)];
+	_switchViewButton.scale = kControlSizeScale;
+	[self addChild: _switchViewButton];
 	
-	// Set up the menu item and position it in the bottom center of the layer
-	switchViewMI = [AdornableMenuItemImage itemWithNormalImage: kSwitchViewButtonFileName
-												 selectedImage: kSwitchViewButtonFileName
-														target: self
-													  selector: @selector(switchViewSelected:)];
-	switchViewMI.scale = kControlSizeScale;
-	[self positionButtons];
-	
-	// Instead of having different normal and selected images, the toggle menu item uses an
-	// adornment, which is displayed whenever an item is selected.
+	// The button uses an adornment, which is displayed whenever the button is selected.
 	CCNodeAdornmentBase* adornment;
 	
-	// The adornment is a ring that fades in around the menu item and then fades out when
-	// the menu item is no longer selected.
-	CCSprite* ringSprite = [CCSprite spriteWithFile: kButtonRingFileName];
+	// The adornment is a ring that fades in around the button and fades out when the button
+	// is no longer selected.
+	CCSprite* ringSprite = [CCSprite spriteWithImageNamed: kButtonRingFileName];
 	adornment = [CCNodeAdornmentOverlayFader adornmentWithAdornmentNode: ringSprite];
 	adornment.zOrder = kAdornmentUnderZOrder;
 	
 	// The adornment could also be a "shine" image that is faded in on-top of the
 	// menu item when it is selected, similar to some UIKit toolbar button implementations.
 	// To try a "shine" adornment instead, uncomment the following.
-//	CCSprite* shineSprite = [CCSprite spriteWithFile: kButtonShineFileName];
+//	CCSprite* shineSprite = [CCSprite spriteWithImageNamed: kButtonShineFileName];
 //	shineSprite.color = ccYELLOW;
 //	adornment = [CCNodeAdornmentOverlayFader adornmentWithAdornmentNode: shineSprite
 //	 													    peakOpacity: kPeakShineOpacity];
@@ -167,112 +165,67 @@
 	// To try a scaler adornment, uncomment the following line.
 //	adornment = [CCNodeAdornmentScaler adornmentToScaleUniformlyBy: kButtonAdornmentScale];
 	
-	// Attach the adornment to the menu item and center it on the menu item
-	adornment.position = ccpCompMult(ccpFromSize(switchViewMI.contentSize), switchViewMI.anchorPoint);
-	switchViewMI.adornment = adornment;
-	
-	CCMenu* viewMenu = [CCMenu menuWithItems: switchViewMI, nil];
-	viewMenu.position = CGPointZero;
-	[self addChild: viewMenu];
+	// Attach the adornment to the button and center it
+	adornment.position = ccpCompMult(ccpFromSize(_switchViewButton.contentSize), _switchViewButton.anchorPoint);
+	_switchViewButton.adornment = adornment;
 }
 
-/**
- * Creates a button (actually a single-item menu) in the bottom center of the layer that will
- * allow the user to create a robot invasion.
- */
+/** Creates a button that will allow the user to create a robot invasion. */
 -(void) addInvasionButton {
-	
-	// Set up the menu item and position it in the bottom center of the layer
-	invasionMI = [AdornableMenuItemImage itemWithNormalImage: kInvasionButtonFileName
-											   selectedImage: kInvasionButtonFileName
-													  target: self
-													selector: @selector(invade:)];
-	invasionMI.scale = kControlSizeScale;
-	[self positionButtons];
-	
-	// Instead of having different normal and selected images, the toggle menu item uses an
-	// adornment, which is displayed whenever an item is selected.
-	CCNodeAdornmentBase* adornment;
-	
-	// The adornment is a ring that fades in around the menu item and then fades out when
-	// the menu item is no longer selected.
-	CCSprite* ringSprite = [CCSprite spriteWithFile: kButtonRingFileName];
-	adornment = [CCNodeAdornmentOverlayFader adornmentWithAdornmentNode: ringSprite];
+	_invasionButton = [AdornableButton buttonWithTitle: nil
+										   spriteFrame: [CCSpriteFrame frameWithImageNamed: kInvasionButtonFileName]];
+	_invasionButton.scale = kControlSizeScale;
+	[self addChild: _invasionButton];
+		
+	// The button uses an adornment, which is displayed whenever the button is selected. The adornment
+	// is a ring that fades in around the button and fades out when the button is no longer selected.
+	CCSprite* ringSprite = [CCSprite spriteWithImageNamed: kButtonRingFileName];
+	CCNodeAdornmentBase* adornment = [CCNodeAdornmentOverlayFader adornmentWithAdornmentNode: ringSprite];
 	adornment.zOrder = kAdornmentUnderZOrder;
 	
-	// Attach the adornment to the menu item and center it on the menu item
-	adornment.position = ccpCompMult(ccpFromSize(invasionMI.contentSize), invasionMI.anchorPoint);
-	invasionMI.adornment = adornment;
-	
-	CCMenu* viewMenu = [CCMenu menuWithItems: invasionMI, nil];
-	viewMenu.position = CGPointZero;
-	[self addChild: viewMenu];
+	// Attach the adornment to the button and center it
+	adornment.position = ccpCompMult(ccpFromSize(_invasionButton.contentSize), _invasionButton.anchorPoint);
+	_invasionButton.adornment = adornment;
 }
 
-/**
- * Creates a button (actually a single-item menu) in the bottom center of the layer that will
- * allow the user to turn the sun on or off.
- */
+/** Creates a button that will allow the user to turn the sun on or off. */
 -(void) addSunlightButton {
+	_sunlightButton = [AdornableButton buttonWithTitle: nil
+										   spriteFrame: [CCSpriteFrame frameWithImageNamed: kSunlightButtonFileName]];
+	_sunlightButton.scale = kControlSizeScale;
+	[self addChild: _sunlightButton];
 	
-	// Set up the menu item and position it in the bottom center of the layer
-	sunlightMI = [AdornableMenuItemImage itemWithNormalImage: kSunlightButtonFileName
-											   selectedImage: kSunlightButtonFileName
-													  target: self
-													selector: @selector(cycleLights:)];
-	sunlightMI.scale = kControlSizeScale;
-	[self positionButtons];
-	
-	// Instead of having different normal and selected images, the toggle menu item uses an
-	// adornment, which is displayed whenever an item is selected.
-	CCNodeAdornmentBase* adornment;
-	
-	// The adornment is a ring that fades in around the menu item and then fades out when
-	// the menu item is no longer selected.
-	CCSprite* ringSprite = [CCSprite spriteWithFile: kButtonRingFileName];
-	adornment = [CCNodeAdornmentOverlayFader adornmentWithAdornmentNode: ringSprite];
+	// The button uses an adornment, which is displayed whenever the button is selected. The adornment
+	// is a ring that fades in around the button and fades out when the button is no longer selected.
+	CCSprite* ringSprite = [CCSprite spriteWithImageNamed: kButtonRingFileName];
+	CCNodeAdornmentBase* adornment = [CCNodeAdornmentOverlayFader adornmentWithAdornmentNode: ringSprite];
 	adornment.zOrder = kAdornmentUnderZOrder;
 	
-	// Attach the adornment to the menu item and center it on the menu item
-	adornment.position = ccpCompMult(ccpFromSize(sunlightMI.contentSize), sunlightMI.anchorPoint);
-	sunlightMI.adornment = adornment;
-	
-	CCMenu* viewMenu = [CCMenu menuWithItems: sunlightMI, nil];
-	viewMenu.position = CGPointZero;
-	[self addChild: viewMenu];
+	// Attach the adornment to the button and center it
+	adornment.position = ccpCompMult(ccpFromSize(_sunlightButton.contentSize), _sunlightButton.anchorPoint);
+	_sunlightButton.adornment = adornment;
 }
 
 /**
- * Creates a button (actually a single-item menu) in the bottom center of the layer
- * that will allow the user to move between viewing the whole scene and viewing
- * from the previous position.
+ * Creates a button that will allow the user to move between viewing the whole scene and 
+ * viewing from the previous position.
  */
 -(void) addZoomButton {
-	
-	// Set up the menu item and position it in the bottom center of the layer
-	zoomMI = [AdornableMenuItemImage itemWithNormalImage: kZoomButtonFileName
-										   selectedImage: kZoomButtonFileName
-												  target: self
-												selector: @selector(cycleZoom:)];
-	zoomMI.scale = kControlSizeScale;
-	[self positionButtons];
+	_zoomButton = [AdornableButton buttonWithTitle: nil
+									   spriteFrame: [CCSpriteFrame frameWithImageNamed: kZoomButtonFileName]];
+	_zoomButton.scale = kControlSizeScale;
+	[self addChild: _zoomButton];
 	
 	// Instead of having different normal and selected images, the toggle menu
 	// item uses a shine adornment, which is displayed whenever an item is selected.
-	CCNodeAdornmentBase* adornment;
-
-	CCSprite* shineSprite = [CCSprite spriteWithFile: kButtonShineFileName];
-	shineSprite.color = ccWHITE;
-	adornment = [CCNodeAdornmentOverlayFader adornmentWithAdornmentNode: shineSprite
-															peakOpacity: kPeakShineOpacity];
+	CCSprite* shineSprite = [CCSprite spriteWithImageNamed: kButtonShineFileName];
+	shineSprite.color = [CCColor whiteColor];
+	CCNodeAdornmentBase* adornment = [CCNodeAdornmentOverlayFader adornmentWithAdornmentNode: shineSprite
+																				 peakOpacity: kPeakShineOpacity];
 	
-	// Attach the adornment to the menu item and center it on the menu item
-	adornment.position = ccpCompMult(ccpFromSize(zoomMI.contentSize), zoomMI.anchorPoint);
-	zoomMI.adornment = adornment;
-	
-	CCMenu* viewMenu = [CCMenu menuWithItems: zoomMI, nil];
-	viewMenu.position = CGPointZero;
-	[self addChild: viewMenu];
+	// Attach the adornment to the button and center it
+	adornment.position = ccpCompMult(ccpFromSize(_zoomButton.contentSize), _zoomButton.anchorPoint);
+	_zoomButton.adornment = adornment;
 }
 
 /**
@@ -280,36 +233,22 @@
  * that will allow the user to toggle shadows on and off for a selected node.
  */
 -(void) addShadowButton {
+	_shadowButton = [AdornableButton buttonWithTitle: nil
+									   spriteFrame: [CCSpriteFrame frameWithImageNamed: kShadowButtonFileName]];
+	[_shadowButton setBackgroundSpriteFrame: [CCSpriteFrame frameWithImageNamed: kShadowButtonLatchedFileName]
+								   forState: CCControlStateSelected];
+	_shadowButton.scale = kControlSizeScale;
+	[self addChild: _shadowButton];
 	
-	// Set up the menu item and position it in the bottom center of the layer.
-	// We use a toggle button to indicate when the shadow activations are active.
-	CCMenuItem* sb = [CCMenuItemImage itemWithNormalImage: kShadowButtonFileName
-											selectedImage: kShadowButtonFileName];
-	CCMenuItem* sbl = [CCMenuItemImage itemWithNormalImage: kShadowButtonLatchedFileName
-											 selectedImage: kShadowButtonLatchedFileName];
-	shadowMI = [AdornableMenuItemToggle itemWithTarget: self
-											  selector: @selector(toggleShadows:)
-												 items: sb, sbl, nil];
-	shadowMI.scale = kControlSizeScale;
-	[self positionButtons];
-	
-	// Instead of having different normal and selected images, the toggle menu
-	// item uses a shine adornment, which is displayed whenever an item is selected.
-	CCNodeAdornmentBase* adornment;
-	
-	// The adornment is a ring that fades in around the menu item and then fades out when
-	// the menu item is no longer selected.
-	CCSprite* ringSprite = [CCSprite spriteWithFile: kButtonRingFileName];
-	adornment = [CCNodeAdornmentOverlayFader adornmentWithAdornmentNode: ringSprite];
+	// The button uses an adornment, which is displayed whenever the button is selected. The adornment
+	// is a ring that fades in around the button and fades out when the button is no longer selected.
+	CCSprite* ringSprite = [CCSprite spriteWithImageNamed: kButtonRingFileName];
+	CCNodeAdornmentBase* adornment = [CCNodeAdornmentOverlayFader adornmentWithAdornmentNode: ringSprite];
 	adornment.zOrder = kAdornmentUnderZOrder;
 	
-	// Attach the adornment to the menu item and center it on the menu item
-	adornment.position = ccpCompMult(ccpFromSize(shadowMI.contentSize), shadowMI.anchorPoint);
-	shadowMI.adornment = adornment;
-	
-	CCMenu* viewMenu = [CCMenu menuWithItems: shadowMI, nil];
-	viewMenu.position = CGPointZero;
-	[self addChild: viewMenu];
+	// Attach the adornment to the button and center it
+	adornment.position = ccpCompMult(ccpFromSize(_shadowButton.contentSize), _shadowButton.anchorPoint);
+	_shadowButton.adornment = adornment;
 }
 
 /**
@@ -318,7 +257,7 @@
  * to keep the joystick in the correct location within the new layer dimensions.
  */
 -(void) positionLocationJoystick {
-	locationJoystick.position = ccp(self.contentSize.width - kJoystickSideLength - kJoystickPadding, kJoystickPadding);
+	_locationJoystick.position = ccp(self.contentSize.width - kJoystickSideLength - kJoystickPadding, kJoystickPadding);
 }
 
 /**
@@ -330,13 +269,13 @@
 	GLfloat middle = self.contentSize.width / 2.0;
 	GLfloat btnY = (kJoystickPadding * 0.5) + (kButtonGrid * 0.5);
 
-	shadowMI.position = ccp(middle - (kButtonGrid * 0.5), btnY);
-	zoomMI.position = ccp(middle + (kButtonGrid * 0.5), btnY);
+	_shadowButton.position = ccp(middle - (kButtonGrid * 0.5), btnY);
+	_zoomButton.position = ccp(middle + (kButtonGrid * 0.5), btnY);
 
 	btnY += kButtonGrid;
-	switchViewMI.position = ccp(middle - (kButtonGrid * 1.0), btnY);
-	invasionMI.position = ccp(middle, btnY);
-	sunlightMI.position = ccp(middle + (kButtonGrid * 1.0), btnY);
+	_switchViewButton.position = ccp(middle - (kButtonGrid * 1.0), btnY);
+	_invasionButton.position = ccp(middle, btnY);
+	_sunlightButton.position = ccp(middle + (kButtonGrid * 1.0), btnY);
 }
 
 
@@ -349,27 +288,25 @@
 -(void) update: (CCTime)dt {
 	
 	// Update the player direction and position in the scene from the joystick velocities
-	self.mashUpScene.playerDirectionControl = directionJoystick.velocity;
-	self.mashUpScene.playerLocationControl = locationJoystick.velocity;
+	self.mashUpScene.playerDirectionControl = _directionJoystick.velocity;
+	self.mashUpScene.playerLocationControl = _locationJoystick.velocity;
 	[super update: dt];
 }
 
 /** The user has pressed the switch camera view button. Tell the 3D scene so it can move the camera. */
--(void) switchViewSelected: (CCMenuItemToggle*) svMI {
-	[self.mashUpScene switchCameraTarget];
-}
+-(void) switchViewSelected: (AdornableButton*) button { [self.mashUpScene switchCameraTarget]; }
 
 /** The user has pressed the invade button. Tell the 3D scene. */
--(void) invade: (CCMenuItemToggle*) svMI { [self.mashUpScene invade]; }
+-(void) invade: (AdornableButton*) button { [self.mashUpScene invade]; }
 
 /** The user has pressed the cycle lights button. Tell the 3D scene. */
--(void) cycleLights: (CCMenuItemToggle*) svMI { [self.mashUpScene cycleLights]; }
+-(void) cycleLights: (AdornableButton*) button { [self.mashUpScene cycleLights]; }
 
 /** The user has pressed the zoom button. Tell the 3D scene. */
--(void) cycleZoom: (CCMenuItemToggle*) svMI { [self.mashUpScene cycleZoom]; }
+-(void) cycleZoom: (AdornableButton*) button { [self.mashUpScene cycleZoom]; }
 
 /** The user has pressed the shadow button. Tell the 3D scene. */
--(void) toggleShadows: (CCMenuItemToggle*) svMI {
+-(void) toggleShadows: (AdornableButton*) button {
 	self.mashUpScene.isManagingShadows = !self.mashUpScene.isManagingShadows;
 }
 
@@ -397,7 +334,7 @@
  * smoothly expands to the top-right corner of the main scene.
  */
 -(void) openGlobeHUDFromTouchAt: (CGPoint) touchPoint {
-	if (hudLayer) return;
+	if (_hudLayer) return;
 	
 	// Determine an appropriate size for the HUD child window.
 	CGSize mySize = self.contentSize;
@@ -409,20 +346,20 @@
 	// Create the HUD CC3Layer, with a semi-transparent background, set its position
 	// to the touch-point (offset by the size of the layer), and set its final size.
 	// Start it with a small scale.
-	hudLayer = [HUDLayer layer];
-	hudLayer.position = ccpSub(touchPoint, ccpMult(ccpFromSize(hudSize), 0.5));
-	hudLayer.contentSize = hudSize;
-	hudLayer.scale = 0.1;
+	_hudLayer = [HUDLayer layer];
+	_hudLayer.position = ccpSub(touchPoint, ccpMult(ccpFromSize(hudSize), 0.5));
+	_hudLayer.contentSize = hudSize;
+	_hudLayer.scale = 0.1;
 
 	// Create and add a new CC3Scene, containing just a copy of the rotating globe,
 	// for the HUD layer, and ensure its camera frames the globe.
-	hudLayer.cc3Scene = [self makeHUDScene];
+	_hudLayer.cc3Scene = [self makeHUDScene];
 
 	// Run actions to move and scale the HUD layer from its starting position
 	// and size to its final expanded position and size.
-	[hudLayer runAction: [CCMoveTo actionWithDuration: 1.0 position: hudPos]];
-	[hudLayer runAction: [CCScaleTo actionWithDuration: 1.0 scale: 1.0]];
-	[self addChild: hudLayer];
+	[_hudLayer runAction: [CCActionMoveTo actionWithDuration: 1.0 position: hudPos]];
+	[_hudLayer runAction: [CCActionScaleTo actionWithDuration: 1.0 scale: 1.0]];
+	[self addChild: _hudLayer];
 }
 
 /**
@@ -435,39 +372,37 @@
 	CC3Node* globe = [[self.cc3Scene getNodeNamed: kGlobeName] copy];
 	globe.location = kCC3VectorZero;
 	globe.rotation = kCC3VectorZero;
-	[globe runAction: [CCRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
+	[globe runAction: [CCActionRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
 																				rotateBy: cc3v(0.0, 30.0, 0.0)]]];
 	[hudScene addChild: globe];	
-
 	[hudScene createGLBuffers];		// Won't really do anything because the Globe mesh...
 									// ...has already been buffered in main scene
 	hudScene.opacity = 200;			// Makes everything in the scene somewhat translucent
-
 	return hudScene;
 }
 
 /** Closes the HUD window by fading it and the scene out and then removing it using CCActions. */
 -(void) closeGlobeHUDFromTouchAt: (CGPoint) touchPoint {
-	[hudLayer stopAllActions];
-	CCActionInterval* fadeLayer = [CCFadeTo actionWithDuration: 1.0 opacity: 0];
-	CCActionInterval* fadeScene = [CCFadeTo actionWithDuration: 1.0 opacity: 0];
-	CCActionInstant* removeHUD = [CCCallFunc actionWithTarget: self
-													 selector: @selector(removeGlobeHUD)];
-	[hudLayer runAction: [CCSequence actionOne: fadeLayer two: removeHUD]];
-	[hudLayer.cc3Scene runAction: fadeScene];
+	[_hudLayer stopAllActions];
+	CCActionInterval* fadeLayer = [CCActionFadeTo actionWithDuration: 1.0 opacity: 0];
+	CCActionInterval* fadeScene = [CCActionFadeTo actionWithDuration: 1.0 opacity: 0];
+	CCActionInstant* removeHUD = [CCActionCallFunc actionWithTarget: self
+														   selector: @selector(removeGlobeHUD)];
+	[_hudLayer runAction: [CCActionSequence actionOne: fadeLayer two: removeHUD]];
+	[_hudLayer.cc3Scene runAction: fadeScene];
 }
 
 /** Removes the HUD window if it exists. */
 -(void) removeGlobeHUD {
-	if (hudLayer) {
-		[self removeChild: hudLayer cleanup: YES];
-		hudLayer = nil;
+	if (_hudLayer) {
+		[self removeChild: _hudLayer cleanup: YES];
+		_hudLayer = nil;
 	}
 }
 
 /** Toggles between opening and closing the HUD window. */
 -(void) toggleGlobeHUDFromTouchAt: (CGPoint) touchPoint {
-	if (hudLayer)
+	if (_hudLayer)
 		[self closeGlobeHUDFromTouchAt: touchPoint];
 	else
 		[self openGlobeHUDFromTouchAt: touchPoint];
@@ -657,3 +592,5 @@
 #endif	// CC3_IOS
 
 @end
+
+#endif	// !CC3_CC2_CLASSIC

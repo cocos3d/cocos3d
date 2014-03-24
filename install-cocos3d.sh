@@ -249,17 +249,15 @@ link_cocos2d_libs(){
 	# Chipmunk library (cocos2d 3.x only)
 	CHPMK_DIR=cocos2d-chipmunk
 	rm -rf   "$CHPMK_DIR"
-	if [[ -d "$CC2_DIST_DIR/cocos2d-ui" ]]; then	# test for cocos2d 3.x
-		CHIPMUNK_DIST_DIR="$CC2_DIST_DIR/external/Chipmunk"
-		if [[ -d "$CHIPMUNK_DIST_DIR" ]]; then
-			mkdir -p "$CHPMK_DIR"
-			mkdir -p "$CHPMK_DIR/chipmunk"
-			link_dir "$CHIPMUNK_DIST_DIR/include" "$CHPMK_DIR/chipmunk" "Chipmunk includes"
-			link_dir "$CHIPMUNK_DIST_DIR/src" "$CHPMK_DIR/chipmunk" "Chipmunk source"
-			link_dir "$CHIPMUNK_DIST_DIR/objectivec" "$CHPMK_DIR" "Objective Chipmunk"
-		fi
-		copy_file "LICENSE_Chipmunk.txt" "$CC2_DIST_DIR" "$CHPMK_DIR"
+	CHIPMUNK_DIST_DIR="$CC2_DIST_DIR/external/Chipmunk"
+	if [[ -d "$CHIPMUNK_DIST_DIR" ]]; then
+		mkdir -p "$CHPMK_DIR"
+		mkdir -p "$CHPMK_DIR/chipmunk"
+		link_dir "$CHIPMUNK_DIST_DIR/include" "$CHPMK_DIR/chipmunk" "Chipmunk includes"
+		link_dir "$CHIPMUNK_DIST_DIR/src" "$CHPMK_DIR/chipmunk" "Chipmunk source"
+		link_dir "$CHIPMUNK_DIST_DIR/objectivec" "$CHPMK_DIR" "Objective Chipmunk"
 	fi
+	copy_file "LICENSE_Chipmunk.txt" "$CC2_DIST_DIR" "$CHPMK_DIR"
 
 	# ObjectAL  (cocos2d 3.x only)
 	link_dir "$CC2_DIST_DIR/external/ObjectAL" "$CC2_DIR" "ObjectAL"

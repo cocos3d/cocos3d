@@ -45,7 +45,7 @@
 #	define kControlSizeScale		(MAX(UIScreen.mainScreen.bounds.size.width, UIScreen.mainScreen.bounds.size.height) / 1024.0f)
 #	define kControlPositionScale	kControlSizeScale
 #else
-#	define kControlSizeScale		CC_CONTENT_SCALE_FACTOR()
+#	define kControlSizeScale		CCDirector.sharedDirector.contentScaleFactor
 #	define kControlPositionScale	1.0
 #endif	// APPORTABLE
 
@@ -337,7 +337,7 @@
 		// that when multiple dragons are visible, they are not all flapping in unison.
 		CCTime flapTime = CC3RandomFloatBetween(1.0, 2.0);
 		CC3Animate* flap = [CC3Animate actionWithDuration: flapTime onTrack: _flapTrack];
-		[aNode runAction: [CCRepeatForever actionWithAction: flap]];
+		[aNode runAction: [CCActionRepeatForever actionWithAction: flap]];
 	}
 	
 	scene.mainNode = aNode;		// Set the node as the main node of the scene, for easy access

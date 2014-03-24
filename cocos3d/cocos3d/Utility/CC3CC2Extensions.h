@@ -35,27 +35,65 @@
 #import "CC3OSExtensions.h"
 #import "CCTextureCache.h"
 
-#if !(CC3_CC2_1 || CC3_CC2_2)
+#if !CC3_CC2_CLASSIC
 #	import "CCNode_Private.h"
 #	import "CCDirector_Private.h"
 #	import "CCTexture_Private.h"
-#endif
+#endif	// !CC3_CC2_CLASSIC
 
 #pragma mark -
 #pragma mark CCGLView & CC3GLView
 
 // Backwards compatibility to renamed Cocos2D entities
-#if (CC3_CC2_1 || CC3_CC2_2)
+#if CC3_CC2_CLASSIC
 typedef ccTime CCTime;
-#define CCTexture CCTexture2D
-#define viewSizeInPixels winSizeInPixels
-#endif
 
-#if !(CC3_CC2_1 || CC3_CC2_2)
+#define CCNextPOT			ccNextPOT
+#define CCTexture			CCTexture2D
+#define viewSize			winSize
+#define viewSizeInPixels	winSizeInPixels
+
+#define CCTexturePixelFormat			CCTexture2DPixelFormat
+#define CCTexturePixelFormat_RGBA8888	kCCTexture2DPixelFormat_RGBA8888
+#define CCTexturePixelFormat_RGB888		kCCTexture2DPixelFormat_RGB888
+#define CCTexturePixelFormat_RGB565		kCCTexture2DPixelFormat_RGB565
+#define CCTexturePixelFormat_A8			kCCTexture2DPixelFormat_A8
+#define CCTexturePixelFormat_I8			kCCTexture2DPixelFormat_I8
+#define CCTexturePixelFormat_AI88		kCCTexture2DPixelFormat_AI88
+#define CCTexturePixelFormat_RGBA4444	kCCTexture2DPixelFormat_RGBA4444
+#define CCTexturePixelFormat_RGB5A1		kCCTexture2DPixelFormat_RGB5A1
+#define CCTexturePixelFormat_PVRTC4		kCCTexture2DPixelFormat_PVRTC4
+#define CCTexturePixelFormat_PVRTC2		kCCTexture2DPixelFormat_PVRTC2
+#define CCTexturePixelFormat_Default	kCCTexture2DPixelFormat_Default
+
+#define CCActionFadeTo			CCFadeTo
+#define CCActionFadeIn			CCFadeIn
+#define CCActionFadeOut			CCFadeOut
+#define CCActionHide			CCHide
+#define CCActionTintTo			CCTintTo
+#define CCActionMoveTo			CCMoveTo
+#define CCActionScaleTo			CCScaleTo
+#define CCActionSequence		CCSequence
+#define CCActionRepeat			CCRepeat
+#define CCActionRepeatForever	CCRepeatForever
+#define CCActionEaseOut			CCEaseOut
+#define CCActionEaseIn			CCEaseIn
+#define CCActionEaseInOut		CCEaseInOut
+#define CCActionEaseBounceOut	CCEaseBounceOut
+#define CCActionEaseElasticOut	CCEaseElasticOut
+#define CCActionCallFunc		CCCallFunc
+
+#endif	// CC3_CC2_CLASSIC
+
+#if !CC3_CC2_CLASSIC
 @protocol CCRGBAProtocol <NSObject>
 @end
-#define CCLayer CCNode
-#endif
+
+// Dummy class for backwards compatibility
+@interface CCLayer : CCNode
+@end
+
+#endif	// !CC3_CC2_CLASSIC
 
 #if CC3_IOS
 
@@ -101,7 +139,7 @@ typedef ccTime CCTime;
 #endif
 
 
-#if !CC3_IOS || !((CC3_CC2_1 || CC3_CC2_2))
+#if !CC3_IOS || !CC3_CC2_CLASSIC
 enum {
 	kCCTouchBegan,
 	kCCTouchMoved,
@@ -110,7 +148,7 @@ enum {
 	
 	kCCTouchMax,
 };
-#endif	// !CC3_IOS || !((CC3_CC2_1 || CC3_CC2_2))
+#endif	// !CC3_IOS || !CC3_CC2_CLASSIC
 
 #if !CC3_IOS
 
@@ -170,18 +208,26 @@ enum {
 /** Extension category to support cocos3d functionality. */
 @interface CCNode (CC3)
 
-#if (CC3_CC2_1 || CC3_CC2_2)
+#if CC3_CC2_CLASSIC
 /** Returns YES if the node is added to an active scene and neither it nor any of it's ancestors is paused. */
 @property(nonatomic,readonly) BOOL isRunningInActiveScene;
-#endif	// (CC3_CC2_1 || CC3_CC2_2)
-	
-#if CC3_CC2_2
+
+/** If paused, no callbacks will be called, and no actions will be run. */
+@property(nonatomic, assign) BOOL paused;
+#endif	// CC3_CC2_CLASSIC
+
+#if !CC3_CC2_CLASSIC
+/** For backwards compatibility with prior cocos2d versions. Does nothing. */
+-(void) scheduleUpdate;
+#endif	// !CC3_CC2_CLASSIC
+
+#if !CC3_CC2_1
 /** cocos2d 2.x compatibility with pixel-based sizing. */
 @property (nonatomic, readonly) CGSize contentSizeInPixels;
 
 /** cocos2d 2.x compatibility with pixel-based sizing. */
 @property (nonatomic, readonly) CGRect boundingBoxInPixels;
-#endif
+#endif	// !CC3_CC2_1
 
 /**
  * Returns whether this node will receive touch events.
@@ -314,7 +360,7 @@ enum {
 @end
 
 
-#if (CC3_CC2_1 || CC3_CC2_2)
+#if CC3_CC2_CLASSIC
 
 #pragma mark -
 #pragma mark CCLayer extension
@@ -377,7 +423,7 @@ enum {
 #endif
 @end
 
-#endif	// (CC3_CC2_1 || CC3_CC2_2)
+#endif	// CC3_CC2_CLASSIC
 
 
 #pragma mark -
@@ -394,6 +440,16 @@ enum {
  * name is nil, this texture is not added to the cache.
  */
 -(void) addToCacheWithName: (NSString*) texName;
+
+#if CC3_CC2_CLASSIC
+
+/** Legacy support for renamed pixelsWide property. */
+@property(nonatomic,readonly) NSUInteger pixelWidth;
+
+/** Legacy support for renamed pixelsHigh property. */
+@property(nonatomic,readonly) NSUInteger pixelHeight;
+
+#endif	// CC3_CC2_CLASSIC
 
 @end
 
@@ -468,14 +524,21 @@ enum {
 
 #endif	// CC3_CC2_1
 
-#if CC3_CC2_2 || CC3_OSX
+#if !CC3_CC2_1
 /**
- * Adds support under cocos2d 2.x for legacy code that looks for device orientation under cocos2d 1.x.
+ * Adds support above cocos2d 1.x for legacy code that looks for device orientation under cocos2d 1.x.
  *
  * Always returns UIDeviceOrientationPortrait.
  */
 -(UIDeviceOrientation) deviceOrientation;
-#endif	// CC3_CC2_2 && CC3_IOS
+#endif	// !CC3_CC2_1
+
+#if CC3_CC2_CLASSIC
+
+/** Content scaling factor. Simply delegates to same property on CCDirectorIOS. */
+@property(nonatomic, assign) CGFloat contentScaleFactor;
+
+#endif	//CC3_CC2_CLASSIC
 
 @end
 
@@ -508,6 +571,22 @@ enum {
 
 /** Extension category to support cocos3d functionality. */
 @interface CCDirectorDisplayLink (CC3)
+@end
+
+
+#pragma mark -
+#pragma mark CCScheduler extension
+
+@interface CCScheduler (CC3)
+
+#if !CC3_CC2_CLASSIC
+/** Pauses the target. */
+-(void) pauseTarget:(id)target;
+
+/** Resumes the target. */
+-(void) resumeTarget:(id)target;
+#endif	// !CC3_CC2_CLASSIC
+
 @end
 
 

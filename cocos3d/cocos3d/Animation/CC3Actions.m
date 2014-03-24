@@ -679,7 +679,7 @@
 }
 
 -(id) copyWithZone: (NSZone*) zone {
-	CC3Animate* newAnim = [[[self class] allocWithZone: zone] initWithDuration: self.duration];
+	CC3Animate* newAnim = [((CC3Animate*)[[self class] allocWithZone: zone]) initWithDuration: self.duration];
 	newAnim.isReversed = self.isReversed;
 	return newAnim;
 }

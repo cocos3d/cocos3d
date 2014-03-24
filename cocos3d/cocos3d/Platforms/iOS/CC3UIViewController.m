@@ -57,8 +57,8 @@
 #	define CC2_VIEW __view
 #endif
 
-#if CC3_CC2_2
-// In cocos2d 2.x, view is tracked separately and does not lazily init. Restore that functionality.
+#if !CC3_CC2_1
+// In cocos2d 2.x and above, view is tracked separately and does not lazily init. Restore that functionality.
 -(CC3GLView*) view {
 	if ( !CC2_VIEW ) {
 		[self loadView];
@@ -66,7 +66,7 @@
 	}
 	return super.view;
 }
-#endif	// CC3_CC2_2
+#endif	// !CC3_CC2_1
 
 /** Ensure that retina display is established if required. */
 -(void) setView:(CC3GLView *)view {
@@ -108,13 +108,18 @@
 	return [self checkRetinaDisplay];
 }
 
+// Not needed for Cocos2D v3
 -(BOOL) checkRetinaDisplay {
+#if CC3_CC2_CLASSIC
 #if CC3_CC2_2
 	return [super enableRetinaDisplay: _shouldUseRetina];
 #endif	// CC3_CC2_2
 #if CC3_CC2_1
 	return [CCDirector.sharedDirector enableRetinaDisplay: _shouldUseRetina];
 #endif	// CC3_CC2_1
+#endif	// CC3_CC2_CLASSIC
+
+	return YES;
 }
 
 #if COCOS2D_VERSION >= 0x020100

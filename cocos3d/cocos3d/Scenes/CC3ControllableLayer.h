@@ -32,7 +32,7 @@
 #import "CC3ViewController.h"
 #import "CC3OSExtensions.h"
 
-#if (CC3_CC2_1 || CC3_CC2_2)
+#if CC3_CC2_CLASSIC
 #import "CCLayer.h"
 #endif
 

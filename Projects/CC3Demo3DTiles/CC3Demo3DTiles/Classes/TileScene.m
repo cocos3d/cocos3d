@@ -157,7 +157,7 @@
 -(void) flashMainNodeAt: (CGPoint) touchPoint {
 	CCActionInterval* tintUp = [CC3TintEmissionTo actionWithDuration: 0.2f colorTo: kCCC4FCyan];
 	CCActionInterval* tintDown = [CC3TintEmissionTo actionWithDuration: 0.5f colorTo: kCCC4FBlack];
-	[_mainNode runAction: [CCSequence actionOne: tintUp two: tintDown]];
+	[_mainNode runAction: [CCActionSequence actionOne: tintUp two: tintDown]];
 }
 
 @end

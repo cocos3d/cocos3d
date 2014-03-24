@@ -44,7 +44,7 @@
 
 @implementation CCNodeAdornmentBase
 
-@synthesize actionDuration;
+@synthesize actionDuration=_actionDuration;
 
 -(NSInteger) zOrder { return [super zOrder]; }
 
@@ -64,7 +64,7 @@
 
 -(id) initWithActionDuration: (CCTime) aDuration {
 	if( (self = [super init]) ) {
-		actionDuration = aDuration;
+		_actionDuration = aDuration;
 		self.zOrder = kAdornmentOverZOrder;
 	}
 	return self;
@@ -86,16 +86,16 @@
 
 @implementation CCNodeAdornmentOverlayFader
 
-@synthesize peakOpacity, adornmentNode;
+@synthesize peakOpacity=_peakOpacity, adornmentNode=_adornmentNode;
 
 -(id) initWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode peakOpacity: (GLubyte) opacity fadeDuration: (CCTime) aDuration {
 	CC3Assert(aNode, @"CCNodeAdornment node must not be nil");
 	if( (self = [super initWithActionDuration: aDuration]) ) {
-		peakOpacity = opacity;
+		_peakOpacity = opacity;
 		self.contentSize = aNode.contentSize;
 		aNode.visible = NO;
 		[aNode setOpacity: 0];
-		adornmentNode = aNode;
+		_adornmentNode = aNode;
 		[self addChild: aNode];
 	}
 	return self;
@@ -125,11 +125,11 @@
 // to fade it in up to the peak opacity. The action is tagged so that it
 // can be easily found if it needs to be cancelled.
 -(void) activate {
-	[adornmentNode stopActionByTag: kFadeActionTag];	// Cancel any existing fade action
-	CCAction* fadeAction = [CCFadeTo actionWithDuration: self.actionDuration opacity: peakOpacity];
+	[_adornmentNode stopActionByTag: kFadeActionTag];	// Cancel any existing fade action
+	CCAction* fadeAction = [CCActionFadeTo actionWithDuration: self.actionDuration opacity: _peakOpacity];
 	fadeAction.tag = kFadeActionTag;
-	adornmentNode.visible = YES;
-	[adornmentNode runAction: fadeAction];
+	_adornmentNode.visible = YES;
+	[_adornmentNode runAction: fadeAction];
 }
 
 // When deactivated, establish an action sequence to first fade the adornment node
@@ -138,13 +138,13 @@
 // adornment node more efficient. The action is tagged so that it can be easily found
 // if it needs to be cancelled.
 -(void) deactivate {
-	[adornmentNode stopActionByTag: kFadeActionTag];	// Cancel any existing fade action
-	CCFiniteTimeAction* fadeAction = [CCFadeOut actionWithDuration: self.actionDuration];
-	CCFiniteTimeAction* hideAction = [CCHide action];
-	CCFiniteTimeAction* fadeThenHideAction = [CCSequence actionOne: fadeAction 
-															   two: hideAction];
+	[_adornmentNode stopActionByTag: kFadeActionTag];	// Cancel any existing fade action
+	CCActionInterval* fadeAction = [CCActionFadeOut actionWithDuration: self.actionDuration];
+	CCActionInterval* hideAction = [CCActionHide action];
+	CCActionInterval* fadeThenHideAction = [CCActionSequence actionOne: fadeAction
+																   two: hideAction];
 	fadeThenHideAction.tag = kFadeActionTag;
-	[adornmentNode runAction: fadeThenHideAction];
+	[_adornmentNode runAction: fadeThenHideAction];
 }
 
 @end
@@ -159,12 +159,12 @@
 
 @implementation CCNodeAdornmentScaler
 
-@synthesize activatedScale;
+@synthesize activatedScale=_activatedScale;
 
 -(id) initToScaleBy: (CGSize) aScale scaleDuration: (CCTime) aDuration {
 	if( (self = [super init]) ) {
 		self.actionDuration = aDuration;
-		activatedScale = aScale;
+		_activatedScale = aScale;
 	}
 	return self;
 }
@@ -200,7 +200,7 @@
 // Sets the value of originalScale from the current parent.
 -(void) setOriginalScaleFromParent {
 	CCNode* p = self.parent;
-	originalScale = CGSizeMake(p.scaleX, p.scaleY);
+	_originalScale = CGSizeMake(p.scaleX, p.scaleY);
 }
 
 // Overridden to cache the parent's current scale
@@ -228,11 +228,11 @@
 	}
 	// use scaleTo instead of scaleBy so that final size is deterministic in the case
 	// where we have interrupted an active scaling action above
-	float finalScaleX = originalScale.width * activatedScale.width;
-	float finalScaleY = originalScale.height * activatedScale.height;
-	CCAction* scaleAction = [CCScaleTo actionWithDuration: self.actionDuration
-												   scaleX: finalScaleX
-												   scaleY: finalScaleY];
+	float finalScaleX = _originalScale.width * _activatedScale.width;
+	float finalScaleY = _originalScale.height * _activatedScale.height;
+	CCAction* scaleAction = [CCActionScaleTo actionWithDuration: self.actionDuration
+														 scaleX: finalScaleX
+														 scaleY: finalScaleY];
 	scaleAction.tag = kScaleActionTag;
 	[p runAction: scaleAction];
 }
@@ -242,9 +242,9 @@
 -(void) deactivate {
 	CCNode* p = self.parent;
 	[p stopActionByTag: kScaleActionTag];		// Cancel any existing scaling action
-	CCAction* scaleAction = [CCScaleTo actionWithDuration: self.actionDuration
-												   scaleX: originalScale.width
-												   scaleY: originalScale.height];
+	CCAction* scaleAction = [CCActionScaleTo actionWithDuration: self.actionDuration
+														 scaleX: _originalScale.width
+														 scaleY: _originalScale.height];
 	scaleAction.tag = kScaleActionTag;
 	[p runAction: scaleAction];
 }
@@ -252,66 +252,88 @@
 @end
 
 
-#pragma mark AdornableMenuItemToggle CCMenuItemToggle extention implementation
+#if CC3_CC2_CLASSIC
+
+#pragma mark AdornableMenuItemToggle
 
 @implementation AdornableMenuItemToggle
 
--(CCNode<CCNodeAdornmentProtocol>*) adornment {
-	return adornment;
-}
+-(CCNode<CCNodeAdornmentProtocol>*) adornment { return _adornment; }
 
 // Add the adornment as a child, removing any previous adornment.
 -(void) setAdornment: (CCNode<CCNodeAdornmentProtocol>*) aNode {
-	[self removeChild: adornment cleanup: YES];
-	adornment = aNode;
-	if(aNode) {
-		[self addChild: aNode];
-	}
+	[self removeChild: _adornment cleanup: YES];
+	_adornment = aNode;
+	if(aNode) [self addChild: aNode];
 }
 
 // When this menu item is selected, activate the adornment
 -(void) selected {
 	[super selected];
-	[adornment activate];
+	[_adornment activate];
 }
 
 // When this menu item is unselected, deactivate the adornment
 -(void) unselected {
 	[super unselected];
-	[adornment deactivate];
+	[_adornment deactivate];
 }
 
 @end
 
 
-#pragma mark AdornableMenuItemImage CCMenuItemToggle extention implementation
+#pragma mark AdornableMenuItemImage
 
 @implementation AdornableMenuItemImage
 
--(CCNode<CCNodeAdornmentProtocol>*) adornment {
-	return adornment;
-}
+-(CCNode<CCNodeAdornmentProtocol>*) adornment { return _adornment; }
 
 // Add the adornment as a child, removing any previous adornment.
 -(void) setAdornment: (CCNode<CCNodeAdornmentProtocol>*) aNode {
-	[self removeChild: adornment cleanup: YES];
-	adornment = aNode;
-	if(aNode) {
-		[self addChild: aNode];
-	}
+	[self removeChild: _adornment cleanup: YES];
+	_adornment = aNode;
+	if(aNode) [self addChild: aNode];
 }
 
 // When this menu item is selected, activate the adornment
 -(void) selected {
 	[super selected];
-	[adornment activate];
+	[_adornment activate];
 }
 
 // When this menu item is unselected, deactivate the adornment
 -(void) unselected {
 	[super unselected];
-	[adornment deactivate];
+	[_adornment deactivate];
 }
 
 @end
+
+#else
+
+
+#pragma mark AdornableButton
+
+@implementation AdornableButton
+
+-(CCNode<CCNodeAdornmentProtocol>*) adornment { return _adornment; }
+
+// Add the adornment as a child, removing any previous adornment.
+-(void) setAdornment: (CCNode<CCNodeAdornmentProtocol>*) aNode {
+	[self removeChild: _adornment cleanup: YES];
+	_adornment = aNode;
+	if(aNode) [self addChild: aNode];
+}
+
+-(void) setHighlighted: (BOOL) highlighted {
+	[super setHighlighted: highlighted];
+	if (highlighted)
+		[_adornment activate];
+	else if (!self.selected)
+		[_adornment deactivate];
+}
+
+@end
+
+#endif	// CC3_CC2_CLASSIC
 

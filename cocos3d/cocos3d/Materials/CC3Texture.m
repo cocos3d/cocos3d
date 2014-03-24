@@ -73,9 +73,9 @@
 	_textureID = 0;
 }
 
--(BOOL) isPOTWidth { return (_size.width == ccNextPOT(_size.width)); }
+-(BOOL) isPOTWidth { return (_size.width == CCNextPOT(_size.width)); }
 
--(BOOL) isPOTHeight { return (_size.height == ccNextPOT(_size.height)); }
+-(BOOL) isPOTHeight { return (_size.height == CCNextPOT(_size.height)); }
 
 -(BOOL) isPOT { return self.isPOTWidth && self.isPOTHeight; }
 
@@ -130,7 +130,7 @@
 	
 	[self ensureGLTexture];
 	
-	_size = CC3IntSizeMake((GLint)texContent.pixelsWide, (GLint)texContent.pixelsHigh);
+	_size = CC3IntSizeMake((GLint)texContent.pixelWidth, (GLint)texContent.pixelHeight);
 	_coverage = CGSizeMake(texContent.maxS, texContent.maxT);
 	_pixelFormat = texContent.pixelGLFormat;
 	_pixelType = texContent.pixelGLType;
@@ -564,7 +564,7 @@ static BOOL _shouldCacheAssociatedCCTextures = NO;
 		_textureID = 0;
 		_size = CC3IntSizeMake(0, 0);
 		_coverage = CGSizeZero;
-		_pixelFormat = kCCTexture2DPixelFormat_Default;
+		_pixelFormat = GL_RGBA;
 		_hasMipmap = NO;
 		_hasAlpha = NO;
 		_hasPremultipliedAlpha = NO;
@@ -1321,17 +1321,17 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 #pragma mark -
 #pragma mark CC3Texture2DContent
 
-#if COCOS2D_VERSION < 0x020100
-#	define CC2_TEX_NAME name_
-#	define CC2_TEX_SIZE size_
-#	define CC2_TEX_WIDTH width_
-#	define CC2_TEX_HEIGHT height_
-#	define CC2_TEX_FORMAT format_
-#	define CC2_TEX_MAXS maxS_
-#	define CC2_TEX_MAXT maxT_
-#	define CC2_TEX_HAS_PREMULT_ALPHA hasPremultipliedAlpha_
-#	define CC2_TEX_HAS_MIPMAP hasMipmaps_
-#else
+#if COCOS2D_VERSION >= 0x030000
+#	define CC2_TEX_NAME _name
+#	define CC2_TEX_SIZE _sizeInPixels
+#	define CC2_TEX_WIDTH _width
+#	define CC2_TEX_HEIGHT _height
+#	define CC2_TEX_FORMAT _format
+#	define CC2_TEX_MAXS _maxS
+#	define CC2_TEX_MAXT _maxT
+#	define CC2_TEX_HAS_PREMULT_ALPHA _premultipliedAlpha
+#	define CC2_TEX_HAS_MIPMAP _hasMipmaps
+#elif COCOS2D_VERSION >= 0x020100
 #	define CC2_TEX_NAME _name
 #	define CC2_TEX_SIZE _size
 #	define CC2_TEX_WIDTH _width
@@ -1341,6 +1341,16 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 #	define CC2_TEX_MAXT _maxT
 #	define CC2_TEX_HAS_PREMULT_ALPHA _hasPremultipliedAlpha
 #	define CC2_TEX_HAS_MIPMAP _hasMipmaps
+#else
+#	define CC2_TEX_NAME name_
+#	define CC2_TEX_SIZE size_
+#	define CC2_TEX_WIDTH width_
+#	define CC2_TEX_HEIGHT height_
+#	define CC2_TEX_FORMAT format_
+#	define CC2_TEX_MAXS maxS_
+#	define CC2_TEX_MAXT maxT_
+#	define CC2_TEX_HAS_PREMULT_ALPHA hasPremultipliedAlpha_
+#	define CC2_TEX_HAS_MIPMAP hasMipmaps_
 #endif
 
 @implementation CC3Texture2DContent
@@ -1438,8 +1448,8 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 	if ( !_imageData ) return;		// If no data, nothing to flip!
 
 	CC3FlipVertically((GLubyte*)_imageData,
-					  (GLuint)self.pixelsHigh,
-					  (GLuint)self.pixelsWide * self.bytesPerPixel);
+					  (GLuint)self.pixelHeight,
+					  (GLuint)self.pixelWidth * self.bytesPerPixel);
 	
 	_isUpsideDown = !_isUpsideDown;		// Orientation has changed
 }
@@ -1447,8 +1457,8 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 -(void) flipHorizontally {
 	if ( !_imageData ) return;		// If no data, nothing to flip!
 
-	GLuint rowCnt = (GLuint)self.pixelsHigh;
-	GLuint colCnt = (GLuint)self.pixelsWide;
+	GLuint rowCnt = (GLuint)self.pixelHeight;
+	GLuint colCnt = (GLuint)self.pixelWidth;
 	GLuint lastColIdx = colCnt - 1;
 	GLuint halfColCnt = colCnt / 2;
 
@@ -1472,10 +1482,10 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 -(void) rotateHalfCircle {
 	if ( !_imageData ) return;		// If no data, nothing to rotate!
 	
-	GLuint rowCnt = (GLuint)self.pixelsHigh;
+	GLuint rowCnt = (GLuint)self.pixelHeight;
 	GLuint lastRowIdx = rowCnt - 1;
 	GLuint halfRowCnt = (rowCnt + 1) / 2;		// Use ceiling to capture any middle row: (A+B-1)/B
-	GLuint colCnt = (GLuint)self.pixelsWide;
+	GLuint colCnt = (GLuint)self.pixelWidth;
 	GLuint lastColIdx = colCnt - 1;
 	
 	GLubyte* pixData = (GLubyte*)_imageData;
@@ -1526,7 +1536,7 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 
 /** Overridden to set content parameters, but postpone loading the content into the GL engine. */
 -(id) initWithData: (const GLvoid*) data
-	   pixelFormat: (CCTexture2DPixelFormat) pixelFormat
+	   pixelFormat: (CCTexturePixelFormat) pixelFormat
 		pixelsWide: (NSUInteger) width
 		pixelsHigh: (NSUInteger) height
 	   contentSize: (CGSize) size {
@@ -1551,31 +1561,31 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 -(void) updateFromPixelFormat {
 	GLuint pixFmt = self.pixelFormat;	// Not all versions of cocos2d contain all enum values.
 	switch(pixFmt) {
-		case kCCTexture2DPixelFormat_RGBA8888:
+		case CCTexturePixelFormat_RGBA8888:
 			_pixelGLFormat = GL_RGBA;
 			_pixelGLType = GL_UNSIGNED_BYTE;
 			break;
-		case kCCTexture2DPixelFormat_RGBA4444:
+		case CCTexturePixelFormat_RGBA4444:
 			_pixelGLFormat = GL_RGBA;
 			_pixelGLType = GL_UNSIGNED_SHORT_4_4_4_4;
 			break;
-		case kCCTexture2DPixelFormat_RGB5A1:
+		case CCTexturePixelFormat_RGB5A1:
 			_pixelGLFormat = GL_RGBA;
 			_pixelGLType = GL_UNSIGNED_SHORT_5_5_5_1;
 			break;
-		case kCCTexture2DPixelFormat_RGB565:
+		case CCTexturePixelFormat_RGB565:
 			_pixelGLFormat = GL_RGB;
 			_pixelGLType = GL_UNSIGNED_SHORT_5_6_5;
 			break;
-		case kCCTexture2DPixelFormat_RGB888:
+		case CCTexturePixelFormat_RGB888:
 			_pixelGLFormat = GL_RGB;
 			_pixelGLType = GL_UNSIGNED_BYTE;
 			break;
-		case kCCTexture2DPixelFormat_AI88:
+		case CCTexturePixelFormat_AI88:
 			_pixelGLFormat = GL_LUMINANCE_ALPHA;
 			_pixelGLType = GL_UNSIGNED_BYTE;
 			break;
-		case kCCTexture2DPixelFormat_A8:
+		case CCTexturePixelFormat_A8:
 			_pixelGLFormat = GL_ALPHA;
 			_pixelGLType = GL_UNSIGNED_BYTE;
 			break;
@@ -1591,13 +1601,13 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 		case GL_RGBA: {
 			switch (_pixelGLType) {
 				case GL_UNSIGNED_BYTE:
-					CC2_TEX_FORMAT = kCCTexture2DPixelFormat_RGBA8888;
+					CC2_TEX_FORMAT = CCTexturePixelFormat_RGBA8888;
 					return;
 				case GL_UNSIGNED_SHORT_4_4_4_4:
-					CC2_TEX_FORMAT = kCCTexture2DPixelFormat_RGBA4444;
+					CC2_TEX_FORMAT = CCTexturePixelFormat_RGBA4444;
 					return;
 				case GL_UNSIGNED_SHORT_5_5_5_1:
-					CC2_TEX_FORMAT = kCCTexture2DPixelFormat_RGB5A1;
+					CC2_TEX_FORMAT = CCTexturePixelFormat_RGB5A1;
 					return;
 				default:
 					break;
@@ -1608,10 +1618,10 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 		case GL_RGB: {
 			switch (_pixelGLType) {
 				case GL_UNSIGNED_BYTE:
-					CC2_TEX_FORMAT = kCCTexture2DPixelFormat_RGB888;
+					CC2_TEX_FORMAT = CCTexturePixelFormat_RGB888;
 					return;
 				case GL_UNSIGNED_SHORT_5_6_5:
-					CC2_TEX_FORMAT = kCCTexture2DPixelFormat_RGB565;
+					CC2_TEX_FORMAT = CCTexturePixelFormat_RGB565;
 					return;
 				default:
 					break;
@@ -1620,20 +1630,27 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 		}
 			
 		case GL_LUMINANCE_ALPHA:
-			CC2_TEX_FORMAT = kCCTexture2DPixelFormat_AI88;
+			CC2_TEX_FORMAT = CCTexturePixelFormat_AI88;
 			return;
 			
 		case GL_LUMINANCE:
 		case GL_ALPHA:
-			CC2_TEX_FORMAT = kCCTexture2DPixelFormat_A8;
+			CC2_TEX_FORMAT = CCTexturePixelFormat_A8;
 			return;
 			
 		default:
 			break;
 	}
-	CC2_TEX_FORMAT = kCCTexture2DPixelFormat_Default;
+	CC2_TEX_FORMAT = CCTexturePixelFormat_Default;
 }
 
+#if !CC3_CC2_CLASSIC
+-(id) initWithCGImage: (CGImageRef) cgImg {
+	return [self initWithCGImage: cgImg contentScale: 1.0f];
+}
+#endif	// !CC3_CC2_CLASSIC
+
+#if CC3_CC2_CLASSIC
 -(id) initWithCGImage: (CGImageRef) cgImg {
 #if CC3_IOS
 
@@ -1667,8 +1684,8 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 #endif	// CC3_CC2_1
 
 #endif	// CC_OSX
-
 }
+#endif	// CC3_CC2_CLASSIC
 
 -(id) initFromFile: (NSString*) aFilePath {
 	if ( [CC3STBImage shouldUseForFileExtension: aFilePath.pathExtension] )
@@ -1700,17 +1717,16 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 -(id) initFromOSFile: (NSString*) aFilePath {
 #if CC3_IOS
 	UIImage* uiImg = [UIImage imageWithContentsOfFile: CC3EnsureAbsoluteFilePath(aFilePath)];
-	
-#if CC3_CC2_2
-	return [self initWithCGImage: uiImg.CGImage];
-#endif	// CC3_CC2_2
-	
+
 #if CC3_CC2_1
 #if COCOS2D_VERSION < 0x010100
 	return [self initWithImage: uiImg];
 #else
 	return [self initWithImage: uiImg resolutionType: kCCResolutionUnknown];
 #endif // COCOS2D_VERSION < 0x010100
+
+#else
+	return [self initWithCGImage: uiImg.CGImage];
 #endif	// CC3_CC2_1
 	
 #endif	// CC_IOS

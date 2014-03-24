@@ -57,7 +57,7 @@
 
 @implementation Joystick
 
-@synthesize velocity, angularVelocity;
+@synthesize velocity=_velocity, angularVelocity=_angularVelocity;
 
 /** The anchor point in terms of cocos2d points. */
 -(CGPoint) anchorPointInPoints {
@@ -67,21 +67,29 @@
 -(id) initWithThumb: (CCNode*) aNode andSize: (CGSize) size {
 	CC3Assert(aNode, @"Thumb node must not be nil");
 	if( (self = [super init]) ) {
-		self.mousePriority = kJoystickEventPriority;
-		self.mouseEnabled = YES;
-		self.touchEnabled = YES;
-		isTracking = NO;
-		velocity = CGPointZero;
-		angularVelocity = AngularPointZero;
+		[self initializeEvents];
+		_isTracking = NO;
+		_velocity = CGPointZero;
+		_angularVelocity = AngularPointZero;
 
 		// Add thumb node as a child and position it at the center
 		// Must do following in this order: set thumb / set size / get anchor point
-		thumbNode = aNode;
-		[self addChild: thumbNode z: 1];
+		_thumbNode = aNode;
+		[self addChild: _thumbNode z: 1];
 		self.contentSize = size;
-		[thumbNode setPosition: self.anchorPointInPoints];
+		[_thumbNode setPosition: self.anchorPointInPoints];
 	}
 	return self;
+}
+
+-(void) initializeEvents {
+#if CC3_CC2_CLASSIC
+	self.mousePriority = kJoystickEventPriority;
+	self.mouseEnabled = YES;
+	self.touchEnabled = YES;
+#else
+	self.userInteractionEnabled = YES;
+#endif	// CC3_CC2_CLASSIC
 }
 
 +(id) joystickWithThumb: (CCNode*) aNode andSize: (CGSize) size {
@@ -108,8 +116,8 @@
  */
 -(void) setContentSize: (CGSize) newSize {
 	[super setContentSize: newSize];
-	travelLimit = ccpMult(ccpSub(ccpFromSize(self.contentSize), 
-								 ccpFromSize(thumbNode.scaledSize)), 0.5);
+	_travelLimit = ccpMult(ccpSub(ccpFromSize(self.contentSize),
+								  ccpFromSize(_thumbNode.scaledSize)), 0.5);
 }
 
 #pragma mark Event handling
@@ -122,6 +130,10 @@
 	[super onEnter];
 	[self resetVelocity];
 }
+
+#if CC3_CC2_CLASSIC
+
+#if CC3_IOS
 
 /** Handle touch events one at a time. */
 -(void) registerWithTouchDispatcher {
@@ -137,45 +149,94 @@
 }
 
 -(void) ccTouchEnded: (UITouch *)touch withEvent: (UIEvent *)event {
-	CC3Assert(isTracking, @"Touch ended that was never begun");
+	CC3Assert(_isTracking, @"Touch ended that was never begun");
 	[self resetVelocity];
 }
 
 -(void) ccTouchCancelled: (UITouch *)touch withEvent: (UIEvent *)event {
-	CC3Assert(isTracking, @"Touch cancelled that was never begun");
+	CC3Assert(_isTracking, @"Touch cancelled that was never begun");
 	[self resetVelocity];
 }
 
 -(void) ccTouchMoved: (UITouch *)touch withEvent: (UIEvent *)event {
-	CC3Assert(isTracking, @"Touch moved that was never begun");
+	CC3Assert(_isTracking, @"Touch moved that was never begun");
 	[self trackVelocity: [self convertTouchToNodeSpace: touch]];
 }
 
--(BOOL) ccMouseDown:(NSEvent*) event {
+#endif	// CC3_IOS
+
+#if CC3_OSX
+
+-(BOOL) ccMouseDown: (NSEvent*) event {
 	return [self processTouchDownAt: [self cc3ConvertNSEventToNodeSpace: event]];
 }
 
 -(BOOL) ccMouseDragged: (NSEvent*) event {
-	BOOL isMine = isTracking;
+	BOOL isMine = _isTracking;
 	if (isMine) [self trackVelocity: [self cc3ConvertNSEventToNodeSpace: event]];
 	return isMine;
 }
 
 -(BOOL) ccMouseUp: (NSEvent*) event {
-	BOOL isMine = isTracking;
+	BOOL isMine = _isTracking;
 	if (isMine) [self resetVelocity];
 	return isMine;
 }
 
+#endif	// CC3_OSX
+
+#else
+
+#if CC3_IOS
+
+-(void) touchBegan: (UITouch*) touch withEvent: (UIEvent*) event {
+	[self processTouchDownAt: [touch locationInNode: self]];
+}
+
+-(void) touchMoved: (UITouch*) touch withEvent: (UIEvent*) event {
+	CC3Assert(_isTracking, @"Touch moved that was never begun");
+	[self trackVelocity: [touch locationInNode: self]];
+}
+
+-(void) touchEnded: (UITouch*) touch withEvent: (UIEvent*) event {
+	CC3Assert(_isTracking, @"Touch ended that was never begun");
+	[self resetVelocity];
+}
+
+-(void) touchCancelled: (UITouch*) touch withEvent: (UIEvent*) event {
+	CC3Assert(_isTracking, @"Touch cancelled that was never begun");
+	[self resetVelocity];
+}
+
+#endif	// CC3_IOS
+
+#if CC3_OSX
+
+-(void) mouseDown: (NSEvent*) event {
+	[self processTouchDownAt: [event locationInNode: self]];
+}
+
+-(void) mouseDragged: (NSEvent*) event {
+	if (_isTracking) [self trackVelocity: [event locationInNode: self]];
+}
+
+-(void) mouseUp: (NSEvent*) event {
+	if (_isTracking) [self resetVelocity];
+}
+
+#endif	// CC3_OSX
+
+#endif	// CC3_CC2_CLASSIC
+
 /** Process an iOS touch down or OSX mouse down event at the specified point. */
 -(BOOL) processTouchDownAt: (CGPoint) localPoint {
-	if(isTracking) return NO;
-
+	if(_isTracking) return NO;
+	
 	CGSize cs = self.contentSize;
 	CGRect nodeBounds = CGRectMake(0, 0, cs.width, cs.height);
 	if(CGRectContainsPoint(nodeBounds, localPoint)) {
-		isTracking = YES;
-		[thumbNode stopAllActions];
+		_isTracking = YES;
+		[_thumbNode stopAllActions];
 		[self trackVelocity: localPoint];
 		return YES;
 	}
@@ -195,25 +256,23 @@
 	CGPoint relPoint = ccpSub(nodeTouchPoint, ankPt);
 	
 	// Determine the raw unconstrained velocity vector
-	CGPoint rawVelocity = CGPointMake(relPoint.x / travelLimit.x,
-									  relPoint.y / travelLimit.y);
+	CGPoint rawVelocity = CGPointMake(relPoint.x / _travelLimit.x,
+									  relPoint.y / _travelLimit.y);
 
 	// If necessary, normalize the velocity vector relative to the travel limits
 	CGFloat rawVelLen = ccpLength(rawVelocity);
-	velocity = (rawVelLen <= 1.0) ? rawVelocity : ccpMult(rawVelocity, 1.0f/rawVelLen);
+	_velocity = (rawVelLen <= 1.0) ? rawVelocity : ccpMult(rawVelocity, 1.0f/rawVelLen);
 
 	// Calculate the vector in angular coordinates
 	// ccpToAngle returns counterclockwise positive relative to X-axis.
 	// We want clockwise positive relative to the Y-axis.
-	CGFloat angle = 90.0 - CC_RADIANS_TO_DEGREES(ccpToAngle(velocity));
-	if(angle > 180.0) {
-		angle -= 360.0;
-	}
-	angularVelocity.radius = ccpLength(velocity);
-	angularVelocity.heading = angle;
+	CGFloat angle = 90.0 - CC_RADIANS_TO_DEGREES(ccpToAngle(_velocity));
+	if(angle > 180.0) angle -= 360.0;
+	_angularVelocity.radius = ccpLength(_velocity);
+	_angularVelocity.heading = angle;
 	
 	// Update the thumb's position, clamping it within the contentSize of the Joystick
-	[thumbNode setPosition: ccpAdd(ccpCompMult(velocity, travelLimit), ankPt)];
+	[_thumbNode setPosition: ccpAdd(ccpCompMult(_velocity, _travelLimit), ankPt)];
 }
 
 /**
@@ -221,12 +280,12 @@
  * to the center, using ElasticOut to give it a bounce as it centers.
  */
 -(void) resetVelocity {
-	isTracking = NO;
-	velocity = CGPointZero;
-	angularVelocity = AngularPointZero;
-	[thumbNode runAction: [CCEaseElasticOut actionWithAction:
-								[CCMoveTo actionWithDuration: kThumbSpringBackDuration 
-										  position: self.anchorPointInPoints]]];
+	_isTracking = NO;
+	_velocity = CGPointZero;
+	_angularVelocity = AngularPointZero;
+	[_thumbNode runAction: [CCActionEaseElasticOut actionWithAction:
+								[CCActionMoveTo actionWithDuration: kThumbSpringBackDuration
+														  position: self.anchorPointInPoints]]];
 }
 
 @end

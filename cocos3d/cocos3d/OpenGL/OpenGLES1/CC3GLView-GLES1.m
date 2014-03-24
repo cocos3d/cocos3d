@@ -97,8 +97,8 @@
 	
 	// Get the size of the view in pixels from the view bounds.
 	CGSize viewSize = self.bounds.size;
-	CC2_SIZE = CGSizeMake(viewSize.width * CC_CONTENT_SCALE_FACTOR(),
-						  viewSize.height * CC_CONTENT_SCALE_FACTOR());
+	CC2_SIZE = CGSizeMake(viewSize.width * CCDirector.sharedDirector.contentScaleFactor,
+						  viewSize.height * CCDirector.sharedDirector.contentScaleFactor);
 	
 	// Resize all surfaces in the surface manager to the new view size.
 	[_surfaceManager resizeTo: CC3IntSizeFromCGSize(CC2_SIZE)];

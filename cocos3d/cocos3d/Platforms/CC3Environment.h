@@ -62,6 +62,9 @@
 #ifndef CC3_CC2_2
 #	define CC3_CC2_2		(COCOS2D_VERSION >= 0x020000 && COCOS2D_VERSION < 0x030000)
 #endif
+#ifndef CC3_CC2_CLASSIC
+#	define CC3_CC2_CLASSIC	(COCOS2D_VERSION < 0x030000)
+#endif
 #ifndef CC3_CC2_3
 #	define CC3_CC2_3		(COCOS2D_VERSION >= 0x030000)
 #endif

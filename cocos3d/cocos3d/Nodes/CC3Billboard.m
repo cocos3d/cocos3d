@@ -77,7 +77,7 @@
 		self.blendFunc = ((id<CCBlendProtocol>)_billboard).blendFunc;
 	}
 	[self normalizeBillboardScaleToDevice];
-	if (self.isRunning) [_billboard onEnter];	// If running, start scheduled activities on new billboard
+	if (self.isRunning) _billboard.paused = NO;	// If running, start scheduled activities on new billboard
 }
 
 -(void) setShouldDrawAs2DOverlay: (BOOL) drawAsOverlay {
@@ -99,15 +99,11 @@
 		_billboard.scale = _billboard.billboard3DContentScaleFactor;
 }
 
-// Overridden to enable or disable the CCNode
+// Overridden to run or pause the CCNode
 // Thanks to cocos3d user Sev_Inf for submitting this patch
 -(void) setIsRunning: (BOOL) shouldRun {
     [super setIsRunning:shouldRun];
-	
-	if (self.isRunning && !_billboard.isRunning)
-		[_billboard onEnter];
-	else if (!self.isRunning && _billboard.isRunning)
-		[_billboard onExit];
+	_billboard.paused = !shouldRun;
 }
 
 /** Returns whether the bounding rectangle needs to be measured on each update pass. */
@@ -174,6 +170,7 @@
 
 #pragma mark CCRGBAProtocol support
 
+#if CC3_CC2_CLASSIC
 /** Returns color of billboard if it has a color, otherwise falls back to superclass implementation. */
 -(ccColor3B) color {
 	return ([_billboard conformsToProtocol: @protocol(CCRGBAProtocol)])
@@ -201,6 +198,25 @@
 		[((id<CCRGBAProtocol>)_billboard) setOpacity: opacity];
 	[super setOpacity: opacity];
 }
+#else
+/** Returns color of billboard if it exists, otherwise falls back to superclass implementation. */
+-(ccColor3B) color { return _billboard ? _billboard.color.ccColor3b : [super color]; }
+
+/** Also sets color of billboard if it can be set. */
+-(void) setColor: (ccColor3B) color {
+	[_billboard setColor: [CCColor colorWithCcColor3b: color]];
+	[super setColor: color];
+}
+
+/** Returns opacity of billboard if it has an opacity, otherwise falls back to superclass implementation. */
+-(GLubyte) opacity { return _billboard ? CCColorByteFromFloat(_billboard.opacity) : [super opacity]; }
+
+/** Also sets opacity of billboard if it can be set. */
+-(void) setOpacity: (GLubyte) opacity {
+	[_billboard setOpacity: CCColorFloatFromByte(opacity)];
+	[super setOpacity: opacity];
+}
+#endif	// CC3_CC2_CLASSIC
 
 
 #pragma mark Allocation and initialization
@@ -436,7 +452,7 @@ static GLfloat deviceScaleFactor = 0.0f;
 
 +(GLfloat) deviceScaleFactor {
 	if (deviceScaleFactor == 0.0f) {
-		CGSize winSz = [[CCDirector sharedDirector] winSize];
+		CGSize winSz = CCDirector.sharedDirector.viewSize;
 		deviceScaleFactor = MAX(winSz.height, winSz.width) / kCC3DeviceScaleFactorBase;
 	}
 	return deviceScaleFactor;
@@ -587,12 +603,12 @@ static GLfloat deviceScaleFactor = 0.0f;
 
 - (void) resumeAllActions {
 	[super resumeAllActions];
-	[_billboard resumeSchedulerAndActions];
+	_billboard.paused = NO;
 }
 
 - (void) pauseAllActions {
 	[super pauseAllActions];
-	[_billboard pauseSchedulerAndActions];
+	_billboard.paused = YES;
 }
 
 
@@ -893,11 +909,10 @@ static GLfloat deviceScaleFactor = 0.0f;
 @implementation CCNode (CC3Billboard)
 
 -(CGFloat) billboard3DContentScaleFactor {
-#if CC3_CC2_2
-	return 1.0f;
-#endif	// CC3_CC2_2
 #if CC3_CC2_1
-	return 1.0f / CC_CONTENT_SCALE_FACTOR();
+	return 1.0f / CCDirector.sharedDirector.contentScaleFactor;
+#else
+	return 1.0f;
 #endif	// CC3_CC2_1
 }
 
@@ -906,6 +921,9 @@ static GLfloat deviceScaleFactor = 0.0f;
 
 @end
 
+#if !CC3_CC2_CLASSIC
+#define CCParticleSystemQuad CCParticleSystem
+#endif	// !CC3_CC2_CLASSIC
 
 #pragma mark -
 #pragma mark CCParticleSystemQuad extensions
