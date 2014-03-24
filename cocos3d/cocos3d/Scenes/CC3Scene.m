@@ -216,15 +216,18 @@
 		_timeAtOpen = 0;
 		_elapsedTimeSinceOpened = 0;
 		_shouldDisplayPickingRender = NO;
-		[self initializeSceneAndClose3D];
+		[self processInitializeScene];
 		LogGLErrorState(@"after initializing %@", self);
 	}
 	return self;
 }
 
--(void) initializeSceneAndClose3D {
+/** Establish 3D environment, initialize scene, then tear 3D environment down. */
+-(void) processInitializeScene {
+	CC3NodeDrawingVisitor* visitor = self.viewDrawingVisitor;
+	[self open3DWithVisitor: visitor];
 	[self initializeScene];
-	[self close3DWithVisitor: _viewDrawingVisitor];
+	[self close3DWithVisitor: visitor];
 }
 
 // Default does nothing. Subclasses will customize.
@@ -360,7 +363,7 @@
 
 -(id<CC3RenderSurface>) pickingSurface { return self.viewSurfaceManager.pickingSurface; }
 
--(void) drawScene { [self drawSceneWithVisitor: _viewDrawingVisitor]; }
+-(void) drawScene { [self drawSceneWithVisitor: self.viewDrawingVisitor]; }
 	
 -(void) drawSceneWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	if ( !self.visible ) return;

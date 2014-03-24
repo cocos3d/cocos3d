@@ -362,7 +362,11 @@
 	[super align2DStateCache];
 	
 	ccGLBlendFunc(value_GL_BLEND_SRC_RGB, value_GL_BLEND_DST_RGB);
-	ccGLBindTexture2DN(value_GL_ACTIVE_TEXTURE, value_GL_TEXTURE_BINDING_2D[value_GL_ACTIVE_TEXTURE]);
+	
+	#define kCCMaxActiveTexture 16		// Max cocos2d texture units, as defined in ccGLStateCache.m
+	GLuint tuCnt = MIN(value_MaxTextureUnitsUsed, kCCMaxActiveTexture);
+	for (GLuint tuIdx = 0; tuIdx < tuCnt; tuIdx++)
+		ccGLBindTexture2DN(tuIdx, value_GL_TEXTURE_BINDING_2D[tuIdx]);
 	
 	ccGLEnableVertexAttribs(kCCVertexAttribFlag_None);
 	ccGLEnableVertexAttribs(kCCVertexAttribFlag_PosColorTex);
