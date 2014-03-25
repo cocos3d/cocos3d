@@ -45,8 +45,8 @@
 		A92DA7CB1427B5980051AFFA /* Shine48x48.png in Resources */ = {isa = PBXBuildFile; fileRef = A92DA7A91427B5980051AFFA /* Shine48x48.png */; };
 		A92DA7CE1427B5980051AFFA /* SunlightButton48x48.png in Resources */ = {isa = PBXBuildFile; fileRef = A92DA7AC1427B5980051AFFA /* SunlightButton48x48.png */; };
 		A92DA7D11427B5980051AFFA /* ZoomButton48x48.png in Resources */ = {isa = PBXBuildFile; fileRef = A92DA7AF1427B5980051AFFA /* ZoomButton48x48.png */; };
-		A92E837617A6CB94003B859E /* libcocos2d-library-iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A92E837317A6CB18003B859E /* libcocos2d-library-iOS.a */; };
-		A92E872C17A6E5F8003B859E /* libcocos3d-library-iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A92E872317A6E4DA003B859E /* libcocos3d-library-iOS.a */; };
+		A92E837617A6CB94003B859E /* libcocos2d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A92E837317A6CB18003B859E /* libcocos2d.a */; };
+		A92E872C17A6E5F8003B859E /* libcocos3d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A92E872317A6E4DA003B859E /* libcocos3d.a */; };
 		A9306A851445B23C0004EB5A /* HUDLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = A9306A841445B23C0004EB5A /* HUDLayer.m */; };
 		A933812E14E09E9000FCA181 /* Earth_1024.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A933812D14E09E9000FCA181 /* Earth_1024.jpg */; };
 		A93B2AA91695E6A6007144C7 /* Arial32BMGlyph.fnt in Resources */ = {isa = PBXBuildFile; fileRef = A93B2AA71695E6A6007144C7 /* Arial32BMGlyph.fnt */; };
@@ -95,7 +95,7 @@
 		A9883E18174C4D0200127768 /* samsung_tv-med.pod in Resources */ = {isa = PBXBuildFile; fileRef = A9883E17174C4D0200127768 /* samsung_tv-med.pod */; };
 		A99B7D4318DF45D700A3CC71 /* CC3DemoMashUpLayer-Classic.m in Sources */ = {isa = PBXBuildFile; fileRef = A99B7D3F18DF45D700A3CC71 /* CC3DemoMashUpLayer-Classic.m */; };
 		A99B7D4418DF45D700A3CC71 /* CC3DemoMashUpLayer-v3.m in Sources */ = {isa = PBXBuildFile; fileRef = A99B7D4118DF45D700A3CC71 /* CC3DemoMashUpLayer-v3.m */; };
-		A99B7D4F18DF818D00A3CC71 /* libObjectiveChipmunk.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A92B41FF18BE39290026B00F /* libObjectiveChipmunk.a */; };
+		A99B7D4F18DF818D00A3CC71 /* libcocos2d-chipmunk.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A92B41FF18BE39290026B00F /* libcocos2d-chipmunk.a */; };
 		A99CD83815866E1C00B5BAC3 /* BallBoxTexture.png in Resources */ = {isa = PBXBuildFile; fileRef = A99CD83715866E1C00B5BAC3 /* BallBoxTexture.png */; };
 		A9AAF0081525E41000E1620A /* Bricks-Red.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A9AAF0071525E41000E1620A /* Bricks-Red.jpg */; };
 		A9AE3D7D14E46118002805DA /* Stamp.png in Resources */ = {isa = PBXBuildFile; fileRef = A9AE3D7C14E46118002805DA /* Stamp.png */; };
@@ -408,9 +408,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A92E872C17A6E5F8003B859E /* libcocos3d-library-iOS.a in Frameworks */,
-				A92E837617A6CB94003B859E /* libcocos2d-library-iOS.a in Frameworks */,
-				A99B7D4F18DF818D00A3CC71 /* libObjectiveChipmunk.a in Frameworks */,
+				A92E872C17A6E5F8003B859E /* libcocos3d.a in Frameworks */,
+				A92E837617A6CB94003B859E /* libcocos2d.a in Frameworks */,
+				A99B7D4F18DF818D00A3CC71 /* libcocos2d-chipmunk.a in Frameworks */,
 				DC6640030F83B3EA000B3E49 /* AudioToolbox.framework in Frameworks */,
 				506EDBA5102F4C9F00A389B3 /* AVFoundation.framework in Frameworks */,
 				DCCBF1B70F6022AE0040855A /* CoreGraphics.framework in Frameworks */,
@@ -580,8 +580,8 @@
 		A92E836F17A6CB18003B859E /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A92E837317A6CB18003B859E /* libcocos2d-library-iOS.a */,
-				A92B41FF18BE39290026B00F /* libObjectiveChipmunk.a */,
+				A92E837317A6CB18003B859E /* libcocos2d.a */,
+				A92B41FF18BE39290026B00F /* libcocos2d-chipmunk.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -589,7 +589,7 @@
 		A92E871F17A6E4D9003B859E /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A92E872317A6E4DA003B859E /* libcocos3d-library-iOS.a */,
+				A92E872317A6E4DA003B859E /* libcocos3d.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -849,24 +849,24 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		A92B41FF18BE39290026B00F /* libObjectiveChipmunk.a */ = {
+		A92B41FF18BE39290026B00F /* libcocos2d-chipmunk.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
-			path = libObjectiveChipmunk.a;
+			path = "libcocos2d-chipmunk.a";
 			remoteRef = A92B41FE18BE39290026B00F /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		A92E837317A6CB18003B859E /* libcocos2d-library-iOS.a */ = {
+		A92E837317A6CB18003B859E /* libcocos2d.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
-			path = "libcocos2d-library-iOS.a";
+			path = libcocos2d.a;
 			remoteRef = A92E837217A6CB18003B859E /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		A92E872317A6E4DA003B859E /* libcocos3d-library-iOS.a */ = {
+		A92E872317A6E4DA003B859E /* libcocos3d.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
-			path = "libcocos3d-library-iOS.a";
+			path = libcocos3d.a;
 			remoteRef = A92E872217A6E4DA003B859E /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
@@ -1131,6 +1131,7 @@
 					"../../cocos2d/**",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-lz",
@@ -1138,7 +1139,6 @@
 				);
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				VALID_ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 			};
 			name = Debug;
 		};
@@ -1188,7 +1188,6 @@
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
-				VALID_ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 			};
 			name = Release;
 		};

@@ -65,7 +65,7 @@
 	aNode.controller = self;
 }
 
-#if CC3_CC2_2 && CC3_IOS
+#if CC3_IOS && !CC3_CC2_1
 
 -(void) startAnimation { [super startAnimation]; }
 
@@ -77,7 +77,7 @@
 
 -(void) stopAnimation { [CCDirector.sharedDirector stopAnimation]; }
 
-#endif	// CC3_CC2_2 && CC3_IOS
+#endif	// CC3_IOS && !CC3_CC2_1
 
 -(void) pauseAnimation { [CCDirector.sharedDirector pause]; }
 

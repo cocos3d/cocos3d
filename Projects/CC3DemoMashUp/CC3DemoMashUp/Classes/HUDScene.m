@@ -64,12 +64,12 @@
 	[super drawSceneContentWithVisitor: visitor];
 }
 
--(GLubyte) opacity { return _backdrop.opacity / kBackDropOpacityFactor; }
+-(CCOpacity) opacity { return _backdrop.opacity / kBackDropOpacityFactor; }
 
 /** Whatever the opacity of this scene is set to, make the backdrop more transparent. */
--(void) setOpacity: (GLubyte) opacity {
+-(void) setOpacity: (CCOpacity) opacity {
 	super.opacity = opacity;
-	_backdrop.opacity = opacity * kBackDropOpacityFactor;
+	_backdrop.opacity = (opacity * kBackDropOpacityFactor);
 }
 
 /** Ensure the camera frames the globe. */

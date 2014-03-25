@@ -1242,9 +1242,9 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 
 -(void) setColor: (ccColor3B) aColor { _vertexColors.color = aColor; }
 
--(GLubyte) opacity { return _vertexColors ? _vertexColors.opacity : 0; }
+-(CCOpacity) opacity { return _vertexColors ? _vertexColors.opacity : kCCOpacityFull; }
 
--(void) setOpacity: (GLubyte) opacity { _vertexColors.opacity = opacity; }
+-(void) setOpacity: (CCOpacity) opacity { _vertexColors.opacity = opacity; }
 
 
 #pragma mark Textures

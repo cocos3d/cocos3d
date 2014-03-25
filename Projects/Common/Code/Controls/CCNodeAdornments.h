@@ -31,6 +31,7 @@
 
 #import <Foundation/Foundation.h>
 #import "CC3CC2Extensions.h"
+#import "CC3Foundation.h"
 
 #if !CC3_CC2_CLASSIC
 #	import "CCButton.h"
@@ -143,9 +144,6 @@
 /** The default duration of the fade-in and fade-out actions of the CCNodeAdornmentOverlayFader */
 #define kDefaultFadeDuration 0.25
 
-// The numberic opacity value associated with full opacity.
-#define kFullOpacity 255
-
 
 /**
  * An adornment CCNode that wraps a separate visible child CCNode, and implements the
@@ -156,7 +154,7 @@
  */
 @interface CCNodeAdornmentOverlayFader : CCNodeAdornmentBase {
 	CCNode<CCRGBAProtocol>* _adornmentNode;
-	GLubyte _peakOpacity;
+	CCOpacity _peakOpacity;
 }
 
 /**
@@ -170,40 +168,44 @@
  * in from zero opacity to the value of this peakOpacity property, and when deactivated,
  * will fade the adornmentNode back to zero opacity.
  *
- * This value defaults to kFullOpacity, indicating that the adornmentNode should fade
+ * This value defaults to kCCOpacityFull, indicating that the adornmentNode should fade
  * in from fully transparent to fully opaque. Setting this property to a lower value
  * will allow the base CCNode to remain partially visible, making the adornmentNode
  * appear as a "shine" over the base CCNode.
  */
-@property(nonatomic, assign) GLubyte peakOpacity;
+@property(nonatomic, assign) CCOpacity peakOpacity;
 
 /**
  * Initializes this instance to use the specified CCNode as the visual adornmentNode and,
  * when activated, to fade the adornmentNode in from fully transparent up to the specified
  * opacity, over the specified duration.
  */
--(id) initWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode peakOpacity: (GLubyte) opacity fadeDuration: (CCTime) aDuration;
+-(id) initWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode
+				peakOpacity: (CCOpacity) opacity
+			   fadeDuration: (CCTime) aDuration;
 
 /**
  * Allocates and initializes an autoreleased instance to use the specified CCNode
  * as the visual adornmentNode and, when activated, to fade the adornmentNode in
  * from fully transparent up to the specified opacity, over the specified duration.
  */
-+(id) adornmentWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode peakOpacity: (GLubyte) opacity fadeDuration: (CCTime) aDuration;
++(id) adornmentWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode
+					 peakOpacity: (CCOpacity) opacity
+					fadeDuration: (CCTime) aDuration;
 
 /**
  * Initializes this instance to use the specified CCNode as the visual adornmentNode and,
  * when activated, to fade the adornmentNode in from fully transparent up to the specified
  * opacity. The fade duration will default to kDefaultFadeDuration.
  */
--(id) initWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode peakOpacity: (GLubyte) opacity;
+-(id) initWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode peakOpacity: (CCOpacity) opacity;
 
 /**
  * Allocates and initializes an autoreleased instance to use the specified CCNode as the
  * visual adornmentNode and, when activated, to fade the adornmentNode in from fully
  * transparent up to the specified opacity. The fade duration will default to kDefaultFadeDuration.
  */
-+(id) adornmentWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode peakOpacity: (GLubyte) opacity;
++(id) adornmentWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode peakOpacity: (CCOpacity) opacity;
 
 /**
  * Initializes this instance to use the specified CCNode as the visual adornmentNode and,

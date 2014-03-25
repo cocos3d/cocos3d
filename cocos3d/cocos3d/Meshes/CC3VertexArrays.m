@@ -1150,14 +1150,15 @@ static GLuint lastAssignedVertexArrayTag;
 }
 
 /** Returns the opacity of the first vertex. */
--(GLubyte) opacity { return (self.vertexCount > 0) ? [self color4BAt: 0].a : 0; }
+-(CCOpacity) opacity { return (self.vertexCount > 0) ? CCOpacityFromGLubyte([self color4BAt: 0].a) : kCCOpacityFull; }
 
 /** Sets the opacity of each vertex without changing the individual color of each vertex. */
--(void) setOpacity: (GLubyte) opacity {
+-(void) setOpacity: (CCOpacity) opacity {
 	GLuint vtxCount = self.vertexCount;
 	for (GLuint vIdx = 0; vIdx < vtxCount; vIdx++) {
 		ccColor4B vtxCol = [self color4BAt: vIdx];
-		[self setColor4B: ccc4(vtxCol.r, vtxCol.g, vtxCol.b, opacity) at: vIdx];
+		vtxCol.a = GLubyteFromCCOpacity(opacity);
+		[self setColor4B: vtxCol at: vIdx];
 	}
 	[self updateGLBuffer];
 }

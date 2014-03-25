@@ -377,7 +377,7 @@
 	[hudScene addChild: globe];	
 	[hudScene createGLBuffers];		// Won't really do anything because the Globe mesh...
 									// ...has already been buffered in main scene
-	hudScene.opacity = 200;			// Makes everything in the scene somewhat translucent
+	hudScene.opacity = (kCCOpacityFull * 0.75);		// Makes everything in the scene somewhat translucent
 	return hudScene;
 }
 

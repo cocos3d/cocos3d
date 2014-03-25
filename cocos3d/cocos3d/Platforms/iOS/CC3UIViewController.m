@@ -110,16 +110,15 @@
 
 // Not needed for Cocos2D v3
 -(BOOL) checkRetinaDisplay {
-#if CC3_CC2_CLASSIC
+#if CC3_CC2_3
+	return YES;
+#endif	// CC3_CC2_3
 #if CC3_CC2_2
 	return [super enableRetinaDisplay: _shouldUseRetina];
 #endif	// CC3_CC2_2
 #if CC3_CC2_1
 	return [CCDirector.sharedDirector enableRetinaDisplay: _shouldUseRetina];
 #endif	// CC3_CC2_1
-#endif	// CC3_CC2_CLASSIC
-
-	return YES;
 }
 
 #if COCOS2D_VERSION >= 0x020100
@@ -211,9 +210,9 @@ CC3_POP_NOSELECTOR
 
 #pragma mark Instance initialization and management
 
-#if CC3_CC2_2
+#if !CC3_CC2_1
 +(id) sharedDirector { return super.sharedDirector; }
-#endif
+#endif	// !CC3_CC2_1
 
 // CCDirector must be in portrait orientation for autorotation to work
 -(id) initWithNibName: (NSString*) nibNameOrNil bundle: (NSBundle*) nibBundleOrNil {

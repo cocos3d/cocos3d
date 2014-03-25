@@ -593,7 +593,7 @@
 -(ccColor3B) displayNodeColor;
 
 /** The opacity used when this bounding volume is displayed. */
--(GLubyte) displayNodeOpacity;
+-(CCOpacity) displayNodeOpacity;
 
 @end
 

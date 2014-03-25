@@ -1628,7 +1628,7 @@ typedef enum {
 @property(nonatomic, assign) ccColor3B color;
 
 /**
- * Implementation of the CCRGBAProtocol opacity property.
+ * The average opacity of this node.
  *
  * Querying this property returns the average value of querying this property on all child nodes.
  * When querying this value on a large node assembly, be aware that this may be time-consuming.
@@ -1647,7 +1647,7 @@ typedef enum {
  * specific blending properties on the CC3Material instance directly, and avoid making
  * changes to this property.
  */
-@property(nonatomic, assign) GLubyte opacity;
+@property(nonatomic, assign) CCOpacity opacity;
 
 /**
  * Implementation of the CCBlendProtocol blendFunc property.

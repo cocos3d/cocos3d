@@ -1214,7 +1214,7 @@ static const GLuint kCC3ParticlesNoMax = UINT_MAX;
 @property(nonatomic, assign) ccColor3B color;
 
 /**
- * Implementation of the CCRGBAProtocol opacity property.
+ * The opacity of this particle.
  *
  * If this particle has individual color content, (which can be checked with the hasColor
  * property), this property indicates the opacity in which this particle will appear.
@@ -1232,7 +1232,7 @@ static const GLuint kCC3ParticlesNoMax = UINT_MAX;
  * of the opacity of the diffuseColor property of the emitter. In this condition, it is safe to
  * set this property, but changes will have no effect.
  */
-@property(nonatomic, assign) GLubyte opacity;
+@property(nonatomic, assign) CCOpacity opacity;
 
 
 #pragma mark Allocation and initialization

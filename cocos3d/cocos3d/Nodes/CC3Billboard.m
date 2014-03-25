@@ -209,11 +209,11 @@
 }
 
 /** Returns opacity of billboard if it has an opacity, otherwise falls back to superclass implementation. */
--(GLubyte) opacity { return _billboard ? CCColorByteFromFloat(_billboard.opacity) : [super opacity]; }
+-(CCOpacity) opacity { return _billboard ? _billboard.opacity : [super opacity]; }
 
 /** Also sets opacity of billboard if it can be set. */
--(void) setOpacity: (GLubyte) opacity {
-	[_billboard setOpacity: CCColorFloatFromByte(opacity)];
+-(void) setOpacity: (CCOpacity) opacity {
+	[_billboard setOpacity: opacity];
 	[super setOpacity: opacity];
 }
 #endif	// CC3_CC2_CLASSIC
@@ -761,9 +761,9 @@ static GLfloat deviceScaleFactor = 0.0f;
 
 -(NSString*) displayNodeNameSuffix { return @"BV-Billboard"; }
 
--(ccColor3B) displayNodeColor { return ccc3(0,255,255); }	// Cyan
+-(ccColor3B) displayNodeColor { return ccc3(0,255,255); }				// Cyan
 
--(GLubyte) displayNodeOpacity { return 64; }				// Cyan is heavy...reduce to 25% opacity
+-(CCOpacity) displayNodeOpacity { return (kCCOpacityFull * 0.25); }		// Cyan is heavy...reduce to 25% opacity
 
 /** Get the mesh from the rectangular bounding mesh of the billboard node, which is used for node picking. */
 -(void) populateDisplayNode {

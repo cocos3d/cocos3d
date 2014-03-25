@@ -878,14 +878,14 @@
 }
 
 -(void) setColor: (ccColor3B) color {
-	self.color4B = ccc4(color.r, color.g, color.b, self.opacity);
+	self.color4B = ccc4(color.r, color.g, color.b, GLubyteFromCCOpacity(self.opacity));
 }
 
--(GLubyte) opacity { return self.color4B.a; }
+-(CCOpacity) opacity { return CCOpacityFromGLubyte(self.color4B.a); }
 
--(void) setOpacity: (GLubyte) opacity {
+-(void) setOpacity: (CCOpacity) opacity {
 	ccColor4B c4 = self.color4B;
-	c4.a = opacity;
+	c4.a = GLubyteFromCCOpacity(opacity);
 	self.color4B = c4;
 }
 
@@ -897,13 +897,13 @@
 
 -(void) updateDisplayedColor: (ccColor3B) color {}
 
--(GLubyte) displayedOpacity { return self.opacity; }
+-(CCOpacity) displayedOpacity { return self.opacity; }
 
 -(BOOL) isCascadeOpacityEnabled { return NO; }
 
 -(void) setCascadeOpacityEnabled: (BOOL) cascadeOpacityEnabled {}
 
--(void) updateDisplayedOpacity: (GLubyte) opacity {}
+-(void) updateDisplayedOpacity: (CCOpacity) opacity {}
 
 -(NSString*) description { return [NSString stringWithFormat: @"%@", [self class]]; }
 

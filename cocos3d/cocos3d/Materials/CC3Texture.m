@@ -1331,6 +1331,8 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 #	define CC2_TEX_MAXT _maxT
 #	define CC2_TEX_HAS_PREMULT_ALPHA _premultipliedAlpha
 #	define CC2_TEX_HAS_MIPMAP _hasMipmaps
+#	define CC2_TEX_ANTIALIASED _antialiased
+#	define CC2_TEX_CONTENT_SCALE _contentScale
 #elif COCOS2D_VERSION >= 0x020100
 #	define CC2_TEX_NAME _name
 #	define CC2_TEX_SIZE _size
@@ -1534,13 +1536,14 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 	return self;
 }
 
+#if CC3_CC2_CLASSIC
 /** Overridden to set content parameters, but postpone loading the content into the GL engine. */
 -(id) initWithData: (const GLvoid*) data
 	   pixelFormat: (CCTexturePixelFormat) pixelFormat
 		pixelsWide: (NSUInteger) width
 		pixelsHigh: (NSUInteger) height
 	   contentSize: (CGSize) size {
-
+	
 	LogTrace(@"Loading texture width %u height %u content size %@ format %i data %p",
 			 width, height, NSStringFromCGSize(size), pixelFormat, data);
 	if( (self = [super init]) ) {
@@ -1551,12 +1554,45 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 		CC2_TEX_MAXS = width ? (size.width / (float)width) : 1.0f;
 		CC2_TEX_MAXT = height ? (size.height / (float)height) : 1.0f;
 		CC2_TEX_HAS_PREMULT_ALPHA = NO;
+		
 		_imageData = data;
 		_isUpsideDown = YES;			// Assume upside down
 		[self updateFromPixelFormat];
 	}
 	return self;
 }
+
+#else
+
+/** Overridden to set content parameters, but postpone loading the content into the GL engine. */
+-(id) initWithData: (const void*) data
+	   pixelFormat: (CCTexturePixelFormat) pixelFormat
+		pixelsWide: (NSUInteger) width
+		pixelsHigh: (NSUInteger) height
+contentSizeInPixels: (CGSize) sizeInPixels
+	  contentScale: (CGFloat) contentScale {
+
+	LogTrace(@"Loading texture width %u height %u content size %@ format %i data %p",
+			 width, height, NSStringFromCGSize(size), pixelFormat, data);
+	if( (self = [super init]) ) {
+		CC2_TEX_SIZE = sizeInPixels;
+		CC2_TEX_WIDTH = width;
+		CC2_TEX_HEIGHT = height;
+		CC2_TEX_FORMAT = pixelFormat;
+		CC2_TEX_MAXS = width ? (sizeInPixels.width / (float)width) : 1.0f;
+		CC2_TEX_MAXT = height ? (sizeInPixels.height / (float)height) : 1.0f;
+		CC2_TEX_HAS_PREMULT_ALPHA = NO;
+		CC2_TEX_HAS_MIPMAP = NO;
+        CC2_TEX_ANTIALIASED = YES;
+		CC2_TEX_CONTENT_SCALE = contentScale;
+		
+		_imageData = data;
+		_isUpsideDown = YES;			// Assume upside down
+		[self updateFromPixelFormat];
+	}
+	return self;
+}
+#endif	// CC3_CC2_CLASSIC
 
 -(void) updateFromPixelFormat {
 	GLuint pixFmt = self.pixelFormat;	// Not all versions of cocos2d contain all enum values.
@@ -1747,7 +1783,7 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 		CC2_TEX_MAXT = texture.coverage.height;
 		CC2_TEX_SIZE = CGSizeMake((CGFloat)CC2_TEX_WIDTH * CC2_TEX_MAXS, (CGFloat)CC2_TEX_HEIGHT * CC2_TEX_MAXT);
 		CC2_TEX_HAS_PREMULT_ALPHA = texture.hasPremultipliedAlpha;
-#if CC3_CC2_2
+#if !CC3_CC2_1
 		CC2_TEX_HAS_MIPMAP = texture.hasMipmap;
 #endif
 		_isUpsideDown = texture.isUpsideDown;

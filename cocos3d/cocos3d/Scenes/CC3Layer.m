@@ -110,9 +110,9 @@
 
 -(void)	setColor: (ccColor3B) color { _cc3Scene.color = color; }
 
--(GLubyte) opacity { return _cc3Scene.opacity; }
+-(CCOpacity) opacity { return _cc3Scene.opacity; }
 
--(void) setOpacity: (GLubyte) opacity { _cc3Scene.opacity = opacity; }
+-(void) setOpacity: (CCOpacity) opacity { _cc3Scene.opacity = opacity; }
 
 
 #pragma mark Updating layer

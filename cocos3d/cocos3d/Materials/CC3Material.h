@@ -589,7 +589,7 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
 @property(nonatomic, assign) ccColor3B color;
 
 /**
- * Implementation of the CCRGBAProtocol opacity property.
+ * The opacity of this material, as described by the alpha component of the diffuse color of this material.
  *
  * Querying this property returns the alpha component of the diffuseColor property, converted
  * from the floating point range (0 to 1) to the byte range (0 to 255).
@@ -616,7 +616,7 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
  * set the sourceBlend and destinationBlend properties, and the alpha values of the individual colors
  * directly, and avoid making changes to this property.
  */
-@property(nonatomic, assign) GLubyte opacity;
+@property(nonatomic, assign) CCOpacity opacity;
 
 /**
  * Implementation of the CCBlendProtocol blendFunc property.

@@ -159,9 +159,9 @@
 
 	return cc3VC;
 }
-#endif
 
-#if CC3_CC2_2
+#else
+
 /**
  * In cocos2d 2.x, the view controller and CCDirector are one and the same, and we create the
  * controller using the singleton mechanism. To establish the correct CCDirector/UIViewController
@@ -185,7 +185,7 @@
 	[cc3VC enableRetinaDisplay: YES];
 	return cc3VC;
 }
-#endif
+#endif	// CC3_CC2_1
 
 /**
  * Closes the current 3D controller, removes the controller's view from the view hierarchy,

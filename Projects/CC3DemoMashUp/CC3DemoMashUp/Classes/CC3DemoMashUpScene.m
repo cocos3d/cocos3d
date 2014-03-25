@@ -3563,8 +3563,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// descriptor node as a child to it when the beach ball is touched we can't trust
 	// the value of the opacity property of the beach ball parent node. Instead, we
 	// need to dig into one of its mesh node segments to determine its opacity.
-	GLubyte bbOpacity = [_beachBall getNodeNamed: kBeachBallWhiteSegment].opacity;
-	_beachBall.opacity = (bbOpacity == 255) ? (255 * 0.75) : 255;
+	CCOpacity bbOpacity = [_beachBall getNodeNamed: kBeachBallWhiteSegment].opacity;
+	_beachBall.opacity = (bbOpacity == kCCOpacityFull) ? (kCCOpacityFull * 0.75) : kCCOpacityFull;
 }
 
 /** When the brick wall is touched, slide it back and forth to open or close it. */

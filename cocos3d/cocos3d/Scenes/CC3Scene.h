@@ -416,7 +416,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 @property(nonatomic, assign) ccColor3B color;
 
 /**
- * Implementation of the CCRGBAProtocol opacity property.
+ * The opacity of the scene.
  *
  * Returns the opacity of the node in the backdrop property, or if there is no backdrop,
  * returns the value of the superclass implementation.
@@ -424,7 +424,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * Setting this property set the opacity of the node in the backdrop property, and
  * propagates the opacity change to all descendant nodes.
  */
-@property(nonatomic, assign) GLubyte opacity;
+@property(nonatomic, assign) CCOpacity opacity;
 
 
 #pragma mark Allocation and initialization

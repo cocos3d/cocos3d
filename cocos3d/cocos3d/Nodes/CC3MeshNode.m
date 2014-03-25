@@ -370,12 +370,12 @@
 	[super setColor: color];	// pass along to any children
 }
 
--(GLubyte) opacity { return self.ensureMaterial.opacity; }
+-(CCOpacity) opacity { return self.ensureMaterial.opacity; }
 
--(void) setOpacity: (GLubyte) opacity {
+-(void) setOpacity: (CCOpacity) opacity {
 	self.ensureMaterial.opacity = opacity;
 	if (_shouldApplyOpacityAndColorToMeshContent) _mesh.opacity = opacity;	// for meshes with colored vertices
-	_pureColor.a = CCColorFloatFromByte(opacity);
+	_pureColor.a = GLfloatFromCCOpacity(opacity);
 
 	[super setOpacity: opacity];	// pass along to any children
 }

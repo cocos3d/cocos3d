@@ -186,7 +186,7 @@ changing the version of `Cocos2D` that is linked, by following these steps withi
    Cocos3D distribution folder to the Xcode Project Navigator panel. If you are using the Cocos2D
    static library, you will drag the folder into the `cocos2d-library-iOS` or `cocos2d-library-OSX` 
    project. When prompted for the target to add the source code to, select the `cocos2d` target.
-4. Add the newly linked cocos2d-chipmunk files to the project by dragging the `cocos2d-chipmunk`
+4. Add the newly linked Cocos2D Chipmunk files to the project by dragging the `cocos2d-chipmunk`
    folder from the Cocos3D distribution folder to the Xcode Project Navigator panel. If you are
    using the Cocos2D static library, you will drag the folder into the `cocos2d-library-iOS` or
    `cocos2d-library-OSX` project. When prompted for the target to add the source code to, select
@@ -211,8 +211,8 @@ changing the version of `Cocos2D` that is linked, by following these steps withi
    Xcode Projects in the Cocos3D distribution is set to `$(ARCHS_STANDARD_32_BIT)` (which 
    resolves to **armv7 armv7s**), so that the demo projects will compile with all versions
    of `Cocos2D`. If you are now linking to `Cocos2D` `3.x`, you can set this property to
-   `$(ARCHS_STANDARD)` (or simply remove this setting from the Project) to allow compilation 
-   to include the ARM64 architecture.
+   `$(ARCHS_STANDARD)` (or simply remove this setting from the Project), in all demo Projects,
+   to allow compilation to include the ARM64 architecture.
 8. As a development optimization, if you are now linking to `Cocos2D` `3.x`, you can set the 
    value of the **Build Active Architecture Only** (aka `ONLY_ACTIVE_ARCH`) build setting in 
    the *Debug* configuration in all demo Projects to `YES`. You should not do this if you are 

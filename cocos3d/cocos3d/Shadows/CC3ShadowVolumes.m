@@ -216,7 +216,7 @@
 -(void) checkShadowMaterial {
 	if ( !_shouldDrawTerminator && self.visible ) {
 		self.color = ccc3(85, 85, 85);	// Will lazily init material if needed
-		self.opacity = 85;
+		self.opacity = (kCCOpacityFull * kCC3OneThird);
 	} else
 		self.material = nil;
 }

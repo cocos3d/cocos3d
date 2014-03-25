@@ -76,9 +76,9 @@
 	// This must be done after the GL view is assigned to the director!
 	[director enableRetinaDisplay: YES];
 }
-#endif
 
-#if CC3_CC2_2
+#else
+
 /**
  * In cocos2d 2.x, the view controller and CCDirector are one and the same, and we create the
  * controller using the singleton mechanism. To establish the correct CCDirector/UIViewController
@@ -101,7 +101,7 @@
 	_viewController.displayStats = YES;
 	[_viewController enableRetinaDisplay: YES];
 }
-#endif
+#endif	// CC3_CC2_1
 
 -(void) applicationDidFinishLaunching: (UIApplication*) application {
 	

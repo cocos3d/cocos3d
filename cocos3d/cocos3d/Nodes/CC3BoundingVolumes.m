@@ -613,7 +613,7 @@
 -(ccColor3B) displayNodeColor { return ccWHITE; }
 
 /** The opacity at which to display the bounding volume. */
--(GLubyte) displayNodeOpacity { return 64; }	// 25% opacity
+-(CCOpacity) displayNodeOpacity { return (kCCOpacityFull * 0.25); }	// 25% opacity
 
 /**
  * Populates the display node to create the appropriate shape.
@@ -876,7 +876,8 @@
 
 -(ccColor3B) displayNodeColor { return ccMAGENTA; }		// Magenta
 
--(GLubyte) displayNodeOpacity { return 85; }			// Magenta is faint...increase to 33% opacity
+// Magenta is faint...increase to 33% opacity
+-(CCOpacity) displayNodeOpacity { return (kCCOpacityFull * kCC3OneThird); }
 
 -(void) populateDisplayNode {
 	CC3BoundingVolumeDisplayNode* dn = self.displayNode;
@@ -1051,7 +1052,8 @@
 
 -(ccColor3B) displayNodeColor { return ccc3(0,255,255); }	// Cyan
 
--(GLubyte) displayNodeOpacity { return 64; }				// Cyan is heavy...reduce to 25% opacity
+// Cyan is heavy...reduce to 25% opacity
+-(CCOpacity) displayNodeOpacity { return (kCCOpacityFull * 0.25); }
 
 -(void) populateDisplayNode {
 	CC3BoundingVolumeDisplayNode* dn = self.displayNode;

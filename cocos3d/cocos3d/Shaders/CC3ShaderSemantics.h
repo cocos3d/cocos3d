@@ -152,7 +152,7 @@ typedef enum {
 	kCC3SemanticMaterialColorDiffuse,			/**< (vec4) Diffuse color of the material. */
 	kCC3SemanticMaterialColorSpecular,			/**< (vec4) Specular color of the material. */
 	kCC3SemanticMaterialColorEmission,			/**< (vec4) Emission color of the material. */
-	kCC3SemanticMaterialOpacity,				/**< (float) Opacity of the material. */
+	kCC3SemanticMaterialOpacity,				/**< (float) Opacity of the material (0.0 - 1.0). */
 	kCC3SemanticMaterialShininess,				/**< (float) Shininess of the material (0 <> 128). */
 	kCC3SemanticMaterialReflectivity,			/**< (float) Reflectivity of the material (0 <> 1). */
 	kCC3SemanticMinimumDrawnAlpha,				/**< (float) Minimum alpha value to be drawn, otherwise will be discarded. */

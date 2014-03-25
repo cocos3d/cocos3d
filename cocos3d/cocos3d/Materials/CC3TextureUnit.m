@@ -114,9 +114,9 @@
 	_constantColor.b = CCColorFloatFromByte(aColor.b);
 }
 
--(GLubyte) opacity { return CCColorByteFromFloat(_constantColor.a); }
+-(CCOpacity) opacity { return CCOpacityFromGLfloat(_constantColor.a); }
 
--(void) setOpacity: (GLubyte) opacity { _constantColor.a = CCColorFloatFromByte(opacity); }
+-(void) setOpacity: (CCOpacity) opacity { _constantColor.a = GLfloatFromCCOpacity(opacity); }
 
 -(ccColor3B) displayedColor { return self.color; }
 
@@ -126,13 +126,13 @@
 
 -(void) updateDisplayedColor: (ccColor3B) color {}
 
--(GLubyte) displayedOpacity { return self.opacity; }
+-(CCOpacity) displayedOpacity { return self.opacity; }
 
 -(BOOL) isCascadeOpacityEnabled { return NO; }
 
 -(void) setCascadeOpacityEnabled: (BOOL) cascadeOpacityEnabled {}
 
--(void) updateDisplayedOpacity: (GLubyte) opacity {}
+-(void) updateDisplayedOpacity: (CCOpacity) opacity {}
 
 
 #pragma mark Allocation and Initialization

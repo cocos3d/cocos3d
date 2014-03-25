@@ -178,7 +178,7 @@ typedef enum {
 @property(nonatomic, assign) ccColor3B color;
 
 /**
- * Implementation of the CCRGBAProtocol opacity property.
+ * The opacity of this texture unit.
  *
  * Querying this property returns the alpha component of the constantColor property,
  * converted from the floating point range (0 to 1), to the byte range (0 to 255).
@@ -187,7 +187,7 @@ typedef enum {
  * between 0 and 1, and is set into the constantColor property.
  * The RGB components of constantColor remain unchanged.
  */
-@property(nonatomic, assign) GLubyte opacity;
+@property(nonatomic, assign) CCOpacity opacity;
 
 
 #pragma mark Allocation and Initialization

@@ -843,18 +843,18 @@
 	if (_cascadeColorEnabled) for (CC3Node* child in _children) child.color = color;
 }
 
--(GLubyte) opacity {
-	GLubyte opc = 0;
+-(CCOpacity) opacity {
+	CCOpacity opc = 0;
 	NSUInteger childCnt = 0;
 	if (_children && (childCnt = _children.count) > 0) {
-		GLuint oSum = 0;
+		GLfloat oSum = 0;
 		for (CC3Node* child in _children) oSum += child.opacity;
 		opc = oSum / childCnt;
 	}
 	return opc;
 }
 
--(void) setOpacity: (GLubyte) opacity {
+-(void) setOpacity: (CCOpacity) opacity {
 	if (_cascadeOpacityEnabled) for (CC3Node* child in _children) child.opacity = opacity;
 }
 
@@ -868,7 +868,7 @@
 
 -(void) updateDisplayedColor: (ccColor3B) color {}
 
--(GLubyte) displayedOpacity { return self.opacity; }
+-(CCOpacity) displayedOpacity { return self.opacity; }
 
 -(BOOL) isCascadeOpacityEnabled { return _cascadeOpacityEnabled; }
 
@@ -876,7 +876,7 @@
 	_cascadeOpacityEnabled = cascadeOpacityEnabled;
 }
 
--(void) updateDisplayedOpacity: (GLubyte) opacity {}
+-(void) updateDisplayedOpacity: (CCOpacity) opacity {}
 
 -(ccBlendFunc) blendFunc {
 	for (CC3Node* child in _children) return child.blendFunc;	// From first child if exists

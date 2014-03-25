@@ -1231,7 +1231,7 @@
 @property(nonatomic, assign) ccColor3B color;
 
 /**
- * Implementation of the CCRGBAProtocol opacity property.
+ * The opacity of the vertices in this mesh.
  *
  * Querying this property returns the alpha component of the first vertex.
  *
@@ -1239,7 +1239,7 @@
  * opacity, without affecting the RGB color value of each individual vertex. If the content
  * of this vertex array has been copied to a GL buffer, that buffer is automatically updated. 
  */
-@property(nonatomic, assign) GLubyte opacity;
+@property(nonatomic, assign) CCOpacity opacity;
 
 @end
 

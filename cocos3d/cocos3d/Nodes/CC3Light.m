@@ -494,7 +494,7 @@
 		GLfloat dIntensity = CCC4FIntensity(self.diffuseColor);
 		GLfloat totIntensity = CCC4FIntensity(totalLight);
 		GLfloat shadowIntensity =  (dIntensity / totIntensity) * _shadowIntensityFactor;
-		_stencilledShadowPainter.opacity = CCColorByteFromFloat(shadowIntensity);
+		_stencilledShadowPainter.opacity = CCOpacityFromGLfloat(shadowIntensity);
 		LogTrace(@"%@ updated shadow intensity to %u from light illumination %@ against total illumination %@ and shadow intensity factor %.3f",
 					  self, _stencilledShadowPainter.opacity,
 					  NSStringFromCCC4F(self.diffuseColor), NSStringFromCCC4F(self.scene.totalIllumination), _shadowIntensityFactor);

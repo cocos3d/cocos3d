@@ -220,11 +220,11 @@
 @property(nonatomic, assign) ccColor3B color;
 
 /**
- * Implementation of the CCRGBAProtocol opacity property.
+ * The opacity of this layer.
  *
  * Returns and changes the value of the same property on the cc3Scene.
  */
-@property(nonatomic, assign) GLubyte opacity;
+@property(nonatomic, assign) CCOpacity opacity;
 
 
 #pragma mark Allocation and initialization

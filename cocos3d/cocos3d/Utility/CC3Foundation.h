@@ -49,6 +49,7 @@
 
 /* Base library of definitions and functions for operating in a 3D scene. */
 
+#import "CC3Environment.h"
 #import "CC3Math.h"
 #import "CC3Logging.h"
 #import "ccTypes.h"
@@ -1987,6 +1988,29 @@ static inline CGRect CGRectFromCC3Viewport(CC3Viewport vp) {
 
 #pragma mark -
 #pragma mark Color support
+
+#if CC3_CC2_CLASSIC
+
+/** In Cocos2D v1 & v2, opacity is defined as an integer value between 0 and 255. */
+typedef GLubyte CCOpacity;
+#define kCCOpacityFull					255
+#define GLfloatFromCCOpacity(ccOp)		CCColorFloatFromByte(ccOp)
+#define CCOpacityFromGLfloat(glf)		CCColorByteFromFloat(glf)
+#define GLubyteFromCCOpacity(ccOp)		((GLubyte)(ccOp))
+#define CCOpacityFromGLubyte(glub)		((CCOpacity)(glub))
+
+#else
+
+/** In Cocos2D v3 and above, opacity is defined as a float value between 0.0 and 1.0. */
+typedef CGFloat CCOpacity;
+#define kCCOpacityFull					1.0
+#define GLfloatFromCCOpacity(ccOp)		((GLfloat)(ccOp))
+#define CCOpacityFromGLfloat(glf)		((CCOpacity)(glf))
+#define GLubyteFromCCOpacity(ccOp)		CCColorByteFromFloat(ccOp)
+#define CCOpacityFromGLubyte(glub)		((CCOpacity)CCColorFloatFromByte(glub))
+
+#endif	// CC3_CC2_CLASSIC
+
 
 /** Returns a GLfloat between 0 and 1 converted from the specified GLubyte value between 0 and 255. */
 static inline GLfloat CCColorFloatFromByte(GLubyte colorValue) {

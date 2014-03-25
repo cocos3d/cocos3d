@@ -79,6 +79,7 @@
 }
 
 #else
+
 /**
  * In cocos2d 2.x, the view controller and CCDirector are one and the same, and we create the
  * controller using the singleton mechanism. To establish the correct CCDirector/UIViewController

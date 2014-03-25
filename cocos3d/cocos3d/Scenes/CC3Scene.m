@@ -183,9 +183,9 @@
 
 -(void) setColor: (ccColor3B) color { _backdrop.color = color; }
 
--(GLubyte) opacity { return _backdrop ? _backdrop.opacity : super.opacity; }
+-(CCOpacity) opacity { return _backdrop ? _backdrop.opacity : super.opacity; }
 
--(void) setOpacity: (GLubyte) opacity {
+-(void) setOpacity: (CCOpacity) opacity {
 	_backdrop.opacity = opacity;
 	super.opacity = opacity;
 }

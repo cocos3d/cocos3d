@@ -88,7 +88,9 @@
 
 @synthesize peakOpacity=_peakOpacity, adornmentNode=_adornmentNode;
 
--(id) initWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode peakOpacity: (GLubyte) opacity fadeDuration: (CCTime) aDuration {
+-(id) initWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode
+				peakOpacity: (CCOpacity) opacity
+			   fadeDuration: (CCTime) aDuration {
 	CC3Assert(aNode, @"CCNodeAdornment node must not be nil");
 	if( (self = [super initWithActionDuration: aDuration]) ) {
 		_peakOpacity = opacity;
@@ -101,20 +103,24 @@
 	return self;
 }
 
-+(id) adornmentWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode peakOpacity: (GLubyte) opacity fadeDuration: (CCTime) aDuration {
-	return [[self alloc] initWithAdornmentNode: aNode peakOpacity: opacity fadeDuration: (CCTime) aDuration];
++(id) adornmentWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode
+					 peakOpacity: (CCOpacity) opacity
+					fadeDuration: (CCTime) aDuration {
+	return [[self alloc] initWithAdornmentNode: aNode
+								   peakOpacity: opacity
+								  fadeDuration: (CCTime) aDuration];
 }
 
--(id) initWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode peakOpacity: (GLubyte) opacity {
+-(id) initWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode peakOpacity: (CCOpacity) opacity {
 	return [self initWithAdornmentNode: aNode peakOpacity: opacity fadeDuration: kDefaultFadeDuration];
 }
 
-+(id) adornmentWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode peakOpacity: (GLubyte) opacity {
++(id) adornmentWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode peakOpacity: (CCOpacity) opacity {
 	return [[self alloc] initWithAdornmentNode: aNode peakOpacity: opacity];
 }
 
 -(id) initWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode {
-	return [self initWithAdornmentNode: aNode peakOpacity: kFullOpacity];
+	return [self initWithAdornmentNode: aNode peakOpacity: kCCOpacityFull];
 }
 
 +(id) adornmentWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode {

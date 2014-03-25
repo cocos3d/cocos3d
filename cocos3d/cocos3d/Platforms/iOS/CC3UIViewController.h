@@ -276,10 +276,10 @@
 /** Allocates and initializes an autoreleased instance. */
 +(id) controller;
 
-#if CC3_CC2_2
+#if !CC3_CC2_1
 /** Cast the returned object as id to treat this method as an instance initializer. */
 +(id) sharedDirector;
-#endif
+#endif	// !CC3_CC2_1
 
 
 #pragma mark Deprecated functionality

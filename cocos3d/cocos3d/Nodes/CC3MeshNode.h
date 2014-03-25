@@ -434,7 +434,8 @@
 @property(nonatomic, assign) ccColor3B color;
 
 /**
- * Implementation of the CCRGBAProtocol opacity property.
+ * The opacity of this node, as described by the alpha component of the diffuse color of
+ * the material covering this mesh.
  *
  * Querying this property returns the alpha component of the material's diffuseColor
  * property, or of this node's pureColor property if this node has no material.
@@ -456,7 +457,7 @@
  * specific blending properties on the CC3Material instance directly, and avoid making
  * changes to this property.
  */
-@property(nonatomic, assign) GLubyte opacity;
+@property(nonatomic, assign) CCOpacity opacity;
 
 /**
  * Indicates whether the material of this mesh node is opaque.

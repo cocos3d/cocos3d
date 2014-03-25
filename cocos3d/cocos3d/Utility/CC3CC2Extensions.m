@@ -37,6 +37,17 @@
 
 // Dummy class for backwards compatibility
 @implementation CCLayer
+
+/** Assume layer covers the entire window. */
+-(id) init {
+	if ( (self = [ super init ]) ){
+		self.anchorPoint = ccp(0.0f, 0.0f);
+		[self setContentSize: [CCDirector sharedDirector].designSize];
+	}
+	
+	return( self );
+}
+
 @end
 
 #endif	// !CC3_CC2_CLASSIC
@@ -202,7 +213,7 @@
 	rect = CGRectApplyAffineTransform(rect, [self nodeToWorldTransform]);
 	return CC_RECT_SCALE(rect, CCDirector.sharedDirector.contentScaleFactor);
 }
-#endif	// CC3_CC2_2
+#endif	// CC3_CC2_3
 #if CC3_CC2_2
 -(CGRect) globalBoundingBoxInPixels {
 	CGSize cs = self.contentSize;
@@ -546,7 +557,7 @@
 
 @implementation CCDirectorDisplayLink (CC3)
 
-#if CC3_CC2_2
+#if !CC3_CC2_1
 -(NSTimeInterval) displayLinkTime { return CC2_LAST_DISPLAY_TIME; }
 #endif
 

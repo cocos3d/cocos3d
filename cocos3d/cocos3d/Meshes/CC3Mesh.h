@@ -2059,17 +2059,17 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
 @property(nonatomic, assign) ccColor3B color;
 
 /**
- * Implementation of the CCRGBAProtocol opacity property.
+ * The opacity of the vertices in this mesh.
  *
- * Querying this property returns the alpha component of the first vertex in this mesh, or zero
- * if this mesh contains no per-vertex color content.
+ * Querying this property returns the alpha component of the first vertex in this mesh, or 
+ * full opacity if this mesh contains no per-vertex color content.
  *
  * When setting this property, if this mesh contains per-vertex color content, the alpha values of
  * each vertex in this mesh is set to the specified opacity, without affecting the RGB color value
  * of each individual vertex. If the vertex color content of this mesh has been copied to a GL buffer,
  * that GL buffer is automatically updated.
  */
-@property(nonatomic, assign) GLubyte opacity;
+@property(nonatomic, assign) CCOpacity opacity;
 
 
 #pragma mark Textures

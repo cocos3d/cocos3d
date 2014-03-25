@@ -191,15 +191,15 @@
 	_diffuseColor.b = bf;
 }
 
--(GLubyte) opacity { return CCColorByteFromFloat(_diffuseColor.a); }
+-(CCOpacity) opacity { return CCOpacityFromGLfloat(_diffuseColor.a); }
 
 /**
  * Set opacity of all colors, retaining the colors of each, and sets the isOpaque property
  * to the appropriate value. This is a convenience that ensures that a previously opaque node
  * can be faded without having to turn isOpaque off separately.
  */
--(void) setOpacity: (GLubyte) opacity {
-	GLfloat af = CCColorFloatFromByte(opacity);
+-(void) setOpacity: (CCOpacity) opacity {
+	GLfloat af = GLfloatFromCCOpacity(opacity);
 	_ambientColor.a = af;
 	_diffuseColor.a = af;
 	_specularColor.a = af;
@@ -210,7 +210,7 @@
 	// blending will occur. If the opacity is full, set isOpaque to YES only if if the
 	// shouldBlendAtFullOpacity flag is set to YES. This ensures that a texture
 	// with transparency will still blend, even when this material is at full opacity.
-	self.isOpaque = (opacity == 255 && !self.shouldBlendAtFullOpacity);
+	self.isOpaque = (opacity == kCCOpacityFull && !self.shouldBlendAtFullOpacity);
 }
 
 -(ccColor3B) displayedColor { return self.color; }
@@ -221,13 +221,13 @@
 
 -(void) updateDisplayedColor: (ccColor3B) color {}
 
--(GLubyte) displayedOpacity { return self.opacity; }
+-(CCOpacity) displayedOpacity { return self.opacity; }
 
 -(BOOL) isCascadeOpacityEnabled { return NO; }
 
 -(void) setCascadeOpacityEnabled: (BOOL) cascadeOpacityEnabled {}
 
--(void) updateDisplayedOpacity: (GLubyte) opacity {}
+-(void) updateDisplayedOpacity: (CCOpacity) opacity {}
 
 -(ccBlendFunc) blendFunc { return self.blendFuncRGB; }
 
