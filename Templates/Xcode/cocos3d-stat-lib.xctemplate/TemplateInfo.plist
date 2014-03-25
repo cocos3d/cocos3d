@@ -3,19 +3,17 @@
 <plist version="1.0">
 <dict>
 	<key>Identifier</key>
-	<string>org.cocos3d.cocos2d-v2OSXStatLib</string>
+	<string>org.cocos3d.cocos3dStatLib</string>
 	<key>Description</key>
-	<string>cocos2d 2.x as a static library for inclusion in cocos3d OSX projects.</string>
+	<string>Cocos3D as a static library for inclusion in other application projects. Your application project must also include Cocos2D libraries.</string>
 	<key>Kind</key>
 	<string>Xcode.Xcode3.ProjectTemplateUnitKind</string>
 	<key>Concrete</key>
 	<false/>
 	<key>Ancestors</key>
 	<array>
-		<string>com.cocos2d-v2.bundlebase</string>
-		<string>com.cocos2d-v2.cocos2dlib</string>
-		<string>com.cocos2d-v2.cocosdenshionlib</string>
-		<string>com.cocos2d-v2.kazmathlib</string>
+		<string>org.cocos3d.cocos3dBase</string>
+		<string>org.cocos3d.cocos3dLib</string>
 	</array>
 	<key>Targets</key>
 	<array>
@@ -24,30 +22,26 @@
 			<string>com.apple.product-type.library.static</string>
 			<key>SharedSettings</key>
 			<dict>
-				<key>CLANG_ENABLE_OBJC_ARC</key>
-				<string>NO</string>
+				<key>HEADER_SEARCH_PATHS</key>
+				<array>
+					<string>cocos2d/**</string>
+				</array>
 				<key>SKIP_INSTALL</key>
 				<string>YES</string>
-				<key>OTHER_LDFLAGS</key>
-				<array/>
 			</dict>
 		</dict>
 	</array>
 	<key>Definitions</key>
 	<dict>
-		<key>Prefix.pch</key>
+		<key>LICENSE_cocos3d.txt</key>
 		<dict>
-			<key>Group</key>
-			<string>Supporting Files</string>
 			<key>Path</key>
-			<string>Prefix.pch</string>
-			<key>TargetIndices</key>
-			<array/>
+			<string>LICENSE_cocos3d.txt</string>
 		</dict>
 	</dict>
 	<key>Nodes</key>
 	<array>
-		<string>Prefix.pch</string>
+		<string>LICENSE_cocos3d.txt</string>
 	</array>
 </dict>
 </plist>

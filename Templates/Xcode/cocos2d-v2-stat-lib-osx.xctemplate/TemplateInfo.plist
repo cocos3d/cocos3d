@@ -3,19 +3,17 @@
 <plist version="1.0">
 <dict>
 	<key>Identifier</key>
-	<string>org.cocos3d.cocos2d-v1iOSStatLib</string>
-	<key>Description</key>
-	<string>cocos2d 1.x as a static library for inclusion in cocos3d iOS projects.</string>
+	<string>org.cocos3d.cocos2d-v2StatLibOSX</string>
 	<key>Kind</key>
 	<string>Xcode.Xcode3.ProjectTemplateUnitKind</string>
 	<key>Concrete</key>
 	<false/>
 	<key>Ancestors</key>
 	<array>
-		<string>com.cocos2d.bundlebase</string>
-		<string>com.cocos2d.cocos2dlib</string>
-		<string>com.cocos2d.cocosdenshionlib</string>
-		<string>com.cocos2d.fontlabellib</string>
+		<string>com.cocos2d-v2.bundlebase</string>
+		<string>com.cocos2d-v2.cocos2dlib</string>
+		<string>com.cocos2d-v2.cocosdenshionlib</string>
+		<string>com.cocos2d-v2.kazmathlib</string>
 	</array>
 	<key>Targets</key>
 	<array>

@@ -26,6 +26,7 @@
 		A92B424318BE3ED60026B00F /* CCNodeAdornments.m in Sources */ = {isa = PBXBuildFile; fileRef = A92B423E18BE3ED60026B00F /* CCNodeAdornments.m */; };
 		A92B424418BE3ED60026B00F /* CCNodeExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = A92B424018BE3ED60026B00F /* CCNodeExtensions.m */; };
 		A92B424518BE3ED60026B00F /* Joystick.m in Sources */ = {isa = PBXBuildFile; fileRef = A92B424218BE3ED60026B00F /* Joystick.m */; };
+		A92BD9D018E127BD003D1F64 /* libcocos2d-chipmunk.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A92BD9CF18E127AA003D1F64 /* libcocos2d-chipmunk.a */; };
 		A968802D17A72580007FA5F0 /* libcocos2d-library-OSX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A968802817A7251E007FA5F0 /* libcocos2d-library-OSX.a */; };
 		A968802E17A72580007FA5F0 /* libcocos3d-library-OSX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A968802217A72516007FA5F0 /* libcocos3d-library-OSX.a */; };
 		A96E0CCE170DC8060044CA2A /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A96E0CCD170DC8060044CA2A /* QuartzCore.framework */; };
@@ -154,6 +155,20 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		A92BD9CB18E127AA003D1F64 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A968802317A7251E007FA5F0 /* cocos2d-library-OSX.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = A92BD95818E12720003D1F64;
+			remoteInfo = "cocos2d-chipmunk";
+		};
+		A92BD9CE18E127AA003D1F64 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A968802317A7251E007FA5F0 /* cocos2d-library-OSX.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = A92BD9CA18E12720003D1F64;
+			remoteInfo = "cocos2d-chipmunk";
+		};
 		A968802117A72516007FA5F0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = A968801D17A72516007FA5F0 /* cocos3d-library-OSX.xcodeproj */;
@@ -347,8 +362,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A968802D17A72580007FA5F0 /* libcocos2d-library-OSX.a in Frameworks */,
 				A968802E17A72580007FA5F0 /* libcocos3d-library-OSX.a in Frameworks */,
+				A968802D17A72580007FA5F0 /* libcocos2d-library-OSX.a in Frameworks */,
+				A92BD9D018E127BD003D1F64 /* libcocos2d-chipmunk.a in Frameworks */,
 				A96E0CCE170DC8060044CA2A /* QuartzCore.framework in Frameworks */,
 				A96E0CD0170DC8060044CA2A /* OpenGL.framework in Frameworks */,
 				A96E0CD2170DC8060044CA2A /* OpenAL.framework in Frameworks */,
@@ -415,6 +431,7 @@
 			isa = PBXGroup;
 			children = (
 				A968802817A7251E007FA5F0 /* libcocos2d-library-OSX.a */,
+				A92BD9CF18E127AA003D1F64 /* libcocos2d-chipmunk.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -691,6 +708,7 @@
 			dependencies = (
 				A968802A17A7256E007FA5F0 /* PBXTargetDependency */,
 				A968802C17A7256E007FA5F0 /* PBXTargetDependency */,
+				A92BD9CC18E127AA003D1F64 /* PBXTargetDependency */,
 			);
 			name = CC3DemoMashUp;
 			productName = CC3DemoMashUp;
@@ -734,17 +752,26 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
+		A92BD9CF18E127AA003D1F64 /* libcocos2d-chipmunk.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libcocos2d-chipmunk.a";
+			remoteRef = A92BD9CE18E127AA003D1F64 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		A968802217A72516007FA5F0 /* libcocos3d-library-OSX.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
-			path = "libcocos3d-library-OSX.a";
+			name = "libcocos3d-library-OSX.a";
+			path = libcocos3d.a;
 			remoteRef = A968802117A72516007FA5F0 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		A968802817A7251E007FA5F0 /* libcocos2d-library-OSX.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
-			path = "libcocos2d-library-OSX.a";
+			name = "libcocos2d-library-OSX.a";
+			path = libcocos2d.a;
 			remoteRef = A968802717A7251E007FA5F0 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
@@ -907,6 +934,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		A92BD9CC18E127AA003D1F64 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "cocos2d-chipmunk";
+			targetProxy = A92BD9CB18E127AA003D1F64 /* PBXContainerItemProxy */;
+		};
 		A968802A17A7256E007FA5F0 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = "cocos3d-library-OSX";

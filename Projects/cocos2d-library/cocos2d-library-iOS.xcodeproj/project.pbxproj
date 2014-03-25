@@ -146,16 +146,6 @@
 		A940466A18DFAB5600E6D48C /* cpVect.c in Sources */ = {isa = PBXBuildFile; fileRef = A940464B18DFAB5600E6D48C /* cpVect.c */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXContainerItemProxy section */
-		A96C04E118BD3B60003E8F91 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = A9D8ED2117A6009300FB443C /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = A96C044718BD338A003E8F91;
-			remoteInfo = ObjectiveChipmunk;
-		};
-/* End PBXContainerItemProxy section */
-
 /* Begin PBXCopyFilesBuildPhase section */
 		A96C044618BD338A003E8F91 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -486,9 +476,9 @@
 		A940464C18DFAB5600E6D48C /* prime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = prime.h; sourceTree = "<group>"; };
 		A940464D18DFAB5600E6D48C /* LICENSE_Chipmunk.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE_Chipmunk.txt; sourceTree = "<group>"; };
 		A95B479318119BC8007A3804 /* configuration.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = configuration.json; path = "cocos2d-library-iOS.approj/configuration.json"; sourceTree = "<group>"; };
-		A96C044818BD338A003E8F91 /* libObjectiveChipmunk.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libObjectiveChipmunk.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		A96C044818BD338A003E8F91 /* libcocos2d-chipmunk.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libcocos2d-chipmunk.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A96C045618BD338B003E8F91 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
-		A9D8ED2917A6009300FB443C /* libcocos2d-library-iOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libcocos2d-library-iOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A9D8ED2917A6009300FB443C /* libcocos2d.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libcocos2d.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		A9D8EEAE17A601CF00FB443C /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		A9D8EEAF17A601CF00FB443C /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		A9D8EEB017A601CF00FB443C /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -1006,8 +996,8 @@
 		A9D8ED2A17A6009300FB443C /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A9D8ED2917A6009300FB443C /* libcocos2d-library-iOS.a */,
-				A96C044818BD338A003E8F91 /* libObjectiveChipmunk.a */,
+				A9D8ED2917A6009300FB443C /* libcocos2d.a */,
+				A96C044818BD338A003E8F91 /* libcocos2d-chipmunk.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1031,9 +1021,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		A96C044718BD338A003E8F91 /* ObjectiveChipmunk */ = {
+		A96C044718BD338A003E8F91 /* cocos2d-chipmunk */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A96C046918BD338B003E8F91 /* Build configuration list for PBXNativeTarget "ObjectiveChipmunk" */;
+			buildConfigurationList = A96C046918BD338B003E8F91 /* Build configuration list for PBXNativeTarget "cocos2d-chipmunk" */;
 			buildPhases = (
 				A96C044418BD338A003E8F91 /* Sources */,
 				A96C044518BD338A003E8F91 /* Frameworks */,
@@ -1043,14 +1033,14 @@
 			);
 			dependencies = (
 			);
-			name = ObjectiveChipmunk;
+			name = "cocos2d-chipmunk";
 			productName = ObjectiveChipmunk;
-			productReference = A96C044818BD338A003E8F91 /* libObjectiveChipmunk.a */;
+			productReference = A96C044818BD338A003E8F91 /* libcocos2d-chipmunk.a */;
 			productType = "com.apple.product-type.library.static";
 		};
-		A9D8ED2817A6009300FB443C /* cocos2d-library-iOS */ = {
+		A9D8ED2817A6009300FB443C /* cocos2d */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A9D8ED4C17A6009300FB443C /* Build configuration list for PBXNativeTarget "cocos2d-library-iOS" */;
+			buildConfigurationList = A9D8ED4C17A6009300FB443C /* Build configuration list for PBXNativeTarget "cocos2d" */;
 			buildPhases = (
 				A9D8ED2517A6009300FB443C /* Sources */,
 				A9D8ED2617A6009300FB443C /* Frameworks */,
@@ -1059,11 +1049,10 @@
 			buildRules = (
 			);
 			dependencies = (
-				A96C04E218BD3B60003E8F91 /* PBXTargetDependency */,
 			);
-			name = "cocos2d-library-iOS";
+			name = cocos2d;
 			productName = "cocos2d-library-iOS";
-			productReference = A9D8ED2917A6009300FB443C /* libcocos2d-library-iOS.a */;
+			productReference = A9D8ED2917A6009300FB443C /* libcocos2d.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
@@ -1087,8 +1076,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				A9D8ED2817A6009300FB443C /* cocos2d-library-iOS */,
-				A96C044718BD338A003E8F91 /* ObjectiveChipmunk */,
+				A9D8ED2817A6009300FB443C /* cocos2d */,
+				A96C044718BD338A003E8F91 /* cocos2d-chipmunk */,
 			);
 		};
 /* End PBXProject section */
@@ -1247,14 +1236,6 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
-/* Begin PBXTargetDependency section */
-		A96C04E218BD3B60003E8F91 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = A96C044718BD338A003E8F91 /* ObjectiveChipmunk */;
-			targetProxy = A96C04E118BD3B60003E8F91 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
-
 /* Begin XCBuildConfiguration section */
 		A96C046518BD338B003E8F91 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -1343,7 +1324,6 @@
 		A9D8ED4D17A6009300FB443C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_ENABLE_OBJC_ARC = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 			};
@@ -1352,7 +1332,6 @@
 		A9D8ED4E17A6009300FB443C /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_ENABLE_OBJC_ARC = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 			};
@@ -1361,7 +1340,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		A96C046918BD338B003E8F91 /* Build configuration list for PBXNativeTarget "ObjectiveChipmunk" */ = {
+		A96C046918BD338B003E8F91 /* Build configuration list for PBXNativeTarget "cocos2d-chipmunk" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A96C046518BD338B003E8F91 /* Debug */,
@@ -1379,7 +1358,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		A9D8ED4C17A6009300FB443C /* Build configuration list for PBXNativeTarget "cocos2d-library-iOS" */ = {
+		A9D8ED4C17A6009300FB443C /* Build configuration list for PBXNativeTarget "cocos2d" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A9D8ED4D17A6009300FB443C /* Debug */,

@@ -3,9 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>Identifier</key>
-	<string>org.cocos3d.cocos2d-v2iOSStatLib</string>
-	<key>Description</key>
-	<string>cocos2d 2.x as a static library for inclusion in cocos3d iOS projects.</string>
+	<string>org.cocos3d.cocos2d-v2StatLibIOS</string>
 	<key>Kind</key>
 	<string>Xcode.Xcode3.ProjectTemplateUnitKind</string>
 	<key>Concrete</key>

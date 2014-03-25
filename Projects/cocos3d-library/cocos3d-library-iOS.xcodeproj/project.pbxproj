@@ -146,7 +146,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		A92E838017A6D0A1003B859E /* libcocos3d-library-iOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libcocos3d-library-iOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A92E838017A6D0A1003B859E /* libcocos3d.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libcocos3d.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		A92E855917A6E1F5003B859E /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		A92E855A17A6E1F5003B859E /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		A92E855B17A6E1F5003B859E /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -451,7 +451,7 @@
 		A92E838117A6D0A1003B859E /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A92E838017A6D0A1003B859E /* libcocos3d-library-iOS.a */,
+				A92E838017A6D0A1003B859E /* libcocos3d.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -967,9 +967,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		A92E837F17A6D0A1003B859E /* cocos3d-library-iOS */ = {
+		A92E837F17A6D0A1003B859E /* cocos3d */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A92E83A317A6D0A1003B859E /* Build configuration list for PBXNativeTarget "cocos3d-library-iOS" */;
+			buildConfigurationList = A92E83A317A6D0A1003B859E /* Build configuration list for PBXNativeTarget "cocos3d" */;
 			buildPhases = (
 				A92E837C17A6D0A1003B859E /* Sources */,
 				A92E837D17A6D0A1003B859E /* Frameworks */,
@@ -979,9 +979,9 @@
 			);
 			dependencies = (
 			);
-			name = "cocos3d-library-iOS";
+			name = cocos3d;
 			productName = "cocos3d-library-iOS";
-			productReference = A92E838017A6D0A1003B859E /* libcocos3d-library-iOS.a */;
+			productReference = A92E838017A6D0A1003B859E /* libcocos3d.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
@@ -1005,7 +1005,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				A92E837F17A6D0A1003B859E /* cocos3d-library-iOS */,
+				A92E837F17A6D0A1003B859E /* cocos3d */,
 			);
 		};
 /* End PBXProject section */
@@ -1270,7 +1270,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		A92E83A317A6D0A1003B859E /* Build configuration list for PBXNativeTarget "cocos3d-library-iOS" */ = {
+		A92E83A317A6D0A1003B859E /* Build configuration list for PBXNativeTarget "cocos3d" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A92E83A417A6D0A1003B859E /* Debug */,

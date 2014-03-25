@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>Identifier</key>
-	<string>org.cocos3d.cocos3dAppOGLES1Concrete</string>
+	<string>org.cocos3d.cocos3dAppOGLES1Project</string>
 	<key>Description</key>
-	<string>You can use this as the starting point for any cocos3d application that uses OpenGL ES 1.1 on an iOS or Android device. This template requires that cocos2d 1.x is installed.</string>
+	<string>You can use this as the starting point for any Cocos3D application that uses OpenGL ES 1.1 on an iOS or Android device. This template requires that Cocos2D v1 is installed.</string>
 	<key>Kind</key>
 	<string>Xcode.Xcode3.ProjectTemplateUnitKind</string>
 	<key>Concrete</key>
@@ -20,7 +20,7 @@
 	<array>
 		<dict>
 			<key>Identifier</key>
-			<string>org.cocos3d.cocos2d-v1iOSStatLib</string>
+			<string>org.cocos3d.cocos2d-v1StatLibIOS</string>
 			<key>Name</key>
 			<string>cocos2d</string>
 		</dict>

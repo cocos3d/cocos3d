@@ -3,45 +3,35 @@
 <plist version="1.0">
 <dict>
 	<key>Identifier</key>
-	<string>org.cocos3d.cocos3dStatLib</string>
+	<string>org.cocos3d.cocos3dStatLibProject</string>
 	<key>Description</key>
-	<string>cocos3d as a static library for inclusion in cocos3d application projects.</string>
+	<string>Cocos3D as a static library for inclusion in other application projects. Your application project must also include Cocos2D libraries.</string>
 	<key>Kind</key>
 	<string>Xcode.Xcode3.ProjectTemplateUnitKind</string>
 	<key>Concrete</key>
 	<false/>
 	<key>Ancestors</key>
 	<array>
-		<string>org.cocos3d.cocos3dBase</string>
-		<string>org.cocos3d.cocos3dLib</string>
+		<string>org.cocos3d.cocos3dStatLib</string>
 	</array>
-	<key>Targets</key>
+	<key>Options</key>
 	<array>
 		<dict>
-			<key>ProductType</key>
-			<string>com.apple.product-type.library.static</string>
-			<key>SharedSettings</key>
-			<dict>
-				<key>HEADER_SEARCH_PATHS</key>
-				<array>
-					<string>cocos2d/**</string>
-				</array>
-				<key>SKIP_INSTALL</key>
-				<string>YES</string>
-			</dict>
+			<key>Identifier</key>
+			<string>productName</string>
+			<key>Required</key>
+			<true/>
+			<key>Name</key>
+			<string>Product Name</string>
+			<key>NotPersisted</key>
+			<true/>
+			<key>Description</key>
+			<string>Your new product&apos;s name</string>
+			<key>EmptyReplacement</key>
+			<string>ProductName</string>
+			<key>Type</key>
+			<string>text</string>
 		</dict>
-	</array>
-	<key>Definitions</key>
-	<dict>
-		<key>LICENSE_cocos3d.txt</key>
-		<dict>
-			<key>Path</key>
-			<string>LICENSE_cocos3d.txt</string>
-		</dict>
-	</dict>
-	<key>Nodes</key>
-	<array>
-		<string>LICENSE_cocos3d.txt</string>
 	</array>
 </dict>
 </plist>

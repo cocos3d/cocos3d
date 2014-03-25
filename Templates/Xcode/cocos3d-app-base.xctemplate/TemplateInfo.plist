@@ -93,10 +93,10 @@
 			<key>Path</key>
 			<string>Resources/hello-world.pod</string>
 		</dict>
-		<key>README!</key>
+		<key>README!.md</key>
 		<dict>
 			<key>Path</key>
-			<string>README!.txt</string>
+			<string>README!.md</string>
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
@@ -108,7 +108,7 @@
 		<string>Classes/___PROJECTNAMEASIDENTIFIER___Scene.h</string>
 		<string>Classes/___PROJECTNAMEASIDENTIFIER___Scene.m</string>
 		<string>Resources/hello-world.pod</string>
-		<string>README!</string>
+		<string>README!.md</string>
 	</array>
 </dict>
 </plist>

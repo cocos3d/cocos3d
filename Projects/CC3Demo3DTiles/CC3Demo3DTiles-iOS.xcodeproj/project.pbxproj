@@ -10,6 +10,7 @@
 		A92B421D18BE3E7B0026B00F /* CCNodeAdornments.m in Sources */ = {isa = PBXBuildFile; fileRef = A92B421818BE3E7B0026B00F /* CCNodeAdornments.m */; };
 		A92B421E18BE3E7B0026B00F /* CCNodeExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = A92B421A18BE3E7B0026B00F /* CCNodeExtensions.m */; };
 		A92B421F18BE3E7B0026B00F /* Joystick.m in Sources */ = {isa = PBXBuildFile; fileRef = A92B421C18BE3E7B0026B00F /* Joystick.m */; };
+		A92BD9D118E127CF003D1F64 /* libcocos2d-chipmunk.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A92B421518BE3E730026B00F /* libcocos2d-chipmunk.a */; };
 		A92DA8461427C6F00051AFFA /* arial16.fnt in Resources */ = {isa = PBXBuildFile; fileRef = A92DA8211427C6F00051AFFA /* arial16.fnt */; };
 		A92DA8471427C6F00051AFFA /* arial16.png in Resources */ = {isa = PBXBuildFile; fileRef = A92DA8221427C6F00051AFFA /* arial16.png */; };
 		A92DA8491427C6F00051AFFA /* ArrowUpButton48x48.png in Resources */ = {isa = PBXBuildFile; fileRef = A92DA8241427C6F00051AFFA /* ArrowUpButton48x48.png */; };
@@ -61,8 +62,8 @@
 		A9A3603317F47EB000C76E2B /* Default-Landscape~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = A9A3602F17F47EB000C76E2B /* Default-Landscape~ipad.png */; };
 		A9A3603417F47EB000C76E2B /* Default-Portrait~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = A9A3603017F47EB000C76E2B /* Default-Portrait~ipad.png */; };
 		A9A3603517F47EB000C76E2B /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = A9A3603117F47EB000C76E2B /* Default.png */; };
-		A9A3603617F4810B00C76E2B /* libcocos3d-library-iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A9A35FFB17F47CE600C76E2B /* libcocos3d-library-iOS.a */; };
-		A9A3603717F4811500C76E2B /* libcocos2d-library-iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A9A3600117F47CF200C76E2B /* libcocos2d-library-iOS.a */; };
+		A9A3603617F4810B00C76E2B /* libcocos3d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A9A35FFB17F47CE600C76E2B /* libcocos3d.a */; };
+		A9A3603717F4811500C76E2B /* libcocos2d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A9A3600117F47CF200C76E2B /* libcocos2d.a */; };
 		A9BA3E3018D21DB20077B14E /* CC3LibDefaultPrecision.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3DFF18D21DB20077B14E /* CC3LibDefaultPrecision.fsh */; };
 		A9BA3E3118D21DB20077B14E /* CC3LibDualSidedFragmentColor.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E0018D21DB20077B14E /* CC3LibDualSidedFragmentColor.fsh */; };
 		A9BA3E3218D21DB20077B14E /* CC3LibEnvironmentReflection.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E0118D21DB20077B14E /* CC3LibEnvironmentReflection.fsh */; };
@@ -147,6 +148,13 @@
 			proxyType = 2;
 			remoteGlobalIDString = A9D8ED2917A6009300FB443C;
 			remoteInfo = "cocos2d-library-iOS";
+		};
+		A9B28AE018E1252A007B8EED /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A9A35FFC17F47CF100C76E2B /* cocos2d-library-iOS.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = A96C044718BD338A003E8F91;
+			remoteInfo = "cocos2d-chipmunk";
 		};
 /* End PBXContainerItemProxy section */
 
@@ -270,8 +278,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A9A3603617F4810B00C76E2B /* libcocos3d-library-iOS.a in Frameworks */,
-				A9A3603717F4811500C76E2B /* libcocos2d-library-iOS.a in Frameworks */,
+				A9A3603617F4810B00C76E2B /* libcocos3d.a in Frameworks */,
+				A9A3603717F4811500C76E2B /* libcocos2d.a in Frameworks */,
+				A92BD9D118E127CF003D1F64 /* libcocos2d-chipmunk.a in Frameworks */,
 				A9473C1814100DA5006F410C /* AudioToolbox.framework in Frameworks */,
 				A9473C1A14100DA5006F410C /* AVFoundation.framework in Frameworks */,
 				A9473C2014100DA5006F410C /* CoreGraphics.framework in Frameworks */,
@@ -415,7 +424,7 @@
 		A9A35FF717F47CE600C76E2B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A9A35FFB17F47CE600C76E2B /* libcocos3d-library-iOS.a */,
+				A9A35FFB17F47CE600C76E2B /* libcocos3d.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -423,8 +432,8 @@
 		A9A35FFD17F47CF100C76E2B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A9A3600117F47CF200C76E2B /* libcocos2d-library-iOS.a */,
-				A92B421518BE3E730026B00F /* libObjectiveChipmunk.a */,
+				A9A3600117F47CF200C76E2B /* libcocos2d.a */,
+				A92B421518BE3E730026B00F /* libcocos2d-chipmunk.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -563,6 +572,7 @@
 			dependencies = (
 				A94EE9DB17F48A5C005A43E7 /* PBXTargetDependency */,
 				A94EE9DD17F48A61005A43E7 /* PBXTargetDependency */,
+				A9B28AE118E1252A007B8EED /* PBXTargetDependency */,
 			);
 			name = CC3Demo3DTiles;
 			productName = CC3Demo3DTiles;
@@ -605,24 +615,24 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		A92B421518BE3E730026B00F /* libObjectiveChipmunk.a */ = {
+		A92B421518BE3E730026B00F /* libcocos2d-chipmunk.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
-			path = libObjectiveChipmunk.a;
+			path = "libcocos2d-chipmunk.a";
 			remoteRef = A92B421418BE3E730026B00F /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		A9A35FFB17F47CE600C76E2B /* libcocos3d-library-iOS.a */ = {
+		A9A35FFB17F47CE600C76E2B /* libcocos3d.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
-			path = "libcocos3d-library-iOS.a";
+			path = libcocos3d.a;
 			remoteRef = A9A35FFA17F47CE600C76E2B /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		A9A3600117F47CF200C76E2B /* libcocos2d-library-iOS.a */ = {
+		A9A3600117F47CF200C76E2B /* libcocos2d.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
-			path = "libcocos2d-library-iOS.a";
+			path = libcocos2d.a;
 			remoteRef = A9A3600017F47CF200C76E2B /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
@@ -751,6 +761,11 @@
 			isa = PBXTargetDependency;
 			name = "cocos2d-library-iOS";
 			targetProxy = A94EE9DC17F48A61005A43E7 /* PBXContainerItemProxy */;
+		};
+		A9B28AE118E1252A007B8EED /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "cocos2d-chipmunk";
+			targetProxy = A9B28AE018E1252A007B8EED /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 

@@ -1,7 +1,7 @@
 README!
 ----------------------
 
-cocos3d 2.0.0
+Cocos3D 2.0.0
 
 Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
 http://www.brenwill.com
@@ -23,11 +23,11 @@ typically in the updateBeforeTransform: method.
 
 You can also edit the applicationDidFinishLaunching: method in the
 ___PROJECTNAMEASIDENTIFIER___AppDelegate.m file to tweak the basic setup of your
-cocos3d application. This method is where the cocos3d framework is hooked into the
-cocos2d framework, and Apple's OpenGL ES framework.
+Cocos3D application. This method is where the Cocos3D framework is hooked into the
+Cocos2D framework, and Apple's OpenGL ES framework.
 
-For a complete demonstration of almost all cocos3d capabilities, see the fully-documented
-CC3DemoMashUp demo app, which is your best tool for learning the capabilities of cocos3d,
+For a complete demonstration of almost all Cocos3D capabilities, see the fully-documented
+CC3DemoMashUp demo app, which is your best tool for learning the capabilities of Cocos3D,
 and how to work within the framework.
 
 NOTE: The 'hello-world.pod' 3D model data file used for the 'hello, world' message model
@@ -36,34 +36,25 @@ When adapting this template project for your own application, don't forget to re
 'hello-world.pod' from the Resources folder of your project!
 
 
-cocos2d & OpenGL ES Version Compatibility
+Cocos2D & OpenGL ES Version Compatibility
 -----------------------------------------
 
-cocos3d under iOS and Android is compatible with `cocos2d` `2.1`, for using programmable-pipeline
-OpenGL ES 2.0, and is compatible with `cocos2d` `1.1`, for using fixed-pipeline OpenGL ES 1.1.
+Cocos3D under iOS and Android is compatible with `Cocos2D` `3.x` and `Cocos2D` `2.1`, for 
+using programmable-pipeline OpenGL ES 2.0, and is compatible with `Cocos2D` `1.1`, for using
+fixed-pipeline OpenGL ES 1.1.
 
-cocos3d under OSX is compatible with `cocos2d` `2.1`, for using programmable-pipeline
-OpenGL (OSX). cocos3d is not compatible with `cocos2d` `1.1` under OSX.
+Cocos3D under OSX is compatible with `Cocos2D` `3.x` and `Cocos2D` `2.1`, for using 
+programmable-pipeline OpenGL (OSX). Cocos3D is not compatible with `Cocos2D` `1.1` under OSX.
 
-By linking to cocos2d 2.1, you will automatically use OpenGL ES 2.0, and by linking to
-cocos2d 1.1, you will automatically use OpenGL ES 1.1. Because of this, you cannot mix
-the use of OpenGL ES 2.0 and 1.1 within a single application.
-
-This template application will use whichever version of cocos2d you indicated when you ran
-the install_cocos3d.sh script. You can easily change the version of cocos2d that is linked
-to this project by following these steps within Xcode:
-
-1. Delete the reference to the cocos2d group in the Xcode Project Navigator panel.
-2. Run the install_cocos3d script and identify the new version of cocos2d to be linked.
-3. Add the newly linked cocos2d files to the project by dragging the cocos2d folder from
-   the cocos3d distribution folder to the Xcode Project Navigator panel. When prompted for
-   the target to add the source code to, select the `cocos2d` target.
+Choosing the appropriate Cocos3D template will automatically link to the corresponding version
+of the `Cocos2D` library, if it exists in your template environment. You must ensure that you 
+have downloaded the appropriate version of `Cocos2D`, and have installed its templates.
 
 
 Creating POD 3D Model Files
 ---------------------------
 
-cocos3d reads 3D model content from POD files.
+Cocos3D reads 3D model content from POD files.
 
 If you are using Blender, Maya, or 3DS Max as your 3D editor, you can install the PVRGeoPOD
 plugin from Imagination Technologies to export directly from your editor to the POD file format.
@@ -79,6 +70,6 @@ for more info on where to get the PVRGeoPOD converter, and how to use it to gene
 
 If you are using Blender as your 3D editor, and have many .blend files to export to POD format,
 you can use the command-line batch tool available in the "Tools/Blender-POD Batch Converter"
-folder in the cocos3d distribution. See the README.txt file in that folder for instructions.
-The "Blender-POD Batch Converter" tool was created by cocos3d user Nikita Medvedev.
+folder in the Cocos3D distribution. See the README.txt file in that folder for instructions.
+The "Blender-POD Batch Converter" tool was created by Cocos3D user Nikita Medvedev.
 
