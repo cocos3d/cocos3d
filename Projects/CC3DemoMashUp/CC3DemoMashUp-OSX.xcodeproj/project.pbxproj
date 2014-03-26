@@ -369,12 +369,12 @@
 				A968802E17A72580007FA5F0 /* libcocos3d.a in Frameworks */,
 				A968802D17A72580007FA5F0 /* libcocos2d.a in Frameworks */,
 				A92BD9D018E127BD003D1F64 /* libcocos2d-chipmunk.a in Frameworks */,
-				A96E0CCE170DC8060044CA2A /* QuartzCore.framework in Frameworks */,
-				A96E0CD0170DC8060044CA2A /* OpenGL.framework in Frameworks */,
-				A96E0CD2170DC8060044CA2A /* OpenAL.framework in Frameworks */,
-				A96E0CD4170DC8060044CA2A /* AudioToolbox.framework in Frameworks */,
 				A96E0CD6170DC8060044CA2A /* AppKit.framework in Frameworks */,
+				A96E0CD4170DC8060044CA2A /* AudioToolbox.framework in Frameworks */,
 				A96E0CD8170DC8060044CA2A /* Foundation.framework in Frameworks */,
+				A96E0CCE170DC8060044CA2A /* QuartzCore.framework in Frameworks */,
+				A96E0CD2170DC8060044CA2A /* OpenAL.framework in Frameworks */,
+				A96E0CD0170DC8060044CA2A /* OpenGL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -452,12 +452,12 @@
 		A96E0CCC170DC8060044CA2A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				A96E0CCD170DC8060044CA2A /* QuartzCore.framework */,
-				A96E0CCF170DC8060044CA2A /* OpenGL.framework */,
-				A96E0CD1170DC8060044CA2A /* OpenAL.framework */,
-				A96E0CD3170DC8060044CA2A /* AudioToolbox.framework */,
 				A96E0CD5170DC8060044CA2A /* AppKit.framework */,
+				A96E0CD3170DC8060044CA2A /* AudioToolbox.framework */,
 				A96E0CD7170DC8060044CA2A /* Foundation.framework */,
+				A96E0CD1170DC8060044CA2A /* OpenAL.framework */,
+				A96E0CCF170DC8060044CA2A /* OpenGL.framework */,
+				A96E0CCD170DC8060044CA2A /* QuartzCore.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";

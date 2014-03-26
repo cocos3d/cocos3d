@@ -368,14 +368,14 @@
 		A9473C1014100DA5006F410C /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				A9473C1114100DA5006F410C /* QuartzCore.framework */,
-				A9473C1314100DA5006F410C /* OpenGLES.framework */,
-				A9473C1514100DA5006F410C /* OpenAL.framework */,
 				A9473C1714100DA5006F410C /* AudioToolbox.framework */,
 				A9473C1914100DA5006F410C /* AVFoundation.framework */,
-				A9473C1B14100DA5006F410C /* UIKit.framework */,
-				A9473C1D14100DA5006F410C /* Foundation.framework */,
 				A9473C1F14100DA5006F410C /* CoreGraphics.framework */,
+				A9473C1D14100DA5006F410C /* Foundation.framework */,
+				A9473C1514100DA5006F410C /* OpenAL.framework */,
+				A9473C1314100DA5006F410C /* OpenGLES.framework */,
+				A9473C1114100DA5006F410C /* QuartzCore.framework */,
+				A9473C1B14100DA5006F410C /* UIKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
