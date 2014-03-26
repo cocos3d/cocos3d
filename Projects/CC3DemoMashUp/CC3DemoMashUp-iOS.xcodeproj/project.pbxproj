@@ -144,8 +144,6 @@
 		A9BA3DFB18D21DA80077B14E /* CC3TexturableBones.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3DCD18D21DA80077B14E /* CC3TexturableBones.vsh */; };
 		A9BA3DFC18D21DA80077B14E /* CC3TexturableRigidBones.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3DCE18D21DA80077B14E /* CC3TexturableRigidBones.vsh */; };
 		A9BC697418C5586100B67E11 /* Head_diffuse.bmp in Resources */ = {isa = PBXBuildFile; fileRef = A9BC697318C5586100B67E11 /* Head_diffuse.bmp */; };
-		A9BC8FDE189C7610000FB28C /* TestRedTextureShort.png in Resources */ = {isa = PBXBuildFile; fileRef = A9BC8FDC189C7610000FB28C /* TestRedTextureShort.png */; };
-		A9BC8FDF189C7610000FB28C /* TestRedTextureShort.ppng in Resources */ = {isa = PBXBuildFile; fileRef = A9BC8FDD189C7610000FB28C /* TestRedTextureShort.ppng */; };
 		A9C94ABE1451924700CE6BAD /* mallet.png in Resources */ = {isa = PBXBuildFile; fileRef = A9C94ABC1451924700CE6BAD /* mallet.png */; };
 		A9C94ABF1451924700CE6BAD /* mallet.pod in Resources */ = {isa = PBXBuildFile; fileRef = A9C94ABD1451924700CE6BAD /* mallet.pod */; };
 		A9CD198E156C1CFD00A0EDC4 /* earthmap1k.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A9CD198D156C1CFD00A0EDC4 /* earthmap1k.jpg */; };
@@ -297,7 +295,6 @@
 		A96B359C14EF2689002A7363 /* GrassWithLeaves.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = GrassWithLeaves.jpg; sourceTree = "<group>"; };
 		A96B359D14EF2689002A7363 /* MountainGrass.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = MountainGrass.jpg; sourceTree = "<group>"; };
 		A96B359F14EF2689002A7363 /* Grass.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = Grass.jpg; sourceTree = "<group>"; };
-		A96C042718BD32CB003E8F91 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		A971D30D1663EC6E00769DC5 /* fps_images-hd.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "fps_images-hd.png"; sourceTree = "<group>"; };
 		A971D30E1663EC6E00769DC5 /* fps_images-ipadhd.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "fps_images-ipadhd.png"; sourceTree = "<group>"; };
 		A971D30F1663EC6E00769DC5 /* fps_images.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fps_images.png; sourceTree = "<group>"; };
@@ -361,8 +358,6 @@
 		A9BA3DCD18D21DA80077B14E /* CC3TexturableBones.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3TexturableBones.vsh; sourceTree = "<group>"; };
 		A9BA3DCE18D21DA80077B14E /* CC3TexturableRigidBones.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3TexturableRigidBones.vsh; sourceTree = "<group>"; };
 		A9BC697318C5586100B67E11 /* Head_diffuse.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; path = Head_diffuse.bmp; sourceTree = "<group>"; };
-		A9BC8FDC189C7610000FB28C /* TestRedTextureShort.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = TestRedTextureShort.png; path = "../../../../../../Models & Textures/TestRedTextureShort.png"; sourceTree = "<group>"; };
-		A9BC8FDD189C7610000FB28C /* TestRedTextureShort.ppng */ = {isa = PBXFileReference; lastKnownFileType = file; name = TestRedTextureShort.ppng; path = "../../../../../../Models & Textures/TestRedTextureShort.ppng"; sourceTree = "<group>"; };
 		A9C94ABC1451924700CE6BAD /* mallet.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = mallet.png; sourceTree = "<group>"; };
 		A9C94ABD1451924700CE6BAD /* mallet.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = mallet.pod; sourceTree = "<group>"; };
 		A9CD198D156C1CFD00A0EDC4 /* earthmap1k.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = earthmap1k.jpg; sourceTree = "<group>"; };
@@ -440,15 +435,14 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				DC6640020F83B3EA000B3E49 /* AudioToolbox.framework */,
+				506EDBA4102F4C9F00A389B3 /* AVFoundation.framework */,
 				DCCBF1B60F6022AE0040855A /* CoreGraphics.framework */,
 				DCCBF1B80F6022AE0040855A /* Foundation.framework */,
+				DC6640040F83B3EA000B3E49 /* OpenAL.framework */,
 				DCCBF1BA0F6022AE0040855A /* OpenGLES.framework */,
 				DCCBF1BC0F6022AE0040855A /* QuartzCore.framework */,
 				DCCBF1BE0F6022AE0040855A /* UIKit.framework */,
-				DC6640040F83B3EA000B3E49 /* OpenAL.framework */,
-				DC6640020F83B3EA000B3E49 /* AudioToolbox.framework */,
-				506EDBA4102F4C9F00A389B3 /* AVFoundation.framework */,
-				A96C042718BD32CB003E8F91 /* XCTest.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -501,8 +495,6 @@
 		A92DA78D1427B5980051AFFA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				A9BC8FDC189C7610000FB28C /* TestRedTextureShort.png */,
-				A9BC8FDD189C7610000FB28C /* TestRedTextureShort.ppng */,
 				A93B2AA71695E6A6007144C7 /* Arial32BMGlyph.fnt */,
 				A93B2AA81695E6A6007144C7 /* Arial32BMGlyph.png */,
 				A92DA78E1427B5980051AFFA /* ArrowLeftButton48x48.png */,
@@ -906,7 +898,6 @@
 				A9AE3D7D14E46118002805DA /* Stamp.png in Resources */,
 				A9F78F5A189EA362001AE65E /* OrangeRing.png in Resources */,
 				A96B35A014EF2689002A7363 /* GrassCloseUp.jpg in Resources */,
-				A9BC8FDF189C7610000FB28C /* TestRedTextureShort.ppng in Resources */,
 				A96B35A114EF2689002A7363 /* GrassWithLeaves.jpg in Resources */,
 				A901CF6B186F90EC00A26A40 /* BaseTex.png in Resources */,
 				A96B35A214EF2689002A7363 /* MountainGrass.jpg in Resources */,
@@ -960,7 +951,6 @@
 				A97398E817C2C7BC00C17D89 /* Dragon-diffuse.jpg in Resources */,
 				A9E9EE6F16AD7A1D0086F025 /* man.pod in Resources */,
 				A9BA3DEE18D21DA80077B14E /* CC3LibDefaultPrecision.vsh in Resources */,
-				A9BC8FDE189C7610000FB28C /* TestRedTextureShort.png in Resources */,
 				A94EF4E217C65E5A00FA969E /* Icon-76.png in Resources */,
 				A9BA3DD518D21DA80077B14E /* CC3LibSingleTexture2D.fsh in Resources */,
 				A9FF6E12170DF78600FC35C8 /* Head_clonespace.png in Resources */,
