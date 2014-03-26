@@ -166,22 +166,20 @@ typedef enum {
 #pragma mark CCRGBAProtocol support
 
 /**
- * Implementation of the CCRGBAProtocol color property.
+ * The constant color of this texture unit, returned as a CCColorRef.
  *
- * Querying this property returns the RGB components of the constantColor property,
- * converted from the floating point range (0 to 1), to the byte range (0 to 255).
+ * Querying this property returns the RGB components of the constantColor property.
  *
  * When setting this property, the RGB values are each converted to a floating point
  * number between 0 and 1, and are set into the constantColor property.
  * The alpha component of constantColor remains unchanged.
  */
-@property(nonatomic, assign) ccColor3B color;
+@property(nonatomic, assign) CCColorRef color;
 
 /**
  * The opacity of this texture unit.
  *
- * Querying this property returns the alpha component of the constantColor property,
- * converted from the floating point range (0 to 1), to the byte range (0 to 255).
+ * Querying this property returns the alpha component of the constantColor property.
  *
  * When setting this property, the value is converted to a floating point number
  * between 0 and 1, and is set into the constantColor property.

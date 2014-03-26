@@ -2046,7 +2046,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
 #pragma mark CCRGBAProtocol and CCBlendProtocol support
 
 /**
- * Implementation of the CCRGBAProtocol color property.
+ * The color of the vertices of this mesh.
  *
  * Querying this property returns the RGB components of the first vertex in this mesh, or ccBLACK
  * if this mesh contains no per-vertex color content.
@@ -2056,7 +2056,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * individual vertex. If the vertex color content of this mesh has been copied to a GL buffer, that
  * GL buffer is automatically updated.
  */
-@property(nonatomic, assign) ccColor3B color;
+@property(nonatomic, assign) CCColorRef color;
 
 /**
  * The opacity of the vertices in this mesh.

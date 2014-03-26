@@ -1232,7 +1232,12 @@
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = ../../cocos2d/kazmath/include;
+				HEADER_SEARCH_PATHS = (
+					../../cocos2d/kazmath/include,
+					"../../cocos2d-chipmunk/chipmunk/include",
+					"../../cocos2d-chipmunk/chipmunk/include/chipmunk",
+					"../../cocos2d-chipmunk/objectivec/include",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
@@ -1263,7 +1268,12 @@
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = ../../cocos2d/kazmath/include;
+				HEADER_SEARCH_PATHS = (
+					../../cocos2d/kazmath/include,
+					"../../cocos2d-chipmunk/chipmunk/include",
+					"../../cocos2d-chipmunk/chipmunk/include/chipmunk",
+					"../../cocos2d-chipmunk/objectivec/include",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				SDKROOT = macosx;
 			};

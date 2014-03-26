@@ -102,29 +102,28 @@
 
 #pragma mark CCRGBAProtocol support
 
--(ccColor3B) color {
-	return ccc3(CCColorByteFromFloat(_constantColor.r),
-				CCColorByteFromFloat(_constantColor.g),
-				CCColorByteFromFloat(_constantColor.b));
+-(CCColorRef) color {
+	return CCColorRefFromCCC4F(_constantColor);
 }
 
--(void) setColor: (ccColor3B) aColor {
-	_constantColor.r = CCColorFloatFromByte(aColor.r);
-	_constantColor.g = CCColorFloatFromByte(aColor.g);
-	_constantColor.b = CCColorFloatFromByte(aColor.b);
+-(void) setColor: (CCColorRef) aColor {
+	ccColor4F c4f = CCC4FFromCCColorRef(aColor);
+	_constantColor.r = c4f.r;
+	_constantColor.g = c4f.g;
+	_constantColor.b = c4f.b;
 }
 
 -(CCOpacity) opacity { return CCOpacityFromGLfloat(_constantColor.a); }
 
 -(void) setOpacity: (CCOpacity) opacity { _constantColor.a = GLfloatFromCCOpacity(opacity); }
 
--(ccColor3B) displayedColor { return self.color; }
+-(CCColorRef) displayedColor { return self.color; }
 
 -(BOOL) isCascadeColorEnabled { return NO; }
 
 -(void) setCascadeColorEnabled:(BOOL)cascadeColorEnabled {}
 
--(void) updateDisplayedColor: (ccColor3B) color {}
+-(void) updateDisplayedColor: (CCColorRef) color {}
 
 -(CCOpacity) displayedOpacity { return self.opacity; }
 

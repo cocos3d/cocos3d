@@ -405,7 +405,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 #pragma mark CCRGBAProtocol and CCBlendProtocol support
 
 /**
- * Implementation of the CCRGBAProtocol color property.
+ * The background color of the scene.
  *
  * Returns the color of the node in the backdrop property, or if there is no backdrop,
  * returns the value of the superclass implementation.
@@ -413,7 +413,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * Setting this property set the color of the node in the backdrop property, but does
  * not propagate the color change to all descendant nodes.
  */
-@property(nonatomic, assign) ccColor3B color;
+@property(nonatomic, assign) CCColorRef color;
 
 /**
  * The opacity of the scene.

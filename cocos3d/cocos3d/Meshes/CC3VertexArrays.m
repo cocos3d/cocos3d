@@ -1133,18 +1133,18 @@ static GLuint lastAssignedVertexArrayTag;
 #pragma mark CCRGBAProtocol support
 
 /** Returns the color of the first vertex. */
--(ccColor3B) color {
-	if (self.vertexCount == 0) return ccBLACK;
-	ccColor4B vtxCol = [self color4BAt: 0];
-	return *(ccColor3B*)&vtxCol;
+-(CCColorRef) color {
+	if (self.vertexCount == 0) return CCColorRefFromCCC4F(kCCC4FBlackTransparent);
+	return CCColorRefFromCCC4B([self color4BAt: 0]);
 }
 
 /** Sets the color of each vertex without changing the individual opacity of each vertex. */
--(void) setColor: (ccColor3B) aColor {
-	GLuint vtxCount = self.vertexCount;
-	for (GLuint vIdx = 0; vIdx < vtxCount; vIdx++) {
-		ccColor4B vtxCol = [self color4BAt: vIdx];
-		[self setColor4B: ccc4(aColor.r, aColor.g, aColor.b, vtxCol.a) at: vIdx];
+-(void) setColor: (CCColorRef) color {
+	ccColor4B c4b = CCC4BFromCCColorRef(color);
+	GLuint vtxCnt = self.vertexCount;
+	for (GLuint vtxIdx = 0; vtxIdx < vtxCnt; vtxIdx++) {
+		c4b.a = [self color4BAt: vtxIdx].a;
+		[self setColor4B: c4b at: vtxIdx];
 	}
 	[self updateGLBuffer];
 }
@@ -1154,11 +1154,12 @@ static GLuint lastAssignedVertexArrayTag;
 
 /** Sets the opacity of each vertex without changing the individual color of each vertex. */
 -(void) setOpacity: (CCOpacity) opacity {
-	GLuint vtxCount = self.vertexCount;
-	for (GLuint vIdx = 0; vIdx < vtxCount; vIdx++) {
-		ccColor4B vtxCol = [self color4BAt: vIdx];
-		vtxCol.a = GLubyteFromCCOpacity(opacity);
-		[self setColor4B: vtxCol at: vIdx];
+	GLubyte alpha = GLubyteFromCCOpacity(opacity);
+	GLuint vtxCnt = self.vertexCount;
+	for (GLuint vtxIdx = 0; vtxIdx < vtxCnt; vtxIdx++) {
+		ccColor4B vtxCol = [self color4BAt: vtxIdx];
+		vtxCol.a = alpha;
+		[self setColor4B: vtxCol at: vtxIdx];
 	}
 	[self updateGLBuffer];
 }

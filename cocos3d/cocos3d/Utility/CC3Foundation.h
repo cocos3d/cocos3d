@@ -52,6 +52,7 @@
 #import "CC3Environment.h"
 #import "CC3Math.h"
 #import "CC3Logging.h"
+#import "CC3CC2Extensions.h"
 #import "ccTypes.h"
 #import <CoreGraphics/CGColor.h>
 
@@ -1989,28 +1990,6 @@ static inline CGRect CGRectFromCC3Viewport(CC3Viewport vp) {
 #pragma mark -
 #pragma mark Color support
 
-#if CC3_CC2_CLASSIC
-
-/** In Cocos2D v1 & v2, opacity is defined as an integer value between 0 and 255. */
-typedef GLubyte CCOpacity;
-#define kCCOpacityFull					255
-#define GLfloatFromCCOpacity(ccOp)		CCColorFloatFromByte(ccOp)
-#define CCOpacityFromGLfloat(glf)		CCColorByteFromFloat(glf)
-#define GLubyteFromCCOpacity(ccOp)		((GLubyte)(ccOp))
-#define CCOpacityFromGLubyte(glub)		((CCOpacity)(glub))
-
-#else
-
-/** In Cocos2D v3 and above, opacity is defined as a float value between 0.0 and 1.0. */
-typedef CGFloat CCOpacity;
-#define kCCOpacityFull					1.0
-#define GLfloatFromCCOpacity(ccOp)		((GLfloat)(ccOp))
-#define CCOpacityFromGLfloat(glf)		((CCOpacity)(glf))
-#define GLubyteFromCCOpacity(ccOp)		CCColorByteFromFloat(ccOp)
-#define CCOpacityFromGLubyte(glub)		((CCOpacity)CCColorFloatFromByte(glub))
-
-#endif	// CC3_CC2_CLASSIC
-
 
 /** Returns a GLfloat between 0 and 1 converted from the specified GLubyte value between 0 and 255. */
 static inline GLfloat CCColorFloatFromByte(GLubyte colorValue) {
@@ -2120,11 +2099,11 @@ static inline ccColor4F CCC4FFromCCC4B(ccColor4B byteColor) {
 }
 
 /** Returns a ccColor4F structure constructed from the specified ccColor3B and opacity. */
-static inline ccColor4F CCC4FFromColorAndOpacity(ccColor3B byteColor, GLubyte opacity) {
+static inline ccColor4F CCC4FFromColorAndOpacity(ccColor3B byteColor, CCOpacity opacity) {
 	return ccc4f(CCColorFloatFromByte(byteColor.r),
 				 CCColorFloatFromByte(byteColor.g),
 				 CCColorFloatFromByte(byteColor.b),
-				 CCColorFloatFromByte(opacity));
+				 GLfloatFromCCOpacity(opacity));
 }
 
 /** Returns a ccColor4F structure constructed from the specified CoreGraphics CGColorRef. */
@@ -2277,6 +2256,11 @@ static inline ccColor4B CCC4BFromCCC4F(ccColor4F floatColor) {
 				CCColorByteFromFloat(floatColor.g),
 				CCColorByteFromFloat(floatColor.b),
 				CCColorByteFromFloat(floatColor.a));
+}
+
+/** Returns a ccColor4B structure constructed from the specified ccColor3B and opacity. */
+static inline ccColor4B CCC4BFromColorAndOpacity(ccColor3B byteColor, CCOpacity opacity) {
+	return ccc4(byteColor.r, byteColor.g, byteColor.b, GLubyteFromCCOpacity(opacity));
 }
 
 /**

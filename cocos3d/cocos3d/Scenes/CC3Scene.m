@@ -179,9 +179,9 @@
 
 #pragma mark CCRGBAProtocol and CCBlendProtocol support
 
--(ccColor3B) color { return _backdrop ? _backdrop.color : super.color; }
+-(CCColorRef) color { return _backdrop ? _backdrop.color : super.color; }
 
--(void) setColor: (ccColor3B) color { _backdrop.color = color; }
+-(void) setColor: (CCColorRef) color { _backdrop.color = color; }
 
 -(CCOpacity) opacity { return _backdrop ? _backdrop.opacity : super.opacity; }
 

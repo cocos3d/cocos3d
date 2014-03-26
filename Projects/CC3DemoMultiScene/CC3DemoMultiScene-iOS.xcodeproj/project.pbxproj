@@ -113,11 +113,6 @@
 		A946375A18898F9D0097E355 /* Images-iOS.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A946375918898F9D0097E355 /* Images-iOS.xcassets */; };
 		A946375B188990B90097E355 /* libcocos3d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A904C55918888EC50070C47F /* libcocos3d.a */; };
 		A946375C188990BE0097E355 /* libcocos2d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A9D4F67A18888F9B00382DDC /* libcocos2d.a */; };
-		A946377718899B250097E355 /* CC3DemoMashUpLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = A946376718899B250097E355 /* CC3DemoMashUpLayer.m */; };
-		A946377818899B250097E355 /* CC3DemoMashUpScene.m in Sources */ = {isa = PBXBuildFile; fileRef = A946376918899B250097E355 /* CC3DemoMashUpScene.m */; };
-		A946377C18899B250097E355 /* HUDLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = A946377218899B250097E355 /* HUDLayer.m */; };
-		A946377D18899B250097E355 /* HUDScene.m in Sources */ = {isa = PBXBuildFile; fileRef = A946377418899B250097E355 /* HUDScene.m */; };
-		A946377E18899B250097E355 /* Models.m in Sources */ = {isa = PBXBuildFile; fileRef = A946377618899B250097E355 /* Models.m */; };
 		A9A9C43518886E8000659FAC /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9A9C43418886E8000659FAC /* Foundation.framework */; };
 		A9A9C43718886E8000659FAC /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9A9C43618886E8000659FAC /* CoreGraphics.framework */; };
 		A9A9C43918886E8000659FAC /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9A9C43818886E8000659FAC /* UIKit.framework */; };
@@ -177,6 +172,12 @@
 		A9BA3F1D18D21DEF0077B14E /* CC3Texturable.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3EEF18D21DEF0077B14E /* CC3Texturable.vsh */; };
 		A9BA3F1E18D21DEF0077B14E /* CC3TexturableBones.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3EF018D21DEF0077B14E /* CC3TexturableBones.vsh */; };
 		A9BA3F1F18D21DEF0077B14E /* CC3TexturableRigidBones.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3EF118D21DEF0077B14E /* CC3TexturableRigidBones.vsh */; };
+		A9CCA3AB18E34FAE00DDDBDC /* CC3DemoMashUpLayer-Classic.m in Sources */ = {isa = PBXBuildFile; fileRef = A9CCA39F18E34FAE00DDDBDC /* CC3DemoMashUpLayer-Classic.m */; };
+		A9CCA3AC18E34FAE00DDDBDC /* CC3DemoMashUpLayer-v3.m in Sources */ = {isa = PBXBuildFile; fileRef = A9CCA3A118E34FAE00DDDBDC /* CC3DemoMashUpLayer-v3.m */; };
+		A9CCA3AD18E34FAE00DDDBDC /* CC3DemoMashUpScene.m in Sources */ = {isa = PBXBuildFile; fileRef = A9CCA3A418E34FAE00DDDBDC /* CC3DemoMashUpScene.m */; };
+		A9CCA3AE18E34FAE00DDDBDC /* HUDLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = A9CCA3A618E34FAE00DDDBDC /* HUDLayer.m */; };
+		A9CCA3AF18E34FAE00DDDBDC /* HUDScene.m in Sources */ = {isa = PBXBuildFile; fileRef = A9CCA3A818E34FAE00DDDBDC /* HUDScene.m */; };
+		A9CCA3B018E34FAE00DDDBDC /* Models.m in Sources */ = {isa = PBXBuildFile; fileRef = A9CCA3AA18E34FAE00DDDBDC /* Models.m */; };
 		A9D4F69A1889741900382DDC /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = A9D4F68E1889741900382DDC /* AppDelegate.m */; };
 		A9D4F69B1889741900382DDC /* Main_iPad.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A9D4F68F1889741900382DDC /* Main_iPad.storyboard */; };
 		A9D4F69E1889741900382DDC /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = A9D4F6941889741900382DDC /* InfoPlist.strings */; };
@@ -340,16 +341,6 @@
 		A92B423518BE3EAF0026B00F /* Joystick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Joystick.h; sourceTree = "<group>"; };
 		A92B423618BE3EAF0026B00F /* Joystick.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Joystick.m; sourceTree = "<group>"; };
 		A946375918898F9D0097E355 /* Images-iOS.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = "Images-iOS.xcassets"; path = "../Common/Images-iOS.xcassets"; sourceTree = "<group>"; };
-		A946376618899B250097E355 /* CC3DemoMashUpLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3DemoMashUpLayer.h; sourceTree = "<group>"; };
-		A946376718899B250097E355 /* CC3DemoMashUpLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3DemoMashUpLayer.m; sourceTree = "<group>"; };
-		A946376818899B250097E355 /* CC3DemoMashUpScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3DemoMashUpScene.h; sourceTree = "<group>"; };
-		A946376918899B250097E355 /* CC3DemoMashUpScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3DemoMashUpScene.m; sourceTree = "<group>"; };
-		A946377118899B250097E355 /* HUDLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HUDLayer.h; sourceTree = "<group>"; };
-		A946377218899B250097E355 /* HUDLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HUDLayer.m; sourceTree = "<group>"; };
-		A946377318899B250097E355 /* HUDScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HUDScene.h; sourceTree = "<group>"; };
-		A946377418899B250097E355 /* HUDScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HUDScene.m; sourceTree = "<group>"; };
-		A946377518899B250097E355 /* Models.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Models.h; sourceTree = "<group>"; };
-		A946377618899B250097E355 /* Models.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Models.m; sourceTree = "<group>"; };
 		A9A9C43118886E8000659FAC /* CC3DemoMultiScene.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CC3DemoMultiScene.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A9A9C43418886E8000659FAC /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		A9A9C43618886E8000659FAC /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -416,6 +407,19 @@
 		A9BA3EEF18D21DEF0077B14E /* CC3Texturable.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3Texturable.vsh; sourceTree = "<group>"; };
 		A9BA3EF018D21DEF0077B14E /* CC3TexturableBones.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3TexturableBones.vsh; sourceTree = "<group>"; };
 		A9BA3EF118D21DEF0077B14E /* CC3TexturableRigidBones.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3TexturableRigidBones.vsh; sourceTree = "<group>"; };
+		A9CCA39E18E34FAE00DDDBDC /* CC3DemoMashUpLayer-Classic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CC3DemoMashUpLayer-Classic.h"; sourceTree = "<group>"; };
+		A9CCA39F18E34FAE00DDDBDC /* CC3DemoMashUpLayer-Classic.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "CC3DemoMashUpLayer-Classic.m"; sourceTree = "<group>"; };
+		A9CCA3A018E34FAE00DDDBDC /* CC3DemoMashUpLayer-v3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CC3DemoMashUpLayer-v3.h"; sourceTree = "<group>"; };
+		A9CCA3A118E34FAE00DDDBDC /* CC3DemoMashUpLayer-v3.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "CC3DemoMashUpLayer-v3.m"; sourceTree = "<group>"; };
+		A9CCA3A218E34FAE00DDDBDC /* CC3DemoMashUpLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3DemoMashUpLayer.h; sourceTree = "<group>"; };
+		A9CCA3A318E34FAE00DDDBDC /* CC3DemoMashUpScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3DemoMashUpScene.h; sourceTree = "<group>"; };
+		A9CCA3A418E34FAE00DDDBDC /* CC3DemoMashUpScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3DemoMashUpScene.m; sourceTree = "<group>"; };
+		A9CCA3A518E34FAE00DDDBDC /* HUDLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HUDLayer.h; sourceTree = "<group>"; };
+		A9CCA3A618E34FAE00DDDBDC /* HUDLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HUDLayer.m; sourceTree = "<group>"; };
+		A9CCA3A718E34FAE00DDDBDC /* HUDScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HUDScene.h; sourceTree = "<group>"; };
+		A9CCA3A818E34FAE00DDDBDC /* HUDScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HUDScene.m; sourceTree = "<group>"; };
+		A9CCA3A918E34FAE00DDDBDC /* Models.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Models.h; sourceTree = "<group>"; };
+		A9CCA3AA18E34FAE00DDDBDC /* Models.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Models.m; sourceTree = "<group>"; };
 		A9D4F68D1889741900382DDC /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		A9D4F68E1889741900382DDC /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		A9D4F6901889741900382DDC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main_iPad.storyboard; sourceTree = "<group>"; };
@@ -645,29 +649,11 @@
 			path = ../Common/Code/Controls;
 			sourceTree = "<group>";
 		};
-		A946376518899B250097E355 /* CC3DemoMashUp */ = {
-			isa = PBXGroup;
-			children = (
-				A946376618899B250097E355 /* CC3DemoMashUpLayer.h */,
-				A946376718899B250097E355 /* CC3DemoMashUpLayer.m */,
-				A946376818899B250097E355 /* CC3DemoMashUpScene.h */,
-				A946376918899B250097E355 /* CC3DemoMashUpScene.m */,
-				A946377118899B250097E355 /* HUDLayer.h */,
-				A946377218899B250097E355 /* HUDLayer.m */,
-				A946377318899B250097E355 /* HUDScene.h */,
-				A946377418899B250097E355 /* HUDScene.m */,
-				A946377518899B250097E355 /* Models.h */,
-				A946377618899B250097E355 /* Models.m */,
-			);
-			name = CC3DemoMashUp;
-			path = ../CC3DemoMashUp/CC3DemoMashUp/Classes;
-			sourceTree = "<group>";
-		};
 		A9A9C42818886E8000659FAC = {
 			isa = PBXGroup;
 			children = (
+				A9CCA39D18E34FAE00DDDBDC /* CC3DemoMashUp */,
 				A9AC656D189175FC00EC5462 /* CC3Demo3DTiles */,
-				A946376518899B250097E355 /* CC3DemoMashUp */,
 				A9AC65511891706500EC5462 /* CC3Performance */,
 				A92B423018BE3EAF0026B00F /* Controls */,
 				A9D4F68C1889741900382DDC /* iOS Support */,
@@ -817,6 +803,27 @@
 				A9BA3EF118D21DEF0077B14E /* CC3TexturableRigidBones.vsh */,
 			);
 			path = VertexShaders;
+			sourceTree = "<group>";
+		};
+		A9CCA39D18E34FAE00DDDBDC /* CC3DemoMashUp */ = {
+			isa = PBXGroup;
+			children = (
+				A9CCA39E18E34FAE00DDDBDC /* CC3DemoMashUpLayer-Classic.h */,
+				A9CCA39F18E34FAE00DDDBDC /* CC3DemoMashUpLayer-Classic.m */,
+				A9CCA3A018E34FAE00DDDBDC /* CC3DemoMashUpLayer-v3.h */,
+				A9CCA3A118E34FAE00DDDBDC /* CC3DemoMashUpLayer-v3.m */,
+				A9CCA3A218E34FAE00DDDBDC /* CC3DemoMashUpLayer.h */,
+				A9CCA3A318E34FAE00DDDBDC /* CC3DemoMashUpScene.h */,
+				A9CCA3A418E34FAE00DDDBDC /* CC3DemoMashUpScene.m */,
+				A9CCA3A518E34FAE00DDDBDC /* HUDLayer.h */,
+				A9CCA3A618E34FAE00DDDBDC /* HUDLayer.m */,
+				A9CCA3A718E34FAE00DDDBDC /* HUDScene.h */,
+				A9CCA3A818E34FAE00DDDBDC /* HUDScene.m */,
+				A9CCA3A918E34FAE00DDDBDC /* Models.h */,
+				A9CCA3AA18E34FAE00DDDBDC /* Models.m */,
+			);
+			name = CC3DemoMashUp;
+			path = ../CC3DemoMashUp/CC3DemoMashUp/Classes;
 			sourceTree = "<group>";
 		};
 		A9D4F67418888F9B00382DDC /* Products */ = {
@@ -1098,19 +1105,20 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A946377D18899B250097E355 /* HUDScene.m in Sources */,
-				A946377C18899B250097E355 /* HUDLayer.m in Sources */,
 				A9AC657E189175FC00EC5462 /* MainLayer.m in Sources */,
-				A946377718899B250097E355 /* CC3DemoMashUpLayer.m in Sources */,
 				A9AC65641891706500EC5462 /* NodeGrid.m in Sources */,
 				A9AC65601891706500EC5462 /* CC3PerformanceScene.m in Sources */,
-				A946377818899B250097E355 /* CC3DemoMashUpScene.m in Sources */,
-				A946377E18899B250097E355 /* Models.m in Sources */,
+				A9CCA3AE18E34FAE00DDDBDC /* HUDLayer.m in Sources */,
+				A9CCA3AB18E34FAE00DDDBDC /* CC3DemoMashUpLayer-Classic.m in Sources */,
 				A9AC6580189175FC00EC5462 /* TileScene.m in Sources */,
 				A92B423918BE3EAF0026B00F /* Joystick.m in Sources */,
+				A9CCA3B018E34FAE00DDDBDC /* Models.m in Sources */,
+				A9CCA3AD18E34FAE00DDDBDC /* CC3DemoMashUpScene.m in Sources */,
 				A92B423818BE3EAF0026B00F /* CCNodeExtensions.m in Sources */,
 				A9AC657F189175FC00EC5462 /* TileLayer.m in Sources */,
+				A9CCA3AF18E34FAE00DDDBDC /* HUDScene.m in Sources */,
 				A9D4F6A01889741900382DDC /* main.m in Sources */,
+				A9CCA3AC18E34FAE00DDDBDC /* CC3DemoMashUpLayer-v3.m in Sources */,
 				A9AC655F1891706500EC5462 /* CC3PerformanceLayer.m in Sources */,
 				A92B423718BE3EAF0026B00F /* CCNodeAdornments.m in Sources */,
 				A9D4F6A11889741900382DDC /* MainViewController.m in Sources */,

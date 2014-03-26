@@ -610,7 +610,7 @@
 }
 
 /** The color used to display the bounding volume. */
--(ccColor3B) displayNodeColor { return ccWHITE; }
+-(CCColorRef) displayNodeColor { return CCColorRefFromCCC4F(kCCC4FWhite); }
 
 /** The opacity at which to display the bounding volume. */
 -(CCOpacity) displayNodeOpacity { return (kCCOpacityFull * 0.25); }	// 25% opacity
@@ -874,7 +874,7 @@
 
 -(NSString*) displayNodeNameSuffix { return @"BV-Sphere"; }
 
--(ccColor3B) displayNodeColor { return ccMAGENTA; }		// Magenta
+-(CCColorRef) displayNodeColor { return CCColorRefFromCCC4F(kCCC4FMagenta); }		// Magenta
 
 // Magenta is faint...increase to 33% opacity
 -(CCOpacity) displayNodeOpacity { return (kCCOpacityFull * kCC3OneThird); }
@@ -1050,7 +1050,7 @@
 
 -(NSString*) displayNodeNameSuffix { return @"BV-Box"; }
 
--(ccColor3B) displayNodeColor { return ccc3(0,255,255); }	// Cyan
+-(CCColorRef) displayNodeColor { return CCColorRefFromCCC4F(kCCC4FCyan); }	// Cyan
 
 // Cyan is heavy...reduce to 25% opacity
 -(CCOpacity) displayNodeOpacity { return (kCCOpacityFull * 0.25); }

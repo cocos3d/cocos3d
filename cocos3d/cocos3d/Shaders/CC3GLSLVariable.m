@@ -456,12 +456,6 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 	[self setIntVector4: CC3IntVector4Make((bX != NO), (bY != NO), (bZ != NO), (bW != NO)) at: index];
 }
 
--(void) setColor: (ccColor3B) value { [self setColor: value at: 0]; }
-
--(void) setColor: (ccColor3B) value at: (GLuint) index {
-	[self setColor4B: ccc4(value.r, value.g, value.b, 255) at: index];
-}
-
 -(void) setColor4B: (ccColor4B) value { [self setColor4B: value at: 0]; }
 
 -(void) setColor4B: (ccColor4B) value at: (GLuint) index {

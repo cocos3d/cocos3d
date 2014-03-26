@@ -8,9 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		506EDBA5102F4C9F00A389B3 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 506EDBA4102F4C9F00A389B3 /* AVFoundation.framework */; };
-		A92B422A18BE3E960026B00F /* CCNodeAdornments.m in Sources */ = {isa = PBXBuildFile; fileRef = A92B422518BE3E960026B00F /* CCNodeAdornments.m */; };
-		A92B422B18BE3E960026B00F /* CCNodeExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = A92B422718BE3E960026B00F /* CCNodeExtensions.m */; };
-		A92B422C18BE3E960026B00F /* Joystick.m in Sources */ = {isa = PBXBuildFile; fileRef = A92B422918BE3E960026B00F /* Joystick.m */; };
 		A92BD9D218E127DC003D1F64 /* libcocos2d-chipmunk.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A92B422218BE3E8E0026B00F /* libcocos2d-chipmunk.a */; };
 		A92DA7F71427B7870051AFFA /* ArrowUpButton48x48.png in Resources */ = {isa = PBXBuildFile; fileRef = A92DA7D41427B7870051AFFA /* ArrowUpButton48x48.png */; };
 		A92DA7F91427B7870051AFFA /* ButtonRing48x48.png in Resources */ = {isa = PBXBuildFile; fileRef = A92DA7D61427B7870051AFFA /* ButtonRing48x48.png */; };
@@ -110,6 +107,9 @@
 		A9BC8FD5189C4A7D000FB28C /* TestRedTexture.ppng in Resources */ = {isa = PBXBuildFile; fileRef = A9BC8FD4189C4A7C000FB28C /* TestRedTexture.ppng */; };
 		A9BC8FDA189C6A10000FB28C /* TestRedTextureShort.png in Resources */ = {isa = PBXBuildFile; fileRef = A9BC8FD8189C6A10000FB28C /* TestRedTextureShort.png */; };
 		A9BC8FDB189C6A10000FB28C /* TestRedTextureShort.ppng in Resources */ = {isa = PBXBuildFile; fileRef = A9BC8FD9189C6A10000FB28C /* TestRedTextureShort.ppng */; };
+		A9CCA39A18E34F7D00DDDBDC /* CCNodeAdornments.m in Sources */ = {isa = PBXBuildFile; fileRef = A9CCA39518E34F7D00DDDBDC /* CCNodeAdornments.m */; };
+		A9CCA39B18E34F7D00DDDBDC /* CCNodeExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = A9CCA39718E34F7D00DDDBDC /* CCNodeExtensions.m */; };
+		A9CCA39C18E34F7D00DDDBDC /* Joystick.m in Sources */ = {isa = PBXBuildFile; fileRef = A9CCA39918E34F7D00DDDBDC /* Joystick.m */; };
 		DC6640030F83B3EA000B3E49 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC6640020F83B3EA000B3E49 /* AudioToolbox.framework */; };
 		DC6640050F83B3EA000B3E49 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC6640040F83B3EA000B3E49 /* OpenAL.framework */; };
 		DCCBF1B70F6022AE0040855A /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DCCBF1B60F6022AE0040855A /* CoreGraphics.framework */; };
@@ -167,12 +167,6 @@
 /* Begin PBXFileReference section */
 		1D6058910D05DD3D006BFB54 /* CC3Performance.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CC3Performance.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		506EDBA4102F4C9F00A389B3 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
-		A92B422418BE3E960026B00F /* CCNodeAdornments.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCNodeAdornments.h; sourceTree = "<group>"; };
-		A92B422518BE3E960026B00F /* CCNodeAdornments.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CCNodeAdornments.m; sourceTree = "<group>"; };
-		A92B422618BE3E960026B00F /* CCNodeExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCNodeExtensions.h; sourceTree = "<group>"; };
-		A92B422718BE3E960026B00F /* CCNodeExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CCNodeExtensions.m; sourceTree = "<group>"; };
-		A92B422818BE3E960026B00F /* Joystick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Joystick.h; sourceTree = "<group>"; };
-		A92B422918BE3E960026B00F /* Joystick.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Joystick.m; sourceTree = "<group>"; };
 		A92DA7D41427B7870051AFFA /* ArrowUpButton48x48.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ArrowUpButton48x48.png; sourceTree = "<group>"; };
 		A92DA7D61427B7870051AFFA /* ButtonRing48x48.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ButtonRing48x48.png; sourceTree = "<group>"; };
 		A92DA7D71427B7870051AFFA /* cocos3dMascot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cocos3dMascot.png; sourceTree = "<group>"; };
@@ -276,6 +270,12 @@
 		A9BC8FD4189C4A7C000FB28C /* TestRedTexture.ppng */ = {isa = PBXFileReference; lastKnownFileType = file; name = TestRedTexture.ppng; path = "../../../../../../Models & Textures/TestRedTexture.ppng"; sourceTree = "<group>"; };
 		A9BC8FD8189C6A10000FB28C /* TestRedTextureShort.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = TestRedTextureShort.png; path = "../../../../../../Models & Textures/TestRedTextureShort.png"; sourceTree = "<group>"; };
 		A9BC8FD9189C6A10000FB28C /* TestRedTextureShort.ppng */ = {isa = PBXFileReference; lastKnownFileType = file; name = TestRedTextureShort.ppng; path = "../../../../../../Models & Textures/TestRedTextureShort.ppng"; sourceTree = "<group>"; };
+		A9CCA39418E34F7D00DDDBDC /* CCNodeAdornments.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCNodeAdornments.h; sourceTree = "<group>"; };
+		A9CCA39518E34F7D00DDDBDC /* CCNodeAdornments.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CCNodeAdornments.m; sourceTree = "<group>"; };
+		A9CCA39618E34F7D00DDDBDC /* CCNodeExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCNodeExtensions.h; sourceTree = "<group>"; };
+		A9CCA39718E34F7D00DDDBDC /* CCNodeExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CCNodeExtensions.m; sourceTree = "<group>"; };
+		A9CCA39818E34F7D00DDDBDC /* Joystick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Joystick.h; sourceTree = "<group>"; };
+		A9CCA39918E34F7D00DDDBDC /* Joystick.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Joystick.m; sourceTree = "<group>"; };
 		DC6640020F83B3EA000B3E49 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		DC6640040F83B3EA000B3E49 /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
 		DCCBF1B60F6022AE0040855A /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -319,6 +319,7 @@
 			isa = PBXGroup;
 			children = (
 				A9473727140E5983006F410C /* Classes */,
+				A9CCA39318E34F7D00DDDBDC /* Controls */,
 				A946373F18898D530097E355 /* iOS Support */,
 				A92DA7D21427B7870051AFFA /* Resources */,
 				A9BA3E5E18D21DC40077B14E /* cocos3d-GLSL */,
@@ -345,20 +346,6 @@
 				506EDBA4102F4C9F00A389B3 /* AVFoundation.framework */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		A92B422318BE3E960026B00F /* Controls */ = {
-			isa = PBXGroup;
-			children = (
-				A92B422418BE3E960026B00F /* CCNodeAdornments.h */,
-				A92B422518BE3E960026B00F /* CCNodeAdornments.m */,
-				A92B422618BE3E960026B00F /* CCNodeExtensions.h */,
-				A92B422718BE3E960026B00F /* CCNodeExtensions.m */,
-				A92B422818BE3E960026B00F /* Joystick.h */,
-				A92B422918BE3E960026B00F /* Joystick.m */,
-			);
-			name = Controls;
-			path = ../../../Common/Code/Controls;
 			sourceTree = "<group>";
 		};
 		A92DA7D21427B7870051AFFA /* Resources */ = {
@@ -422,7 +409,6 @@
 				A947372D140E5983006F410C /* CC3PerformanceScene.m */,
 				A9473735140E5983006F410C /* NodeGrid.h */,
 				A9473736140E5983006F410C /* NodeGrid.m */,
-				A92B422318BE3E960026B00F /* Controls */,
 			);
 			name = Classes;
 			path = CC3Performance/Classes;
@@ -574,6 +560,20 @@
 				A9BA3E9018D21DC40077B14E /* CC3TexturableRigidBones.vsh */,
 			);
 			path = VertexShaders;
+			sourceTree = "<group>";
+		};
+		A9CCA39318E34F7D00DDDBDC /* Controls */ = {
+			isa = PBXGroup;
+			children = (
+				A9CCA39418E34F7D00DDDBDC /* CCNodeAdornments.h */,
+				A9CCA39518E34F7D00DDDBDC /* CCNodeAdornments.m */,
+				A9CCA39618E34F7D00DDDBDC /* CCNodeExtensions.h */,
+				A9CCA39718E34F7D00DDDBDC /* CCNodeExtensions.m */,
+				A9CCA39818E34F7D00DDDBDC /* Joystick.h */,
+				A9CCA39918E34F7D00DDDBDC /* Joystick.m */,
+			);
+			name = Controls;
+			path = ../Common/Code/Controls;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -771,12 +771,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A92B422A18BE3E960026B00F /* CCNodeAdornments.m in Sources */,
-				A92B422B18BE3E960026B00F /* CCNodeExtensions.m in Sources */,
+				A9CCA39A18E34F7D00DDDBDC /* CCNodeAdornments.m in Sources */,
+				A9CCA39B18E34F7D00DDDBDC /* CCNodeExtensions.m in Sources */,
 				A946374518898D530097E355 /* CC3PerformanceAppDelegate.m in Sources */,
 				A947374C140E5983006F410C /* CC3PerformanceLayer.m in Sources */,
 				A947374D140E5983006F410C /* CC3PerformanceScene.m in Sources */,
-				A92B422C18BE3E960026B00F /* Joystick.m in Sources */,
+				A9CCA39C18E34F7D00DDDBDC /* Joystick.m in Sources */,
 				A946374818898D530097E355 /* main.m in Sources */,
 				A9473751140E5983006F410C /* NodeGrid.m in Sources */,
 			);

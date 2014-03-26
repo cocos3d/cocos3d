@@ -112,25 +112,32 @@
 #pragma mark CCRGBAProtocol support
 
 /** Returns diffuse color. */
--(ccColor3B) color { return CCC3BFromCCC4F(_diffuseColor); }
+-(CCColorRef) color { return CCColorRefFromCCC4F(_diffuseColor); }
 
 // Set both diffuse and ambient colors, retaining the alpha of each
--(void) setColor: (ccColor3B) color {
-	self.ambientColor = CCC4FFromColorAndOpacity(color, _ambientColor.a);
-	self.diffuseColor = CCC4FFromColorAndOpacity(color, _diffuseColor.a);
+-(void) setColor: (CCColorRef) color {
+	ccColor4F c4f = CCC4FFromCCColorRef(color);
+	
+	_ambientColor.r = c4f.r;
+	_ambientColor.g = c4f.g;
+	_ambientColor.b = c4f.b;
+	
+	_diffuseColor.r = c4f.r;
+	_diffuseColor.g = c4f.g;
+	_diffuseColor.b = c4f.b;
 
 	super.color = color;
 }
 
 /** Returns diffuse alpha. */
--(GLubyte) opacity { return CCColorByteFromFloat(_diffuseColor.a); }
+-(CCOpacity) opacity { return CCOpacityFromGLfloat(_diffuseColor.a); }
 
 /** Set opacity of all colors, retaining the colors of each. */
--(void) setOpacity: (GLubyte) opacity {
-	GLfloat af = CCColorFloatFromByte(opacity);
-	_ambientColor.a = af;
-	_diffuseColor.a = af;
-	_specularColor.a = af;
+-(void) setOpacity: (CCOpacity) opacity {
+	GLfloat alpha = GLfloatFromCCOpacity(opacity);
+	_ambientColor.a = alpha;
+	_diffuseColor.a = alpha;
+	_specularColor.a = alpha;
 
 	super.opacity = opacity;
 }

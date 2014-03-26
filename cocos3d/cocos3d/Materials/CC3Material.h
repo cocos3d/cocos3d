@@ -445,12 +445,12 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
  * Setting the value of this property does not change the alpha values of any of the material colors. 
  *
  * The state of this property is also affected by setting the opacity property. As a convenience,
- * setting the opacity property to a value less than 255 will automatically cause this isOpaque
- * property to be set to NO, which, as described above, will also affect the sourceBlend and
+ * setting the opacity property to a value less than kCCOpacityFull will automatically cause this
+ * isOpaque property to be set to NO, which, as described above, will also affect the sourceBlend and
  * destinationBlend properties, so that the translucency will be blended correctly.
  *
- * Setting the opacity property to 255 will automatically cause this isOpaque property to be set to
- * YES (affecting the sourceBlend and destinationBlend properties), unless the shouldBlendAtFullOpacity
+ * Setting the opacity property to kCCOpacityFull will automatically cause this isOpaque property to be set
+ * to YES (affecting the sourceBlend and destinationBlend properties), unless the shouldBlendAtFullOpacity 
  * property is set to YES, in which case the isOpaque property will be left set to NO.
  *
  * Setting this property can be thought of as a convenient way to switch between the two most
@@ -469,18 +469,18 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
  * Indicates whether blending should be applied even when the material is at full opacity.
  *
  * If this property is set to NO, when the opacity property of this material is set to full
- * opacity (255), the isOpaque property will be set to YES, which in turn will set the
- * sourceBlend property to GL_ONE and the destinationBlend property to GL_ZERO, effectively 
+ * opacity (kCCOpacityFull), the isOpaque property will be set to YES, which in turn will set
+ * the sourceBlend property to GL_ONE and the destinationBlend property to GL_ZERO, effectively
  * turning blending off. This allows a node that is opaque to be faded, but when fading is
  * complete, and full opacity is restored, the node will be set fully opaque, which improves
  * performance and the affects the rendering order of the node relative to other nodes.
  *
  * If this property is set to YES, when the opacity property of this material is set to full
- * opacity (255), the isOpaque property will be set to NO, which will leave the sourceBlend
- * and destination properties at their current values, generally leaving blending enabled.
- * This is useful when using fading on a material that contains textures that in turn contain
- * transparency. When this material reaches full opacity, blending will be left enabled, and
- * the transparent sections of the textures will continue to be rendered correctly.
+ * opacity (kCCOpacityFull), the isOpaque property will be set to NO, which will leave the
+ * sourceBlend and destination properties at their current values, generally leaving blending 
+ * enabled. This is useful when using fading on a material that contains textures that in turn
+ * contain transparency. When this material reaches full opacity, blending will be left enabled, 
+ * and the transparent sections of the textures will continue to be rendered correctly.
  *
  * The initial value of this property is NO. Whenever a texture is added to, or removed from,
  * this material, the value is set to the value of the hasTextureAlpha property, reflecting
@@ -577,39 +577,36 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
 #pragma mark CCRGBAProtocol and CCBlendProtocol support
 
 /**
- * Implementation of the CCRGBAProtocol color property.
+ * The diffuse color of this material, returned as a CCColorRef.
  *
- * Querying this property returns the RGB components of the material's diffuseColor property,
- * converted from the floating point range (0 to 1), to the byte range (0 to 255).
+ * Querying this property returns the RGB components of the material's diffuseColor property.
  *
- * When setting this property, the RGB values are each converted to a floating point number
- * between 0 and 1, and are set into both the ambientColor and diffuseColor properties.
- * The alpha of each of those properties remains the same.
+ * When setting this property, the RGB values are each set into both the ambientColor and 
+ * diffuseColor properties. The alpha of each of those properties remains the same.
  */
-@property(nonatomic, assign) ccColor3B color;
+@property(nonatomic, assign) CCColorRef color;
 
 /**
  * The opacity of this material, as described by the alpha component of the diffuse color of this material.
  *
- * Querying this property returns the alpha component of the diffuseColor property, converted
- * from the floating point range (0 to 1) to the byte range (0 to 255).
+ * Querying this property returns the alpha component of the diffuseColor property.
  *
  * When setting this property, the value is converted to a floating point number between 0 and 1,
  * and is set into the alpha component of the ambientColor, diffuseColor, specularColor, and
  * emissionColor properties. The RGB components of each of those properties remains unchanged.
  *
  * Changing this property also affects the isOpaque property. As a convenience, setting this opacity
- * property to a value less than 255 will automatically cause the isOpaque property to be set to NO,
- * which will also affect the sourceBlend and destinationBlend properties, so that the translucency
- * will be blended correctly. See the notes of the isOpaque property for more information.
+ * property to a value less than kCCOpacityFull will automatically cause the isOpaque property to be 
+ * set to NO, which will also affect the sourceBlend and destinationBlend properties, so that the 
+ * translucency will be blended correctly. See the notes of the isOpaque property for more information.
  *
- * However, setting this opacity property to 255 will NOT automatically cause the isOpaque property
- * to be set to YES. Even if the opacity of the material is full, the texture may contain translucency,
- * which would be ignored if the isOpaque property were to be set to YES.
+ * However, setting this opacity property to kCCOpacityFull will NOT automatically cause the isOpaque 
+ * property to be set to YES. Even if the opacity of the material is full, the texture may contain 
+ * translucency, which would be ignored if the isOpaque property were to be set to YES.
  * 
- * Conversely, setting the value of this opacity property to 255 will automatically cause the isOpaque
- * property to be set to YES, which will affect the sourceBlen and destinationBlend properties so that
- * blending will be turned off. See the notes of the isOpaque property for more information.
+ * Conversely, setting the value of this opacity property to kCCOpacityFull will automatically cause the
+ * isOpaque property to be set to YES, which will affect the sourceBlen and destinationBlend properties
+ * so that blending will be turned off. See the notes of the isOpaque property for more information.
  *
  * Setting this property can be thought of as a convenient way to make simple changes to the opacity
  * of a material, using the most common types of blending combinations. For finer control of blending,

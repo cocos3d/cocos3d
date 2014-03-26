@@ -1220,7 +1220,7 @@
 #pragma mark CCRGBAProtocol and CCBlendProtocol support
 
 /**
- * Implementation of the CCRGBAProtocol color property.
+ * The color of the vertices of this mesh.
  *
  * Querying this property returns the RGB components of the first vertex.
  *
@@ -1228,7 +1228,7 @@
  * without affecting the opacity value of each individual vertex. If the content of this vertex
  * array has been copied to a GL buffer, that buffer is automatically updated.
  */
-@property(nonatomic, assign) ccColor3B color;
+@property(nonatomic, assign) CCColorRef color;
 
 /**
  * The opacity of the vertices in this mesh.

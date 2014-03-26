@@ -23,12 +23,9 @@
 		A924D160171307500061DDA0 /* tex_arm.pvr in Resources */ = {isa = PBXBuildFile; fileRef = A924D15D171307500061DDA0 /* tex_arm.pvr */; };
 		A924D161171307500061DDA0 /* tex_base.bmp in Resources */ = {isa = PBXBuildFile; fileRef = A924D15E171307500061DDA0 /* tex_base.bmp */; };
 		A924D162171307500061DDA0 /* tex_base.pvr in Resources */ = {isa = PBXBuildFile; fileRef = A924D15F171307500061DDA0 /* tex_base.pvr */; };
-		A92B424318BE3ED60026B00F /* CCNodeAdornments.m in Sources */ = {isa = PBXBuildFile; fileRef = A92B423E18BE3ED60026B00F /* CCNodeAdornments.m */; };
-		A92B424418BE3ED60026B00F /* CCNodeExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = A92B424018BE3ED60026B00F /* CCNodeExtensions.m */; };
-		A92B424518BE3ED60026B00F /* Joystick.m in Sources */ = {isa = PBXBuildFile; fileRef = A92B424218BE3ED60026B00F /* Joystick.m */; };
 		A92BD9D018E127BD003D1F64 /* libcocos2d-chipmunk.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A92BD9CF18E127AA003D1F64 /* libcocos2d-chipmunk.a */; };
-		A968802D17A72580007FA5F0 /* libcocos2d-library-OSX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A968802817A7251E007FA5F0 /* libcocos2d-library-OSX.a */; };
-		A968802E17A72580007FA5F0 /* libcocos3d-library-OSX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A968802217A72516007FA5F0 /* libcocos3d-library-OSX.a */; };
+		A968802D17A72580007FA5F0 /* libcocos2d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A968802817A7251E007FA5F0 /* libcocos2d.a */; };
+		A968802E17A72580007FA5F0 /* libcocos3d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A968802217A72516007FA5F0 /* libcocos3d.a */; };
 		A96E0CCE170DC8060044CA2A /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A96E0CCD170DC8060044CA2A /* QuartzCore.framework */; };
 		A96E0CD0170DC8060044CA2A /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A96E0CCF170DC8060044CA2A /* OpenGL.framework */; };
 		A96E0CD2170DC8060044CA2A /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A96E0CD1170DC8060044CA2A /* OpenAL.framework */; };
@@ -79,11 +76,6 @@
 		A9742E01170DD72B001FD5A2 /* Stamp.png in Resources */ = {isa = PBXBuildFile; fileRef = A9742DCB170DD72B001FD5A2 /* Stamp.png */; };
 		A9742E03170DD72B001FD5A2 /* SunlightButton48x48.png in Resources */ = {isa = PBXBuildFile; fileRef = A9742DCD170DD72B001FD5A2 /* SunlightButton48x48.png */; };
 		A9742E07170DD72B001FD5A2 /* ZoomButton48x48.png in Resources */ = {isa = PBXBuildFile; fileRef = A9742DD1170DD72B001FD5A2 /* ZoomButton48x48.png */; };
-		A9743101170DD7BF001FD5A2 /* CC3DemoMashUpLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = A97430F1170DD7BF001FD5A2 /* CC3DemoMashUpLayer.m */; };
-		A9743102170DD7BF001FD5A2 /* CC3DemoMashUpScene.m in Sources */ = {isa = PBXBuildFile; fileRef = A97430F3170DD7BF001FD5A2 /* CC3DemoMashUpScene.m */; };
-		A9743106170DD7BF001FD5A2 /* HUDLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = A97430FC170DD7BF001FD5A2 /* HUDLayer.m */; };
-		A9743107170DD7BF001FD5A2 /* HUDScene.m in Sources */ = {isa = PBXBuildFile; fileRef = A97430FE170DD7BF001FD5A2 /* HUDScene.m */; };
-		A9743108170DD7BF001FD5A2 /* Models.m in Sources */ = {isa = PBXBuildFile; fileRef = A9743100170DD7BF001FD5A2 /* Models.m */; };
 		A99205031726E58F005E96CE /* EnvMap.pfx in Resources */ = {isa = PBXBuildFile; fileRef = A99204FC1726E58F005E96CE /* EnvMap.pfx */; };
 		A99205041726E58F005E96CE /* EnvMapNegX.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A99204FD1726E58F005E96CE /* EnvMapNegX.jpg */; };
 		A99205051726E58F005E96CE /* EnvMapNegY.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A99204FE1726E58F005E96CE /* EnvMapNegY.jpg */; };
@@ -137,6 +129,15 @@
 		A9BA45C618D224BB0077B14E /* CC3Texturable.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA459818D224BB0077B14E /* CC3Texturable.vsh */; };
 		A9BA45C718D224BB0077B14E /* CC3TexturableBones.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA459918D224BB0077B14E /* CC3TexturableBones.vsh */; };
 		A9BA45C818D224BB0077B14E /* CC3TexturableRigidBones.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA459A18D224BB0077B14E /* CC3TexturableRigidBones.vsh */; };
+		A9CCA3CB18E3518700DDDBDC /* CC3DemoMashUpLayer-Classic.m in Sources */ = {isa = PBXBuildFile; fileRef = A9CCA3BF18E3518700DDDBDC /* CC3DemoMashUpLayer-Classic.m */; };
+		A9CCA3CC18E3518700DDDBDC /* CC3DemoMashUpLayer-v3.m in Sources */ = {isa = PBXBuildFile; fileRef = A9CCA3C118E3518700DDDBDC /* CC3DemoMashUpLayer-v3.m */; };
+		A9CCA3CD18E3518700DDDBDC /* CC3DemoMashUpScene.m in Sources */ = {isa = PBXBuildFile; fileRef = A9CCA3C418E3518700DDDBDC /* CC3DemoMashUpScene.m */; };
+		A9CCA3CE18E3518700DDDBDC /* HUDLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = A9CCA3C618E3518700DDDBDC /* HUDLayer.m */; };
+		A9CCA3CF18E3518700DDDBDC /* HUDScene.m in Sources */ = {isa = PBXBuildFile; fileRef = A9CCA3C818E3518700DDDBDC /* HUDScene.m */; };
+		A9CCA3D018E3518700DDDBDC /* Models.m in Sources */ = {isa = PBXBuildFile; fileRef = A9CCA3CA18E3518700DDDBDC /* Models.m */; };
+		A9CCA3D818E3519000DDDBDC /* CCNodeAdornments.m in Sources */ = {isa = PBXBuildFile; fileRef = A9CCA3D318E3519000DDDBDC /* CCNodeAdornments.m */; };
+		A9CCA3D918E3519000DDDBDC /* CCNodeExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = A9CCA3D518E3519000DDDBDC /* CCNodeExtensions.m */; };
+		A9CCA3DA18E3519000DDDBDC /* Joystick.m in Sources */ = {isa = PBXBuildFile; fileRef = A9CCA3D718E3519000DDDBDC /* Joystick.m */; };
 		A9DDA35F17C8EF2E00F36657 /* Skybox.pvr in Resources */ = {isa = PBXBuildFile; fileRef = A9DDA35E17C8EF2E00F36657 /* Skybox.pvr */; };
 		A9DDA36317C8F4DB00F36657 /* icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = A9DDA36217C8F4DB00F36657 /* icon.icns */; };
 		A9F78F4C189EA32E001AE65E /* OrangeRing.png in Resources */ = {isa = PBXBuildFile; fileRef = A9F78F4A189EA32E001AE65E /* OrangeRing.png */; };
@@ -216,12 +217,6 @@
 		A924D15D171307500061DDA0 /* tex_arm.pvr */ = {isa = PBXFileReference; lastKnownFileType = file; name = tex_arm.pvr; path = ../Common/Resources/tex_arm.pvr; sourceTree = "<group>"; };
 		A924D15E171307500061DDA0 /* tex_base.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; name = tex_base.bmp; path = ../Common/Resources/tex_base.bmp; sourceTree = "<group>"; };
 		A924D15F171307500061DDA0 /* tex_base.pvr */ = {isa = PBXFileReference; lastKnownFileType = file; name = tex_base.pvr; path = ../Common/Resources/tex_base.pvr; sourceTree = "<group>"; };
-		A92B423D18BE3ED60026B00F /* CCNodeAdornments.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCNodeAdornments.h; sourceTree = "<group>"; };
-		A92B423E18BE3ED60026B00F /* CCNodeAdornments.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CCNodeAdornments.m; sourceTree = "<group>"; };
-		A92B423F18BE3ED60026B00F /* CCNodeExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCNodeExtensions.h; sourceTree = "<group>"; };
-		A92B424018BE3ED60026B00F /* CCNodeExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CCNodeExtensions.m; sourceTree = "<group>"; };
-		A92B424118BE3ED60026B00F /* Joystick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Joystick.h; sourceTree = "<group>"; };
-		A92B424218BE3ED60026B00F /* Joystick.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Joystick.m; sourceTree = "<group>"; };
 		A968801D17A72516007FA5F0 /* cocos3d-library-OSX.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "cocos3d-library-OSX.xcodeproj"; path = "../cocos3d-library/cocos3d-library-OSX.xcodeproj"; sourceTree = "<group>"; };
 		A968802317A7251E007FA5F0 /* cocos2d-library-OSX.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "cocos2d-library-OSX.xcodeproj"; path = "../cocos2d-library/cocos2d-library-OSX.xcodeproj"; sourceTree = "<group>"; };
 		A96E0CCA170DC8060044CA2A /* CC3DemoMashUp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CC3DemoMashUp.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -277,16 +272,6 @@
 		A9742DCB170DD72B001FD5A2 /* Stamp.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Stamp.png; path = ../Common/Resources/Stamp.png; sourceTree = "<group>"; };
 		A9742DCD170DD72B001FD5A2 /* SunlightButton48x48.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = SunlightButton48x48.png; path = ../Common/Resources/SunlightButton48x48.png; sourceTree = "<group>"; };
 		A9742DD1170DD72B001FD5A2 /* ZoomButton48x48.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = ZoomButton48x48.png; path = ../Common/Resources/ZoomButton48x48.png; sourceTree = "<group>"; };
-		A97430F0170DD7BF001FD5A2 /* CC3DemoMashUpLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3DemoMashUpLayer.h; sourceTree = "<group>"; };
-		A97430F1170DD7BF001FD5A2 /* CC3DemoMashUpLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3DemoMashUpLayer.m; sourceTree = "<group>"; };
-		A97430F2170DD7BF001FD5A2 /* CC3DemoMashUpScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3DemoMashUpScene.h; sourceTree = "<group>"; };
-		A97430F3170DD7BF001FD5A2 /* CC3DemoMashUpScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3DemoMashUpScene.m; sourceTree = "<group>"; };
-		A97430FB170DD7BF001FD5A2 /* HUDLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HUDLayer.h; sourceTree = "<group>"; };
-		A97430FC170DD7BF001FD5A2 /* HUDLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HUDLayer.m; sourceTree = "<group>"; };
-		A97430FD170DD7BF001FD5A2 /* HUDScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HUDScene.h; sourceTree = "<group>"; };
-		A97430FE170DD7BF001FD5A2 /* HUDScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HUDScene.m; sourceTree = "<group>"; };
-		A97430FF170DD7BF001FD5A2 /* Models.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Models.h; sourceTree = "<group>"; };
-		A9743100170DD7BF001FD5A2 /* Models.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Models.m; sourceTree = "<group>"; };
 		A99204FC1726E58F005E96CE /* EnvMap.pfx */ = {isa = PBXFileReference; explicitFileType = sourcecode.glsl; fileEncoding = 4; path = EnvMap.pfx; sourceTree = "<group>"; };
 		A99204FD1726E58F005E96CE /* EnvMapNegX.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = EnvMapNegX.jpg; sourceTree = "<group>"; };
 		A99204FE1726E58F005E96CE /* EnvMapNegY.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = EnvMapNegY.jpg; sourceTree = "<group>"; };
@@ -340,6 +325,25 @@
 		A9BA459818D224BB0077B14E /* CC3Texturable.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3Texturable.vsh; sourceTree = "<group>"; };
 		A9BA459918D224BB0077B14E /* CC3TexturableBones.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3TexturableBones.vsh; sourceTree = "<group>"; };
 		A9BA459A18D224BB0077B14E /* CC3TexturableRigidBones.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3TexturableRigidBones.vsh; sourceTree = "<group>"; };
+		A9CCA3BE18E3518700DDDBDC /* CC3DemoMashUpLayer-Classic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CC3DemoMashUpLayer-Classic.h"; sourceTree = "<group>"; };
+		A9CCA3BF18E3518700DDDBDC /* CC3DemoMashUpLayer-Classic.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "CC3DemoMashUpLayer-Classic.m"; sourceTree = "<group>"; };
+		A9CCA3C018E3518700DDDBDC /* CC3DemoMashUpLayer-v3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CC3DemoMashUpLayer-v3.h"; sourceTree = "<group>"; };
+		A9CCA3C118E3518700DDDBDC /* CC3DemoMashUpLayer-v3.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "CC3DemoMashUpLayer-v3.m"; sourceTree = "<group>"; };
+		A9CCA3C218E3518700DDDBDC /* CC3DemoMashUpLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3DemoMashUpLayer.h; sourceTree = "<group>"; };
+		A9CCA3C318E3518700DDDBDC /* CC3DemoMashUpScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3DemoMashUpScene.h; sourceTree = "<group>"; };
+		A9CCA3C418E3518700DDDBDC /* CC3DemoMashUpScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3DemoMashUpScene.m; sourceTree = "<group>"; };
+		A9CCA3C518E3518700DDDBDC /* HUDLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HUDLayer.h; sourceTree = "<group>"; };
+		A9CCA3C618E3518700DDDBDC /* HUDLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HUDLayer.m; sourceTree = "<group>"; };
+		A9CCA3C718E3518700DDDBDC /* HUDScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HUDScene.h; sourceTree = "<group>"; };
+		A9CCA3C818E3518700DDDBDC /* HUDScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HUDScene.m; sourceTree = "<group>"; };
+		A9CCA3C918E3518700DDDBDC /* Models.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Models.h; sourceTree = "<group>"; };
+		A9CCA3CA18E3518700DDDBDC /* Models.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Models.m; sourceTree = "<group>"; };
+		A9CCA3D218E3519000DDDBDC /* CCNodeAdornments.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCNodeAdornments.h; sourceTree = "<group>"; };
+		A9CCA3D318E3519000DDDBDC /* CCNodeAdornments.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CCNodeAdornments.m; sourceTree = "<group>"; };
+		A9CCA3D418E3519000DDDBDC /* CCNodeExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCNodeExtensions.h; sourceTree = "<group>"; };
+		A9CCA3D518E3519000DDDBDC /* CCNodeExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CCNodeExtensions.m; sourceTree = "<group>"; };
+		A9CCA3D618E3519000DDDBDC /* Joystick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Joystick.h; sourceTree = "<group>"; };
+		A9CCA3D718E3519000DDDBDC /* Joystick.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Joystick.m; sourceTree = "<group>"; };
 		A9DDA35E17C8EF2E00F36657 /* Skybox.pvr */ = {isa = PBXFileReference; lastKnownFileType = file; name = Skybox.pvr; path = ../Common/Resources/Skybox.pvr; sourceTree = "<group>"; };
 		A9DDA36217C8F4DB00F36657 /* icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = icon.icns; sourceTree = "<group>"; };
 		A9F78F4A189EA32E001AE65E /* OrangeRing.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = OrangeRing.png; path = ../Common/Resources/OrangeRing.png; sourceTree = "<group>"; };
@@ -362,8 +366,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A968802E17A72580007FA5F0 /* libcocos3d-library-OSX.a in Frameworks */,
-				A968802D17A72580007FA5F0 /* libcocos2d-library-OSX.a in Frameworks */,
+				A968802E17A72580007FA5F0 /* libcocos3d.a in Frameworks */,
+				A968802D17A72580007FA5F0 /* libcocos2d.a in Frameworks */,
 				A92BD9D018E127BD003D1F64 /* libcocos2d-chipmunk.a in Frameworks */,
 				A96E0CCE170DC8060044CA2A /* QuartzCore.framework in Frameworks */,
 				A96E0CD0170DC8060044CA2A /* OpenGL.framework in Frameworks */,
@@ -405,24 +409,10 @@
 			path = ../Common/Resources/TV;
 			sourceTree = "<group>";
 		};
-		A92B423C18BE3ED60026B00F /* Controls */ = {
-			isa = PBXGroup;
-			children = (
-				A92B423D18BE3ED60026B00F /* CCNodeAdornments.h */,
-				A92B423E18BE3ED60026B00F /* CCNodeAdornments.m */,
-				A92B423F18BE3ED60026B00F /* CCNodeExtensions.h */,
-				A92B424018BE3ED60026B00F /* CCNodeExtensions.m */,
-				A92B424118BE3ED60026B00F /* Joystick.h */,
-				A92B424218BE3ED60026B00F /* Joystick.m */,
-			);
-			name = Controls;
-			path = ../../../Common/Code/Controls;
-			sourceTree = "<group>";
-		};
 		A968801E17A72516007FA5F0 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A968802217A72516007FA5F0 /* libcocos3d-library-OSX.a */,
+				A968802217A72516007FA5F0 /* libcocos3d.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -430,7 +420,7 @@
 		A968802417A7251E007FA5F0 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A968802817A7251E007FA5F0 /* libcocos2d-library-OSX.a */,
+				A968802817A7251E007FA5F0 /* libcocos2d.a */,
 				A92BD9CF18E127AA003D1F64 /* libcocos2d-chipmunk.a */,
 			);
 			name = Products;
@@ -439,7 +429,8 @@
 		A96E0CC1170DC8060044CA2A = {
 			isa = PBXGroup;
 			children = (
-				A97430EF170DD7BF001FD5A2 /* Classes */,
+				A9CCA3BD18E3518700DDDBDC /* Classes */,
+				A9CCA3D118E3519000DDDBDC /* Controls */,
 				A9742D9B170DD713001FD5A2 /* Resources */,
 				A9BA456818D224BB0077B14E /* cocos3d-GLSL */,
 				A9742D8A170DD6A8001FD5A2 /* OSX Support */,
@@ -560,25 +551,6 @@
 			name = Resources;
 			sourceTree = "<group>";
 		};
-		A97430EF170DD7BF001FD5A2 /* Classes */ = {
-			isa = PBXGroup;
-			children = (
-				A97430F0170DD7BF001FD5A2 /* CC3DemoMashUpLayer.h */,
-				A97430F1170DD7BF001FD5A2 /* CC3DemoMashUpLayer.m */,
-				A97430F2170DD7BF001FD5A2 /* CC3DemoMashUpScene.h */,
-				A97430F3170DD7BF001FD5A2 /* CC3DemoMashUpScene.m */,
-				A97430FF170DD7BF001FD5A2 /* Models.h */,
-				A9743100170DD7BF001FD5A2 /* Models.m */,
-				A97430FB170DD7BF001FD5A2 /* HUDLayer.h */,
-				A97430FC170DD7BF001FD5A2 /* HUDLayer.m */,
-				A97430FD170DD7BF001FD5A2 /* HUDScene.h */,
-				A97430FE170DD7BF001FD5A2 /* HUDScene.m */,
-				A92B423C18BE3ED60026B00F /* Controls */,
-			);
-			name = Classes;
-			path = CC3DemoMashUp/Classes;
-			sourceTree = "<group>";
-		};
 		A99204FB1726E58F005E96CE /* EnvMap */ = {
 			isa = PBXGroup;
 			children = (
@@ -680,6 +652,41 @@
 			path = VertexShaders;
 			sourceTree = "<group>";
 		};
+		A9CCA3BD18E3518700DDDBDC /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+				A9CCA3BE18E3518700DDDBDC /* CC3DemoMashUpLayer-Classic.h */,
+				A9CCA3BF18E3518700DDDBDC /* CC3DemoMashUpLayer-Classic.m */,
+				A9CCA3C018E3518700DDDBDC /* CC3DemoMashUpLayer-v3.h */,
+				A9CCA3C118E3518700DDDBDC /* CC3DemoMashUpLayer-v3.m */,
+				A9CCA3C218E3518700DDDBDC /* CC3DemoMashUpLayer.h */,
+				A9CCA3C318E3518700DDDBDC /* CC3DemoMashUpScene.h */,
+				A9CCA3C418E3518700DDDBDC /* CC3DemoMashUpScene.m */,
+				A9CCA3C518E3518700DDDBDC /* HUDLayer.h */,
+				A9CCA3C618E3518700DDDBDC /* HUDLayer.m */,
+				A9CCA3C718E3518700DDDBDC /* HUDScene.h */,
+				A9CCA3C818E3518700DDDBDC /* HUDScene.m */,
+				A9CCA3C918E3518700DDDBDC /* Models.h */,
+				A9CCA3CA18E3518700DDDBDC /* Models.m */,
+			);
+			name = Classes;
+			path = CC3DemoMashUp/Classes;
+			sourceTree = "<group>";
+		};
+		A9CCA3D118E3519000DDDBDC /* Controls */ = {
+			isa = PBXGroup;
+			children = (
+				A9CCA3D218E3519000DDDBDC /* CCNodeAdornments.h */,
+				A9CCA3D318E3519000DDDBDC /* CCNodeAdornments.m */,
+				A9CCA3D418E3519000DDDBDC /* CCNodeExtensions.h */,
+				A9CCA3D518E3519000DDDBDC /* CCNodeExtensions.m */,
+				A9CCA3D618E3519000DDDBDC /* Joystick.h */,
+				A9CCA3D718E3519000DDDBDC /* Joystick.m */,
+			);
+			name = Controls;
+			path = ../Common/Code/Controls;
+			sourceTree = "<group>";
+		};
 		A9FF6DEA170DE83600FC35C8 /* RunningMen */ = {
 			isa = PBXGroup;
 			children = (
@@ -759,18 +766,16 @@
 			remoteRef = A92BD9CE18E127AA003D1F64 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		A968802217A72516007FA5F0 /* libcocos3d-library-OSX.a */ = {
+		A968802217A72516007FA5F0 /* libcocos3d.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
-			name = "libcocos3d-library-OSX.a";
 			path = libcocos3d.a;
 			remoteRef = A968802117A72516007FA5F0 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		A968802817A7251E007FA5F0 /* libcocos2d-library-OSX.a */ = {
+		A968802817A7251E007FA5F0 /* libcocos2d.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
-			name = "libcocos2d-library-OSX.a";
 			path = libcocos2d.a;
 			remoteRef = A968802717A7251E007FA5F0 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
@@ -919,15 +924,16 @@
 			buildActionMask = 2147483647;
 			files = (
 				A9742D95170DD6A8001FD5A2 /* CC3DemoMashUpAppDelegate.m in Sources */,
+				A9CCA3CD18E3518700DDDBDC /* CC3DemoMashUpScene.m in Sources */,
+				A9CCA3CC18E3518700DDDBDC /* CC3DemoMashUpLayer-v3.m in Sources */,
+				A9CCA3DA18E3519000DDDBDC /* Joystick.m in Sources */,
+				A9CCA3CF18E3518700DDDBDC /* HUDScene.m in Sources */,
 				A9742D9A170DD6A8001FD5A2 /* main.m in Sources */,
-				A9743101170DD7BF001FD5A2 /* CC3DemoMashUpLayer.m in Sources */,
-				A9743102170DD7BF001FD5A2 /* CC3DemoMashUpScene.m in Sources */,
-				A92B424318BE3ED60026B00F /* CCNodeAdornments.m in Sources */,
-				A92B424518BE3ED60026B00F /* Joystick.m in Sources */,
-				A92B424418BE3ED60026B00F /* CCNodeExtensions.m in Sources */,
-				A9743106170DD7BF001FD5A2 /* HUDLayer.m in Sources */,
-				A9743107170DD7BF001FD5A2 /* HUDScene.m in Sources */,
-				A9743108170DD7BF001FD5A2 /* Models.m in Sources */,
+				A9CCA3D918E3519000DDDBDC /* CCNodeExtensions.m in Sources */,
+				A9CCA3CB18E3518700DDDBDC /* CC3DemoMashUpLayer-Classic.m in Sources */,
+				A9CCA3D818E3519000DDDBDC /* CCNodeAdornments.m in Sources */,
+				A9CCA3CE18E3518700DDDBDC /* HUDLayer.m in Sources */,
+				A9CCA3D018E3518700DDDBDC /* Models.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

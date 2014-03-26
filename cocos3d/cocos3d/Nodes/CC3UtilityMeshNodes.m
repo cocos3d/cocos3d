@@ -563,20 +563,18 @@ static GLfloat directionMarkerMinimumLength = 0;
 @implementation CC3BoundingVolumeDisplayNode
 
 /** Forces the color to always remain the same, even when the primary node is tinted to some other color. */
--(void) setColor: (ccColor3B) color {
+-(void) setColor: (CCColorRef) color {
 	CC3NodeBoundingVolume* bv = self.parent.boundingVolume;
-	if (bv) color = bv.displayNodeColor;
-	[super setColor:color];
+	[super setColor: (bv ? bv.displayNodeColor : color)];
 }
 
 /** 
  * Limit the opacity of the bounding volume display, so it doesn't obscure the primary node,
  * even when opacity of the parent is changed, as in a fade-in.
  */
--(void) setOpacity:(CCOpacity)opacity {
+-(void) setOpacity: (CCOpacity) opacity {
 	CC3NodeBoundingVolume* bv = self.parent.boundingVolume;
-	if (bv) opacity = MIN(opacity, bv.displayNodeOpacity);
-	[super setOpacity: opacity];
+	[super setOpacity: (bv ? MIN(opacity, bv.displayNodeOpacity) : opacity)];
 }
 
 -(BOOL) shouldIncludeInDeepCopy { return NO; }

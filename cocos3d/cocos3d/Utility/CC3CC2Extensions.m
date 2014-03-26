@@ -167,6 +167,26 @@
 @end
 
 
+#if CC3_CC2_CLASSIC
+
+#pragma mark -
+#pragma mark CCActionTintTo extension
+
+@implementation CCActionTintTo (CC2_CLASSIC)
+
+-(id) initWithDuration: (CCTime) duration color: (ccColor3B) color {
+	return [self initWithDuration: duration red: color.r green: color.g blue: color.b];
+}
+
++(id) actionWithDuration: (CCTime) duration color: (ccColor3B) color {
+	return [[[self alloc] initWithDuration: duration color: color] autorelease];
+}
+
+@end
+
+#endif	// CC3_CC2_CLASSIC
+
+
 #pragma mark -
 #pragma mark CCNode extension
 
@@ -491,6 +511,8 @@
 #if CC3_CC2_CLASSIC
 
 -(CGFloat) contentScaleFactor { return CC_CONTENT_SCALE_FACTOR(); }
+
+-(void) setContentScaleFactor: (CGFloat) contentScaleFactor {}
 
 #endif	//CC3_CC2_CLASSIC
 

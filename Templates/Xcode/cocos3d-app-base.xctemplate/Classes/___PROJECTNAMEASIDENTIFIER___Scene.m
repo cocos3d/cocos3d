@@ -73,7 +73,7 @@
 	// surprise of an empty scene, the following line ensures that all nodes loaded so far will
 	// be visible. However, it also removes any translucency or transparency from the nodes, which
 	// may not be what you want. If your model contains transparency or translucency, remove this line.
-	self.opacity = 255;
+	self.opacity = kCCOpacityFull;
 	
 	// Select the appropriate shaders for each mesh node in this scene now. If this step is
 	// omitted, a shaders will be selected for each mesh node the first time that mesh node is
@@ -161,18 +161,12 @@
 	// To make things a bit more appealing, set up a repeating up/down cycle to
 	// change the color of the text from the original red to blue, and back again.
 	GLfloat tintTime = 8.0f;
-	ccColor3B startColor = helloTxt.color;
-	ccColor3B endColor = { 50, 0, 200 };
-	CCActionInterval* tintDown = [CCTintTo actionWithDuration: tintTime
-														  red: endColor.r
-														green: endColor.g
-														 blue: endColor.b];
-	CCActionInterval* tintUp = [CCTintTo actionWithDuration: tintTime
-														red: startColor.r
-													  green: startColor.g
-													   blue: startColor.b];
-	 CCActionInterval* tintCycle = [CCSequence actionOne: tintDown two: tintUp];
-	[helloTxt runAction: [CCRepeatForever actionWithAction: tintCycle]];
+	CCColorRef startColor = helloTxt.color;
+	CCColorRef endColor = CCColorRefFromCCC4F(ccc4f(0.2, 0.0, 0.8, 1.0));
+	CCActionInterval* tintDown = [CCActionTintTo actionWithDuration: tintTime color: endColor];
+	CCActionInterval* tintUp   = [CCActionTintTo actionWithDuration: tintTime color: startColor];
+	CCActionInterval* tintCycle = [CCActionSequence actionOne: tintDown two: tintUp];
+	[helloTxt runAction: [CCActionRepeatForever actionWithAction: tintCycle]];
 }
 
 /**

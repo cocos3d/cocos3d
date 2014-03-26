@@ -1238,9 +1238,9 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 
 #pragma mark CCRGBAProtocol support
 
--(ccColor3B) color { return _vertexColors ? _vertexColors.color : ccBLACK; }
+-(CCColorRef) color { return _vertexColors ? _vertexColors.color : CCColorRefFromCCC4F(kCCC4FBlackTransparent); }
 
--(void) setColor: (ccColor3B) aColor { _vertexColors.color = aColor; }
+-(void) setColor: (CCColorRef) aColor { _vertexColors.color = aColor; }
 
 -(CCOpacity) opacity { return _vertexColors ? _vertexColors.opacity : kCCOpacityFull; }
 

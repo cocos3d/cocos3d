@@ -96,7 +96,7 @@
 		_peakOpacity = opacity;
 		self.contentSize = aNode.contentSize;
 		aNode.visible = NO;
-		[aNode setOpacity: 0];
+		aNode.opacity = 0;
 		_adornmentNode = aNode;
 		[self addChild: aNode];
 	}

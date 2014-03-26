@@ -417,12 +417,10 @@
 #pragma mark CCRGBAProtocol and CCBlendProtocol support
 
 /**
- * Implementation of the CCRGBAProtocol color property.
+ * The color of this node, as described by the diffuse color of the material covering this node.
  *
  * Querying this property returns the RGB components of the material's diffuseColor
  * property, or of this node's pureColor property if this node has no material.
- * In either case, the RGB values are converted from the floating point range (0 to 1),
- * to the byte range (0 to 255).
  *
  * When setting this property, the RGB values are each converted to a floating point
  * number between 0 and 1, and are set into both the ambientColor and diffuseColor
@@ -431,7 +429,7 @@
  *
  * Setting this property also sets the same property on all descendant nodes.
  */
-@property(nonatomic, assign) ccColor3B color;
+@property(nonatomic, assign) CCColorRef color;
 
 /**
  * The opacity of this node, as described by the alpha component of the diffuse color of
@@ -439,8 +437,6 @@
  *
  * Querying this property returns the alpha component of the material's diffuseColor
  * property, or of this node's pureColor property if this node has no material.
- * In either case, the RGB values are converted from the floating point range (0 to 1),
- * to the byte range (0 to 255).
  *
  * When setting this property, the value is converted to a floating point number
  * between 0 and 1, and is set into all of the ambientColor, diffuseColor, specularColor,

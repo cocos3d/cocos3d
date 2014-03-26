@@ -213,11 +213,11 @@
 #pragma mark CCRGBAProtocol and CCBlendProtocol support
 
 /** 
- * Implementation of the CCRGBAProtocol color property.
+ * The color of this layer.
  *
  * Returns and changes the value of the same property on the cc3Scene.
  */
-@property(nonatomic, assign) ccColor3B color;
+@property(nonatomic, assign) CCColorRef color;
 
 /**
  * The opacity of this layer.

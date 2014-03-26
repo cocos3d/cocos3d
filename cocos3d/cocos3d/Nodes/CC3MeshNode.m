@@ -357,15 +357,16 @@
 
 #pragma mark CCRGBAProtocol and CCBlendProtocol support
 
--(ccColor3B) color { return self.ensureMaterial.color; }
+-(CCColorRef) color { return self.ensureMaterial.color; }
 
--(void) setColor: (ccColor3B) color {
+-(void) setColor: (CCColorRef) color {
 	self.ensureMaterial.color = color;
 	if (_shouldApplyOpacityAndColorToMeshContent) _mesh.color = color;	// for meshes with colored vertices
 
-	_pureColor.r = CCColorFloatFromByte(color.r);
-	_pureColor.g = CCColorFloatFromByte(color.g);
-	_pureColor.b = CCColorFloatFromByte(color.b);
+	ccColor4F c4f = CCC4FFromCCColorRef(color);
+	_pureColor.r = c4f.r;
+	_pureColor.g = c4f.g;
+	_pureColor.b = c4f.b;
 
 	[super setColor: color];	// pass along to any children
 }

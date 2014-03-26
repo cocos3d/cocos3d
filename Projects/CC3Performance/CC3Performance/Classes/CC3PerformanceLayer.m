@@ -54,7 +54,6 @@
 #define kArrowUpButtonFileName		@"ArrowUpButton48x48.png"
 #define kAnimateNodesButtonFileName	@"GridButton48x48.png"
 #define kButtonRingFileName			@"ButtonRing48x48.png"
-#define kPeakShineOpacity			255
 #define kButtonAdornmentScale		1.5
 
 @implementation CC3PerformanceLayer
@@ -180,17 +179,17 @@
 	
 	_nodeNameLabel = [self addStatsLabel: @""];
 	_nodeNameLabel.anchorPoint = ccp(0.5, 0.0);
-	[_nodeNameLabel setColor: ccYELLOW];
+	_nodeNameLabel.color = CCColorRefFromCCC4F(kCCC4FYellow);
 
 	_updateTitleLabel = [self addStatsLabel: @"Updates:"];
-	[_updateTitleLabel setColor: ccYELLOW];
+	_updateTitleLabel.color = CCColorRefFromCCC4F(kCCC4FYellow);
 
 	_updateRateLabel = [self addStatsLabel: @"0"];
 	_nodesUpdatedLabel = [self addStatsLabel: @"0"];
 	_nodesTransformedLabel = [self addStatsLabel: @"0"];
 	
 	_drawingTitleLabel = [self addStatsLabel: @"Drawing:"];
-	[_drawingTitleLabel setColor: ccYELLOW];
+	_drawingTitleLabel.color = CCColorRefFromCCC4F(kCCC4FYellow);
 
 	_frameRateLabel = [self addStatsLabel: @"0"];
 	_nodesVisitedForDrawingLabel = [self addStatsLabel: @"0"];

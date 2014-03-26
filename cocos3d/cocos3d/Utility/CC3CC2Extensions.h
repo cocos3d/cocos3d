@@ -95,6 +95,80 @@ typedef ccTime CCTime;
 
 #endif	// !CC3_CC2_CLASSIC
 
+
+#if CC3_CC2_CLASSIC
+
+/** In Cocos2D v1 & v2, opacity is defined as an integer value between 0 and 255. */
+typedef GLubyte CCOpacity;
+
+/** Maximum opacity value (GLubyte 255) in Cocos2D v1 & v2. */
+#define kCCOpacityFull					255
+
+/** Convert GLfloat to CCOpacity (GLubyte) in Cocos2D v1 & v2. */
+#define CCOpacityFromGLfloat(glf)		CCColorByteFromFloat(glf)
+
+/** Convert CCOpacity (GLubyte) to GLfloat in Cocos2D v1 & v2. */
+#define GLfloatFromCCOpacity(ccOp)		CCColorFloatFromByte(ccOp)
+
+/** Convert GLubyte to CCOpacity (GLubyte) in Cocos2D v1 & v2. */
+#define CCOpacityFromGLubyte(glub)		(glub)
+
+/** Convert CCOpacity (GLubyte) to GLubyte in Cocos2D v1 & v2. */
+#define GLubyteFromCCOpacity(ccOp)		(ccOp)
+
+/** In Cocos2D v1 & v2, color is defined as a ccColor3B structure containing 3 GLubyte color components. */
+typedef ccColor3B CCColorRef;
+
+/** Convert ccColor4F to CCColorRef (ccColor3B) in Cocos2D v1 & v2. */
+#define CCColorRefFromCCC4F(c4f)		CCC3BFromCCC4F(c4f)
+
+/** Convert CCColorRef (ccColor3B) to ccColor4F in Cocos2D v1 & v2. */
+#define CCC4FFromCCColorRef(ccRef)		CCC4FFromColorAndOpacity(ccRef, kCCOpacityFull)
+
+/** Convert ccColor4B to CCColorRef (ccColor3B) in Cocos2D v1 & v2. */
+#define CCColorRefFromCCC4B(c4b)		CCC3BFromCCC4B(c4b)
+
+/** Convert CCColorRef (ccColor3B) to ccColor4B in Cocos2D v1 & v2. */
+#define CCC4BFromCCColorRef(ccRef)		CCC4BFromColorAndOpacity(ccRef, kCCOpacityFull)
+
+#else
+
+/** In Cocos2D v3 and above, opacity is defined as a CGFloat value between 0.0 and 1.0. */
+typedef CGFloat CCOpacity;
+
+/** Maximum opacity value (CGFloat 1.0) in Cocos2D v3. */
+#define kCCOpacityFull					1.0
+
+/** Convert GLfloat to CCOpacity (CGFloat) in Cocos2D v3. */
+#define CCOpacityFromGLfloat(glf)		((CCOpacity)(glf))
+
+/** Convert CCOpacity (CGFloat) to GLfloat in Cocos2D v3. */
+#define GLfloatFromCCOpacity(ccOp)		((GLfloat)(ccOp))
+
+/** Convert GLubyte to CCOpacity (CGFloat) in Cocos2D v3. */
+#define CCOpacityFromGLubyte(glub)		((CCOpacity)CCColorFloatFromByte(glub))
+
+/** Convert CCOpacity (CGFloat) to GLubyte in Cocos2D v3. */
+#define GLubyteFromCCOpacity(ccOp)		CCColorByteFromFloat((GLfloat)(ccOp))
+
+/** In Cocos2D v3 and above, color is defined as an instance of the CCColor class. */
+typedef CCColor* CCColorRef;
+
+/** Convert ccColor4F to CCColorRef (CCColor*) in Cocos2D v3. */
+#define CCColorRefFromCCC4F(c4f)		[CCColor colorWithCcColor4f: c4f]
+
+/** Convert CCColorRef (CCColor*) to ccColor4F in Cocos2D v3. */
+#define CCC4FFromCCColorRef(ccRef)		[ccRef ccColor4f]
+
+/** Convert ccColor4B to CCColorRef (CCColor*) in Cocos2D v3. */
+#define CCColorRefFromCCC4B(c4b)		[CCColor colorWithCcColor4b: c4b]
+
+/** Convert CCColorRef (CCColor*) to ccColor4B in Cocos2D v3. */
+#define CCC4BFromCCColorRef(ccRef)		[ccRef ccColor4b]
+
+#endif	// CC3_CC2_CLASSIC
+
+
 #if CC3_IOS
 
 /** Under cocos2d 1.x iOS, create an alias CCGLView for EAGLView. */
@@ -200,6 +274,40 @@ enum {
 
 @end
 
+
+#if CC3_CC2_CLASSIC
+
+#pragma mark -
+#pragma mark CCActionTintTo extension
+
+/** Extension category to support cocos3d functionality. */
+@interface CCActionTintTo (CC2_CLASSIC)
+
+/**
+ *  Initalizes a tint to action.
+ *  Compatible with Cocos2D v3 implementation.
+ *
+ *  @param duration     Action duration.
+ *  @param color		Destination color tint to.
+ *
+ *  @return New tint to action.
+ */
+-(id) initWithDuration: (CCTime) duration color: (ccColor3B) color;
+
+/**
+ *  Creates a tint to action.
+ *  Compatible with Cocos2D v3 implementation.
+ *
+ *  @param duration     Action duration.
+ *  @param color		Destination color tint to.
+ *
+ *  @return New tint to action.
+ */
++(id) actionWithDuration: (CCTime) duration color: (ccColor3B) color;
+
+@end
+
+#endif	// CC3_CC2_CLASSIC
 
 
 #pragma mark -
@@ -535,7 +643,7 @@ enum {
 
 #if CC3_CC2_CLASSIC
 
-/** Content scaling factor. Simply delegates to same property on CCDirectorIOS. */
+/** Content scaling factor. Does nothing, as content scaling factor only applies to CCDirectorIOS. */
 @property(nonatomic, assign) CGFloat contentScaleFactor;
 
 #endif	//CC3_CC2_CLASSIC

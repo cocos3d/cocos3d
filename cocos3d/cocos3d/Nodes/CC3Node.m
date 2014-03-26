@@ -822,24 +822,22 @@
 
 #pragma mark CCRGBAProtocol and CCBlendProtocol support
 
--(ccColor3B) color {
-	ccColor3B col = ccBLACK;
+-(CCColorRef) color {
+	ccColor4F colorSum = kCCC4FBlackTransparent;
 	NSUInteger childCnt = 0;
 	if (_children && (childCnt = _children.count) > 0) {
-		GLuint rSum, bSum, gSum;
-		rSum = bSum = gSum = 0;
 		for (CC3Node* child in _children) {
-			ccColor3B childColor = child.color;
-			rSum += childColor.r;
-			gSum += childColor.g;
-			bSum += childColor.b;
+			ccColor4F childColor = CCC4FFromCCColorRef(child.color);
+			colorSum.r += childColor.r;
+			colorSum.g += childColor.g;
+			colorSum.b += childColor.b;
 		}
-		col = ccc3(rSum / childCnt, gSum / childCnt, bSum / childCnt);
+		colorSum = CCC4FUniformScale(colorSum, (1.0f / (GLfloat)childCnt));
 	}
-	return col;
+	return CCColorRefFromCCC4F(colorSum);
 }
 
--(void) setColor: (ccColor3B) color {
+-(void) setColor: (CCColorRef) color {
 	if (_cascadeColorEnabled) for (CC3Node* child in _children) child.color = color;
 }
 
@@ -858,7 +856,7 @@
 	if (_cascadeOpacityEnabled) for (CC3Node* child in _children) child.opacity = opacity;
 }
 
--(ccColor3B) displayedColor { return self.color; }
+-(CCColorRef) displayedColor { return self.color; }
 
 -(BOOL) isCascadeColorEnabled { return _cascadeColorEnabled; }
 
@@ -866,7 +864,7 @@
 	_cascadeColorEnabled = cascadeColorEnabled;
 }
 
--(void) updateDisplayedColor: (ccColor3B) color {}
+-(void) updateDisplayedColor: (CCColorRef) color {}
 
 -(CCOpacity) displayedOpacity { return self.opacity; }
 

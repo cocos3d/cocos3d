@@ -1661,19 +1661,13 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 
 	// To make things a bit more interesting, set up a repeating up/down cycle to
 	// change the color of the fog from the original bluish to reddish, and back again.
-//	GLfloat tintTime = 4.0f;
-//	ccColor3B startColor = _fog.color;
-//	ccColor3B endColor = ccc3(180, 128, 128);		// A slightly redish fog.
-//	CCActionInterval* tintDown = [CCActionTintTo actionWithDuration: tintTime
-//																red: endColor.r
-//															  green: endColor.g
-//															   blue: endColor.b];
-//	CCActionInterval* tintUp = [CCActionTintTo actionWithDuration: tintTime
-//															  red: startColor.r
-//															green: startColor.g
-//															 blue: startColor.b];
-//	CCActionInterval* tintCycle = [CCActionSequence actionOne: tintDown two: tintUp];
-//	[_fog runAction: [CCActionRepeatForever actionWithAction: tintCycle]];
+	GLfloat tintTime = 4.0f;
+	CCColorRef startColor = _fog.color;
+	CCColorRef endColor = CCColorRefFromCCC4F(ccc4f(0.7, 0.5, 0.5, 1.0));		// A slightly redish fog.
+	CCActionInterval* tintDown = [CCActionTintTo actionWithDuration: tintTime color: endColor];
+	CCActionInterval* tintUp   = [CCActionTintTo actionWithDuration: tintTime color: startColor];
+	CCActionInterval* tintCycle = [CCActionSequence actionOne: tintDown two: tintUp];
+	[_fog runAction: [CCActionRepeatForever actionWithAction: tintCycle]];
 }
 
 /**

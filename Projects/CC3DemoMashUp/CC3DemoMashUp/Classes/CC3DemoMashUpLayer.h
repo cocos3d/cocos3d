@@ -28,7 +28,7 @@
  */
 
 
-/** Imports the version of CC3DemoMashUpLayer suitable for the platform environment. */
+/** Imports the version of CC3DemoMashUpLayer suitable for the Cocos2D version environment. */
 
 #import "CC3DemoMashUpLayer-Classic.h"
 #import "CC3DemoMashUpLayer-v3.h"

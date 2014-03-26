@@ -174,21 +174,19 @@
 
 #pragma mark CCRGBAProtocol & CCBlendProtocol support
 
--(ccColor3B) color { return CCC3BFromCCC4F(_diffuseColor); }
+-(CCColorRef) color { return CCColorRefFromCCC4F(_diffuseColor); }
 
 // Set both diffuse and ambient colors, retaining the alpha of each
--(void) setColor: (ccColor3B) color {
-	GLfloat rf = CCColorFloatFromByte(color.r);
-	GLfloat gf = CCColorFloatFromByte(color.g);
-	GLfloat bf = CCColorFloatFromByte(color.b);
+-(void) setColor: (CCColorRef) color {
+	ccColor4F c4f = CCC4FFromCCColorRef(color);
 	
-	_ambientColor.r = rf;
-	_ambientColor.g = gf;
-	_ambientColor.b = bf;
+	_ambientColor.r = c4f.r;
+	_ambientColor.g = c4f.g;
+	_ambientColor.b = c4f.b;
 	
-	_diffuseColor.r = rf;
-	_diffuseColor.g = gf;
-	_diffuseColor.b = bf;
+	_diffuseColor.r = c4f.r;
+	_diffuseColor.g = c4f.g;
+	_diffuseColor.b = c4f.b;
 }
 
 -(CCOpacity) opacity { return CCOpacityFromGLfloat(_diffuseColor.a); }
@@ -199,11 +197,11 @@
  * can be faded without having to turn isOpaque off separately.
  */
 -(void) setOpacity: (CCOpacity) opacity {
-	GLfloat af = GLfloatFromCCOpacity(opacity);
-	_ambientColor.a = af;
-	_diffuseColor.a = af;
-	_specularColor.a = af;
-	_emissionColor.a = af;
+	GLfloat alpha = GLfloatFromCCOpacity(opacity);
+	_ambientColor.a = alpha;
+	_diffuseColor.a = alpha;
+	_specularColor.a = alpha;
+	_emissionColor.a = alpha;
 
 	// As a convenience, set the blending to be compatible with the opacity level.
 	// If the opacity has been reduced below full, set isOpaque to NO to ensure alpha
@@ -213,13 +211,13 @@
 	self.isOpaque = (opacity == kCCOpacityFull && !self.shouldBlendAtFullOpacity);
 }
 
--(ccColor3B) displayedColor { return self.color; }
+-(CCColorRef) displayedColor { return self.color; }
 
 -(BOOL) isCascadeColorEnabled { return NO; }
 
 -(void) setCascadeColorEnabled:(BOOL)cascadeColorEnabled {}
 
--(void) updateDisplayedColor: (ccColor3B) color {}
+-(void) updateDisplayedColor: (CCColorRef) color {}
 
 -(CCOpacity) displayedOpacity { return self.opacity; }
 

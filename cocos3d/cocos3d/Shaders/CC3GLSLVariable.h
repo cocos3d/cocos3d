@@ -775,37 +775,6 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope);
  * The type property of this instance can be any value other than one of matrix types.
  * If the type property indicates an float type, the integers are normalized to floats between
  * 0 and 1. If the type property indicates a scalar, the R component of the specified color is
- * used. If the type property indicates a vector type with fewer than three components, the
- * R & G components are used. If the type property indicates a vector type with four components,
- * the A component is set to 255 (or 1 if float type).
- */
--(void) setColor: (ccColor3B) value;
-
-/**
- * Sets the element at the specified index in this uniform to the specified value.
- *
- * The specified index must be less than the value of the size property. This method may
- * still be used when this uniform has not been declared as an array. In this case, the
- * value of the size property will be one, and so the specified index must be zero.
- *
- * The type property of this instance can be any value other than one of matrix types.
- * If the type property indicates an float type, the integers are normalized to floats between
- * 0 and 1. If the type property indicates a scalar, the R component of the specified color is
- * used. If the type property indicates a vector type with fewer than three components, the
- * R & G components are used. If the type property indicates a vector type with four components,
- * the A component is set to 255 (or 1 if float type).
- */
--(void) setColor: (ccColor3B) value at: (GLuint) index;
-
-/**
- * Sets the value of this uniform to the specified value.
- *
- * If this uniform has been declared as an array, this method sets the value of the first
- * element in the array.
- *
- * The type property of this instance can be any value other than one of matrix types.
- * If the type property indicates an float type, the integers are normalized to floats between
- * 0 and 1. If the type property indicates a scalar, the R component of the specified color is
  * used. If the type property indicates a vector type with fewer than four components, the R & G,
  * or R, G & B components are used.
  */

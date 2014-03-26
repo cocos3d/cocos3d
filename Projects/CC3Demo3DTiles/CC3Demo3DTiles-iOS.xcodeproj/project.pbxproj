@@ -7,9 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A92B421D18BE3E7B0026B00F /* CCNodeAdornments.m in Sources */ = {isa = PBXBuildFile; fileRef = A92B421818BE3E7B0026B00F /* CCNodeAdornments.m */; };
-		A92B421E18BE3E7B0026B00F /* CCNodeExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = A92B421A18BE3E7B0026B00F /* CCNodeExtensions.m */; };
-		A92B421F18BE3E7B0026B00F /* Joystick.m in Sources */ = {isa = PBXBuildFile; fileRef = A92B421C18BE3E7B0026B00F /* Joystick.m */; };
 		A92BD9D118E127CF003D1F64 /* libcocos2d-chipmunk.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A92B421518BE3E730026B00F /* libcocos2d-chipmunk.a */; };
 		A92DA8461427C6F00051AFFA /* arial16.fnt in Resources */ = {isa = PBXBuildFile; fileRef = A92DA8211427C6F00051AFFA /* arial16.fnt */; };
 		A92DA8471427C6F00051AFFA /* arial16.png in Resources */ = {isa = PBXBuildFile; fileRef = A92DA8221427C6F00051AFFA /* arial16.png */; };
@@ -110,6 +107,9 @@
 		A9BA3E5B18D21DB20077B14E /* CC3Texturable.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E2D18D21DB20077B14E /* CC3Texturable.vsh */; };
 		A9BA3E5C18D21DB20077B14E /* CC3TexturableBones.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E2E18D21DB20077B14E /* CC3TexturableBones.vsh */; };
 		A9BA3E5D18D21DB20077B14E /* CC3TexturableRigidBones.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E2F18D21DB20077B14E /* CC3TexturableRigidBones.vsh */; };
+		A9CCA39018E34F6800DDDBDC /* CCNodeAdornments.m in Sources */ = {isa = PBXBuildFile; fileRef = A9CCA38B18E34F6800DDDBDC /* CCNodeAdornments.m */; };
+		A9CCA39118E34F6800DDDBDC /* CCNodeExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = A9CCA38D18E34F6800DDDBDC /* CCNodeExtensions.m */; };
+		A9CCA39218E34F6800DDDBDC /* Joystick.m in Sources */ = {isa = PBXBuildFile; fileRef = A9CCA38F18E34F6800DDDBDC /* Joystick.m */; };
 		A9EB5D0E14103A8700240563 /* TileScene.m in Sources */ = {isa = PBXBuildFile; fileRef = A9EB5D0D14103A8600240563 /* TileScene.m */; };
 /* End PBXBuildFile section */
 
@@ -159,12 +159,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		A92B421718BE3E7B0026B00F /* CCNodeAdornments.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCNodeAdornments.h; sourceTree = "<group>"; };
-		A92B421818BE3E7B0026B00F /* CCNodeAdornments.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CCNodeAdornments.m; sourceTree = "<group>"; };
-		A92B421918BE3E7B0026B00F /* CCNodeExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCNodeExtensions.h; sourceTree = "<group>"; };
-		A92B421A18BE3E7B0026B00F /* CCNodeExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CCNodeExtensions.m; sourceTree = "<group>"; };
-		A92B421B18BE3E7B0026B00F /* Joystick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Joystick.h; sourceTree = "<group>"; };
-		A92B421C18BE3E7B0026B00F /* Joystick.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Joystick.m; sourceTree = "<group>"; };
 		A92DA8211427C6F00051AFFA /* arial16.fnt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = arial16.fnt; sourceTree = "<group>"; };
 		A92DA8221427C6F00051AFFA /* arial16.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = arial16.png; sourceTree = "<group>"; };
 		A92DA8241427C6F00051AFFA /* ArrowUpButton48x48.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ArrowUpButton48x48.png; sourceTree = "<group>"; };
@@ -269,6 +263,12 @@
 		A9BA3E2D18D21DB20077B14E /* CC3Texturable.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3Texturable.vsh; sourceTree = "<group>"; };
 		A9BA3E2E18D21DB20077B14E /* CC3TexturableBones.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3TexturableBones.vsh; sourceTree = "<group>"; };
 		A9BA3E2F18D21DB20077B14E /* CC3TexturableRigidBones.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3TexturableRigidBones.vsh; sourceTree = "<group>"; };
+		A9CCA38A18E34F6800DDDBDC /* CCNodeAdornments.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCNodeAdornments.h; sourceTree = "<group>"; };
+		A9CCA38B18E34F6800DDDBDC /* CCNodeAdornments.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CCNodeAdornments.m; sourceTree = "<group>"; };
+		A9CCA38C18E34F6800DDDBDC /* CCNodeExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCNodeExtensions.h; sourceTree = "<group>"; };
+		A9CCA38D18E34F6800DDDBDC /* CCNodeExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CCNodeExtensions.m; sourceTree = "<group>"; };
+		A9CCA38E18E34F6800DDDBDC /* Joystick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Joystick.h; sourceTree = "<group>"; };
+		A9CCA38F18E34F6800DDDBDC /* Joystick.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Joystick.m; sourceTree = "<group>"; };
 		A9EB5D0C14103A8600240563 /* TileScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TileScene.h; sourceTree = "<group>"; };
 		A9EB5D0D14103A8600240563 /* TileScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TileScene.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -295,20 +295,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		A92B421618BE3E7B0026B00F /* Controls */ = {
-			isa = PBXGroup;
-			children = (
-				A92B421718BE3E7B0026B00F /* CCNodeAdornments.h */,
-				A92B421818BE3E7B0026B00F /* CCNodeAdornments.m */,
-				A92B421918BE3E7B0026B00F /* CCNodeExtensions.h */,
-				A92B421A18BE3E7B0026B00F /* CCNodeExtensions.m */,
-				A92B421B18BE3E7B0026B00F /* Joystick.h */,
-				A92B421C18BE3E7B0026B00F /* Joystick.m */,
-			);
-			name = Controls;
-			path = ../../../Common/Code/Controls;
-			sourceTree = "<group>";
-		};
 		A92DA8201427C6F00051AFFA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
@@ -358,6 +344,7 @@
 			isa = PBXGroup;
 			children = (
 				A9473D8214100EB3006F410C /* Classes */,
+				A9CCA38918E34F6800DDDBDC /* Controls */,
 				A946374918898D7B0097E355 /* iOS Support */,
 				A92DA8201427C6F00051AFFA /* Resources */,
 				A9BA3DFD18D21DB20077B14E /* cocos3d-GLSL */,
@@ -402,7 +389,6 @@
 				A97DA6691418056100D72A4B /* TileLayer.m */,
 				A9EB5D0C14103A8600240563 /* TileScene.h */,
 				A9EB5D0D14103A8600240563 /* TileScene.m */,
-				A92B421618BE3E7B0026B00F /* Controls */,
 			);
 			name = Classes;
 			path = CC3Demo3DTiles/Classes;
@@ -554,6 +540,20 @@
 				A9BA3E2F18D21DB20077B14E /* CC3TexturableRigidBones.vsh */,
 			);
 			path = VertexShaders;
+			sourceTree = "<group>";
+		};
+		A9CCA38918E34F6800DDDBDC /* Controls */ = {
+			isa = PBXGroup;
+			children = (
+				A9CCA38A18E34F6800DDDBDC /* CCNodeAdornments.h */,
+				A9CCA38B18E34F6800DDDBDC /* CCNodeAdornments.m */,
+				A9CCA38C18E34F6800DDDBDC /* CCNodeExtensions.h */,
+				A9CCA38D18E34F6800DDDBDC /* CCNodeExtensions.m */,
+				A9CCA38E18E34F6800DDDBDC /* Joystick.h */,
+				A9CCA38F18E34F6800DDDBDC /* Joystick.m */,
+			);
+			name = Controls;
+			path = ../Common/Code/Controls;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -738,12 +738,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A92B421D18BE3E7B0026B00F /* CCNodeAdornments.m in Sources */,
-				A92B421E18BE3E7B0026B00F /* CCNodeExtensions.m in Sources */,
+				A9CCA39018E34F6800DDDBDC /* CCNodeAdornments.m in Sources */,
+				A9CCA39118E34F6800DDDBDC /* CCNodeExtensions.m in Sources */,
 				A9473D8B14100EB3006F410C /* MainLayer.m in Sources */,
 				A9EB5D0E14103A8700240563 /* TileScene.m in Sources */,
 				A97DA66A1418056200D72A4B /* TileLayer.m in Sources */,
-				A92B421F18BE3E7B0026B00F /* Joystick.m in Sources */,
+				A9CCA39218E34F6800DDDBDC /* Joystick.m in Sources */,
 				A946375218898D7B0097E355 /* main.m in Sources */,
 				A946374F18898D7B0097E355 /* AppDelegate.m in Sources */,
 			);

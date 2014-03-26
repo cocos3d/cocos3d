@@ -1613,7 +1613,7 @@ typedef enum {
 #pragma mark CCRGBAProtocol and CCBlendProtocol support
 
 /**
- * Implementation of the CCRGBAProtocol color property.
+ * The average color of this node.
  *
  * Setting this property sets the same property on all child nodes.
  *
@@ -1625,7 +1625,7 @@ typedef enum {
  * Querying this property returns the average value of querying this property on all child nodes.
  * When querying this value on a large node assembly, be aware that this may be time-consuming.
  */
-@property(nonatomic, assign) ccColor3B color;
+@property(nonatomic, assign) CCColorRef color;
 
 /**
  * The average opacity of this node.

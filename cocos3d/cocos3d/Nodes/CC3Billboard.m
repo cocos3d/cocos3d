@@ -172,39 +172,39 @@
 
 #if CC3_CC2_CLASSIC
 /** Returns color of billboard if it has a color, otherwise falls back to superclass implementation. */
--(ccColor3B) color {
+-(CCColorRef) color {
 	return ([_billboard conformsToProtocol: @protocol(CCRGBAProtocol)])
 				? [((id<CCRGBAProtocol>)_billboard) color]
 				: [super color];
 }
 
 /** Also sets color of billboard if it can be set. */
--(void) setColor: (ccColor3B) color {
+-(void) setColor: (CCColorRef) color {
 	if ([_billboard conformsToProtocol: @protocol(CCRGBAProtocol)])
 		[((id<CCRGBAProtocol>)_billboard) setColor: color];
 	[super setColor: color];
 }
 
 /** Returns opacity of billboard if it has an opacity, otherwise falls back to superclass implementation. */
--(GLubyte) opacity {
+-(CCOpacity) opacity {
 	return ([_billboard conformsToProtocol: @protocol(CCRGBAProtocol)])
 				? [((id<CCRGBAProtocol>)_billboard) opacity]
 				: [super opacity];
 }
 
 /** Also sets opacity of billboard if it can be set. */
--(void) setOpacity: (GLubyte) opacity {
+-(void) setOpacity: (CCOpacity) opacity {
 	if ([_billboard conformsToProtocol: @protocol(CCRGBAProtocol)])
 		[((id<CCRGBAProtocol>)_billboard) setOpacity: opacity];
 	[super setOpacity: opacity];
 }
 #else
 /** Returns color of billboard if it exists, otherwise falls back to superclass implementation. */
--(ccColor3B) color { return _billboard ? _billboard.color.ccColor3b : [super color]; }
+-(CCColorRef) color { return _billboard ? _billboard.color : [super color]; }
 
 /** Also sets color of billboard if it can be set. */
--(void) setColor: (ccColor3B) color {
-	[_billboard setColor: [CCColor colorWithCcColor3b: color]];
+-(void) setColor: (CCColorRef) color {
+	_billboard.color color;
 	[super setColor: color];
 }
 
@@ -213,7 +213,7 @@
 
 /** Also sets opacity of billboard if it can be set. */
 -(void) setOpacity: (CCOpacity) opacity {
-	[_billboard setOpacity: opacity];
+	_billboard.opacity = opacity;
 	[super setOpacity: opacity];
 }
 #endif	// CC3_CC2_CLASSIC
@@ -761,9 +761,9 @@ static GLfloat deviceScaleFactor = 0.0f;
 
 -(NSString*) displayNodeNameSuffix { return @"BV-Billboard"; }
 
--(ccColor3B) displayNodeColor { return ccc3(0,255,255); }				// Cyan
+-(CCColorRef) displayNodeColor { return CCColorRefFromCCC4F(kCCC4FCyan); }	// Cyan
 
--(CCOpacity) displayNodeOpacity { return (kCCOpacityFull * 0.25); }		// Cyan is heavy...reduce to 25% opacity
+-(CCOpacity) displayNodeOpacity { return (kCCOpacityFull * 0.25); }			// Cyan is heavy...reduce to 25% opacity
 
 /** Get the mesh from the rectangular bounding mesh of the billboard node, which is used for node picking. */
 -(void) populateDisplayNode {
