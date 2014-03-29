@@ -277,15 +277,19 @@
 
 -(void) deleteShaderProgram: (GLuint) programID {
 	if ( !programID ) return;		// Silently ignore zero ID
-
+	
 	// If the program to be deleted is currently bound, force it to unbind first. Program deletion
 	// is deferred by the GL engine until the program is no longer in use. If the GL state is not
 	// updated, the program will not actually be deleted in the GL engine. This can occur, for
 	// instance, when closing 3D rendering temporarily within an app. The currently bound program
 	// will actually never be deleted. In addition, this state engine will continue to think it is
 	// bound, which can cause problems if a new shader program is later created with the same ID.
-	if (value_GL_CURRENT_PROGRAM == programID) [self useShaderProgram: 0];
-	
+	// This method can be invoked outside the render loop, including during autorelease deallocations,
+	// so, align the 2D state to ensure that 2D components will use the correct program.
+	if (value_GL_CURRENT_PROGRAM == programID) {
+		[self useShaderProgram: 0];
+		ccGLUseProgram(0);
+	}
 	glDeleteProgram(programID);
 	LogGLErrorTrace(@"glDeleteProgram(%u)", programID);
 }
