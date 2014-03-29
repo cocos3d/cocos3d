@@ -86,56 +86,48 @@
 
 @implementation CCNodeAdornmentOverlayFader
 
-@synthesize peakOpacity=_peakOpacity, adornmentNode=_adornmentNode;
+@synthesize peakOpacity=_peakOpacity, sprite=_sprite;
 
--(id) initWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode
-				peakOpacity: (CCOpacity) opacity
-			   fadeDuration: (CCTime) aDuration {
-	CC3Assert(aNode, @"CCNodeAdornment node must not be nil");
+-(id) initWithSprite: (CCSprite*) sprite
+		 peakOpacity: (CCOpacity) opacity
+		fadeDuration: (CCTime) aDuration {
+	CC3Assert(sprite, @"Sprite must not be nil");
 	if( (self = [super initWithActionDuration: aDuration]) ) {
 		_peakOpacity = opacity;
-		self.contentSize = aNode.contentSize;
-		aNode.visible = NO;
-		aNode.opacity = 0;
-		_adornmentNode = aNode;
-		[self addChild: aNode];
+		self.contentSize = sprite.contentSize;
+		sprite.visible = NO;
+		sprite.opacity = 0;
+		_sprite = sprite;
+		[self addChild: sprite];
 	}
 	return self;
 }
 
-+(id) adornmentWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode
-					 peakOpacity: (CCOpacity) opacity
-					fadeDuration: (CCTime) aDuration {
-	return [[self alloc] initWithAdornmentNode: aNode
-								   peakOpacity: opacity
-								  fadeDuration: (CCTime) aDuration];
++(id) adornmentWithSprite: (CCSprite*) sprite peakOpacity: (CCOpacity) opacity fadeDuration: (CCTime) aDuration {
+	return [[self alloc] initWithSprite: sprite peakOpacity: opacity fadeDuration: aDuration];
 }
 
--(id) initWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode peakOpacity: (CCOpacity) opacity {
-	return [self initWithAdornmentNode: aNode peakOpacity: opacity fadeDuration: kDefaultFadeDuration];
+-(id) initWithSprite: (CCSprite*) sprite peakOpacity: (CCOpacity) opacity {
+	return [self initWithSprite: sprite peakOpacity: opacity fadeDuration: kDefaultFadeDuration];
 }
 
-+(id) adornmentWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode peakOpacity: (CCOpacity) opacity {
-	return [[self alloc] initWithAdornmentNode: aNode peakOpacity: opacity];
++(id) adornmentWithSprite: (CCSprite*) sprite peakOpacity: (CCOpacity) opacity {
+	return [[self alloc] initWithSprite: sprite peakOpacity: opacity];
 }
 
--(id) initWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode {
-	return [self initWithAdornmentNode: aNode peakOpacity: kCCOpacityFull];
-}
+-(id) initWithSprite: (CCSprite*) sprite { return [self initWithSprite: sprite peakOpacity: kCCOpacityFull]; }
 
-+(id) adornmentWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode {
-	return [[self alloc] initWithAdornmentNode: aNode];
-}
++(id) adornmentWithSprite: (CCSprite*) sprite { return [[self alloc] initWithSprite: sprite]; }
 
 // When activated, make the adornment node visible and establish an action
 // to fade it in up to the peak opacity. The action is tagged so that it
 // can be easily found if it needs to be cancelled.
 -(void) activate {
-	[_adornmentNode stopActionByTag: kFadeActionTag];	// Cancel any existing fade action
+	[_sprite stopActionByTag: kFadeActionTag];	// Cancel any existing fade action
 	CCAction* fadeAction = [CCActionFadeTo actionWithDuration: self.actionDuration opacity: _peakOpacity];
 	fadeAction.tag = kFadeActionTag;
-	_adornmentNode.visible = YES;
-	[_adornmentNode runAction: fadeAction];
+	_sprite.visible = YES;
+	[_sprite runAction: fadeAction];
 }
 
 // When deactivated, establish an action sequence to first fade the adornment node
@@ -144,13 +136,13 @@
 // adornment node more efficient. The action is tagged so that it can be easily found
 // if it needs to be cancelled.
 -(void) deactivate {
-	[_adornmentNode stopActionByTag: kFadeActionTag];	// Cancel any existing fade action
+	[_sprite stopActionByTag: kFadeActionTag];	// Cancel any existing fade action
 	CCActionInterval* fadeAction = [CCActionFadeOut actionWithDuration: self.actionDuration];
 	CCActionInterval* hideAction = [CCActionHide action];
 	CCActionInterval* fadeThenHideAction = [CCActionSequence actionOne: fadeAction
 																   two: hideAction];
 	fadeThenHideAction.tag = kFadeActionTag;
-	[_adornmentNode runAction: fadeThenHideAction];
+	[_sprite runAction: fadeThenHideAction];
 }
 
 @end

@@ -146,80 +146,76 @@
 
 
 /**
- * An adornment CCNode that wraps a separate visible child CCNode, and implements the
- * CCNodeAdornmentProtocol such that, when activated, will fade the visible child CCNode
- * in over the adorned CCNode, and, when deactivated, will fade that child CCNode out to
- * make it invisible again. It is the child CCNode that defines what the actual adornment
- * will look like. That child may be any CCNode.
+ * An adornment CCNode that wraps a separate visible child CCSprite, and implements the
+ * CCNodeAdornmentProtocol such that, when activated, will fade the visible child CCSprite
+ * in over the adorned CCNode, and, when deactivated, will fade that child CCSprite out to
+ * make it invisible again. It is the child CCSprite that defines what the actual adornment
+ * will look like. That child may be any CCSprite.
  */
 @interface CCNodeAdornmentOverlayFader : CCNodeAdornmentBase {
-	CCNode<CCRGBAProtocol>* _adornmentNode;
+	CCSprite* _sprite;
 	CCOpacity _peakOpacity;
 }
 
-/**
- * The visible CCNode to be displayed as the visual child adornment.
- * Typically this will be a CCSprite, but may be any CCNode.
- */
-@property(nonatomic, readonly) CCNode<CCRGBAProtocol>* adornmentNode;
+/** The visible CCSprite to be displayed as the visual child adornment. */
+@property(nonatomic, readonly) CCSprite* sprite;
 
 /**
- * When activated, this CCNodeAdornmentOverlayFader instance will fade the adornmentNode
- * in from zero opacity to the value of this peakOpacity property, and when deactivated,
- * will fade the adornmentNode back to zero opacity.
+ * When activated, this CCNodeAdornmentOverlayFader instance will fade the sprite in from 
+ * zero opacity to the value of this peakOpacity property, and when deactivated, will fade 
+ * the adornmentNode back to zero opacity.
  *
- * This value defaults to kCCOpacityFull, indicating that the adornmentNode should fade
- * in from fully transparent to fully opaque. Setting this property to a lower value
- * will allow the base CCNode to remain partially visible, making the adornmentNode
- * appear as a "shine" over the base CCNode.
+ * This value defaults to kCCOpacityFull, indicating that the adornmentNode should fade in from 
+ * fully transparent to fully opaque. Setting this property to a lower value will allow the base 
+ * CCNode to remain partially visible, making the sprite appear as a "shine" over the base CCNode.
  */
 @property(nonatomic, assign) CCOpacity peakOpacity;
 
 /**
- * Initializes this instance to use the specified CCNode as the visual adornmentNode and,
- * when activated, to fade the adornmentNode in from fully transparent up to the specified
- * opacity, over the specified duration.
+ * Initializes this instance to use the specified CCSprite as the visual sprite and, when 
+ * activated, to fade the sprite in from fully transparent up to the specified opacity, 
+ * over the specified duration.
  */
--(id) initWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode
-				peakOpacity: (CCOpacity) opacity
-			   fadeDuration: (CCTime) aDuration;
+-(id) initWithSprite: (CCSprite*) sprite
+		 peakOpacity: (CCOpacity) opacity
+		fadeDuration: (CCTime) aDuration;
 
 /**
- * Allocates and initializes an autoreleased instance to use the specified CCNode
- * as the visual adornmentNode and, when activated, to fade the adornmentNode in
- * from fully transparent up to the specified opacity, over the specified duration.
+ * Allocates and initializes an autoreleased instance to use the specified CCSprite as the
+ * visual sprite and, when activated, to fade the sprite in from fully transparent up to 
+ * the specified opacity, over the specified duration.
  */
-+(id) adornmentWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode
-					 peakOpacity: (CCOpacity) opacity
-					fadeDuration: (CCTime) aDuration;
++(id) adornmentWithSprite: (CCSprite*) sprite
+			  peakOpacity: (CCOpacity) opacity
+			 fadeDuration: (CCTime) aDuration;
 
 /**
- * Initializes this instance to use the specified CCNode as the visual adornmentNode and,
- * when activated, to fade the adornmentNode in from fully transparent up to the specified
- * opacity. The fade duration will default to kDefaultFadeDuration.
- */
--(id) initWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode peakOpacity: (CCOpacity) opacity;
-
-/**
- * Allocates and initializes an autoreleased instance to use the specified CCNode as the
- * visual adornmentNode and, when activated, to fade the adornmentNode in from fully
- * transparent up to the specified opacity. The fade duration will default to kDefaultFadeDuration.
- */
-+(id) adornmentWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode peakOpacity: (CCOpacity) opacity;
-
-/**
- * Initializes this instance to use the specified CCNode as the visual adornmentNode and,
- * when activated, to fade the adornmentNode in from fully transparent to fully opaque.
+ * Initializes this instance to use the specified CCSprite as the visual sprite and, when 
+ * activated, to fade the sprite in from fully transparent up to the specified opacity. 
  * The fade duration will default to kDefaultFadeDuration.
  */
--(id) initWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode;
+-(id) initWithSprite: (CCSprite*) sprite peakOpacity: (CCOpacity) opacity;
 
 /**
- * Allocates and initializes an autoreleased instance to use the specified CCNode as the
- * visual adornmentNode and, when activated, to fade the adornmentNode in from fully
- * transparent fully opaque. The fade duration will default to kDefaultFadeDuration.
+ * Allocates and initializes an autoreleased instance to use the specified CCSprite as the
+ * visual sprite and, when activated, to fade the sprite in from fully transparent up to 
+ * the specified opacity. The fade duration will default to kDefaultFadeDuration.
  */
-+(id) adornmentWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode;
++(id) adornmentWithSprite: (CCSprite*) aNode peakOpacity: (CCOpacity) opacity;
+
+/**
+ * Initializes this instance to use the specified CCSprite as the visual sprite and,
+ * when activated, to fade the sprite in from fully transparent to fully opaque.
+ * The fade duration will default to kDefaultFadeDuration.
+ */
+-(id) initWithSprite: (CCSprite*) aNode;
+
+/**
+ * Allocates and initializes an autoreleased instance to use the specified CCSprite as the
+ * visual sprite and, when activated, to fade the sprite in from fully transparent fully opaque. 
+ * The fade duration will default to kDefaultFadeDuration.
+ */
++(id) adornmentWithSprite: (CCSprite*) aNode;
 
 @end
 
@@ -316,6 +312,8 @@
  * A concrete subclass of CCMenuItemToggle that supports a visual adornment via the 
  * AdornableCCNodeProtocol. When the menu item is selected by the user, the adornment will be
  * activated, and when the item is deselected by the user, the adornment will be deactivated.
+ *
+ * This control can only be used with Cocos2D v1 & v2.
  */
 @interface AdornableMenuItemToggle : CCMenuItemToggle<AdornableCCNodeProtocol> {
 	CCNode<CCNodeAdornmentProtocol>* _adornment;
@@ -330,6 +328,8 @@
  * A concrete subclass of CCMenuItemImage that supports a visual adornment via the
  * AdornableCCNodeProtocol. When the menu item is selected by the user, the adornment will be
  * activated, and when the item is deselected by the user, the adornment will be deactivated.
+ *
+ * This control can only be used with Cocos2D v1 & v2.
  */
 @interface AdornableMenuItemImage : CCMenuItemImage<AdornableCCNodeProtocol> {
 	CCNode<CCNodeAdornmentProtocol>* _adornment;
@@ -345,6 +345,8 @@
  * A concrete subclass of CCButton that supports a visual adornment via the AdornableCCNodeProtocol.
  * When the button is selected by the user, the adornment will be activated, and when the item is
  * deselected by the user, the adornment will be deactivated.
+ 
+ * This control can only be used with Cocos2D v3.
  */
 @interface AdornableButton : CCButton<AdornableCCNodeProtocol> {
 	CCNode<CCNodeAdornmentProtocol>* _adornment;

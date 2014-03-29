@@ -74,7 +74,7 @@
 
 // Gesture support under Android is less sophisticated and more challenging than under iOS.
 // When running on Android, avoid using gestures, and use underlying touch events instead.
-#define kShouldAvoidGestures			(APPORTABLE)
+#define kShouldUseGestures				(CC3_IOS && !APPORTABLE)
 
 @interface CC3Layer (TemplateMethods)
 -(BOOL) handleTouch: (UITouch*) touch ofType: (uint) touchType;
@@ -92,7 +92,7 @@
 	
 	// Set the userInteractionEnabled property to NO to control the scene using gestures,
 	// and to YES to control the scene using lower-level touch and mouse events.
-	self.userInteractionEnabled = kShouldAvoidGestures;
+	self.userInteractionEnabled = !kShouldUseGestures;
 	
 	[self addJoysticks];
 	[self addSwitchViewButton];
@@ -113,7 +113,18 @@
 	
 	_directionJoystick = [Joystick joystickWithThumb: jsThumb
 											 andSize: CGSizeMake(kJoystickSideLength, kJoystickSideLength)];
-	_directionJoystick.position = ccp(kJoystickPadding, kJoystickPadding);
+
+	// If you want to see the size of the Joystick backdrop, comment out the line above and
+	// uncomment the two lines below. This just adds a simple transparent white backdrop to
+	// demonstrate that the thumb and backdrop can be any CCNode, but normally you would use
+	// a cool graphical CCSprite for the Joystick backdrop.
+//	CCNode* jsBackdrop = [CCNodeColor nodeWithColor: [CCColor colorWithWhite: 1.0 alpha: 0.25]
+//											  width: kJoystickSideLength
+//											 height: kJoystickSideLength];
+//	_directionJoystick = [Joystick joystickWithThumb: jsThumb andBackdrop: jsBackdrop];
+
+	CGPoint jsMiddle = _directionJoystick.anchorPointInPoints;
+	_directionJoystick.position = ccp(jsMiddle.x + kJoystickPadding, jsMiddle.y + kJoystickPadding);
 	[self addChild: _directionJoystick];
 	
 	// The joystick that controls the player's (camera's) location
@@ -140,7 +151,7 @@
 	// The adornment is a ring that fades in around the button and fades out when the button
 	// is no longer selected.
 	CCSprite* ringSprite = [CCSprite spriteWithImageNamed: kButtonRingFileName];
-	adornment = [CCNodeAdornmentOverlayFader adornmentWithAdornmentNode: ringSprite];
+	adornment = [CCNodeAdornmentOverlayFader adornmentWithSprite: ringSprite];
 	adornment.zOrder = kAdornmentUnderZOrder;
 	
 	// The adornment could also be a "shine" image that is faded in on-top of the
@@ -148,7 +159,7 @@
 	// To try a "shine" adornment instead, uncomment the following.
 //	CCSprite* shineSprite = [CCSprite spriteWithImageNamed: kButtonShineFileName];
 //	shineSprite.color = ccYELLOW;
-//	adornment = [CCNodeAdornmentOverlayFader adornmentWithAdornmentNode: shineSprite
+//	adornment = [CCNodeAdornmentOverlayFader adornmentWithSprite: shineSprite
 //	 													    peakOpacity: kPeakShineOpacity];
 	
 	// Or the menu item adornment could be one that scales the menu item when activated.
@@ -164,13 +175,14 @@
 -(void) addInvasionButton {
 	_invasionButton = [AdornableButton buttonWithTitle: nil
 										   spriteFrame: [CCSpriteFrame frameWithImageNamed: kInvasionButtonFileName]];
+	[_invasionButton setTarget: self selector: @selector(invade:)];
 	_invasionButton.scale = kControlSizeScale;
 	[self addChild: _invasionButton];
 		
 	// The button uses an adornment, which is displayed whenever the button is selected. The adornment
 	// is a ring that fades in around the button and fades out when the button is no longer selected.
 	CCSprite* ringSprite = [CCSprite spriteWithImageNamed: kButtonRingFileName];
-	CCNodeAdornmentBase* adornment = [CCNodeAdornmentOverlayFader adornmentWithAdornmentNode: ringSprite];
+	CCNodeAdornmentBase* adornment = [CCNodeAdornmentOverlayFader adornmentWithSprite: ringSprite];
 	adornment.zOrder = kAdornmentUnderZOrder;
 	
 	// Attach the adornment to the button and center it
@@ -182,13 +194,14 @@
 -(void) addSunlightButton {
 	_sunlightButton = [AdornableButton buttonWithTitle: nil
 										   spriteFrame: [CCSpriteFrame frameWithImageNamed: kSunlightButtonFileName]];
+	[_sunlightButton setTarget: self selector: @selector(cycleLights:)];
 	_sunlightButton.scale = kControlSizeScale;
 	[self addChild: _sunlightButton];
 	
 	// The button uses an adornment, which is displayed whenever the button is selected. The adornment
 	// is a ring that fades in around the button and fades out when the button is no longer selected.
 	CCSprite* ringSprite = [CCSprite spriteWithImageNamed: kButtonRingFileName];
-	CCNodeAdornmentBase* adornment = [CCNodeAdornmentOverlayFader adornmentWithAdornmentNode: ringSprite];
+	CCNodeAdornmentBase* adornment = [CCNodeAdornmentOverlayFader adornmentWithSprite: ringSprite];
 	adornment.zOrder = kAdornmentUnderZOrder;
 	
 	// Attach the adornment to the button and center it
@@ -203,6 +216,7 @@
 -(void) addZoomButton {
 	_zoomButton = [AdornableButton buttonWithTitle: nil
 									   spriteFrame: [CCSpriteFrame frameWithImageNamed: kZoomButtonFileName]];
+	[_zoomButton setTarget: self selector: @selector(cycleZoom:)];
 	_zoomButton.scale = kControlSizeScale;
 	[self addChild: _zoomButton];
 	
@@ -210,7 +224,7 @@
 	// item uses a shine adornment, which is displayed whenever an item is selected.
 	CCSprite* shineSprite = [CCSprite spriteWithImageNamed: kButtonShineFileName];
 	shineSprite.color = [CCColor whiteColor];
-	CCNodeAdornmentBase* adornment = [CCNodeAdornmentOverlayFader adornmentWithAdornmentNode: shineSprite
+	CCNodeAdornmentBase* adornment = [CCNodeAdornmentOverlayFader adornmentWithSprite: shineSprite
 																				 peakOpacity: kPeakShineOpacity];
 	
 	// Attach the adornment to the button and center it
@@ -225,15 +239,15 @@
 -(void) addShadowButton {
 	_shadowButton = [AdornableButton buttonWithTitle: nil
 									   spriteFrame: [CCSpriteFrame frameWithImageNamed: kShadowButtonFileName]];
-	[_shadowButton setBackgroundSpriteFrame: [CCSpriteFrame frameWithImageNamed: kShadowButtonLatchedFileName]
-								   forState: CCControlStateSelected];
+	_shadowButton.togglesSelectedState = YES;
+	[_shadowButton setTarget: self selector: @selector(toggleShadows:)];
 	_shadowButton.scale = kControlSizeScale;
 	[self addChild: _shadowButton];
 	
 	// The button uses an adornment, which is displayed whenever the button is selected. The adornment
 	// is a ring that fades in around the button and fades out when the button is no longer selected.
 	CCSprite* ringSprite = [CCSprite spriteWithImageNamed: kButtonRingFileName];
-	CCNodeAdornmentBase* adornment = [CCNodeAdornmentOverlayFader adornmentWithAdornmentNode: ringSprite];
+	CCNodeAdornmentBase* adornment = [CCNodeAdornmentOverlayFader adornmentWithSprite: ringSprite];
 	adornment.zOrder = kAdornmentUnderZOrder;
 	
 	// Attach the adornment to the button and center it
@@ -247,7 +261,9 @@
  * to keep the joystick in the correct location within the new layer dimensions.
  */
 -(void) positionLocationJoystick {
-	_locationJoystick.position = ccp(self.contentSize.width - kJoystickSideLength - kJoystickPadding, kJoystickPadding);
+	CGPoint jsMiddle = _locationJoystick.anchorPointInPoints;
+	_locationJoystick.position = ccp(self.contentSize.width - (jsMiddle.x + kJoystickPadding),
+									 (jsMiddle.y + kJoystickPadding));
 }
 
 /**
@@ -329,16 +345,13 @@
 	// Determine an appropriate size for the HUD child window.
 	CGSize mySize = self.contentSize;
 	GLfloat hudSide = MIN(mySize.width, mySize.height) * 0.5 - (kHUDPadding * 2);
-	CGPoint hudPos = ccp(mySize.width - (hudSide + kHUDPadding),
-						 mySize.height - (hudSide + kHUDPadding));
-	CGSize hudSize = CGSizeMake(hudSide, hudSide);
 	
 	// Create the HUD CC3Layer, with a semi-transparent background, set its position
 	// to the touch-point (offset by the size of the layer), and set its final size.
 	// Start it with a small scale.
 	_hudLayer = [HUDLayer layer];
-	_hudLayer.position = ccpSub(touchPoint, ccpMult(ccpFromSize(hudSize), 0.5));
-	_hudLayer.contentSize = hudSize;
+	_hudLayer.position = touchPoint;
+	_hudLayer.contentSize = CGSizeMake(hudSide, hudSide);
 	_hudLayer.scale = 0.1;
 
 	// Create and add a new CC3Scene, containing just a copy of the rotating globe,
@@ -347,6 +360,9 @@
 
 	// Run actions to move and scale the HUD layer from its starting position
 	// and size to its final expanded position and size.
+	CGPoint hudMiddle = _hudLayer.anchorPointInPoints;
+	CGPoint hudPos = ccp(mySize.width - (hudMiddle.x + kHUDPadding),
+						 mySize.height - (hudMiddle.y + kHUDPadding));
 	[_hudLayer runAction: [CCActionMoveTo actionWithDuration: 1.0 position: hudPos]];
 	[_hudLayer runAction: [CCActionScaleTo actionWithDuration: 1.0 scale: 1.0]];
 	[self addChild: _hudLayer];
@@ -363,7 +379,7 @@
 	globe.location = kCC3VectorZero;
 	globe.rotation = kCC3VectorZero;
 	[globe runAction: [CCActionRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
-																				rotateBy: cc3v(0.0, 30.0, 0.0)]]];
+																					  rotateBy: cc3v(0.0, 30.0, 0.0)]]];
 	[hudScene addChild: globe];	
 	[hudScene createGLBuffers];		// Won't really do anything because the Globe mesh...
 									// ...has already been buffered in main scene
@@ -371,23 +387,19 @@
 	return hudScene;
 }
 
-/** Closes the HUD window by fading it and the scene out and then removing it using CCActions. */
+/** Closes the HUD window by using CCActions to fade it out and then remove it. */
 -(void) closeGlobeHUDFromTouchAt: (CGPoint) touchPoint {
 	[_hudLayer stopAllActions];
-	CCActionInterval* fadeLayer = [CCActionFadeTo actionWithDuration: 1.0 opacity: 0];
-	CCActionInterval* fadeScene = [CCActionFadeTo actionWithDuration: 1.0 opacity: 0];
+	CCActionInterval* fadeHUD = [CCActionFadeTo actionWithDuration: 1.0 opacity: 0];
 	CCActionInstant* removeHUD = [CCActionCallFunc actionWithTarget: self
 														   selector: @selector(removeGlobeHUD)];
-	[_hudLayer runAction: [CCActionSequence actionOne: fadeLayer two: removeHUD]];
-	[_hudLayer.cc3Scene runAction: fadeScene];
+	[_hudLayer runAction: [CCActionSequence actionOne: fadeHUD two: removeHUD]];
 }
 
 /** Removes the HUD window if it exists. */
 -(void) removeGlobeHUD {
-	if (_hudLayer) {
-		[self removeChild: _hudLayer cleanup: YES];
-		_hudLayer = nil;
-	}
+	if (_hudLayer) [self removeChild: _hudLayer cleanup: YES];
+	_hudLayer = nil;
 }
 
 /** Toggles between opening and closing the HUD window. */
@@ -433,7 +445,7 @@
  * to receive touch events in the middle of a pan or pinch.
  */
 -(void) onOpenCC3Layer {
-	if ( [self isTouchEnabled] ) return;
+	if (self.isUserInteractionEnabled) return;
 	
 	// Register for tap gestures to select 3D nodes.
 	// This layer has child buttons on it. To ensure that those buttons receive their

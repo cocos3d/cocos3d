@@ -59,7 +59,7 @@
 -(void) initQueuePriority {
 	
 #if CC3_IOS
-	self.queuePriority = ((CCConfiguration.sharedConfiguration.OSVersion >= kCCiOSVersion_5_0)
+	self.queuePriority = ((CCConfiguration.sharedConfiguration.OSVersion >= CCSystemVersion_iOS_5_0)
 						  ? DISPATCH_QUEUE_PRIORITY_BACKGROUND
 						  : DISPATCH_QUEUE_PRIORITY_LOW);
 #endif	// CC3_IOS

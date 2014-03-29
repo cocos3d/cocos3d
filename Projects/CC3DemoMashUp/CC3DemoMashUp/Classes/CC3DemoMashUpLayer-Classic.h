@@ -54,14 +54,14 @@
  * gestures or touch events.
  */
 @interface CC3DemoMashUpLayer : CC3Layer {
-	Joystick* directionJoystick;
-	Joystick* locationJoystick;
-	AdornableMenuItemImage* switchViewMI;
-	AdornableMenuItemImage* invasionMI;
-	AdornableMenuItemImage* sunlightMI;
-	AdornableMenuItemImage* zoomMI;
-	AdornableMenuItemImage* shadowMI;
-	CC3Layer* hudLayer;
+	Joystick* _directionJoystick;
+	Joystick* _locationJoystick;
+	AdornableMenuItemImage* _switchViewMI;
+	AdornableMenuItemImage* _invasionMI;
+	AdornableMenuItemImage* _sunlightMI;
+	AdornableMenuItemImage* _zoomMI;
+	AdornableMenuItemImage* _shadowMI;
+	CC3Layer* _hudLayer;
 }
 
 /**

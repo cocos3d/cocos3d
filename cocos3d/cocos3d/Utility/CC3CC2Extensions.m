@@ -193,20 +193,26 @@
 @implementation CCNode (CC3)
 
 #if CC3_CC2_CLASSIC
+
 -(BOOL) isRunningInActiveScene { return self.isRunning; }
 
 -(BOOL) paused { return self.isRunning; }
 
--(void) setPaused: (BOOL) shouldPause {
-	if (!shouldPause && !self.isRunning)
-		[self onEnter];
-	else if (shouldPause && self.isRunning)
-		[self onExit];
+-(void) setPaused: (BOOL) shouldPause {}
+
+-(BOOL) isUserInteractionEnabled { return self.isTouchEnabled || self.isMouseEnabled; }
+
+-(void) setUserInteractionEnabled: (BOOL) shouldEnable {
+	self.touchEnabled = shouldEnable;
+	self.mouseEnabled = shouldEnable;
 }
+
 #endif	// CC3_CC2_CLASSIC
 
 #if !CC3_CC2_CLASSIC
 -(void) scheduleUpdate {}
+-(NSInteger) mousePriority { return 0; }
+-(void) setMousePriority: (NSInteger) priority {}
 #endif	// !CC3_CC2_CLASSIC
 
 #if CC3_CC2_3
@@ -225,6 +231,12 @@
 #endif	// CC3_CC2_2
 
 -(BOOL) isTouchEnabled { return NO; }
+
+-(void) setTouchEnabled: (BOOL) touchEnabled {}
+
+-(BOOL) isMouseEnabled { return NO; }
+
+-(void) setMouseEnabled: (BOOL) isMouseEnabled {}
 
 #if CC3_CC2_3
 -(CGRect) globalBoundingBoxInPixels {
@@ -291,7 +303,7 @@
  */
 -(BOOL) cc3WillConsumeTouchEventAt: (CGPoint) viewPoint {
 	
-	if (self.isTouchEnabled &&
+	if (self.isUserInteractionEnabled &&
 		self.visible &&
 		self.isRunningInActiveScene &&
 		[self cc3ContainsTouchPoint: viewPoint] ) return YES;
@@ -357,8 +369,6 @@
 #endif
 
 #if CC3_IOS
--(BOOL) isMouseEnabled { return NO; }
--(void) setMouseEnabled: (BOOL) isMouseEnabled {}
 -(NSInteger) mousePriority { return 0; }
 -(void) setMousePriority: (NSInteger) priority {}
 #endif	// CC3_IOS

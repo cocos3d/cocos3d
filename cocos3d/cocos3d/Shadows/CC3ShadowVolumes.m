@@ -215,7 +215,7 @@
 /** A shadow volume only uses a material when it is to be visible during development. */
 -(void) checkShadowMaterial {
 	if ( !_shouldDrawTerminator && self.visible ) {
-		self.color = ccc3(85, 85, 85);	// Will lazily init material if needed
+		self.color = CCColorRefFromCCC4F(ccc4f(kCC3OneThird, kCC3OneThird, kCC3OneThird, 1.0));	// Will lazily init material if needed
 		self.opacity = (kCCOpacityFull * kCC3OneThird);
 	} else
 		self.material = nil;

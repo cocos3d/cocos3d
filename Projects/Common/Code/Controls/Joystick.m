@@ -43,8 +43,10 @@
 
 #if CC3_CC2_1
 #	define kJoystickEventPriority	kCCMenuTouchPriority
-#else
+#elif CC3_CC2_2
 #	define kJoystickEventPriority	kCCMenuHandlerPriority
+#else
+#	define kJoystickEventPriority	0
 #endif
 
 
@@ -59,11 +61,6 @@
 
 @synthesize velocity=_velocity, angularVelocity=_angularVelocity;
 
-/** The anchor point in terms of cocos2d points. */
--(CGPoint) anchorPointInPoints {
-	return ccpCompMult(ccpFromSize(self.contentSize), self.anchorPoint);
-}
-
 -(id) initWithThumb: (CCNode*) aNode andSize: (CGSize) size {
 	CC3Assert(aNode, @"Thumb node must not be nil");
 	if( (self = [super init]) ) {
@@ -71,10 +68,12 @@
 		_isTracking = NO;
 		_velocity = CGPointZero;
 		_angularVelocity = AngularPointZero;
+		self.anchorPoint = ccp(0.5f, 0.5f);
 
 		// Add thumb node as a child and position it at the center
-		// Must do following in this order: set thumb / set size / get anchor point
+		// Must do following in this order: add thumb / set size / get anchor point
 		_thumbNode = aNode;
+		_thumbNode.anchorPoint = ccp(0.5f, 0.5f);
 		[self addChild: _thumbNode z: 1];
 		self.contentSize = size;
 		[_thumbNode setPosition: self.anchorPointInPoints];
@@ -83,13 +82,8 @@
 }
 
 -(void) initializeEvents {
-#if CC3_CC2_CLASSIC
-	self.mousePriority = kJoystickEventPriority;
-	self.mouseEnabled = YES;
-	self.touchEnabled = YES;
-#else
 	self.userInteractionEnabled = YES;
-#endif	// CC3_CC2_CLASSIC
+	self.mousePriority = kJoystickEventPriority;
 }
 
 +(id) joystickWithThumb: (CCNode*) aNode andSize: (CGSize) size {
@@ -97,11 +91,11 @@
 }
 
 -(id) initWithThumb: (CCNode*) aNode andBackdrop: (CCNode*) bgNode {
-	CC3Assert(bgNode, @"Backdrop node must not be nil");
 	if( (self = [self initWithThumb: aNode andSize: bgNode.scaledSize]) ) {
 		// Position the background node at the center and behind the thumb node 
+		bgNode.anchorPoint = ccp(0.5f, 0.5f);
 		[bgNode setPosition: self.anchorPointInPoints];
-		[self addChild: bgNode z: 0];
+		if (bgNode) [self addChild: bgNode];
 	}
 	return self;
 }

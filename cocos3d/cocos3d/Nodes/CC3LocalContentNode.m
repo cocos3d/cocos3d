@@ -155,8 +155,8 @@
 #pragma mark Developer support
 
 /** Overridden to return local content box color */
--(ccColor3B) initialDescriptorColor {
-	return CCC3BFromCCC4F(self.initialLocalContentWireframeBoxColor);
+-(CCColorRef) initialDescriptorColor {
+	return CCColorRefFromCCC4F(self.initialLocalContentWireframeBoxColor);
 }
 
 /** Suffix used to name the local content wireframe. */
@@ -202,7 +202,7 @@
 -(ccColor4F) initialLocalContentWireframeBoxColor {
 	ccColor4F defaultColor = [[self class] localContentWireframeBoxColor];
 	return CCC4FAreEqual(defaultColor, kCCC4FBlackTransparent)
-				? ccc4FFromccc3B(self.color) 
+				? CCC4FFromCCColorRef(self.color) 
 				: defaultColor;
 }
 

@@ -83,6 +83,9 @@ typedef ccTime CCTime;
 #define CCActionEaseElasticOut	CCEaseElasticOut
 #define CCActionCallFunc		CCCallFunc
 
+#define CCSystemVersion_iOS_5_0 kCCiOSVersion_5_0
+#define CCSystemVersion_iOS_6_0 kCCiOSVersion_6_0_0
+
 #endif	// CC3_CC2_CLASSIC
 
 #if !CC3_CC2_CLASSIC
@@ -317,16 +320,29 @@ enum {
 @interface CCNode (CC3)
 
 #if CC3_CC2_CLASSIC
+
 /** Returns YES if the node is added to an active scene and neither it nor any of it's ancestors is paused. */
 @property(nonatomic,readonly) BOOL isRunningInActiveScene;
 
-/** If paused, no callbacks will be called, and no actions will be run. */
+/** 
+ * If paused, no callbacks will be called, and no actions will be run.
+ * For compatibility with Cocos2D v3. Setting this property does nothing.
+ */
 @property(nonatomic, assign) BOOL paused;
+
+/** Enables user interaction (either touch or mouse) on a node. */
+@property ( nonatomic, assign, getter = isUserInteractionEnabled ) BOOL userInteractionEnabled;
+
 #endif	// CC3_CC2_CLASSIC
 
 #if !CC3_CC2_CLASSIC
-/** For backwards compatibility with prior cocos2d versions. Does nothing. */
+
+/** For backwards compatibility with prior Cocos2D versions. Does nothing. */
 -(void) scheduleUpdate;
+
+/** Dummy property for compatibility with prior Cocos2D versions. Does nothing */
+@property (nonatomic, assign) NSInteger mousePriority;
+
 #endif	// !CC3_CC2_CLASSIC
 
 #if !CC3_CC2_1
@@ -342,8 +358,14 @@ enum {
  *
  * This implementation returns NO.
  */
-@property(nonatomic, readonly, getter=isTouchEnabled) BOOL touchEnabled;
+@property(nonatomic, readwrite, getter=isTouchEnabled) BOOL touchEnabled;
 
+/**
+ * Returns whether this node will receive mouse events.
+ *
+ * This implementation returns NO.
+ */
+@property (nonatomic, readwrite, getter=isMouseEnabled) BOOL mouseEnabled;
 
 /** Returns the bounding box of this CCNode, measured in pixels, in the global coordinate system. */
 @property (nonatomic, readonly) CGRect globalBoundingBoxInPixels;
@@ -482,8 +504,6 @@ enum {
 #endif
 
 #if CC3_IOS
-/** Dummy property for compatibility with apps that run both OSX and IOS. */
-@property (nonatomic, readwrite, getter=isMouseEnabled) BOOL mouseEnabled;
 /** Dummy property for compatibility with apps that run both OSX and IOS. */
 @property (nonatomic, assign) NSInteger mousePriority;
 #endif	// CC3_IOS

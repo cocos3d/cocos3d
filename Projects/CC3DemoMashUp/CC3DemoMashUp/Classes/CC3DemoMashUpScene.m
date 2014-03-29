@@ -162,8 +162,8 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 -(CCAction*) reverse;
 @end
 
-@interface CC3Node (TempalteMethods)
-@property(nonatomic, readonly) ccColor3B initialDescriptorColor;
+@interface CC3Node (TemplateMethods)
+@property(nonatomic, readonly) CCColorRef initialDescriptorColor;
 @end
 
 @implementation CC3DemoMashUpScene
@@ -1215,7 +1215,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	bmLabel.location = cc3v(-150.0, 75.0, 500.0);
 	bmLabel.rotation = cc3v(0.0, 180.0, 0.0);
 	bmLabel.uniformScale = 2.0;
-	bmLabel.color = ccc3(0, 220, 120);
+	bmLabel.color = CCColorRefFromCCC4F(ccc4f(0.0, 0.85, 0.45, 1.0));
 	bmLabel.shouldCullBackFaces = NO;			// Show from behind as well.
 	bmLabel.touchEnabled = YES;
 
@@ -1242,7 +1242,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 											 fontName: @"Marker Felt"
 											 fontSize: 18.0];
 	CC3Billboard* bb = [CC3Billboard nodeWithName: kBillboardName withBillboard: bbLabel];
-	bb.color = ccYELLOW;
+	bb.color = CCColorRefFromCCC4F(kCCC4FYellow);
 	
 	// The billboard is a one-sided rectangular mesh, and would not normally be visible from the
 	// back side. This is not an issue, since it is configured to always face the camera. However,
@@ -1647,7 +1647,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 #endif	// !CC3_GLSL
 
 	_fog.visible = NO;
-	_fog.color = ccc3(128, 128, 180);		// A slightly bluish fog.
+	_fog.color = CCColorRefFromCCC4F(ccc4f(0.5, 0.5, 0.75, 1.0));	// A slightly bluish fog.
 
 	// Choose one of GL_LINEAR, GL_EXP and GL_EXP2
 	_fog.attenuationMode = GL_EXP2;
@@ -1663,7 +1663,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// change the color of the fog from the original bluish to reddish, and back again.
 	GLfloat tintTime = 4.0f;
 	CCColorRef startColor = _fog.color;
-	CCColorRef endColor = CCColorRefFromCCC4F(ccc4f(0.7, 0.5, 0.5, 1.0));		// A slightly redish fog.
+	CCColorRef endColor = CCColorRefFromCCC4F(ccc4f(0.75, 0.5, 0.5, 1.0));		// A slightly redish fog.
 	CCActionInterval* tintDown = [CCActionTintTo actionWithDuration: tintTime color: endColor];
 	CCActionInterval* tintUp   = [CCActionTintTo actionWithDuration: tintTime color: startColor];
 	CCActionInterval* tintCycle = [CCActionSequence actionOne: tintDown two: tintUp];
@@ -3735,12 +3735,12 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	switch (_bmLabelMessageIndex) {
 		case 0:
 			bmLabel.labelString = @"Goodbye,\ncruel world.";
-			bmLabel.color = ccRED;
+			bmLabel.color = CCColorRefFromCCC4F(kCCC4FRed);
 			_bmLabelMessageIndex++;
 			break;
 		default:
 			bmLabel.labelString = @"Hello, world!";
-			bmLabel.color = ccc3(0, 220, 120);
+			bmLabel.color = CCColorRefFromCCC4F(ccc4f(0, 0.85, 0.5, 1.0));
 			_bmLabelMessageIndex = 0;
 			break;
 	}

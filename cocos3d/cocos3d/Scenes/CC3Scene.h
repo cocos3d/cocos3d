@@ -170,10 +170,10 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * is customized for your application. In most cases, you will add methods and state to
  * both your CC3Scene and CC3Layer subclasses to facilitate user interaction.
  * 
- * The CC3Layer and CC3Scene can process touch events. To enable touch event handling,
- * set the isTouchEnabled property of your customized CC3Layer to YES. Touch events are
- * forwarded from the CC3Layer to the touchEvent:at: method of your CC3Scene for handling
- * by your CC3Scene.
+ * The CC3Layer and CC3Scene can process touch events. To enable touch event handling, 
+ * set the userInteractionEnabled property of your customized CC3Layer to YES. Touch
+ * events are forwarded from the CC3Layer to the touchEvent:at: method of your CC3Scene 
+ * for handling by your CC3Scene.
  *
  * Since the touch-move events are both voluminous and seldom used, the implementation
  * of ccTouchMoved:withEvent: has been left out of the default CC3Layer implementation.
@@ -186,10 +186,10 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * which 3D node is under the touch point. Object picking is handled asynchronously, and
  * once the node is retrieved, the nodeSelected:byTouchEvent:at: callback method will be
  * invoked on your customized CC3Scene instance. You indicate which nodes in your scene
- * should respond to touch events by setting the isTouchEnabled property on those nodes
+ * should respond to touch events by setting the touchEnabled property on those nodes
  * that you want to trigger a touch event callback to the nodeSelected:byTouchEvent:at:
  * method. See the description of the nodeSelected:byTouchEvent:at: method and the
- * CC3Node isTouchEnabled property for useful hints about choosing which nodes to enable
+ * CC3Node touchEnabled property for useful hints about choosing which nodes to enable
  * for touch selection.
  *
  * Be aware that node picking from touch events is expensive, and you should override
@@ -1056,11 +1056,11 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  *
  * For node assemblies, the specified node will not necessarily be the individual
  * component or leaf node that was touched. The specified node will be the closest
- * structural ancestor of the leaf node that has the isTouchEnabled property set to YES.
+ * structural ancestor of the leaf node that has the touchEnabled property set to YES.
  *
  * For example, if the node representing a wheel of a car is touched, it may be more
  * desireable to identify the car as being the object of interest to be selected,
- * instead of the wheel. In this case, setting the isTouchEnabled property to YES
+ * instead of the wheel. In this case, setting the touchEnabled property to YES
  * on the car, but to NO on the wheel, will allow the wheel to be touched, but the
  * node received by this callback will be the car structural node.
  * 
@@ -1072,7 +1072,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * the invocation of either the updateBeforeTransform: and updateAfterTransform: methods.
  * This callback is invoked only once per event.
  * 
- * To enable touch events, set the isTouchEnabled property of the CC3Layer.
+ * To enable touch events, set the userInteractionEnabled property of the CC3Layer.
  *
  * Since the touch-move events are both voluminous and seldom used, the handling of
  * ccTouchMoved:withEvent: has been left out of the default CC3Layer implementation.
@@ -1091,7 +1091,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * touch-move and touch-up events in the touchEvent:at: method, and avoid propagating
  * them to the selection mechanism.
  * 
- * To enable a node to be selectable by touching, set the isTouchEnabled property
+ * To enable a node to be selectable by touching, set the touchEnabled property
  * of that node, or an ancestor node to YES. 
  *
  * This implementation does nothing. Subclasses that are interested in node picking

@@ -229,7 +229,7 @@
 	if (!_isRunning && shouldRun) [self resumeAllActions];
 	if (_isRunning && !shouldRun) [self pauseAllActions];
 	_isRunning = shouldRun;
-	for (CC3Node* child in _children) child.isRunning = _isRunning;
+	for (CC3Node* child in _children) child.isRunning = shouldRun;
 }
 
 
@@ -1947,9 +1947,7 @@ static GLuint lastAssignedNodeTag;
 
 -(void) cleanupActions {
 	[self stopAllActions];
-	for (CC3Node* child in _children) {
-		[child cleanupActions];
-	}
+	for (CC3Node* child in _children) [child cleanupActions];
 }
 
 // Deprecated
@@ -1959,6 +1957,7 @@ static GLuint lastAssignedNodeTag;
 #pragma mark Touch handling
 
 -(BOOL) isTouchEnabled { return _touchEnabled; }
+
 -(void) setTouchEnabled: (BOOL) canTouch { _touchEnabled = canTouch; }
 
 // Deprecated
@@ -2042,7 +2041,7 @@ static GLuint lastAssignedNodeTag;
 	return (CC3NodeDescriptor*)[self getNodeNamed: [self descriptorName]];
 }
 
--(ccColor3B) initialDescriptorColor { return CCC3BFromCCC4F(self.initialWireframeBoxColor); }
+-(CCColorRef) initialDescriptorColor { return CCColorRefFromCCC4F(self.initialWireframeBoxColor); }
 
 -(BOOL) shouldDrawDescriptor { return (self.descriptorNode != nil); }
 
@@ -2140,7 +2139,7 @@ static CGFloat descriptorFontSize = 8.0;
 -(ccColor4F) initialWireframeBoxColor {
 	ccColor4F defaultColor = [[self class] wireframeBoxColor];
 	return CCC4FAreEqual(defaultColor, kCCC4FBlackTransparent)
-				? ccc4FFromccc3B(self.color) 
+				? CCC4FFromCCColorRef(self.color)
 				: defaultColor;
 }
 
@@ -2227,7 +2226,7 @@ static ccColor4F wireframeBoxColor = { 1.0, 1.0, 0.0, 1.0 };	// kCCC4FYellow
 -(ccColor4F) initialDirectionMarkerColor {
 	ccColor4F defaultColor = [[self class] directionMarkerColor];
 	return CCC4FAreEqual(defaultColor, kCCC4FBlackTransparent)
-				? ccc4FFromccc3B(self.color)
+				? CCC4FFromCCColorRef(self.color)
 				: defaultColor;
 }
 

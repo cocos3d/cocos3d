@@ -39,13 +39,10 @@
 
 -(void) initializeControls {
 	_isTracking = NO;
-	
-#if CC3_CC2_CLASSIC
-	self.touchEnabled = YES;		// Enable touch event handling
+	self.anchorPoint = ccp(0.5f, 0.5f);
+	self.userInteractionEnabled = YES;
 	self.mousePriority = kHUDEventPriority;
-	self.mouseEnabled = YES;		// Enable mouse event handling under OSX
 	[self scheduleUpdate];
-#endif	// CC3_CC2_CLASSIC
 }
 
 -(NSInteger) mouseDelegatePriority { return kHUDEventPriority; }

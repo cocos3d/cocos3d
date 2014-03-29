@@ -139,7 +139,7 @@
 	// The adornment is a ring that fades in around the menu item and then fades out when
 	// the menu item is no longer selected.
 	CCSprite* ringSprite = [CCSprite spriteWithFile: kButtonRingFileName];
-	adornment = [CCNodeAdornmentOverlayFader adornmentWithAdornmentNode: ringSprite];
+	adornment = [CCNodeAdornmentOverlayFader adornmentWithSprite: ringSprite];
 	adornment.zOrder = kAdornmentUnderZOrder;
 	
 	// Attach the adornment to the menu item and center it on the menu item

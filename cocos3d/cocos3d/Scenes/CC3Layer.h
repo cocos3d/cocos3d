@@ -83,7 +83,7 @@
  * the CC3Layer. When compiling with versions of cocos2d 3.0 or higher, these callbacks will
  * happen automatically, and you do not need to invoke the scheduleUpdate method.
  *
- * To enable simple single-touch event handling for this layer, set the isTouchEnabled
+ * To enable simple single-touch event handling for this layer, set the userInteractionEnabled
  * property to YES. Once enabled, single-touch events will automatically be forwarded to
  * the touchEvent:at: method on your customized CC3Scene instance to support user selection
  * of 3D nodes via touches. For more information on handling 3D node selections, see the

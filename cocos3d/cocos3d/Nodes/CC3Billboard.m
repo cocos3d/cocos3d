@@ -77,7 +77,7 @@
 		self.blendFunc = ((id<CCBlendProtocol>)_billboard).blendFunc;
 	}
 	[self normalizeBillboardScaleToDevice];
-	if (self.isRunning) _billboard.paused = NO;	// If running, start scheduled activities on new billboard
+	if (self.isRunning) [self start2DBillboard];	// If running already, start scheduled activities on new billboard
 }
 
 -(void) setShouldDrawAs2DOverlay: (BOOL) drawAsOverlay {
@@ -97,13 +97,6 @@
 -(void) normalizeBillboardScaleToDevice {
 	if (!_shouldDrawAs2DOverlay && _shouldNormalizeScaleToDevice)
 		_billboard.scale = _billboard.billboard3DContentScaleFactor;
-}
-
-// Overridden to run or pause the CCNode
-// Thanks to cocos3d user Sev_Inf for submitting this patch
--(void) setIsRunning: (BOOL) shouldRun {
-    [super setIsRunning:shouldRun];
-	_billboard.paused = !shouldRun;
 }
 
 /** Returns whether the bounding rectangle needs to be measured on each update pass. */
@@ -204,7 +197,7 @@
 
 /** Also sets color of billboard if it can be set. */
 -(void) setColor: (CCColorRef) color {
-	_billboard.color color;
+	_billboard.color = color;
 	[super setColor: color];
 }
 
@@ -223,7 +216,7 @@
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		self.color = ccWHITE;
+		self.color =  CCColorRefFromCCC4F(kCCC4FWhite);
 		self.billboard = nil;
 		_billboardBoundingRect = CGRectNull;
 		_offsetPosition = CGPointZero;
@@ -340,6 +333,18 @@
 
 
 #pragma mark Updating
+
+/** Starts the 2D billboard. */
+-(void) start2DBillboard {
+	_billboard.paused = NO;
+	[_billboard onEnter];
+}
+
+/** Stops the 2D billboard. */
+-(void) stop2DBillboard {
+	_billboard.paused = YES;
+	[_billboard onExit];
+}
 
 -(void) alignToCamera:(CC3Camera*) camera {
 	if (camera && _billboard) {
@@ -603,12 +608,12 @@ static GLfloat deviceScaleFactor = 0.0f;
 
 - (void) resumeAllActions {
 	[super resumeAllActions];
-	_billboard.paused = NO;
+	[self start2DBillboard];
 }
 
 - (void) pauseAllActions {
 	[super pauseAllActions];
-	_billboard.paused = YES;
+	[self stop2DBillboard];
 }
 
 
@@ -928,33 +933,23 @@ static GLfloat deviceScaleFactor = 0.0f;
 #pragma mark -
 #pragma mark CCParticleSystemQuad extensions
 
-@implementation CCParticleSystemQuad (CC3)
+#if COCOS2D_VERSION >= 0x020100
+#	define CC2_QUADS _quads
+#	define CC2_PARTICLE_IDX _particleIdx
+#else
+#	define CC2_QUADS quads_
+#	define CC2_PARTICLE_IDX particleIdx
+#endif
 
 // cocos2d 1.0 and below use 2D structures for particle quad vertices
 // cocos2d 1.1 and above use 3D structures for particle quad vertices
-#if COCOS2D_VERSION < 0x010100
-	#define CC_PARTICLE_QUAD_TYPE ccV2F_C4B_T2F_Quad
+#if COCOS2D_VERSION >= 0x010100
+#	define CC_PARTICLE_QUAD_TYPE ccV3F_C4B_T2F_Quad
 #else
-	#define CC_PARTICLE_QUAD_TYPE ccV3F_C4B_T2F_Quad
+#	define CC_PARTICLE_QUAD_TYPE ccV2F_C4B_T2F_Quad
 #endif
 
-/** Returns a pointer to the internal quads. */
--(CC_PARTICLE_QUAD_TYPE*) cc3Quads {
-#if COCOS2D_VERSION < 0x020100
-	return quads_;
-#else
-	return _quads;
-#endif
-}
-
-/** Returns the particle index. */
--(NSUInteger) cc3ParticleIndex {
-#if COCOS2D_VERSION < 0x020100
-	return particleIdx;
-#else
-	return _particleIdx;
-#endif
-}
+@implementation CCParticleSystemQuad (CC3)
 
 /**
  * Find the absolute bottom left and top right from all four vertices in the quad,
@@ -974,28 +969,23 @@ static GLfloat deviceScaleFactor = 0.0f;
 
 /** Build the bounding box to encompass the locations of all of the particles. */
 -(CGRect) measureBoundingBoxInPixels {
-	// Must have at least one quad
-	NSUInteger partCnt = self.cc3ParticleIndex;
-	CC_PARTICLE_QUAD_TYPE* pQuads = self.cc3Quads;
+	
+	// Must have at least one quad, otherwise simply return a zero rect
+	if (!CC2_QUADS || CC2_PARTICLE_IDX == 0) return CGRectZero;
 
-	if (pQuads && partCnt > 0) {
-		// Get the first quad as a starting point
-		CGRect boundingRect = [self makeRectFromQuad: self.cc3Quads[0]];
-		
-		// Iterate through all the remaining quads, taking the union of the
-		// current bounding rect and each quad to find the rectangle that
-		// bounds all the quads.
-		for(NSUInteger i = 1; i < partCnt; i++) {
-			CGRect quadRect = [self makeRectFromQuad: pQuads[i]];
-			boundingRect = CGRectUnion(boundingRect, quadRect);
-		}
-		LogTrace(@"%@ bounding rect measured as %@ across %u active of %u possible particles",
-				 [self class], NSStringFromCGRect(boundingRect), particleIdx, totalParticles);
-		return boundingRect;
-	} else {
-		// Otherwise simply return a zero rect
-		return CGRectZero;
+	// Get the first quad as a starting point
+	CGRect boundingRect = [self makeRectFromQuad: CC2_QUADS[0]];
+	
+	// Iterate through all the remaining quads, taking the union of the
+	// current bounding rect and each quad to find the rectangle that
+	// bounds all the quads.
+	for(NSUInteger i = 1; i < CC2_PARTICLE_IDX; i++) {
+		CGRect quadRect = [self makeRectFromQuad: CC2_QUADS[i]];
+		boundingRect = CGRectUnion(boundingRect, quadRect);
 	}
+	LogTrace(@"%@ bounding rect measured as %@ across %u active of %u possible particles",
+			 [self class], NSStringFromCGRect(boundingRect), particleIdx, totalParticles);
+	return boundingRect;
 }
 
 @end
