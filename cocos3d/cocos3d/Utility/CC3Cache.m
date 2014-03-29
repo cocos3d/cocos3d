@@ -77,17 +77,23 @@
 
 -(void) removeObjectNamed: (NSString*) name {
 	if ( !name ) return;
-
+	
 	[self lock];
-
-#if LOGGING_REZLOAD
-	id obj = [[[_objectsByName objectForKey: name] retain] autorelease];	// Retain long enough to log
-#endif
+	
+	// If this cache is the only thing referencing the object, it will be deallocated immediately,
+	// which may interfere with with further processing of the removed object on this loop,
+	// including the auto-removal of weakly-cached objects from within the dealloc method of
+	// the removed object itself, resulting in a deadlock. To avoid this deadlock, the object
+	// is retained before removing it from the cache, and then autoreleased. In the case of a
+	// weakly-held value, we are careful to retain the NSValue wrapper, not the object itself,
+	// in case this removal is occurring from within the dealloc method of the object itself.
+	id obj = [[_objectsByName objectForKey: name] retain];
 	
 	[_objectsByName removeObjectForKey: name];
 	[self unlock];
-
+	
 	LogRezIf(obj != nil, @"Removed %@ named %@ from the %@ cache.", [[obj resolveWeakReference] class], name, _typeName);
+	[obj autorelease];		// Let the object go once the loop is done
 }
 
 -(void) removeAllObjects { [self removeAllObjectsOfType: NSObject.class]; }
