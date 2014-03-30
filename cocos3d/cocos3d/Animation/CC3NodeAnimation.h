@@ -207,7 +207,7 @@
  * NULL (the default). If you do not set an animation data property, the corresponding property
  * on the node will not be animated, and will retain its originally set value.
  *
- * For example, if you set only the animatedLocations property, and run a CC3Animate on the node,
+ * For example, if you set only the animatedLocations property, and run a CC3ActionAnimate on the node,
  * only the location of the node will move around during the animation. The remaining node
  * properties (quaternion & scale) will remain unchanged by the animation. The effect will be
  * that the node moves around, but remains at a fixed size, and oriented in a fixed rotation.
@@ -668,8 +668,8 @@
  *
  * It is important to understand that with multi-track animation, each animation track will
  * contribute to the node's animated properties according to its weight even in the absence of
- * a CC3Animate action running on that track. This is to ensure smooth transitions before and
- * after a CC3Animate is run. To stop a track from contributing to the animated properties of
+ * a CC3ActionAnimate action running on that track. This is to ensure smooth transitions before and
+ * after a CC3ActionAnimate is run. To stop a track from contributing to the animated properties of
  * the node, either set the value of this property to zero, or set the isEnabled property to NO.
  *
  * The initial value of this property is one.
@@ -903,7 +903,7 @@
  *
  * To animate this node, use this method to add one or more instances of a subclass of the
  * abstract CC3NodeAnimation class, populated with animation content, and then create an
- * instance of a CC3Animate action for each track, and selectively run them on this node.
+ * instance of a CC3ActionAnimate action for each track, and selectively run them on this node.
  */
 -(void) addAnimation: (CC3NodeAnimation*) animation asTrack: (GLuint) trackID;
 
@@ -1219,7 +1219,7 @@
  *
  * To animate this node, set this property to an instance of a subclass of the abstract
  * CC3NodeAnimation class, populated with animation content, and then create an instance
- * of a CC3Animate action, and run it on this node.
+ * of a CC3ActionAnimate action, and run it on this node.
  */
 @property(nonatomic, strong) CC3NodeAnimation* animation;
 
@@ -1524,7 +1524,7 @@
  * and one indicating the last animation frame. Only those transform properties for which there
  * is animation content will be changed.
  *
- * This method is usually invoked automatically from an active CC3Animate action during each update
+ * This method is usually invoked automatically from an active CC3ActionAnimate action during each update
  * cycle. Once all animation tracks have been updated accordingly, the node automatically blends
  * the weighted animation from each track to determine the corresponding values of the location,
  * quaternion and scale properties of this node.
@@ -1538,7 +1538,7 @@
  * from animation, and this method will not have any affect on this node. However, this method will
  * be propagated to child nodes.
  *
- * This method is invoked automatically from an instance of CC3Animate that is animating
+ * This method is invoked automatically from an instance of CC3ActionAnimate that is animating
  * this node. Usually, the application never needs to invoke this method directly.
  */
 -(void) establishAnimationFrameAt: (CCTime) t onTrack: (GLuint) trackID;

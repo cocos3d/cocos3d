@@ -215,9 +215,9 @@
 				// that each invader moves at its own speed.
 				CCActionInterval* invaderAction;
 				if (invader.containsAnimation)
-					invaderAction = [CC3Animate actionWithDuration: CC3RandomFloatBetween(2.5, 10.0)];
+					invaderAction = [CC3ActionAnimate actionWithDuration: CC3RandomFloatBetween(2.5, 10.0)];
 				else
-					invaderAction = [CC3RotateBy actionWithDuration: 1.0
+					invaderAction = [CC3ActionRotateBy actionWithDuration: 1.0
 														   rotateBy: cc3v(0.0, CC3RandomFloatBetween(30.0, 90.0), 0.0)];
 				
 				CCActionInterval* groundAction = [CCActionRepeat actionWithAction: invaderAction
@@ -226,7 +226,7 @@
 				// Create a landing action that is a bouncing drop of random duration, to simulate raining down.
 				CC3Vector landingLocation = cc3v(invader.location.x, 0.0, invader.location.z);
 				CCActionInterval* landingAction = [CCActionEaseBounceOut actionWithAction:
-														[CC3MoveTo actionWithDuration: CC3RandomFloatBetween(1.0, 2.0)
+														[CC3ActionMoveTo actionWithDuration: CC3RandomFloatBetween(1.0, 2.0)
 																			   moveTo: landingLocation]];
 				
 				// Set up a sequence on the invader...first drop, and then animate or rotate
@@ -252,7 +252,7 @@
 /** Uses a CCActionSequence action to first fade the army away and then remove it. */
 -(void) evaporate {
 	[self runAction: [CCActionSequence actionOne: [CCActionFadeOut actionWithDuration: 1.0]
-											 two: [CC3Remove action]]];
+											 two: [CC3ActionRemove action]]];
 }
 
 @end

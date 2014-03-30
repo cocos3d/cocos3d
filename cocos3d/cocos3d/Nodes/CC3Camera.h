@@ -945,9 +945,9 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
  * is finished, you should consider not using this method, and instead, use the
  * calculateLocationToShowAllOf:whileLookingAt:fromDirection:withPadding: method to
  * determine the location to move the camera to, and create a combination of actions
- * that include using the CC3MoveTo and CC3RotateToLookTowards actions in parallel,
- * plus a callback action once those actions are complete, to a method that will set
- * the appropriate target or targetLocation, and shouldTrackTarget properties.
+ * that include using the CC3ActionMoveTo and CC3ActionRotateToLookTowards actions in
+ * parallel, plus a callback action once those actions are complete, to a method that
+ * will set the appropriate target or targetLocation, and shouldTrackTarget properties.
  * See the implementation of this method for ideas.
  *
  * This method requires that the CC3Scene is attached to a CC3Layer that has a valid
@@ -987,9 +987,9 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
  * is finished, you should consider not using this method, and instead, use the
  * calculateLocationToShowAllOf:whileLookingAt:fromDirection:withPadding: method to
  * determine the location to move the camera to, and create a combination of actions
- * that include using the CC3MoveTo and CC3RotateToLookTowards actions in parallel,
- * plus a callback action once those actions are complete, to a method that will set
- * the appropriate target or targetLocation, and shouldTrackTarget properties.
+ * that include using the CC3ActionMoveTo and CC3ActionRotateToLookTowards actions in 
+ * parallel, plus a callback action once those actions are complete, to a method that
+ * will set the appropriate target or targetLocation, and shouldTrackTarget properties.
  * See the implementation of this method for ideas.
  *
  * This method requires that the CC3Scene is attached to a CC3Layer that has a valid
@@ -1023,9 +1023,9 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
  * is finished, you should consider not using this method, and instead, use the
  * calculateLocationToShowAllOf:whileLookingAt:fromDirection:withPadding: method to
  * determine the location to move the camera to, and create a combination of actions
- * that include using the CC3MoveTo and CC3RotateToLookTowards actions in parallel,
- * plus a callback action once those actions are complete, to a method that will set
- * the appropriate target or targetLocation, and shouldTrackTarget properties.
+ * that include using the CC3ActionMoveTo and CC3ActionRotateToLookTowards actions in 
+ * parallel, plus a callback action once those actions are complete, to a method that
+ * will set the appropriate target or targetLocation, and shouldTrackTarget properties.
  * See the implementation of this method for ideas.
  *
  * This method requires that the CC3Scene is attached to a CC3Layer that has a valid
@@ -1061,9 +1061,9 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
  * is finished, you should consider not using this method, and instead, use the
  * calculateLocationToShowAllOf:whileLookingAt:fromDirection:withPadding: method to
  * determine the location to move the camera to, and create a combination of actions
- * that include using the CC3MoveTo and CC3RotateToLookTowards actions in parallel,
- * plus a callback action once those actions are complete, to a method that will set
- * the appropriate target or targetLocation, and shouldTrackTarget properties.
+ * that include using the CC3ActionMoveTo and CC3ActionRotateToLookTowards actions in
+ * parallel, plus a callback action once those actions are complete, to a method that
+ * will set the appropriate target or targetLocation, and shouldTrackTarget properties.
  * See the implementation of this method for ideas.
  *
  * This method requires that the CC3Scene is attached to a CC3Layer that has a valid

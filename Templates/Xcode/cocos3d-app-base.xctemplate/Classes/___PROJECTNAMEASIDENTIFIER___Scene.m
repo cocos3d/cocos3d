@@ -154,9 +154,7 @@
 	
 	// Fetch the 'hello, world' object that was loaded from the POD file and start it rotating
 	CC3MeshNode* helloTxt = (CC3MeshNode*)[self getNodeNamed: @"Hello"];
-	CCActionInterval* partialRot = [CC3RotateBy actionWithDuration: 1.0
-														  rotateBy: cc3v(0.0, 30.0, 0.0)];
-	[helloTxt runAction: [CCRepeatForever actionWithAction: partialRot]];
+	[helloTxt runAction: [CC3ActionRotateForever actionWithRotationRate: cc3v(0, 30, 0)]];
 	
 	// To make things a bit more appealing, set up a repeating up/down cycle to
 	// change the color of the text from the original red to blue, and back again.
@@ -165,8 +163,7 @@
 	CCColorRef endColor = CCColorRefFromCCC4F(ccc4f(0.2, 0.0, 0.8, 1.0));
 	CCActionInterval* tintDown = [CCActionTintTo actionWithDuration: tintTime color: endColor];
 	CCActionInterval* tintUp   = [CCActionTintTo actionWithDuration: tintTime color: startColor];
-	CCActionInterval* tintCycle = [CCActionSequence actionOne: tintDown two: tintUp];
-	[helloTxt runAction: [CCActionRepeatForever actionWithAction: tintCycle]];
+	[helloTxt runAction: [[CCActionSequence actionOne: tintDown two: tintUp] repeatForever]];
 }
 
 /**

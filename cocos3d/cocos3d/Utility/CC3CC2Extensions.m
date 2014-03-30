@@ -105,68 +105,6 @@
 #endif		// !CC3_IOS
 
 
-#if COCOS2D_VERSION < 0x020100
-#	define CC2_DT dt
-#	define CC2_FRAME_RATE frameRate_
-#	define CC2_RUNNING_SCENE runningScene_
-#	define CC2_NEXT_SCENE nextScene_
-#	define CC2_LAST_DISPLAY_TIME lastDisplayTime_
-#else
-#	define CC2_DT _dt
-#	define CC2_FRAME_RATE _frameRate
-#	define CC2_RUNNING_SCENE _runningScene
-#	define CC2_NEXT_SCENE _nextScene
-#	define CC2_LAST_DISPLAY_TIME _lastDisplayTime
-#endif
-
-#if !CC3_IOS
-#	undef CC2_LAST_DISPLAY_TIME
-#	define CC2_LAST_DISPLAY_TIME 0
-#endif
-
-#pragma mark -
-#pragma mark CC3CCSizeTo action
-
-@implementation CC3CCSizeTo
-
--(id) initWithDuration: (CCTime) dur sizeTo: (CGSize) endSize {
-	if( (self = [super initWithDuration: dur]) ) {
-		endSize_ = endSize;
-	}
-	return self;
-}
-
-+(id) actionWithDuration: (CCTime) dur sizeTo: (CGSize) endSize {
-	return [[[self alloc] initWithDuration: dur sizeTo: endSize] autorelease];
-}
-
--(id) copyWithZone: (NSZone*) zone {
-	return [[[self class] allocWithZone: zone] initWithDuration: [self duration]
-														 sizeTo: endSize_];
-}
-
--(id) reverse { return [[self class] actionWithDuration: self.duration  sizeTo: endSize_]; }
-
--(void) startWithTarget: (CCNode*) aTarget {
-	[super startWithTarget: aTarget];
-	startSize_ = aTarget.contentSize;
-	sizeChange_ = CGSizeMake(endSize_.width - startSize_.width, endSize_.height - startSize_.height);
-}
-
--(void) update: (CCTime) t {
-	CCNode* tNode = (CCNode*)self.target;
-	tNode.contentSize = CGSizeMake(startSize_.width + (sizeChange_.width * t),
-								   startSize_.height + (sizeChange_.height * t));
-}
-
--(NSString*) description {
-	return [NSString stringWithFormat: @"%@ start: %@, end: %@, time change: %@", [self class],
-			NSStringFromCGSize(startSize_), NSStringFromCGSize(endSize_), NSStringFromCGSize(sizeChange_)];
-}
-
-@end
-
-
 #if CC3_CC2_CLASSIC
 
 #pragma mark -
@@ -478,6 +416,25 @@
 
 #pragma mark -
 #pragma mark CCDirector extension
+
+#if COCOS2D_VERSION < 0x020100
+#	define CC2_DT dt
+#	define CC2_FRAME_RATE frameRate_
+#	define CC2_RUNNING_SCENE runningScene_
+#	define CC2_NEXT_SCENE nextScene_
+#	define CC2_LAST_DISPLAY_TIME lastDisplayTime_
+#else
+#	define CC2_DT _dt
+#	define CC2_FRAME_RATE _frameRate
+#	define CC2_RUNNING_SCENE _runningScene
+#	define CC2_NEXT_SCENE _nextScene
+#	define CC2_LAST_DISPLAY_TIME _lastDisplayTime
+#endif
+
+#if !CC3_IOS
+#	undef CC2_LAST_DISPLAY_TIME
+#	define CC2_LAST_DISPLAY_TIME 0
+#endif
 
 @implementation CCDirector (CC3)
 

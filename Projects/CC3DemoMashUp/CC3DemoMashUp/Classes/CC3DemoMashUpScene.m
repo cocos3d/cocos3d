@@ -504,8 +504,8 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// To see the effect of mounting a camera on a moving object, uncomment the following
 	// lines to mount the camera on a virtual boom attached to the beach ball.
 	// Since the beach ball rotates as it bounces, you might also want to comment out the
-	// CC3RotateBy action that is run on the beachBall in the addBeachBall method!
-//	[beachBall addChild: cam];				// Mount the camera on the beach ball
+	// CC3ActionRotateForever action that is run on the beach ball in the addBeachBall method!
+//	[_beachBall addChild: cam];				// Mount the camera on the beach ball
 //	cam.location = cc3v(2.0, 1.0, 0.0);		// Relative to the parent beach ball
 //	cam.rotation = cc3v(0.0, 90.0, 0.0);	// Point camera out over the beach ball
 
@@ -513,9 +513,9 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// location or object, even as the moving object bounces and rotates, uncomment the following
 	// lines to mount the camera on a virtual boom attached to the beach ball, but stay pointed at
 	// the moving rainbow teapot, even as the beach ball that the camera is mounted on bounces and
-	// rotates. In this case, you do not need to comment out the CC3RotateBy action that is run on
-	// the beachBall in the addBeachBall method
-//	[beachBall addChild: cam];				// Mount the camera on the beach ball
+	// rotates. In this case, you do not need to comment out the CC3ActionRotateForever action that
+	// is run on the beach ball in the addBeachBall method
+//	[_beachBall addChild: cam];				// Mount the camera on the beach ball
 //	cam.location = cc3v(2.0, 1.0, 0.0);		// Relative to the parent beach ball
 //	cam.target = teapotSatellite;			// Look toward the rainbow teapot...
 //	cam.shouldTrackTarget = YES;			// ...and track it as it moves
@@ -740,12 +740,10 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// Fade the floating ring in and out
 	CCActionInterval* fadeOut = [CCActionFadeOut actionWithDuration: 5.0];
 	CCActionInterval* fadeIn = [CCActionFadeIn actionWithDuration: 5.0];
-	CCActionInterval* fadeCycle = [CCActionSequence actionOne: fadeOut two: fadeIn];
-	[floater runAction: [CCActionRepeatForever actionWithAction: fadeCycle]];
+	[floater runAction: [[CCActionSequence actionOne: fadeOut two: fadeIn] repeatForever]];
 	
 	// Rotate the floating ring to see the effect on the orientation of the plane normals
-	[floater runAction: [CCActionRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
-																						rotateBy: cc3v(0.0, 30.0, 0.0)]]];
+	[floater runAction: [CC3ActionRotateForever actionWithRotationRate: cc3v(0.0, 30.0, 0.0)]];
 }
 
 /** Utility method to copy a file from the resources directory to the Documents directory */
@@ -803,18 +801,16 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	CC3Vector landingLocation = dropLocation;
 	landingLocation.y = _ground.location.y + 30.0f;
 	
-	CCActionInterval* dropAction = [CC3MoveTo actionWithDuration: hangTime moveTo: landingLocation];
+	CCActionInterval* dropAction = [CC3ActionMoveTo actionWithDuration: hangTime moveTo: landingLocation];
 	dropAction = [CCActionEaseOut actionWithAction: [CCActionEaseIn actionWithAction: dropAction rate: 4.0f] rate: 1.6f];
 	
-	CCActionInterval* riseAction = [CC3MoveTo actionWithDuration: hangTime moveTo: dropLocation];
+	CCActionInterval* riseAction = [CC3ActionMoveTo actionWithDuration: hangTime moveTo: dropLocation];
 	riseAction = [CCActionEaseIn actionWithAction: [CCActionEaseOut actionWithAction: riseAction rate: 4.0f] rate: 1.6f];
 	
-	CCActionInterval* bounce = [CCActionSequence actionOne: dropAction two: riseAction];
-	[_beachBall runAction: [CCActionRepeatForever actionWithAction: bounce]];
+	[_beachBall runAction: [[CCActionSequence actionOne: dropAction two: riseAction] repeatForever]];
 	
 	// For extra realism, also rotate the beach ball as it bounces.
-	[_beachBall runAction: [CCActionRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
-																					rotateBy: cc3v(30.0, 0.0, 45.0)]]];
+	[_beachBall runAction: [CC3ActionRotateForever actionWithRotationRate: cc3v(30.0, 0.0, 45.0)]];
 	
 	// Beach ball is added on on background thread. Configure it for the scene, and fade it in slowly.
 	[self configureForScene: _beachBall andMaterializeWithDuration: kFadeInDuration];
@@ -844,8 +840,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	_globe.touchEnabled = YES;				// allow this node to be selected by touch events
 	
 	// Rotate the globe
-	[_globe runAction: [CCActionRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
-																				 rotateBy: cc3v(0.0, 30.0, 0.0)]]];
+	[_globe runAction: [CC3ActionRotateForever actionWithRotationRate: cc3v(0.0, 30.0, 0.0)]];
 	
 	// Cube is added on on background thread. Configure it for the scene, and fade it in slowly.
 	[self configureForScene: _globe andMaterializeWithDuration: kFadeInDuration];
@@ -1032,14 +1027,12 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// Rotate the teapots. The satellite orbits the reflective teapot because it is a child node of the
 	// reflective teapot, and orbits as the parent node rotates. We give the rotation action a tag so we can
 	// find it again when the satellite teapot collides with the brick wall and we need to change the motion.
-	CCAction* teapotSpinAction = [CCActionRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
-																						   rotateBy: cc3v(0.0, 60.0, 0.0)]];
+	CCAction* teapotSpinAction =  [CC3ActionRotateForever actionWithRotationRate: cc3v(0.0, 60.0, 0.0)];
 	teapotSpinAction.tag = kTeapotRotationActionTag;
 	[_teapotTextured runAction: teapotSpinAction];
 
 	 // For effect, also rotate the satellite around its own axes.
-	[_teapotSatellite runAction: [CCActionRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
-																						   rotateBy: cc3v(30.0, 0.0, 45.0)]]];
+	[_teapotSatellite runAction: [CC3ActionRotateForever actionWithRotationRate: cc3v(30.0, 0.0, 45.0)]];
 }
 
 /**
@@ -1122,18 +1115,17 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// Start the animation of the robot arm and bouncing lamp from the PVR POD file contents.
 	// But we'll have a bit of fun with the animation, as follows.
 	// The basic animation in the POD pirouettes the robot arm in a complex movement...
-	CCActionInterval* pirouette = [CC3Animate actionWithDuration: 5.0];
+	CCActionInterval* pirouette = [CC3ActionAnimate actionWithDuration: 5.0];
 	
 	// Extract only the initial bending-down motion from the animation, reverse it to create
 	// a stand-up motion, and paste the two actions together to create a bowing motion.
-	CCActionInterval* bendDown = [CC3Animate actionWithDuration: 1.8 limitFrom: 0.0 to: 0.15];
+	CCActionInterval* bendDown = [CC3ActionAnimate actionWithDuration: 1.8 limitFrom: 0.0 to: 0.15];
 	CCActionInterval* standUp = [bendDown reverse];
 	CCActionInterval* takeABow = [CCActionSequence actionOne: bendDown two: standUp];
 	
 	// Now...put it all together. The robot arm performs its pirouette, and then takes a bow,
 	// over and over again.
-	[podRezNode runAction: [CCActionRepeatForever actionWithAction: [CCActionSequence actionOne: pirouette
-																				two: takeABow]]];
+	[podRezNode runAction: [[CCActionSequence actionOne: pirouette two: takeABow] repeatForever]];
 }
 
 /**
@@ -1222,8 +1214,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// Label is added on on background thread. Configure it for the scene, and fade it in slowly.
 	[self configureForScene: bmLabel andMaterializeWithDuration: kFadeInDuration];
 	[self addChild: bmLabel];
-	[bmLabel runAction: [CCActionRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
-																				  rotateBy: cc3v(0, 30, 0)]]];
+	[bmLabel runAction: [CC3ActionRotateForever actionWithRotationRate: cc3v(0, 30, 0)]];
 }
 
 /**
@@ -1666,8 +1657,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	CCColorRef endColor = CCColorRefFromCCC4F(ccc4f(0.75, 0.5, 0.5, 1.0));		// A slightly redish fog.
 	CCActionInterval* tintDown = [CCActionTintTo actionWithDuration: tintTime color: endColor];
 	CCActionInterval* tintUp   = [CCActionTintTo actionWithDuration: tintTime color: startColor];
-	CCActionInterval* tintCycle = [CCActionSequence actionOne: tintDown two: tintUp];
-	[_fog runAction: [CCActionRepeatForever actionWithAction: tintCycle]];
+	[_fog runAction: [[CCActionSequence actionOne: tintDown two: tintUp] repeatForever]];
 }
 
 /**
@@ -1714,12 +1704,10 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	malletAndAnvils.rotation = cc3v(0.0, -45.0, 0.0);
 	malletAndAnvils.uniformScale = 0.15;
 	
-	CCActionInterval* hammering = [CC3Animate actionWithDuration: 3.0];
-	[malletAndAnvils runAction: [CCActionRepeatForever actionWithAction: hammering]];
+	[malletAndAnvils runAction: [[CC3ActionAnimate actionWithDuration: 3.0] repeatForever]];
 
 	// Spin the mallet and anvils around for effect
-	[malletAndAnvils runAction: [CCActionRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
-																						  rotateBy: cc3v(0.0, 10.0, 0.0)]]];
+	[malletAndAnvils runAction: [CC3ActionRotateForever actionWithRotationRate: cc3v(0.0, 10.0, 0.0)]];
 
 	// Mallet is added on on background thread. Configure it for the scene, and fade it in slowly.
 	[self configureForScene: malletAndAnvils andMaterializeWithDuration: kFadeInDuration];
@@ -1818,14 +1806,12 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 
 	// Run, man, run!
 	// The POD node contains animation to move the skinned character through a running stride.
-	CCActionInterval* stride = [CC3Animate actionWithDuration: 2.4];
-	[runner runAction: [CCActionRepeatForever actionWithAction: stride]];
+	[runner runAction: [[CC3ActionAnimate actionWithDuration: 2.4] repeatForever]];
 
 	// Make him run around a circular track by rotating the "track" around the scene's center,
-	// and it will carry the man around in a circle with it. By trial and error, set the
-	// rotation to match to take 15 seconds for a full circle, to match the man's stride.
-	CCActionInterval* runLap = [CC3RotateBy actionWithDuration: 30.0 rotateBy: cc3v(0.0, 360.0, 0.0)];
-	[runningTrack runAction: [CCActionRepeatForever actionWithAction: runLap]];
+	// and it will carry the man around in a circle with it. By trial and error, set the rotation
+	// to take 15 seconds for a full circle, to match the man's stride.
+	[runningTrack runAction: [CC3ActionRotateForever actionWithRotationRate: cc3v(0.0, 12.0, 0.0)]];
 
 	// To demonstrate copying of skinned nodes, add another runner that is a copy, but smaller and
 	// with a faster stride. We don't want the runner's POD camera or light, so we'll retrieve the
@@ -1840,8 +1826,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	littleBrother.touchEnabled = YES;			// make the runner touchable
 	
 	[runningTrack addChild: littleBrother];
-	stride = [CC3Animate actionWithDuration: 1.6];
-	[littleBrother runAction: [CCActionRepeatForever actionWithAction: stride]];
+	[littleBrother runAction: [[CC3ActionAnimate actionWithDuration: 1.6] repeatForever]];
 
 #if !CC3_OGLES_1
 	// If cube-maps are available, give the little runner a reflective coating. This is done
@@ -2043,10 +2028,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 
 	emitter.touchEnabled = YES;		// Shows the emitter name when touched
 	
-	// Set the location of the emitter, and set it rotating for effect.
+	// Set the location of the emitter, and optionally set it rotating for effect.
 	emitter.location = cc3v(0.0, 150.0, kParticlesPerSide * kParticlesSpacing / 2.0f);
-//	[emitter runAction: [CCActionRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
-//																				  rotateBy: cc3v(0.0, 15.0, 0.0)]]];
+//	[emitter runAction: [CC3ActionRotateForever actionWithRotationRate: cc3v(0.0, 15.0, 0.0)]];
 	[self addChild: emitter];
 
 //	[emitter emitParticles: emitter.maximumParticleCapacity];	// Uncomment to get them all out at once
@@ -2113,10 +2097,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	
 	emitter.touchEnabled = YES;		// Shows the emitter name when touched
 	
-	// Set the location of the emitter, and set it rotating for effect.
+	// Set the location of the emitter, and optionally set it rotating for effect.
 	emitter.location = cc3v(0.0, 150.0, kParticlesPerSide * kParticlesSpacing / 2.0f);
-//	[emitter runAction: [CCActionRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
-//																				  rotateBy: cc3v(0.0, 15.0, 0.0)]]];
+//	[emitter runAction: [CC3ActionRotateForever actionWithRotationRate: cc3v(0.0, 15.0, 0.0)]];
 	[self addChild: emitter];
 	
 //	[emitter emitParticles: emitter.maximumParticleCapacity];	// Uncomment to get them all out at once
@@ -2430,7 +2413,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 
 	// Make the mask touchable and animate it.
 	mask.isTouchEnabled = YES;
-	[mask runAction: [CCActionRepeatForever actionWithAction: [CC3Animate actionWithDuration: 10.0]]];
+	[mask runAction: [[CC3ActionAnimate actionWithDuration: 10.0] repeatForever]];
 }
 
 /**
@@ -2475,8 +2458,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	
 	// Make the mask touchable and animate it.
 	mask.isTouchEnabled = YES;
-	[mask runAction: [CCActionRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
-																			   rotateBy: cc3v(0.0, 30.0, 0.0)]]];
+	[mask runAction: [CC3ActionRotateForever actionWithRotationRate: cc3v(0.0, 30.0, 0.0)]];
 }
 
 /**
@@ -2553,8 +2535,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// Now create an animate action to actually run the flapping animation, and make it repeat
 	// in a loop. We give it a known tag so that we can identify it to stop it later, after
 	// we transition to a different movement.
-	CC3Animate* flap = [CC3Animate actionWithDuration: 1.5 onTrack: _dragonFlapTrack];
-	CCAction* flapping = [CCActionRepeatForever actionWithAction: flap];
+	CCAction* flapping = [[CC3ActionAnimate actionWithDuration: 1.5 onTrack: _dragonFlapTrack] repeatForever];
 	flapping.tag = kFlappingActionTag;
 	[_dragon runAction: flapping];
 	_dragonMotion = kDragonFlapping;	// Keep track of which animation is currently active
@@ -2567,8 +2548,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	_dragon.location = cc3v(0, 500, 1300);
 	_dragon.rotation = cc3v(0, -90, 15);
 	_dragon.uniformScale = 5.0;
-	[flightPath runAction: [CCActionRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
-																				  rotateBy: cc3v(0, -15, 0)]]];
+	[flightPath runAction: [CC3ActionRotateForever actionWithRotationRate: cc3v(0, -15, 0)]];
 
 	// Dragon is added on on background thread. Configure it for the scene, and fade it in slowly.
 	[self configureForScene: _dragon andMaterializeWithDuration: kFadeInDuration];
@@ -3007,7 +2987,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	CC3Camera* cam = self.activeCamera;
 	cam.target = nil;			// Ensure the camera is not locked to the original target
 	[cam stopAllActions];
-	[cam runAction: [CC3RotateToLookAt actionWithDuration: 2.0 targetLocation: _camTarget.globalLocation]];
+	[cam runAction: [CC3ActionRotateToLookAt actionWithDuration: 2.0 targetLocation: _camTarget.globalLocation]];
 	LogInfo(@"Camera target toggled to %@", _camTarget);
 }
 
@@ -3185,9 +3165,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 		default:
 			self.shouldDrawDescriptor = NO;
 			self.shouldDrawWireframeBox = NO;
-			[cam runAction: [CC3MoveTo actionWithDuration: kCameraMoveDuration
+			[cam runAction: [CC3ActionMoveTo actionWithDuration: kCameraMoveDuration
 												   moveTo: _lastCameraOrientation.startLocation]];
-			[cam runAction: [CC3RotateToLookTowards actionWithDuration: kCameraMoveDuration
+			[cam runAction: [CC3ActionRotateToLookTowards actionWithDuration: kCameraMoveDuration
 													  forwardDirection: _lastCameraOrientation.direction]];
 			_cameraZoomType = kCameraZoomNone;	// Mark new state
 			break;
@@ -3491,7 +3471,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// Use actions to fade the descriptor node in and then out, and remove it when done.
 	CCActionInterval* fadeIn = [CCActionFadeIn actionWithDuration: 0.2];
 	CCActionInterval* fadeOut = [CCActionFadeOut actionWithDuration: 5.0];
-	CCActionInstant* remove = [CC3Remove action];
+	CCActionInstant* remove = [CC3ActionRemove action];
 	dn.opacity = 0;		// Start invisible
 	[dn runAction: [CCActionSequence actions: fadeIn, fadeOut, remove, nil]];
 	
@@ -3564,7 +3544,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 /** When the brick wall is touched, slide it back and forth to open or close it. */
 -(void) touchBrickWallAt: (CGPoint) touchPoint {
 	CC3Vector destination = _brickWall.isOpen ? kBrickWallClosedLocation : kBrickWallOpenLocation;
-	CCActionInterval* moveAction = [CC3MoveTo actionWithDuration: 3.0 moveTo: destination];
+	CCActionInterval* moveAction = [CC3ActionMoveTo actionWithDuration: 3.0 moveTo: destination];
 	// Add a little bounce for realism.
 	moveAction = [CCActionEaseElasticOut actionWithAction: moveAction period: 0.5];
 	[_brickWall stopAllActions];
@@ -3806,15 +3786,14 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 -(void)	dragonTransitionToGliding {
 	
 	// Create the gliding animation action and start it running on the dragon
-	CC3Animate* glide = [CC3Animate actionWithDuration: 2.0 onTrack: _dragonGlideTrack];
-	CCAction* gliding = [CCActionRepeatForever actionWithAction: glide];
+	CCAction* gliding = [[CC3ActionAnimate actionWithDuration: 2.0 onTrack: _dragonGlideTrack] repeatForever];
 	gliding.tag = kGlidingActionTag;
 	[_dragon runAction: gliding];
 	
 	// The dragon is currently running the flapping animation at full weight and the gliding animation
 	// at zero weight. Cross-fade from flapping to gliding over a short time period, then shut
 	// down the flapping animation, so we're not wasting time animating it when it's not visible.
-	CCActionInterval* crossFade = [CC3AnimationCrossFade actionWithDuration: 0.5
+	CCActionInterval* crossFade = [CC3ActionAnimationCrossFade actionWithDuration: 0.5
 																  fromTrack: _dragonFlapTrack
 																	toTrack: _dragonGlideTrack];
 	CCActionCallFunc* stopFlapping = [CCActionCallFunc actionWithTarget: self selector: @selector(dragonStopFlapping)];
@@ -3839,15 +3818,14 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 -(void)	dragonTransitionToFlapping {
 	
 	// Create the flapping animation action and start it running on the dragon
-	CC3Animate* flap = [CC3Animate actionWithDuration: 2.0 onTrack: _dragonFlapTrack];
-	CCAction* flapping = [CCActionRepeatForever actionWithAction: flap];
+	CCAction* flapping = [[CC3ActionAnimate actionWithDuration: 2.0 onTrack: _dragonFlapTrack] repeatForever];
 	flapping.tag = kFlappingActionTag;
 	[_dragon runAction: flapping];
 	
 	// The dragon is currently running the gliding animation at full weight and the flapping animation
 	// at zero weight. Cross-fade from gliding to flapping over a short time period, then shut
 	// down the gliding animation, so we're not wasting time animating it when it's not visible.
-	CCActionInterval* crossFade = [CC3AnimationCrossFade actionWithDuration: 0.5
+	CCActionInterval* crossFade = [CC3ActionAnimationCrossFade actionWithDuration: 0.5
 																  fromTrack: _dragonGlideTrack
 																	toTrack: _dragonFlapTrack];
 	CCActionCallFunc* stopGliding = [CCActionCallFunc actionWithTarget: self selector: @selector(dragonStopGliding)];
@@ -3856,10 +3834,10 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	_dragonMotion = kDragonFlapping;		// Dragon is flapping now
 }
 
-/** Stop the CC3Animate action that is running the dragon's flapping animation. */
+/** Stop the CC3ActionAnimate action that is running the dragon's flapping animation. */
 -(void) dragonStopFlapping { [_dragon stopActionByTag: kFlappingActionTag]; }
 
-/** Stop the CC3Animate action that is running the dragon's gliding animation. */
+/** Stop the CC3ActionAnimate action that is running the dragon's gliding animation. */
 -(void) dragonStopGliding { [_dragon stopActionByTag: kGlidingActionTag]; }
 
 @end

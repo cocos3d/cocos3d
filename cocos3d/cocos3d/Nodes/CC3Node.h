@@ -128,7 +128,7 @@ typedef enum {
  * and scaled in three dimensions, or made to point towards a direction (for cameras and
  * lights), all under control of cocos2d CCActions. As with other CCActions, these actions
  * can be combined into action sequences or repeating actions, or modified with cocos2d ease
- * actions. See the class CC3TransformTo and its subclasses for actions that operate on CC3Nodes.
+ * actions. See the class CC3ActionTransformTo and its subclasses for actions that operate on CC3Nodes.
  *
  * When populating your scene, you can easily create hordes of similar nodes using the copy
  * and copyWithName: methods. Those methods effect deep copies to allow each copy to be
@@ -138,7 +138,7 @@ typedef enum {
  * You can animate this class with animation data held in a subclass of CC3NodeAnimation.
  * To animate this node using animation data, set the animation property to an instance
  * of a subclass of the abstract CC3NodeAnimation class, populated with animation content,
- * and then create an instance of a CC3Animate action, and run it on this node.
+ * and then create an instance of a CC3ActionAnimate action, and run it on this node.
  *
  * Nodes can respond to iOS touch events. The property touchEnabled can be set to YES
  * to allow a node to be selected by a touch event. If the shouldInheritTouchability

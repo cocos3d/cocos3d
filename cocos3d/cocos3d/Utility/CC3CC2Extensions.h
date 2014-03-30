@@ -253,31 +253,6 @@ enum {
 #endif		// !CC3_IOS
 
 
-#pragma mark -
-#pragma mark CC3CCSizeTo action
-
-/** Animates a change to the contentSize of a CCNode. */
-@interface CC3CCSizeTo : CCActionInterval {
-	CGSize startSize_;
-	CGSize endSize_;
-	CGSize sizeChange_;
-}
-
-/**
- * Initializes this instance to change the contentSize property of the target to the specified
- * size, within the specified elapsed duration.
- */
--(id) initWithDuration: (CCTime) dur sizeTo: (CGSize) endSize;
-
-/**
- * Allocates and initializes an autoreleased instance to change the contentSize property of
- * the target to the specified size, within the specified elapsed duration.
- */
-+(id) actionWithDuration: (CCTime) dur sizeTo: (CGSize) endSize;
-
-@end
-
-
 #if CC3_CC2_CLASSIC
 
 #pragma mark -

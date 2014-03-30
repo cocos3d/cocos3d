@@ -155,8 +155,8 @@
 
 /** For dramatic effect, tint the node up and down when the user lets go. */
 -(void) flashMainNodeAt: (CGPoint) touchPoint {
-	CCActionInterval* tintUp = [CC3TintEmissionTo actionWithDuration: 0.2f colorTo: kCCC4FCyan];
-	CCActionInterval* tintDown = [CC3TintEmissionTo actionWithDuration: 0.5f colorTo: kCCC4FBlack];
+	CCActionInterval* tintUp = [CC3ActionTintEmissionTo actionWithDuration: 0.2f colorTo: kCCC4FCyan];
+	CCActionInterval* tintDown = [CC3ActionTintEmissionTo actionWithDuration: 0.5f colorTo: kCCC4FBlack];
 	[_mainNode runAction: [CCActionSequence actionOne: tintUp two: tintDown]];
 }
 

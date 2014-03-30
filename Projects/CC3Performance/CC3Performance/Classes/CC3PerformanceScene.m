@@ -289,12 +289,10 @@
 -(void) animationWasChanged {
 	if ( !_templateNode.containsAnimation) return;
 
-	if (_shouldAnimateNodes) {
-		CC3Animate* flap = [CC3Animate actionWithDuration: 1.5 onTrack: _flapTrack];
-		[self runAction: [CCActionRepeatForever actionWithAction: flap]];
-	} else {
+	if (_shouldAnimateNodes)
+		[self runAction: [[CC3ActionAnimate actionWithDuration: 1.5 onTrack: _flapTrack] repeatForever]];
+	else
 		[self stopAllActions];
-	}
 }
 
 /** 

@@ -322,7 +322,7 @@
 	// The shouldColorTile property is actually tracked by the userData property!
 	if (aNode.shouldColorTile) aNode.color = [self pickNodeColor];
 	
-	// If the node is animated, initiate a CC3Animate action on it
+	// If the node is animated, initiate a CC3ActionAnimate action on it
 	if (aNode.containsAnimation) {
 		
 		// The dragon model now contains three animation tracks: a gliding track, a flapping
@@ -333,11 +333,10 @@
 		[aNode setAnimationBlendingWeight: 0.0f onTrack: _glideTrack];
 		[aNode setAnimationBlendingWeight: 1.0f onTrack: _flapTrack];
 
-		// Create the CC3Animate action to run the animation. The duration is randomized so
+		// Create the CC3ActionAnimate action to run the animation. The duration is randomized so
 		// that when multiple dragons are visible, they are not all flapping in unison.
 		CCTime flapTime = CC3RandomFloatBetween(1.0, 2.0);
-		CC3Animate* flap = [CC3Animate actionWithDuration: flapTime onTrack: _flapTrack];
-		[aNode runAction: [CCActionRepeatForever actionWithAction: flap]];
+		[aNode runAction: [[CC3ActionAnimate actionWithDuration: flapTime onTrack: _flapTrack] repeatForever];
 	}
 	
 	scene.mainNode = aNode;		// Set the node as the main node of the scene, for easy access

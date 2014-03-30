@@ -564,8 +564,8 @@
 
 	[self ensureAtRootAncestor];
 	if (t > 0.0f) {
-		[self runAction: [CC3MoveTo actionWithDuration: t moveTo: newLoc]];
-		[self runAction: [CC3RotateToLookTowards actionWithDuration: t forwardDirection: newFwdDir]];
+		[self runAction: [CC3ActionMoveTo actionWithDuration: t moveTo: newLoc]];
+		[self runAction: [CC3ActionRotateToLookTowards actionWithDuration: t forwardDirection: newFwdDir]];
 	} else {
 		self.location = newLoc;
 		self.forwardDirection = newFwdDir;

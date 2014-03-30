@@ -65,7 +65,7 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 #pragma mark -
 #pragma mark CCAction
 
-/** Extension category to support cocos3d. */
+/** Extension category to support cocos3d functionality. */
 @interface CCAction (CC3)
 
 /** The action target cast as a CC3Node. */
@@ -75,14 +75,26 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 
 
 #pragma mark -
-#pragma mark CC3TransformVectorAction
+#pragma mark CCActionInterval extension
+
+/** Extension category to support cocos3d functionality. */
+@interface CCActionInterval (CC3)
+
+/** Returns a CCAction that repeats this action forever. */
+-(CCAction*) repeatForever;
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3ActionTransformVector
 
 /**
- * CC3TransformVectorAction is an abstract subclass of CCActionInterval that is the
+ * CC3ActionTransformVector is an abstract subclass of CCActionInterval that is the
  * parent of subclasses that transform a vector component of a target CC3Node (such
  * as the location, rotation, or scale) by some amount, or to some value over time.
  */
-@interface CC3TransformVectorAction : CCActionInterval <NSCopying> {
+@interface CC3ActionTransformVector : CCActionInterval <NSCopying> {
 	CC3Vector _startVector;
 	CC3Vector _diffVector;
 }
@@ -103,22 +115,22 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 
 
 #pragma mark -
-#pragma mark CC3TransformBy
+#pragma mark CC3ActionTransformBy
 
 /**
- * CC3TransformBy is an abstract subclass of CC3TransformVectorAction that is the
+ * CC3ActionTransformBy is an abstract subclass of CC3ActionTransformVector that is the
  * parent of subclasses that transform the location, rotation, or scale of a target
  * CC3Node by some amount in some way.
  */
-@interface CC3TransformBy : CC3TransformVectorAction
+@interface CC3ActionTransformBy : CC3ActionTransformVector
 @end
 
 
 #pragma mark -
-#pragma mark CC3MoveBy
+#pragma mark CC3ActionMoveBy
 
-/** CC3MoveBy is a CCActionInterval that moves a target CC3Node by a specific translation amount. */
-@interface CC3MoveBy : CC3TransformBy
+/** CC3ActionMoveBy moves a target CC3Node by a specific translation amount. */
+@interface CC3ActionMoveBy : CC3ActionTransformBy
 
 /**
  * Initializes this instance to move the target node
@@ -136,10 +148,10 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 
 
 #pragma mark -
-#pragma mark CC3RotateBy
+#pragma mark CC3ActionRotateBy
 
-/** CC3RotateBy is a CCActionInterval that rotates a target CC3Node by a specific rotation amount. */
-@interface CC3RotateBy : CC3TransformBy
+/** CC3ActionRotateBy rotates a target CC3Node by a specific rotation amount. */
+@interface CC3ActionRotateBy : CC3ActionTransformBy
 
 /**
  * Initializes this instance to rotate the target node
@@ -157,10 +169,28 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 
 
 #pragma mark -
-#pragma mark CC3ScaleBy
+#pragma mark CC3ActionRotateForever
 
-/** CC3ScaleBy is a CCActionInterval that scales a target CC3Node by a specific scale factor. */
-@interface CC3ScaleBy : CC3TransformBy {
+/** CC3ActionRotateForever rotates a target CC3Node by a specific rotation rate per second, without stopping. */
+@interface CC3ActionRotateForever : CCActionRepeatForever
+
+/** Initializes this instance to rotate the target node at the specified rotation rate per second, forever. */
+-(id) initWithRotationRate: (CC3Vector) rotationPerSecond;
+
+/**
+ * Allocates and initializes an autoreleased instance to rotate the target node at the
+ * specified rotation amount per second, forever. 
+ */
++(id) actionWithRotationRate: (CC3Vector) rotationPerSecond;
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3ActionScaleBy
+
+/** CC3ActionScaleBy scales a target CC3Node by a specific scale factor. */
+@interface CC3ActionScaleBy : CC3ActionTransformBy {
 	CC3Vector _scaledDiffVector;
 }
 
@@ -192,14 +222,14 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 
 
 #pragma mark -
-#pragma mark CC3RotateByAngle
+#pragma mark CC3ActionRotateByAngle
 
 /**
- * CC3RotateByAngle is a CCActionInterval that rotates a target CC3Node by a specific
+ * CC3ActionRotateByAngle rotates a target CC3Node by a specific
  * amount, by repeatedly invoking the rotateByAngle:aroundAxis: method on the target
  * node as the action runs.
  */
-@interface CC3RotateByAngle : CCActionInterval <NSCopying> {
+@interface CC3ActionRotateByAngle : CCActionInterval <NSCopying> {
 	CC3Vector _rotationAxis;
 	CC3Vector _activeRotationAxis;
 	GLfloat _diffAngle;
@@ -235,14 +265,38 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 
 
 #pragma mark -
-#pragma mark CC3TransformTo
+#pragma mark CC3ActionRotateOnAxisForever
+
+/** 
+ * CC3ActionRotateOnAxisForever rotates a target CC3Node around a specific axis, 
+ * at a specific rotation rate per second, without stopping.
+ */
+@interface CC3ActionRotateOnAxisForever : CCActionRepeatForever
+
+/** 
+ * Initializes this instance to rotate the target node around the specified axis,
+ * at the specified rotation rate per second, forever. 
+ */
+-(id) initWithRotationRate: (GLfloat) degreesPerSecond aroundAxis: (CC3Vector) anAxis;
 
 /**
- * CC3TransformTo is an abstract subclass of CC3TransformVectorAction that is the
+ * Allocates and initializes an autoreleased instance to rotate the target node around
+ * the specified axis, by the specified rotation amount per second, forever.
+ */
++(id) actionWithRotationRate: (GLfloat) degreesPerSecond aroundAxis: (CC3Vector) anAxis;
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3ActionTransformTo
+
+/**
+ * CC3ActionTransformTo is an abstract subclass of CC3ActionTransformVector that is the
  * parent of subclasses that transform the location, rotation, or scale of a target
  * CC3Node to some end value in some way.
  */
-@interface CC3TransformTo : CC3TransformVectorAction {
+@interface CC3ActionTransformTo : CC3ActionTransformVector {
 	CC3Vector _endVector;
 }
 
@@ -262,10 +316,10 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 
 
 #pragma mark -
-#pragma mark CC3MoveTo
+#pragma mark CC3ActionMoveTo
 
-/** CC3MoveTo is a CCActionInterval that moves a target CC3Node to a specific location. */
-@interface CC3MoveTo : CC3TransformTo
+/** CC3ActionMoveTo moves a target CC3Node to a specific location. */
+@interface CC3ActionMoveTo : CC3ActionTransformTo
 
 /**
  * Initializes this instance to move the target node
@@ -283,16 +337,16 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 
 
 #pragma mark -
-#pragma mark CC3RotateTo
+#pragma mark CC3ActionRotateTo
 
 /**
- * CC3RotateTo is a CCActionInterval that rotates a target CC3Node to a specific orientation.
+ * CC3ActionRotateTo rotates a target CC3Node to a specific orientation.
  *
  * The rotational travel will be minimized, taking into consideration the cyclical nature
  * of rotation. For exmaple, a rotation from 10 degrees to 350 degrees in any axis should
  * travel -20 degrees, not the +340 degrees that would result from simple subtraction.
  */
-@interface CC3RotateTo : CC3TransformTo
+@interface CC3ActionRotateTo : CC3ActionTransformTo
 
 /**
  * Initializes this instance to move the target node
@@ -310,10 +364,10 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 
 
 #pragma mark -
-#pragma mark CC3ScaleTo
+#pragma mark CC3ActionScaleTo
 
-/** CC3ScaleTo is a CCActionInterval that scales a target CC3Node to a specific scale. */
-@interface CC3ScaleTo : CC3TransformTo
+/** CC3ActionScaleTo scales a target CC3Node to a specific scale. */
+@interface CC3ActionScaleTo : CC3ActionTransformTo
 
 /**
  * Initializes this instance to scale the target node
@@ -343,11 +397,10 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 
 
 #pragma mark -
-#pragma mark CC3RotateToAngle
+#pragma mark CC3ActionRotateToAngle
 
 /**
- * CC3RotateToAngle is a CCActionInterval that rotates a target CC3Node to a specific
- * rotationAngle, by updating the rotationAngle propety.
+ * CC3ActionRotateToAngle rotates a target CC3Node to a specific rotationAngle.
  *
  * The rotationAngle property rotates the node around the axis set in the rotationAxis
  * property of the node. Make sure that you set the rotationAxis property on the node
@@ -357,7 +410,7 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * of rotation. For exmaple, a rotation from 10 degrees to 350 degrees in any axis should
  * travel -20 degrees, not the +340 degrees that would result from simple subtraction.
  */
-@interface CC3RotateToAngle : CCActionInterval <NSCopying> {
+@interface CC3ActionRotateToAngle : CCActionInterval <NSCopying> {
 	GLfloat _startAngle;
 	GLfloat _endAngle;
 	GLfloat _diffAngle;
@@ -379,13 +432,12 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 
 
 #pragma mark -
-#pragma mark CC3RotateToLookTowards
+#pragma mark CC3ActionRotateToLookTowards
 
 /**
- * CC3RotateToLookTowards is a CCActionInterval that rotates a target CC3Node
- * to look towards a specific direction.
+ * CC3ActionRotateToLookTowards rotates a target CC3Node to look towards a specific direction.
  */
-@interface CC3RotateToLookTowards : CC3TransformTo
+@interface CC3ActionRotateToLookTowards : CC3ActionTransformTo
 
 /**
  * Initializes this instance to rotate the target node to look towards
@@ -403,13 +455,12 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 
 
 #pragma mark -
-#pragma mark CC3RotateToLookAt
+#pragma mark CC3ActionRotateToLookAt
 
 /**
- * CC3RotateToLookAt is a CCActionInterval that rotates a target CC3Node
- * to look at a specific location.
+ * CC3ActionRotateToLookAt rotates a target CC3Node to look at a specific location.
  */
-@interface CC3RotateToLookAt : CC3RotateToLookTowards
+@interface CC3ActionRotateToLookAt : CC3ActionRotateToLookTowards
 
 /**
  * Initializes this instance to rotate the target node to look at
@@ -427,10 +478,10 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 
 
 #pragma mark -
-#pragma mark CC3MoveDirectionallyBy
+#pragma mark CC3ActionMoveDirectionallyBy
 
 /**
- * CC3MoveDirectionallyBy is an abstract subclass of CCActionInterval that is
+ * CC3ActionMoveDirectionallyBy is an abstract subclass of CCActionInterval that is
  * the parent of subclasses that move a target CC3Node by a specific translation
  * distance in a direction relative to the orientation of the node.
  *
@@ -441,7 +492,7 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * This is an abstract class. Subclasses define the actual direction of
  * movement by overriding the targetDirection property.
  */
-@interface CC3MoveDirectionallyBy : CCActionInterval <NSCopying> {
+@interface CC3ActionMoveDirectionallyBy : CCActionInterval <NSCopying> {
 	CCTime _prevTime;
 	GLfloat	_distance;
 }
@@ -489,10 +540,10 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 
 
 #pragma mark -
-#pragma mark CC3MoveForwardBy
+#pragma mark CC3ActionMoveForwardBy
 
 /**
- * CC3MoveForwardBy moves a target CC3Node forward by a specific distance.
+ * CC3ActionMoveForwardBy moves a target CC3Node forward by a specific distance.
  *
  * The direction of movement is taken from the forwardDirection property 
  * of the node, and is evaluated on each update frame. If the node is being
@@ -503,15 +554,15 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * The specified distance may be negative, indicating the node should move
  * backward, relative to the direction indicated by the forwardDirection property.
  */
-@interface CC3MoveForwardBy : CC3MoveDirectionallyBy
+@interface CC3ActionMoveForwardBy : CC3ActionMoveDirectionallyBy
 @end
 
 
 #pragma mark -
-#pragma mark CC3MoveRightBy
+#pragma mark CC3ActionMoveRightBy
 
 /**
- * CC3MoveRightBy moves a target CC3Node to the right by a specific distance.
+ * CC3ActionMoveRightBy moves a target CC3Node to the right by a specific distance.
  *
  * The direction of movement is taken from the rightDirection property of the
  * node, and is evaluated on each update frame. If the node is being separately
@@ -522,15 +573,15 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * The specified distance may be negative, indicating the node should move
  * backward, relative to the direction indicated by the rightDirection property.
  */
-@interface CC3MoveRightBy : CC3MoveDirectionallyBy
+@interface CC3ActionMoveRightBy : CC3ActionMoveDirectionallyBy
 @end
 
 
 #pragma mark -
-#pragma mark CC3MoveUpBy
+#pragma mark CC3ActionMoveUpBy
 
 /**
- * CC3MoveUpBy moves a target CC3Node up by a specific distance.
+ * CC3ActionMoveUpBy moves a target CC3Node up by a specific distance.
  *
  * The direction of movement is taken from the upDirection property of the node,
  * and is evaluated on each update frame. If the node is being separately rotated
@@ -541,22 +592,21 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * The specified distance may be negative, indicating the node should move
  * backward, relative to the direction indicated by the upDirection property.
  */
-@interface CC3MoveUpBy : CC3MoveDirectionallyBy
+@interface CC3ActionMoveUpBy : CC3ActionMoveDirectionallyBy
 @end
 
 
 #pragma mark -
-#pragma mark CC3TintTo
+#pragma mark CC3ActionTintTo
 
 /**
- * CC3TintTo is an abstract CCActionInterval whose subclasses changes one
- * of the color properties of a target CC3Node to a particular color.
- * Each subclass is dedicated to changing one particular color property.
+ * CC3ActionTintTo changes the color of a target CC3Node to a particular color.
  *
- * This class is abstract and should not be instantiated directly.
- * Instead, use one of the concrete subclasses.
+ * This implementation changes BOTH the ambientColor and diffuseColor properties of the
+ * target CC3Node. In addition, CC3ActionTintTo has several subclasses, each dedicated to 
+ * changing one particular color property, without affecting the other color properties.
  */
-@interface CC3TintTo : CCActionInterval <NSCopying> {
+@interface CC3ActionTintTo : CCActionInterval <NSCopying> {
 	ccColor4F _startColor;
 	ccColor4F _endColor;
 }
@@ -577,57 +627,57 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 
 
 #pragma mark -
-#pragma mark CC3TintAmbientTo
+#pragma mark CC3ActionTintAmbientTo
 
-/** A concrete subclass of CC3TintTo that changes the ambient color of the target CC3Node. */
-@interface CC3TintAmbientTo : CC3TintTo
+/** CC3ActionTintAmbientTo changes only the ambientColor property of the target CC3Node. */
+@interface CC3ActionTintAmbientTo : CC3ActionTintTo
 @end
 
 
 #pragma mark -
-#pragma mark CC3TintDiffuseTo
+#pragma mark CC3ActionTintDiffuseTo
 
-/** A concrete subclass of CC3TintTo that changes the diffuse color of the target CC3Node. */
-@interface CC3TintDiffuseTo : CC3TintTo
+/** CC3ActionTintDiffuseTo changes only the diffuseColor property of the target CC3Node. */
+@interface CC3ActionTintDiffuseTo : CC3ActionTintTo
 @end
 
 
 #pragma mark -
-#pragma mark CC3TintSpecularTo
+#pragma mark CC3ActionTintSpecularTo
 
-/** A concrete subclass of CC3TintTo that changes the specular color of the target CC3Node. */
-@interface CC3TintSpecularTo : CC3TintTo
+/** CC3ActionTintSpecularTo changes only the specularColor property of the target CC3Node. */
+@interface CC3ActionTintSpecularTo : CC3ActionTintTo
 @end
 
 
 #pragma mark -
-#pragma mark CC3TintEmissionTo
+#pragma mark CC3ActionTintEmissionTo
 
-/** A concrete subclass of CC3TintTo that changes the emission color of the target CC3Node. */
-@interface CC3TintEmissionTo : CC3TintTo
+/** CC3ActionTintEmissionTo changes only the emissionColor property of the target CC3Node. */
+@interface CC3ActionTintEmissionTo : CC3ActionTintTo
 @end
 
 
 #pragma mark -
-#pragma mark CC3Animate
+#pragma mark CC3ActionAnimate
 
 /**
- * A CCActionInterval that animates a single track of animation on a CC3Node and its descendants.
+ * CC3ActionAnimate animates a single track of animation on a CC3Node and its descendants.
  *
- * To animate a node, CC3Animate invokes the establishAnimationFrameAt:onTrack: method of the
+ * To animate a node, CC3ActionAnimate invokes the establishAnimationFrameAt:onTrack: method of the
  * target CC3Node. The heavy lifting is performed by the CC3NodeAnimation instance held in the
  * animation property of the node.
  *
  * The establishAnimationFrameAt:onTrack: method of the CC3Node also takes care of propagating
  * the animation to its descendant nodes. A complete assembly of nodes can therefore be animated
- * in concert for one track of information using a single CC3Animate instance.
+ * in concert for one track of information using a single CC3ActionAnimate instance.
  *
  * It is possible to animate only a fraction of the full animation. This can be done using
  * either the actionWithDuration:onTrack:limitFrom:to: or asActionLimitedFrom:to: methods.
  *
  * Doing so will result is an animation action that will perform only part of the animation.
  * This is very useful for an node that contains several different motions in one animation.
- * Using a range-limited CC3Animate, you can animate one of those distinct motions without having
+ * Using a range-limited CC3ActionAnimate, you can animate one of those distinct motions without having
  * to run the full animation. To do this, set the startOfRange and endOfRange values to the
  * fractional positions (between zero and one) of the start and end frames of the sub-animation.
  *
@@ -635,7 +685,7 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * at relative positions 0.67 and 0.78 respectively within the full animation, setting
  * those two values here will result in an animation containing only the punch.
  */
-@interface CC3Animate : CCActionInterval <NSCopying> {
+@interface CC3ActionAnimate : CCActionInterval <NSCopying> {
 	GLuint _trackID;
 	BOOL _isReversed : 1;
 }
@@ -685,7 +735,7 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  *
  * The effective result is an animation action that will perform only part of the animation.
  * This is very useful for a node that contains several different motions in one animation.
- * Using a range-limited CC3Animate, you can animate one of those distinct motions without having
+ * Using a range-limited CC3ActionAnimate, you can animate one of those distinct motions without having
  * to run the full animation. To do this, set the startOfRange and endOfRange values
  * to the fractional positions (between zero and one) of the start and end frames of the sub-animation.
  *
@@ -703,7 +753,7 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  *
  * The effective result is an animation action that will perform only part of the animation.
  * This is very useful for a node that contains several different motions in one animation.
- * Using a range-limited CC3Animate, you can animate one of those distinct motions without having
+ * Using a range-limited CC3ActionAnimate, you can animate one of those distinct motions without having
  * to run the full animation. To do this, set the startOfRange and endOfRange values
  * to the fractional positions (between zero and one) of the start and end frames of the sub-animation.
  *
@@ -719,7 +769,7 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  *
  * The effective result is an animation action that will perform only part of the animation.
  * This is very useful for an node that contains several different motions in one animation.
- * Using a range-limited CC3Animate, you can animate one of those distinct motions without having
+ * Using a range-limited CC3ActionAnimate, you can animate one of those distinct motions without having
  * to run the full animation. To do this, set the startOfRange and endOfRange values of the
  * fractional positions (between zero and one) of the start and end frames of the sub-animation.
  *
@@ -733,14 +783,14 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 
 
 #pragma mark -
-#pragma mark CC3AnimationBlendingFadeTrackTo
+#pragma mark CC3ActionAnimationBlendingFadeTrackTo
 
 /**
- * CC3AnimationBlendingFadeTrackTo fades the animation blending weight of an animation track in the
- * target CC3Node from its current value to an end value. This allows the animation track to
- * be faded in or out smoothly.
+ * CC3ActionAnimationBlendingFadeTrackTo fades the animation blending weight of an animation
+ * track in the target CC3Node from its current value to an end value. This allows the animation
+ * track to be faded in or out smoothly.
  */
-@interface CC3AnimationBlendingFadeTrackTo : CCActionInterval <NSCopying> {
+@interface CC3ActionAnimationBlendingFadeTrackTo : CCActionInterval <NSCopying> {
 	GLfloat _startWeight;
 	GLfloat _endWeight;
 	GLuint _trackID;
@@ -765,10 +815,10 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 
 
 #pragma mark -
-#pragma mark CC3AnimationCrossFade
+#pragma mark CC3ActionAnimationCrossFade
 
-/** CC3AnimationCrossFade fades smoothly from one animation track to another. */
-@interface CC3AnimationCrossFade : CCActionInterval <NSCopying> {
+/** CC3ActionAnimationCrossFade fades smoothly from one animation track to another. */
+@interface CC3ActionAnimationCrossFade : CCActionInterval <NSCopying> {
 	GLuint _fromTrackID;
 	GLuint _toTrackID;
 	GLfloat _startWeight;
@@ -821,15 +871,15 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 
 
 #pragma mark -
-#pragma mark CC3AnimationBlendingSetTrackTo
+#pragma mark CC3ActionAnimationBlendingSetTrackTo
 
 /**
- * CC3AnimationBlendingSetTrackTo immediately sets the animation blending weight of an animation
- * track in the target CC3Node to a specified value.
+ * CC3ActionAnimationBlendingSetTrackTo immediately sets the animation blending weight of
+ * an animation track in the target CC3Node to a specified value.
  *
  * By setting the blending weight to zero, the animation track can be effectively turned off.
  */
-@interface CC3AnimationBlendingSetTrackTo : CCActionInstant {
+@interface CC3ActionAnimationBlendingSetTrackTo : CCActionInstant {
 	GLfloat _endWeight;
 	GLuint _trackID;
 }
@@ -857,13 +907,13 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 
 
 #pragma mark -
-#pragma mark CC3EnableAnimationTrack
+#pragma mark CC3ActionEnableAnimationTrack
 
 /**
  * CC3EnableAnimation immediately enables a specified animation track on the target node
  * and all of its descendants.
  */
-@interface CC3EnableAnimationTrack : CCActionInstant {
+@interface CC3ActionEnableAnimationTrack : CCActionInstant {
 	GLuint _trackID;
 }
 
@@ -886,13 +936,13 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 
 
 #pragma mark -
-#pragma mark CC3DisableAnimationTrack
+#pragma mark CC3ActionDisableAnimationTrack
 
 /**
  * CC3DisableAnimation immediately disables a specified animation track on the target node
  * and all of its descendants.
  */
-@interface CC3DisableAnimationTrack : CCActionInstant {
+@interface CC3ActionDisableAnimationTrack : CCActionInstant {
 	GLuint _trackID;
 }
 
@@ -950,17 +1000,77 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 
 
 #pragma mark -
-#pragma mark CC3Remove
+#pragma mark CC3ActionRemove
 
 /**
- * CC3Remove removes a CC3Node from the scene, by invoking the remove method on the CC3Node.
+ * CC3ActionRemove immediately removes a CC3Node from the scene, by invoking the remove method of the CC3Node.
  *
  * This action can be used as part of a CCActionSequence to remove a node after some other 
  * kind of action has completed. For example, you might create a CCActionSequence containing 
- * a CCActionFadeOut and a CC3Remove, to fade a node away and then remove it from the scene.
+ * a CCActionFadeOut and a CC3ActionRemove, to fade a node away and then remove it from the scene.
  */
-@interface CC3Remove : CCActionInstant
-	
+@interface CC3ActionRemove : CCActionInstant
 @end
+
+
+#pragma mark -
+#pragma mark CC3ActionCCNodeSizeTo action
+
+/** Animates a change to the contentSize of a CCNode. */
+@interface CC3ActionCCNodeSizeTo : CCActionInterval {
+	CGSize startSize_;
+	CGSize endSize_;
+	CGSize sizeChange_;
+}
+
+/**
+ * Initializes this instance to change the contentSize property of the target to the specified
+ * size, within the specified elapsed duration.
+ */
+-(id) initWithDuration: (CCTime) dur sizeTo: (CGSize) endSize;
+
+/**
+ * Allocates and initializes an autoreleased instance to change the contentSize property of
+ * the target to the specified size, within the specified elapsed duration.
+ */
++(id) actionWithDuration: (CCTime) dur sizeTo: (CGSize) endSize;
+
+@end
+
+
+#pragma mark -
+#pragma mark Legacy class names
+
+#define CC3TransformVectorAction			CC3ActionTransformVector
+#define CC3TransformBy						CC3ActionTransformBy
+#define CC3MoveBy							CC3ActionMoveBy
+#define CC3RotateBy							CC3ActionRotateBy
+#define CC3ScaleBy							CC3ActionScaleBy
+#define CC3RotateByAngle					CC3ActionRotateByAngle
+#define CC3TransformTo						CC3ActionTransformTo
+#define CC3MoveTo							CC3ActionMoveTo
+#define CC3RotateTo							CC3ActionRotateTo
+#define CC3ScaleTo							CC3ActionScaleTo
+#define CC3RotateToAngle					CC3ActionRotateToAngle
+#define CC3RotateToLookTowards				CC3ActionRotateToLookTowards
+#define CC3RotateToLookAt					CC3ActionRotateToLookAt
+#define CC3MoveDirectionallyBy				CC3ActionMoveDirectionallyBy
+#define CC3MoveForwardBy					CC3ActionMoveForwardBy
+#define CC3MoveRightBy						CC3ActionMoveRightBy
+#define CC3MoveUpBy							CC3ActionMoveUpBy
+#define CC3TintTo							CC3ActionTintTo
+#define CC3TintAmbientTo					CC3ActionTintAmbientTo
+#define CC3TintDiffuseTo					CC3ActionTintDiffuseTo
+#define CC3TintSpecularTo					CC3ActionTintSpecularTo
+#define CC3TintEmissionTo					CC3ActionTintEmissionTo
+#define CC3Animate							CC3ActionAnimate
+#define CC3AnimationBlendingFadeTrackTo		CC3ActionAnimationBlendingFadeTrackTo
+#define CC3AnimationCrossFade				CC3ActionAnimationCrossFade
+#define CC3AnimationBlendingSetTrackTo		CC3ActionAnimationBlendingSetTrackTo
+#define CC3EnableAnimationTrack				CC3ActionEnableAnimationTrack
+#define CC3DisableAnimationTrack			CC3ActionDisableAnimationTrack
+#define CC3Remove							CC3ActionRemove
+#define CC3CCSizeTo							CC3ActionCCNodeSizeTo
+
 
 

@@ -1,7 +1,7 @@
 CHANGELOG
 ---------
 
-cocos3d 2.0.0
+Cocos3D 2.0.0
 
 Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
 http://www.brenwill.com
@@ -9,19 +9,19 @@ http://www.brenwill.com
 +++++++++++++++++++++++++++++++++++++
 
 
-cocos3d 2.0.0 - 2014/03/31
+Cocos3D 2.0.0 - 2014/04/30
 -------------------------------------
 
-- Added support for OpenGL ES 2.0 & cocos2d 2.x.
-- Single cocos3d codebase can be used with either cocos2d 2.x/OpenGL ES 2.0, or cocos2d 1.x/OpenGL ES 1.1 frameworks
-- Two cocos3d Xcode template projects are provided:
-    - cocos3d1 Application - for use with OpenGL ES 1.1 and cocos2d 1.x.
-    - cocos3d2 Application - for use with OpenGL ES 2.0 and cocos2d 2.x.
-- cocos3d Workspace and demo apps: CC3DemoMashUp, CC3Demo3DTiles and CC3Performance are pre-configured to use cocos2d 2.0.
-    - to use cocos2d 2.1, 1.1 or 1.0.1, in any of these projects:
-	    - delete the reference to the cocos2d group in the Xcode Project Navigator panel.
-	    - run the install_cocos3d script and identify the version of cocos2d to be linked.
-		- add the newly linked cocos2d files to the project by dragging the cocos2d folder from the cocos3d distribution folder to the Xcode Project Navigator panel.
+- Added support for OpenGL ES 2.0 & Cocos2D 2.x.
+- Single Cocos3D codebase can be used with either Cocos2D 2.x/OpenGL ES 2.0, or Cocos2D 1.x/OpenGL ES 1.1 frameworks
+- Two Cocos3D Xcode template projects are provided:
+    - cocos3d1 Application - for use with OpenGL ES 1.1 and Cocos2D 1.x.
+    - cocos3d2 Application - for use with OpenGL ES 2.0 and Cocos2D 2.x.
+- Cocos3D Workspace and demo apps: CC3DemoMashUp, CC3Demo3DTiles and CC3Performance are pre-configured to use Cocos2D 2.0.
+    - to use Cocos2D 2.1, 1.1 or 1.0.1, in any of these projects:
+	    - delete the reference to the Cocos2D group in the Xcode Project Navigator panel.
+	    - run the install_cocos3d script and identify the version of Cocos2D to be linked.
+		- add the newly linked Cocos2D files to the project by dragging the Cocos2D folder from the Cocos3D distribution folder to the Xcode Project Navigator panel.
 
 - Added support for OpenGL ES shaders:
     - CC3ShaderProgram added to represent a GL program pairing one vertex shader and one fragment shader under OpenGL ES 2.
@@ -37,7 +37,7 @@ cocos3d 2.0.0 - 2014/03/31
     - Added GLSL folder containing standard GLSL shader source code
 
 - Added support for loading PowerVR PFX files describing textures and shaders to be applied to a POD model.
-    - Includes support for PVRShaman semantics. Shaders can be developed in PVRShaman, exported to PFX format and loaded into cocos3d.
+    - Includes support for PVRShaman semantics. Shaders can be developed in PVRShaman, exported to PFX format and loaded into Cocos3D.
 
 - Added support for tangent and bitangent vertex content
     - Added CC3VertexTangents vertex array
@@ -45,11 +45,9 @@ cocos3d 2.0.0 - 2014/03/31
 	- Added flipNormals method to CC3MeshNode, CC3Mesh & CC3VertexNormals to reverse the directions of all the normals in a mesh.
 
 - Added support for Mac OSX.
-	- cocos3d can now be run on a Mac under OSX.
-		- can be linked to cocos2d 2.x to run OpenGL with a GLSL shader-based programmable pipeline.
-		- can be linked to cocos2d 1.x to run OpenGL with a fixed pipeline.
-	- Added cocos3d2 OSX Application template in the OS X/cocos3d template area for building Mac app if using cocos2d 2.x.
-	- Added cocos3d1 OSX Application template in the OS X/cocos3d template area for building Mac app if using cocos2d 1.x.
+	- Cocos3D can now be run on a Mac under OSX.
+		- can be linked to Cocos2D 2.x to run OpenGL with a GLSL shader-based programmable pipeline.
+	- Added Cocos3D OSX OpenGL Application template in the OS X/Cocos3D template area for building Mac app if using Cocos2D 2.x.
 	- CC3DemoMashUp now comes with two Xcode projects: one for running under iOS and one for running on a Mac under OSX.
 	- Xcode workspace cocos3d-iOS.workspace opens demos for running on iOS.
 	- Xcode workspace cocos3d-Mac.workspace opens demos for running on a Mac under OSX.
@@ -58,7 +56,7 @@ cocos3d 2.0.0 - 2014/03/31
 		- Added new CC3NSViewController for OSX.
 
 - Added support for Android via the Apportable SDK.
-	- Add demo apps and cocos3d Application template apps can be built and deployed using the Apportable SDK
+	- Add demo apps and Cocos3D Application template apps can be built and deployed using the Apportable SDK
 
 - Added support for multi-pass rendering, render-to-texture, and dynamic environment maps:
 	- Added CC3RenderSurface classes to provide both on-screen and off-screen framebuffer surfaces as rendering targets
@@ -82,8 +80,8 @@ cocos3d 2.0.0 - 2014/03/31
 
 - Added support for loading resources, textures and shaders on a background thread.
 
-- Added cocos3d and cocos2d static library projects to the cocos3d distribution
-	- available in the cocos3d-iOS.workspace and cocos3d-OSX.workspace Xcode workspaces
+- Added Cocos3D and Cocos2D static library projects to the Cocos3D distribution
+	- available in the Cocos3D-iOS.workspace and Cocos3D-OSX.workspace Xcode workspaces
 	- also available in the Project folder
 
 - Animation enhancements:
@@ -135,7 +133,11 @@ cocos3d 2.0.0 - 2014/03/31
 	- Tools available in Tools/Blender-POD Batch Converter folder
 	- Contributed by Nikita Medvedev (@medvedNick). Many thanks!
 
-- Added CC3Remove action to remove a node as part of an action sequence. Can be used as part of a CCSequence to remove a node after some other action, such as CCFadeOut, has finished.
+- Enhancements to Cocos3D actions
+	- Renamed all Cocos3D action classes to Cocos2D v3 CC3Action... convention.
+	- Added CCAction repeatForever method, and CC3ActionRotateOnAxisForever & CC3ActionRotateForever classes to simplify creating imortal actions.
+	- Added CC3ActionRemove action to remove a node as part of an action sequence. Can be used as part of a CCSequence to remove a node after some other action, such as CCActionFadeOut, has finished.
+	- CC3ActionTintTo is now concrete and changes both ambientColor and diffuseColor properties.
 
 - Improvements to bounding volumes:
 	- bounding volumes are no longer automatically added to nodes
@@ -202,7 +204,7 @@ cocos3d 2.0.0 - 2014/03/31
 
 - [API change] Replaced CC3OpenGLESEngine state management object hierarchy with simpler state management:
 	- Added CC3OpenGL class to handle state management, with subclasses for specific OpenGL ES or OpenGL versions.
-	- CC3OpenGL includes a corresponding method for each OpenGL/OpenGL ES function supported by cocos3d.
+	- CC3OpenGL includes a corresponding method for each OpenGL/OpenGL ES function supported by Cocos3D.
 		- This organization is easier to adapt by users and override for different versions of OpenGL & OpenGL ES than previous state management via CC3OpenGLESEngine object assemblies.
 	- CC3NodeDrawingVisitor carries an instance of CC3OpenGL.
 	- State management no longer queries the GL engine for current state during initialization.
@@ -247,10 +249,10 @@ cocos3d 2.0.0 - 2014/03/31
 - Upgraded PowerVR POD/PFX library to version 3.0r2 and stripped it to minimum required files.
 - Removed files CC3OpenGLES1Intercept.h/m as redundant. Xcode GL frame capture provides a much more useful GL trace capability.
 
-- The cocos3d Application template project (hello, world) now automatically moves the camera to frame the scene by default.
+- The Cocos3D Application template project (hello, world) now automatically moves the camera to frame the scene by default.
 
 
-cocos3d 0.7.2 - 2012/11/11
+Cocos3D 0.7.2 - 2012/11/11
 -------------------------------------
 
 - Support for Xcode 4.5
@@ -258,7 +260,7 @@ cocos3d 0.7.2 - 2012/11/11
 	- Fixed numerous style issues raised by Analyzer
 
 - Support for PowerVR SDK 3.0
-    - Verified cocos3d support for POD files created with Collada2POD converter 3.0
+    - Verified Cocos3D support for POD files created with Collada2POD converter 3.0
 
 - Added mesh particles as a type of particle system:
     - CC3ParticleEmitter is an abstract base class with two concrete subclasses:
@@ -319,7 +321,7 @@ cocos3d 0.7.2 - 2012/11/11
 	- Fixed issue where retainVertex... methods did not correctly retain interleaved non-location coordinates if vertex locations were not also retained.
 
 - Enhanced integration with UIViews and UIViewController
-    - Added CC3UIViewController subclass of UIViewController to support cocos3d (& cocos2d) interaction within a standard UIViewController hierarchy.
+    - Added CC3UIViewController subclass of UIViewController to support Cocos3D (& Cocos2D) interaction within a standard UIViewController hierarchy.
         - CC3UIViewController supports auto-rotation of the 3D/2D scene to the device orientation using standard UIKit auto-rotation.
 		    - CC3UIViewController supportedInterfaceOrientations property allows supported orientations to be defined without subclassing.
 		    - Both iOS6 and pre-iOS6 rotation mechanisms are supported.
@@ -327,7 +329,7 @@ cocos3d 0.7.2 - 2012/11/11
         - CC3UIViewController loadView method now creates an appropriate CC3EAGLView, removing need to create the view outside the controller in the AppDelegate.
             - CC3UIViewController now supports viewClass, viewBounds, viewColorFormat, viewDepthFormat, viewShouldUseStencilBuffer & viewPixelSamples properties to pre-configure view without subclassing the controller.
         - Deprecated CCNodeController class and ControlledCCNodeProtocol protocol.
-    - CC3UIViewController recommended for use in all cocos3d apps
+    - CC3UIViewController recommended for use in all Cocos3D apps
 	    - All demos and templates now use CC3UIViewController
     - Added CC3ControllableLayer as basis of CCLayers that can be controlled by CC3UIViewController.
         - CC3Layer now subclasses from CC3ControllableLayer.
@@ -360,7 +362,7 @@ cocos3d 0.7.2 - 2012/11/11
 	- Logging functions LogTrace, LogInfo, LogError, LogDebug & LogRez no longer output timestamp and app context, and are now equivalent to LogClean...
 	    - Added logging functions LogTimedTrace, LogTimedInfo, LogTimedError, LogTimedDebug & LogTimedRez to provide timestamped logs if needed.
 	- Added CC3WireframeBoundingBoxNode updateFromParentBoundingBox method to allow a wireframe box node to its parent's bounding box.
-	- The cocos3d installer now links the cocos2d libraries instead of copying them into the cocos3d directory.
+	- The Cocos3D installer now links the Cocos2D libraries instead of copying them into the Cocos3D directory.
 	- Fixed GL get calls that were unknown to OpenGL ES Analyzer, causing it to crash the app.
 
 - Additional parametric mesh population features:
@@ -373,7 +375,7 @@ cocos3d 0.7.2 - 2012/11/11
 		- The CC3TouchBox shouldAlwaysMeasureParentBoundingBox property allows the touch box to dynamically resize as the descendant nodes of the parent move around.
 	- Added CC3SimpleLineNode to simplify the creation of a simple two-point straight line.
 	- Added CC3VertexArrayMesh populateAs... family of parametric creation methods to allow mesh content to be created parametrically without having to create a mesh node
-	- [API change] Renamed references to mesh pivot point to mesh origin to clarify purpose and align better with cocos2d terminology:
+	- [API change] Renamed references to mesh pivot point to mesh origin to clarify purpose and align better with Cocos2D terminology:
 		- [API change] Renamed movePivotTo: method in CC3VertexArray, CC3Mesh and CC3MeshNode to moveMeshOriginTo: and deprecated the original
 		- [API change] Renamed movePivotToCenterOfGeometry method in CC3VertexArray, CC3Mesh and CC3MeshNode to moveMeshOriginToCenterOfGeometry and deprecated the original
 		- [API change] Renamed CC3MeshNode populateAsRectangleWithSize:andPivot: method to populateAsRectangleWithSize:andRelativeOrigin: and deprecated the original
@@ -449,22 +451,22 @@ cocos3d 0.7.2 - 2012/11/11
 
 
 
-cocos3d 0.7.1 - 2012/04/22
+Cocos3D 0.7.1 - 2012/04/22
 -------------------------------------
 
 - Added explicit support for Gesture Recognizers:
     - Added CC3Node methods cc3ConvertUIPointToNodeSpace:, cc3ConvertUIMovementToNodeSpace: & cc3NormalizeUIMovement: to make it easy to use gesture location data in a CC3Layer and CC3Scene.
 	- Added CC3Scene pickNodeFromTapAt: and pickNodeFromTouchEvent:at: methods to make it easy to pick nodes from tap & long-press gestures and touch events.
 	- Added CC3Layer cc3AddGestureRecognizer: and cc3RemoveGestureRecognizer: methods to simplify adding a gesture recogizers to a dedicated layer.
-	- Added CC3Node cc3ValidateGesture:, cc3WillConsumeTouchEventAt: and cc3ContainsTouchPoint: methods to help determine whether a gesture should be cancelled because a cocos2d button or control on the layer wants the touch event.
+	- Added CC3Node cc3ValidateGesture:, cc3WillConsumeTouchEventAt: and cc3ContainsTouchPoint: methods to help determine whether a gesture should be cancelled because a Cocos2D button or control on the layer wants the touch event.
     - Added CC3Layer onOpenCC3Layer and onCloseCC3Layer callback template methods as convenient place to perform set-up and tear-down activity, including managing gesture recognizers for a dedicated CC3Layer.
 	- CC3DemoMashUp now uses pinch, pan and tap gestures to move or pan the camera, select 3D nodes, and spin the cubes.
 	    - Setting shouldUseGestures variable in CC3DemoMashUpLayer initializeControls method will turn gestures off, and layer and scene will use basic touch events for control. 
 - Added CC3Node shouldCastShadowsWhenInvisible property to allow meshes and lights to cast shadows even when invisible.
 - Corrected the capitalization of the name of the Stamp.pvr texture file.
 - Added short delay to resuming activity in AppDelegate applicationDidBecomeActive: method, to fix issue where performance slowed to 40fps on app resume.
-- Moved cocos2d extensions for cocos3d to CC3CC2Extensions.h from CC3Foundation.h.
-- Moved iOS extensions for cocos3d to CC3IOSExtensions.h from CC3Foundation.h.
+- Moved Cocos2D extensions for Cocos3D to CC3CC2Extensions.h from CC3Foundation.h.
+- Moved iOS extensions for Cocos3D to CC3IOSExtensions.h from CC3Foundation.h.
 - Added assertion in CC3OpenGLES11VertexArrays drawIndicies:ofLength:andType:as: method to detect models that contain index types other than GL_UNSIGNED_SHORT or GL_UNSIGNED_BYTE.
 - Added log level to output of LogClean... logging functions.
 - Added backward compatibility with legacy LLVM GCC 4.2 compiler
@@ -479,10 +481,10 @@ cocos3d 0.7.1 - 2012/04/22
 - Renamed CC3Node shouldCleanupWhenRemoved method to shouldCleanupActionsWhenRemoved to clarify purpose, and deprecated shouldCleanupWhenRemoved.
 - Fixed memory leaks when destroying and recreating CC3Scenes with skinned meshes, shadows, 2D particle systems, or fog.
 - Fixed incorrect override of CC3Scene close method in the CC3Scene subclass in the hello, world template app.
-- Changed install-cocos3d.sh script to remove option to install outside user home directory.
+- Changed install-Cocos3D.sh script to remove option to install outside user home directory.
 
 
-cocos3d 0.7.0 - 2012/04/12
+Cocos3D 0.7.0 - 2012/04/12
 -------------------------------------
 
 - [API change] Renamed CC3World to CC3Scene, and deprecated CC3World, in order to clarify the purpose of that class.
@@ -508,7 +510,7 @@ cocos3d 0.7.0 - 2012/04/12
 		- Added hasMipmap property to CCTexture2D and CC3Texture.
 		- Added CC3Texture2D subclass of CCTexture2D to provide more automated tracking of texture mipmaps.
 		- CC3Texture2D is automatically used for any texture loaded by CC3Texture.
-		- CCTexture2D can now be configured as a cluster class to instantiate any subclass (such as CC3Texture2D) in its place, even when used within cocos2d.
+		- CCTexture2D can now be configured as a cluster class to instantiate any subclass (such as CC3Texture2D) in its place, even when used within Cocos2D.
 		- CC3Texture mipmap and wrapping properties now have better access and better documentation
     - The alignment of textures with meshes, for both NPOT and iOS-inverted textures is now completely automatic when a texture or material is assigned to a CC3MeshNode:
         - [API change] Deprecated CC3Node alignTextures and alignInvertedTextures methods.
@@ -563,11 +565,11 @@ cocos3d 0.7.0 - 2012/04/12
 	- Added CC3MoveUpBy action to move a node in the direction of the node's upDirection vector by a specific distance over time.
 		- In all of these, the distance may be negative, to move backwards, left, and down, respectively.	
 	    - The direction of movement is evaluated on each update frame. If the node is separately rotated while the action is active, the action will follow the changes to the direction of movement.
-    - Added CC3RotateByAngle actionWithDuration:rotateByAngle:aroundAxis: method to allow applying consecutive rotations to a CC3Node.
+    - Added CC3ActionRotateByAngle actionWithDuration:rotateByAngle:aroundAxis: method to allow applying consecutive rotations to a CC3Node.
 	    - for example rotate by 90 degrees around the Y axis, then rotate by 45 degrees around the X axis.
 	- Added CC3ScaleTo actionWithDuration:scaleUniformlyTo: method for convenience
-	- Added CC3ScaleBy actionWithDuration:scaleUniformlyBy: method for convenience
-	- [API change] CC3ScaleBy now scales multiplicatively. If scale is already 3 and scale by is 5, the final scale will be 15, not 8, as before when scaling was by difference.
+	- Added CC3ActionScaleBy actionWithDuration:scaleUniformlyBy: method for convenience
+	- [API change] CC3ActionScaleBy now scales multiplicatively. If scale is already 3 and scale by is 5, the final scale will be 15, not 8, as before when scaling was by difference.
 - Added CC3Node asOrientingWrapper method to easily wrap a node in another node to assign rotational or locational offsets.
 - Added support for general notifications whenever the node is transformed (moved, rotated or scaled).
     - Added protocol CC3NodeTransformListenerProtocol to allow any object to be notified when a node is transformed (moved, rotated or scaled).
@@ -642,24 +644,24 @@ cocos3d 0.7.0 - 2012/04/12
 - Fixed issue where secondary cameras with default configurations were not displaying correctly due to the projection matrix not being updated correctly.
 - Fixed issue in CCNodeController, where the background device camera displayed black bar at the bottom for Retina displays.
 - Fixed issue where node picking of translucent nodes directly over the device camera during AR caused a visible flicker.
-- Changed cocos3d Xcode template app TemplateInfo.plist Identifier prefix from com.brenwill to org.cocos3d.
-- Added COCOS3D_VERSION macro define to indicate the version of the cocos3d library.
-- Removed the need to set the CC_USES_2D_PARTICLES macro define to distinguish between handling of 2D particles across cocos2d versions.
+- Changed Cocos3D Xcode template app TemplateInfo.plist Identifier prefix from com.brenwill to org.Cocos3D.
+- Added COCOS3D_VERSION macro define to indicate the version of the Cocos3D library.
+- Removed the need to set the CC_USES_2D_PARTICLES macro define to distinguish between handling of 2D particles across Cocos2D versions.
 - Clamped effective field of view of camera to below 180 degrees, to avoid scene vanishing into the distance when camera scale is set too low.
 - Minor fixes to the derivation of the targetLocation property. If derived from other rotation settings, the targetLocation will now be one unit length away from the globalLocation, in the forwardDirection.
-- [API change] The populateFrom: method used during copying of cocos3d classes that support the <NSCopying> protocol is now declared in the public interface. It no longer needs to be declared by subclasses that are overriding this method. 
+- [API change] The populateFrom: method used during copying of Cocos3D classes that support the <NSCopying> protocol is now declared in the public interface. It no longer needs to be declared by subclasses that are overriding this method. 
 - In CC3DemoMashUp, added lower limit to speed of SpinningNode, so that it doesn't waste effort updating rotations (and shadows) when its spin speed is unnoticable.
 - In CC3DemoMashUp, the wooden sign now uses the textureRectangle property to demonstrate the covering of a mesh by only a section of a larger texture atlas.
 - Upgraded PowerVR POD library to version 2.10.
 
 
-cocos3d 0.6.5 - 2011/12/19
+Cocos3D 0.6.5 - 2011/12/19
 -------------------------------------
 
 - Fixed issue where, with large, complex POD files, the POD loader sometimes incorrectly created skinned meshes and mesh nodes instead of regular meshes and mesh nodes.
 
 
-cocos3d 0.6.4 - 2011/11/20
+Cocos3D 0.6.4 - 2011/11/20
 -------------------------------------
 
 - Added support for iOS 5.0 and Xcode 4.2:
@@ -670,7 +672,7 @@ cocos3d 0.6.4 - 2011/11/20
 - Removed unnecessary PowerVR POD library files
 
 
-cocos3d 0.6.3 - 2011/11/12
+Cocos3D 0.6.3 - 2011/11/12
 -------------------------------------
 
 - Added vertex skinning, allowing soft-body meshes to be realistically deformed based on the movement of an underlying skeleton constructed of bone and joints:
@@ -681,11 +683,11 @@ cocos3d 0.6.3 - 2011/11/12
         - CC3Bone is a subclass of CC3Node and these bones can be assembled into a skeleton.
     - Added CC3SkinSection to manage the drawing of a section of the skin mesh that is controlled by a specific collection of bones.
     - CC3DemoMashUp added running figures and flexible mallet to demonstrate vertex skinning, and copying soft-body nodes.
-    - Special thanks to cocos3d user Chris Myers, who took the initiative to add vertex skinning to cocos3d, and provided much of the code for vertex skinning in cocos3d.
+    - Special thanks to Cocos3D user Chris Myers, who took the initiative to add vertex skinning to Cocos3D, and provided much of the code for vertex skinning in Cocos3D.
 - Added repeatTexture: method to CC3MeshNode, CC3Mesh and CC3VertexTextureCoordinates to easily specify that the texture should repeat across the mesh, in one or both directions.
-- Support for cocos2d 1.1-beta:
-    - Fixed issue where compile breaks when using with cocos2d 1.1, due to changed structure used for 2D particle quad vertices
-    - When running with cocos2d 1.1 and above, set Xcode build setting CC_USES_2D_PARTICLES=0 in Preprocessor Macros.
+- Support for Cocos2D 1.1-beta:
+    - Fixed issue where compile breaks when using with Cocos2D 1.1, due to changed structure used for 2D particle quad vertices
+    - When running with Cocos2D 1.1 and above, set Xcode build setting CC_USES_2D_PARTICLES=0 in Preprocessor Macros.
 - CC3Node updateTransformMatrices and updateTransformMatrix methods now automatically incorporate any changes that have been made to ancestor nodes.
 - Added method drawFrom:forCount:withVisitor: to CC3Mesh and CC3DrawableVertexArray to allow drawing a subset of the vertices within a mesh.
 - Added CC3Node scaleTolerance property to support fuzzy testing for scaling unity and uniformity, to facilitate faster rigid matrix inversions when scaling is close to, but not exactly equal to one.
@@ -712,7 +714,7 @@ cocos3d 0.6.3 - 2011/11/12
 - [API change] Redefined LogGLErrorState() macro function to take a format string and variable-length list of arguments.
 
 
-cocos3d 0.6.2 - 2011/10/19
+Cocos3D 0.6.2 - 2011/10/19
 -------------------------------------
 
 - Added support for 3D point particle generators:
@@ -727,19 +729,19 @@ cocos3d 0.6.2 - 2011/10/19
 - Moved all CC3MeshNode populateAs... parametric mesh population methods to a separate CC3MeshNode (ParametricShapes) category.
     - [API change] You must now import the CC3ParametricMeshNodes.h files to use any populateAs... method.
 - Added support for textured boxes and cubes with the addition of CC3MeshNode methods populateAsTexturedBox: and populateAsTexturedBox:withCorner:.
-    - Thanks to cocos3d user andyman for contributing the prototype code and texture template file for this method.
+    - Thanks to Cocos3D user andyman for contributing the prototype code and texture template file for this method.
 - Added ability to change the location and rotation of a node by a specific amount, instead of setting the final state:
     - Added CC3Node translateBy: method
     - Added CC3Node rotateBy: method
     - Added CC3Node rotateByQuaternion: method
-    - Added CC3Node rotateByAngle:aroundAxis: method (thanks to cocos3d user nt901 for contributing to the development of this feature)
+    - Added CC3Node rotateByAngle:aroundAxis: method (thanks to Cocos3D user nt901 for contributing to the development of this feature)
 - Added CC3Demo3DTiles demo app to demonstrate:
     - Multiple CC3Layers and CC3Worlds on screen at once.
     - Optimizing tricks under those conditions.
     - Automatically moving the camera to frame a particular object.
     - Touch selection and control of objects when many worlds are concurrently displayed.
     - Techinques for allocating, deallocating, and copying user data tracked by the userData property.
-    - Using the cocos2d RootController with cocos3d.
+    - Using the Cocos2D RootController with Cocos3D.
 - Added improvements in layering CC3Layer/CC3World combinations on top of each other:
     - Additional CC3Layer/CC3World pairs can be layered over the main CC3Layer/CC3World pair.
     - CC3Layer and its CC3World can be made translucent when overlaying another pair, allowing impressive HUD effects.
@@ -778,17 +780,17 @@ cocos3d 0.6.2 - 2011/10/19
 - CC3World updateWorld method can now be invoked prior to the CC3World play method.
 - CC3World touchEvent:at: method now only forwards touch-down events to the node picker by default. Override this method as required.
 - Fixed issue where updateWorld was being invoked at incorrect time when adding CC3World to CC3Layer, causing an initial empty screen to be displayed.
-    - Thanks to cocos3d user Paco_777 for finding the issue and suggesting a solution.
+    - Thanks to Cocos3D user Paco_777 for finding the issue and suggesting a solution.
 - Fixed issue where CC3Layer viewport could not be assigned bounds that overlapped outside the window bounds (including negative origin and position and size beyond top right window corner).
-	- Thanks to cocos3d user Robert Szeleney for pointing this out and suggesting a fix.
+	- Thanks to Cocos3D user Robert Szeleney for pointing this out and suggesting a fix.
 - Fixed issue where negative rotation component angles were converted to their positive analogues when read back from the property.
 - Fixed issue where 2D billboards embedded in the 3D world occasionally caused texture flipping among 3D nodes under certain conditions.
-- Fixed issue in the CC3MeshNode populateAsRectangleWithSize:andPivot:withTexture:invertTexture: method where non-centered pivot point was ignored (thanks to cocos3d user nurbed for finding and suggesting the fix).
+- Fixed issue in the CC3MeshNode populateAsRectangleWithSize:andPivot:withTexture:invertTexture: method where non-centered pivot point was ignored (thanks to Cocos3D user nurbed for finding and suggesting the fix).
 - Fixed issue where copying a CC3World did not correctly copy the drawing sequencer.
 - Fixed issue where CC3VertexColors setColor4F:at: and setColor4B:at: set incorrect color when converting to different GL element color type.
 - Fixed issue where texture files were not being located correctly if POD files were loaded from a location outside the resources directory.
 - Added additional data types for CC3VertexColors loaded from POD files.
-    - Thanks to cocos3d user esmrg for contributing this fix.
+    - Thanks to Cocos3D user esmrg for contributing this fix.
 - Fixed issue where flicker occurred in CC3Layer background color during node picking when background color was translucent.
     - Unavoidable flicker will still occur during node picking on a translucent object that has only the CC3Layer color background behind it, and that background color is translucent as well.
 - Fixed minor memory leak of CC3World drawingSequenceVisitor when CC3World deallocated.
@@ -799,7 +801,7 @@ cocos3d 0.6.2 - 2011/10/19
 - Added additional node types to CC3Performance demo app.
 
 
-cocos3d 0.6.1 - 2011/08/30
+Cocos3D 0.6.1 - 2011/08/30
 -------------------------------------
 
 - Added several new diagnostic features to help developers:
@@ -809,7 +811,7 @@ cocos3d 0.6.1 - 2011/08/30
     - Added LOGGING_REZLOAD compiler switch to optionally log the details of POD file loading and resulting node structures to troubleshoot POD file loading.
     - Added CC3Node structureDescription to return string descriptive outline of the descendant nodes of a node (including the CC3World) for use in diagnostic logging.
     - Added Models folder, containing the original Blender and Collada source files for some POD models in CC3DemoMashUp and hello, world template, to help developers resolve issues with their own model files. 
-- CC3Billboards drawing cocos2d 2D nodes can now be fully embedded in the 3D world, in addition to being drawn as an overlay on the 3D world.
+- CC3Billboards drawing Cocos2D 2D nodes can now be fully embedded in the 3D world, in addition to being drawn as an overlay on the 3D world.
 - CC3Billboards that are embedded in the 3D world (the default) can be:
     - Occluded by other 3D nodes.
     - Rotated to face away from the camera.
@@ -823,7 +825,7 @@ cocos3d 0.6.1 - 2011/08/30
     - Fixed issue where targets were not tracked when the targetting node moved and the target did not.
 - Added ability to rotate nodes around an arbitrary axis:
     - Added CC3Node rotationAxis and rotationAngle properties (and can be used interchangably with rotation (Euler angles) and quaternion properties).
-    - Added CC3RotateByAngle and CC3RotateToAngle interval actions to animate the rotation of a node around its rotationAxis
+    - Added CC3ActionRotateByAngle and CC3RotateToAngle interval actions to animate the rotation of a node around its rotationAxis
     - Added a spinning die cube to CC3DemoMashUp to demonstrate rotation around any axis (and using touch-move events to create swipe gestures)
 - Added vertex data access methods to CC3MeshNode and CC3Mesh to make is easy to manipulate the underlying vertex data:
     - Vertex data access methods include: setVertexLocation:at:, setVertexNormal:at:, setVertexTexCoord2F:at:forTextureUnit:, setVertexColor4F:at:, setVertexColor4B:at:, and setVertexIndex:at: 
@@ -840,9 +842,9 @@ cocos3d 0.6.1 - 2011/08/30
 - CC3Material now supports CCBlendProtocol property blendFunc in addition to individual sourceBlend and destinationBlend properties. Class property defaultBlendFunc now replace defaultSourceBlend and defaultDestinationBlend properties.
 - Enhancements to CC3Logging to log create log entries without timestamp and app context preamble info.
 - Fixed issue where translucent and transparent 3D nodes that are over CC3Layer background color would flicker during 3D node selection from touch events.
-- Fixed issue where changing the CC3Billboard property did not change the running status of the contained 2D CCNode. Thanks to cocos3d user Sev_Inf for submitting this patch.
+- Fixed issue where changing the CC3Billboard property did not change the running status of the contained 2D CCNode. Thanks to Cocos3D user Sev_Inf for submitting this patch.
 - Fixed issue where unprojecting did not work correctly when the camera was mounted on a rotating object.
-  Thanks to cocos3d forum user Rogs for suggesting a fix for this.
+  Thanks to Cocos3D forum user Rogs for suggesting a fix for this.
 - Added protection code to guard against materials in POD files containing out-of-range texture indices.
 - Fixed file permissions on file in the PVR 2.08 directory that was causing the files not to be installed in project templates.
 - CC3NodeVisitor design standardized across subclasses. Now uses a single standard visit: method.
@@ -850,11 +852,11 @@ cocos3d 0.6.1 - 2011/08/30
 - Renamed CC3WorldTouchHandler to CC3TouchedNodePicker to clarify its only function is to pick a touched node when handling touch events.
 
 
-cocos3d 0.6.0-sp - 2011/07/21
+Cocos3D 0.6.0-sp - 2011/07/21
 -------------------------------------
 
-- Added a cocos3d Xcode 4 workspace to organize layout and access to cocos3d library and demo projects.
-- The 'cocos3d Application' project template ("hello, world") now includes the cocos3d source code. The cocos3d source code no longer needs to be copied into the project after creating it from a template.
+- Added a Cocos3D Xcode 4 workspace to organize layout and access to Cocos3D library and demo projects.
+- The 'Cocos3D Application' project template ("hello, world") now includes the Cocos3D source code. The Cocos3D source code no longer needs to be copied into the project after creating it from a template.
 - Multi-texturing using multiple texture units is now available. CC3Material now supports adding additional textures as overlays, and CC3VertexArrayMesh supports adding additional texture mappings if separate texture mappings are required for each texture unit. Texture combination functions are configurable using a CC3TextureUnit instance attached to each texture.
 - Using multi-texturing, DOT3 bump-maps (normal maps) can be applied to models to increase surface detail on models without having to increase the number of vertices.
 - CC3BumpMapTextureUnit added for explicit bump-mapping support with multi-texturing.
@@ -871,7 +873,7 @@ cocos3d 0.6.0-sp - 2011/07/21
 - Fog effects can be applied to the CC3World via the fog property and the CC3Fog class.
 - CC3DemoMashUp now contains a pushbutton that demonstrates fog, or a tightly focused spotlight with distance intensity attenuation.
 - Added CC3EAGLView to support node-picking when antialiasing multisamping is active. While using the normal EAGLView, turning on antialiasing multisamping will cause node-picking to stop working.
-- Demo apps and cocos3d project template now use CC3EAGLView.
+- Demo apps and Cocos3D project template now use CC3EAGLView.
 - CC3MeshModel and CC3VertexArrayMeshModel now renamed to CC3Mesh and CC3VertexArrayMesh to better distinguish meshes from nodes.
 - CC3MeshNode and CC3PlaneNode now support populateAs...andTessellation:... methods to create a rectangular plane mesh as a grid of many smaller rectangular faces to improve realism with specular or spot lighting.
 - CC3VertexLocations now support convenience methods to move the pivot point of the mesh to something more convenient (such as the center of the mesh) if desired.
@@ -899,7 +901,7 @@ cocos3d 0.6.0-sp - 2011/07/21
 - Upgraded PowerVR POD library to version 2.08
 
 
-cocos3d 0.5.4 - 2011/04/14
+Cocos3D 0.5.4 - 2011/04/14
 --------------------------
 
 - CC3Camera now support parallel/isometric/orthographic projection by setting the isUsingParallelProjection property
@@ -911,15 +913,15 @@ cocos3d 0.5.4 - 2011/04/14
 - [API Change] CC3Camera near and far clipping planes normalized to a standard (less arbitrary) range. The nearClippingPlane now defaults to 1.0, and the farClippingPlane now defaults to 1000.0.
 
 
-cocos3d 0.5.3 - 2011/04/06
+Cocos3D 0.5.3 - 2011/04/06
 --------------------------
 
-- includes Xcode 4 cocos3d project template (The Xcode 4 project template requires an additional project template step. See the README! file in the Xcode 4 project after creating it from the project template).
+- includes Xcode 4 Cocos3D project template (The Xcode 4 project template requires an additional project template step. See the README! file in the Xcode 4 project after creating it from the project template).
 - positioning objects by touch point location is now supported. See the CC3Camera unprojectPoint: and unprojectPoint:ontoPlane: methods. For an example of how to use this functionality, see how the CC3DemoMashUp handles touch events on the ground plane.
 - CC3Node now has an addAndLocalizeChild: method to add objects of known size and rotation and not have those properties affected by the transform of the parent object.
 - performance tuning
 - CC3World now optionally collects application drawing and updating performance statistics in the performanceStatistics property. 
-- new demo project CC3Performance now available for developers to explore cocos3d performance with various 3D models.
+- new demo project CC3Performance now available for developers to explore Cocos3D performance with various 3D models.
 - changing scale of CC3Camera (scale or uniformScale properties) now updates projectionMatrix automatically.
 - CC3BoxNode class added as subclass of CC3MeshNode to simplify the creation of cube and box meshes.
 - CC3LineNode added line population methods
@@ -937,7 +939,7 @@ cocos3d 0.5.3 - 2011/04/06
 - hello, world template now using a mesh with fewer vertices to improve performance on older devices
 
 
-cocos3d 0.5.2 - 2011/03/12
+Cocos3D 0.5.2 - 2011/03/12
 --------------------------
 
 - retina display now supported
@@ -962,12 +964,12 @@ cocos3d 0.5.2 - 2011/03/12
 - corrected issue with touch selection where touch events that were close together were sometimes sent with incorrect touch type. 
 - CC3DemoMashUp: corrected issue where the robot army was not visible through the translucent beach ball.
 - CC3DemoMashUp: touching the beach ball toggles the it between opacity and translucency.
-- CC3DemoMashUp: the translucent beach ball no longer flickers during touch event processing when it has 3D objects behind it. It still flickers when no objects are behind it, such as when the "sky" appears behind it. This is because the "sky" is really just the background color of the cocos2d layer, and does not participate in the translucency of the beach ball.
+- CC3DemoMashUp: the translucent beach ball no longer flickers during touch event processing when it has 3D objects behind it. It still flickers when no objects are behind it, such as when the "sky" appears behind it. This is because the "sky" is really just the background color of the Cocos2D layer, and does not participate in the translucency of the beach ball.
 - CC3DemoMashUp: touching either the textured or rainbow teapot will toggle the display of a wire-frame of the teapot's bounding box.
 - CC3DemoMashUp: the ground plane is now constructed using a CC3PlaneNode instance.
 
 
-cocos3d 0.5.1 - 2011/02/24
+Cocos3D 0.5.1 - 2011/02/24
 --------------------------
 
 - added support for picking 3D nodes via UI touch events
@@ -1007,7 +1009,7 @@ cocos3d 0.5.1 - 2011/02/24
 - minor documentation and commenting corrections
 
 
-cocos3d 0.5 - 2011/02/01
+Cocos3D 0.5 - 2011/02/01
 ------------------------
 
 Initial public release.

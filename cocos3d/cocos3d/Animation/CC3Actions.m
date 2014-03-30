@@ -44,13 +44,23 @@
 
 
 #pragma mark -
-#pragma mark CC3TransformVectorAction
+#pragma mark CCActionInterval extension
 
-@interface CC3TransformVectorAction (TemplateMethods)
+@implementation CCActionInterval (CC3)
+
+-(CCAction*) repeatForever { return [CCActionRepeatForever actionWithAction: self]; }
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3ActionTransformVector
+
+@interface CC3ActionTransformVector (TemplateMethods)
 @property(nonatomic, assign) CC3Vector targetVector;
 @end
 
-@implementation CC3TransformVectorAction
+@implementation CC3ActionTransformVector
 
 -(id) initWithDuration: (CCTime) t differenceVector: (CC3Vector) aVector {
 	if( (self = [super initWithDuration: t]) ) {
@@ -93,16 +103,16 @@
 
 
 #pragma mark -
-#pragma mark CC3TransformBy
+#pragma mark CC3ActionTransformBy
 
-@implementation CC3TransformBy
+@implementation CC3ActionTransformBy
 @end
 
 
 #pragma mark -
-#pragma mark CC3MoveBy
+#pragma mark CC3ActionMoveBy
 
-@implementation CC3MoveBy
+@implementation CC3ActionMoveBy
 
 -(id) initWithDuration: (CCTime) t moveBy: (CC3Vector) aTranslation {
 	return [self initWithDuration: t differenceVector: aTranslation];
@@ -120,9 +130,9 @@
 
 
 #pragma mark -
-#pragma mark CC3RotateBy
+#pragma mark CC3ActionRotateBy
 
-@implementation CC3RotateBy
+@implementation CC3ActionRotateBy
 
 -(id) initWithDuration: (CCTime) t rotateBy: (CC3Vector) aRotation {
 	return [self initWithDuration: t differenceVector: aRotation];
@@ -140,9 +150,28 @@
 
 
 #pragma mark -
-#pragma mark CC3ScaleBy
+#pragma mark CC3ActionRotateForever
 
-@implementation CC3ScaleBy
+@implementation CC3ActionRotateForever
+
+-(id) initWithRotationRate: (CC3Vector) rotationPerSecond {
+	return [self initWithAction: [CC3ActionRotateBy actionWithDuration: 1.0
+															  rotateBy: rotationPerSecond]];
+}
+
++(id) actionWithRotationRate: (CC3Vector) rotationPerSecond {
+	return [[[self alloc] initWithRotationRate: rotationPerSecond] autorelease];
+}
+
+-(CCActionInterval*) reverse { return [self.class actionWithAction: [self.innerAction reverse]]; }
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3ActionScaleBy
+
+@implementation CC3ActionScaleBy
 
 /**
  * Scale is multiplicative. Scaling BY 5 means take whatever the current scale is
@@ -183,9 +212,9 @@
 
 
 #pragma mark -
-#pragma mark CC3RotateByAngle
+#pragma mark CC3ActionRotateByAngle
 
-@implementation CC3RotateByAngle
+@implementation CC3ActionRotateByAngle
 
 -(id) initWithDuration: (CCTime) t rotateByAngle: (GLfloat) anAngle {
 	return [self initWithDuration: t rotateByAngle: anAngle aroundAxis: kCC3VectorNull];
@@ -242,9 +271,29 @@
 
 
 #pragma mark -
-#pragma mark CC3TransformTo
+#pragma mark CC3ActionRotateOnAxisForever
 
-@implementation CC3TransformTo
+@implementation CC3ActionRotateOnAxisForever
+
+-(id) initWithRotationRate: (GLfloat) degreesPerSecond aroundAxis: (CC3Vector) anAxis {
+	return [self initWithAction: [CC3ActionRotateByAngle actionWithDuration: 1.0
+															  rotateByAngle: degreesPerSecond
+																 aroundAxis:anAxis]];
+}
+
++(id) actionWithRotationRate: (GLfloat) degreesPerSecond aroundAxis: (CC3Vector) anAxis {
+	return [[[self alloc] initWithRotationRate: degreesPerSecond aroundAxis: anAxis] autorelease];
+}
+
+-(CCActionInterval*) reverse { return [self.class actionWithAction: [self.innerAction reverse]]; }
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3ActionTransformTo
+
+@implementation CC3ActionTransformTo
 
 -(id) initWithDuration: (CCTime) t endVector: (CC3Vector) aVector {
 	if( (self = [super initWithDuration: t]) ) {
@@ -281,9 +330,9 @@
 
 
 #pragma mark -
-#pragma mark CC3MoveTo
+#pragma mark CC3ActionMoveTo
 
-@implementation CC3MoveTo
+@implementation CC3ActionMoveTo
 
 -(id) initWithDuration: (CCTime) t moveTo: (CC3Vector) aLocation {
 	return [self initWithDuration: t endVector: aLocation];
@@ -301,9 +350,9 @@
 
 
 #pragma mark -
-#pragma mark CC3RotateTo
+#pragma mark CC3ActionRotateTo
 
-@implementation CC3RotateTo
+@implementation CC3ActionRotateTo
 
 -(id) initWithDuration: (CCTime) t rotateTo: (CC3Vector) aRotation {
 	return [self initWithDuration: t endVector: aRotation];
@@ -330,9 +379,9 @@
 
 
 #pragma mark -
-#pragma mark CC3ScaleTo
+#pragma mark CC3ActionScaleTo
 
-@implementation CC3ScaleTo
+@implementation CC3ActionScaleTo
 
 -(id) initWithDuration: (CCTime) t scaleTo: (CC3Vector) aScale {
 	return [self initWithDuration: t endVector: aScale];
@@ -358,9 +407,9 @@
 
 
 #pragma mark -
-#pragma mark CC3RotateToAngle
+#pragma mark CC3ActionRotateToAngle
 
-@implementation CC3RotateToAngle
+@implementation CC3ActionRotateToAngle
 
 -(id) initWithDuration: (CCTime) t rotateToAngle: (GLfloat) anAngle {
 	if( (self = [super initWithDuration: t]) ) {
@@ -405,9 +454,9 @@
 
 
 #pragma mark -
-#pragma mark CC3RotateToLookTowards
+#pragma mark CC3ActionRotateToLookTowards
 
-@implementation CC3RotateToLookTowards
+@implementation CC3ActionRotateToLookTowards
 
 -(id) initWithDuration: (CCTime) t forwardDirection: (CC3Vector) aDirection {
 	return [self initWithDuration: t endVector: CC3VectorNormalize(aDirection)];
@@ -426,9 +475,9 @@
 
 
 #pragma mark -
-#pragma mark CC3RotateToLookAt
+#pragma mark CC3ActionRotateToLookAt
 
-@implementation CC3RotateToLookAt
+@implementation CC3ActionRotateToLookAt
 
 -(id) initWithDuration: (CCTime) t targetLocation: (CC3Vector) aLocation {
 	return [self initWithDuration: t endVector: aLocation];
@@ -447,13 +496,13 @@
 
 
 #pragma mark -
-#pragma mark CC3MoveDirectionallyBy
+#pragma mark CC3ActionMoveDirectionallyBy
 
-@interface CC3MoveDirectionallyBy (TemplateMethods)
+@interface CC3ActionMoveDirectionallyBy (TemplateMethods)
 @property(nonatomic, readonly) CC3Vector targetDirection;
 @end
 
-@implementation CC3MoveDirectionallyBy
+@implementation CC3ActionMoveDirectionallyBy
 
 -(id) initWithDuration: (CCTime) t moveBy: (GLfloat) aDistance {
 	if( (self = [super initWithDuration: t]) ) {
@@ -463,16 +512,16 @@
 }
 
 +(id) actionWithDuration: (CCTime) t moveBy: (GLfloat) aDistance {
-	return [[(CC3MoveDirectionallyBy*)[self alloc] initWithDuration: t moveBy: aDistance] autorelease];
+	return [[(CC3ActionMoveDirectionallyBy*)[self alloc] initWithDuration: t moveBy: aDistance] autorelease];
 }
 
 -(id) copyWithZone: (NSZone*) zone {
-	return [(CC3MoveDirectionallyBy*)[[self class] allocWithZone: zone] initWithDuration: [self duration]
+	return [(CC3ActionMoveDirectionallyBy*)[[self class] allocWithZone: zone] initWithDuration: [self duration]
 																				  moveBy: _distance];
 }
 
 -(id) reverse {
-	return [[(CC3MoveDirectionallyBy*)[[self class] alloc] initWithDuration: self.duration
+	return [[(CC3ActionMoveDirectionallyBy*)[[self class] alloc] initWithDuration: self.duration
 																	 moveBy: -_distance] autorelease];
 }
 
@@ -506,9 +555,9 @@
 
 
 #pragma mark -
-#pragma mark CC3MoveForwardBy
+#pragma mark CC3ActionMoveForwardBy
 
-@implementation CC3MoveForwardBy
+@implementation CC3ActionMoveForwardBy
 
 -(CC3Vector) targetDirection { return self.targetCC3Node.forwardDirection; }
 
@@ -516,9 +565,9 @@
 
 
 #pragma mark -
-#pragma mark CC3MoveRightBy
+#pragma mark CC3ActionMoveRightBy
 
-@implementation CC3MoveRightBy
+@implementation CC3ActionMoveRightBy
 
 -(CC3Vector) targetDirection { return self.targetCC3Node.rightDirection; }
 
@@ -526,9 +575,9 @@
 
 
 #pragma mark -
-#pragma mark CC3MoveUpBy
+#pragma mark CC3ActionMoveUpBy
 
-@implementation CC3MoveUpBy
+@implementation CC3ActionMoveUpBy
 
 -(CC3Vector) targetDirection { return self.targetCC3Node.upDirection; }
 
@@ -536,26 +585,22 @@
 
 
 #pragma mark -
-#pragma mark CC3TintTo
+#pragma mark CC3ActionTintTo
 
-@interface CC3TintTo (TemplateMethods)
+@interface CC3ActionTintTo (TemplateMethods)
 @property(nonatomic, assign) ccColor4F targetColor;
 @property(nonatomic, readonly) CC3Node* targetNode;
 @end
 
-@implementation CC3TintTo
+@implementation CC3ActionTintTo
 
--(CC3Node*) targetNode {
-	return (CC3Node*)self.target;
-}
+-(CC3Node*) targetNode { return (CC3Node*)self.target; }
 
--(ccColor4F) targetColor {
-	CC3Assert(NO, @"%@ is abstract. Property targetColor must be implemented in a concrete subclass", self);
-	return kCCC4FBlackTransparent;
-}
+-(ccColor4F) targetColor { return self.targetNode.diffuseColor; }
 
 -(void) setTargetColor: (ccColor4F) aColor {
-	CC3Assert(NO, @"%@ is abstract. Property targetColor must be implemented in a concrete subclass", self);
+	self.targetNode.ambientColor = aColor;
+	self.targetNode.diffuseColor = aColor;
 }
 
 -(id) initWithDuration: (CCTime) t colorTo: (ccColor4F) aColor {
@@ -586,9 +631,9 @@
 
 
 #pragma mark -
-#pragma mark CC3TintAmbientTo
+#pragma mark CC3ActionTintAmbientTo
 
-@implementation CC3TintAmbientTo
+@implementation CC3ActionTintAmbientTo
 
 -(ccColor4F) targetColor { return self.targetNode.ambientColor; }
 
@@ -598,9 +643,9 @@
 
 
 #pragma mark -
-#pragma mark CC3TintDiffuseTo
+#pragma mark CC3ActionTintDiffuseTo
 
-@implementation CC3TintDiffuseTo
+@implementation CC3ActionTintDiffuseTo
 
 -(ccColor4F) targetColor { return self.targetNode.diffuseColor; }
 
@@ -610,9 +655,9 @@
 
 
 #pragma mark -
-#pragma mark CC3TintSpecularTo
+#pragma mark CC3ActionTintSpecularTo
 
-@implementation CC3TintSpecularTo
+@implementation CC3ActionTintSpecularTo
 
 -(ccColor4F) targetColor { return self.targetNode.specularColor; }
 
@@ -622,9 +667,9 @@
 
 
 #pragma mark -
-#pragma mark CC3TintEmissionTo
+#pragma mark CC3ActionTintEmissionTo
 
-@implementation CC3TintEmissionTo
+@implementation CC3ActionTintEmissionTo
 
 -(ccColor4F) targetColor { return self.targetNode.emissionColor; }
 
@@ -634,9 +679,9 @@
 
 
 #pragma mark -
-#pragma mark CC3Animate
+#pragma mark CC3ActionAnimate
 
-@implementation CC3Animate
+@implementation CC3ActionAnimate
 
 @synthesize trackID = _trackID, isReversed=_isReversed;
 
@@ -673,13 +718,13 @@
 }
 
 -(CCActionInterval*) reverse {
-	CC3Animate* newAnim = [[self class] actionWithDuration: self.duration];
+	CC3ActionAnimate* newAnim = [[self class] actionWithDuration: self.duration];
 	newAnim.isReversed = !self.isReversed;
 	return newAnim;
 }
 
 -(id) copyWithZone: (NSZone*) zone {
-	CC3Animate* newAnim = [((CC3Animate*)[[self class] allocWithZone: zone]) initWithDuration: self.duration];
+	CC3ActionAnimate* newAnim = [((CC3ActionAnimate*)[[self class] allocWithZone: zone]) initWithDuration: self.duration];
 	newAnim.isReversed = self.isReversed;
 	return newAnim;
 }
@@ -688,9 +733,9 @@
 
 
 #pragma mark -
-#pragma mark CC3AnimationBlendingFadeTrackTo
+#pragma mark CC3ActionAnimationBlendingFadeTrackTo
 
-@implementation CC3AnimationBlendingFadeTrackTo
+@implementation CC3ActionAnimationBlendingFadeTrackTo
 
 @synthesize trackID=_trackID;
 
@@ -730,9 +775,9 @@
 
 
 #pragma mark -
-#pragma mark CC3AnimationCrossFade
+#pragma mark CC3ActionAnimationCrossFade
 
-@implementation CC3AnimationCrossFade
+@implementation CC3ActionAnimationCrossFade
 
 @synthesize fromTrackID=_fromTrackID, toTrackID=_toTrackID;
 
@@ -799,9 +844,9 @@
 
 
 #pragma mark -
-#pragma mark CC3AnimationBlendingSetTrackTo
+#pragma mark CC3ActionAnimationBlendingSetTrackTo
 
-@implementation CC3AnimationBlendingSetTrackTo
+@implementation CC3ActionAnimationBlendingSetTrackTo
 
 @synthesize trackID=_trackID;
 
@@ -825,9 +870,9 @@
 
 
 #pragma mark -
-#pragma mark CC3EnableAnimationTrack
+#pragma mark CC3ActionEnableAnimationTrack
 
-@implementation CC3EnableAnimationTrack
+@implementation CC3ActionEnableAnimationTrack
 
 @synthesize trackID=_trackID;
 
@@ -846,9 +891,9 @@
 
 
 #pragma mark -
-#pragma mark CC3DisableAnimationTrack
+#pragma mark CC3ActionDisableAnimationTrack
 
-@implementation CC3DisableAnimationTrack
+@implementation CC3ActionDisableAnimationTrack
 
 @synthesize trackID=_trackID;
 
@@ -908,10 +953,53 @@
 
 
 #pragma mark -
-#pragma mark CC3Remove
+#pragma mark CC3ActionRemove
 
-@implementation CC3Remove
+@implementation CC3ActionRemove
 
 -(void) update: (CCTime) t { [self.targetCC3Node remove]; }
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3ActionCCNodeSizeTo action
+
+@implementation CC3ActionCCNodeSizeTo
+
+-(id) initWithDuration: (CCTime) dur sizeTo: (CGSize) endSize {
+	if( (self = [super initWithDuration: dur]) ) {
+		endSize_ = endSize;
+	}
+	return self;
+}
+
++(id) actionWithDuration: (CCTime) dur sizeTo: (CGSize) endSize {
+	return [[[self alloc] initWithDuration: dur sizeTo: endSize] autorelease];
+}
+
+-(id) copyWithZone: (NSZone*) zone {
+	return [[[self class] allocWithZone: zone] initWithDuration: [self duration]
+														 sizeTo: endSize_];
+}
+
+-(id) reverse { return [[self class] actionWithDuration: self.duration  sizeTo: endSize_]; }
+
+-(void) startWithTarget: (CCNode*) aTarget {
+	[super startWithTarget: aTarget];
+	startSize_ = aTarget.contentSize;
+	sizeChange_ = CGSizeMake(endSize_.width - startSize_.width, endSize_.height - startSize_.height);
+}
+
+-(void) update: (CCTime) t {
+	CCNode* tNode = (CCNode*)self.target;
+	tNode.contentSize = CGSizeMake(startSize_.width + (sizeChange_.width * t),
+								   startSize_.height + (sizeChange_.height * t));
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ start: %@, end: %@, time change: %@", [self class],
+			NSStringFromCGSize(startSize_), NSStringFromCGSize(endSize_), NSStringFromCGSize(sizeChange_)];
+}
 
 @end

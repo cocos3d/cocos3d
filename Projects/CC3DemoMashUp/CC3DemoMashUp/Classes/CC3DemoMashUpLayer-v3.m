@@ -378,9 +378,8 @@
 	CC3Node* globe = [[self.cc3Scene getNodeNamed: kGlobeName] copy];
 	globe.location = kCC3VectorZero;
 	globe.rotation = kCC3VectorZero;
-	[globe runAction: [CCActionRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
-																					  rotateBy: cc3v(0.0, 30.0, 0.0)]]];
-	[hudScene addChild: globe];	
+	[globe runAction: [CC3ActionRotateForever actionWithRotationRate: cc3v(0, 30, 0)]];
+	[hudScene addChild: globe];
 	[hudScene createGLBuffers];		// Won't really do anything because the Globe mesh...
 									// ...has already been buffered in main scene
 	hudScene.opacity = (kCCOpacityFull * 0.75);		// Makes everything in the scene somewhat translucent
