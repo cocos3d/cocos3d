@@ -34,7 +34,6 @@
 #import "CC3Light.h"
 #import "CC3Actions.h"
 #import "CC3UtilityMeshNodes.h"
-#import "CCTouchDispatcher.h"
 #import "CGPointExtension.h"
 
 #define kTileLightIndex		0

@@ -41,14 +41,35 @@
 	self.userInteractionEnabled = YES;	// Enable touch event handling for 3D object picking
 }
 
-// The ccTouchMoved:withEvent: method is optional for the <CCTouchDelegateProtocol>.
-// The event dispatcher will not dispatch events for which there is no method
-// implementation. Since the touch-move events are both voluminous and seldom used,
-// the implementation of ccTouchMoved:withEvent: has been left out of the default
-// CC3Layer implementation. To receive and handle touch-move events for object
-// picking, it must be implemented here.
+#if CC3_CC2_CLASSIC
+
+/**
+ * The ccTouchMoved:withEvent: method is optional. Since the touch-move events are both
+ * voluminous and seldom used, the implementation of this method has been left out of
+ * the default CC3Layer implementation. To receive and handle touch-move events for
+ * object picking, copy the following method implementation to your CC3Layer subclass.
+ *
+ * This method is used by Cocos2D versions prior to v3.
+ */
 -(void) ccTouchMoved: (UITouch *)touch withEvent: (UIEvent *)event {
 	[self handleTouch: touch ofType: kCCTouchMoved];
 }
+
+#else
+
+/**
+ * The touchMoved:withEvent: method is optional. Since the touch-move events are both
+ * voluminous and seldom used, the implementation of this method has been left out of
+ * the default CC3Layer implementation. To receive and handle touch-move events for
+ * object picking, copy the following method implementation to your CC3Layer subclass.
+ *
+ * This method is used by Cocos2D versions v3 and above.
+ */
+-(void) touchMoved: (UITouch*) touch withEvent: (UIEvent*) event {
+	if ( ![self handleTouch: touch ofType: kCCTouchMoved] )
+		[super touchMoved: touch withEvent: event];
+}
+
+#endif	// CC3_CC2_CLASSIC
 
 @end

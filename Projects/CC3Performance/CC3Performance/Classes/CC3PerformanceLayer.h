@@ -32,6 +32,12 @@
 #import "Joystick.h"
 #import "CCNodeAdornments.h"
 
+// In Cocos2D v1 & v2, buttons are actually menu items
+#if CC3_CC2_CLASSIC
+#	define CC_BUTTON_CLASS		AdornableMenuItemImage
+#else
+#	define CC_BUTTON_CLASS		AdornableButton
+#endif	// CC3_CC2_CLASSIC
 
 /**
  * This application-specific CC3Scene provides a platform for testing and displaying
@@ -69,11 +75,11 @@
 @interface CC3PerformanceLayer : CC3Layer {
 	Joystick* _directionJoystick;
 	Joystick* _locationJoystick;
-	CCMenuItem* _increaseNodesMI;
-	CCMenuItem* _decreaseNodesMI;
-	CCMenuItem* _nextNodeTypeMI;
-	CCMenuItem* _prevNodeTypeMI;
-	CCMenuItem* _animateNodesMI;
+	CC_BUTTON_CLASS* _increaseNodesButton;
+	CC_BUTTON_CLASS* _decreaseNodesButton;
+	CC_BUTTON_CLASS* _nextNodeTypeButton;
+	CC_BUTTON_CLASS* _prevNodeTypeButton;
+	CC_BUTTON_CLASS* _animateNodesButton;
 	CCLabelBMFont* _nodeNameLabel;
 	CCLabelBMFont* _updateTitleLabel;
 	CCLabelBMFont* _updateRateLabel;

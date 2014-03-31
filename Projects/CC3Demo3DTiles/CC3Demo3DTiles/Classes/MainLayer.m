@@ -110,48 +110,50 @@
 -(void) addButtons {
 	
 	// Add button to allow user to increase the number of nodes in the 3D scene.
-	_increaseNodesMI = [self addButtonWithImageFile: kArrowUpButtonFileName
-									  withSelector: @selector(increaseNodesSelected:)];
+	_increaseNodesButton = [self addButtonWithCallbackSelector: @selector(increaseNodesSelected)
+											 withImageFile: kArrowUpButtonFileName];
 	
 	// Add button to allow user to decrease the number of nodes in the 3D scene.
-	_decreaseNodesMI = [self addButtonWithImageFile: kArrowUpButtonFileName
-									  withSelector: @selector(decreaseNodesSelected:)];
-	_decreaseNodesMI.rotation = 180.0f;
+	_decreaseNodesButton = [self addButtonWithCallbackSelector: @selector(decreaseNodesSelected)
+											 withImageFile: kArrowUpButtonFileName];
+	_decreaseNodesButton.rotation = 180.0f;
 }
 
 /**
- * Creates a button (actually a single-item menu) that will invoke the specified selector
- * as its callback when it is pressed. The button is adorned with a ring aound the button
- * that fades in when pressed, and fades back out when released.
+ * Adds a UI button to this layer, and returns the button. The button will display the image
+ * in the specified file, and is adorned with a ring adornment that will be activated when the
+ * button is touched. The button will invoke the specified callback method on this instance 
+ * when the button is pressed and released by the user. The type of button used depends on 
+ * whether we are using Cocos2D v3, or Cocos2D v2/v1.
  */
--(CCMenuItem*) addButtonWithImageFile: (NSString*) imageFile withSelector: (SEL) callbackSelector {
-	AdornableMenuItemImage* mi;
+-(CC_BUTTON_CLASS*) addButtonWithCallbackSelector: (SEL) callBackSelector
+									withImageFile: (NSString*) imgFileName {
+	CC_BUTTON_CLASS* button;
 	
-	// Set up the menu item and position it in the bottom center of the layer
-	mi = [AdornableMenuItemImage itemWithNormalImage: imageFile
-									   selectedImage: imageFile
-											  target: self
-											selector: callbackSelector];	
-	// Instead of having different normal and selected images, the toggle menu item uses an
-	// adornment, which is displayed whenever an item is selected.
-	CCNodeAdornmentBase* adornment;
-	
-	// The adornment is a ring that fades in around the menu item and then fades out when
-	// the menu item is no longer selected.
-	CCSprite* ringSprite = [CCSprite spriteWithFile: kButtonRingFileName];
-	adornment = [CCNodeAdornmentOverlayFader adornmentWithSprite: ringSprite];
-	adornment.zOrder = kAdornmentUnderZOrder;
-	
-	// Attach the adornment to the menu item and center it on the menu item
-	adornment.position = ccpCompMult(ccpFromSize(mi.contentSize), mi.anchorPoint);
-	mi.adornment = adornment;
-	mi.scale = kControlSizeScale;
-	
-	CCMenu* viewMenu = [CCMenu menuWithItems: mi, nil];
+#if CC3_CC2_CLASSIC
+	button = [AdornableMenuItemImage itemWithNormalImage: imgFileName
+										   selectedImage: imgFileName
+												  target: self
+												selector: callBackSelector];
+	CCMenu* viewMenu = [CCMenu menuWithItems: button, nil];
 	viewMenu.position = CGPointZero;
 	[self addChild: viewMenu];
+#else
+	button = [AdornableButton buttonWithTitle: nil
+								  spriteFrame: [CCSpriteFrame frameWithImageNamed: imgFileName]];
+	[button setTarget: self selector: callBackSelector];
+	[self addChild: button];
+#endif	// CC3_CC2_CLASSIC
 	
-	return mi;
+	// Add a ring adornment that fades in around the button and then fades out when the button is deselected.
+	CCSprite* ringSprite = [CCSprite spriteWithImageNamed: kButtonRingFileName];
+	CCNodeAdornmentBase* adornment = [CCNodeAdornmentOverlayFader adornmentWithSprite: ringSprite];
+	adornment.zOrder = kAdornmentUnderZOrder;
+	adornment.position = ccpCompMult(ccpFromSize(button.contentSize), button.anchorPoint);
+	button.adornment = adornment;
+	
+	button.scale = kControlSizeScale;
+	return button;
 }
 
 /**
@@ -163,13 +165,13 @@
 	GLfloat xPos, yPos;
 	GLfloat middle = self.contentSize.height / 2.0;
 
-	xPos = self.contentSize.width - (_increaseNodesMI.contentSize.width / 2.0) * kControlSizeScale;
+	xPos = self.contentSize.width - (_increaseNodesButton.contentSize.width / 2.0) * kControlSizeScale;
 
-	yPos = middle + (_increaseNodesMI.contentSize.height / 2.0) * kControlSizeScale;
-	_increaseNodesMI.position = ccp(xPos, yPos);
+	yPos = middle + (_increaseNodesButton.contentSize.height / 2.0) * kControlSizeScale;
+	_increaseNodesButton.position = ccp(xPos, yPos);
 	
-	yPos = middle - (_decreaseNodesMI.contentSize.height / 2.0) * kControlSizeScale;
-	_decreaseNodesMI.position = ccp(xPos, yPos);
+	yPos = middle - (_decreaseNodesButton.contentSize.height / 2.0) * kControlSizeScale;
+	_decreaseNodesButton.position = ccp(xPos, yPos);
 	
 	_label.position =  ccp(self.contentSize.width , 0.0);
 }
@@ -268,7 +270,7 @@
 -(void) addTiles {
 	[self removeTiles];
 	CGSize mySize = self.contentSize;
-	CGSize gridSize = CGSizeMake(mySize.width - (_increaseNodesMI.contentSize.width * kControlSizeScale),
+	CGSize gridSize = CGSizeMake(mySize.width - (_increaseNodesButton.contentSize.width * kControlSizeScale),
 								 mySize.height - kGridPadding);
 	CGSize tileSize = CGSizeMake(gridSize.width / _tilesPerSide - kGridPadding,
 								 gridSize.height / _tilesPerSide - kGridPadding);
@@ -336,7 +338,7 @@
 		// Create the CC3ActionAnimate action to run the animation. The duration is randomized so
 		// that when multiple dragons are visible, they are not all flapping in unison.
 		CCTime flapTime = CC3RandomFloatBetween(1.0, 2.0);
-		[aNode runAction: [[CC3ActionAnimate actionWithDuration: flapTime onTrack: _flapTrack] repeatForever];
+		[aNode runAction: [[CC3ActionAnimate actionWithDuration: flapTime onTrack: _flapTrack] repeatForever]];
 	}
 	
 	scene.mainNode = aNode;		// Set the node as the main node of the scene, for easy access
@@ -344,21 +346,21 @@
 	return scene;
 }
 
--(ccColor3B) pickNodeColor {
+-(CCColorRef) pickNodeColor {
 	switch (CC3RandomUIntBelow(6)) {
 		case 0:
-			return ccRED;
+			return CCColorRefFromCCC4F(kCCC4FRed);
 		case 1:
-			return ccGREEN;
+			return CCColorRefFromCCC4F(kCCC4FGreen);
 		case 2:
-			return ccBLUE;
+			return CCColorRefFromCCC4F(kCCC4FBlue);
 		case 3:
-			return ccYELLOW;
+			return CCColorRefFromCCC4F(kCCC4FYellow);
 		case 4:
-			return ccORANGE;
+			return CCColorRefFromCCC4F(kCCC4FOrange);
 		case 5:
 		default:
-			return ccWHITE;
+			return CCColorRefFromCCC4F(kCCC4FWhite);
 	}
 }
 
@@ -378,7 +380,7 @@
  * The user has pressed the increase nodes button.
  * Add one row and column to the grid, but limit the smaller side of the tile to a min length.
  */
--(void) increaseNodesSelected: (CCMenuItemToggle*) menuItem {
+-(void) increaseNodesSelected {
 	CGSize cs = self.contentSize;
 	CGFloat maxTPS = MIN(cs.width, cs.height) / (kMinTileSideLen + kGridPadding);
 	_tilesPerSide = MIN(_tilesPerSide + 1, maxTPS);
@@ -389,7 +391,7 @@
  * The user has pressed the decrease nodes button.
  * Remove one row and column, but always show at least one.
  */
--(void) decreaseNodesSelected: (CCMenuItemToggle*) menuItem {
+-(void) decreaseNodesSelected {
 	_tilesPerSide = MAX(_tilesPerSide - 1, 1);
 	[self addTiles];
 }

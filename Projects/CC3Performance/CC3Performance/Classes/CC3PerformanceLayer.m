@@ -44,17 +44,16 @@
 #endif	// APPORTABLE
 
 /** Parameters for setting up the joystick and button controls */
-#define kJoystickSideLength		(80.0 * kControlPositionScale)
-#define kJoystickSidePadding	(8.0 * kControlPositionScale)
-#define kJoystickBottomPadding	(12.0 * kControlPositionScale)
-#define kStatsLineSpacing		(16.0 * kControlPositionScale)
-#define kAdornmentRingThickness	(4.0 * kControlPositionScale)
+#define kButtonFrameHeight			(80.0 * kControlPositionScale)
+#define kButtonPadding				(8.0 * kControlPositionScale)
+#define kStatsLineSpacing			(16.0 * kControlPositionScale)
+#define kStatsLabelRightTabInset	(130.0 * kControlPositionScale)
+#define kAdornmentRingThickness		(4.0 * kControlPositionScale)
 
-#define kJoystickThumbFileName		@"JoystickThumb.png"
 #define kArrowUpButtonFileName		@"ArrowUpButton48x48.png"
 #define kAnimateNodesButtonFileName	@"GridButton48x48.png"
 #define kButtonRingFileName			@"ButtonRing48x48.png"
-#define kButtonAdornmentScale		1.5
+
 
 @implementation CC3PerformanceLayer
 
@@ -66,101 +65,74 @@
 
 /** Initialize all the 2D user controls. */
 -(void) initializeControls {
-	[self addJoysticks];
 	[self addButtons];
 	[self addStatsLabels];
 	[self scheduleUpdate];
-}
-
-/** Creates the two joysticks that control the 3D camera direction and location. */
--(void) addJoysticks {
-	CCSprite* jsThumb;
-	
-	// The joystick that controls the player's (camera's) direction
-	jsThumb = [CCSprite spriteWithFile: kJoystickThumbFileName];
-	jsThumb.scale = kControlSizeScale;
-	
-	_directionJoystick = [Joystick joystickWithThumb: jsThumb
-											andSize: CGSizeMake(kJoystickSideLength, kJoystickSideLength)];
-	
-	_directionJoystick.position = ccp(kJoystickSidePadding, kJoystickBottomPadding + kStatsLineSpacing);
-	[self addChild: _directionJoystick];
-	
-	// The joystick that controls the player's (camera's) location
-	jsThumb = [CCSprite spriteWithFile: kJoystickThumbFileName];
-	jsThumb.scale = kControlSizeScale;
-	
-	_locationJoystick = [Joystick joystickWithThumb: jsThumb
-										   andSize: CGSizeMake(kJoystickSideLength, kJoystickSideLength)];
-	[self positionLocationJoystick];
-	[self addChild: _locationJoystick];
-}
-
-/**
- * Creates a button (actually a single-item menu) that will invoke the specified selector
- * as its callback when it is pressed. The button is adorned with a ring aound the button
- * that fades in when pressed, and fades back out when released.
- */
--(CCMenuItem*) addButtonWithImageFile: (NSString*) imageFile withSelector: (SEL) callbackSelector {
-	AdornableMenuItemImage* mi;
-	
-	// Set up the menu item and position it in the bottom center of the layer
-	mi = [AdornableMenuItemImage itemWithNormalImage: imageFile
-									   selectedImage: imageFile
-											  target: self
-											selector: callbackSelector];	
-	// Instead of having different normal and selected images, the toggle menu item uses an
-	// adornment, which is displayed whenever an item is selected.
-	CCNodeAdornmentBase* adornment;
-	
-	// The adornment is a ring that fades in around the menu item and then fades out when
-	// the menu item is no longer selected.
-	CCSprite* ringSprite = [CCSprite spriteWithFile: kButtonRingFileName];
-	adornment = [CCNodeAdornmentOverlayFader adornmentWithSprite: ringSprite];
-	adornment.zOrder = kAdornmentUnderZOrder;
-	
-	// Attach the adornment to the menu item and center it on the menu item
-	adornment.position = ccpCompMult(ccpFromSize(mi.contentSize), mi.anchorPoint);
-	mi.adornment = adornment;
-	
-	CCMenu* viewMenu = [CCMenu menuWithItems: mi, nil];
-	viewMenu.position = CGPointZero;
-	[self addChild: viewMenu];
-	
-	return mi;
 }
 
 /** Creates buttons (actually single-item menus) for user interaction. */
 -(void) addButtons {
 
 	// Add button to allow user to increase the number of nodes in the 3D scene.
-	_increaseNodesMI = [self addButtonWithImageFile: kArrowUpButtonFileName
-									  withSelector: @selector(increaseNodesSelected:)];
-	_increaseNodesMI.scale = kControlSizeScale;
+	_increaseNodesButton = [self addButtonWithCallbackSelector: @selector(increaseNodesSelected)
+												 withImageFile: kArrowUpButtonFileName];
 
 	// Add button to allow user to decrease the number of nodes in the 3D scene.
-	_decreaseNodesMI = [self addButtonWithImageFile: kArrowUpButtonFileName
-									  withSelector: @selector(decreaseNodesSelected:)];
-	_decreaseNodesMI.rotation = 180.0f;
-	_decreaseNodesMI.scale = kControlSizeScale;
+	_decreaseNodesButton = [self addButtonWithCallbackSelector: @selector(decreaseNodesSelected)
+												 withImageFile: kArrowUpButtonFileName];
+	_decreaseNodesButton.rotation = 180.0f;
 	
 	// Add button to allow user to select the next node type.
-	_nextNodeTypeMI = [self addButtonWithImageFile: kArrowUpButtonFileName
-									  withSelector: @selector(nextNodeTypeSelected:)];
-	_nextNodeTypeMI.scale = kControlSizeScale;
+	_nextNodeTypeButton = [self addButtonWithCallbackSelector: @selector(nextNodeTypeSelected)
+												withImageFile: kArrowUpButtonFileName];
 	
 	// Add button to allow user to select the previous node type.
-	_prevNodeTypeMI = [self addButtonWithImageFile: kArrowUpButtonFileName
-									  withSelector: @selector(prevNodeTypeSelected:)];
-	_prevNodeTypeMI.rotation = 180.0f;
-	_prevNodeTypeMI.scale = kControlSizeScale;
+	_prevNodeTypeButton = [self addButtonWithCallbackSelector: @selector(prevNodeTypeSelected)
+												withImageFile: kArrowUpButtonFileName];
+	_prevNodeTypeButton.rotation = 180.0f;
 	
 	// Add button to allow user to increase the number of nodes in the 3D scene.
-	_animateNodesMI = [self addButtonWithImageFile: kAnimateNodesButtonFileName
-									  withSelector: @selector(animateNodesSelected:)];
-	_animateNodesMI.scale = kControlSizeScale;
-	
+	_animateNodesButton = [self addButtonWithCallbackSelector: @selector(animateNodesSelected)
+												withImageFile: kAnimateNodesButtonFileName];
+
 	[self positionButtons];
+}
+
+/**
+ * Adds a UI button to this layer, and returns the button. The button will display the image
+ * in the specified file, and is adorned with a ring adornment that will be activated when the
+ * button is touched. The button will invoke the specified callback method on this instance
+ * when the button is pressed and released by the user. The type of button used depends on
+ * whether we are using Cocos2D v3, or Cocos2D v2/v1.
+ */
+-(CC_BUTTON_CLASS*) addButtonWithCallbackSelector: (SEL) callBackSelector
+									withImageFile: (NSString*) imgFileName {
+	CC_BUTTON_CLASS* button;
+	
+#if CC3_CC2_CLASSIC
+	button = [AdornableMenuItemImage itemWithNormalImage: imgFileName
+										   selectedImage: imgFileName
+												  target: self
+												selector: callBackSelector];
+	CCMenu* viewMenu = [CCMenu menuWithItems: button, nil];
+	viewMenu.position = CGPointZero;
+	[self addChild: viewMenu];
+#else
+	button = [AdornableButton buttonWithTitle: nil
+								  spriteFrame: [CCSpriteFrame frameWithImageNamed: imgFileName]];
+	[button setTarget: self selector: callBackSelector];
+	[self addChild: button];
+#endif	// CC3_CC2_CLASSIC
+	
+	// Add a ring adornment that fades in around the button and then fades out when the button is deselected.
+	CCSprite* ringSprite = [CCSprite spriteWithImageNamed: kButtonRingFileName];
+	CCNodeAdornmentBase* adornment = [CCNodeAdornmentOverlayFader adornmentWithSprite: ringSprite];
+	adornment.zOrder = kAdornmentUnderZOrder;
+	adornment.position = ccpCompMult(ccpFromSize(button.contentSize), button.anchorPoint);
+	button.adornment = adornment;
+	
+	button.scale = kControlSizeScale;
+	return button;
 }
 
 // Creates a label to be used for statistics, adds it as a child, and returns it.
@@ -174,8 +146,8 @@
 
 // Add several labels that display performance statistics.
 -(void) addStatsLabels {
-	CCTexture2DPixelFormat currentFormat = [CCTexture defaultAlphaPixelFormat];
-	[CCTexture setDefaultAlphaPixelFormat: kCCTexture2DPixelFormat_RGBA4444];
+	CCTexturePixelFormat currentFormat = [CCTexture defaultAlphaPixelFormat];
+	[CCTexture setDefaultAlphaPixelFormat: CCTexturePixelFormat_RGBA4444];
 	
 	_nodeNameLabel = [self addStatsLabel: @""];
 	_nodeNameLabel.anchorPoint = ccp(0.5, 0.0);
@@ -203,16 +175,6 @@
 }
 
 /**
- * Positions the right-side location joystick at the right of the layer.
- * This is called at initialization, and anytime the content size of the layer changes
- * to keep the joystick in the correct location within the new layer dimensions.
- */
--(void) positionLocationJoystick {
-	_locationJoystick.position = ccp(self.contentSize.width - kJoystickSideLength - kJoystickSidePadding,
-									 kJoystickBottomPadding + kStatsLineSpacing);
-}
-
-/**
  * Positions the view switching and invasion buttons between the two joysticks.
  * This is called at initialization, and anytime the content size of the layer changes
  * to keep the button in the correct location within the new layer dimensions.
@@ -220,22 +182,22 @@
 -(void) positionButtons {
 	GLfloat xPos;
 	GLfloat middle = self.contentSize.width / 2.0;
-	GLfloat yPosTop = ((kJoystickSideLength + _increaseNodesMI.contentSize.height * kControlSizeScale) / 2.0)
-						+ kJoystickBottomPadding - kAdornmentRingThickness;
-	GLfloat yPosBtm = ((kJoystickSideLength - _decreaseNodesMI.contentSize.height * kControlSizeScale) / 2.0)
-						+ kJoystickBottomPadding + kAdornmentRingThickness;
-	GLfloat yPosMid = (kJoystickSideLength / 2.0) + kJoystickBottomPadding;
+	GLfloat yPosTop = ((kButtonFrameHeight + _increaseNodesButton.contentSize.height * kControlSizeScale) / 2.0)
+						+ kButtonPadding - kAdornmentRingThickness;
+	GLfloat yPosBtm = ((kButtonFrameHeight - _decreaseNodesButton.contentSize.height * kControlSizeScale) / 2.0)
+						+ kButtonPadding + kAdornmentRingThickness;
+	GLfloat yPosMid = (kButtonFrameHeight / 2.0) + kButtonPadding;
 
-	xPos = middle - (_increaseNodesMI.contentSize.width * kControlSizeScale);
-	_increaseNodesMI.position = ccp(xPos, yPosTop);
-	_decreaseNodesMI.position = ccp(xPos, yPosBtm);
+	xPos = middle - (_increaseNodesButton.contentSize.width * kControlSizeScale);
+	_increaseNodesButton.position = ccp(xPos, yPosTop);
+	_decreaseNodesButton.position = ccp(xPos, yPosBtm);
 
 	xPos = middle;
-	_animateNodesMI.position = ccp(xPos, yPosMid);
+	_animateNodesButton.position = ccp(xPos, yPosMid);
 	
-	xPos = middle + (_nextNodeTypeMI.contentSize.width * kControlSizeScale);
-	_nextNodeTypeMI.position = ccp(xPos, yPosTop);
-	_prevNodeTypeMI.position = ccp(xPos, yPosBtm);
+	xPos = middle + (_nextNodeTypeButton.contentSize.width * kControlSizeScale);
+	_nextNodeTypeButton.position = ccp(xPos, yPosTop);
+	_prevNodeTypeButton.position = ccp(xPos, yPosBtm);
 }
 
 /**
@@ -243,9 +205,9 @@
  * drawing stats on the left, update stats on the right.
  */
 -(void) positionStatsLabels {
-	CGFloat leftTab = kJoystickSidePadding;
-	CGFloat rightTab = _locationJoystick.position.x - 32.0;
-	GLfloat vertPos = self.contentSize.height - kJoystickSidePadding;
+	CGFloat leftTab = kButtonPadding;
+	CGFloat rightTab = self.contentSize.width - kStatsLabelRightTabInset;
+	GLfloat vertPos = self.contentSize.height - kButtonPadding;
 	
 	vertPos -= kStatsLineSpacing;
 	_drawingTitleLabel.position = ccp(leftTab, vertPos);
@@ -271,8 +233,8 @@
 
 	// Center the name of the node type just above the buttons
 	_nodeNameLabel.position = ccp(self.contentSize.width / 2.0,
-								  _increaseNodesMI.position.y +
-								  (_increaseNodesMI.contentSize.height / 2.0) + kJoystickSidePadding);
+								  _increaseNodesButton.position.y +
+								  (_increaseNodesButton.contentSize.height / 2.0) + kButtonPadding);
 }
 
 #pragma mark Updating
@@ -290,29 +252,29 @@
 }
 
 /** The user has pressed the increase nodes button. Tell the 3D scene. */
--(void) increaseNodesSelected: (CCMenuItemToggle*) menuItem {
+-(void) increaseNodesSelected {
 	[self.performanceScene increaseNodes];
 }
 
 /** The user has pressed the decrease nodes button. Tell the 3D scene. */
--(void) decreaseNodesSelected: (CCMenuItemToggle*) menuItem {
+-(void) decreaseNodesSelected {
 	[self.performanceScene decreaseNodes];
 }
 
 /** The user has pressed the button to select the next node type. Tell the 3D scene. */
--(void) nextNodeTypeSelected: (CCMenuItemToggle*) menuItem {
+-(void) nextNodeTypeSelected {
 	[self.performanceScene nextNodeType];
 	[_nodeNameLabel setString: self.performanceScene.templateNode.name];
 }
 
 /** The user has pressed the button to select the previous node type. Tell the 3D scene. */
--(void) prevNodeTypeSelected: (CCMenuItemToggle*) menuItem {
+-(void) prevNodeTypeSelected {
 	[self.performanceScene prevNodeType];
 	[_nodeNameLabel setString: self.performanceScene.templateNode.name];
 }
 
 /** The user has pressed the button to toggle between animating the nodes. Tell the 3D scene. */
--(void) animateNodesSelected: (CCMenuItemToggle*) menuItem {
+-(void) animateNodesSelected {
 	CC3PerformanceScene* pScene = [self performanceScene];
 	pScene.shouldAnimateNodes = !pScene.shouldAnimateNodes;
 }
@@ -324,7 +286,6 @@
  */
 -(void) didUpdateContentSizeFrom: (CGSize) oldSize {
 	[super didUpdateContentSizeFrom: oldSize];
-	[self positionLocationJoystick];
 	[self positionButtons];
 	[self positionStatsLabels];
 }

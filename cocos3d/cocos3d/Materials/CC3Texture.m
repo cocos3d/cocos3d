@@ -1628,7 +1628,7 @@ contentSizeInPixels: (CGSize) sizeInPixels
 		default:
 			_pixelGLFormat = GL_ZERO;
 			_pixelGLType = GL_ZERO;
-			CC3Assert(NO, @"Couldn't bind texture data in unexpected format %u", self.pixelFormat);
+			CC3Assert(NO, @"Couldn't bind texture data in unexpected format %u", pixFmt);
 	}
 }
 

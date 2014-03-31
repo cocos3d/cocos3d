@@ -152,7 +152,7 @@
 	CC3BoxNode* boxNode = [CC3BoxNode nodeWithName: @"Simple box"];
 	CC3Box box = CC3BoxFromMinMax(cc3v(-10.0, -10.0, -10.0), cc3v( 10.0,  10.0,  10.0));
 	[boxNode populateAsSolidBox: box];
-	boxNode.color = ccORANGE;
+	boxNode.color = CCColorRefFromCCC4F(kCCC4FOrange);
 	[self configureAndAddTemplate: boxNode];
 
 	// Ring of lines
@@ -169,7 +169,7 @@
 	[lineNode populateAsLineStripWith: (kRingLineCount + 1)
 							 vertices: ringVertices
 							andRetain: YES];
-	lineNode.color = ccGREEN;
+	lineNode.color = CCColorRefFromCCC4F(kCCC4FGreen);
 	lineNode.lineWidth = 2.0;
 	lineNode.uniformScale = 10.0;
 	[self configureAndAddTemplate: lineNode];

@@ -32,6 +32,13 @@
 #import "CC3Layer.h"
 #import "CCNodeAdornments.h"
 
+// In Cocos2D v1 & v2, buttons are actually menu items
+#if CC3_CC2_CLASSIC
+#	define CC_BUTTON_CLASS		AdornableMenuItemImage
+#else
+#	define CC_BUTTON_CLASS		AdornableButton
+#endif	// CC3_CC2_CLASSIC
+
 /**
  * MainLayer covers the whole screen. Within this layer, the user can add
  * or remove a square grid of CC3Layers, by clicking buttons to increase
@@ -71,8 +78,8 @@
  * suitable for most apps.
  */
 @interface MainLayer : CC3ControllableLayer {
-	CCMenuItem* _increaseNodesMI;
-	CCMenuItem* _decreaseNodesMI;
+	CC_BUTTON_CLASS* _increaseNodesButton;
+	CC_BUTTON_CLASS* _decreaseNodesButton;
 	CCLabelTTF* _label;
 	NSMutableArray* _tiles;
 	NSMutableArray* _templates;

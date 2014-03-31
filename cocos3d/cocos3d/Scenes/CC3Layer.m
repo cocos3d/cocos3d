@@ -252,12 +252,10 @@
 }
 
 /**
- * The ccTouchMoved:withEvent: method is optional for the <CCTouchDelegateProtocol>.
- * The event dispatcher will not dispatch events for which there is no method
- * implementation. Since the touch-move events are both voluminous and seldom used,
- * the implementation of ccTouchMoved:withEvent: has been left out of the default
- * CC3Layer implementation. To receive and handle touch-move events for object
- * picking, copy the following method implementation to your CC3Layer subclass.
+ * The ccTouchMoved:withEvent: method is optional. Since the touch-move events are both 
+ * voluminous and seldom used, the implementation of this method has been left out of 
+ * the default CC3Layer implementation. To receive and handle touch-move events for 
+ * object picking, copy the following method implementation to your CC3Layer subclass.
  */
 //-(void) ccTouchMoved: (UITouch *)touch withEvent: (UIEvent *)event {
 //	[self handleTouch: touch ofType: kCCTouchMoved];
@@ -323,6 +321,17 @@
 	if ( ![self handleTouch: touch ofType: kCCTouchEnded] )
 		[super touchEnded: touch withEvent: event];
 }
+
+/**
+ * The touchMoved:withEvent: method is optional. Since the touch-move events are both 
+ * voluminous and seldom used, the implementation of this method has been left out of
+ * the default CC3Layer implementation. To receive and handle touch-move events for 
+ * object picking, copy the following method implementation to your CC3Layer subclass.
+ */
+//-(void) touchMoved: (UITouch*) touch withEvent: (UIEvent*) event {
+//	if ( ![self handleTouch: touch ofType: kCCTouchMoved] )
+//		[super touchMoved: touch withEvent: event];
+//}
 
 /** Handles cancelled touch events. */
 -(void) touchCancelled: (UITouch*) touch withEvent: (UIEvent*) event {

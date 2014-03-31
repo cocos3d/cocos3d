@@ -132,79 +132,6 @@
 	[self positionLocationJoystick];
 }
 
-/** 
- * Adds a UI button to this layer, and returns the button. The button will display the image
- * in the specified file, and is adorned with the specified visual adornment that will be
- * activated when the button is touched. The button will invoke the specified callback method
- * on this instance when the button is pressed and released by the user. The type of button 
- * used depends on whether we are using Cocos2D v3, or Cocos2D v2/v1.
- */
--(CC_BUTTON_CLASS*) addButtonWithCallbackSelector: (SEL) callBackSelector
-									withImageFile: (NSString*) imgFileName
-									withAdornment: (CCNode<CCNodeAdornmentProtocol>*) adornment {
-	CC_BUTTON_CLASS* button;
-
-#if CC3_CC2_CLASSIC
-	button = [AdornableMenuItemImage itemWithNormalImage: imgFileName
-										   selectedImage: imgFileName
-												  target: self
-												selector: callBackSelector];
-	CCMenu* viewMenu = [CCMenu menuWithItems: button, nil];
-	viewMenu.position = CGPointZero;
-	[self addChild: viewMenu];
-#else
-	button = [AdornableButton buttonWithTitle: nil
-								  spriteFrame: [CCSpriteFrame frameWithImageNamed: imgFileName]];
-	[button setTarget: self selector: callBackSelector];
-	[self addChild: button];
-#endif	// CC3_CC2_CLASSIC
-
-	button.scale = kControlSizeScale;
-	adornment.position = ccpCompMult(ccpFromSize(button.contentSize), button.anchorPoint);
-	button.adornment = adornment;
-	
-	return button;
-}
-
-/**
- * Adds a toggle UI button to this layer, and returns the button. The button will display 
- * the image in the specified file, and is adorned with the specified visual adornment that 
- * will be activated when the button is touched. The button will invoke the specified callback
- * method on this instance when the button is pressed and released by the user. The type of
- * button used depends on whether we are using Cocos2D v3, or Cocos2D v2/v1.
- */
--(CC_BUTTON_CLASS*) addToggleButtonWithCallbackSelector: (SEL) callBackSelector
-										  withImageFile: (NSString*) imgFileName
-								   withLatchedImageFile: (NSString*) imgLatchFileName
-										  withAdornment: (CCNode<CCNodeAdornmentProtocol>*) adornment {
-	CC_BUTTON_CLASS* button;
-	
-#if CC3_CC2_CLASSIC
-	CCMenuItem* b = [CCMenuItemImage itemWithNormalImage: imgFileName
-										   selectedImage: imgFileName];
-	CCMenuItem* bl = [CCMenuItemImage itemWithNormalImage: imgLatchFileName
-											selectedImage: imgLatchFileName];
-	button = [AdornableMenuItemToggle itemWithTarget: self
-											   selector: callBackSelector
-												  items: b, bl, nil];
-	CCMenu* viewMenu = [CCMenu menuWithItems: button, nil];
-	viewMenu.position = CGPointZero;
-	[self addChild: viewMenu];
-#else
-	button = [AdornableButton buttonWithTitle: nil
-								  spriteFrame: [CCSpriteFrame frameWithImageNamed: imgFileName]];
-	[button setTarget: self selector: callBackSelector];
-	button.togglesSelectedState = YES;
-	[self addChild: button];
-#endif	// CC3_CC2_CLASSIC
-	
-	button.scale = kControlSizeScale;
-	adornment.position = ccpCompMult(ccpFromSize(button.contentSize), button.anchorPoint);
-	button.adornment = adornment;
-	
-	return button;
-}
-
 /**
  * Creates a button that will allow the user to switch between different views of the 3D scene.
  * The type of button depends on whether we are using Cocos2D v3, or the legacy Cocos2D v2/v1.
@@ -296,6 +223,79 @@
 }
 
 /**
+ * Adds a UI button to this layer, and returns the button. The button will display the image
+ * in the specified file, and is adorned with the specified visual adornment that will be
+ * activated when the button is touched. The button will invoke the specified callback method
+ * on this instance when the button is pressed and released by the user. The type of button
+ * used depends on whether we are using Cocos2D v3, or Cocos2D v2/v1.
+ */
+-(CC_BUTTON_CLASS*) addButtonWithCallbackSelector: (SEL) callBackSelector
+									withImageFile: (NSString*) imgFileName
+									withAdornment: (CCNode<CCNodeAdornmentProtocol>*) adornment {
+	CC_BUTTON_CLASS* button;
+	
+#if CC3_CC2_CLASSIC
+	button = [AdornableMenuItemImage itemWithNormalImage: imgFileName
+										   selectedImage: imgFileName
+												  target: self
+												selector: callBackSelector];
+	CCMenu* viewMenu = [CCMenu menuWithItems: button, nil];
+	viewMenu.position = CGPointZero;
+	[self addChild: viewMenu];
+#else
+	button = [AdornableButton buttonWithTitle: nil
+								  spriteFrame: [CCSpriteFrame frameWithImageNamed: imgFileName]];
+	[button setTarget: self selector: callBackSelector];
+	[self addChild: button];
+#endif	// CC3_CC2_CLASSIC
+	
+	adornment.position = ccpCompMult(ccpFromSize(button.contentSize), button.anchorPoint);
+	button.adornment = adornment;
+	
+	button.scale = kControlSizeScale;
+	return button;
+}
+
+/**
+ * Adds a toggle UI button to this layer, and returns the button. The button will display
+ * the image in the specified file, and is adorned with the specified visual adornment that
+ * will be activated when the button is touched. The button will invoke the specified callback
+ * method on this instance when the button is pressed and released by the user. The type of
+ * button used depends on whether we are using Cocos2D v3, or Cocos2D v2/v1.
+ */
+-(CC_BUTTON_CLASS*) addToggleButtonWithCallbackSelector: (SEL) callBackSelector
+										  withImageFile: (NSString*) imgFileName
+								   withLatchedImageFile: (NSString*) imgLatchFileName
+										  withAdornment: (CCNode<CCNodeAdornmentProtocol>*) adornment {
+	CC_BUTTON_CLASS* button;
+	
+#if CC3_CC2_CLASSIC
+	CCMenuItem* b = [CCMenuItemImage itemWithNormalImage: imgFileName
+										   selectedImage: imgFileName];
+	CCMenuItem* bl = [CCMenuItemImage itemWithNormalImage: imgLatchFileName
+											selectedImage: imgLatchFileName];
+	button = [AdornableMenuItemToggle itemWithTarget: self
+											selector: callBackSelector
+											   items: b, bl, nil];
+	CCMenu* viewMenu = [CCMenu menuWithItems: button, nil];
+	viewMenu.position = CGPointZero;
+	[self addChild: viewMenu];
+#else
+	button = [AdornableButton buttonWithTitle: nil
+								  spriteFrame: [CCSpriteFrame frameWithImageNamed: imgFileName]];
+	[button setTarget: self selector: callBackSelector];
+	button.togglesSelectedState = YES;
+	[self addChild: button];
+#endif	// CC3_CC2_CLASSIC
+	
+	adornment.position = ccpCompMult(ccpFromSize(button.contentSize), button.anchorPoint);
+	button.adornment = adornment;
+	
+	button.scale = kControlSizeScale;
+	return button;
+}
+
+/**
  * Positions the right-side location joystick at the right of the layer.
  * This is called at initialization, and anytime the content size of the layer changes
  * to keep the joystick in the correct location within the new layer dimensions.
@@ -304,8 +304,6 @@
 	CGPoint jsMiddle = _locationJoystick.anchorPointInPoints;
 	_locationJoystick.position = ccp(self.contentSize.width - (jsMiddle.x + kJoystickPadding),
 									 (jsMiddle.y + kJoystickPadding));
-
-//	_locationJoystick.position = ccp(self.contentSize.width - kJoystickSideLength - kJoystickPadding, kJoystickPadding);
 
 }
 
