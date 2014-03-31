@@ -1,5 +1,5 @@
 /*
- * CC3DemoMashUpLayer-v3.m
+ * CC3DemoMashUpLayer.m
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -26,16 +26,10 @@
  *
  * http://en.wikipedia.org/wiki/MIT_License
  * 
- * See header file CC3DemoMashUpLayer-v3.h for full API documentation.
+ * See header file CC3DemoMashUpLayer.h for full API documentation.
  */
 
-#import "CC3DemoMashUpLayer-v3.h"
-
-/** This implementation of CC3DemoMashUpLayer is used when compiling with cocos2d v1 and above. */
-
-
-#if !CC3_CC2_CLASSIC
-
+#import "CC3DemoMashUpLayer.h"
 #import "CC3DemoMashUpScene.h"
 #import "CC3Actions.h"
 #import "CC3CC2Extensions.h"
@@ -101,6 +95,7 @@
 	[self addZoomButton];
 	[self addShadowButton];
 	[self positionButtons];
+	[self scheduleUpdate];		// Schedule updates on each frame
 }
 
 /** Creates the two joysticks that control the 3D camera direction and location. */
@@ -137,122 +132,167 @@
 	[self positionLocationJoystick];
 }
 
-/** Creates a button that will allow the user to switch between different views of the 3D scene. */
--(void) addSwitchViewButton {
-	_switchViewButton = [AdornableButton buttonWithTitle: nil
-											 spriteFrame: [CCSpriteFrame frameWithImageNamed: kSwitchViewButtonFileName]];
-	[_switchViewButton setTarget: self selector: @selector(switchViewSelected:)];
-	_switchViewButton.scale = kControlSizeScale;
-	[self addChild: _switchViewButton];
+/** 
+ * Adds a UI button to this layer, and returns the button. The button will display the image
+ * in the specified file, and is adorned with the specified visual adornment that will be
+ * activated when the button is touched. The button will invoke the specified callback method
+ * on this instance when the button is pressed and released by the user. The type of button 
+ * used depends on whether we are using Cocos2D v3, or Cocos2D v2/v1.
+ */
+-(CC_BUTTON_CLASS*) addButtonWithCallbackSelector: (SEL) callBackSelector
+									withImageFile: (NSString*) imgFileName
+									withAdornment: (CCNode<CCNodeAdornmentProtocol>*) adornment {
+	CC_BUTTON_CLASS* button;
+
+#if CC3_CC2_CLASSIC
+	button = [AdornableMenuItemImage itemWithNormalImage: imgFileName
+										   selectedImage: imgFileName
+												  target: self
+												selector: callBackSelector];
+	CCMenu* viewMenu = [CCMenu menuWithItems: button, nil];
+	viewMenu.position = CGPointZero;
+	[self addChild: viewMenu];
+#else
+	button = [AdornableButton buttonWithTitle: nil
+								  spriteFrame: [CCSpriteFrame frameWithImageNamed: imgFileName]];
+	[button setTarget: self selector: callBackSelector];
+	[self addChild: button];
+#endif	// CC3_CC2_CLASSIC
+
+	button.scale = kControlSizeScale;
+	adornment.position = ccpCompMult(ccpFromSize(button.contentSize), button.anchorPoint);
+	button.adornment = adornment;
 	
+	return button;
+}
+
+/**
+ * Adds a toggle UI button to this layer, and returns the button. The button will display 
+ * the image in the specified file, and is adorned with the specified visual adornment that 
+ * will be activated when the button is touched. The button will invoke the specified callback
+ * method on this instance when the button is pressed and released by the user. The type of
+ * button used depends on whether we are using Cocos2D v3, or Cocos2D v2/v1.
+ */
+-(CC_BUTTON_CLASS*) addToggleButtonWithCallbackSelector: (SEL) callBackSelector
+										  withImageFile: (NSString*) imgFileName
+								   withLatchedImageFile: (NSString*) imgLatchFileName
+										  withAdornment: (CCNode<CCNodeAdornmentProtocol>*) adornment {
+	CC_BUTTON_CLASS* button;
+	
+#if CC3_CC2_CLASSIC
+	CCMenuItem* b = [CCMenuItemImage itemWithNormalImage: imgFileName
+										   selectedImage: imgFileName];
+	CCMenuItem* bl = [CCMenuItemImage itemWithNormalImage: imgLatchFileName
+											selectedImage: imgLatchFileName];
+	button = [AdornableMenuItemToggle itemWithTarget: self
+											   selector: callBackSelector
+												  items: b, bl, nil];
+	CCMenu* viewMenu = [CCMenu menuWithItems: button, nil];
+	viewMenu.position = CGPointZero;
+	[self addChild: viewMenu];
+#else
+	button = [AdornableButton buttonWithTitle: nil
+								  spriteFrame: [CCSpriteFrame frameWithImageNamed: imgFileName]];
+	[button setTarget: self selector: callBackSelector];
+	button.togglesSelectedState = YES;
+	[self addChild: button];
+#endif	// CC3_CC2_CLASSIC
+	
+	button.scale = kControlSizeScale;
+	adornment.position = ccpCompMult(ccpFromSize(button.contentSize), button.anchorPoint);
+	button.adornment = adornment;
+	
+	return button;
+}
+
+/**
+ * Creates a button that will allow the user to switch between different views of the 3D scene.
+ * The type of button depends on whether we are using Cocos2D v3, or the legacy Cocos2D v2/v1.
+ */
+-(void) addSwitchViewButton {
 	// The button uses an adornment, which is displayed whenever the button is selected.
 	CCNodeAdornmentBase* adornment;
 	
-	// The adornment is a ring that fades in around the button and fades out when the button
-	// is no longer selected.
+	// The adornment is a ring that fades in around the button and fades out when the button is deselected.
 	CCSprite* ringSprite = [CCSprite spriteWithImageNamed: kButtonRingFileName];
 	adornment = [CCNodeAdornmentOverlayFader adornmentWithSprite: ringSprite];
 	adornment.zOrder = kAdornmentUnderZOrder;
 	
-	// The adornment could also be a "shine" image that is faded in on-top of the
-	// menu item when it is selected, similar to some UIKit toolbar button implementations.
-	// To try a "shine" adornment instead, uncomment the following.
-//	CCSprite* shineSprite = [CCSprite spriteWithImageNamed: kButtonShineFileName];
-//	shineSprite.color = ccYELLOW;
-//	adornment = [CCNodeAdornmentOverlayFader adornmentWithSprite: shineSprite
-//	 													    peakOpacity: kPeakShineOpacity];
-	
-	// Or the menu item adornment could be one that scales the menu item when activated.
+	// Or the adornment could scale the button it is when selected.
 	// To try a scaler adornment, uncomment the following line.
 //	adornment = [CCNodeAdornmentScaler adornmentToScaleUniformlyBy: kButtonAdornmentScale];
-	
-	// Attach the adornment to the button and center it
-	adornment.position = ccpCompMult(ccpFromSize(_switchViewButton.contentSize), _switchViewButton.anchorPoint);
-	_switchViewButton.adornment = adornment;
-}
 
-/** Creates a button that will allow the user to create a robot invasion. */
--(void) addInvasionButton {
-	_invasionButton = [AdornableButton buttonWithTitle: nil
-										   spriteFrame: [CCSpriteFrame frameWithImageNamed: kInvasionButtonFileName]];
-	[_invasionButton setTarget: self selector: @selector(invade:)];
-	_invasionButton.scale = kControlSizeScale;
-	[self addChild: _invasionButton];
-		
-	// The button uses an adornment, which is displayed whenever the button is selected. The adornment
-	// is a ring that fades in around the button and fades out when the button is no longer selected.
-	CCSprite* ringSprite = [CCSprite spriteWithImageNamed: kButtonRingFileName];
-	CCNodeAdornmentBase* adornment = [CCNodeAdornmentOverlayFader adornmentWithSprite: ringSprite];
-	adornment.zOrder = kAdornmentUnderZOrder;
-	
-	// Attach the adornment to the button and center it
-	adornment.position = ccpCompMult(ccpFromSize(_invasionButton.contentSize), _invasionButton.anchorPoint);
-	_invasionButton.adornment = adornment;
-}
-
-/** Creates a button that will allow the user to turn the sun on or off. */
--(void) addSunlightButton {
-	_sunlightButton = [AdornableButton buttonWithTitle: nil
-										   spriteFrame: [CCSpriteFrame frameWithImageNamed: kSunlightButtonFileName]];
-	[_sunlightButton setTarget: self selector: @selector(cycleLights:)];
-	_sunlightButton.scale = kControlSizeScale;
-	[self addChild: _sunlightButton];
-	
-	// The button uses an adornment, which is displayed whenever the button is selected. The adornment
-	// is a ring that fades in around the button and fades out when the button is no longer selected.
-	CCSprite* ringSprite = [CCSprite spriteWithImageNamed: kButtonRingFileName];
-	CCNodeAdornmentBase* adornment = [CCNodeAdornmentOverlayFader adornmentWithSprite: ringSprite];
-	adornment.zOrder = kAdornmentUnderZOrder;
-	
-	// Attach the adornment to the button and center it
-	adornment.position = ccpCompMult(ccpFromSize(_sunlightButton.contentSize), _sunlightButton.anchorPoint);
-	_sunlightButton.adornment = adornment;
+	_switchViewButton = [self addButtonWithCallbackSelector: @selector(switchViewSelected)
+											  withImageFile: kSwitchViewButtonFileName
+											  withAdornment: adornment];
 }
 
 /**
- * Creates a button that will allow the user to move between viewing the whole scene and 
+ * Creates a button that will allow the user to create a robot invasion.
+ * The type of button depends on whether we are using Cocos2D v3, or the legacy Cocos2D v2/v1.
+ */
+-(void) addInvasionButton {
+
+	// The button uses an adornment, which is displayed whenever the button is selected.
+	// The adornment is a ring that fades in around the button and fades out when the button is deselected.
+	CCSprite* ringSprite = [CCSprite spriteWithImageNamed: kButtonRingFileName];
+	CCNodeAdornmentBase* adornment = [CCNodeAdornmentOverlayFader adornmentWithSprite: ringSprite];
+	adornment.zOrder = kAdornmentUnderZOrder;
+
+	_invasionButton = [self addButtonWithCallbackSelector: @selector(invade)
+											  withImageFile: kInvasionButtonFileName
+											withAdornment: adornment];
+}
+
+/**
+ * Creates a button that will allow the user to turn the sun on or off.
+ * The type of button depends on whether we are using Cocos2D v3, or the legacy Cocos2D v2/v1.
+ */
+-(void) addSunlightButton {
+	
+	// The button uses an adornment, which is displayed whenever the button is selected.
+	// The adornment is a ring that fades in around the button and fades out when the button is deselected.
+	CCSprite* ringSprite = [CCSprite spriteWithImageNamed: kButtonRingFileName];
+	CCNodeAdornmentBase* adornment = [CCNodeAdornmentOverlayFader adornmentWithSprite: ringSprite];
+	adornment.zOrder = kAdornmentUnderZOrder;
+
+	_sunlightButton = [self addButtonWithCallbackSelector: @selector(cycleLights)
+											withImageFile: kSunlightButtonFileName
+											withAdornment: adornment];
+}
+
+/**
+ * Creates a button that will allow the user to move between viewing the whole scene and
  * viewing from the previous position.
+ * The type of button depends on whether we are using Cocos2D v3, or the legacy Cocos2D v2/v1.
  */
 -(void) addZoomButton {
-	_zoomButton = [AdornableButton buttonWithTitle: nil
-									   spriteFrame: [CCSpriteFrame frameWithImageNamed: kZoomButtonFileName]];
-	[_zoomButton setTarget: self selector: @selector(cycleZoom:)];
-	_zoomButton.scale = kControlSizeScale;
-	[self addChild: _zoomButton];
-	
-	// Instead of having different normal and selected images, the toggle menu
-	// item uses a shine adornment, which is displayed whenever an item is selected.
+	// The button uses an adornment, which is displayed whenever the button is selected.
+	// The adornment is a shine that fades in on the button and fades out when the button is deselected.
 	CCSprite* shineSprite = [CCSprite spriteWithImageNamed: kButtonShineFileName];
-	shineSprite.color = [CCColor whiteColor];
+	shineSprite.color = CCColorRefFromCCC4F(kCCC4FWhite);
 	CCNodeAdornmentBase* adornment = [CCNodeAdornmentOverlayFader adornmentWithSprite: shineSprite
-																				 peakOpacity: kPeakShineOpacity];
-	
-	// Attach the adornment to the button and center it
-	adornment.position = ccpCompMult(ccpFromSize(_zoomButton.contentSize), _zoomButton.anchorPoint);
-	_zoomButton.adornment = adornment;
+																		  peakOpacity: kPeakShineOpacity];
+	_zoomButton = [self addButtonWithCallbackSelector: @selector(cycleZoom)
+											withImageFile: kZoomButtonFileName
+										withAdornment: adornment];
 }
 
 /**
- * Creates a button (actually a single-item menu) in the bottom center of the layer
- * that will allow the user to toggle shadows on and off for a selected node.
+ * Creates a toggle button that will allow the user to toggle shadows on and off for a selected node.
+ * The type of button depends on whether we are using Cocos2D v3, or the legacy Cocos2D v2/v1.
  */
 -(void) addShadowButton {
-	_shadowButton = [AdornableButton buttonWithTitle: nil
-									   spriteFrame: [CCSpriteFrame frameWithImageNamed: kShadowButtonFileName]];
-	_shadowButton.togglesSelectedState = YES;
-	[_shadowButton setTarget: self selector: @selector(toggleShadows:)];
-	_shadowButton.scale = kControlSizeScale;
-	[self addChild: _shadowButton];
-	
 	// The button uses an adornment, which is displayed whenever the button is selected. The adornment
 	// is a ring that fades in around the button and fades out when the button is no longer selected.
 	CCSprite* ringSprite = [CCSprite spriteWithImageNamed: kButtonRingFileName];
 	CCNodeAdornmentBase* adornment = [CCNodeAdornmentOverlayFader adornmentWithSprite: ringSprite];
 	adornment.zOrder = kAdornmentUnderZOrder;
-	
-	// Attach the adornment to the button and center it
-	adornment.position = ccpCompMult(ccpFromSize(_shadowButton.contentSize), _shadowButton.anchorPoint);
-	_shadowButton.adornment = adornment;
+
+	_shadowButton = [self addToggleButtonWithCallbackSelector: @selector(toggleShadows)
+												withImageFile: kShadowButtonFileName
+										 withLatchedImageFile: kShadowButtonLatchedFileName
+												withAdornment: adornment];
 }
 
 /**
@@ -264,6 +304,9 @@
 	CGPoint jsMiddle = _locationJoystick.anchorPointInPoints;
 	_locationJoystick.position = ccp(self.contentSize.width - (jsMiddle.x + kJoystickPadding),
 									 (jsMiddle.y + kJoystickPadding));
+
+//	_locationJoystick.position = ccp(self.contentSize.width - kJoystickSideLength - kJoystickPadding, kJoystickPadding);
+
 }
 
 /**
@@ -300,21 +343,19 @@
 }
 
 /** The user has pressed the switch camera view button. Tell the 3D scene so it can move the camera. */
--(void) switchViewSelected: (AdornableButton*) button { [self.mashUpScene switchCameraTarget]; }
+-(void) switchViewSelected { [self.mashUpScene switchCameraTarget]; }
 
 /** The user has pressed the invade button. Tell the 3D scene. */
--(void) invade: (AdornableButton*) button { [self.mashUpScene invade]; }
+-(void) invade { [self.mashUpScene invade]; }
 
 /** The user has pressed the cycle lights button. Tell the 3D scene. */
--(void) cycleLights: (AdornableButton*) button { [self.mashUpScene cycleLights]; }
+-(void) cycleLights { [self.mashUpScene cycleLights]; }
 
 /** The user has pressed the zoom button. Tell the 3D scene. */
--(void) cycleZoom: (AdornableButton*) button { [self.mashUpScene cycleZoom]; }
+-(void) cycleZoom { [self.mashUpScene cycleZoom]; }
 
 /** The user has pressed the shadow button. Tell the 3D scene. */
--(void) toggleShadows: (AdornableButton*) button {
-	self.mashUpScene.isManagingShadows = !self.mashUpScene.isManagingShadows;
-}
+-(void) toggleShadows { self.mashUpScene.isManagingShadows = !self.mashUpScene.isManagingShadows; }
 
 /**
  * Called automatically when the contentSize has changed.
@@ -593,5 +634,3 @@
 #endif	// CC3_IOS
 
 @end
-
-#endif	// !CC3_CC2_CLASSIC

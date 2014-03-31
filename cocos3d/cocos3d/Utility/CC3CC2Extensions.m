@@ -151,6 +151,8 @@
 -(void) scheduleUpdate {}
 -(NSInteger) mousePriority { return 0; }
 -(void) setMousePriority: (NSInteger) priority {}
+-(BOOL) ignoreAnchorPointForPosition { return NO; }
+-(void) setIgnoreAnchorPointForPosition: (BOOL) ignore {}
 #endif	// !CC3_CC2_CLASSIC
 
 #if CC3_CC2_3
@@ -318,6 +320,16 @@
 -(void) setMousePriority: (NSInteger) priority {}
 #endif
 #endif	// CC3_OSX
+
+@end
+
+
+#pragma mark -
+#pragma mark CCSprite extension
+
+@implementation CCSprite (CC3)
+
++(id) spriteWithImageNamed: (NSString*) fileName { return [self spriteWithFile: fileName]; }
 
 @end
 

@@ -38,10 +38,16 @@
 @implementation HUDLayer
 
 -(void) initializeControls {
-	_isTracking = NO;
+	
+	// Position based on midpoint
+	self.ignoreAnchorPointForPosition = NO;
 	self.anchorPoint = ccp(0.5f, 0.5f);
+
+	// Configue UI
+	_isTracking = NO;
 	self.userInteractionEnabled = YES;
 	self.mousePriority = kHUDEventPriority;
+
 	[self scheduleUpdate];
 }
 

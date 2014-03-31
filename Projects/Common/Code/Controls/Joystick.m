@@ -68,6 +68,7 @@
 		_isTracking = NO;
 		_velocity = CGPointZero;
 		_angularVelocity = AngularPointZero;
+		self.ignoreAnchorPointForPosition = NO;
 		self.anchorPoint = ccp(0.5f, 0.5f);
 
 		// Add thumb node as a child and position it at the center

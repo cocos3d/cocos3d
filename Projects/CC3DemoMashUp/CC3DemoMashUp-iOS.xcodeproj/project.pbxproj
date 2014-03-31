@@ -25,6 +25,11 @@
 		A911536E1723A27F004A87FC /* EnvMapPosX.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A91153671723A27F004A87FC /* EnvMapPosX.jpg */; };
 		A911536F1723A27F004A87FC /* EnvMapPosY.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A91153681723A27F004A87FC /* EnvMapPosY.jpg */; };
 		A91153701723A27F004A87FC /* EnvMapPosZ.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A91153691723A27F004A87FC /* EnvMapPosZ.jpg */; };
+		A91CC35C18E8FD6C00D2D8E0 /* CC3DemoMashUpLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = A91CC35318E8FD6C00D2D8E0 /* CC3DemoMashUpLayer.m */; };
+		A91CC35D18E8FD6C00D2D8E0 /* CC3DemoMashUpScene.m in Sources */ = {isa = PBXBuildFile; fileRef = A91CC35518E8FD6C00D2D8E0 /* CC3DemoMashUpScene.m */; };
+		A91CC35E18E8FD6C00D2D8E0 /* HUDLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = A91CC35718E8FD6C00D2D8E0 /* HUDLayer.m */; };
+		A91CC35F18E8FD6C00D2D8E0 /* HUDScene.m in Sources */ = {isa = PBXBuildFile; fileRef = A91CC35918E8FD6C00D2D8E0 /* HUDScene.m */; };
+		A91CC36018E8FD6C00D2D8E0 /* Models.m in Sources */ = {isa = PBXBuildFile; fileRef = A91CC35B18E8FD6C00D2D8E0 /* Models.m */; };
 		A924D15A171306F20061DDA0 /* tex_arm.pvr in Resources */ = {isa = PBXBuildFile; fileRef = A924D157171306F20061DDA0 /* tex_arm.pvr */; };
 		A924D15B171306F20061DDA0 /* tex_base.bmp in Resources */ = {isa = PBXBuildFile; fileRef = A924D158171306F20061DDA0 /* tex_base.bmp */; };
 		A924D15C171306F20061DDA0 /* tex_base.pvr in Resources */ = {isa = PBXBuildFile; fileRef = A924D159171306F20061DDA0 /* tex_base.pvr */; };
@@ -140,12 +145,6 @@
 		A9BC697418C5586100B67E11 /* Head_diffuse.bmp in Resources */ = {isa = PBXBuildFile; fileRef = A9BC697318C5586100B67E11 /* Head_diffuse.bmp */; };
 		A9C94ABE1451924700CE6BAD /* mallet.png in Resources */ = {isa = PBXBuildFile; fileRef = A9C94ABC1451924700CE6BAD /* mallet.png */; };
 		A9C94ABF1451924700CE6BAD /* mallet.pod in Resources */ = {isa = PBXBuildFile; fileRef = A9C94ABD1451924700CE6BAD /* mallet.pod */; };
-		A9CCA37918E34F1B00DDDBDC /* CC3DemoMashUpLayer-Classic.m in Sources */ = {isa = PBXBuildFile; fileRef = A9CCA36D18E34F1B00DDDBDC /* CC3DemoMashUpLayer-Classic.m */; };
-		A9CCA37A18E34F1B00DDDBDC /* CC3DemoMashUpLayer-v3.m in Sources */ = {isa = PBXBuildFile; fileRef = A9CCA36F18E34F1B00DDDBDC /* CC3DemoMashUpLayer-v3.m */; };
-		A9CCA37B18E34F1B00DDDBDC /* CC3DemoMashUpScene.m in Sources */ = {isa = PBXBuildFile; fileRef = A9CCA37218E34F1B00DDDBDC /* CC3DemoMashUpScene.m */; };
-		A9CCA37C18E34F1B00DDDBDC /* HUDLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = A9CCA37418E34F1B00DDDBDC /* HUDLayer.m */; };
-		A9CCA37D18E34F1B00DDDBDC /* HUDScene.m in Sources */ = {isa = PBXBuildFile; fileRef = A9CCA37618E34F1B00DDDBDC /* HUDScene.m */; };
-		A9CCA37E18E34F1B00DDDBDC /* Models.m in Sources */ = {isa = PBXBuildFile; fileRef = A9CCA37818E34F1B00DDDBDC /* Models.m */; };
 		A9CCA38618E34F4400DDDBDC /* CCNodeAdornments.m in Sources */ = {isa = PBXBuildFile; fileRef = A9CCA38118E34F4400DDDBDC /* CCNodeAdornments.m */; };
 		A9CCA38718E34F4400DDDBDC /* CCNodeExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = A9CCA38318E34F4400DDDBDC /* CCNodeExtensions.m */; };
 		A9CCA38818E34F4400DDDBDC /* Joystick.m in Sources */ = {isa = PBXBuildFile; fileRef = A9CCA38518E34F4400DDDBDC /* Joystick.m */; };
@@ -238,6 +237,16 @@
 		A91153671723A27F004A87FC /* EnvMapPosX.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = EnvMapPosX.jpg; sourceTree = "<group>"; };
 		A91153681723A27F004A87FC /* EnvMapPosY.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = EnvMapPosY.jpg; sourceTree = "<group>"; };
 		A91153691723A27F004A87FC /* EnvMapPosZ.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = EnvMapPosZ.jpg; sourceTree = "<group>"; };
+		A91CC35218E8FD6C00D2D8E0 /* CC3DemoMashUpLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3DemoMashUpLayer.h; sourceTree = "<group>"; };
+		A91CC35318E8FD6C00D2D8E0 /* CC3DemoMashUpLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3DemoMashUpLayer.m; sourceTree = "<group>"; };
+		A91CC35418E8FD6C00D2D8E0 /* CC3DemoMashUpScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3DemoMashUpScene.h; sourceTree = "<group>"; };
+		A91CC35518E8FD6C00D2D8E0 /* CC3DemoMashUpScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3DemoMashUpScene.m; sourceTree = "<group>"; };
+		A91CC35618E8FD6C00D2D8E0 /* HUDLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HUDLayer.h; sourceTree = "<group>"; };
+		A91CC35718E8FD6C00D2D8E0 /* HUDLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HUDLayer.m; sourceTree = "<group>"; };
+		A91CC35818E8FD6C00D2D8E0 /* HUDScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HUDScene.h; sourceTree = "<group>"; };
+		A91CC35918E8FD6C00D2D8E0 /* HUDScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HUDScene.m; sourceTree = "<group>"; };
+		A91CC35A18E8FD6C00D2D8E0 /* Models.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Models.h; sourceTree = "<group>"; };
+		A91CC35B18E8FD6C00D2D8E0 /* Models.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Models.m; sourceTree = "<group>"; };
 		A924D157171306F20061DDA0 /* tex_arm.pvr */ = {isa = PBXFileReference; lastKnownFileType = file; path = tex_arm.pvr; sourceTree = "<group>"; };
 		A924D158171306F20061DDA0 /* tex_base.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; path = tex_base.bmp; sourceTree = "<group>"; };
 		A924D159171306F20061DDA0 /* tex_base.pvr */ = {isa = PBXFileReference; lastKnownFileType = file; path = tex_base.pvr; sourceTree = "<group>"; };
@@ -355,19 +364,6 @@
 		A9BC697318C5586100B67E11 /* Head_diffuse.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; path = Head_diffuse.bmp; sourceTree = "<group>"; };
 		A9C94ABC1451924700CE6BAD /* mallet.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = mallet.png; sourceTree = "<group>"; };
 		A9C94ABD1451924700CE6BAD /* mallet.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = mallet.pod; sourceTree = "<group>"; };
-		A9CCA36C18E34F1B00DDDBDC /* CC3DemoMashUpLayer-Classic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CC3DemoMashUpLayer-Classic.h"; sourceTree = "<group>"; };
-		A9CCA36D18E34F1B00DDDBDC /* CC3DemoMashUpLayer-Classic.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "CC3DemoMashUpLayer-Classic.m"; sourceTree = "<group>"; };
-		A9CCA36E18E34F1B00DDDBDC /* CC3DemoMashUpLayer-v3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CC3DemoMashUpLayer-v3.h"; sourceTree = "<group>"; };
-		A9CCA36F18E34F1B00DDDBDC /* CC3DemoMashUpLayer-v3.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "CC3DemoMashUpLayer-v3.m"; sourceTree = "<group>"; };
-		A9CCA37018E34F1B00DDDBDC /* CC3DemoMashUpLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3DemoMashUpLayer.h; sourceTree = "<group>"; };
-		A9CCA37118E34F1B00DDDBDC /* CC3DemoMashUpScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3DemoMashUpScene.h; sourceTree = "<group>"; };
-		A9CCA37218E34F1B00DDDBDC /* CC3DemoMashUpScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3DemoMashUpScene.m; sourceTree = "<group>"; };
-		A9CCA37318E34F1B00DDDBDC /* HUDLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HUDLayer.h; sourceTree = "<group>"; };
-		A9CCA37418E34F1B00DDDBDC /* HUDLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HUDLayer.m; sourceTree = "<group>"; };
-		A9CCA37518E34F1B00DDDBDC /* HUDScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HUDScene.h; sourceTree = "<group>"; };
-		A9CCA37618E34F1B00DDDBDC /* HUDScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HUDScene.m; sourceTree = "<group>"; };
-		A9CCA37718E34F1B00DDDBDC /* Models.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Models.h; sourceTree = "<group>"; };
-		A9CCA37818E34F1B00DDDBDC /* Models.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Models.m; sourceTree = "<group>"; };
 		A9CCA38018E34F4400DDDBDC /* CCNodeAdornments.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCNodeAdornments.h; sourceTree = "<group>"; };
 		A9CCA38118E34F4400DDDBDC /* CCNodeAdornments.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CCNodeAdornments.m; sourceTree = "<group>"; };
 		A9CCA38218E34F4400DDDBDC /* CCNodeExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCNodeExtensions.h; sourceTree = "<group>"; };
@@ -431,7 +427,7 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
-				A9CCA36B18E34F1B00DDDBDC /* Classes */,
+				A91CC35118E8FD6C00D2D8E0 /* Classes */,
 				A9CCA37F18E34F4400DDDBDC /* Controls */,
 				A946373518898B510097E355 /* iOS Support */,
 				A92DA78D1427B5980051AFFA /* Resources */,
@@ -490,6 +486,24 @@
 				A91153691723A27F004A87FC /* EnvMapPosZ.jpg */,
 			);
 			path = EnvMap;
+			sourceTree = "<group>";
+		};
+		A91CC35118E8FD6C00D2D8E0 /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+				A91CC35218E8FD6C00D2D8E0 /* CC3DemoMashUpLayer.h */,
+				A91CC35318E8FD6C00D2D8E0 /* CC3DemoMashUpLayer.m */,
+				A91CC35418E8FD6C00D2D8E0 /* CC3DemoMashUpScene.h */,
+				A91CC35518E8FD6C00D2D8E0 /* CC3DemoMashUpScene.m */,
+				A91CC35618E8FD6C00D2D8E0 /* HUDLayer.h */,
+				A91CC35718E8FD6C00D2D8E0 /* HUDLayer.m */,
+				A91CC35818E8FD6C00D2D8E0 /* HUDScene.h */,
+				A91CC35918E8FD6C00D2D8E0 /* HUDScene.m */,
+				A91CC35A18E8FD6C00D2D8E0 /* Models.h */,
+				A91CC35B18E8FD6C00D2D8E0 /* Models.m */,
+			);
+			name = Classes;
+			path = CC3DemoMashUp/Classes;
 			sourceTree = "<group>";
 		};
 		A92DA78D1427B5980051AFFA /* Resources */ = {
@@ -731,27 +745,6 @@
 				A9BA3DCE18D21DA80077B14E /* CC3TexturableRigidBones.vsh */,
 			);
 			path = VertexShaders;
-			sourceTree = "<group>";
-		};
-		A9CCA36B18E34F1B00DDDBDC /* Classes */ = {
-			isa = PBXGroup;
-			children = (
-				A9CCA36C18E34F1B00DDDBDC /* CC3DemoMashUpLayer-Classic.h */,
-				A9CCA36D18E34F1B00DDDBDC /* CC3DemoMashUpLayer-Classic.m */,
-				A9CCA36E18E34F1B00DDDBDC /* CC3DemoMashUpLayer-v3.h */,
-				A9CCA36F18E34F1B00DDDBDC /* CC3DemoMashUpLayer-v3.m */,
-				A9CCA37018E34F1B00DDDBDC /* CC3DemoMashUpLayer.h */,
-				A9CCA37118E34F1B00DDDBDC /* CC3DemoMashUpScene.h */,
-				A9CCA37218E34F1B00DDDBDC /* CC3DemoMashUpScene.m */,
-				A9CCA37318E34F1B00DDDBDC /* HUDLayer.h */,
-				A9CCA37418E34F1B00DDDBDC /* HUDLayer.m */,
-				A9CCA37518E34F1B00DDDBDC /* HUDScene.h */,
-				A9CCA37618E34F1B00DDDBDC /* HUDScene.m */,
-				A9CCA37718E34F1B00DDDBDC /* Models.h */,
-				A9CCA37818E34F1B00DDDBDC /* Models.m */,
-			);
-			name = Classes;
-			path = CC3DemoMashUp/Classes;
 			sourceTree = "<group>";
 		};
 		A9CCA37F18E34F4400DDDBDC /* Controls */ = {
@@ -1022,16 +1015,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				A946373E18898B510097E355 /* main.m in Sources */,
-				A9CCA37B18E34F1B00DDDBDC /* CC3DemoMashUpScene.m in Sources */,
-				A9CCA37A18E34F1B00DDDBDC /* CC3DemoMashUpLayer-v3.m in Sources */,
 				A9CCA38818E34F4400DDDBDC /* Joystick.m in Sources */,
-				A9CCA37D18E34F1B00DDDBDC /* HUDScene.m in Sources */,
 				A946373B18898B510097E355 /* CC3DemoMashUpAppDelegate.m in Sources */,
+				A91CC35E18E8FD6C00D2D8E0 /* HUDLayer.m in Sources */,
 				A9CCA38718E34F4400DDDBDC /* CCNodeExtensions.m in Sources */,
-				A9CCA37918E34F1B00DDDBDC /* CC3DemoMashUpLayer-Classic.m in Sources */,
+				A91CC35C18E8FD6C00D2D8E0 /* CC3DemoMashUpLayer.m in Sources */,
+				A91CC35D18E8FD6C00D2D8E0 /* CC3DemoMashUpScene.m in Sources */,
+				A91CC35F18E8FD6C00D2D8E0 /* HUDScene.m in Sources */,
 				A9CCA38618E34F4400DDDBDC /* CCNodeAdornments.m in Sources */,
-				A9CCA37C18E34F1B00DDDBDC /* HUDLayer.m in Sources */,
-				A9CCA37E18E34F1B00DDDBDC /* Models.m in Sources */,
+				A91CC36018E8FD6C00D2D8E0 /* Models.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

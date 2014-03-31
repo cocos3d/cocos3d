@@ -318,6 +318,12 @@ enum {
 /** Dummy property for compatibility with prior Cocos2D versions. Does nothing */
 @property (nonatomic, assign) NSInteger mousePriority;
 
+/** 
+ * Use (0,0) when you position the CCNode.
+ * Does nothing. Provided for backwards compatibility.
+ */
+@property(nonatomic,readwrite,assign) BOOL ignoreAnchorPointForPosition;
+
 #endif	// !CC3_CC2_CLASSIC
 
 #if !CC3_CC2_1
@@ -491,6 +497,21 @@ enum {
 @property (nonatomic, assign) NSInteger mousePriority;
 #endif
 #endif	// CC3_OSX
+
+@end
+
+
+#pragma mark -
+#pragma mark CCSprite extension
+
+/** Extension category to support cocos3d functionality. */
+@interface CCSprite (CC3)
+
+/** 
+ * Allocates and initializes an autoreleased instance created from the image
+ * in the specified file. For compatibility with Cocos2D v3 and above.
+ */
++(id) spriteWithImageNamed: (NSString*) fileName;
 
 @end
 
