@@ -40,12 +40,19 @@
 #import "CC3Actions.h"
 #import "CC3VertexSkinning.h"
 
+/** Cocos2D v3 auto-scales images for Retina. Cocos2D v2 & v1 do not. This affects the button sizes. */
+#if CC3_CC2_CLASSIC
+#	define kSpriteScale				1.0
+#else
+#	define kSpriteScale				(CCDirector.sharedDirector.contentScaleFactor)
+#endif	// CC3_CC2_CLASSIC
+
 /** Scale and position the buttons so they are usable at various screen resolutions. */
 #if APPORTABLE
-#	define kControlSizeScale		(MAX(UIScreen.mainScreen.bounds.size.width, UIScreen.mainScreen.bounds.size.height) / 1024.0f)
+#	define kControlSizeScale		(MAX(UIScreen.mainScreen.bounds.size.width, UIScreen.mainScreen.bounds.size.height) / (1024.0f * kSpriteScale))
 #	define kControlPositionScale	kControlSizeScale
 #else
-#	define kControlSizeScale		CCDirector.sharedDirector.contentScaleFactor
+#	define kControlSizeScale		(CCDirector.sharedDirector.contentScaleFactor / kSpriteScale)
 #	define kControlPositionScale	1.0
 #endif	// APPORTABLE
 
