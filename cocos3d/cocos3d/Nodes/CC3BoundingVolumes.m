@@ -484,7 +484,7 @@
 -(id) init {
 	if ( (self = [super init]) ) {
 		_node = nil;
-		_shouldBuildFromMesh = YES;		// Assume YES. Will be set to no if not assigned to mesh node
+		_shouldBuildFromMesh = YES;
 		_centerOfGeometry = kCC3VectorZero;
 		_globalCenterOfGeometry = kCC3VectorZero;
 		_shouldMaximize = NO;
@@ -521,7 +521,7 @@
 
 #pragma mark Updating
 
--(void) scaleBy: (GLfloat) scale { _shouldBuildFromMesh = NO; }
+-(void) scaleBy: (GLfloat) scale {}
 
 -(BOOL) isTransformDirty { return _isTransformDirty; }
 

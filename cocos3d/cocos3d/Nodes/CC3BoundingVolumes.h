@@ -506,9 +506,6 @@
  *
  * This method also sets the shouldBuildFromMesh property to NO so that the size of this
  * bounding volume will not change if the underlying mesh vertices change.
- *
- * This implementation sets the shouldBuildFromMesh property to NO. Subclasses with actual 
- * size should override to adjust their size, and then invoke this superclass method.
  */
 -(void) scaleBy: (GLfloat) scale;
 
