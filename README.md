@@ -205,7 +205,7 @@ changing the version of `Cocos2D` that is linked, by following these steps withi
 	4. The `cocos2d-chipmunk` part of the `Cocos2D` `3.x` library does NOT use ARC. Ensure
 	   the **Objective-C Automatic Reference Counting** (aka `CLANG_ENABLE_OBJC_ARC`) setting
 	   of the `cocos2d-chipmunk` target is always set to NO.
-7. `Cocos2D` `3.x` supports compiling to the ARM64 architecture. `Cocos2D` `2.1` and 
+7. `Cocos2D` `3.x` supports compiling to the ARM64 architecture. `Cocos2D` `2.1` and
    `Cocos2D` `1.1` do NOT support compiling to the ARM64 architecture. Because of this, 
    by default, the **Valid Architectures** (aka `VALID_ARCHS`) build setting for all demo 
    Xcode Projects in the Cocos3D distribution is set to `$(ARCHS_STANDARD_32_BIT)` (which 

@@ -357,7 +357,7 @@
 
 -(void) prevNodeType {
 	_templateIndex--;
-	if (_templateIndex < 0) _templateIndex = _availableTemplateNodes.count - 1;
+	if (_templateIndex < 0) _templateIndex = (GLint)_availableTemplateNodes.count - 1;
 	self.templateNode = [_availableTemplateNodes objectAtIndex: _templateIndex];
 }
 

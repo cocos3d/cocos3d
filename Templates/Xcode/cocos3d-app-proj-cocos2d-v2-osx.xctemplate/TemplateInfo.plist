@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Identifier</key>
+	<string>org.cocos3d.cocos3dAppProjCocos2d-v2OSX</string>
+	<key>Name</key>
+	<string>Cocos3D OSX App with Cocos2D-v2</string>
+	<key>Description</key>
+	<string>A basic Cocos3D application that uses Cocos2D v2 and OpenGL on a Mac running OSX. This template requires that Cocos2D v2 is installed.</string>
+	<key>Kind</key>
+	<string>Xcode.Xcode3.ProjectTemplateUnitKind</string>
+	<key>Concrete</key>
+	<true/>
+	<key>SortOrder</key>
+	<integer>1</integer>
+	<key>Ancestors</key>
+	<array>
+		<string>org.cocos3d.cocos3dProjOSX</string>
+	</array>
+	<key>Components</key>
+	<array>
+		<dict>
+			<key>Identifier</key>
+			<string>org.cocos3d.cocos2d-v2StatLib</string>
+			<key>Name</key>
+			<string>cocos2d</string>
+		</dict>
+		<dict>
+			<key>Identifier</key>
+			<string>org.cocos3d.cocos3dStatLib</string>
+			<key>Name</key>
+			<string>cocos3d</string>
+		</dict>
+		<dict>
+			<key>Identifier</key>
+			<string>org.cocos3d.cocos3dAppCocos2d-v2OSX</string>
+			<key>Name</key>
+			<string>___PACKAGENAME___</string>
+		</dict>
+	</array>
+</dict>
+</plist>

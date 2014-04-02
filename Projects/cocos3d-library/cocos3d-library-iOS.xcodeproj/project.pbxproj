@@ -147,14 +147,6 @@
 
 /* Begin PBXFileReference section */
 		A92E838017A6D0A1003B859E /* libcocos3d.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libcocos3d.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		A92E855917A6E1F5003B859E /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
-		A92E855A17A6E1F5003B859E /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
-		A92E855B17A6E1F5003B859E /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
-		A92E855C17A6E1F5003B859E /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
-		A92E855D17A6E1F5003B859E /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
-		A92E855E17A6E1F5003B859E /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
-		A92E855F17A6E1F5003B859E /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
-		A92E856017A6E1F5003B859E /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		A95B479418119BD0007A3804 /* configuration.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = configuration.json; path = "cocos3d-library-iOS.approj/configuration.json"; sourceTree = "<group>"; };
 		A9BA3F2218D21E240077B14E /* Cal3D File Formats.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "Cal3D File Formats.txt"; sourceTree = "<group>"; };
 		A9BA3F2318D21E240077B14E /* CC3CAFResource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3CAFResource.h; sourceTree = "<group>"; };
@@ -427,23 +419,12 @@
 		A9BA404718D21E250077B14E /* ControllableCCLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ControllableCCLayer.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
-/* Begin PBXFrameworksBuildPhase section */
-		A92E837D17A6D0A1003B859E /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXFrameworksBuildPhase section */
-
 /* Begin PBXGroup section */
 		A92E837717A6D0A1003B859E = {
 			isa = PBXGroup;
 			children = (
 				A9BA3F2018D21E240077B14E /* cocos3d */,
 				A95B478F18119B44007A3804 /* Apportable */,
-				A92E838217A6D0A1003B859E /* Frameworks */,
 				A92E838117A6D0A1003B859E /* Products */,
 			);
 			sourceTree = "<group>";
@@ -454,21 +435,6 @@
 				A92E838017A6D0A1003B859E /* libcocos3d.a */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		A92E838217A6D0A1003B859E /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				A92E855917A6E1F5003B859E /* AudioToolbox.framework */,
-				A92E855A17A6E1F5003B859E /* AVFoundation.framework */,
-				A92E855B17A6E1F5003B859E /* CoreGraphics.framework */,
-				A92E855C17A6E1F5003B859E /* Foundation.framework */,
-				A92E855D17A6E1F5003B859E /* OpenAL.framework */,
-				A92E855E17A6E1F5003B859E /* OpenGLES.framework */,
-				A92E855F17A6E1F5003B859E /* QuartzCore.framework */,
-				A92E856017A6E1F5003B859E /* UIKit.framework */,
-			);
-			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		A95B478F18119B44007A3804 /* Apportable */ = {
@@ -972,7 +938,6 @@
 			buildConfigurationList = A92E83A317A6D0A1003B859E /* Build configuration list for PBXNativeTarget "cocos3d" */;
 			buildPhases = (
 				A92E837C17A6D0A1003B859E /* Sources */,
-				A92E837D17A6D0A1003B859E /* Frameworks */,
 				A92E837E17A6D0A1003B859E /* CopyFiles */,
 			);
 			buildRules = (
@@ -1236,6 +1201,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = "../../cocos2d/**";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
+				ONLY_ACTIVE_ARCH = NO;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;

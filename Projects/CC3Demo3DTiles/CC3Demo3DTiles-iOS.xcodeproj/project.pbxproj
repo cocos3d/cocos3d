@@ -34,6 +34,7 @@
 		A94EE9E717F4CED3005A43E7 /* Dragon-normals.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A94EE9E117F4CED3005A43E7 /* Dragon-normals.jpg */; };
 		A94EE9E917F4CED3005A43E7 /* Dragon.pod in Resources */ = {isa = PBXBuildFile; fileRef = A94EE9E317F4CED3005A43E7 /* Dragon.pod */; };
 		A94EE9EA17F4CED3005A43E7 /* DRAGON_LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = A94EE9E417F4CED3005A43E7 /* DRAGON_LICENSE.txt */; };
+		A96E1FF418EB76080080FA2F /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A96E1FF318EB76080080FA2F /* CoreText.framework */; };
 		A971D31B1663ECDE00769DC5 /* fps_images-hd.png in Resources */ = {isa = PBXBuildFile; fileRef = A971D3191663ECDE00769DC5 /* fps_images-hd.png */; };
 		A971D31C1663ECDE00769DC5 /* fps_images-ipadhd.png in Resources */ = {isa = PBXBuildFile; fileRef = A971D31A1663ECDE00769DC5 /* fps_images-ipadhd.png */; };
 		A97A31351689004C004CBAA1 /* fps_images_1.png in Resources */ = {isa = PBXBuildFile; fileRef = A97A31341689004C004CBAA1 /* fps_images_1.png */; };
@@ -189,6 +190,7 @@
 		A94EE9E117F4CED3005A43E7 /* Dragon-normals.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "Dragon-normals.jpg"; sourceTree = "<group>"; };
 		A94EE9E317F4CED3005A43E7 /* Dragon.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = Dragon.pod; sourceTree = "<group>"; };
 		A94EE9E417F4CED3005A43E7 /* DRAGON_LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = DRAGON_LICENSE.txt; sourceTree = "<group>"; };
+		A96E1FF318EB76080080FA2F /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
 		A971D3191663ECDE00769DC5 /* fps_images-hd.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "fps_images-hd.png"; sourceTree = "<group>"; };
 		A971D31A1663ECDE00769DC5 /* fps_images-ipadhd.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "fps_images-ipadhd.png"; sourceTree = "<group>"; };
 		A97A31341689004C004CBAA1 /* fps_images_1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fps_images_1.png; sourceTree = "<group>"; };
@@ -284,6 +286,7 @@
 				A9473C1814100DA5006F410C /* AudioToolbox.framework in Frameworks */,
 				A9473C1A14100DA5006F410C /* AVFoundation.framework in Frameworks */,
 				A9473C2014100DA5006F410C /* CoreGraphics.framework in Frameworks */,
+				A96E1FF418EB76080080FA2F /* CoreText.framework in Frameworks */,
 				A9473C1E14100DA5006F410C /* Foundation.framework in Frameworks */,
 				A9473C1614100DA5006F410C /* OpenAL.framework in Frameworks */,
 				A9473C1414100DA5006F410C /* OpenGLES.framework in Frameworks */,
@@ -371,6 +374,7 @@
 				A9473C1714100DA5006F410C /* AudioToolbox.framework */,
 				A9473C1914100DA5006F410C /* AVFoundation.framework */,
 				A9473C1F14100DA5006F410C /* CoreGraphics.framework */,
+				A96E1FF318EB76080080FA2F /* CoreText.framework */,
 				A9473C1D14100DA5006F410C /* Foundation.framework */,
 				A9473C1514100DA5006F410C /* OpenAL.framework */,
 				A9473C1314100DA5006F410C /* OpenGLES.framework */,
@@ -863,6 +867,7 @@
 					"../../cocos2d/**",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-lz",

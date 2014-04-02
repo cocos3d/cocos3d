@@ -1,0 +1,21 @@
+/** Prefix header for all cocos2d source files. */
+
+// iOS header
+# ifdef __IPHONE_OS_VERSION_MAX_ALLOWED
+#	import <Availability.h>
+#	ifdef __OBJC__
+#		import <UIKit/UIKit.h>
+#		import <Foundation/Foundation.h>
+#	endif
+# endif	// __IPHONE_OS_VERSION_MAX_ALLOWED
+
+
+// OSX header
+# ifdef __MAC_OS_X_VERSION_MAX_ALLOWED
+#	ifdef __OBJC__
+#		import <Cocoa/Cocoa.h>
+#	endif
+# endif	// __MAC_OS_X_VERSION_MAX_ALLOWED
+
+
+

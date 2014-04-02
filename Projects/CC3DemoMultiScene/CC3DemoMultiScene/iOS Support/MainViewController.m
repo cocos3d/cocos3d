@@ -59,7 +59,7 @@
  * new scene from there.
  */
 -(IBAction) requestChange3DSceneFromSegmentControl: (UISegmentedControl*) sender {
-	_selectedScene = sender.selectedSegmentIndex;
+	_selectedScene = (SelectedScene)sender.selectedSegmentIndex;
 	[self disableUI];
 	[_cc3Controller.view removeFromSuperview];
 

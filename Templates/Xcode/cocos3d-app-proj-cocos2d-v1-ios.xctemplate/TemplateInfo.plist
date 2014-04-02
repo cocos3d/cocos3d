@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Identifier</key>
+	<string>org.cocos3d.cocos3dAppProjCocos2d-v1iOS</string>
+	<key>Name</key>
+	<string>Cocos3D iOS App with Cocos2D-v1</string>
+	<key>Description</key>
+	<string>A basic Cocos3D application that uses Cocos2D v1 and OpenGL ES 1.1 on an iOS or Android device. This template requires that Cocos2D v1 is installed.</string>
+	<key>Kind</key>
+	<string>Xcode.Xcode3.ProjectTemplateUnitKind</string>
+	<key>Concrete</key>
+	<true/>
+	<key>SortOrder</key>
+	<integer>1</integer>
+	<key>Ancestors</key>
+	<array>
+		<string>org.cocos3d.cocos3dProjIOS</string>
+	</array>
+	<key>Components</key>
+	<array>
+		<dict>
+			<key>Identifier</key>
+			<string>org.cocos3d.cocos2d-v1StatLib</string>
+			<key>Name</key>
+			<string>cocos2d</string>
+		</dict>
+		<dict>
+			<key>Identifier</key>
+			<string>org.cocos3d.cocos3dStatLib</string>
+			<key>Name</key>
+			<string>cocos3d</string>
+		</dict>
+		<dict>
+			<key>Identifier</key>
+			<string>org.cocos3d.cocos3dAppCocos2d-v1iOS</string>
+			<key>Name</key>
+			<string>___PACKAGENAME___</string>
+		</dict>
+	</array>
+	<key>Project</key>
+	<dict>
+		<key>SharedSettings</key>
+		<dict>
+			<key>IPHONEOS_DEPLOYMENT_TARGET</key>
+			<string>4.0</string>
+			<key>VALID_ARCHS</key>
+			<string>$(ARCHS_STANDARD_32_BIT)</string>
+		</dict>
+		<key>Configurations</key>
+		<dict>
+			<key>Debug</key>
+			<dict>
+				<key>ONLY_ACTIVE_ARCH</key>
+				<string>NO</string>
+			</dict>
+		</dict>
+	</dict>
+</dict>
+</plist>

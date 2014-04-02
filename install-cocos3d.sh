@@ -86,8 +86,8 @@ fi
 #If it exists, copies the file $1 from source directory $2 to dest directory $3
 copy_file() {
 	if [[ -e "$2/$1" ]]; then
-		echo "...copying $1"
 		check_dir "$3"
+		echo "...copying $1"
 		cp "$2/$1" "$3"
 	fi
 }
@@ -99,7 +99,7 @@ copy_files(){
 
 check_dir(){
 	if [[ ! -d "$1" ]];  then
-		echo ...creating destination directory: "$1"
+		echo ...creating directory: "$1"
 		mkdir -p "$1"
 	fi
 }
@@ -113,17 +113,10 @@ link_dir() {
 	fi
 }
 
-copy_template_files(){
-	DST_DIR="$TEMPLATE_DIR""$TEMPLATE"".xctemplate"
-	echo ...copying $TEMPLATE template files
-	copy_files "Templates/Xcode/$TEMPLATE.xctemplate/" "$DST_DIR"
-}
-
 print_template_banner(){
 	echo ''
 	echo "$1"
 	echo '----------------------------------------------------'
-	echo ''
 }
 
 # Copies Xcode project-based templates
@@ -131,108 +124,70 @@ copy_xc_project_templates() {
 
 	print_template_banner "Installing Cocos3D Xcode templates"
 
-	TEMPLATE_DIR="${BASE_TEMPLATE_4_DIR}/${COCOS3D_TEMPLATE_4_DIR}/"
-	LEGACY_TEMPLATE_DIR="${BASE_TEMPLATE_4_DIR}/cocos3d/"
+	TEMPLATE_DIR="$BASE_TEMPLATE_4_DIR/Cocos3D"
+	REZ_SRC_DIR="Projects/Common/Resources"
+	SUPPORT_DIR="Support"
+	BASE_DIR="$SUPPORT_DIR/Base"
+	BUNDLE_DIR="$SUPPORT_DIR/Bundle"
+	STAT_LIB_DIR="$SUPPORT_DIR/StatLib"
 
 # Delete the existing Cocos3D template directory, and recreate it
+	echo ...deleting existing Cocos3D template files
 	rm -rf "$TEMPLATE_DIR"
+	rm -rf "$BASE_TEMPLATE_4_DIR/cocos3d"	# Delete legacy folder
 
-# Copy Cocos2D v1 iOS static library settings
-	TEMPLATE="cocos2d-v1-stat-lib-ios"
-	copy_template_files
+# Copy new Cocos3D template files
+	echo ...creating Cocos3D template files
+	copy_files "Templates/Xcode/" "$TEMPLATE_DIR"
 
-# Copy Cocos2D v2 iOS static library settings
-	TEMPLATE="cocos2d-v2-stat-lib-ios"
-	copy_template_files
-
-# Copy Cocos2D OSX static library settings
-	TEMPLATE="cocos2d-v2-stat-lib-osx"
-	copy_template_files
-
-# Copy Cocos3D library files references
-	TEMPLATE="cocos3d-lib"
-	copy_template_files
+# Copy Cocos3D library files
+	echo ...copying Cocos3D source files
+	TEMPLATE="$BASE_DIR/cocos3d-lib"
+	DST_DIR="$TEMPLATE_DIR/$TEMPLATE.xctemplate"
 	copy_files "cocos3d" "$DST_DIR"
 
-# Copy Cocos3D GLSL files references
-	TEMPLATE="cocos3d-glsl"
-	copy_template_files
+# Copy Cocos3D GLSL files
+	echo ...copying Cocos3D GLSL source files
+	TEMPLATE="$BASE_DIR/cocos3d-glsl"
+	DST_DIR="$TEMPLATE_DIR/$TEMPLATE.xctemplate"
 	copy_files "cocos3d-GLSL" "$DST_DIR"
 
-# Copy base Cocos3D settings
-	TEMPLATE="cocos3d-base"
-	copy_template_files
-
-# Copy Cocos3D static library settings
-	TEMPLATE="cocos3d-stat-lib"
-	copy_template_files
+# Copy Cocos3D licenses
+	TEMPLATE="$STAT_LIB_DIR/cocos3d-stat-lib"
+	DST_DIR="$TEMPLATE_DIR/$TEMPLATE.xctemplate"
 	copy_file "LICENSE_cocos3d.txt" "." "$DST_DIR"
 
-# Copy Cocos3D static library project settings
-#	TEMPLATE="Cocos3D Static Library"
-#	copy_template_files
+# Copy application model assets
+	TEMPLATE="$BUNDLE_DIR/cocos3d-app-base"
+	DST_DIR="$TEMPLATE_DIR/$TEMPLATE.xctemplate/Resources"
+	copy_file "hello-world.pod" "Models/Hello World" "$DST_DIR"
 
-# Copy application base Cocos3D settings
-	TEMPLATE="cocos3d-app-base"
-	copy_template_files
-	copy_file "hello-world.pod" "Models/Hello World" "$DST_DIR""/Resources"
+# Copy icons and launch images
+	echo ...copying icons and launch images
+	TEMPLATE="$BUNDLE_DIR/cocos3d-app-ios"
+	DST_DIR="$TEMPLATE_DIR/$TEMPLATE.xctemplate/Resources"
+	copy_files "$REZ_SRC_DIR/Icons" "$DST_DIR"
+	copy_files "$REZ_SRC_DIR/LaunchImages" "$DST_DIR"
 
-# Copy base Cocos3D iOS app settings
-	TEMPLATE="cocos3d-app-ios"
-	copy_template_files
-	copy_files "Projects/Common/Resources/Icons/" "$DST_DIR""/Resources"
-	copy_files "Projects/Common/Resources/LaunchImages/" "$DST_DIR""/Resources"
+# Copy Cocos2D iOS FPS images
+	TEMPLATE="$BUNDLE_DIR/cocos3d-app-ios"
+	DST_DIR="$TEMPLATE_DIR/$TEMPLATE.xctemplate/Resources"
+	copy_file "fps_images.png" "$REZ_SRC_DIR" "$DST_DIR"
+	copy_file "fps_images-hd.png" "$REZ_SRC_DIR" "$DST_DIR"
+	copy_file "fps_images-ipadhd.png" "$REZ_SRC_DIR" "$DST_DIR"
+	copy_file "fps_images_1.png" "$REZ_SRC_DIR" "$DST_DIR"
 
-# Copy base Cocos3D OSX settings
-	TEMPLATE="cocos3d-app-osx"
-	copy_template_files
+# Copy Cocos2D OSX FPS images
+	TEMPLATE="$BUNDLE_DIR/cocos3d-app-osx"
+	DST_DIR="$TEMPLATE_DIR/$TEMPLATE.xctemplate/Resources"
+	copy_file "fps_images.png" "$REZ_SRC_DIR" "$DST_DIR"
 
-# Copy base Cocos3D app project settings
-	TEMPLATE="cocos3d-app-proj"
-	copy_template_files
-
-# Copy base Cocos3D iOS app project settings
-	TEMPLATE="cocos3d-app-proj-ios"
-	copy_template_files
-
-# Copy base Cocos3D OSX app project settings
-	TEMPLATE="cocos3d-app-proj-osx"
-	copy_template_files
-
-# Copy OpenGL ES 1 Template
-	TEMPLATE="cocos3d-app-ogles1"
-	copy_template_files
-	copy_file "fps_images_1.png" "Projects/Common/Resources" "$DST_DIR""/Resources"
-
-# Copy Concrete OpenGL ES 1 Application Template
-	TEMPLATE="Cocos3D iOS OpenGL ES 1.1 Application"
-	copy_template_files
-
-# Copy OpenGL ES 2 Template
-	TEMPLATE="cocos3d-app-ogles2"
-	copy_template_files
-	copy_file "fps_images.png" "Projects/Common/Resources" "$DST_DIR""/Resources"
-	copy_file "fps_images-hd.png" "Projects/Common/Resources" "$DST_DIR""/Resources"
-	copy_file "fps_images-ipadhd.png" "Projects/Common/Resources" "$DST_DIR""/Resources"
-
-# Copy Concrete OpenGL ES 2 Application Template
-	TEMPLATE="Cocos3D iOS OpenGL ES 2.0 Application"
-	copy_template_files
-
-# Copy OpenGL OSX Template (Cocos2D v3/v2)
-	TEMPLATE="cocos3d-app-ogl"
-	copy_template_files
-	copy_file "fps_images.png" "Projects/Common/Resources" "$DST_DIR""/Resources"
-
-# Copy Concrete OSX OpenGL Application Template
-	TEMPLATE="Cocos3D OSX OpenGL Application"
-	copy_template_files
-
+	echo Finished installing Cocos3D Xcode templates.
 }
 
 link_cocos2d_libs(){
-	echo
-	echo "Linking to Cocos2D distribution libraries in '$CC2_DIST_DIR'."
+
+	print_template_banner "Linking to Cocos2D distribution libraries in '$CC2_DIST_DIR'."
 
 	CC2_DIR=cocos2d
 
@@ -286,5 +241,7 @@ link_cocos2d_libs
 
 copy_xc_project_templates
 
+echo
 echo Done!
+echo
 

@@ -32,6 +32,7 @@
 		A96E0CD4170DC8060044CA2A /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A96E0CD3170DC8060044CA2A /* AudioToolbox.framework */; };
 		A96E0CD6170DC8060044CA2A /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A96E0CD5170DC8060044CA2A /* AppKit.framework */; };
 		A96E0CD8170DC8060044CA2A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A96E0CD7170DC8060044CA2A /* Foundation.framework */; };
+		A96E1FEE18EB74BE0080FA2F /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A96E1FED18EB74BD0080FA2F /* AVFoundation.framework */; };
 		A97398F317C2CA6F00C17D89 /* BeachBall.pod in Resources */ = {isa = PBXBuildFile; fileRef = A97398F217C2CA6F00C17D89 /* BeachBall.pod */; };
 		A97398F517C2CA8000C17D89 /* DieCube.pod in Resources */ = {isa = PBXBuildFile; fileRef = A97398F417C2CA8000C17D89 /* DieCube.pod */; };
 		A97398FD17C2CA8F00C17D89 /* Dragon-diffuse.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A97398F717C2CA8F00C17D89 /* Dragon-diffuse.jpg */; };
@@ -225,6 +226,7 @@
 		A96E0CD3170DC8060044CA2A /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		A96E0CD5170DC8060044CA2A /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		A96E0CD7170DC8060044CA2A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		A96E1FED18EB74BD0080FA2F /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		A97398F217C2CA6F00C17D89 /* BeachBall.pod */ = {isa = PBXFileReference; lastKnownFileType = file; name = BeachBall.pod; path = "../../Models/Beach Ball/BeachBall.pod"; sourceTree = "<group>"; };
 		A97398F417C2CA8000C17D89 /* DieCube.pod */ = {isa = PBXFileReference; lastKnownFileType = file; name = DieCube.pod; path = "../../Models/Die Cube/DieCube.pod"; sourceTree = "<group>"; };
 		A97398F717C2CA8F00C17D89 /* Dragon-diffuse.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "Dragon-diffuse.jpg"; sourceTree = "<group>"; };
@@ -367,10 +369,11 @@
 				A92BD9D018E127BD003D1F64 /* libcocos2d-chipmunk.a in Frameworks */,
 				A96E0CD6170DC8060044CA2A /* AppKit.framework in Frameworks */,
 				A96E0CD4170DC8060044CA2A /* AudioToolbox.framework in Frameworks */,
+				A96E1FEE18EB74BE0080FA2F /* AVFoundation.framework in Frameworks */,
 				A96E0CD8170DC8060044CA2A /* Foundation.framework in Frameworks */,
-				A96E0CCE170DC8060044CA2A /* QuartzCore.framework in Frameworks */,
 				A96E0CD2170DC8060044CA2A /* OpenAL.framework in Frameworks */,
 				A96E0CD0170DC8060044CA2A /* OpenGL.framework in Frameworks */,
+				A96E0CCE170DC8060044CA2A /* QuartzCore.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -450,6 +453,7 @@
 			children = (
 				A96E0CD5170DC8060044CA2A /* AppKit.framework */,
 				A96E0CD3170DC8060044CA2A /* AudioToolbox.framework */,
+				A96E1FED18EB74BD0080FA2F /* AVFoundation.framework */,
 				A96E0CD7170DC8060044CA2A /* Foundation.framework */,
 				A96E0CD1170DC8060044CA2A /* OpenAL.framework */,
 				A96E0CCF170DC8060044CA2A /* OpenGL.framework */,

@@ -1,5 +1,0 @@
-/** Prefix header for all cocos2d source files. */
-
-#ifdef __OBJC__
-    #import <Cocoa/Cocoa.h>
-#endif
