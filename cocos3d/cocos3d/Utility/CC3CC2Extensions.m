@@ -170,6 +170,12 @@
 -(CGRect) boundingBoxInPixels { return CC_RECT_POINTS_TO_PIXELS(self.boundingBox); }
 #endif	// CC3_CC2_2
 
+#if CC3_CC2_1
+-(CGPoint) anchorPointInPoints { return ccpCompMult(ccpFromSize(self.contentSize), self.anchorPoint); }
+-(BOOL) ignoreAnchorPointForPosition { return !self.isRelativeAnchorPoint; }
+-(void) setIgnoreAnchorPointForPosition: (BOOL) ignore { self.isRelativeAnchorPoint = !ignore; }
+#endif	// !CC3_CC2_1
+
 -(BOOL) isTouchEnabled { return NO; }
 
 -(void) setTouchEnabled: (BOOL) touchEnabled {}

@@ -116,15 +116,11 @@
 	_directionJoystick = [Joystick joystickWithThumb: jsThumb
 											 andSize: CGSizeMake(kJoystickSideLength, kJoystickSideLength)];
 
-	// If you want to see the size of the Joystick backdrop, comment out the line above and
-	// uncomment the two lines below. This just adds a simple transparent white backdrop to
-	// demonstrate that the thumb and backdrop can be any CCNode, but normally you would use
-	// a cool graphical CCSprite for the Joystick backdrop.
-//	CCNode* jsBackdrop = [CCNodeColor nodeWithColor: [CCColor colorWithWhite: 1.0 alpha: 0.25]
-//											  width: kJoystickSideLength
-//											 height: kJoystickSideLength];
-//	_directionJoystick = [Joystick joystickWithThumb: jsThumb andBackdrop: jsBackdrop];
-
+	// If you want to see the size of the Joystick backdrop, comment out the line above and uncomment the
+	// following line, which include a simple backdrop image. The thumb and backdrop can be any CCNode.
+//	_directionJoystick = [Joystick joystickWithThumb: jsThumb
+//										 andBackdrop: [CCSprite spriteWithImageNamed: @"Icon-76.png"]];
+	
 	CGPoint jsMiddle = _directionJoystick.anchorPointInPoints;
 	_directionJoystick.position = ccp(jsMiddle.x + kJoystickPadding, jsMiddle.y + kJoystickPadding);
 	[self addChild: _directionJoystick];

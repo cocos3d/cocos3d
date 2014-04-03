@@ -79,7 +79,7 @@ fi
 
 # Make sure Cocos2D distribution directory exists
 if [[ ! -d "$CC2_DIST_DIR" ]];  then
-	echo "The Cocos2D distribution directory '$CC2_DIST_DIR' couldn't be found!"
+	echo "The Cocos2D distribution directory '$CC2_DIST_DIR' could not be found!"
 	exit 1
 fi
 

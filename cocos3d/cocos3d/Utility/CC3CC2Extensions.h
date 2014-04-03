@@ -318,7 +318,7 @@ enum {
 /** Dummy property for compatibility with prior Cocos2D versions. Does nothing */
 @property (nonatomic, assign) NSInteger mousePriority;
 
-/** 
+/**
  * Use (0,0) when you position the CCNode.
  * Does nothing. Provided for backwards compatibility.
  */
@@ -333,6 +333,17 @@ enum {
 /** cocos2d 2.x compatibility with pixel-based sizing. */
 @property (nonatomic, readonly) CGRect boundingBoxInPixels;
 #endif	// !CC3_CC2_1
+
+#if CC3_CC2_1
+/** The anchorPoint in absolute points. */
+@property(nonatomic,readonly) CGPoint anchorPointInPoints;
+
+/**
+ * Use (0,0) when you position the CCNode.
+ * Does nothing. Provided for backwards compatibility.
+ */
+@property(nonatomic,readwrite,assign) BOOL ignoreAnchorPointForPosition;
+#endif	// CC3_CC2_1
 
 /**
  * Returns whether this node will receive touch events.
