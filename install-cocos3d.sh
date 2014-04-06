@@ -27,79 +27,153 @@
 # http://en.wikipedia.org/wiki/MIT_License
 #
 
-echo 'Cocos3D installer'
 
-COCOS3D_TEMPLATE_4_DIR='Cocos3D'
-BASE_TEMPLATE_4_DIR="$HOME/Library/Developer/Xcode/Templates"
+# ---------------------------- SETUP ----------------------------------
 
+XCODE_TEMPLATE_DIR="$HOME/Library/Developer/Xcode/Templates"
+CC2_DIR=cocos2d
+CC2_CHPMK_DIR=cocos2d-chipmunk
+CC2_SRC=
+
+COLOREND=$(tput sgr0)
+GREEN=$(tput setaf 2)
+RED=$(tput setaf 1)
+UNDER=$(tput smul)
+BOLD=$(tput bold)
+
+
+# ---------------------------- FUNCTIONS ----------------------------------
+
+# Outputs usage info
 usage() {
 cat << EOF
-Installs or updates Cocos3D Xcode templates and links Cocos2D libraries
+${BOLD}USAGE:${COLOREND}
+   $0
+    $0 -2 "cocos2d-location"
+    $0 -h
 
-usage: $0 [options] -2 "cocos2d-dist-dir"
- 
-The arg "cocos2d-dist-dir" following the -2 switch is the location of
-the directory containing the Cocos2D distribution. This installer looks
-for the following directories within that specified directory:
-    cocos2d
-	cocos2d-ui
-    CocosDenshion
-    CocosDenshionExtras
-    external/kazmath		(Cocos2D v3 & v2 only)
- 
-OPTIONS:
-   -h	this help
+The arg ${BOLD}"cocos2d-location"${COLOREND} following the ${BOLD}-2${COLOREND} switch is the location of
+the directory containing the Cocos2D source files. This may be one of
+the following psuedo-locations:
+
+    v1
+    v2
+    v3
+
+which indicates the version of Cocos2D to link to. For example:
+
+    $0 -2 v3
+
+will link to the Cocos2D version ${BOLD}3.x${COLOREND} template libraries that you have
+most recently installed. When using a psuedo-location, you must have
+previously installed the corresponding version of Cocos2D.
+
+The arg ${BOLD}"cocos2d-location"${COLOREND} may also be a relative or absolute path
+to a specific Cocos2D distribution retrieved from GitHub. For example:
+
+    $0 -2 "../cocos2d-iphone-release-3.0"
+
+If the ${BOLD}"cocos2d-location"${COLOREND} arg is omitted, the installer will link to the
+latest installed version of Cocos2D.
+
+${BOLD}OPTIONS${COLOREND}:
+    -2 "cocos2d-location"    The path to the Cocos2D libraries
+    -h                       This help
+
 EOF
 }
 
-while getopts "fh2:" OPTION; do
-	case "$OPTION" in
-		h)
-			usage
-			exit 0
-			;;
-		2)
-			CC2_DIST_DIR=$OPTARG
-			;;
-	esac
-done
+# Determine and verify the location of the Cocos2D source
+get_cc2_location() {
 
-# Make sure Cocos2D distribution directory has been specified
-if [[ ! $CC2_DIST_DIR ]]; then
-	echo "Please specify the location of the Cocos2D distribution directory using the -2 switch."
+	# If the Cocos2D distribution directory has not been specified, look for the most recent version
+	if [[ ! $CC2_SRC ]]; then
+		if [[ -d "$XCODE_TEMPLATE_DIR/cocos2d v3.x" ]]; then
+			CC2_SRC="v3"
+		elif [[ -d "$XCODE_TEMPLATE_DIR/cocos2d v2.x" ]]; then
+			CC2_SRC="v2"
+		elif [[ -d "$XCODE_TEMPLATE_DIR/cocos2d" ]]; then
+			CC2_SRC="v1"
+		else
+			echo
+			echo "${RED}✖︎${COLOREND}  A compatible version of Cocos2D does not appear to be installed. Cocos3D requires Cocos2D. See the ${BOLD}README.md${COLOREND} file for more info."
+			echo
+			exit 1
+		fi
+		echo
+		echo "The version of Cocos2D to link to was not specified."
+		echo "Cocos2D $CC2_SRC was found, and the Cocos3D demo apps will be linked to it."
+	fi
+
+	# Check if one of the psuedo locations is being used, and set the source location accordingly
+	# The psuedo locations include the Cocos2D project templates. If not a pseudo location, take
+	# the location indicate a path to the Cocos2D distribution.
+	if [[ $CC2_SRC == "v3" ]]; then
+		CC2_DIST_DIR="$XCODE_TEMPLATE_DIR/cocos2d v3.x"
+	elif [[ $CC2_SRC == "v2" ]]; then
+		CC2_DIST_DIR="$XCODE_TEMPLATE_DIR/cocos2d v2.x"
+		print_version_warning
+	elif [[ $CC2_SRC == "v1" ]]; then
+		CC2_DIST_DIR="$XCODE_TEMPLATE_DIR/cocos2d"
+		print_version_warning
+	else
+		CC2_DIST_DIR=$CC2_SRC
+	fi
+
+	# Resolve the Cocos2D distribution directory to an absolute path
+	if [[ $CC2_DIST_DIR != /* ]]; then
+		CC2_DIST_DIR="$PWD/$CC2_DIST_DIR"
+		echo "${BOLD}Please see the README.md file for instructions on ensuring the Cocos3D demo apps are configured to use the version of Cocos2D you are using.${COLOREND}"
+	fi
+
+	# Make sure Cocos2D distribution directory exists
+	if [[ ! -d "$CC2_DIST_DIR" ]];  then
+		echo
+		echo "${RED}✖︎${COLOREND}  The Cocos2D distribution directory '$CC2_DIST_DIR' could not be found! Make sure you have installed this version of Cocos2D before installing Cocos3D."
+		echo
+		exit 1
+	fi
+
+}
+
+print_version_warning() {
 	echo
-	usage
-	exit 1
-fi
+	echo "${BOLD}You are linking the Cocos3D demo apps to Cocos2D $CC2_SRC."
+	echo "Please see the README.md file for instructions on configuring the Cocos3D demo apps to use this version of Cocos2D.${COLOREND}"
+}
 
-# Resolve the Cocos2D distribution directory to an absolute path
-if [[ $CC2_DIST_DIR != /* ]]; then
-	CC2_DIST_DIR="$PWD/$CC2_DIST_DIR"
-fi
+# Outputs a banner header
+print_banner(){
+	echo ''
+	echo "$1"
+	echo '----------------------------------------------------'
+}
 
-# Make sure Cocos2D distribution directory exists
-if [[ ! -d "$CC2_DIST_DIR" ]];  then
-	echo "The Cocos2D distribution directory '$CC2_DIST_DIR' could not be found!"
-	exit 1
-fi
+print_ok() {
+	printf " ${GREEN}✔${COLOREND}\n"
+}
 
 #If it exists, copies the file $1 from source directory $2 to dest directory $3
 copy_file() {
 	if [[ -e "$2/$1" ]]; then
 		check_dir "$3"
-		echo "...copying $1"
+		echo -n "...copying $1..."
 		cp "$2/$1" "$3"
+		print_ok
 	fi
 }
 
+# Copies files in directory $1 to $2, creating the destination directory if needed.
+# Arg $3 is used to output user feedback about what is being copied.
 copy_files(){
 	check_dir "$2"
-	rsync -r --exclude=.svn "$1" "$2"
+	echo -n "...copying $3..."
+	rsync -r "$1" "$2"
+	print_ok
 }
 
 check_dir(){
 	if [[ ! -d "$1" ]];  then
-		echo ...creating directory: "$1"
 		mkdir -p "$1"
 	fi
 }
@@ -108,23 +182,19 @@ check_dir(){
 # The third arg is just a description that is echoed
 link_dir() {
 	if [[ -d "$1" ]]; then
-		echo "...linking $3"
+		echo -n "...linking $3..."
 		ln -s "$1" "$2"
+		print_ok
 	fi
 }
 
-print_template_banner(){
-	echo ''
-	echo "$1"
-	echo '----------------------------------------------------'
-}
+# Copies Cocos3D Xcode project templates
+copy_project_templates() {
 
-# Copies Xcode project-based templates
-copy_xc_project_templates() {
+	print_banner "Installing Cocos3D Xcode templates"
 
-	print_template_banner "Installing Cocos3D Xcode templates"
-
-	TEMPLATE_DIR="$BASE_TEMPLATE_4_DIR/Cocos3D"
+	CC3_TEMPLATE_DIR="$XCODE_TEMPLATE_DIR/Cocos3D"
+	TEMPLATE_SRC_DIR="Templates/Xcode"
 	REZ_SRC_DIR="Projects/Common/Resources"
 	SUPPORT_DIR="Support"
 	BASE_DIR="$SUPPORT_DIR/Base"
@@ -132,46 +202,66 @@ copy_xc_project_templates() {
 	STAT_LIB_DIR="$SUPPORT_DIR/StatLib"
 
 # Delete the existing Cocos3D template directory, and recreate it
-	echo ...deleting existing Cocos3D template files
-	rm -rf "$TEMPLATE_DIR"
-	rm -rf "$BASE_TEMPLATE_4_DIR/cocos3d"	# Delete legacy folder
+	echo -n "...removing existing Cocos3D template files..."
+	rm -rf "$CC3_TEMPLATE_DIR"
+	rm -rf "$XCODE_TEMPLATE_DIR/cocos3d"	# Delete legacy folder
+	mkdir -p "$CC3_TEMPLATE_DIR"
+	print_ok
 
-# Copy new Cocos3D template files
-	echo ...creating Cocos3D template files
-	copy_files "Templates/Xcode/" "$TEMPLATE_DIR"
+# Copy new Cocos3D support template files
+	copy_files "$TEMPLATE_SRC_DIR/$SUPPORT_DIR" "$CC3_TEMPLATE_DIR" "Cocos3D template support files"
+
+# Copy app templates for Cocos2D v3
+	if [[ -d "$XCODE_TEMPLATE_DIR/cocos2d v3.x" ]]; then
+		SRC_DIR="$TEMPLATE_SRC_DIR/cocos3d-app-proj-cocos2d-v3-ios.xctemplate"
+		copy_files "$SRC_DIR" "$CC3_TEMPLATE_DIR" "Cocos3D iOS App with Cocos2D-v3 template"
+		SRC_DIR="$TEMPLATE_SRC_DIR/cocos3d-app-proj-cocos2d-v3-osx.xctemplate"
+		copy_files "$SRC_DIR" "$CC3_TEMPLATE_DIR" "Cocos3D OSX App with Cocos2D-v3 template"
+	fi
+
+# Copy app templates for Cocos2D v2
+	if [[ -d "$XCODE_TEMPLATE_DIR/cocos2d v2.x" ]]; then
+		SRC_DIR="$TEMPLATE_SRC_DIR/cocos3d-app-proj-cocos2d-v2-ios.xctemplate"
+		copy_files "$SRC_DIR" "$CC3_TEMPLATE_DIR" "Cocos3D iOS App with Cocos2D-v2 template"
+		SRC_DIR="$TEMPLATE_SRC_DIR/cocos3d-app-proj-cocos2d-v2-osx.xctemplate"
+		copy_files "$SRC_DIR" "$CC3_TEMPLATE_DIR" "Cocos3D OSX App with Cocos2D-v2 template"
+	fi
+
+# Copy app templates for Cocos2D v1
+	if [[ -d "$XCODE_TEMPLATE_DIR/cocos2d" ]]; then
+		SRC_DIR="$TEMPLATE_SRC_DIR/cocos3d-app-proj-cocos2d-v1-ios.xctemplate"
+		copy_files "$SRC_DIR" "$CC3_TEMPLATE_DIR" "Cocos3D iOS App with Cocos2D-v1 template"
+	fi
 
 # Copy Cocos3D library files
-	echo ...copying Cocos3D source files
 	TEMPLATE="$BASE_DIR/cocos3d-lib"
-	DST_DIR="$TEMPLATE_DIR/$TEMPLATE.xctemplate"
-	copy_files "cocos3d" "$DST_DIR"
+	DST_DIR="$CC3_TEMPLATE_DIR/$TEMPLATE.xctemplate"
+	copy_files "cocos3d" "$DST_DIR" "Cocos3D source files"
 
 # Copy Cocos3D GLSL files
-	echo ...copying Cocos3D GLSL source files
 	TEMPLATE="$BASE_DIR/cocos3d-glsl"
-	DST_DIR="$TEMPLATE_DIR/$TEMPLATE.xctemplate"
-	copy_files "cocos3d-GLSL" "$DST_DIR"
+	DST_DIR="$CC3_TEMPLATE_DIR/$TEMPLATE.xctemplate"
+	copy_files "cocos3d-GLSL" "$DST_DIR" "Cocos3D GLSL source files"
 
 # Copy Cocos3D licenses
 	TEMPLATE="$STAT_LIB_DIR/cocos3d-stat-lib"
-	DST_DIR="$TEMPLATE_DIR/$TEMPLATE.xctemplate"
+	DST_DIR="$CC3_TEMPLATE_DIR/$TEMPLATE.xctemplate"
 	copy_file "LICENSE_cocos3d.txt" "." "$DST_DIR"
 
 # Copy application model assets
 	TEMPLATE="$BUNDLE_DIR/cocos3d-app-base"
-	DST_DIR="$TEMPLATE_DIR/$TEMPLATE.xctemplate/Resources"
+	DST_DIR="$CC3_TEMPLATE_DIR/$TEMPLATE.xctemplate/Resources"
 	copy_file "hello-world.pod" "Models/Hello World" "$DST_DIR"
 
 # Copy icons and launch images
-	echo ...copying icons and launch images
 	TEMPLATE="$BUNDLE_DIR/cocos3d-app-ios"
-	DST_DIR="$TEMPLATE_DIR/$TEMPLATE.xctemplate/Resources"
-	copy_files "$REZ_SRC_DIR/Icons" "$DST_DIR"
-	copy_files "$REZ_SRC_DIR/LaunchImages" "$DST_DIR"
+	DST_DIR="$CC3_TEMPLATE_DIR/$TEMPLATE.xctemplate/Resources"
+	copy_files "$REZ_SRC_DIR/Icons" "$DST_DIR" "icons"
+	copy_files "$REZ_SRC_DIR/LaunchImages" "$DST_DIR" "launch images"
 
 # Copy Cocos2D iOS FPS images
 	TEMPLATE="$BUNDLE_DIR/cocos3d-app-ios"
-	DST_DIR="$TEMPLATE_DIR/$TEMPLATE.xctemplate/Resources"
+	DST_DIR="$CC3_TEMPLATE_DIR/$TEMPLATE.xctemplate/Resources"
 	copy_file "fps_images.png" "$REZ_SRC_DIR" "$DST_DIR"
 	copy_file "fps_images-hd.png" "$REZ_SRC_DIR" "$DST_DIR"
 	copy_file "fps_images-ipadhd.png" "$REZ_SRC_DIR" "$DST_DIR"
@@ -179,21 +269,123 @@ copy_xc_project_templates() {
 
 # Copy Cocos2D OSX FPS images
 	TEMPLATE="$BUNDLE_DIR/cocos3d-app-osx"
-	DST_DIR="$TEMPLATE_DIR/$TEMPLATE.xctemplate/Resources"
+	DST_DIR="$CC3_TEMPLATE_DIR/$TEMPLATE.xctemplate/Resources"
 	copy_file "fps_images.png" "$REZ_SRC_DIR" "$DST_DIR"
 
 	echo Finished installing Cocos3D Xcode templates.
 }
 
-link_cocos2d_libs(){
-
-	print_template_banner "Linking to Cocos2D distribution libraries in '$CC2_DIST_DIR'."
-
-	CC2_DIR=cocos2d
-
-	# Remove current symbolic links and re-create new link directory
+# Remove current links and re-create new link directory
+clear_cocos2d_links() {
+	echo -n "...removing existing Cocos2D links..."
 	rm -rf "$CC2_DIR"
 	mkdir -p "$CC2_DIR"
+	rm -rf   "$CC2_CHPMK_DIR"
+	mkdir -p "$CC2_CHPMK_DIR"
+	mkdir -p "$CC2_CHPMK_DIR/chipmunk"
+	print_ok
+}
+
+# Links to the Cocos2D libraries in the Cocos2d v1 templates
+link_cocos2d_templates_v1() {
+	print_banner "Linking Cocos3D demo apps to installed Cocos2D v1 libraries in '$CC2_DIST_DIR'."
+
+	# Remove current links and re-create new link directory
+	clear_cocos2d_links
+
+	# Primary Cocos2D codebase and license
+	SRC_DIR="$CC2_DIST_DIR/lib_cocos2d.xctemplate/libs"
+	link_dir "$SRC_DIR/cocos2d" "$CC2_DIR" "cocos2d"
+	copy_file "LICENSE_cocos2d.txt" "$SRC_DIR" "$CC2_DIR"
+
+	# CocosDenshion
+	SRC_DIR="$CC2_DIST_DIR/lib_cocosdenshion.xctemplate/libs"
+	link_dir "$SRC_DIR/CocosDenshion" "$CC2_DIR" "CocosDenshion"
+	copy_file "LICENSE_CocosDenshion.txt" "$SRC_DIR" "$CC2_DIR"
+
+	# CocosDenshion Extras
+	SRC_DIR="$CC2_DIST_DIR/lib_cocosdenshionextras.xctemplate/libs"
+	link_dir "$SRC_DIR/CocosDenshionExtras" "$CC2_DIR" "CocosDenshion Extras"
+
+	# Chipmunk library
+	SRC_DIR="$CC2_DIST_DIR/lib_chipmunk.xctemplate/libs"
+	link_dir "$SRC_DIR/Chipmunk/include" "$CC2_CHPMK_DIR/chipmunk" "Chipmunk includes"
+	link_dir "$SRC_DIR/Chipmunk/src" "$CC2_CHPMK_DIR/chipmunk" "Chipmunk source"
+	copy_file "LICENSE_Chipmunk.txt" "$SRC_DIR" "$CC2_CHPMK_DIR"
+
+}
+
+# Links to the Cocos2D libraries in the Cocos2d v2 templates
+link_cocos2d_templates_v2() {
+	print_banner "Linking Cocos3D demo apps to installed Cocos2D v2 libraries in '$CC2_DIST_DIR'."
+
+	# Remove current links and re-create new link directory
+	clear_cocos2d_links
+
+	# Primary Cocos2D codebase and license
+	SRC_DIR="$CC2_DIST_DIR/lib_cocos2d.xctemplate/libs"
+	link_dir "$SRC_DIR/cocos2d" "$CC2_DIR" "cocos2d"
+	copy_file "LICENSE_cocos2d.txt" "$SRC_DIR" "$CC2_DIR"
+
+	# Kazmath library
+	SRC_DIR="$CC2_DIST_DIR/lib_kazmath.xctemplate/libs"
+	link_dir "$SRC_DIR/kazmath" "$CC2_DIR" "kazmath"
+	copy_file "LICENSE_Kazmath.txt" "$SRC_DIR" "$CC2_DIR"
+
+	# CocosDenshion
+	SRC_DIR="$CC2_DIST_DIR/lib_cocosdenshion.xctemplate/libs"
+	link_dir "$SRC_DIR/CocosDenshion" "$CC2_DIR" "CocosDenshion"
+	copy_file "LICENSE_CocosDenshion.txt" "$SRC_DIR" "$CC2_DIR"
+
+	# Chipmunk library
+	SRC_DIR="$CC2_DIST_DIR/lib_chipmunk.xctemplate/libs"
+	link_dir "$SRC_DIR/Chipmunk/include" "$CC2_CHPMK_DIR/chipmunk" "Chipmunk includes"
+	link_dir "$SRC_DIR/Chipmunk/src" "$CC2_CHPMK_DIR/chipmunk" "Chipmunk source"
+	copy_file "LICENSE_Chipmunk.txt" "$SRC_DIR" "$CC2_CHPMK_DIR"
+
+}
+
+# Links to the Cocos2D libraries in the Cocos2d v3 templates
+link_cocos2d_templates_v3() {
+	print_banner "Linking Cocos3D demo apps to installed Cocos2D v3 libraries in '$CC2_DIST_DIR'."
+
+	# Remove current links and re-create new link directory
+	clear_cocos2d_links
+
+	# Primary Cocos2D codebase and license
+	SRC_DIR="$CC2_DIST_DIR/Support/Libraries/lib_cocos2d.xctemplate/Libraries"
+	link_dir "$SRC_DIR/cocos2d" "$CC2_DIR" "cocos2d"
+	copy_file "LICENSE_cocos2d.txt" "$SRC_DIR" "$CC2_DIR"
+
+	# Cocos2D UI code
+	SRC_DIR="$CC2_DIST_DIR/Support/Libraries/lib_cocos2d-ui.xctemplate/Libraries"
+	link_dir "$SRC_DIR/cocos2d-ui" "$CC2_DIR" "cocos2d-ui"
+
+	# Kazmath library
+	SRC_DIR="$CC2_DIST_DIR/Support/Libraries/lib_kazmath.xctemplate/Libraries"
+	link_dir "$SRC_DIR/kazmath" "$CC2_DIR" "kazmath"
+	copy_file "LICENSE_Kazmath.txt" "$SRC_DIR" "$CC2_DIR"
+
+	# ObjectAL
+	SRC_DIR="$CC2_DIST_DIR/Support/Libraries/lib_objectal.xctemplate/Libraries"
+	link_dir "$SRC_DIR/ObjectAL" "$CC2_DIR" "CocosDenshion"
+
+	# Chipmunk library
+	SRC_DIR="$CC2_DIST_DIR/Support/Libraries/lib_chipmunk.xctemplate/Libraries"
+	link_dir "$SRC_DIR/Chipmunk/chipmunk/include" "$CC2_CHPMK_DIR/chipmunk" "Chipmunk includes"
+	link_dir "$SRC_DIR/Chipmunk/chipmunk/src" "$CC2_CHPMK_DIR/chipmunk" "Chipmunk source"
+	link_dir "$SRC_DIR/Chipmunk/objectivec" "$CC2_CHPMK_DIR" "Objective Chipmunk"
+	copy_file "LICENSE_Chipmunk.txt" "$SRC_DIR" "$CC2_CHPMK_DIR"
+
+}
+
+# Links to the Cocos2D libraries in a specific Cocos2D distribution directory
+link_cocos2d_distribution() {
+
+	print_banner "Linking Cocos3D demo apps to Cocos2D distribution libraries in '$CC2_DIST_DIR'."
+
+	# Remove current links and re-create new link directory
+	clear_cocos2d_links
 
 	# Primary Cocos2D codebase
 	link_dir "$CC2_DIST_DIR/cocos2d" "$CC2_DIR" "cocos2d"
@@ -208,17 +400,11 @@ link_cocos2d_libs(){
 	copy_file "LICENSE_Kazmath.txt" "$CC2_DIST_DIR" "$CC2_DIR"
 
 	# Chipmunk library
-	CHPMK_DIR=cocos2d-chipmunk
-	rm -rf   "$CHPMK_DIR"
 	CHIPMUNK_DIST_DIR="$CC2_DIST_DIR/external/Chipmunk"
-	if [[ -d "$CHIPMUNK_DIST_DIR" ]]; then
-		mkdir -p "$CHPMK_DIR"
-		mkdir -p "$CHPMK_DIR/chipmunk"
-		link_dir "$CHIPMUNK_DIST_DIR/include" "$CHPMK_DIR/chipmunk" "Chipmunk includes"
-		link_dir "$CHIPMUNK_DIST_DIR/src" "$CHPMK_DIR/chipmunk" "Chipmunk source"
-		link_dir "$CHIPMUNK_DIST_DIR/objectivec" "$CHPMK_DIR" "Objective Chipmunk"
-	fi
-	copy_file "LICENSE_Chipmunk.txt" "$CC2_DIST_DIR" "$CHPMK_DIR"
+	link_dir "$CHIPMUNK_DIST_DIR/include" "$CC2_CHPMK_DIR/chipmunk" "Chipmunk includes"
+	link_dir "$CHIPMUNK_DIST_DIR/src" "$CC2_CHPMK_DIR/chipmunk" "Chipmunk source"
+	link_dir "$CHIPMUNK_DIST_DIR/objectivec" "$CC2_CHPMK_DIR" "Objective Chipmunk"
+	copy_file "LICENSE_Chipmunk.txt" "$CC2_DIST_DIR" "$CC2_CHPMK_DIR"
 
 	# ObjectAL  (Cocos2D v3 only)
 	link_dir "$CC2_DIST_DIR/external/ObjectAL" "$CC2_DIR" "ObjectAL"
@@ -233,15 +419,55 @@ link_cocos2d_libs(){
 		link_dir "$CDEN_DIST_DIR" "$CC2_DIR" "CocosDenshion"
 	fi
 	copy_file "LICENSE_CocosDenshion.txt" "$CC2_DIST_DIR" "$CC2_DIR"
+}
+
+# Links to the Cocos2D libraries
+link_cocos2d_libs() {
+
+	if [[ $CC2_SRC == "v1" ]]; then
+		link_cocos2d_templates_v1
+	elif [[ $CC2_SRC == "v2" ]]; then
+		link_cocos2d_templates_v2
+	elif [[ $CC2_SRC == "v3" ]]; then
+		link_cocos2d_templates_v3
+	else
+		link_cocos2d_distribution
+	fi
 
 	echo Finished linking Cocos2D.
 }
 
-link_cocos2d_libs
 
-copy_xc_project_templates
+
+# ----------------------------MAIN ENTRY POINT ----------------------------------
+
+# Retrieve the command arguments
+while getopts "h2:" OPTION; do
+	case "$OPTION" in
+		h)
+			echo
+			echo ${BOLD}Installs Cocos3D Xcode templates and links to the Cocos2D libraries.${COLOREND}
+			echo
+			usage
+			exit 0
+		;;
+
+		2)
+			CC2_SRC=$OPTARG
+		;;
+	esac
+done
 
 echo
-echo Done!
+echo "${BOLD}Installing Cocos3D...${COLOREND}"
+
+get_cc2_location
+
+copy_project_templates
+
+link_cocos2d_libs
+
+echo
+printf "${GREEN}✔${COLOREND} ${BOLD}Done!${COLOREND}\n"
 echo
 

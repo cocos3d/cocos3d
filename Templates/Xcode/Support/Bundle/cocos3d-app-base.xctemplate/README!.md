@@ -3,10 +3,7 @@ README!
 
 Cocos3D 2.0.0
 
-Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
-http://www.brenwill.com
-
-+++++++++++++++++++++++++++++++++++
+Copyright (c) 2010-2014 [The Brenwill Workshop Ltd.](http://www.brenwill.com) All rights reserved.
 
 
 Getting Started
@@ -39,11 +36,11 @@ When adapting this template project for your own application, don't forget to re
 Cocos2D & OpenGL ES Version Compatibility
 -----------------------------------------
 
-Cocos3D under iOS and Android is compatible with `Cocos2D` `3.x` and `Cocos2D` `2.1`, for 
+Cocos3D under iOS and Android is compatible with `Cocos2D` `3.0` and `Cocos2D` `2.1`, for 
 using programmable-pipeline OpenGL ES 2.0, and is compatible with `Cocos2D` `1.1`, for using
 fixed-pipeline OpenGL ES 1.1.
 
-Cocos3D under OSX is compatible with `Cocos2D` `3.x` and `Cocos2D` `2.1`, for using 
+Cocos3D under OSX is compatible with `Cocos2D` `3.0` and `Cocos2D` `2.1`, for using 
 programmable-pipeline OpenGL (OSX). Cocos3D is not compatible with `Cocos2D` `1.1` under OSX.
 
 Choosing the appropriate Cocos3D template will automatically link to the corresponding version
@@ -65,7 +62,7 @@ the standalone PVRGeoPOD app to convert the COLLADA file to the POD format.
 Both the standalone and plugin versions of PVRGeoPOD are available free of charge from
 Imagination Technologies, the supplier of the GPU's used in iOS devices.
 
-Read the full instructions at http://brenwill.com/2011/cocos3d-importing-converting-collada-to-pod/
+Read the [full instructions](http://brenwill.com/2011/cocos3d-importing-converting-collada-to-pod/)
 for more info on where to get the PVRGeoPOD converter, and how to use it to generate POD files.
 
 If you are using Blender as your 3D editor, and have many .blend files to export to POD format,

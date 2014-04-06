@@ -1,6 +1,6 @@
 <img src="http://www.brenwill.com/docs/cocos3d/Logos/cocos3d-Banner-150h.png">
 
-Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
+Copyright (c) 2010-2014 [The Brenwill Workshop Ltd.](http://www.brenwill.com) All rights reserved.
 
 Cocos3D
 =======
@@ -10,15 +10,16 @@ Table of Contents
 
 - About Cocos3D
 - Installation
-- Cocos2D & OpenGL Version Compatibility
 - Creating Your First Cocos3D Project
-- Cocos3D and Cocos2D Static Libraries
-- Compiling for Android
-- Documentation
 - Demo Applications
     - CC3DemoMashUp - demos all important Cocos3D features
     - CC3Demo3DTiles - demos adding running many concurrent layers and scenes
     - CC3Performance - demos performance capabilities and testing
+    - CC3DemoMultiScene - demos using Cocos3D with Xcode Storyboards
+- Cocos3D and Cocos2D Static Libraries
+- Cocos2D Version Compatibility
+- Compiling for Android
+- Documentation
 - Creating POD 3D Model Files
 - Demo Models
 
@@ -102,33 +103,49 @@ Installation
 ------------
 
 1. The Cocos3D framework works with [Cocos2D](http://www.cocos2d-iphone.org). Before installing
-Cocos3D, you must [download](http://www.cocos2d-iphone.org/download) and install Cocos2D.<br/><br/>
+   Cocos3D, you must [download](http://www.cocos2d-iphone.org/download) and install Cocos2D.<br/><br/>
 
-	The same Cocos3D distribution can be used with either `Cocos2D 2.1` or `Cocos2D 1.1`.
-	Link to `Cocos2D 2.1` to make use of the more advanced shader-based programmable-pipeline
-	available with OpenGL ES 2.0 (iOS) or OpenGL (OSX). Or link to `Cocos2D 1.1` to use the simpler
-	configurable fixed-pipeline of OpenGL ES 1.1 (iOS), and avoid the need to write GLSL shaders.
+	The same Cocos3D distribution can be used with `Cocos2D 3.0`, `Cocos2D 2.1` or `Cocos2D 1.1`.
+	Link to `Cocos2D 3.0` or `Cocos2D 2.1` to make use of the more advanced shader-based 
+	programmable-pipeline available with OpenGL ES 2.0 (iOS) or OpenGL (OSX). Or link to 
+	`Cocos2D 1.1` to use the simpler configurable fixed-pipeline of OpenGL ES 1.1 (iOS), 
+	and avoid the need to write GLSL shaders.
 
 2. Download the latest [stable Cocos3D release](http://cocos3d.org), or clone the
    [Cocos3D GitHub repository](http://github.com/cocos3d/cocos3d).
 
 3. Unzip the Cocos3D distribution file.
 
-4. Open a Terminal session, navigate to the unzipped Cocos3D distribution
-   directory and run the install-cocos3d script as follows:
+4. Open a Terminal session, navigate to the unzipped Cocos3D distribution directory, and run 
+   the `install-cocos3d` script using one of the following formats:
 
-		./install-cocos3d.sh -f -2 "path-to-cocos2d"
+		./install-cocos3d.sh
+		./install-cocos3d.sh -2 cocos2d-version
 
-	For example:
-
-		./install-cocos3d.sh -f -2 "../cocos2d-iphone"
-
-	The Cocos2D distribution must be available and identified using the -2 switch so the
-	installer can link the Cocos2D libraries to the Cocos3D templates and demo projects.<br/><br/>
+	A Cocos2D distribution must be installed. In the first format, the Cocos3D demo apps 
+	will be linked to the latest major version of Cocos2D that is installed.</br></br>
 	
-	You may use either a relative path (as above), or an absolute path. If for some reason
-	the relative path cannot be correctly resolved on your system, or the resulting links 
-	to the Cocos2D library are not accurate, try again using the full absolute path.
+	By using the -2 option, you can specify the version of Cocos2D to which the Cocos3D demo
+	apps should be linked. The ***cocos2d-verison*** argument can be either an installed 
+	Cocos2D version number (`v3`, `v2`, or `v1`), or a path to a specific Cocos2D distribution 
+	retrieved from GitHub.
+
+	An example of each format is as follows:
+
+		./install-cocos3d.sh -2 v3
+		./install-cocos3d.sh -2 "../cocos2d-iphone-release-3.0-RC4"
+
+	The first format will link the Cocos3D demo apps to the `Cocos2D 3.0` template libraries 
+	that you have most recently installed. When using this format, you must have previously 
+	installed the corresponding version of Cocos2D. This installation format is suitable for 
+	most Cocos3D development activities.</br></br>
+
+	The second format will link the Cocos3D demo apps to the specific Cocos2D distribution 
+	that was downloaded into the specified directory. This format can be useful when testing 
+	against specific Cocos2D versions downloaded from GitHub. You may use either a relative 
+	path (as above), or an absolute path. If for some reason the relative path cannot be 
+	correctly resolved on your system, or the resulting links to the Cocos2D library are 
+	not accurate, try again using the full absolute path.
 
 	If you encounter errors during installation, it's typically because you are trying
 	to run the installer without first navigating to the Cocos3D distribution directory.
@@ -137,93 +154,7 @@ Cocos3D, you must [download](http://www.cocos2d-iphone.org/download) and install
 5. That's it!
 
 Keep in mind that Cocos3D does not "patch" your Cocos2D installation. Instead, you install
-Cocos3D alongside Cocos2D, and link to it using the installation script. As a concrete 
-example, let's say you have a development directory named `MyCocosDev`, into which you 
-download and unzip both Cocos2D and Cocos3D. You'll end up with a directory structure like:
-
-	MyCocosDev
-		cocos2d-iphone
-		cocos3d-2.0.0
-
-First, in a Terminal session, install Cocos2D by navigating to the `cocos2d-iphone` directory
-and running:
-
-	./install-templates.sh -f -u
-
-Then, navigate to the `cocos3d-2.0.0` directory and install Cocos3D by running:
-
-	./install-cocos3d.sh -f -2 "../cocos2d-iphone"
-
-
-Cocos2D & OpenGL Version Compatibility
------------------------------------------
-
-Cocos3D under iOS and Android is compatible with `Cocos2D` `3.x` and `Cocos2D` `2.1`, for 
-using programmable-pipeline OpenGL ES 2.0, and is compatible with `Cocos2D` `1.1`, for 
-using fixed-pipeline OpenGL ES 1.1.
-
-Cocos3D under OSX is compatible with `Cocos2D` `3.x` and `Cocos2D` `2.1`, for using 
-programmable-pipeline OpenGL (OSX). Cocos3D is not compatible with `Cocos2D` `1.1` under OSX.
-
-When linking to a Cocos2D library version, keep in mind that if you want to use shaders and a
-programmable pipeline using OpenGL ES 2.0 (iOS & Android) or OpenGL (OSX), you must use the
-`Cocos2D` `3.x` or `Cocos2D 2.1` version, and if you want to use a fixed pipeline using
-OpenGL ES 1.1 (iOS & Android), you must use the `Cocos2D 1.1` version.
-
-Because of this, you cannot mix the use of fixed and programmable pipelines within a single app.
-However, you can easily change whether an app uses a programmable or fixed rendering pipeline by
-changing the version of `Cocos2D` that is linked, by following these steps within any Xcode project
-(including the included `cocos2d-library-iOS` and `cocos2d-library-OSX` static library projects):
-
-1. Delete the reference to the *cocos2d* and *cocos2d-chipmunk* groups in the Xcode Project 
-   Navigator panel. If you are using the Cocos2D static library, you will find these groups 
-   in the `cocos2d-library-iOS` or `cocos2d-library-OSX` project.
-2. Run the `install-cocos3d.sh` script again and identify the new version of `Cocos2D` to be linked.
-   Keep in mind that you must link `Cocos2D` `3.x` or `Cocos2D 2.1` if you want to use 
-   OpenGL ES 2.0 (iOS) or OpenGL (OSX) with a programmable rendering pipeline, and you must link
-   `Cocos2D 1.1` if you want to use OpenGL ES 1.1 (iOS & Android) with a fixed rendering pipeline.
-3. Add the newly linked Cocos2D files to the project by dragging the `cocos2d` folder from the 
-   Cocos3D distribution folder to the Xcode Project Navigator panel. If you are using the Cocos2D
-   static library, you will drag the folder into the `cocos2d-library-iOS` or `cocos2d-library-OSX` 
-   project. When prompted for the target to add the source code to, select the `cocos2d` target.
-4. Add the newly linked Cocos2D Chipmunk files to the project by dragging the `cocos2d-chipmunk`
-   folder from the Cocos3D distribution folder to the Xcode Project Navigator panel. If you are
-   using the Cocos2D static library, you will drag the folder into the `cocos2d-library-iOS` or
-   `cocos2d-library-OSX` project. When prompted for the target to add the source code to, select
-   the `cocos2d-chipmunk` target.
-6. `Cocos2D` `3.x` uses ARC. `Cocos2D` `2.1` and `Cocos2D` `1.1` do not. You must set the
-   approprite compiler build setting to ensure the compiler will use the correct technique.
-	1. Select the `cocos2d` target in your project settings. If you are using the Cocos2D
-	   static library, you will find the `cocos2d` target in the `cocos2d-library-iOS` or
-	   `cocos2d-library-OSX` project. 
-	2. Select the `Build Settings` tab.
-	3. Locate the **Objective-C Automatic Reference Counting** (aka `CLANG_ENABLE_OBJC_ARC`)
-	   setting for the `cocos2d` target. If you are now linking to `Cocos2D` `3.x`, set this
-	   property to `YES`. If you are now linking to `Cocos2D` `2.1` or `Cocos2D` `1.1`, set 
-	   this property to NO. Make sure you change only the setting for the `cocos2d` target 
-	   within your project. Do not change the setting for the Xcode project itself.
-	4. The `cocos2d-chipmunk` part of the `Cocos2D` `3.x` library does NOT use ARC. Ensure
-	   the **Objective-C Automatic Reference Counting** (aka `CLANG_ENABLE_OBJC_ARC`) setting
-	   of the `cocos2d-chipmunk` target is always set to NO.
-7. `Cocos2D` `3.x` supports compiling to the ARM64 architecture. `Cocos2D` `2.1` and
-   `Cocos2D` `1.1` do NOT support compiling to the ARM64 architecture. Because of this, 
-   by default, the **Valid Architectures** (aka `VALID_ARCHS`) build setting for all demo 
-   Xcode Projects in the Cocos3D distribution is set to `$(ARCHS_STANDARD_32_BIT)` (which 
-   resolves to **armv7 armv7s**), so that the demo projects will compile with all versions
-   of `Cocos2D`. If you are now linking to `Cocos2D` `3.x`, you can set this property to
-   `$(ARCHS_STANDARD)` (or simply remove this setting from the Project), in all demo Projects,
-   to allow compilation to include the ARM64 architecture.
-8. As a development optimization, if you are now linking to `Cocos2D` `3.x`, you can set the 
-   value of the **Build Active Architecture Only** (aka `ONLY_ACTIVE_ARCH`) build setting in 
-   the *Debug* configuration in all demo Projects to `YES`. You should not do this if you are 
-   linking to `Cocos2D` `2.1` or `Cocos2D` `1.1`, as this will prohibit you from building
-   the demo apps on devices that use the ARM64 processor.
-9. If you have already built the app using the old version of `Cocos2D`, delete the contents
-   of your `~/Library/Developer/Xcode/DerivedData` folder, and restart Xcode.
-
-At the time of this release, the current stable version of Cocos2D is `2.1`, and by default,
-the demo apps within the Cocos3D distribution are pre-configured to use that version. To build
-and run the demo apps with a different version of Cocos2D, follow the steps described above.
+Cocos3D alongside Cocos2D, and link to it using the installation script.
 
 
 Creating Your First Cocos3D Project
@@ -231,88 +162,22 @@ Creating Your First Cocos3D Project
 
 The `install-cocos3d.sh` script also installs several convenient Xcode project templates.
 
-To get started with your first Cocos3D iOS project, open Xcode, click on the File->New->NewProject...
-menu selection, and select either the *Cocos3D OpenGL ES 2.0 Application* or the *Cocos3D OpenGL ES 1.1 Application*
-project template from the Cocos3D template group in the iOS section, depending on whether you want to
-use OpenGL ES 2.0, or OpenGL ES 1.1, respectively.
+To get started with your first Cocos3D project, open Xcode, click on the File->New->NewProject...
+menu selection, and select one of the templates in the `Cocos3D` group under either the
+`iOS` or `OS X` sections.
 
-If you want to use the *Cocos3D OpenGL ES 2.0 Application* template and OpenGL ES 2.0, your 
-Cocos3D installation must be linked to the `Cocos2D` `2.1` version, as described above. 
-If you want to use the *Cocos3D OpenGL ES 1.1 Application* template and OpenGL ES 1.1, your
-Cocos3D installation must be linked to the `Cocos2D` `1.1` version, as described above.
-
-To get started with your first Cocos3D Mac OSX project, open Xcode, click on the File->New->NewProject...
-menu selection, and select the *Cocos3D OpenGL Application* project template from the Cocos3D template group
-in the OS X section. The *Cocos3D OpenGL Application* template uses the OpenGL programmable pipeline and
-your Cocos3D installation must be linked to the `Cocos2D` `2.1` version, as described above.
+The same Cocos3D distribution can be used with `Cocos2D 3.0`, `Cocos2D 2.1` or `Cocos2D 1.1`.
+Choose the Cocos3D template that corresponds to the version of Cocos2D that you want to
+work with, and which you previously downloaded and installed.
 
 The template project starts with a working 3D variation on the familiar *hello, world*
-application, and you can use it as a starting point for your own application.
+application, which you can use as a starting point for your own application.
 
-
-Cocos3D and Cocos2D Static Libraries
-------------------------------------
-
-The Cocos3D distribution includes Xcode projects to build static libraries for Cocos3D and Cocos2D.
-These are available in the `cocos3d-iOS.xcworkspace` and `cocos3d-OSX.xcworkspace` Xcode workspaces,
-and the Xcode projects are also individually available in the `cocos3d-library` and `cocos2d-library`
-folders under the `Projects` folder in the Cocos3D distribution.
-
-You can add these static library projects as sub-projects of your Xcode app project. Instructions
-for adding a static library to your app project are available through Apple's documentation, or
-can be found by searching the web. You can also reference how these static libraries have been
-added to the demo apps, also available in the `Projects` folder in the Cocos3D distribution.
-
-When adding Cocos3D files to your project, either as a static library, or as individual files, be 
-aware that, to ensure the highest performance, the Cocos3D libraries do not use Automatic Reference
-Counting (ARC). However, you can seamlessly use the Cocos3D library within an ARC-enabled application.
-The Cocos3D static library project provided with the Cocos3D distribution is already configured to 
-bypass ARC, and you can simply include this static library project as subproject to your application
-project, regardless of whether your application uses ARC or Manual Reference Counting (MRC).
-
-Like any static library, the compiled Cocos3D static library includes only executable code, and does
-not include the standard Cocos3D GLSL shader files. If you use the Cocos3D static library in your
-application project, and want to use the standard Cocos3D GLSL shader files, you should also drag
-the `cocos3d-GLSL` folder in the Cocos3D distribution to the Xcode Project Navigator panel of your
-application project. One further step is required because, by default, Xcode treats these GLSL files
-as source code files, rather than resource files. After dragging the GLSL files to your application
-project in Xcode, select your project in the Xcode Project Navigator, select the Build Phases tab, 
-and move all of the .vsh and .fsh files from the Compile Sources list to the Copy Bundle Resources list.
-
-Finally, the Cocos3D and Cocos2D static libraries require linking to certain other support libraries.
-To direct Xcode to link with these support libraries, in your application project build settings,
-make sure the **Other Linker Flags** (aka `OTHER_LDFLAGS`) entry includes the following entries:
-	-ObjC -lz -lstdc++
-
-
-Compiling for Android
----------------------
-
-Cocos3D (along with Cocos2D) is written in Objective-C. Cocos3D has partnered with 
-[Apportable] ( http://www.apportable.com) to bring your 3D apps and games to the Android
-platform. The Apportable SDK is a free SDK for porting Objective-C applications to Android.
-
-To build and install your app or game project for the Android platform:
-
-1. Download and install the Apportable SDK.
-2. Open a Terminal window and navigate to the Xcode project folder of your Cocos3D app.
-3. Run the command: `apportable install` to build and install your Cocos3D app on an
-   Android device connected to your computer.
-	
-Please refer to the Apportable SDK documentation for more information about building and
-installing your app on Android. If you are building an OpenGL ES 1.1 app, you will need
-to modify the `configuration.json` file in your Xcode project, as indicated in that file.
-
-
-Documentation
--------------
-
-To learn more about Cocos3D, please refer to the [Cocos3D Programming Guide](http://brenwill.com/2011/cocos3d-programming-guide/)
-and the latest [API documentation] (http://brenwill.com/docs/cocos3d/2.0.0/api/).
-
-You can create a local copy of the API documentation using Doxygen to extract the documentation
-from the source files. There is a Doxygen configuration file to output the API documents in the
-same format as appears online in the folder Docs/API within the Cocos3D distribution.
+When you ran the `install-cocos3d` script (see the Installation section above), it checked
+which versions of Cocos2D you have installed, and only installs those Cocos3D templates that 
+work with the major Cocos2D versions that you have installed. If you install a different major
+version of Cocos2D (3.0, 2.1 or 1.1), you can run the `install-cocos3d` script again to 
+automatically add the Cocos3D templates that are designed for that major version of Cocos2D.
 
 
 Demo Applications
@@ -327,16 +192,15 @@ For convenience, to access all of the demos together, open either the `cocos3d-i
 or `cocos3d-OSX.xcworkspace` Xcode workspace. You can also open each demo project individually
 in the Projects folder.
 
-At the time of this release, the current stable version of Cocos2D is `2.1`, and by default,
-the demo apps within the Cocos3D distribution are pre-configured to use that version. To build
-and run the demo apps with a different version of Cocos2D, follow the steps described above in
-the section about Cocos2D version compatibility.
+At the time of this release, the current version of Cocos2D is `3.0`, and by default, the demo
+apps within the Cocos3D distribution are pre-configured to use that version. To build and run
+the demo apps with a different version of Cocos2D, follow the steps described below in the 
+section titled *Cocos2D Version Compatibility*.
 
 The following demo apps are included in the Cocos3D distribution:
 
 
-CC3DemoMashUp
--------------
+###CC3DemoMashUp
 
 Please read the class notes of the `CC3DemoMashUpScene` class for a full description of how to
 run and interact with this demo, and what features it covers.
@@ -445,8 +309,7 @@ including experimenting with:
 - Cocos2D CCSprite displaying the television screen rendered texture
 
 
-CC3Demo3DTiles
---------------
+###CC3Demo3DTiles
 
 A simple demo that lays out multiple small Cocos3D scenes as layers in a larger controllable
 Cocos2D layer. The effect is a grid of tiles, with each tile displaying a separate 3D scene,
@@ -458,8 +321,7 @@ techniques for optimizing under those conditions. It also demonstrates touch con
 many 3D scene are visible concurrently.
 
 
-CC3Performance
---------------
+###CC3Performance
 
 This is a simple demo of the performance characteristics of Cocos3D. It demonstrates how to
 collect detailed statistics about your application's performance. In doing so, it presents
@@ -468,16 +330,147 @@ loaded, and how many copies to render.
 
 You can dynamically experiment with how different model types, sizes and quantities affect
 the performance of Cocos3D. You can also use this performance demo app to compare performance
-across different device types.
+across different devices.
 
 
-CC3DemoMultiScene
------------------
+###CC3DemoMultiScene
 
-This demo app is actually a sophisticated combination of the three demo apps listed above, 
-overlaid onto a typical iOS UIKit application. Using standard UIKit controls, you can load 
-any of the Cocos3D demos listed above. Using the same UIKit controls, you can shut down
-the running demo, and load a different Cocos3D demo.
+This demo app is a sophisticated combination of the three demo apps listed above. It 
+demonstrates how to include Cocos3D in a UIView using Xcode Storyboards. Using standard
+UIKit controls, you can load any of the Cocos3D demos listed above, then shut down the 
+running demo, and load a different Cocos3D demo.
+
+
+Cocos3D and Cocos2D Static Libraries
+------------------------------------
+
+The Cocos3D distribution includes `Xcode` projects to build static libraries for Cocos3D and Cocos2D.
+These are available in the `cocos3d-iOS.xcworkspace` and `cocos3d-OSX.xcworkspace` Xcode workspaces,
+and the Xcode projects are also individually available in the `cocos3d-library` and `cocos2d-library`
+folders under the `Projects` folder in the Cocos3D distribution.
+
+You can add these static library projects as sub-projects of your `Xcode` app project. Instructions
+for adding a static library to your app project are available through Apple's documentation, or
+can be found by searching the web. You can also reference how these static libraries have been
+added to the demo apps, also available in the `Projects` folder in the Cocos3D distribution.
+
+When adding Cocos3D files to your project, either as a static library, or as individual files, be 
+aware that, to ensure the highest performance, the Cocos3D libraries do not use Automatic Reference
+Counting (ARC). However, you can seamlessly use the Cocos3D library within an ARC-enabled application.
+The Cocos3D static library project provided with the Cocos3D distribution is already configured to 
+bypass ARC, and you can simply include this static library project as subproject to your application
+project, regardless of whether your application uses ARC or Manual Reference Counting (MRC).
+
+Like any static library, the compiled Cocos3D static library includes only executable code, and does
+not include the standard Cocos3D GLSL shader files. If you use the Cocos3D static library in your
+application project, and want to use the standard Cocos3D GLSL shader files, you should also drag
+the `cocos3d-GLSL` folder in the Cocos3D distribution to the `Xcode` *Project Navigator* panel of your
+application project. One further step is required because, by default, `Xcode` treats these GLSL files
+as source code files, rather than resource files. After dragging the GLSL files to your application
+project in Xcode, select your project in the `Xcode` *Project Navigator*, select the *Build Phases* tab,
+and move all of the `.vsh` and `.fsh` files from the *Compile Sources* list to the *Copy Bundle Resources* list.
+
+Finally, the Cocos3D and Cocos2D static libraries require linking to certain other support libraries.
+To direct `Xcode` to link with these support libraries, in your application target build settings,
+make sure the **Other Linker Flags** (aka `OTHER_LDFLAGS`) entry includes the following entries:
+	-ObjC -lz -lstdc++
+
+At the time of this release, the current version of Cocos2D is `3.0`, and by default, the 
+static library projects within the Cocos3D distribution are pre-configured to use that version.
+To build and run the static libraries with a different version of Cocos2D, follow the steps
+described below in the section titled *Cocos2D Version Compatibility*.
+
+
+Cocos2D Version Compatibility
+-----------------------------
+
+Cocos3D under iOS and Android is compatible with `Cocos2D` `3.0` and `Cocos2D` `2.1`, for 
+using programmable-pipeline OpenGL ES 2.0, and is compatible with `Cocos2D` `1.1`, for 
+using fixed-pipeline OpenGL ES 1.1.
+
+Cocos3D under OSX is compatible with `Cocos2D` `3.0` and `Cocos2D` `2.1`, for using
+programmable-pipeline OpenGL. Cocos3D is not compatible with `Cocos2D` `1.1` under OSX.
+
+At the time of this release, the current version of Cocos2D is `3.0`, and by default, the 
+demo apps and static libraries within the Cocos3D distribution are pre-configured to use 
+that version. To build and run the demo apps or static libraries with a different version 
+of Cocos2D, follow the steps described here:
+
+1. Delete the reference to the *cocos2d* and *cocos2d-chipmunk* groups in the `Xcode` *Project Navigator*
+   panel. These groups can be found in the `cocos2d-library-iOS` or `cocos2d-library-OSX` project.
+2. Run the `install-cocos3d.sh` script again and identify the new version of `Cocos2D` to be linked.
+   Keep in mind that you must link `Cocos2D` `3.0` or `Cocos2D 2.1` if you want to use 
+   OpenGL ES 2.0 (iOS) or OpenGL (OSX) with a programmable rendering pipeline, and you must link
+   `Cocos2D 1.1` if you want to use OpenGL ES 1.1 (iOS & Android) with a fixed rendering pipeline.
+3. Add the newly linked Cocos2D files to the project by dragging the `cocos2d` folder from the 
+   Cocos3D distribution folder into the `cocos2d-library-iOS` or `cocos2d-library-OSX` 
+   project in the `Xcode` *Project Navigator* panel. When prompted for the target to add the source
+   code to, select the `cocos2d` target.
+4. Add the newly linked Cocos2D Chipmunk files to the project by dragging the `cocos2d-chipmunk`
+   folder from the Cocos3D distribution folder into the `cocos2d-library-iOS` or `cocos2d-library-OSX` 
+   project in the `Xcode` *Project Navigator* panel. When prompted for the target to add the source
+   code to, select the `cocos2d-chipmunk` target.
+6. `Cocos2D` `3.0` uses Automatic Reference Counting (ARC). `Cocos2D` `2.1` and `Cocos2D` `1.1`
+   do not. You must set the appropriate compiler build setting to ensure the compiler will use
+   the correct technique.
+	1. In the `cocos2d-library-iOS` or `cocos2d-library-OSX` project, select the `cocos2d` 
+	   target in your project settings.
+	2. Select the *Build Settings* tab.
+	3. Locate the **Objective-C Automatic Reference Counting** (aka `CLANG_ENABLE_OBJC_ARC`)
+	   setting for the `cocos2d` target. If you are now linking to `Cocos2D` `3.0`, set this
+	   property to `YES`. If you are now linking to `Cocos2D` `2.1` or `Cocos2D` `1.1`, set 
+	   this property to NO. Make sure you change only the setting for the `cocos2d` target 
+	   within your project. Do not change the setting for the `cocos2d-library-iOS` or 
+	   `cocos2d-library-OSX` project itself.
+	4. The `cocos2d-chipmunk` part of the `Cocos2D` `3.0` library does *not* use ARC. Ensure
+	   the **Objective-C Automatic Reference Counting** (aka `CLANG_ENABLE_OBJC_ARC`) setting
+	   of the `cocos2d-chipmunk` target is always set to NO.
+7. `Cocos2D` `3.0` supports compiling to the ARM64 architecture. `Cocos2D` `2.1` and
+   `Cocos2D` `1.1` do *not* support compiling to the ARM64 architecture. Because of this,
+   by default, the **Valid Architectures** (aka `VALID_ARCHS`) build setting for all demo 
+   Xcode Projects in the Cocos3D distribution is set to `$(ARCHS_STANDARD_32_BIT)` (which 
+   resolves to **armv7 armv7s**), so that the demo projects will compile with all versions
+   of `Cocos2D`. If you are now linking to `Cocos2D` `3.0`, you can set this property to
+   `$(ARCHS_STANDARD)` (or simply remove this setting from the Project), in all demo Projects,
+   to allow compilation to include the ARM64 architecture.
+8. As a development optimization, if you are now linking to `Cocos2D` `3.0`, you can set the 
+   value of the **Build Active Architecture Only** (aka `ONLY_ACTIVE_ARCH`) build setting in 
+   the *Debug* configuration in all demo projects to `YES`. You should not do this if you are
+   linking to `Cocos2D` `2.1` or `Cocos2D` `1.1`, as this will prohibit you from building
+   the demo apps on devices that use the ARM64 processor.
+9. If you have already built the demo app using the old version of `Cocos2D`, delete the 
+   contents of your `~/Library/Developer/Xcode/DerivedData` folder, and restart Xcode.
+
+
+Compiling for Android
+---------------------
+
+Cocos3D (along with Cocos2D) is written in Objective-C. Cocos3D has partnered with 
+[Apportable] ( http://www.apportable.com) to bring your 3D apps and games to the Android
+platform. The Apportable SDK is a free SDK for porting Objective-C applications to Android.
+
+To build and install your app or game project for the Android platform:
+
+1. Download and install the Apportable SDK.
+2. Open a `Terminal` window and navigate to the `Xcode` project folder of your Cocos3D app.
+3. Run the command: `apportable install` to build and install your Cocos3D app on an
+   Android device connected to your computer.
+	
+Please refer to the Apportable SDK documentation for more information about building,
+installing, and debugging your app on Android. If you are building an OpenGL ES 1.1 app, 
+you will need to modify the `configuration.json` file in your `Xcode` project, as indicated
+in that file.
+
+
+Documentation
+-------------
+
+To learn more about Cocos3D, please refer to the [Cocos3D Programming Guide](http://brenwill.com/2011/cocos3d-programming-guide/)
+and the latest [API documentation] (http://brenwill.com/docs/cocos3d/2.0.0/api/).
+
+You can create a local copy of the API documentation using `Doxygen` to extract the documentation
+from the source files. There is a `Doxygen` configuration file to output the API documents in the
+same format as appears online in the folder Docs/API within the Cocos3D distribution.
 
 
 Creating POD 3D Model Files
@@ -510,5 +503,5 @@ Some of the POD models that appear in the demo and template apps were designed i
 exported to POD files using the PowerVR *PVRGeoPOD* converter.
 
 As a reference for the creation of your own 3D models for use in Cocos3D, you can find the original
-Blender files and DAE files for these POD models in the Models folder in the Cocos3D distribution.
+Blender files and DAE files for these POD models in the `Models` folder in the Cocos3D distribution.
 
