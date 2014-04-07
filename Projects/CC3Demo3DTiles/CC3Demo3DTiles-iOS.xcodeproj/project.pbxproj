@@ -589,7 +589,7 @@
 		A9473C0414100DA5006F410C /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0430;
+				LastUpgradeCheck = 0510;
 			};
 			buildConfigurationList = A9473C0714100DA5006F410C /* Build configuration list for PBXProject "CC3Demo3DTiles-iOS" */;
 			compatibilityVersion = "Xcode 3.2";
