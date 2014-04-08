@@ -421,12 +421,6 @@
 /**
  * Populates this instance as a wire-frame box with the specified dimensions.
  *
- * You can add a material or pureColor as desired to establish the color of the lines
- * of the wire-frame. If a material is used, the appearance of the lines will be affected
- * by the lighting conditions. If a pureColor is used, the appearance of the lines will
- * not be affected by the lighting conditions, and the wire-frame box will always appear
- * in the same pure, solid color, regardless of the lighting sources.
- *
  * This is a convenience method for creating a simple, but useful, shape.
  */
 -(void) populateAsWireBox: (CC3Box) box;
@@ -545,12 +539,6 @@
  * If you are defining the vertices data dynamically in another method, you may want to
  * set this flag to YES to have this instance copy and manage the data. If the vertices
  * array is a static array, you can set this flag to NO.
- *
- * You can add a material or pureColor as desired to establish the color of the lines.
- * If a material is used, the appearance of the lines will be affected by the lighting
- * conditions. If a pureColor is used, the appearance of the lines will not be affected
- * by the lighting conditions, and the wire-frame box will always appear in the same pure,
- * solid color, regardless of the lighting sources.
  *
  * This is a convenience method for creating a simple, but useful, shape.
  */

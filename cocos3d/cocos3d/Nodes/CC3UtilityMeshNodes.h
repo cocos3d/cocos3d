@@ -77,12 +77,6 @@
  * GL_LINE_STRIP or GL_LINE_LOOP. This property must be set after the mesh is attached.
  * Other than that, you configure the mesh node and its mesh as you would with any mesh node.
  *
- * To color the lines, use the pureColor property to draw the lines in a pure, solid color
- * that is not affected by lighting conditions. You can also add a material to your CC3LineNode
- * instance to get more subtle coloring and blending, but this can sometimes
- * appear strange with lines. You can also use CCActionInterval to change the tinting or
- * opacity of the lines, as you would with any mesh node.
- *
  * Several convenience methods exist in the CC3MeshNode class to aid in constructing a
  * CC3LineNode instance:
  *   - populateAsLineStripWith:vertices:andRetain:

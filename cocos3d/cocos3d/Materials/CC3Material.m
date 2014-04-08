@@ -174,22 +174,27 @@
 
 #pragma mark CCRGBAProtocol & CCBlendProtocol support
 
--(CCColorRef) color { return CCColorRefFromCCC4F(_diffuseColor); }
+-(CCColorRef) color { return CCColorRefFromCCC4F(_shouldUseLighting ? _diffuseColor : _emissionColor); }
 
-// Set both diffuse and ambient colors, retaining the alpha of each
 -(void) setColor: (CCColorRef) color {
 	ccColor4F c4f = CCC4FFromCCColorRef(color);
-	
-	_ambientColor.r = c4f.r;
-	_ambientColor.g = c4f.g;
-	_ambientColor.b = c4f.b;
-	
-	_diffuseColor.r = c4f.r;
-	_diffuseColor.g = c4f.g;
-	_diffuseColor.b = c4f.b;
+
+	if (_shouldUseLighting) {
+		_ambientColor.r = c4f.r;
+		_ambientColor.g = c4f.g;
+		_ambientColor.b = c4f.b;
+		
+		_diffuseColor.r = c4f.r;
+		_diffuseColor.g = c4f.g;
+		_diffuseColor.b = c4f.b;
+	} else {
+		_emissionColor.r = c4f.r;
+		_emissionColor.g = c4f.g;
+		_emissionColor.b = c4f.b;
+	}
 }
 
--(CCOpacity) opacity { return CCOpacityFromGLfloat(_diffuseColor.a); }
+-(CCOpacity) opacity { return CCOpacityFromGLfloat(_shouldUseLighting ? _diffuseColor.a : _emissionColor.a); }
 
 /**
  * Set opacity of all colors, retaining the colors of each, and sets the isOpaque property
@@ -565,7 +570,7 @@ static GLuint lastAssignedMaterialTag;
 	} else {
 		[gl enableLighting: NO];
 	}
-	visitor.currentColor = self.effectiveDiffuseColor;
+	visitor.currentColor = self.effectiveEmissionColor;
 }
 
 /**

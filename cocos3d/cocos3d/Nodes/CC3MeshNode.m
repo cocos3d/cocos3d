@@ -52,7 +52,7 @@
 
 @implementation CC3MeshNode
 
-@synthesize mesh=_mesh, material=_material, pureColor=_pureColor, lineWidth=_lineWidth;
+@synthesize mesh=_mesh, lineWidth=_lineWidth;
 @synthesize shouldSmoothLines=_shouldSmoothLines, lineSmoothingHint=_lineSmoothingHint;
 
 -(void) dealloc {
@@ -66,7 +66,7 @@
 -(void) setName: (NSString*) aName {
 	super.name = aName;
 	[_mesh deriveNameFrom: self];
-	[_material deriveNameFrom: self];
+	[_material deriveNameFrom: self];	// Don't lazy init material yet
 }
 
 // Sets the name of the mesh if needed and marks the bounding volume as dirty.
@@ -77,10 +77,7 @@
 	_mesh = [aMesh retain];
 	
 	[_mesh deriveNameFrom: self];
-
-	if ( !_mesh.hasVertexNormals ) _material.shouldUseLighting = NO;	// Only if material exists
-	if ( !_mesh.hasVertexTextureCoordinates ) _material.texture = nil;	// Only if material exists
-	
+	[self alignMaterialAndMesh];
 	[self markBoundingVolumeDirty];
 }
 
@@ -98,6 +95,12 @@
 // Support for deprecated CC3MeshModel class
 -(void) setMeshModel: (CC3Mesh*) aMesh { self.mesh = aMesh; }
 
+/** Lazily init the material */
+-(CC3Material*) material {
+	if ( !_material ) self.material = [self makeMaterial];
+	return _material;
+}
+
 /**
  * Sets the name of the material if needed, then checks the vertex content types and the
  * alignment of the texture coordinates for each texture unit against the corresponding
@@ -110,24 +113,20 @@
 	_material = [aMaterial retain];
 
 	[_material deriveNameFrom: self];
-
-	if ( !_mesh.hasVertexNormals ) _material.shouldUseLighting = NO;
-	if ( !_mesh.hasVertexTextureCoordinates ) _material.texture = nil;
-
+	[self alignMaterialAndMesh];
 	[self alignTextureUnits];
 }
 
--(CC3Material*) ensureMaterial {
-	if ( !_material ) self.material = [self makeMaterial];
-	return _material;
+-(CC3Material*) makeMaterial { return [CC3Material material]; }
+
+/** Align the material properties to those of the mesh. */
+-(void) alignMaterialAndMesh {
+	if ( !_mesh.hasVertexNormals ) _material.shouldUseLighting = NO;	// Only if material exists
+	if ( !_mesh.hasVertexTextureCoordinates ) _material.texture = nil;	// Only if material exists
 }
 
--(CC3Material*) makeMaterial {
-	CC3Material* mat = [CC3Material material];
-	mat.ambientColor = CCC4FModulate(mat.ambientColor, self.pureColor);
-	mat.diffuseColor = CCC4FModulate(mat.diffuseColor, self.pureColor);
-	return mat;
-}
+// Deprecated
+-(CC3Material*) ensureMaterial { return self.material; }
 
 /**
  * Returns a bounding volume that first checks against the spherical boundary, and then checks
@@ -241,49 +240,53 @@
 -(BOOL) shouldUseLighting { return _material ? _material.shouldUseLighting : NO; }
 
 -(void) setShouldUseLighting: (BOOL) useLighting {
-	self.ensureMaterial.shouldUseLighting = useLighting;
+	self.material.shouldUseLighting = useLighting;
 	[super setShouldUseLighting: useLighting];	// pass along to any children
 }
 
--(ccColor4F) ambientColor { return self.ensureMaterial.ambientColor; }
+-(ccColor4F) ambientColor { return self.material.ambientColor; }
 
 -(void) setAmbientColor:(ccColor4F) aColor {
-	self.ensureMaterial.ambientColor = aColor;
+	self.material.ambientColor = aColor;
 	[super setAmbientColor: aColor];	// pass along to any children
 }
 
--(ccColor4F) diffuseColor { return self.ensureMaterial.diffuseColor; }
+-(ccColor4F) diffuseColor { return self.material.diffuseColor; }
 
 -(void) setDiffuseColor:(ccColor4F) aColor {
-	self.ensureMaterial.diffuseColor = aColor;
+	self.material.diffuseColor = aColor;
 	[super setDiffuseColor: aColor];	// pass along to any children
 }
 
--(ccColor4F) specularColor { return self.ensureMaterial.specularColor; }
+-(ccColor4F) specularColor { return self.material.specularColor; }
 
 -(void) setSpecularColor:(ccColor4F) aColor {
-	self.ensureMaterial.specularColor = aColor;
+	self.material.specularColor = aColor;
 	[super setSpecularColor: aColor];	// pass along to any children
 }
 
--(ccColor4F) emissionColor { return self.ensureMaterial.emissionColor; }
+-(ccColor4F) emissionColor { return self.material.emissionColor; }
 
 -(void) setEmissionColor:(ccColor4F) aColor {
-	self.ensureMaterial.emissionColor = aColor;
+	self.material.emissionColor = aColor;
 	[super setEmissionColor: aColor];	// pass along to any children
 }
 
--(GLfloat) shininess { return self.ensureMaterial.shininess; }
+// Deprecated
+-(ccColor4F) pureColor { return self.emissionColor; }
+-(void) setPureColor: (ccColor4F) pureColor { self.emissionColor = pureColor; }
+
+-(GLfloat) shininess { return self.material.shininess; }
 
 -(void) setShininess: (GLfloat) shininess {
-	self.ensureMaterial.shininess = shininess;
+	self.material.shininess = shininess;
 	[super setShininess: shininess];	// pass along to any children
 }
 
--(GLfloat) reflectivity { return self.ensureMaterial.reflectivity; }
+-(GLfloat) reflectivity { return self.material.reflectivity; }
 
 -(void) setReflectivity: (GLfloat) reflectivity {
-	self.ensureMaterial.reflectivity = reflectivity;
+	self.material.reflectivity = reflectivity;
 	[super setReflectivity: reflectivity];	// pass along to any children
 }
 
@@ -295,7 +298,7 @@
 
 -(void) setGlobalLightPosition: (CC3Vector4) aPosition {
 	CC3Vector4 localLtPos = [self.globalTransformMatrixInverted transformHomogeneousVector: aPosition];
-	self.ensureMaterial.lightDirection = localLtPos.v;
+	self.material.lightDirection = localLtPos.v;
 	[super setGlobalLightPosition: aPosition];
 }
 
@@ -357,58 +360,49 @@
 
 #pragma mark CCRGBAProtocol and CCBlendProtocol support
 
--(CCColorRef) color { return self.ensureMaterial.color; }
+-(CCColorRef) color { return self.material.color; }
 
 -(void) setColor: (CCColorRef) color {
-	self.ensureMaterial.color = color;
+	self.material.color = color;
 	if (_shouldApplyOpacityAndColorToMeshContent) _mesh.color = color;	// for meshes with colored vertices
-
-	ccColor4F c4f = CCC4FFromCCColorRef(color);
-	_pureColor.r = c4f.r;
-	_pureColor.g = c4f.g;
-	_pureColor.b = c4f.b;
-
 	[super setColor: color];	// pass along to any children
 }
 
--(CCOpacity) opacity { return self.ensureMaterial.opacity; }
+-(CCOpacity) opacity { return self.material.opacity; }
 
 -(void) setOpacity: (CCOpacity) opacity {
-	self.ensureMaterial.opacity = opacity;
+	self.material.opacity = opacity;
 	if (_shouldApplyOpacityAndColorToMeshContent) _mesh.opacity = opacity;	// for meshes with colored vertices
-	_pureColor.a = GLfloatFromCCOpacity(opacity);
 
 	[super setOpacity: opacity];	// pass along to any children
 }
 
--(BOOL) shouldBlendAtFullOpacity { return self.ensureMaterial.shouldBlendAtFullOpacity; }
+-(BOOL) shouldBlendAtFullOpacity { return self.material.shouldBlendAtFullOpacity; }
 
 -(void) setShouldBlendAtFullOpacity: (BOOL) shouldBlend {
-	self.ensureMaterial.shouldBlendAtFullOpacity = shouldBlend;
+	self.material.shouldBlendAtFullOpacity = shouldBlend;
 	
 	[super setShouldBlendAtFullOpacity: shouldBlend];	// pass along to any children
 }
 
--(BOOL) isOpaque { return self.ensureMaterial.isOpaque; }
+-(BOOL) isOpaque { return self.material.isOpaque; }
 
 -(void) setIsOpaque: (BOOL) opaque {
-	self.ensureMaterial.isOpaque = opaque;
-	if (opaque) _pureColor.a = 1.0f;
-	
+	self.material.isOpaque = opaque;
 	[super setIsOpaque: opaque];	// pass along to any children
 }
 
--(ccBlendFunc) blendFunc { return self.ensureMaterial.blendFunc; }
+-(ccBlendFunc) blendFunc { return self.material.blendFunc; }
 
 -(void) setBlendFunc: (ccBlendFunc) aBlendFunc {
-	self.ensureMaterial.blendFunc = aBlendFunc;
+	self.material.blendFunc = aBlendFunc;
 	[super setBlendFunc: aBlendFunc];
 }
 
--(BOOL) shouldDrawLowAlpha { return self.ensureMaterial.shouldDrawLowAlpha; }
+-(BOOL) shouldDrawLowAlpha { return self.material.shouldDrawLowAlpha; }
 
 -(void) setShouldDrawLowAlpha: (BOOL) shouldDraw {
-	self.ensureMaterial.shouldDrawLowAlpha = shouldDraw;
+	self.material.shouldDrawLowAlpha = shouldDraw;
 }
 
 -(BOOL) shouldApplyOpacityAndColorToMeshContent { return _shouldApplyOpacityAndColorToMeshContent; }
@@ -449,14 +443,13 @@
 -(CC3Texture*) texture { return _material.texture; }
 
 -(void) setTexture: (CC3Texture*) aTexture {
-	if (aTexture) [self ensureMaterial];
-	_material.texture = aTexture;
+	self.material.texture = aTexture;
 	[self alignTextureUnit: 0];
 	[super setTexture: aTexture];
 }
 
 -(void) addTexture: (CC3Texture*) aTexture {
-	[self.ensureMaterial addTexture: aTexture];
+	[self.material addTexture: aTexture];
 	GLuint texCount = self.textureCount;
 	if (texCount > 0) [self alignTextureUnit: (self.textureCount - 1)];
 	[super addTexture: aTexture];
@@ -469,7 +462,7 @@
 }
 
 -(void) setTexture: (CC3Texture*) aTexture forTextureUnit: (GLuint) texUnit {
-	[self.ensureMaterial setTexture: aTexture forTextureUnit: texUnit];
+	[self.material setTexture: aTexture forTextureUnit: texUnit];
 	[self alignTextureUnit: texUnit];
 }
 
@@ -559,7 +552,6 @@
 		_mesh = nil;
 		_material = nil;
 		_shaderContext = nil;
-		_pureColor = kCCC4FWhite;
 		_shouldUseSmoothShading = YES;
 		_shouldCullBackFaces = YES;
 		_shouldCullFrontFaces = NO;
@@ -591,7 +583,6 @@
 	[_shaderContext release];
 	_shaderContext = [another.shaderContext copy];	// retained
 	
-	_pureColor = another.pureColor;
 	_shouldUseSmoothShading = another.shouldUseSmoothShading;
 	_shouldCullBackFaces = another.shouldCullBackFaces;
 	_shouldCullFrontFaces = another.shouldCullFrontFaces;
@@ -900,12 +891,10 @@
 	
 	[visitor resetTextureUnits];
 	
-	if (_material && visitor.shouldDecorateNode) {
-		[_material drawWithVisitor: visitor];
-	} else {
+	if (visitor.shouldDecorateNode)
+		[self.material drawWithVisitor: visitor];
+	else
 		[CC3Material unbindWithVisitor: visitor];
-		if (visitor.shouldDecorateNode) visitor.currentColor = _pureColor;
-	}
 
 	[visitor disableUnusedTextureUnits];
 
@@ -934,8 +923,7 @@
 -(void) setVertexContentTypes: (CC3VertexContent) vtxContentTypes {
 	[self ensureMesh];
 	_mesh.vertexContentTypes = vtxContentTypes;
-	if ( !_mesh.hasVertexNormals ) _material.shouldUseLighting = NO;	// Only if material exists
-	if ( !_mesh.hasVertexTextureCoordinates ) _material.texture = nil;	// Only if material exists
+	[self alignMaterialAndMesh];
 }
 
 

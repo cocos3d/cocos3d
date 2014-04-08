@@ -178,7 +178,7 @@
 		_shadowVolumeVertexOffsetFactor = 0;
 		_shadowExpansionLimitFactor = 100;
 		self.visible = self.class.defaultVisible;		// Use setter
-		self.pureColor = kCCC4FYellow;					// For terminator lines
+		self.emissionColor = kCCC4FYellow;				// For terminator lines
 	}
 	return self;
 }

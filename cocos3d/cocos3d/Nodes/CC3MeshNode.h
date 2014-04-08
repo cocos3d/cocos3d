@@ -44,34 +44,28 @@
  * CC3MeshNode is a type of CC3Node, and will often participate in a structural node assembly.
  * An instance can be the child of another node, and the mesh node itself can have child nodes.
  *
- * CC3MeshNodes encapsulate a CC3Mesh instance, and can also encapsulate either a CC3Material
- * instance, or a pure color. The CC3Mesh instance contains the mesh vertex content. The CC3Material
- * instance describes the material and texture properties covering the mesh, which are affected by
- * lighting conditions. Alternately, instead of a material, the mesh may be colored by a single
- * pure color via the pureColor property.
+ * CC3MeshNodes encapsulate a CC3Mesh instance, and a CC3Material instance. The CC3Mesh instance
+ * contains the mesh vertex content. The CC3Material instance describes the material and texture
+ * properties covering the mesh, which can be affected by lighting conditions.
  *
  * If it is not explicitly set beforehand, the material will automatically be created and assigned 
  * to the mesh node when a texture is added to the mesh node through the texture property or the
  * addTexture: method, or if any of the material properties of the mesh node are set or accessed,
  * including color, opacity, ambientColor, diffuseColor, specularColor, emissionColor, blendFunc,
- * or shouldDrawLowAlpha. The material will automatically be created if either the isOpaque or
- * shouldUseLighting property is set, but not if they are simply read.
+ * isOpaque, shouldUseLighting, or shouldDrawLowAlpha.
  *
  * There are a number of populateAs... parametric population methods available in the CC3MeshNode
  * (ParametricShapes) category extension. These methods can be used to populate the vertices of the
  * mesh contained in a new mesh node to create interesting and useful parametric shapes and surfaces.
  *
- * When this node is drawn, it delegates to the mesh instance to render the mesh vertices. If a
- * material is defined, before drawing the mesh, it delegates to the material to configure the
- * covering of the mesh. If no material is defined, the node establishes its pure color before
- * rendering the mesh. The pure color is only used if the node has no material attached. And the
- * pure color may in turn be overridden by the mesh data if vertex coloring is in use.
+ * When this node is drawn, it delegates to the mesh instance to render the mesh vertices. 
+ * Before drawing the mesh, it delegates to the material to configure the covering of the mesh.
  *
- * Each CC3MeshNode can have only one material or pure color. For large, complicated meshes that are
- * covered by more than one material, or colored with more than one color, the mesh must be broken
- * into smaller meshes, each of which are covered by a single material or color. These smaller
- * sub-meshes are sometimes referred to as "vertex groups". Each such sub-mesh is then wrapped in
- * its own CC3MeshNode instance, along with the material that covers that sub-mesh.
+ * Each CC3MeshNode can have only one material. For large, complicated meshes that are 
+ * covered by more than one material, the mesh must be broken into smaller meshes, each
+ * of which is covered by a single material. These smaller sub-meshes are sometimes 
+ * referred to as "vertex groups". Each such sub-mesh is then wrapped in its own CC3MeshNode
+ * instance, along with the material that covers that sub-mesh.
  *
  * These CC3MeshNode instances can then be added as child nodes to a single parent CC3Node instance.
  * This parent CC3Node can then be moved, rotated and scaled, and all of its child nodes will
@@ -99,7 +93,6 @@
 	CC3Mesh* _mesh;
 	CC3Material* _material;
 	CC3ShaderContext* _shaderContext;
-	ccColor4F _pureColor;
 	GLenum _depthFunction;
 	GLfloat _decalOffsetFactor;
 	GLfloat _decalOffsetUnits;
@@ -180,40 +173,30 @@
 /**
  * The material covering this mesh node.
  *
- * If it is not explicitly set beforehand, the material will automatically be created
- * and assigned to the mesh node when a texture is added to the mesh node through the
- * texture property or the addTexture: method, or if any of the material properties
- * of the mesh node are set or accessed, including color, opacity, ambientColor,
- * diffuseColor, specularColor, emissionColor, blendFunc, or shouldDrawLowAlpha.
- * The material will automatically be created if either the isOpaque or
- * shouldUseLighting property is set, but not if they are simply read.
+ * When querying this property, if a material does not yet exist, this method invokes the 
+ * makeMaterial method to create a suitable material, and sets it into this property. 
  */
 @property(nonatomic, retain) CC3Material* material;
 
-/**
- * The pure, solid color used to paint the mesh if no material is established for this node.
- * This color is not not be affected by the lighting conditions. The mesh will always appear
- * in the same pure, solid color, regardless of the lighting sources.
- *
- * If you do not want to use a material with this node, use this pureColor property to
- * set or access the color and opacity of this node. Setting or accessing any of the
- * other coloring properties (color, opacity, ambientColor, diffuseColor, specularColor,
- * or emissionColor) will create a material automatically.
- */
-@property(nonatomic, assign) ccColor4F pureColor;
+/** @deprecated Use the emissionColor property instead. */
+@property(nonatomic, assign) ccColor4F pureColor DEPRECATED_ATTRIBUTE;
 
 /**
  * If this value is set to YES, current lighting conditions will be taken into consideration
- * when drawing colors and textures, and the material ambientColor, diffuseColor, specularColor,
+ * when drawing colors and textures, and the ambientColor, diffuseColor, specularColor,
  * emissionColor, and shininess properties will have effect.
  *
  * If this value is set to NO, lighting conditions will be ignored when drawing colors and
- * textures, and the material emissionColor will be applied to the mesh surface without regard to
+ * textures, and the emissionColor will be applied to the mesh surface, without regard to
  * lighting. Blending will still occur, but the other material aspects, including ambientColor,
  * diffuseColor, specularColor, and shininess will be ignored. This is useful for a cartoon
  * effect, where you want a pure color, or the natural colors of the texture, to be included
  * in blending calculations, without having to arrange lighting, or if you want those colors
  * to be displayed in their natural values despite current lighting conditions.
+ *
+ * Be aware that the initial value of the emissionColor property is normally black. If you
+ * find your node disappears or turns black when you set this property to NO, try changing
+ * the value of the emissionColor property.
  *
  * Setting the value of this property sets the same property in the contained material.
  * Reading the value of this property returns the value of the same property in the contained material.
@@ -289,27 +272,17 @@
  */
 @property(nonatomic, assign) GLfloat reflectivity;
 
-/** 
- * If a material does not yet exist, this method invokes the makeMaterial method to create
- * a suitable material, and sets it into the material property. Does nothing if this mesh
- * node already has a material. Returns the material (existing or new).
- *
- * This method is invoked whenever a property is set that would affect the material.
- * Usually, you will never need to invoke this method.
- */
--(CC3Material*) ensureMaterial;
+/** @deprecated The material property now performs this functionality lazily. */
+-(CC3Material*) ensureMaterial DEPRECATED_ATTRIBUTE;
 
 /**
- * This template method creates a suitable material for this mesh node.
+ * Creates and returns a suitable material for this mesh node.
  *
- * The new material's initial diffuse and ambient colors are modulated by the value of the
- * pureColor property to propagate any color changes already made into the material. The
- * initial value of pureColor is pure white, so if it has not been changed, the ambient and
- * diffuse colors of the material will take on their default initial values.
- * Subclasses may override to provide a different material.
+ * This method is invoked automatically by the material property accessor method if a material
+ * is needed, but has not yet been established.
  *
- * This method is invoked automatically by the ensureMaterial method if a material is needed,
- * but has not yet been established. Usually, you will never need to invoke this method.
+ * This implementation returns an instance of CC3Material initialized with the default 
+ * initializer method. Subclasses may override to provide a different material.
  */
 -(CC3Material*) makeMaterial;
 
@@ -417,33 +390,24 @@
 #pragma mark CCRGBAProtocol and CCBlendProtocol support
 
 /**
- * The color of this node, as described by the diffuse color of the material covering this node.
+ * The color of this node, as described by the color of the material covering this node.
  *
- * Querying this property returns the RGB components of the material's diffuseColor
- * property, or of this node's pureColor property if this node has no material.
+ * Querying this property returns the value of the same property of the enclosed material.
  *
- * When setting this property, the RGB values are each converted to a floating point
- * number between 0 and 1, and are set into both the ambientColor and diffuseColor
- * properties of this node's material, and the pureColor property of this node.
- * The alpha of each of those properties remains unchanged.
- *
- * Setting this property also sets the same property on all descendant nodes.
+ * Setting this property sets the same property on the enclosed material, and on the mesh,
+ * if the shouldApplyOpacityAndColorToMeshContent property is set to YES, and also sets the
+ * same property on all descendant nodes.
  */
 @property(nonatomic, assign) CCColorRef color;
 
 /**
- * The opacity of this node, as described by the alpha component of the diffuse color of
- * the material covering this mesh.
+ * The opacity of this node, as described by the opacity of the material covering this mesh.
  *
- * Querying this property returns the alpha component of the material's diffuseColor
- * property, or of this node's pureColor property if this node has no material.
+ * Querying this property returns the value of the same property of the enclosed material.
  *
- * When setting this property, the value is converted to a floating point number
- * between 0 and 1, and is set into all of the ambientColor, diffuseColor, specularColor,
- * and emissionColor properties of this node's material, and the pureColor property of
- * this node. The RGB components of each of those properties remains unchanged.
- *
- * Setting this property also sets the same property on all descendant nodes.
+ * Setting this property sets the same property on the enclosed material, and on the mesh,
+ * if the shouldApplyOpacityAndColorToMeshContent property is set to YES, and also sets the
+ * same property on all descendant nodes.
  *
  * See the notes for this property on CC3Material for more information on how this
  * property interacts with the other material properties.
@@ -461,8 +425,7 @@
  * If this node has a material, returns the value of the same property on the material,
  * otherwise return YES.
  *
- * Setting this property sets the same property in the material and in all descendants,
- * and sets the alpha component of the pureColor property to 1.0.
+ * Setting this property sets the same property in the material and in all descendants.
  *
  * See the notes for this property on CC3Material for more information on how this
  * property interacts with the other material properties.

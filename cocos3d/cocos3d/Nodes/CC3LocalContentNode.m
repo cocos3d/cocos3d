@@ -192,7 +192,7 @@
 		if ( !CC3BoxIsNull(mbb) ) {
 			wf = [CC3WireframeLocalContentBoundingBoxNode nodeWithName: [self localContentWireframeBoxName]];
 			[wf populateAsWireBox: mbb];
-			wf.pureColor = self.initialLocalContentWireframeBoxColor;
+			wf.emissionColor = self.initialLocalContentWireframeBoxColor;
 			[self addChild: wf];
 		}
 	}

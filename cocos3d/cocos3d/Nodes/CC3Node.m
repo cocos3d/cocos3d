@@ -2113,9 +2113,7 @@ static CGFloat descriptorFontSize = 8.0;
 	CC3WireframeBoundingBoxNode* wf = self.wireframeBoxNode;
 	
 	// If the wireframe exists, but should not, remove it
-	if (wf && !shouldDraw) {
-		[wf remove];
-	}
+	if (wf && !shouldDraw) [wf remove];
 	
 	// If there is no wireframe, but there should be, add it by creating a
 	// CC3WireframeBoundingBoxNode from the boundingBox property and add it as a
@@ -2128,7 +2126,7 @@ static CGFloat descriptorFontSize = 8.0;
 		if ( !CC3BoxIsNull(bb) ) {
 			wf = [CC3WireframeBoundingBoxNode nodeWithName: [self wireframeBoxName]];
 			[wf populateAsWireBox: bb];
-			wf.pureColor = self.initialWireframeBoxColor;
+			wf.emissionColor = self.initialWireframeBoxColor;
 			wf.shouldAlwaysMeasureParentBoundingBox = YES;
 			[self addChild: wf];
 		}
@@ -2194,7 +2192,7 @@ static ccColor4F wireframeBoxColor = { 1.0, 1.0, 0.0, 1.0 };	// kCCC4FYellow
 
 	dm.markerDirection = aDirection;
 	dm.lineWidth = 2.0;
-	dm.pureColor = aColor;
+	dm.emissionColor = aColor;
 	[self addChild: dm];
 }
 

@@ -149,14 +149,13 @@
 		_shouldNormalizeParticleSizesToDevice = YES;
 		_shouldDisableDepthMask = YES;
 		[[self class] deviceScaleFactor];	// Force init the static deviceScaleFactor before accessing it.
-		[self ensureMaterial];				// We need blending, so start with a material.
 	}
 	return self;
 }
 
 /** Overridden to configure for blending. */
 -(CC3Material*) makeMaterial {
-	CC3Material* mat = [CC3Material material];
+	CC3Material* mat = [super makeMaterial];
 	mat.diffuseColor = kCCC4FWhite;
 	mat.sourceBlend = GL_SRC_ALPHA;
 	mat.destinationBlend = GL_ONE_MINUS_SRC_ALPHA;
@@ -358,7 +357,7 @@
 	[gl enableShaderPointSize: YES];
 
 	// Enable texture coordinate replacing in each texture unit used by the material.
-	GLuint texCount = _material ? _material.textureCount : 0;
+	GLuint texCount = self.textureCount;
 	for (GLuint texUnit = 0; texUnit < texCount; texUnit++)
 		[gl enablePointSpriteCoordReplace: YES at: texUnit];
 	
@@ -383,7 +382,7 @@
 	[gl enablePointSprites: NO];
 
 	// Disable texture coordinate replacing again in each texture unit used by the material.
-	GLuint texCount = _material ? _material.textureCount : 0;
+	GLuint texCount = self.textureCount;
 	for (GLuint texUnit = 0; texUnit < texCount; texUnit++)
 		[gl enablePointSpriteCoordReplace: NO at: texUnit];
 }

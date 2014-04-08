@@ -1002,11 +1002,11 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	
 	[_teapotTextured addTexture: _envMapTex];
 	_teapotTextured.reflectivity = 0.7;		// Modify this (0-1) to change how reflective the teapot is
+	_teapotTextured.shouldUseLighting = NO;		// Ignore lighting to highlight reflections demo
 #endif	// !CC3_OGLES_1
 
 	// Add a brushed metal texture (with or without the reflective texture added above).
 	[_teapotTextured addTexture: [CC3Texture textureFromFile: @"tex_base.png"]];
-	_teapotTextured.shouldUseLighting = NO;		// Ignore lighting to highlight reflections demo
 	
 	// Add a second rainbow-colored teapot as a satellite of the reflective teapot.
 	_teapotSatellite = [PhysicsMeshNode nodeWithName: kRainbowTeapotName];
@@ -1887,8 +1887,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	tv.shouldCullBackFaces = NO;				// Faces winding on decimated model is inconsistent
 	_tvScreen = [tv getMeshNodeNamed: @"tv_set-submesh3"];	// Auto-named by PVRGeoPOD
 	_tvScreen.name = kTVScreenName;							// Give it a more friendly name
-	_tvScreen.diffuseColor = kCCC4FWhite;
 	_tvScreen.shouldUseLighting = NO;
+	_tvScreen.emissionColor = kCCC4FWhite;
 	_tvScreen.shouldCullFrontFaces = YES;		// Don't paint both front and back of screen
 	
 	// Start with a test card displayed on the TV
@@ -2087,7 +2087,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	
 	// Uncomment to see effect of not using lighting.
 	// Can also get same effect by not including kCC3VertexContentNormal in particle content above.
-//	emitter.material.shouldUseLighting = NO;
+//	emitter.shouldUseLighting = NO;
+//	emitter.emissionColor = kCCC4FWhite;
 	
 	// Shows the bounding volume. The boundingVolumePadding gives the boundary some depth
 	// so that the emitter doesn't disappear if particles are still on-screen.
@@ -3093,7 +3094,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 			_robotLamp.visible = YES;
 			flashLight.visible = NO;
 			_bumpMapLightTracker.target = _robotLamp;
-			_backdrop.pureColor = kSkyColor;
+			_backdrop.emissionColor = kSkyColor;
 			break;
 		case kLightingFog:
 			sun.visible = YES;
@@ -3101,7 +3102,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 			_robotLamp.visible = YES;
 			flashLight.visible = NO;
 			_bumpMapLightTracker.target = _robotLamp;
-			_backdrop.pureColor = kSkyColor;
+			_backdrop.emissionColor = kSkyColor;
 			break;
 		case kLightingFlashlight:
 			sun.visible = NO;
@@ -3109,7 +3110,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 			_robotLamp.visible = NO;
 			flashLight.visible = YES;
 			_bumpMapLightTracker.target = flashLight;
-			_backdrop.pureColor = kCCC4FBlack;
+			_backdrop.emissionColor = kCCC4FBlack;
 			break;
 		case kLightingGrayscale:
 			sun.visible = YES;
@@ -3117,7 +3118,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 			_robotLamp.visible = YES;
 			flashLight.visible = NO;
 			_bumpMapLightTracker.target = _robotLamp;
-			_backdrop.pureColor = kSkyColor;
+			_backdrop.emissionColor = kSkyColor;
 			break;
 		case kLightingDepth:
 			sun.visible = YES;
@@ -3125,7 +3126,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 			_robotLamp.visible = YES;
 			flashLight.visible = NO;
 			_bumpMapLightTracker.target = _robotLamp;
-			_backdrop.pureColor = kSkyColor;
+			_backdrop.emissionColor = kSkyColor;
 			break;
 	}
 }

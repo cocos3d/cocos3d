@@ -521,7 +521,7 @@ static Class _defaultSemanticDelegateClass = nil;
 			  @"See previously logged error.", self, effectName, rezName);
 
 	[pfxEffect populateMeshNode: self];
-	[pfxEffect populateMaterial: self.ensureMaterial];
+	[pfxEffect populateMaterial: self.material];
 	[self alignTextureUnits];
 	[super applyEffectNamed: effectName inPFXResourceNamed: rezName];
 }
@@ -532,7 +532,7 @@ static Class _defaultSemanticDelegateClass = nil;
 			  @"See previously logged error.", self, effectName, filePath);
 	
 	[pfxEffect populateMeshNode: self];
-	[pfxEffect populateMaterial: self.ensureMaterial];
+	[pfxEffect populateMaterial: self.material];
 	[self alignTextureUnits];
 	[super applyEffectNamed: effectName inPFXResourceFile: filePath];
 }

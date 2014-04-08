@@ -1394,15 +1394,19 @@ typedef enum {
 /**
  * If this value is set to YES, current lighting conditions will be taken into consideration
  * when drawing colors and textures, and the ambientColor, diffuseColor, specularColor,
- * emissionColor, and shininess properties will interact with lighting settings.
+ * emissionColor, and shininess properties will have effect.
  *
  * If this value is set to NO, lighting conditions will be ignored when drawing colors and
- * textures, and the material emissionColor will be applied to the mesh surface without regard
- * to lighting. Blending will still occur, but the other material aspects, including ambientColor,
+ * textures, and the emissionColor will be applied to the mesh surface, without regard to
+ * lighting. Blending will still occur, but the other material aspects, including ambientColor,
  * diffuseColor, specularColor, and shininess will be ignored. This is useful for a cartoon
  * effect, where you want a pure color, or the natural colors of the texture, to be included
  * in blending calculations, without having to arrange lighting, or if you want those colors
  * to be displayed in their natural values despite current lighting conditions.
+ *
+ * Be aware that the initial value of the emissionColor property is normally black. If you
+ * find your node disappears or turns black when you set this property to NO, try changing
+ * the value of the emissionColor property.
  *
  * Setting the value of this property sets the same property in the materials contained in all
  * descendant nodes. Reading the value of this property returns YES if any descendant node

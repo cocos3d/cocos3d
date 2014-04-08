@@ -66,7 +66,7 @@
 
 -(NSString*) fragmentShaderFileForMeshNode: (CC3MeshNode*) aMeshNode {
 	
-	CC3Material* mat = aMeshNode.ensureMaterial;
+	CC3Material* mat = aMeshNode.material;
 	GLuint texCnt = mat.textureCount;
 	BOOL shouldAlphaTest = !mat.shouldDrawLowAlpha;
 	

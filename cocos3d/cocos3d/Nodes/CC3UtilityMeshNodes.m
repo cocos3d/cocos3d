@@ -279,20 +279,20 @@
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
 		self.shouldDrawInClipSpace = YES;
+		self.shouldUseLighting = NO;
 	}
 	return self;
 }
 
 +(id) nodeWithTexture: (CC3Texture*) texture {
-	CC3MeshNode* csn = [self node];
+	CC3MeshNode* csn = [self nodeWithColor: kCCC4FWhite];
 	csn.texture = texture;
 	return csn;
 }
 
-// Use diffuseColor to force material and use clip-space shaders
 +(id) nodeWithColor: (ccColor4F) color {
 	CC3MeshNode* csn = [self node];
-	csn.diffuseColor = color;
+	csn.emissionColor = color;
 	return csn;
 }
 
@@ -447,7 +447,7 @@
 
 /** 
  * Overridden to establish a default parent bounding box for parents that have no bounding
- * box, such as cameras and lights. The default parent box is calculated as 10% of the size
+ * box, such as cameras and lights. The default parent box is calculated as 5% of the size
  * of the entire scene.
  */
 -(CC3Box) parentBoundingBox {

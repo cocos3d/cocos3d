@@ -188,12 +188,16 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
  * emissionColor, and shininess properties will interact with lighting settings.
  *
  * If this value is set to NO, lighting conditions will be ignored when drawing colors and
- * textures, and the emissionColor will be applied to the mesh surface without regard to
+ * textures, and the emissionColor will be applied to the mesh surface, without regard to
  * lighting. Blending will still occur, but the other material aspects, including ambientColor,
  * diffuseColor, specularColor, and shininess will be ignored. This is useful for a cartoon
  * effect, where you want a pure color, or the natural colors of the texture, to be included
  * in blending calculations, without having to arrange lighting, or if you want those colors
  * to be displayed in their natural values despite current lighting conditions.
+ *
+ * Be aware that the initial value of the emissionColor property is normally black. If you
+ * find your node disappears or turns black when you set this property to NO, try changing 
+ * the value of the emissionColor property.
  *
  * The initial value of this property is YES.
  */
@@ -577,25 +581,34 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
 #pragma mark CCRGBAProtocol and CCBlendProtocol support
 
 /**
- * The diffuse color of this material, returned as a CCColorRef.
+ * The color of this material, as a CCColorRef.
  *
- * Querying this property returns the RGB components of the material's diffuseColor property.
+ * The function of this property depends on the value of the shouldUseLighting property.
  *
- * When setting this property, the RGB values are each set into both the ambientColor and 
- * diffuseColor properties. The alpha of each of those properties remains the same.
+ * If the shouldUseLighting property is set to YES, querying this property returns a value 
+ * derived from the diffuseColor property, and setting this property modifies the value of
+ * both the ambientColor and diffuseColor properties.
+ *
+ * If the shouldUseLighting property is set to NO, querying this property returns a value
+ * derived from the emissionColor property, and setting this property modifies the value of
+ * the emissionColor properties.
+ *
+ * When setting this property, the alpha of each of the affected properties is not modified.
  */
 @property(nonatomic, assign) CCColorRef color;
 
 /**
- * The opacity of this material, as described by the alpha component of the diffuse color of this material.
+ * The opacity of this material.
  *
- * Querying this property returns the alpha component of the diffuseColor property.
+ * Querying this property returns the alpha component of either the diffuseColor property or 
+ * the emissionColor property, depending on whether the shouldUseLighting property is set to
+ * YES or NO, respectively.
  *
  * When setting this property, the value is converted to a floating point number between 0 and 1,
  * and is set into the alpha component of the ambientColor, diffuseColor, specularColor, and
- * emissionColor properties. The RGB components of each of those properties remains unchanged.
+ * emissionColor properties. The RGB components of each of those properties remain unchanged.
  *
- * Changing this property also affects the isOpaque property. As a convenience, setting this opacity
+ * Setting this property also affects the isOpaque property. As a convenience, setting this opacity
  * property to a value less than kCCOpacityFull will automatically cause the isOpaque property to be 
  * set to NO, which will also affect the sourceBlend and destinationBlend properties, so that the 
  * translucency will be blended correctly. See the notes of the isOpaque property for more information.
