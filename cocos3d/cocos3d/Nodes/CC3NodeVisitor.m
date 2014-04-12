@@ -33,6 +33,8 @@
 #import "CC3Scene.h"
 #import "CC3Layer.h"
 #import "CC3Mesh.h"
+#import "CC3Light.h"
+#import "CC3EnvironmentNodes.h"
 #import "CC3NodeSequencer.h"
 #import "CC3VertexSkinning.h"
 #import "CC3GLView.h"
@@ -189,7 +191,7 @@
 }
 
 
-#pragma mark Accessing node contents
+#pragma mark Accessing scene contents
 
 -(CC3Scene*) scene { return _startingNode.scene; }
 
@@ -207,11 +209,24 @@
 
 -(CC3Mesh*) currentMesh { return self.currentMeshNode.mesh; }
 
--(NSUInteger) lightCount { return self.scene.lights.count; }
+-(GLuint) lightCount { return (GLuint)self.scene.lights.count; }
 
 -(CC3Light*) lightAt: (GLuint) index {
 	NSArray* lights = self.scene.lights;
 	if (index < lights.count) return [lights objectAtIndex: index];
+	return nil;
+}
+
+-(GLuint) lightProbeCount {
+	GLuint lpCnt = (GLuint)self.scene.lightProbes.count;
+	CC3ShaderProgram* sp = self.currentShaderProgram;
+	if (sp) lpCnt = MIN(lpCnt, sp.textureLightProbeCount);
+	return lpCnt;
+}
+
+-(CC3LightProbe*) lightProbeAt: (GLuint) index {
+	NSArray* lps = self.scene.lightProbes;
+	if (index < lps.count) return [lps objectAtIndex: index];
 	return nil;
 }
 
@@ -279,8 +294,6 @@
 @synthesize deltaTime=_deltaTime;
 @synthesize shouldDecorateNode=_shouldDecorateNode;
 @synthesize isDrawingEnvironmentMap=_isDrawingEnvironmentMap;
-@synthesize current2DTextureUnit=_current2DTextureUnit;
-@synthesize currentCubeTextureUnit=_currentCubeTextureUnit;
 @synthesize currentColor=_currentColor;
 
 -(void) dealloc {
@@ -302,23 +315,44 @@
 
 -(void) clearGL { _gl = nil; }		// weak reference
 
--(id<CC3RenderSurface>) renderSurface {
-	if ( !_renderSurface ) self.renderSurface = self.defaultRenderSurface;
-	return _renderSurface;
+-(GLuint) current2DTextureUnit {
+	switch (_textureBindingMode) {
+		case kCC3TextureBindingModeLightProbe:
+			return _currentLightProbeTextureUnit;
+		case kCC3TextureBindingModeModel:
+			return _current2DTextureUnit;
+	}
 }
 
--(id<CC3RenderSurface>) defaultRenderSurface { return self.scene.viewSurface; }
-
--(void) setRenderSurface: (id<CC3RenderSurface>) renderSurface {
-	if (renderSurface == _renderSurface) return;
-	[_renderSurface release];
-	_renderSurface = [renderSurface retain];
-	[self alignCameraViewport];
+-(void) increment2DTextureUnit {
+	switch (_textureBindingMode) {
+		case kCC3TextureBindingModeLightProbe:
+			_currentLightProbeTextureUnit++;
+			break;
+		case kCC3TextureBindingModeModel:
+			_current2DTextureUnit++;
+			break;
+	}
 }
 
--(void) setCamera: (CC3Camera*) camera {
-	[super setCamera: camera];
-	[self alignCameraViewport];
+-(GLuint) currentCubeTextureUnit {
+	switch (_textureBindingMode) {
+		case kCC3TextureBindingModeLightProbe:
+			return _currentLightProbeTextureUnit;
+		case kCC3TextureBindingModeModel:
+			return _currentCubeTextureUnit;
+	}
+}
+
+-(void) incrementCubeTextureUnit {
+	switch (_textureBindingMode) {
+		case kCC3TextureBindingModeLightProbe:
+			_currentLightProbeTextureUnit++;
+			break;
+		case kCC3TextureBindingModeModel:
+			_currentCubeTextureUnit++;
+			break;
+	}
 }
 
 -(void) alignCameraViewport {
@@ -331,18 +365,6 @@
 -(void) alignShotWith: (CC3NodeDrawingVisitor*) otherVisitor {
 	self.camera = otherVisitor.camera;
 	self.renderSurface = otherVisitor.renderSurface;
-}
-
-/** 
- * Overridden to return either the real shader program, or the pure-color shader program,
- * depending on whether the node should be decorated. For example, during node picking,
- * the node is not decorated, and the pure-color program will be used.
- * The shaderProgram will be selected if it has not been assigned already.
- */
--(CC3ShaderProgram*) currentShaderProgram {
-	return (self.shouldDecorateNode
-			? self.currentMeshNode.shaderProgram
-			: self.currentMeshNode.shaderContext.pureColorProgram);
 }
 
 -(void) processBeforeChildren: (CC3Node*) aNode {
@@ -437,7 +459,26 @@
 	// Under OGLES 1.1, they are determined by the number of textures attached to the mesh node.
 	CC3ShaderProgram* sp = self.currentShaderProgram;
 	_current2DTextureUnit = 0;
-	_currentCubeTextureUnit = sp ? sp.texture2DCount : self.textureCount;
+	_currentCubeTextureUnit = sp ? sp.textureCubeStart : self.textureCount;
+	_currentLightProbeTextureUnit = sp.textureLightProbeStart;
+	_textureBindingMode = kCC3TextureBindingModeModel;
+}
+
+-(void) bindEnvironmentalTextures {
+	[self bindLightProbeTextures];
+}
+
+/** Retrieve any light probe textures and bind them to the GL engine. */
+-(void) bindLightProbeTextures {
+	if ( !self.currentNode.shouldUseLightProbes ) return;
+
+	_textureBindingMode = kCC3TextureBindingModeLightProbe;
+	
+	GLuint tuCnt = self.currentShaderProgram.textureLightProbeCount;
+	for (GLuint tuIdx = 0; tuIdx < tuCnt; tuIdx++)
+		[[self lightProbeAt: tuIdx].texture drawWithVisitor: self];
+	
+	_textureBindingMode = kCC3TextureBindingModeModel;
 }
 
 -(void) disableUnusedTextureUnits {
@@ -446,24 +487,61 @@
 	// Under OGLES 2.0 & OGL, this is determined by the shader uniforms.
 	// Under OGLES 1.1, this is determined by the number of textures attached to the mesh node.
 	CC3ShaderProgram* sp = self.currentShaderProgram;
-	GLuint tex2DMax = sp ? sp.texture2DCount : self.textureCount;
-	GLuint texCubeMax = tex2DMax + (sp ? sp.textureCubeCount : 0);
 	CC3OpenGL* gl = self.gl;
+	GLuint tuMax = 0;
 	
 	// Disable remaining unused 2D textures
-	for (GLuint tuIdx = _current2DTextureUnit; tuIdx < tex2DMax; tuIdx++)
+	tuMax = sp ? (sp.texture2DStart + sp.texture2DCount) : self.textureCount;
+	for (GLuint tuIdx = _current2DTextureUnit; tuIdx < tuMax; tuIdx++)
 		[gl disableTexturingAt: tuIdx];
 	
 	// Disable remaining unused cube textures
-	for (GLuint tuIdx = _currentCubeTextureUnit; tuIdx < texCubeMax; tuIdx++)
+	tuMax = (sp ? (sp.textureCubeStart + sp.textureCubeCount) : tuMax);
+	for (GLuint tuIdx = _currentCubeTextureUnit; tuIdx < tuMax; tuIdx++)
+		[gl disableTexturingAt: tuIdx];
+	
+	// Disable remaining light probe textures
+	tuMax = sp.textureLightProbeStart + sp.textureLightProbeCount;
+	for (GLuint tuIdx = _currentLightProbeTextureUnit; tuIdx < tuMax; tuIdx++)
 		[gl disableTexturingAt: tuIdx];
 	
 	// Ensure remaining system texture units are disabled
-	[gl disableTexturingFrom: texCubeMax];
+	[gl disableTexturingFrom: tuMax];
 }
 
 
-#pragma mark Accessing node contents
+#pragma mark Accessing scene contents
+
+-(id<CC3RenderSurface>) renderSurface {
+	if ( !_renderSurface ) self.renderSurface = self.defaultRenderSurface;
+	return _renderSurface;
+}
+
+-(id<CC3RenderSurface>) defaultRenderSurface { return self.scene.viewSurface; }
+
+-(void) setRenderSurface: (id<CC3RenderSurface>) renderSurface {
+	if (renderSurface == _renderSurface) return;
+	[_renderSurface release];
+	_renderSurface = [renderSurface retain];
+	[self alignCameraViewport];
+}
+
+-(void) setCamera: (CC3Camera*) camera {
+	[super setCamera: camera];
+	[self alignCameraViewport];
+}
+
+/**
+ * Overridden to return either the real shader program, or the pure-color shader program,
+ * depending on whether the node should be decorated. For example, during node picking,
+ * the node is not decorated, and the pure-color program will be used.
+ * The shaderProgram will be selected if it has not been assigned already.
+ */
+-(CC3ShaderProgram*) currentShaderProgram {
+	return (self.shouldDecorateNode
+			? self.currentMeshNode.shaderProgram
+			: self.currentMeshNode.shaderContext.pureColorProgram);
+}
 
 -(ccColor4B) currentColor4B { return CCC4BFromCCC4F(self.currentColor); }
 
@@ -474,6 +552,14 @@
 -(void) setCurrentSkinSection: (CC3SkinSection*) currentSkinSection {
 	_currentSkinSection = currentSkinSection;
 	[self resetBoneMatrices];
+}
+
+-(CC3Vector) transformGlobalLocationToEyeSpace: (CC3Vector) globalLocation {
+	return CC3Matrix4x3TransformLocation(self.viewMatrix, globalLocation);
+}
+
+-(CC3Vector) transformGlobalLocationToModelSpace: (CC3Vector) globalLocation {
+	return [self.currentNode.globalTransformMatrixInverted transformLocation: globalLocation];
 }
 
 

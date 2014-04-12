@@ -1660,6 +1660,30 @@
 			<key>Path</key>
 			<string>cocos3d/cocos3d/Nodes/CC3Camera.m</string>
 		</dict>
+		<key>cocos3d/cocos3d/Nodes/CC3EnvironmentNodes.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Nodes</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Nodes/CC3EnvironmentNodes.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cocos3d/Nodes/CC3EnvironmentNodes.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Nodes</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Nodes/CC3EnvironmentNodes.m</string>
+		</dict>
 		<key>cocos3d/cocos3d/Nodes/CC3Light.h</key>
 		<dict>
 			<key>Group</key>
@@ -3372,6 +3396,8 @@
 		<string>cocos3d/cocos3d/Nodes/CC3BoundingVolumes.m</string>
 		<string>cocos3d/cocos3d/Nodes/CC3Camera.h</string>
 		<string>cocos3d/cocos3d/Nodes/CC3Camera.m</string>
+		<string>cocos3d/cocos3d/Nodes/CC3EnvironmentNodes.h</string>
+		<string>cocos3d/cocos3d/Nodes/CC3EnvironmentNodes.m</string>
 		<string>cocos3d/cocos3d/Nodes/CC3Light.h</string>
 		<string>cocos3d/cocos3d/Nodes/CC3Light.m</string>
 		<string>cocos3d/cocos3d/Nodes/CC3LocalContentNode.h</string>

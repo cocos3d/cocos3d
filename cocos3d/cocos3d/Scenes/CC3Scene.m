@@ -34,6 +34,7 @@
 #import "CC3MeshNode.h"
 #import "CC3Material.h"
 #import "CC3Light.h"
+#import "CC3EnvironmentNodes.h"
 #import "CC3Billboard.h"
 #import "CC3ShadowVolumes.h"
 #import "CC3AffineMatrix.h"
@@ -59,7 +60,8 @@
 @synthesize envMapDrawingVisitor=_envMapDrawingVisitor;
 @synthesize updateVisitor=_updateVisitor;
 @synthesize performanceStatistics=_performanceStatistics;
-@synthesize deltaFrameTime=_deltaFrameTime, backdrop=_backdrop, fog=_fog, lights=_lights;
+@synthesize deltaFrameTime=_deltaFrameTime, backdrop=_backdrop, fog=_fog;
+@synthesize lights=_lights, lightProbes=_lightProbes;
 @synthesize elapsedTimeSinceOpened=_elapsedTimeSinceOpened;
 
 /**
@@ -85,6 +87,8 @@
 	
 	[_lights release];
 	_lights = nil;							// Make nil so won't be referenced during parent dealloc
+	[_lightProbes release];
+	_lightProbes = nil;						// Make nil so won't be referenced during parent dealloc
 	[_billboards release];
 	_billboards = nil;						// Make nil so won't be referenced during parent dealloc
 	
@@ -196,6 +200,7 @@
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
 		_lights = [NSMutableArray new];			// retained
+		_lightProbes = [NSMutableArray new];	// retained
 		_billboards = [NSMutableArray new];		// retained
 		self.drawingSequenceVisitor = [CC3NodeSequencerVisitor visitorWithScene: self];
 		self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirst];
@@ -238,7 +243,7 @@
 -(void) populateFrom: (CC3Scene*) another {
 	[super populateFrom: another];
 	
-	// Lights, targetting nodes, billboards & drawing sequence collections,
+	// Lights, light probes, billboards & drawing sequence collections,
 	// plus activeCamera will be populated as children are added.
 	// No need to configure node picker.
 	
@@ -609,6 +614,9 @@
 		// If the node is a light, add it to the collection of lights
 		if (addedNode.isLight) [_lights addObject: addedNode];
 		
+		// If the node is a light probe, add it to the collection of light probes
+		if (addedNode.isLightProbe) [_lightProbes addObject: addedNode];
+		
 		// if the node is the first camera to be added, make it the active camera.
 		if (addedNode.isCamera && !_activeCamera) self.activeCamera = (CC3Camera*)addedNode;
 		
@@ -639,6 +647,9 @@
 		
 		// If the node is a light, remove it from the collection of lights
 		if (removedNode.isLight) [_lights removeObjectIdenticalTo: removedNode];
+		
+		// If the node is a light probe, remove it from the collection of light probes
+		if (removedNode.isLightProbe) [_lightProbes removeObjectIdenticalTo: removedNode];
 		
 		// If the node is a billboard, remove it from the collection of billboards
 		if (removedNode.isBillboard) [_billboards removeObjectIdenticalTo: removedNode];

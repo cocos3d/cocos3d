@@ -244,6 +244,13 @@
 	[super setShouldUseLighting: useLighting];	// pass along to any children
 }
 
+-(BOOL) shouldUseLightProbes { return _shouldUseLightProbes; }
+
+-(void) setShouldUseLightProbes: (BOOL) shouldUseLightProbes {
+	_shouldUseLightProbes = shouldUseLightProbes;
+	[super setShouldUseLightProbes: shouldUseLightProbes];	// pass along to any children
+}
+
 -(ccColor4F) ambientColor { return self.material.ambientColor; }
 
 -(void) setAmbientColor:(ccColor4F) aColor {
@@ -552,6 +559,7 @@
 		_mesh = nil;
 		_material = nil;
 		_shaderContext = nil;
+		_shouldUseLightProbes = NO;
 		_shouldUseSmoothShading = YES;
 		_shouldCullBackFaces = YES;
 		_shouldCullFrontFaces = NO;
@@ -879,24 +887,10 @@
  */
 -(void) cleanupDrawingParameters: (CC3NodeDrawingVisitor*) visitor {}
 
-/** 
- * Template method to apply the material and texture properties to the GL engine.
- * The visitor keeps track of which texture unit is being processed, with each texture
- * incrementing the appropriate texture unit counter as it draws. GL texture units that
- * are not used by the textures are disabled.
- */
+/** Apply the material and texture properties to the GL engine. */
 -(void) applyMaterialWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-
 	[self updateLightPosition];
-	
-	[visitor resetTextureUnits];
-	
-	if (visitor.shouldDecorateNode)
-		[self.material drawWithVisitor: visitor];
-	else
-		[CC3Material unbindWithVisitor: visitor];
-
-	[visitor disableUnusedTextureUnits];
+	[self.material drawWithVisitor: visitor];
 
 	// currentColor can be set by material, mesh node, or node picking visitor prior to this method.
 	visitor.gl.color = visitor.currentColor;

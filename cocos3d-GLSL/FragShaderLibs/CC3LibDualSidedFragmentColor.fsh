@@ -32,22 +32,32 @@
  * set by the vertex shader, depending on whether the fragment is front-facing or back-facing.
  *
  * This library requires the following varying variables be declared and populated in the vertex shader:
- *   - varying lowp vec4	v_color;		// Fragment front-face color.
- *   - varying lowp vec4	v_colorBack;	// Fragment back-face color.
+ *   - varying lowp vec4	v_color;				// Fragment front-face color.
+ *   - varying lowp vec4	v_colorBack;			// Fragment back-face color.
+ *   - varying vec3			v_vtxNormalGlobal;		// Vertex normal in global coordinates.
  *
  * This library declares and sets the intial values of the following local variables:
- *   - lowp vec4			fragColor;		// The fragment color
+ *   - lowp vec4			fragColor;				// The fragment color
+ *   - vec3					fragNormalGlobal;		// Local normal in global coordinates.
  */
 
 varying lowp vec4	v_color;			/**< Fragment front-face color. */
 varying lowp vec4	v_colorBack;		/**< Fragment back-face color. */
+varying vec3		v_vtxNormalGlobal;	/**< Vertex normal in global coordinates. */
 
 lowp vec4			fragColor;			/**< Local fragment color variable. */
+vec3				fragNormalGlobal;	/**< Local normal in global coordinates. */
 
 /** 
- * Sets the initial value of the fragment color from either the
- * front or back varying color established by the vertex shader.
+ * Sets the initial value of the fragment color from either the front 
+ * or back varying color established by the vertex shader.
  */
 void initFragmentColor() {
-	fragColor = gl_FrontFacing ? v_color : v_colorBack;
+	if (gl_FrontFacing) {
+		fragColor = v_color;
+		fragNormalGlobal = v_vtxNormalGlobal;
+	} else {
+		fragColor = v_colorBack;
+		fragNormalGlobal = -v_vtxNormalGlobal;
+	}
 }

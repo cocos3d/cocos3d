@@ -103,9 +103,9 @@
 
 -(void) incrementTextureUnitInVisitor: (CC3NodeDrawingVisitor*) visitor {
 	if (self.isTextureCube)
-		visitor.currentCubeTextureUnit += 1;
+		[visitor incrementCubeTextureUnit];
 	else
-		visitor.current2DTextureUnit += 1;
+		[visitor increment2DTextureUnit];
 }
 
 @end

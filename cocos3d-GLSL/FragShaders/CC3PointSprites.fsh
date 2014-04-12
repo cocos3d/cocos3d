@@ -39,11 +39,13 @@
 
 #import "CC3LibDefaultPrecision.fsh"
 #import "CC3LibDualSidedFragmentColor.fsh"
+#import "CC3LibLightProbeIllumination.fsh";
 #import "CC3LibTexturedPointSprite.fsh"
 #import "CC3LibSetGLFragColor.fsh"
 
 void main() {
 	initFragmentColor();
+	illuminateWithLightProbes();
 	applySpriteTexture();
 	setGLFragColor();
 }

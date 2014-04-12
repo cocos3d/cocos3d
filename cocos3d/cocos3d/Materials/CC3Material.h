@@ -183,9 +183,8 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
 }
 
 /**
- * If this value is set to YES, current lighting conditions will be taken into consideration
- * when drawing colors and textures, and the ambientColor, diffuseColor, specularColor,
- * emissionColor, and shininess properties will interact with lighting settings.
+ * If this value is set to YES, current lighting conditions (from either lights or light probes)
+ * will be taken into consideration when drawing colors and textures.
  *
  * If this value is set to NO, lighting conditions will be ignored when drawing colors and
  * textures, and the emissionColor will be applied to the mesh surface, without regard to
@@ -196,7 +195,7 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
  * to be displayed in their natural values despite current lighting conditions.
  *
  * Be aware that the initial value of the emissionColor property is normally black. If you
- * find your node disappears or turns black when you set this property to NO, try changing 
+ * find your node disappears or turns black when you set this property to NO, try changing
  * the value of the emissionColor property.
  *
  * The initial value of this property is YES.

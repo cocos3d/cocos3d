@@ -1392,9 +1392,8 @@ typedef enum {
 #pragma mark Matierial properties
 
 /**
- * If this value is set to YES, current lighting conditions will be taken into consideration
- * when drawing colors and textures, and the ambientColor, diffuseColor, specularColor,
- * emissionColor, and shininess properties will have effect.
+ * If this value is set to YES, current lighting conditions (from either lights or light probes)
+ * will be taken into consideration when drawing colors and textures.
  *
  * If this value is set to NO, lighting conditions will be ignored when drawing colors and
  * textures, and the emissionColor will be applied to the mesh surface, without regard to
@@ -1408,11 +1407,27 @@ typedef enum {
  * find your node disappears or turns black when you set this property to NO, try changing
  * the value of the emissionColor property.
  *
- * Setting the value of this property sets the same property in the materials contained in all
- * descendant nodes. Reading the value of this property returns YES if any descendant node
- * returns YES, and returns NO otherwise.
+ * Setting the value of this property sets the same property in all descendant nodes. 
+ * Reading the value of this property returns YES if any descendant node returns YES, 
+ * and returns NO otherwise.
  */
 @property(nonatomic, assign) BOOL shouldUseLighting;
+
+/**
+ * If this value is set to YES, any descendant mesh nodes will ignore the lights in the scene
+ * and will, instead, determine the lighting of the mesh node using textures held by light 
+ * probes in the scene.
+ *
+ * This property only has effect if the shouldUseLighting property is set to YES.
+ *
+ * Setting the value of this property sets the same property in all descendant nodes.
+ * Reading the value of this property returns YES if any descendant node returns YES,
+ * and returns NO otherwise.
+ *
+ * See the notes of the CC3LightProbe class to learn more about using light probes to
+ * illuminate models within the scene.
+ */
+@property(nonatomic, assign) BOOL shouldUseLightProbes;
 
 /**
  * The ambient color of the materials of this node.

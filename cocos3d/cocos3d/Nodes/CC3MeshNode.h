@@ -99,6 +99,7 @@
 	GLfloat _lineWidth;
 	GLenum _lineSmoothingHint;
 	CC3NormalScaling _normalScalingMethod : 4;
+	BOOL _shouldUseLightProbes : 1;
 	BOOL _shouldSmoothLines : 1;
 	BOOL _shouldDisableDepthMask : 1;
 	BOOL _shouldDisableDepthTest : 1;
@@ -182,9 +183,8 @@
 @property(nonatomic, assign) ccColor4F pureColor DEPRECATED_ATTRIBUTE;
 
 /**
- * If this value is set to YES, current lighting conditions will be taken into consideration
- * when drawing colors and textures, and the ambientColor, diffuseColor, specularColor,
- * emissionColor, and shininess properties will have effect.
+ * If this value is set to YES, current lighting conditions (from either lights or light probes)
+ * will be taken into consideration when drawing colors and textures.
  *
  * If this value is set to NO, lighting conditions will be ignored when drawing colors and
  * textures, and the emissionColor will be applied to the mesh surface, without regard to
@@ -204,6 +204,19 @@
  * The initial value of this property is YES.
  */
 @property(nonatomic, assign) BOOL shouldUseLighting;
+
+/**
+ * If this value is set to YES, this mesh node will ignore the lights in the scene and will, instead,
+ * determine the lighting of the mesh node using textures held by light probes in the scene.
+ *
+ * This property only has effect if the shouldUseLighting property is set to YES.
+ *
+ * The initial value of this property is NO.
+ *
+ * See the notes of the CC3LightProbe class to learn more about using light probes to
+ * illuminate models within the scene.
+ */
+@property(nonatomic, assign) BOOL shouldUseLightProbes;
 
 /**
  * The ambient color of the material of this mesh node.

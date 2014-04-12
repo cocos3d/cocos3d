@@ -626,7 +626,15 @@ static NSObject<CC3OpenGLDelegate>* _delegate = nil;
 		[self activateTextureUnit: tuIdx];
 		glBindTexture(target, texID);
 		LogGLErrorTrace(@"glBindTexture(%@, %u)", NSStringFromGLEnum(target), texID);
+
+		// If a real texture was set in this target, unbind all other targets in this texture unit
+		if (texID) [self unbindTexturesExceptTarget: target at: tuIdx];
 	}
+}
+
+/** Unbind all targets in the specified texture unit except the specified target. */
+-(void) unbindTexturesExceptTarget: (GLenum) target at: (GLuint) tuIdx {
+	CC3AssertUnimplemented(@"unbindTexturesExceptTarget:at:");
 }
 
 /** Sets the specified texture parameter for the specified texture unit, without checking a cache. */
@@ -664,6 +672,21 @@ static NSObject<CC3OpenGLDelegate>* _delegate = nil;
 -(void) setTextureEnvColor: (ccColor4F) color at: (GLuint) tuIdx {}
 
 -(void) enablePointSpriteCoordReplace: (BOOL) onOff at: (GLuint) tuIdx {}
+
+-(NSString*) dumpTextureBindings {
+	NSMutableString* desc = [NSMutableString stringWithCapacity: 500];
+	[desc appendString: @"Current GL texture bindings:"];
+	for (GLuint tuIdx = 0; tuIdx < value_MaxTextureUnitsUsed; tuIdx++) {
+		[self activateTextureUnit: tuIdx];
+		[desc appendFormat: @"\n\tTexture Unit %i: %@", tuIdx, [self dumpTextureBindingsAt: tuIdx]];
+	}
+	return desc;
+}
+
+-(NSString*) dumpTextureBindingsAt: (GLuint) tuIdx {
+	CC3AssertUnimplemented(@"dumpTextureBindingsAt:");
+	return nil;
+}
 
 
 #pragma mark Matrices

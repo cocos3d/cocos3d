@@ -96,7 +96,7 @@
 		
 		GLuint tuCnt = visitor.textureCount;
 		for (GLuint tuIdx = 0; tuIdx < tuCnt; tuIdx++) {
-			visitor.current2DTextureUnit = tuIdx;
+			visitor.current2DTextureUnit = tuIdx;	// Test incrementing - maybe need to reset first?
 			[self bindVertexArray: [mesh textureCoordinatesForTextureUnit: tuIdx]
 					  withVisitor: visitor];
 		}

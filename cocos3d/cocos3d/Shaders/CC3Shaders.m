@@ -357,6 +357,7 @@ static CC3Cache* _shaderCache = nil;
 @synthesize maxAttributeNameLength=_maxAttributeNameLength;
 @synthesize texture2DCount=_texture2DCount;
 @synthesize textureCubeCount=_textureCubeCount;
+@synthesize textureLightProbeCount=_textureLightProbeCount;
 @synthesize shouldAllowDefaultVariableValues=_shouldAllowDefaultVariableValues;
 
 -(void) dealloc {
@@ -512,6 +513,15 @@ static BOOL _defaultShouldAllowDefaultVariableValues = NO;
 }
 
 
+#pragma mark Textures
+
+-(GLuint) texture2DStart { return 0; }
+
+-(GLuint) textureCubeStart { return _texture2DCount; }
+
+-(GLuint) textureLightProbeStart { return _texture2DCount + _textureCubeCount; }
+
+
 #pragma mark Linking
 
 -(void) link {
@@ -584,6 +594,7 @@ static BOOL _defaultShouldAllowDefaultVariableValues = NO;
 	[_uniformsDrawScope removeAllObjects];
 	_texture2DCount = 0;
 	_textureCubeCount = 0;
+	_textureLightProbeCount = 0;
 }
 
 /** Let the delegate configure the uniform, and then update the texture counts. */
@@ -593,6 +604,7 @@ static BOOL _defaultShouldAllowDefaultVariableValues = NO;
 	if (var.semantic == kCC3SemanticTextureSampler) _texture2DCount += var.size;
 	if (var.semantic == kCC3SemanticTexture2DSampler) _texture2DCount += var.size;
 	if (var.semantic == kCC3SemanticTextureCubeSampler) _textureCubeCount += var.size;
+	if (var.semantic == kCC3SemanticTextureLightProbeSampler) _textureLightProbeCount += var.size;
 }
 
 /** Adds the specified uniform to the appropriate internal collection, based on variable scope. */
@@ -726,6 +738,7 @@ static BOOL _defaultShouldAllowDefaultVariableValues = NO;
 		_maxAttributeNameLength = 0;
 		_texture2DCount = 0;
 		_textureCubeCount = 0;
+		_textureLightProbeCount = 0;
 		_isSceneScopeDirty = YES;	// start out dirty for auto-loaded programs
 		_semanticDelegate = nil;
 		_shouldAllowDefaultVariableValues = self.class.defaultShouldAllowDefaultVariableValues;

@@ -751,6 +751,9 @@ typedef struct {
  */
 -(void) enablePointSpriteCoordReplace: (BOOL) onOff at: (GLuint) tuIdx;
 
+/** Returns a string description of the current texture object bindings for each texture unit. */
+-(NSString*) dumpTextureBindings;
+
 
 #pragma mark Matrices
 

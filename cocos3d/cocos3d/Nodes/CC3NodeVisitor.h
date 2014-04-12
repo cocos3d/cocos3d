@@ -35,7 +35,8 @@
 #import "CC3PerformanceStatistics.h"
 #import "CC3OpenGL.h"
 
-@class CC3Node, CC3MeshNode, CC3Camera, CC3Light, CC3Scene, CC3ShaderProgram;
+@class CC3Node, CC3MeshNode, CC3Camera, CC3Light, CC3LightProbe;
+@class CC3Scene, CC3ShaderProgram;
 @class CC3Material, CC3TextureUnit, CC3Mesh, CC3NodeSequencer, CC3SkinSection;
 @protocol CC3RenderSurface;
 
@@ -212,8 +213,8 @@
  */
 @property(nonatomic, readonly) CC3ShaderProgram* currentShaderProgram;
 
-/** The number of lights in the scene. */
-@property(nonatomic, readonly) NSUInteger lightCount;
+/** Number of lights in the scene. */
+@property(nonatomic, readonly) GLuint lightCount;
 
 /**
  * Returns the light indicated by the index, or nil if the specified index is greater than
@@ -223,6 +224,17 @@
  * the same as the lightIndex property of the CC3Light.
  */
 -(CC3Light*) lightAt: (GLuint) index;
+
+/** Min of number of light probes in the scene, and the number used by the shader program. */
+@property(nonatomic, readonly) GLuint lightProbeCount;
+
+/**
+ * Returns the light probe indicated by the index, or nil if the specified index is 
+ * greater than the number of light probes currently existing in the scene.
+ *
+ * The specified index is an index into the lightProbes array of the scene.
+ */
+-(CC3LightProbe*) lightProbeAt: (GLuint) index;
 
 /**
  * The performanceStatistics being accumulated during the visitation runs.
@@ -269,6 +281,12 @@
 @end
 
 
+/** Enumeration of drawing visitor texture modes. */
+typedef enum {
+	kCC3TextureBindingModeModel,			/**< Binding model textures. */
+	kCC3TextureBindingModeLightProbe,		/**< Binding light probe textures. */
+} CC3TextureBindingMode;
+
 #pragma mark -
 #pragma mark CC3NodeDrawingVisitor
 
@@ -302,9 +320,11 @@
 	CC3Matrix4x3 _modelViewMatrix;
 	CC3Matrix4x4 _modelViewProjMatrix;
 	ccColor4F _currentColor;
+	CC3TextureBindingMode _textureBindingMode;
 	GLuint _textureUnitCount;
 	GLuint _current2DTextureUnit;
 	GLuint _currentCubeTextureUnit;
+	GLuint _currentLightProbeTextureUnit;
 	CCTime _deltaTime;
 	BOOL _shouldDecorateNode : 1;
 	BOOL _isDrawingEnvironmentMap : 1;
@@ -341,7 +361,10 @@
  * This value is initialized to zero when starting to draw each material, and is incremented
  * as each 2D texture in the material is drawn.
  */
-@property(nonatomic, assign) GLuint current2DTextureUnit;
+@property(nonatomic, readonly) GLuint current2DTextureUnit;
+
+/** Increments the value fo the current2DTextureUnit property. */
+-(void) increment2DTextureUnit;
 
 /**
  * The index of the current texture unit holding a cube-map texture.
@@ -349,13 +372,14 @@
  * This value is initialized to zero when starting to draw each material, and is incremented
  * as each cube-map texture in the material is drawn.
  */
-@property(nonatomic, assign) GLuint currentCubeTextureUnit;
+@property(nonatomic, readonly) GLuint currentCubeTextureUnit;
 
-//@property(nonatomic, assign) GLuint currentTextureUnitIndex;
+/** Increments the value fo the currentCubeTextureUnit property. */
+-(void) incrementCubeTextureUnit;
 
 /** 
  * Sets the value of the current2DTextureUnit property to zero, and sets the value of the 
- * currentCubeTextureUnit property to either the value of the texture2DCount property of 
+ * currentCubeTextureUnit property to either the value of the textureCubeStart property of
  * the currentShaderProgram (OpenGL ES 2.0 & OpenGL), or to the same as the textureCount
  * property of this instance (OpenGL ES 1.1).
  *
@@ -364,10 +388,16 @@
  * consistently assigned to the shader samplers, to avoid the shaders recompiling on the
  * fly to adapt to changing texture types.
  *
+ * Additional environmental textures, such as light probes, are assigned to the texture units
+ * beyond the model's cube textures.
+ *
  * GL texture units of each type that were not used by the textures are disabled via the
  * disabledTextureUnits method.
  */
 -(void) resetTextureUnits;
+
+/** Binds environmental textures, such as light probes. */
+-(void) bindEnvironmentalTextures;
 
 /** 
  * Disables all texture units that do not have an associated texture. 
@@ -405,8 +435,8 @@
  * Indicates whether this visitor is rendering an environment map to a texture.
  *
  * Environment maps typically do not require full detail. This property can be used during
- * drawing to make optimization decisions such as to avoid drawing certain more complex
- * content when creating an environment map.
+ * drawing to make optimization decisions such as to avoid drawing more complex content 
+ * when creating an environment map.
  *
  * The initial value of this property is NO.
  */
@@ -484,6 +514,12 @@
  * Each of the RGBA components of this color are integer values between 0 and 255.
  */
 @property(nonatomic, assign) ccColor4B currentColor4B;
+
+/** Transforms the specified global location to the coordinate system of the camera (eye space). */
+-(CC3Vector) transformGlobalLocationToEyeSpace: (CC3Vector) globalLocation;
+
+/** Transforms the specified global location to the coordinate system of the current node. */
+-(CC3Vector) transformGlobalLocationToModelSpace: (CC3Vector) globalLocation;
 
 
 #pragma mark Environmental matrices

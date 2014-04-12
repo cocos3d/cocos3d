@@ -229,6 +229,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  */
 @interface CC3Scene : CC3Node {
 	NSMutableArray* _lights;
+	NSMutableArray* _lightProbes;
 	NSMutableArray* _billboards;
 	CC3Layer* _cc3Layer;
 	CC3Camera* _activeCamera;
@@ -304,12 +305,22 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 /**
  * Returns the lights currently illuminating this scene.
  *
- * This is a read-only convenience property. You should not change the contents of the
- * array returned by this method. To add a light to the scene, add the light to a parent
- * node (or the scene itself) using the addChild: method. To remove a light from the scene,
- * invoke the remove method on the light itself, or the removeChild: method on its parent.
+ * This is a read-only convenience property. You should not change the contents of the array
+ * returned by this method. To add a light to the scene, add it to a parent node (or the scene 
+ * itself) using the addChild: method. To remove a light from the scene, invoke the remove 
+ * method on the light itself, or the removeChild: method on its parent.
  */
 @property(nonatomic, retain, readonly) NSArray* lights;
+
+/**
+ * Returns the light probes currently illuminating this scene.
+ *
+ * This is a read-only convenience property. You should not change the contents of the array
+ * returned by this method. To add a light probe to the scene, add it to a parent node (or the
+ * scene itself) using the addChild: method. To remove a light probe from the scene, invoke the
+ * remove method on the light probe itself, or the removeChild: method on its parent.
+ */
+@property(nonatomic, retain, readonly) NSArray* lightProbes;
 
 /**
  * To create a backdrop for this scene, set this to a CC3Backdrop instance, covered with

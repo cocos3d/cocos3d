@@ -54,6 +54,7 @@
 #import "CC3ProjectionMatrix.h"
 #import "CC3PFXResource.h"
 #import "CC3BitmapLabelNode.h"
+#import "CC3EnvironmentNodes.h"
 
 
 // File names
@@ -214,6 +215,9 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	
 	[self addSpotlight];			// Add a spotlight to the camera.
 									// This spotlight will be turned on when the sun is turned off.
+	
+	[self addLightProbes];			// Adds light probes to the scene, as an alternate to using lights.
+									// Using the light probes can be turned on and off.
 	
 	[self configureLighting];		// Set up the lighting
 	[self configureCamera];			// Check out some interesting camera options.
@@ -1621,6 +1625,30 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	[self.activeCamera addChild: spotLight];
 }
 
+/** 
+ * Adds light probes to the scene.
+ *
+ * Illuminating models with light probes is an alternate to using individual lights. Light probes 
+ * contain a texture (usually a cube-map texture) that defines the lighting characteristics of an
+ * area of the scene. Within a GLSL shader, the vertex or fragment normal is used to pick a light 
+ * intensity from the texture. Light probes often capture lighting nuances and detail that can be 
+ * difficult to replicate with individual lights, and can improve performance, as they require 
+ * substantially less calculation within a shader.
+ * 
+ * Light probes are not available when using OpenGL ES 1.1.
+ */
+-(void) addLightProbes {
+	// Load the cube texture that contains the lighting incident from all directions.
+	// Alternately, for an interesting effect, you can comment out the first line and
+	// uncomment the second line, to load a cube-texture that contains a different
+	// solid color per side. This color-coded clearly demonstrates how the cube texture
+	// is being mapped to the normals of the model.
+	CC3Texture* lpTex = [CC3Texture textureCubeFromFilePattern: @"cubelight_%@.png"];
+//	CC3Texture* lpTex = [CC3Texture textureCubeColoredForAxes];
+
+	[self addChild: [CC3LightProbe nodeWithTexture: lpTex]];
+}
+
 /**
  * Adds fog to the scene. The fog is initially turned off, but will be turned on when
  * the sun button is toggled. The fog cycles in color between bluish and reddish tones.
@@ -1749,6 +1777,10 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// Retrieve the lamp in the POD, cache it for later access, and turn it off for now.
 	_runnerLamp = (CC3Light*)[runner getNodeNamed: kRunnerLampName];
 	_runnerLamp.visible = NO;
+
+	// Make the runner a little more visible underl lighting
+	runner.diffuseColor = kCCC4FWhite;
+	runner.ambientColor = kCCC4FWhite;
 
 	runner.touchEnabled = YES;		// make the runner touchable
 	
@@ -2718,14 +2750,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 -(void) drawToTVScreen {
 	LogTrace(@"Drawing to TV");
 
-	BOOL lampOnCurr = _runnerLamp.visible;
-	_runnerLamp.visible = YES;					// Temporarily turn the runner-cam's light on
-
 	[_tvDrawingVisitor.renderSurface clearColorAndDepthContent];	// Clear color & depth of TV surface.
 	[self drawBackdropWithVisitor: _tvDrawingVisitor];				// Draw the backdrop if it exists
 	[_tvDrawingVisitor visit: self];								// Draw the scene components
-
-	_runnerLamp.visible = lampOnCurr;
 	
 	[self pictureInPicture];		// Add a small PiP image in the bottom right of the TV screen
 }
@@ -3069,6 +3096,13 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 			_lightingType = kLightingFlashlight;
 			break;
 		case kLightingFlashlight:
+#if CC3_OGLES_1
+			_lightingType = kLightingFog;	// Light probes not supported in OpenGL ES 1
+#else
+			_lightingType = kLightingLightProbe;
+#endif	// CC3_OGLES_1
+			break;
+		case kLightingLightProbe:
 			_lightingType = kLightingFog;
 			break;
 		case kLightingFog:
@@ -3095,14 +3129,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 			flashLight.visible = NO;
 			_bumpMapLightTracker.target = _robotLamp;
 			_backdrop.emissionColor = kSkyColor;
-			break;
-		case kLightingFog:
-			sun.visible = YES;
-			_fog.visible = YES;
-			_robotLamp.visible = YES;
-			flashLight.visible = NO;
-			_bumpMapLightTracker.target = _robotLamp;
-			_backdrop.emissionColor = kSkyColor;
+			self.shouldUseLightProbes = NO;
 			break;
 		case kLightingFlashlight:
 			sun.visible = NO;
@@ -3111,6 +3138,25 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 			flashLight.visible = YES;
 			_bumpMapLightTracker.target = flashLight;
 			_backdrop.emissionColor = kCCC4FBlack;
+			self.shouldUseLightProbes = NO;
+			break;
+		case kLightingLightProbe:
+			sun.visible = NO;
+			_fog.visible = NO;
+			_robotLamp.visible = YES;
+			flashLight.visible = NO;
+			_bumpMapLightTracker.target = _robotLamp;
+			_backdrop.emissionColor = kSkyColor;
+			self.shouldUseLightProbes = YES;
+			break;
+		case kLightingFog:
+			sun.visible = YES;
+			_fog.visible = YES;
+			_robotLamp.visible = YES;
+			flashLight.visible = NO;
+			_bumpMapLightTracker.target = _robotLamp;
+			_backdrop.emissionColor = kSkyColor;
+			self.shouldUseLightProbes = NO;
 			break;
 		case kLightingGrayscale:
 			sun.visible = YES;
@@ -3119,6 +3165,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 			flashLight.visible = NO;
 			_bumpMapLightTracker.target = _robotLamp;
 			_backdrop.emissionColor = kSkyColor;
+			self.shouldUseLightProbes = NO;
 			break;
 		case kLightingDepth:
 			sun.visible = YES;
@@ -3127,6 +3174,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 			flashLight.visible = NO;
 			_bumpMapLightTracker.target = _robotLamp;
 			_backdrop.emissionColor = kSkyColor;
+			self.shouldUseLightProbes = NO;
 			break;
 	}
 }
@@ -3697,18 +3745,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	LogInfo(@"TV image saved to file: %@", imgPath);
 }
 
-/**
- * Toggle between the main scene camera and the camera running along with the runner.
- * When the runner's camera is active, turn on a local light to illuminate him.
- */
+/** Toggle between the main scene camera and the camera running along with the runner. */
 -(void) toggleActiveCamera {
-	if (self.activeCamera == _robotCam) {
-		self.activeCamera = _runnerCam;
-		_runnerLamp.visible = YES;
-	} else {
-		self.activeCamera = _robotCam;
-		_runnerLamp.visible = NO;
-	}
+	self.activeCamera = (self.activeCamera == _robotCam) ? _runnerCam : _robotCam;
 }
 
 /** Cycles the specified bitmapped label node through a selection of label strings. */

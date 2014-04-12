@@ -146,7 +146,7 @@
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName withLightIndex: (GLuint) ltIndx {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		if (ltIndx == UINT_MAX) return nil;		// All the lights have been used already.
+		if (ltIndx == kCC3MaxGLuint) return nil;		// All the lights have been used already.
 			
 		_lightIndex = ltIndx;
 		_shadows = nil;
@@ -584,7 +584,7 @@ static GLuint lightPoolStartIndex = 0;
 
 /**
  * Assigns and returns the next available light index from the pool.
- * If no more lights are available, returns UINT_MAX.
+ * If no more lights are available, returns kCC3MaxGLuint.
  */
 -(GLuint) nextLightIndex {
 	BOOL* indexPool = [[self class] lightIndexPool];
@@ -597,7 +597,7 @@ static GLuint lightPoolStartIndex = 0;
 		}
 	}
 	CC3Assert(NO, @"Too many lights. Only %u lights may be created.", platformMaxLights);
-	return UINT_MAX;
+	return kCC3MaxGLuint;
 }
 
 /** Returns the specified light index to the pool. */
@@ -1012,7 +1012,7 @@ static GLuint lightPoolStartIndex = 0;
 #pragma mark -
 #pragma mark CC3Node extension for lights
 
-@implementation CC3Node (Lighting)
+@implementation CC3Node (CC3Light)
 
 -(BOOL) isLight { return NO; }
 

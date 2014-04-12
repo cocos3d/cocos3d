@@ -485,6 +485,7 @@
 	GLint _maxAttributeNameLength;
 	GLuint _texture2DCount;
 	GLuint _textureCubeCount;
+	GLuint _textureLightProbeCount;
 	BOOL _shouldAllowDefaultVariableValues : 1;
 	BOOL _isSceneScopeDirty : 1;
 }
@@ -551,12 +552,6 @@
 /** Returns the uniform at the specified location, or nil if no uniform is defined at the specified location. */
 -(CC3GLSLUniform*) uniformAtLocation: (GLint) uniformLocation;
 
-/** Returns the number of 2D textures supported by this shader program. */
-@property(nonatomic, readonly) GLuint texture2DCount;
-
-/** Returns the number of cube-map textures supported by this shader program. */
-@property(nonatomic, readonly) GLuint textureCubeCount;
-
 /** Returns the number of vertex attributes declared and in use by this program. */
 @property(nonatomic, readonly) GLuint attributeCount;
 
@@ -580,6 +575,39 @@
 
 /** Returns the vertex attribute at the specified location, or nil if no attribute is defined at the specified location. */
 -(CC3GLSLAttribute*) attributeAtLocation: (GLint) attrLocation;
+
+
+#pragma mark Textures
+
+/** 
+ * Returns the texture unit index of the first 2D texture supported by this shader program.
+ * 
+ * The 2D textures are allocated consecutive texture units beginning at the returned texture unit.
+ */
+@property(nonatomic, readonly) GLuint texture2DStart;
+
+/** Returns the number of 2D textures supported by this shader program. */
+@property(nonatomic, readonly) GLuint texture2DCount;
+
+/**
+ * Returns the texture unit index of the first cube texture supported by this shader program.
+ *
+ * The cube textures are allocated consecutive texture units beginning at the returned texture unit.
+ */
+@property(nonatomic, readonly) GLuint textureCubeStart;
+
+/** Returns the number of cube-map textures supported by this shader program. */
+@property(nonatomic, readonly) GLuint textureCubeCount;
+
+/**
+ * Returns the texture unit index of the first light probe texture supported by this shader program.
+ *
+ * The light probe textures are allocated consecutive texture units beginning at the returned texture unit.
+ */
+@property(nonatomic, readonly) GLuint textureLightProbeStart;
+
+/** Returns the number of light probe textures supported by this shader program. */
+@property(nonatomic, readonly) GLuint textureLightProbeCount;
 
 /**
  * Each uniform used by this shader program must have a valid value. This property can be used to 

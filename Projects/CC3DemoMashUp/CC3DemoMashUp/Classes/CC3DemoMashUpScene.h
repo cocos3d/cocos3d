@@ -53,8 +53,9 @@ typedef enum {
 /** Enumeration of lighting options. */
 typedef enum {
 	kLightingSun,				/**< Sunshine. */
-	kLightingFog,				/**< Sunshine with fog. */
 	kLightingFlashlight,		/**< Nightime with flashlight. */
+	kLightingLightProbe,		/**< Light probe uses cube texture instead of light calcs. */
+	kLightingFog,				/**< Sunshine with fog. */
 	kLightingGrayscale,			/**< Sunshine with grayscale post-processing filter. */
 	kLightingDepth,				/**< Display the depth buffer using a post-processing filter. */
 } LightingType;
@@ -140,6 +141,7 @@ typedef enum {
  *   - apply multiple animation tracks to a model, blend them together, and smoothly transition between
  *     animation tracks using a cross-fade action.
  *   - bypassing Xcode/iOS automatic pre-multiplying of texture color content with alpha content
+ *   - scene lighting using light probes containing cube-map textures, instead of discrete lights
  *
  * In addition, there are a number of interesting options for you to play with by uncommenting
  * certain lines of code in the methods of this class that build objects in the 3D scene,
@@ -525,6 +527,14 @@ typedef enum {
  * configuration or focus of the spotlight, and therefore does not attenuate the per-pixel
  * illumination outside the beam of the spotlight. This is something to keep in mind when
  * combining the techniques of spotlights and bump-mapping.
+ *
+ * If the device is running OpenGL ES 2.0 or OpenGL OSX, touching the illumination button 
+ * again turns the spotlight and main sun light off, and turns on a light probe. A light 
+ * probe contains a cube-map texture that is used to determine the light that hits each 
+ * node from all directions. This can be used to create realistic lighting in a 3D editor, 
+ * and then apply it to the scene. If you touch one of the runners to view them up-close,
+ * you can follow how the lighting on the runners changes as they face different directions,
+ * as they run around the track. The light probe was added in the addLightProbe method.
  *
  * Touching the illumination button again turns the sun back on, but envelopes the scene in
  * a fog. The farther away an object is, the less visible it is through the fog. The effect

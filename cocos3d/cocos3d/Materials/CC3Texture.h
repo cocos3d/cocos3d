@@ -794,7 +794,7 @@
  * See the notes for the pixelFormat and pixelType properties for the range of values permitted
  * for the corresponding format and type parameters here.
  *
- * The name property of this instance will be nil.
+ * The name property of the instance will be nil.
  *
  * Since textures can consume significant resources, you should assign this instance a name
  * and add it to the texture cache by using the class-side addTexture: method. You can then
@@ -839,7 +839,7 @@
  * See the notes for the pixelFormat and pixelType properties for the range of values permitted
  * for the corresponding format and type parameters here.
  *
- * The name property of this instance will be nil.
+ * The name property of the instance will be nil.
  *
  * Since textures can consume significant resources, you should assign this instance a name
  * and add it to the texture cache by using the class-side addTexture: method. You can then
@@ -850,6 +850,42 @@
  * different class than the receiver.
  */
 +(id) textureWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type;
+
+/**
+ * Initializes this instance containing pixel content of the specified size and solid, 
+ * uniform color. This method can be useful for creating a test texture.
+ *
+ * The name property of this instance will be nil.
+ *
+ * Since the texture is just a solid color, a mipmap is not created.
+ *
+ * Since textures can consume significant resources, you should assign this instance a name
+ * and add it to the texture cache by using the class-side addTexture: method. You can then
+ * retrieve the texture from the cache via the getTextureNamed: method to apply this texture
+ * to multple meshes.
+ *
+ * CC3Texture is the root of a class-cluster. The object returned may be a different
+ * instance of a different class than the receiver.
+ */
+-(id) initWithSize: (CC3IntSize) size andColor: (ccColor4B) color;
+
+/**
+ * Allocates and initializes an autoreleased instance containing pixel content of the specified
+ * size and solid, uniform color. This method can be useful for creating a test texture.
+ *
+ * The name property of this instance will be nil.
+ *
+ * Since the texture is just a solid color, a mipmap is not created.
+ *
+ * Since textures can consume significant resources, you should assign this instance a name
+ * and add it to the texture cache by using the class-side addTexture: method. You can then
+ * retrieve the texture from the cache via the getTextureNamed: method to apply this texture
+ * to multple meshes.
+ *
+ * CC3Texture is the root of a class-cluster. The object returned may be a different
+ * instance of a different class than the receiver.
+ */
++(id) textureWithSize: (CC3IntSize) size andColor: (ccColor4B) color;
 
 /**
  * Initializes this instance by loading the six cube face textures at the specified file paths,
@@ -1090,6 +1126,63 @@
  * different class than the receiver.
  */
 +(id) textureCubeWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type;
+
+/**
+ * Initializes this instance to have a unique solid color for each side of the cube.
+ *
+ * The sides of the cube are colored using an easy (RGB <=> XYZ) mnemonic as follows:
+ *   - +X-axis: Red
+ *   - -X-axis: Cyan (inverse of Red)
+ *   - +Y-axis: Green
+ *   - -Y-axis: Magenta (inverse of Green)
+ *   - +Z-axis: Blue
+ *   - -Z-axis: Yellow (inverse of Blue)
+ *
+ * Once initialized, the texture will be bound to the GL engine.
+ *
+ * The name property of this instance will be nil.
+ *
+ * Since the texture is just a solid color, a mipmap is not created.
+ *
+ * CC3Texture is the root of a class-cluster. The object returned may be a different
+ * instance of a different class than the receiver.
+ */
+-(id) initCubeColoredForAxes;
+
+/**
+ * Returns an instance initialized to have a unique solid color for each side of the cube.
+ *
+ * The sides of the cube are colored using an easy (RGB <=> XYZ) mnemonic as follows:
+ *   - +X-axis: Red
+ *   - -X-axis: Cyan (inverse of Red)
+ *   - +Y-axis: Green
+ *   - -Y-axis: Magenta (inverse of Green)
+ *   - +Z-axis: Blue
+ *   - -Z-axis: Yellow (inverse of Blue)
+ *
+ * Once initialized, the texture will be bound to the GL engine.
+ *
+ * Since the texture is just a solid color, a mipmap is not created.
+ *
+ * The name of the instance is set to @"Axes-Colored-Cube".
+ *
+ * Textures loaded through this method are cached. If the texture was already loaded and is in
+ * the cache, it is retrieved and returned. If the texture has not in the cache, it is loaded,
+ * placed into the cache, indexed by its name, and returned. It is therefore safe to invoke this
+ * method any time the texture is needed, without having to worry that the texture will be
+ * repeatedly loaded from file.
+ *
+ * To clear a texture instance from the cache, use the removeTexture: method.
+ *
+ * To create a texture directly, bypassing the cache, use the alloc and initCubeColoredForAxes
+ * methods. This technique can be used to create the same texture twice, if needed for some reason.
+ * Each distinct instance can then be given its own name, and added to the cache separately.
+ * However, when choosing to do so, be aware that textures often consume significant memory.
+ *
+ * CC3Texture is the root of a class-cluster. The object returned may be an instance of a
+ * different class than the receiver.
+ */
++(id) textureCubeColoredForAxes;
 
 /**
  * Returns a texture name derived from the specified file path.
@@ -1716,6 +1809,23 @@
  * The value of the isUpsideDown is set to NO.
  */
 -(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type;
+
+/**
+ * Initializes this instance containing pixel content of the specified size and solid, uniform color.
+ *
+ * This method is useful for creating a blank tetxure canvas of a particular size and color.
+ * By accessing the imageData property, the application can then draw pixels to this canvas.
+ */
+-(id) initWithSize: (CC3IntSize) size andColor: (ccColor4B) color;
+
+/**
+ * Allocates and initializes an autoreleased instance containing pixel content of the 
+ * specified size and solid, uniform color.
+ *
+ * This method is useful for creating a blank tetxure canvas of a particular size and color.
+ * By accessing the imageData property, the application can then draw pixels to this canvas.
+ */
++(id) textureWithSize: (CC3IntSize) size andColor: (ccColor4B) color;
 
 /** Initializes this instance to represent the same GL texture as the specified CC3Texture. */
 -(id) initFromCC3Texture: (CC3Texture*) texture;

@@ -55,13 +55,14 @@ attribute vec2			a_cc3TexCoord;			/**< Vertex texture coordinate. */
 //-------------- VARYING VARIABLE OUTPUTS ----------------------
 varying lowp vec4		v_color;				/**< Fragment base color. */
 varying vec2			v_texCoord0;			/**< Fragment texture coordinates. */
-
+varying vec3			v_vtxNormalGlobal;		/**< Vertex normal in global coordinates. */
 
 //-------------- ENTRY POINT ----------------------
 void main() {
 	
 	// If vertices have individual colors, use them, otherwise use pure color.
 	v_color = u_cc3VertexHasColor ? a_cc3Color : u_cc3Color;
+	v_vtxNormalGlobal = vec3(0.0);		// Unused, but required by frag shader
 	v_texCoord0	= a_cc3TexCoord;
 	gl_Position = a_cc3Position;
 }

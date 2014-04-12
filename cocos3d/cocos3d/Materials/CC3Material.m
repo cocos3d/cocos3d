@@ -520,12 +520,27 @@ static GLuint lastAssignedMaterialTag;
 
 #pragma mark Drawing
 
+/**
+ * Template method to apply the material and texture properties to the GL engine.
+ * The visitor keeps track of which texture unit is being processed, with each texture
+ * incrementing the appropriate texture unit counter as it draws. GL texture units that
+ * are not used by the textures are disabled.
+ */
 -(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	LogTrace(@"Drawing %@", self);
-	[self applyAlphaTestWithVisitor: visitor];
-	[self applyBlendWithVisitor: visitor];
-	[self applyColorsWithVisitor: visitor];
-	[self drawTexturesWithVisitor: visitor];
+
+	[visitor resetTextureUnits];
+
+	if (visitor.shouldDecorateNode) {
+		LogTrace(@"Drawing %@", self);
+		[self applyAlphaTestWithVisitor: visitor];
+		[self applyBlendWithVisitor: visitor];
+		[self applyColorsWithVisitor: visitor];
+		[self drawTexturesWithVisitor: visitor];
+	} else {
+		[self.class unbindWithVisitor: visitor];
+	}
+
+	[visitor disableUnusedTextureUnits];
 }
 
 /**
@@ -581,7 +596,10 @@ static GLuint lastAssignedMaterialTag;
  * The 2D texture are assigned to the lower texture units, and cube-map textures are assigned
  * to texture units above all the 2D textures. This ensures that the same texture types are
  * consistently assigned to the shader samplers, to avoid the shaders recompiling on the
- * fly to adapt to changing texture types.
+ * fly to adapt to changing texture types. 
+ *
+ * After the 2D and cube textures contained in this material are bound, additional 
+ * environmental textures, such as light probes, are bound on top.
  *
  * GL texture units of each type that were not used by the textures are disabled by the
  * mesh node after this method is complete.
@@ -589,6 +607,8 @@ static GLuint lastAssignedMaterialTag;
 -(void) drawTexturesWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	[_texture drawWithVisitor: visitor];
 	for (CC3Texture* ot in _textureOverlays) [ot drawWithVisitor: visitor];
+
+	[visitor bindEnvironmentalTextures];
 }
 
 +(void) unbindWithVisitor: (CC3NodeDrawingVisitor*) visitor {

@@ -635,6 +635,15 @@
 	for (CC3Node* child in _children) child.shouldUseLighting = useLighting;
 }
 
+-(BOOL) shouldUseLightProbes {
+	for (CC3Node* child in _children) if (child.shouldUseLightProbes) return YES;
+	return NO;
+}
+
+-(void) setShouldUseLightProbes: (BOOL) shouldUseLightProbes {
+	for (CC3Node* child in _children) child.shouldUseLightProbes = shouldUseLightProbes;
+}
+
 -(ccColor4F) ambientColor {
 	ccColor4F col = kCCC4FBlackTransparent;
 	NSUInteger childCnt = 0;

@@ -257,7 +257,7 @@ static const CCTime kCC3ParticleInfiniteEmissionRate = kCC3MaxGLfloat;
  * This can be used with the maximumParticleCapacity property, and indicates that there
  * is no pre-defined maximum limit to the number of particles that will be emitted.
  */
-static const GLuint kCC3ParticlesNoMax = UINT_MAX;
+static const GLuint kCC3ParticlesNoMax = kCC3MaxGLuint;
 
 /**
  * A CC3MeshNode that emits 3D particles.

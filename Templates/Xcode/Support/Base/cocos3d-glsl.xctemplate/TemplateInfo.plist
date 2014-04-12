@@ -42,6 +42,16 @@
 			<key>Path</key>
 			<string>cocos3d-GLSL/FragShaderLibs/CC3LibEnvironmentReflection.fsh</string>
 		</dict>
+		<key>cocos3d-GLSL/FragShaderLibs/CC3LibLightProbeIllumination.fsh</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d-GLSL</string>
+				<string>FragShaderLibs</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d-GLSL/FragShaderLibs/CC3LibLightProbeIllumination.fsh</string>
+		</dict>
 		<key>cocos3d-GLSL/FragShaderLibs/CC3LibSetGLFragColor.fsh</key>
 		<dict>
 			<key>Group</key>
@@ -478,6 +488,7 @@
 		<string>cocos3d-GLSL/FragShaderLibs/CC3LibDefaultPrecision.fsh</string>
 		<string>cocos3d-GLSL/FragShaderLibs/CC3LibDualSidedFragmentColor.fsh</string>
 		<string>cocos3d-GLSL/FragShaderLibs/CC3LibEnvironmentReflection.fsh</string>
+		<string>cocos3d-GLSL/FragShaderLibs/CC3LibLightProbeIllumination.fsh</string>
 		<string>cocos3d-GLSL/FragShaderLibs/CC3LibSetGLFragColor.fsh</string>
 		<string>cocos3d-GLSL/FragShaderLibs/CC3LibSetGLFragColorAlphaTest.fsh</string>
 		<string>cocos3d-GLSL/FragShaderLibs/CC3LibSingleSidedFragmentColor.fsh</string>
