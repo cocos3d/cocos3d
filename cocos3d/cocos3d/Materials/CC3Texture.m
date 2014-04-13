@@ -181,7 +181,7 @@
 }
 
 -(void) bindTextureOfColor: (ccColor4B) color andSize: (CC3IntSize) size toTarget: (GLenum) target {
-	id texContent = [[self.textureContentClass alloc] initWithSize: size andColor: color];
+	id texContent = [[self.textureContentClass alloc] initWithSize: size withColor: color];
 	[self bindTextureContent: texContent toTarget: target];
 	[texContent release];
 }
@@ -639,30 +639,51 @@ static BOOL _shouldCacheAssociatedCCTextures = NO;
 
 +(Class) textureClassForEmpty2D { return CC3Texture2D.class; }
 
+-(id) initWithPixelFormat: (GLenum) format withPixelType: (GLenum) type {
+	[self release];
+	return [[[self.class textureClassForEmpty2D] alloc] initWithPixelFormat: format withPixelType: type];
+}
+
+// Deprecated
 -(id) initWithPixelFormat: (GLenum) format andPixelType: (GLenum) type {
-	[self release];
-	return [[[self.class textureClassForEmpty2D] alloc] initWithPixelFormat: format andPixelType: type];
+	return [self initWithPixelFormat: format withPixelType: type];
 }
 
++(id) textureWithPixelFormat: (GLenum) format withPixelType: (GLenum) type {
+	return [[[[self textureClassForEmpty2D] alloc] initWithPixelFormat: format withPixelType: type] autorelease];
+}
+
+// Deprecated
 +(id) textureWithPixelFormat: (GLenum) format andPixelType: (GLenum) type {
-	return [[[[self textureClassForEmpty2D] alloc] initWithPixelFormat: format andPixelType: type] autorelease];
+	return [self textureWithPixelFormat: format withPixelType: type];
 }
 
+-(id) initWithSize: (CC3IntSize) size withPixelFormat: (GLenum) format withPixelType: (GLenum) type {
+	[self release];
+	return [[[self.class textureClassForEmpty2D] alloc] initWithSize: size withPixelFormat: format withPixelType: type];
+}
+
+// Deprecated
 -(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
-	[self release];
-	return [[[self.class textureClassForEmpty2D] alloc] initWithSize: size andPixelFormat: format andPixelType: type];
+	return [self initWithSize: size withPixelFormat: format withPixelType: type];
 }
 
++(id) textureWithSize: (CC3IntSize) size withPixelFormat: (GLenum) format withPixelType: (GLenum) type {
+	return [[[[self textureClassForEmpty2D] alloc] initWithSize: size withPixelFormat: format withPixelType: type] autorelease];
+}
+
+// Deprecated
 +(id) textureWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
-	return [[[[self textureClassForEmpty2D] alloc] initWithSize: size andPixelFormat: format andPixelType: type] autorelease];
-}
--(id) initWithSize: (CC3IntSize) size andColor: (ccColor4B) color {
-	[self release];
-	return [[[self.class textureClassForEmpty2D] alloc] initWithSize: size andColor: color];
+	return [self textureWithSize: size withPixelFormat: format withPixelType: type];
 }
 
-+(id) textureWithSize: (CC3IntSize) size andColor: (ccColor4B) color {
-	return [[[[self textureClassForEmpty2D] alloc] initWithSize: size andColor: color] autorelease];
+-(id) initWithSize: (CC3IntSize) size withColor: (ccColor4B) color {
+	[self release];
+	return [[[self.class textureClassForEmpty2D] alloc] initWithSize: size withColor: color];
+}
+
++(id) textureWithSize: (CC3IntSize) size withColor: (ccColor4B) color {
+	return [[[[self textureClassForEmpty2D] alloc] initWithSize: size withColor: color] autorelease];
 }
 
 +(Class) textureClassForCube { return CC3TextureCube.class; }
@@ -706,22 +727,42 @@ static BOOL _shouldCacheAssociatedCCTextures = NO;
 	return [tex autorelease];
 }
 
+-(id) initCubeWithPixelFormat: (GLenum) format withPixelType: (GLenum) type {
+	[self release];
+	return [[[self.class textureClassForCube] alloc] initCubeWithPixelFormat: format withPixelType: type];
+}
+
+// Deprecated
 -(id) initCubeWithPixelFormat: (GLenum) format andPixelType: (GLenum) type {
-	[self release];
-	return [[[self.class textureClassForCube] alloc] initCubeWithPixelFormat: format andPixelType: type];
+	return [self initCubeWithPixelFormat: format withPixelType: type];
 }
 
++(id) textureCubeWithPixelFormat: (GLenum) format withPixelType: (GLenum) type {
+	return [[[[self textureClassForCube] alloc] initCubeWithPixelFormat: format withPixelType: type] autorelease];
+}
+
+// Deprecated
 +(id) textureCubeWithPixelFormat: (GLenum) format andPixelType: (GLenum) type {
-	return [[[[self textureClassForCube] alloc] initCubeWithPixelFormat: format andPixelType: type] autorelease];
+	return [self textureCubeWithPixelFormat: format withPixelType: type];
 }
 
--(id) initCubeWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
+-(id) initCubeWithSideLength: (GLuint) sideLength withPixelFormat: (GLenum) format withPixelType: (GLenum) type {
 	[self release];
-	return [[[self.class textureClassForCube] alloc] initCubeWithSize: size andPixelFormat: format andPixelType: type];
+	return [[[self.class textureClassForCube] alloc] initCubeWithSideLength: sideLength withPixelFormat: format withPixelType: type];
 }
 
+// Deprecated
+-(id) initCubeWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
+	return [self initCubeWithSideLength: size.width withPixelFormat: format withPixelType: type];
+}
+
++(id) textureCubeWithSideLength: (GLuint) sideLength withPixelFormat: (GLenum) format withPixelType: (GLenum) type {
+	return [[[[self textureClassForCube] alloc] initCubeWithSideLength: sideLength withPixelFormat: format withPixelType: type] autorelease];
+}
+
+// Deprecated
 +(id) textureCubeWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
-	return [[[[self textureClassForCube] alloc] initCubeWithSize: size andPixelFormat: format andPixelType: type] autorelease];
+	return [self textureCubeWithSideLength: size.width withPixelFormat: format withPixelType: type];
 }
 
 -(id) initCubeColoredForAxes {
@@ -900,7 +941,7 @@ static BOOL _defaultShouldFlip2DHorizontallyOnLoad = NO;
 	return self;
 }
 
--(id) initWithPixelFormat: (GLenum) format andPixelType: (GLenum) type {
+-(id) initWithPixelFormat: (GLenum) format withPixelType: (GLenum) type {
 	if ( (self = [self init]) ) {
 		self.shouldFlipVerticallyOnLoad = NO;	// Nothing to flip
 		_pixelFormat = format;
@@ -909,14 +950,14 @@ static BOOL _defaultShouldFlip2DHorizontallyOnLoad = NO;
 	return self;
 }
 
--(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
-	if ( (self = [self initWithPixelFormat: format andPixelType: type]) ) {
+-(id) initWithSize: (CC3IntSize) size withPixelFormat: (GLenum) format withPixelType: (GLenum) type {
+	if ( (self = [self initWithPixelFormat: format withPixelType: type]) ) {
 		[self resizeTo: size];
 	}
 	return self;
 }
 
--(id) initWithSize: (CC3IntSize) size andColor: (ccColor4B) color {
+-(id) initWithSize: (CC3IntSize) size withColor: (ccColor4B) color {
 	if ( (self = [self init]) ) {
 		[self bindTextureOfColor: color andSize: size toTarget: self.textureTarget];
 	}
@@ -1071,7 +1112,7 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 	return self;
 }
 
--(id) initCubeWithPixelFormat: (GLenum) format andPixelType: (GLenum) type {
+-(id) initCubeWithPixelFormat: (GLenum) format withPixelType: (GLenum) type {
 	if ( (self = [self init]) ) {
 		self.shouldFlipVerticallyOnLoad = NO;	// Nothing to flip
 		_pixelFormat = format;
@@ -1080,9 +1121,9 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 	return self;
 }
 
--(id) initCubeWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
-	if ( (self = [self initCubeWithPixelFormat: format andPixelType: type]) ) {
-		[self resizeTo: size];
+-(id) initCubeWithSideLength: (GLuint) sideLength withPixelFormat: (GLenum) format withPixelType: (GLenum) type {
+	if ( (self = [self initCubeWithPixelFormat: format withPixelType: type]) ) {
+		[self resizeTo: CC3IntSizeMake(sideLength, sideLength)];
 	}
 	return self;
 }
@@ -1723,7 +1764,7 @@ contentSizeInPixels: (CGSize) sizeInPixels
 #endif	// CC_OSX
 }
 
--(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
+-(id) initWithSize: (CC3IntSize) size withPixelFormat: (GLenum) format withPixelType: (GLenum) type {
 	LogTrace(@"Creating empty texture width %u height %u content size %@ format %i data %p",
 			 size.width, size.height, NSStringFromCGSize(size), pixelFormat, data);
 	if( (self = [super init]) ) {
@@ -1738,8 +1779,13 @@ contentSizeInPixels: (CGSize) sizeInPixels
 	return self;
 }
 
--(id) initWithSize: (CC3IntSize) size andColor: (ccColor4B) color {
-	if( (self = [self initWithSize: size andPixelFormat: GL_RGBA andPixelType: GL_UNSIGNED_BYTE]) ) {
+// Deprecated
+-(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
+	return [self initWithSize: size withPixelFormat: format withPixelType: type];
+}
+
+-(id) initWithSize: (CC3IntSize) size withColor: (ccColor4B) color {
+	if( (self = [self initWithSize: size withPixelFormat: GL_RGBA withPixelType: GL_UNSIGNED_BYTE]) ) {
 		GLuint pxCnt = size.width * size.height;
 		ccColor4B* pixels = malloc(pxCnt * sizeof(color));
 		for (GLuint pxIdx = 0; pxIdx < pxCnt; pxIdx++) pixels[pxIdx] = color;
@@ -1748,8 +1794,8 @@ contentSizeInPixels: (CGSize) sizeInPixels
 	return self;
 }
 
-+(id) textureWithSize: (CC3IntSize) size andColor: (ccColor4B) color {
-	return [[[self alloc] initWithSize: size andColor: color] autorelease];
++(id) textureWithSize: (CC3IntSize) size withColor: (ccColor4B) color {
+	return [[[self alloc] initWithSize: size withColor: color] autorelease];
 }
 
 -(id) initFromCC3Texture: (CC3Texture*) texture {

@@ -732,25 +732,207 @@
 
 #pragma mark Allocation and initialization
 
-/** Initializes this instance with zero size. */
+/** Initializes this instance to zero size. */
 -(id) init;
 
 /** Allocates and initializes an autoreleased instance with zero size. */
 +(id) surface;
 
 /**
- * Initializes this instance with the specified size.
+ * Initializes this instance to the specified size.
  *
  * When attachments are assigned to this surface, each will be resized to the specified size.
  */
 -(id) initWithSize: (CC3IntSize) size;
 
 /**
- * Allocations and initializes an autoreleased instance with the specified size.
+ * Allocates and initializes an autoreleased instance with the specified size.
  *
  * When attachments are assigned to the instance, each will be resized to the specified size.
  */
 +(id) surfaceWithSize: (CC3IntSize) size;
+
+/**
+ * Initializes this instance to the specified pixel size, sets the colorTexture property to a
+ * new blank 2D texture, and sets the depthAttachment property to a new renderbuffer configured
+ * with the standard GL_DEPTH_COMPONENT16 depth format.
+ *
+ * The isOpaque parameter indicates whether or not the colorTexture should support transparency,
+ * by including or excluding an alpha component in each pixel. The colorTexture will support
+ * transparency if isOpaque is set to NO, otherwise the texture will not support transparency.
+ * Specifically, the pixelFormat / pixelType properties of the texture are configured as follows:
+ *   - GL_RGB / GL_UNSIGNED_SHORT_5_6_5 if isOpaque is YES.
+ *   - GL_RGBA / GL_UNSIGNED_BYTE if isOpaque is NO.
+ *
+ * Note that, with these texture formats, a texture that supports transparency requires twice
+ * the memory space of an opaque texture.
+ *
+ * The depthAttachment is used only during the rendering of content to the color texture.
+ * If you are creating many color texture surfaces of the same size, you can save memory
+ * by using the same depthAttachment for all such surfaces. In this case, consider using 
+ * the initAsColorTextureWithSize:isOpaque:withDepthAttachment: method instead.
+ */
+-(id) initAsColorTextureWithSize: (CC3IntSize) size isOpaque: (BOOL) isOpaque;
+
+/**
+ * Allocates and initializes an autoreleased instance with the specified pixel size, sets the
+ * colorTexture property to a new blank 2D texture, and sets the depthAttachment property to 
+ * a new renderbuffer configured with the standard GL_DEPTH_COMPONENT16 depth format.
+ *
+ * The isOpaque parameter indicates whether or not the colorTexture should support transparency,
+ * by including or excluding an alpha component in each pixel. The colorTexture will support
+ * transparency if isOpaque is set to NO, otherwise the texture will not support transparency.
+ * Specifically, the pixelFormat / pixelType properties of the texture are configured as follows:
+ *   - GL_RGB / GL_UNSIGNED_SHORT_5_6_5 if isOpaque is YES.
+ *   - GL_RGBA / GL_UNSIGNED_BYTE if isOpaque is NO.
+ *
+ * Note that, with these texture formats, a texture that supports transparency requires twice
+ * the memory space of an opaque texture.
+ *
+ * The depthAttachment is used only during the rendering of content to the color texture.
+ * If you are creating many color texture surfaces of the same size, you can save memory
+ * by using the same depthAttachment for all such surfaces. In this case, consider using 
+ * the colorTextureSurfaceWithSize:isOpaque:withDepthAttachment: method instead.
+ */
++(id) colorTextureSurfaceWithSize: (CC3IntSize) size isOpaque: (BOOL) isOpaque;
+
+/**
+ * Initializes this instance to the specified pixel size, sets the colorTexture property to a
+ * new blank 2D texture, and sets the depthAttachment property to a new renderbuffer configured
+ * with the specified depth format.
+ *
+ * The depthFormat argument may be one of the following values:
+ *   - GL_DEPTH_COMPONENT16
+ *   - GL_DEPTH_COMPONENT24
+ *   - GL_DEPTH24_STENCIL8
+ *
+ * The isOpaque parameter indicates whether or not the colorTexture should support transparency,
+ * by including or excluding an alpha component in each pixel. The colorTexture will support
+ * transparency if isOpaque is set to NO, otherwise the texture will not support transparency.
+ * Specifically, the pixelFormat / pixelType properties of the texture are configured as follows:
+ *   - GL_RGB / GL_UNSIGNED_SHORT_5_6_5 if isOpaque is YES.
+ *   - GL_RGBA / GL_UNSIGNED_BYTE if isOpaque is NO.
+ *
+ * Note that, with these texture formats, a texture that supports transparency requires twice
+ * the memory space of an opaque texture.
+ *
+ * The depthAttachment is used only during the rendering of content to the color texture.
+ * If you are creating many color texture surfaces of the same size, you can save memory
+ * by using the same depthAttachment for all such surfaces. In this case, consider using 
+ * the initAsColorTextureWithSize:isOpaque:withDepthAttachment: method instead.
+ */
+-(id) initAsColorTextureWithSize: (CC3IntSize) size
+						isOpaque: (BOOL) isOpaque
+				 withDepthFormat: (GLenum) depthFormat;
+
+/**
+ * Allocates and initializes an autoreleased instance with the specified pixel size, sets the
+ * colorTexture property to a new blank 2D texture, and sets the depthAttachment property to 
+ * a new renderbuffer configured with the specified depth format.
+ *
+ * The depthFormat argument may be one of the following values:
+ *   - GL_DEPTH_COMPONENT16
+ *   - GL_DEPTH_COMPONENT24
+ *   - GL_DEPTH24_STENCIL8
+ *
+ * The isOpaque parameter indicates whether or not the colorTexture should support transparency,
+ * by including or excluding an alpha component in each pixel. The colorTexture will support
+ * transparency if isOpaque is set to NO, otherwise the texture will not support transparency.
+ * Specifically, the pixelFormat / pixelType properties of the texture are configured as follows:
+ *   - GL_RGB / GL_UNSIGNED_SHORT_5_6_5 if isOpaque is YES.
+ *   - GL_RGBA / GL_UNSIGNED_BYTE if isOpaque is NO.
+ *
+ * Note that, with these texture formats, a texture that supports transparency requires twice
+ * the memory space of an opaque texture.
+ *
+ * The depthAttachment is used only during the rendering of content to the color texture.
+ * If you are creating many color texture surfaces of the same size, you can save memory
+ * by using the same depthAttachment for all such surfaces. In this case, consider using 
+ * the colorTextureSurfaceWithSize:isOpaque:withDepthAttachment: method instead.
+ */
++(id) colorTextureSurfaceWithSize: (CC3IntSize) size
+						 isOpaque: (BOOL) isOpaque
+				  withDepthFormat: (GLenum) depthFormat;
+
+/**
+ * Initializes this instance to the specified pixel size, sets the colorTexture property to a
+ * new blank 2D texture, and sets the depthAttachment property to the specified depth attachment.
+ *
+ * The isOpaque parameter indicates whether or not the colorTexture should support transparency,
+ * by including or excluding an alpha component in each pixel. The colorTexture will support 
+ * transparency if isOpaque is set to NO, otherwise the texture will not support transparency. 
+ * Specifically, the pixelFormat / pixelType properties of the texture are configured as follows:
+ *   - GL_RGB / GL_UNSIGNED_SHORT_5_6_5 if isOpaque is YES.
+ *   - GL_RGBA / GL_UNSIGNED_BYTE if isOpaque is NO.
+ *
+ * Note that, with these texture formats, a texture that supports transparency requires twice
+ * the memory space of an opaque texture.
+ *
+ * The depthAttachment is used only during the rendering of content to the color texture.
+ * If you are creating many color texture surfaces of the same size, you can save memory
+ * by using the same depthAttachment for all such surfaces.
+ */
+-(id) initAsColorTextureWithSize: (CC3IntSize) size
+						isOpaque: (BOOL) isOpaque
+			 withDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment;
+
+/**
+ * Allocates and initializes an autoreleased instance with the specified pixel size, sets the
+ * colorTexture property to a new blank 2D texture, and sets the depthAttachment property to 
+ * the specified depth attachment.
+ *
+ * The isOpaque parameter indicates whether or not the colorTexture should support transparency,
+ * by including or excluding an alpha component in each pixel. The colorTexture will support
+ * transparency if isOpaque is set to NO, otherwise the texture will not support transparency.
+ * Specifically, the pixelFormat / pixelType properties of the texture are configured as follows:
+ *   - GL_RGB / GL_UNSIGNED_SHORT_5_6_5 if isOpaque is YES.
+ *   - GL_RGBA / GL_UNSIGNED_BYTE if isOpaque is NO.
+ *
+ * Note that, with these texture formats, a texture that supports transparency requires twice
+ * the memory space of an opaque texture.
+ *
+ * The depthAttachment is used only during the rendering of content to the color texture.
+ * If you are creating many color texture surfaces of the same size, you can save memory
+ * by using the same depthAttachment for all such surfaces.
+ */
++(id) colorTextureSurfaceWithSize: (CC3IntSize) size
+						 isOpaque: (BOOL) isOpaque
+			  withDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment;
+
+/**
+ * Initializes this instance to the specified pixel size, sets the colorTexture property to a
+ * new blank 2D texture, and sets the depthAttachment property to the specified depth attachment.
+ *
+ * The empty colorTexture is configured with the specified pixel format and pixel type.
+ * See the notes for the CC3Texture pixelFormat and pixelType properties for the range 
+ * of values permitted for these parameters.
+ *
+ * The depthAttachment is used only during the rendering of content to the color texture.
+ * If you are creating many color texture surfaces of the same size, you can save memory
+ * by using the same depthAttachment for all such surfaces.
+ */
+-(id) initAsColorTextureWithSize: (CC3IntSize) size
+				 withPixelFormat: (GLenum) pixelFormat
+				   withPixelType: (GLenum) pixelType
+			 withDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment;
+
+/**
+ * Allocates and initializes an autoreleased instance with the specified pixel size, sets the
+ * colorTexture property to a new blank 2D texture, and sets the depthAttachment property to 
+ * the specified depth attachment.
+ *
+ * The empty colorTexture is configured with the specified pixel format and pixel type.
+ * See the notes for the CC3Texture pixelFormat and pixelType properties for the range
+ * of values permitted for these parameters.
+ *
+ * The depthAttachment is used only during the rendering of content to the color texture.
+ * If you are creating many color texture surfaces of the same size, you can save memory
+ * by using the same depthAttachment for all such surfaces.
+ */
++(id) colorTextureSurfaceWithSize: (CC3IntSize) size
+				  withPixelFormat: (GLenum) pixelFormat
+					withPixelType: (GLenum) pixelType
+			  withDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment;
 
 @end
 
@@ -813,6 +995,11 @@
 /** 
  * A texture that supports an environment map created by rendering the scene from the
  * node's perspective in all six axis directions.
+ *
+ * You can use this texture in any model object, wherever you use any cube-map texture.
+ * The generateSnapshotOfScene:fromGlobalLocation: method is used to capture the scene
+ * images to this texture. You can trigger this as often as you need, to keep the image
+ * current with the scene contents.
  */
 @interface CC3EnvironmentMapTexture : CC3TextureCube {
 	CC3GLFramebuffer* _renderSurface;
@@ -881,55 +1068,164 @@
 #pragma mark Allocation and initialization
 
 /**
- * Initializes this instance with a rendering surface constructed from a new cube-map texture
- * with the economical 16-bit GL_RGB/GL_UNSIGNED_SHORT_5_6_5 pixelFormat/pixelType, and the
- * specified depth attachment, which must not be nil and must have a square size.
+ * Initializes this instance with the specified side length, with the standard
+ * GL_RGBA/GL_UNSIGNED_BYTE pixelFormat/pixelType, and backed by a new depth buffer
+ * with the standard GL_DEPTH_COMPONENT16 depth format.
  *
- * The cube-map texture will have the same size as the specified depth attachment.
+ * The sideLength argument indicates the length, in pixels, of each side of the texture.
+ *
+ * The internal depth buffer is used only during the rendering of the environment to this texture.
+ * If you are creating many environmental textures of the same size, for different objects, you
+ * can save memory by using the same depth buffer for all such environment textures. In this case,
+ * consider using the initCubeWithSideLength:WithDepthAttachment: method instead.
  */
--(id) initCubeWithDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment;
+-(id) initCubeWithSideLength: (GLuint) sideLength;
 
 /**
- * Allocates and initializes an autoreleased instance with a rendering surface constructed
- * from a new cube-map texture with whose pixelFormat and pixelType properties are set to
- * GL_RGBA and GL_UNSIGNED_BYTE, respectively, and the specified depth attachment, which
- * must not be nil and must have a square size.
+ * Allocates and initializes an autoreleased instance with the specified side length, with
+ * the standard GL_RGBA/GL_UNSIGNED_BYTE pixelFormat/pixelType, and backed by a new depth
+ * buffer with the standard GL_DEPTH_COMPONENT16 depth format.
  *
- * The cube-map texture will have the same size as the specified depth attachment.
+ * The sideLength argument indicates the length, in pixels, of each side of the texture.
+ *
+ * The internal depth buffer is used only during the rendering of the environment to this texture.
+ * If you are creating many environmental textures of the same size, for different objects, you
+ * can save memory by using the same depth buffer for all such environment textures. In this case,
+ * consider using the textureCubeWithSideLength:WithDepthAttachment: method instead.
  */
-+(id) textureCubeWithDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment;
++(id) textureCubeWithSideLength: (GLuint) sideLength;
 
 /**
- * Initializes this instance with a rendering surface constructed from a new cube-map texture
- * with the specified pixel format and type, and the specified depth attachment, which must
- * not be nil and must have a square size.
+ * Initializes this instance with the specified side length, with the standard
+ * GL_RGBA/GL_UNSIGNED_BYTE pixelFormat/pixelType, and backed by a new depth buffer
+ * of the specified depth format. 
  *
- * The cube-map texture will have the same size as the specified depth attachment.
+ * The sideLength argument indicates the length, in pixels, of each side of the texture.
+ *
+ * The depthFormat argument may be one of the following values:
+ *   - GL_DEPTH_COMPONENT16
+ *   - GL_DEPTH_COMPONENT24
+ *   - GL_DEPTH24_STENCIL8
+ *
+ * The internal depth buffer is used only during the rendering of the environment to this texture.
+ * If you are creating many environmental textures of the same size, for different objects, you
+ * can save memory by using the same depth buffer for all such environment textures. In this case,
+ * consider using the initCubeWithSideLength:WithDepthAttachment: method instead.
+ */
+-(id) initCubeWithSideLength: (GLuint) sideLength withDepthFormat: (GLenum) depthFormat;
+
+/**
+ * Allocates and initializes an autoreleased instance with the specified side length, with
+ * the standard GL_RGBA/GL_UNSIGNED_BYTE pixelFormat/pixelType, and backed by a new depth
+ * buffer of the specified depth format.
+ *
+ * The sideLength argument indicates the length, in pixels, of each side of the texture.
+ *
+ * The depthFormat argument may be one of the following values:
+ *   - GL_DEPTH_COMPONENT16
+ *   - GL_DEPTH_COMPONENT24
+ *   - GL_DEPTH24_STENCIL8
+ *
+ * The internal depth buffer is used only during the rendering of the environment to this texture.
+ * If you are creating many environmental textures of the same size, for different objects, you
+ * can save memory by using the same depth buffer for all such environment textures. In this case,
+ * consider using the textureCubeWithSideLength:WithDepthAttachment: method instead.
+ */
++(id) textureCubeWithSideLength: (GLuint) sideLength withDepthFormat: (GLenum) depthFormat;
+
+/**
+ * Initializes this instance with the specified side length, with the standard GL_RGBA/GL_UNSIGNED_BYTE 
+ * pixelFormat/pixelType, and backed by the specified depth attachment.
+ *
+ * The sideLength argument indicates the length, in pixels, of each side of the texture.
+ *
+ * The depthAttachment argument must not be nil.
+ *
+ * The depth attachment is used only during the rendering of the environment to this texture.
+ * If you are creating many environmental textures of the same size, for different objects,
+ * you can save memory by using the same depth attachment for all such environment textures.
+ */
+-(id) initCubeWithSideLength: (GLuint) sideLength
+		 withDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment;
+
+/**
+ * Allocates and initializes an autoreleased instance with the specified side length, with 
+ * the standard GL_RGBA/GL_UNSIGNED_BYTE pixelFormat/pixelType, and backed by the specified
+ * depth attachment.
+ *
+ * The sideLength argument indicates the length, in pixels, of each side of the texture.
+ *
+ * The depthAttachment argument must not be nil.
+ *
+ * The depth attachment is used only during the rendering of the environment to this texture.
+ * If you are creating many environmental textures of the same size, for different objects,
+ * you can save memory by using the same depth attachment for all such environment textures.
+ */
++(id) textureCubeWithSideLength: (GLuint) sideLength
+			withDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment;
+
+/**
+ * Initializes this instance with the specified side length, with the specified pixel format
+ * and type, and backed by the specified depth attachment.
+ *
+ * The sideLength argument indicates the length, in pixels, of each side of the texture.
+ *
+ * The depthAttachment argument must not be nil.
  *
  * Be aware that the possible combinations of color and depth pixel formats is quite limited
  * with cube-mapped framebuffer attachments. If you have trouble finding a suitable combination,
  * you can use the initWithDepthAttachment: method, which invokes this method with GL_RGBA as
  * the colorFormat and GL_UNSIGNED_BYTE as the colorType.
+ *
+ * The depth attachment is used only during the rendering of the environment to this texture.
+ * If you are creating many environmental textures of the same size, for different objects,
+ * you can save memory by using the same depth attachment for all such environment textures.
  */
--(id) initCubeWithColorPixelFormat: (GLenum) colorFormat
-				 andColorPixelType: (GLenum) colorType
-				andDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment;
+-(id) initCubeWithSideLength: (GLuint) sideLength
+		withColorPixelFormat: (GLenum) colorFormat
+		  withColorPixelType: (GLenum) colorType
+		 withDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment;
 
 /**
- * Allocates and initializes an autoreleased instance with a rendering surface constructed
- * from a new cube-map texture with the specified pixel format and type, and the specified
- * depth attachment, which must not be nil and must have a square size.
+ * Allocates and initializes an autoreleased instance with the specified side length, with
+ * the specified pixel format and type, and backed by the specified depth attachment.
  *
- * The cube-map texture will have the same size as the specified depth attachment.
+ * The sideLength argument indicates the length, in pixels, of each side of the texture.
+ *
+ * The depthAttachment argument must not be nil.
  *
  * Be aware that the possible combinations of color and depth pixel formats is quite limited
  * with cube-mapped framebuffer attachments. If you have trouble finding a suitable combination,
- * you can use the textureWithDepthAttachment: method, which invokes this method with GL_RGBA
- * as the colorFormat and GL_UNSIGNED_BYTE as the colorType.
+ * you can use the initWithDepthAttachment: method, which invokes this method with GL_RGBA as
+ * the colorFormat and GL_UNSIGNED_BYTE as the colorType.
+ *
+ * The depth attachment is used only during the rendering of the environment to this texture.
+ * If you are creating many environmental textures of the same size, for different objects,
+ * you can save memory by using the same depth attachment for all such environment textures.
  */
++(id) textureCubeWithSideLength: (GLuint) sideLength
+		   withColorPixelFormat: (GLenum) colorFormat
+			 withColorPixelType: (GLenum) colorType
+			withDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment;
+
+
+#pragma mark Deprecated
+
+/** @deprecated Use initCubeWithSideLength:withDepthAttachment: instead. */
+-(id) initCubeWithDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Use textureCubeWithSideLength:withDepthAttachment: instead. */
++(id) textureCubeWithDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Use initCubeWithSideLength:withColorPixelFormat:withColorPixelType:withDepthAttachment: instead. */
+-(id) initCubeWithColorPixelFormat: (GLenum) colorFormat
+				 andColorPixelType: (GLenum) colorType
+				andDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Use textureCubeWithSideLength:withColorPixelFormat:withColorPixelType:withDepthAttachment: instead. */
 +(id) textureCubeWithColorPixelFormat: (GLenum) colorFormat
 					andColorPixelType: (GLenum) colorType
-				   andDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment;
+				   andDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment DEPRECATED_ATTRIBUTE;
 
 @end
 

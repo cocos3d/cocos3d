@@ -991,17 +991,15 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// move around the scene. A second texture is added to provide an optional surface material
 	// (eg- brushed metal). The material reflectivity property adjusts how reflective the surface
 	// is, by adjusting the blend between the two textures. Lower the reflectivity towards zero to
-	// show some of the underlying material. Since the enviornment map texture renders the scene,
-	// it requires a depth buffer, so we create a depth buffer of the same size, and attach it here.
-	// If you had multiple reflective objects, you could use the same depth buffer for all of them
-	// if the textures are the same size. Since generating an environment map texture requires
-	// rendering the scene from each of the six axis directions, it can be quite costly. You can use the
-	// numberOfFacesPerSnapshot property to adjust how often the reflective faces are updated, to
-	// trade off real-time accuracy and performance. See the notes of that property for more info.
-	GLint envMapDim = 256;
-	CC3GLRenderbuffer* depthBuff = [CC3GLRenderbuffer renderbufferWithSize: CC3IntSizeMake(envMapDim, envMapDim)
-															andPixelFormat: GL_DEPTH_COMPONENT16];
-	_envMapTex = [CC3EnvironmentMapTexture textureCubeWithDepthAttachment: depthBuff];
+	// show some of the underlying material. Since the environment map texture renders the scene,
+	// it requires a depth buffer. This is created automatically during the initialization of the
+	// environment texture. However, if we had multiple reflective objects, we could use the same
+	// depth buffer for all of them if the textures are the same size, by using a different
+	// creation method for the environment texture. Since generating an environment map texture
+	// requires rendering the scene from each of the six axis directions, it can be quite costly.
+	// You can use the numberOfFacesPerSnapshot property to adjust how often the reflective faces
+	// are updated, to trade off real-time accuracy and performance.
+	_envMapTex = [CC3EnvironmentMapTexture textureCubeWithSideLength: 256];
 	_envMapTex.numberOfFacesPerSnapshot = 1.0f;		// Update only one side of the cube in each frame
 	
 	[_teapotTextured addTexture: _envMapTex];
@@ -1884,23 +1882,20 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * at http://www.blendswap.com/blends/view/63306 under a CreativeCommons Zero license.
  */
 -(void) addTelevision {
-	
-	// Create an off-screen framebuffer surface of a size and aspect (16x9) useful in an
-	// HDTV model, attach an empty texture and depth buffer, and validate the surface.
-	// Alpha is not required for this texture, so choose a more memory-efficient 16-bit RGB format.
-	// Similarly, since stencils will not be used, choose a more efficient 16-bit depth buffer.
-	CC3GLFramebuffer*  tvSurface = [[CC3GLFramebuffer alloc] initWithSize: kTVTexSize];	// retained
-	tvSurface.colorTexture = [CC3Texture textureWithPixelFormat: GL_RGB andPixelType: GL_UNSIGNED_SHORT_5_6_5];
-	tvSurface.depthAttachment = [CC3GLRenderbuffer renderbufferWithPixelFormat: GL_DEPTH_COMPONENT16];
-	[tvSurface validate];
-	
+	// Create an off-screen framebuffer surface, of a size and aspect (16x9) useful in an
+	// HDTV model, backed by a blank color texture to which we can render. Alpha is not
+	// required for the underlying texture, so we indicate the texture is opaque, which
+	// uses a more memory-efficient 16-bit RGB format. Similarly, since stencils will not
+	// be used, we allow a default 16-bit depth buffer to be used for this surface.
+	CC3GLFramebuffer*  tvSurface = [CC3GLFramebuffer colorTextureSurfaceWithSize: kTVTexSize isOpaque: YES];
+
 	// Now create a drawing visitor that will coordinate the drawing of the the TV screen
 	// Since the aspect of the TV screen surface is different than the main display, we don't
 	// want to reuse either the main camera, or the runner's camera. Instead, we create a
 	// dedicated drawing visitor, with it's own camera, which we copy from the runner's camera.
 	// and add it beside the runner's camera. We clear the new camera's existing viewport
 	// so that it will be set to match the aspect of the TV screen.
-	_tvDrawingVisitor = [[[self viewDrawVisitorClass] alloc] init];		// retained
+	_tvDrawingVisitor = [[[self viewDrawVisitorClass] alloc] init];
 	_tvDrawingVisitor.renderSurface = tvSurface;
 	CC3Camera* tvCam = [_runnerCam copy];
 	[_runnerCam.parent addChild: tvCam];
@@ -1984,17 +1979,20 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 -(void) addPostProcessing {
 #if !CC3_OGLES_1	// Depth-texture not supported in OpenGL ES 1
 
-	// Create the offscreen framebuffer with the same size and characteristics as the view's
-	// rendering surface, add color and depth texture attachments, and register the surface
-	// with the view's surface manager, so that this surface will be resized automatically
-	// whenever the view is resized.
+	// Create the off-screen framebuffer surface to render the scene to for post-processing effects.
+	// We create the off-screen surface with the same size and format characteristics as the view's
+	// rendering surface. We specifically use a renderable texture as the depth buffer, so that we
+	// can use it to display the contents of the depth buffer as one post-processing option.
+	// Otherwise, we could have just used the simpler renderbuffer option for the depth buffer.
+	// Finally, we register the off-screen surface with the view's surface manager, so that the
+	// off-screen surface will be resized automatically whenever the view is resized.
 	CC3GLViewSurfaceManager* surfMgr = self.viewSurfaceManager;
-	_postProcSurface = [[CC3GLFramebuffer alloc] initWithSize: surfMgr.size];	// retained
-	_postProcSurface.colorTexture = [CC3Texture textureWithPixelFormat: surfMgr.colorTexelFormat
-														 andPixelType: surfMgr.colorTexelType];
-	_postProcSurface.depthTexture = [CC3Texture textureWithPixelFormat: surfMgr.depthTexelFormat
-														 andPixelType: surfMgr.depthTexelType];
-	[_postProcSurface validate];
+	CC3Texture* depthTexture = [CC3Texture textureWithPixelFormat: surfMgr.depthTexelFormat
+													withPixelType: surfMgr.depthTexelType];
+	_postProcSurface = [CC3GLFramebuffer colorTextureSurfaceWithSize: surfMgr.size
+													 withPixelFormat: surfMgr.colorTexelFormat
+													   withPixelType: surfMgr.colorTexelType
+												 withDepthAttachment: [CC3TextureFramebufferAttachment attachmentWithTexture: depthTexture]];
 	[surfMgr addSurface: _postProcSurface];
 	
 	// Create a clip-space node that will render the off-screen color texture to the screen.

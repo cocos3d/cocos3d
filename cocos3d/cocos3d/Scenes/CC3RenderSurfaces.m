@@ -512,6 +512,8 @@
 
 -(id) init { return [self initWithSize: CC3IntSizeMake(0, 0)]; }
 
++(id) surface { return [[[self alloc] init] autorelease]; }
+
 -(id) initWithSize: (CC3IntSize) size {
 	if ( (self = [super init]) ) {
 		_fbID = 0;
@@ -523,10 +525,71 @@
 	return self;
 }
 
-+(id) surface { return [[[self alloc] init] autorelease]; }
-
 +(id) surfaceWithSize: (CC3IntSize) size {
 	return [[((CC3GLFramebuffer*)[self alloc]) initWithSize: size] autorelease];
+}
+
+-(id) initAsColorTextureWithSize: (CC3IntSize) size isOpaque: (BOOL) isOpaque {
+	return [self initAsColorTextureWithSize: size isOpaque: isOpaque withDepthFormat: GL_DEPTH_COMPONENT16];
+}
+
++(id) colorTextureSurfaceWithSize: (CC3IntSize) size isOpaque: (BOOL) isOpaque {
+	return [[[self alloc] initAsColorTextureWithSize: size isOpaque: isOpaque] autorelease];
+}
+
+-(id) initAsColorTextureWithSize: (CC3IntSize) size
+						isOpaque: (BOOL) isOpaque
+				 withDepthFormat: (GLenum) depthFormat {
+	return [self initAsColorTextureWithSize: size
+								   isOpaque: isOpaque
+						withDepthAttachment: [CC3GLRenderbuffer renderbufferWithPixelFormat: depthFormat]];
+}
+
++(id) colorTextureSurfaceWithSize: (CC3IntSize) size
+						 isOpaque: (BOOL) isOpaque
+				  withDepthFormat: (GLenum) depthFormat {
+	return [[[self alloc] initAsColorTextureWithSize: size
+											isOpaque: isOpaque
+									 withDepthFormat: depthFormat] autorelease];
+}
+
+-(id) initAsColorTextureWithSize: (CC3IntSize) size
+						isOpaque: (BOOL) isOpaque
+			 withDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment {
+	return [self initAsColorTextureWithSize: size
+							withPixelFormat: (isOpaque ? GL_RGB : GL_RGBA)
+							  withPixelType: (isOpaque ? GL_UNSIGNED_SHORT_5_6_5 : GL_UNSIGNED_BYTE)
+						withDepthAttachment: depthAttachment];
+}
+
++(id) colorTextureSurfaceWithSize: (CC3IntSize) size
+						 isOpaque: (BOOL) isOpaque
+			  withDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment {
+	return [[[self alloc] initAsColorTextureWithSize: size
+											isOpaque: (BOOL) isOpaque
+								 withDepthAttachment: depthAttachment] autorelease];
+}
+
+-(id) initAsColorTextureWithSize: (CC3IntSize) size
+				 withPixelFormat: (GLenum) pixelFormat
+				   withPixelType: (GLenum) pixelType
+			 withDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment {
+	if ( (self = [self initWithSize: size]) ) {
+		self.colorTexture = [CC3Texture textureWithPixelFormat: pixelFormat withPixelType: pixelType];
+		self.depthAttachment = depthAttachment;
+		[self validate];
+	}
+	return self;
+}
+
++(id) colorTextureSurfaceWithSize: (CC3IntSize) size
+				  withPixelFormat: (GLenum) pixelFormat
+					withPixelType: (GLenum) pixelType
+			  withDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment {
+	return [[[self alloc] initAsColorTextureWithSize: size
+									 withPixelFormat: pixelFormat
+									   withPixelType: pixelType
+								 withDepthAttachment: depthAttachment] autorelease];
 }
 
 -(NSString*) description { return [NSString stringWithFormat: @"%@ %u", self.class, _fbID]; }
@@ -784,43 +847,96 @@
 
 #pragma mark Allocation and initialization
 
--(id) initCubeWithDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment {
-	return [self initCubeWithColorPixelFormat: GL_RGBA
-							andColorPixelType: GL_UNSIGNED_BYTE
-						   andDepthAttachment: depthAttachment];
+-(id) initCubeWithSideLength: (GLuint) sideLength {
+	return [self initCubeWithSideLength: sideLength withDepthFormat: GL_DEPTH_COMPONENT16];
 }
 
-+(id) textureCubeWithDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment {
-	return [[[self alloc] initCubeWithDepthAttachment: depthAttachment] autorelease];
++(id) textureCubeWithSideLength: (GLuint) sideLength {
+	return [[[self alloc] initCubeWithSideLength: (GLuint) sideLength] autorelease];
 }
 
--(id) initCubeWithColorPixelFormat: (GLenum) colorFormat
-				 andColorPixelType: (GLenum) colorType
-				andDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment {
-	if ( (self = [super initCubeWithPixelFormat: colorFormat andPixelType: colorType]) ) {
+-(id) initCubeWithSideLength: (GLuint) sideLength withDepthFormat: (GLenum) depthFormat {
+	CC3IntSize size = CC3IntSizeMake(sideLength, sideLength);
+	CC3GLRenderbuffer* depthBuff = [CC3GLRenderbuffer renderbufferWithSize: size andPixelFormat: depthFormat];
+	return [self initCubeWithSideLength: sideLength withDepthAttachment: depthBuff];
+}
+
++(id) textureCubeWithSideLength: (GLuint) sideLength withDepthFormat: (GLenum) depthFormat {
+	return [[[self alloc] initCubeWithSideLength: (GLuint) sideLength withDepthFormat: depthFormat] autorelease];
+}
+
+-(id) initCubeWithSideLength: (GLuint) sideLength
+		 withDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment {
+	return [self initCubeWithSideLength: sideLength
+				   withColorPixelFormat: GL_RGBA
+					 withColorPixelType: GL_UNSIGNED_BYTE
+					withDepthAttachment: depthAttachment];
+}
+
++(id) textureCubeWithSideLength: (GLuint) sideLength
+			withDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment {
+	return [[[self alloc] initCubeWithSideLength: sideLength withDepthAttachment: depthAttachment] autorelease];
+}
+
+-(id) initCubeWithSideLength: (GLuint) sideLength
+		withColorPixelFormat: (GLenum) colorFormat
+		  withColorPixelType: (GLenum) colorType
+		 withDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment {
+	if ( (self = [self initCubeWithSideLength: sideLength withPixelFormat: colorFormat withPixelType: colorType]) ) {
 		_faceCount = 0.0f;
 		_numberOfFacesPerSnapshot = 1.0f;
 		_currentFace = GL_ZERO;
-		_renderSurface = [CC3GLFramebuffer new];			// retained
-		_renderSurface.depthAttachment = depthAttachment;
+		_renderSurface = [[CC3GLFramebuffer alloc] initWithSize: CC3IntSizeMake(sideLength, sideLength)];	// retained
 
 		// Create the texture attachment, based on this texture. Since this texture holds the rendering surface,
 		// it must be attached to the surface attachment with a weak reference, to avoid a retain cycle.
 		CC3TextureFramebufferAttachment* ta = [CC3TextureFramebufferAttachment attachmentWithTexture: self];
 		ta.shouldUseStrongReferenceToTexture = NO;
 		_renderSurface.colorAttachment = ta;
+		_renderSurface.depthAttachment = depthAttachment;
 
 		[_renderSurface validate];
 	}
 	return self;
 }
 
++(id) textureCubeWithSideLength: (GLuint) sideLength
+		   withColorPixelFormat: (GLenum) colorFormat
+			 withColorPixelType: (GLenum) colorType
+			withDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment {
+	return [[[self alloc] initCubeWithSideLength: sideLength
+							withColorPixelFormat: colorFormat
+							  withColorPixelType: colorType
+							 withDepthAttachment: depthAttachment] autorelease];
+}
+
+
+#pragma mark Deprecated
+
+-(id) initCubeWithDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment {
+	return [self initCubeWithSideLength: depthAttachment.size.width withDepthAttachment: depthAttachment ];
+}
+
++(id) textureCubeWithDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment {
+	return [self textureCubeWithSideLength: depthAttachment.size.width withDepthAttachment: depthAttachment ];
+}
+
+-(id) initCubeWithColorPixelFormat: (GLenum) colorFormat
+				 andColorPixelType: (GLenum) colorType
+				andDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment {
+	return [self initCubeWithSideLength: depthAttachment.size.width
+				   withColorPixelFormat: colorFormat
+					 withColorPixelType: colorType
+					withDepthAttachment: depthAttachment ];
+}
+
 +(id) textureCubeWithColorPixelFormat: (GLenum) colorFormat
 					andColorPixelType: (GLenum) colorType
 				   andDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment {
-	return [[[self alloc] initCubeWithColorPixelFormat: colorFormat
-									 andColorPixelType: colorType
-									andDepthAttachment: depthAttachment] autorelease];
+	return [self textureCubeWithSideLength: depthAttachment.size.width
+					  withColorPixelFormat: colorFormat
+						withColorPixelType: colorType
+					   withDepthAttachment: depthAttachment ];
 }
 
 @end

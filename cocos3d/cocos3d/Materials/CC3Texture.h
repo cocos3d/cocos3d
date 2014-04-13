@@ -782,7 +782,10 @@
  * CC3Texture is the root of a class-cluster. The object returned may be a different
  * instance of a different class than the receiver.
  */
--(id) initWithPixelFormat: (GLenum) format andPixelType: (GLenum) type;
+-(id) initWithPixelFormat: (GLenum) format withPixelType: (GLenum) type;
+
+/** @deprecated Use initWithPixelFormat:withPixelType: */
+-(id) initWithPixelFormat: (GLenum) format andPixelType: (GLenum) type DEPRECATED_ATTRIBUTE;
 
 /**
  * Allocates and initializes an autoreleased instance from the specified texture properties,
@@ -804,7 +807,10 @@
  * CC3Texture is the root of a class-cluster. The object returned may be an instance of a
  * different class than the receiver.
  */
-+(id) textureWithPixelFormat: (GLenum) format andPixelType: (GLenum) type;
++(id) textureWithPixelFormat: (GLenum) format withPixelType: (GLenum) type;
+
+/** @deprecated Use textureWithPixelFormat:withPixelType: */
++(id) textureWithPixelFormat: (GLenum) format andPixelType: (GLenum) type DEPRECATED_ATTRIBUTE;
 
 /**
  * Initializes this instance from the specified texture properties, without providing content.
@@ -826,7 +832,10 @@
  * CC3Texture is the root of a class-cluster. The object returned may be a different
  * instance of a different class than the receiver.
  */
--(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type;
+-(id) initWithSize: (CC3IntSize) size withPixelFormat: (GLenum) format withPixelType: (GLenum) type;
+
+/** @deprecated Use initWithSize:withPixelFormat:withPixelType: */
+-(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type DEPRECATED_ATTRIBUTE;
 
 /**
  * Allocates and initializes an autoreleased instance from the specified texture properties,
@@ -849,7 +858,10 @@
  * CC3Texture is the root of a class-cluster. The object returned may be an instance of a
  * different class than the receiver.
  */
-+(id) textureWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type;
++(id) textureWithSize: (CC3IntSize) size withPixelFormat: (GLenum) format withPixelType: (GLenum) type;
+
+/** @deprecated Use textureWithSize:withPixelFormat:withPixelType: */
++(id) textureWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type DEPRECATED_ATTRIBUTE;
 
 /**
  * Initializes this instance containing pixel content of the specified size and solid, 
@@ -867,7 +879,7 @@
  * CC3Texture is the root of a class-cluster. The object returned may be a different
  * instance of a different class than the receiver.
  */
--(id) initWithSize: (CC3IntSize) size andColor: (ccColor4B) color;
+-(id) initWithSize: (CC3IntSize) size withColor: (ccColor4B) color;
 
 /**
  * Allocates and initializes an autoreleased instance containing pixel content of the specified
@@ -885,7 +897,7 @@
  * CC3Texture is the root of a class-cluster. The object returned may be a different
  * instance of a different class than the receiver.
  */
-+(id) textureWithSize: (CC3IntSize) size andColor: (ccColor4B) color;
++(id) textureWithSize: (CC3IntSize) size withColor: (ccColor4B) color;
 
 /**
  * Initializes this instance by loading the six cube face textures at the specified file paths,
@@ -1058,7 +1070,10 @@
  * CC3Texture is the root of a class-cluster. The object returned may be a different
  * instance of a different class than the receiver.
  */
--(id) initCubeWithPixelFormat: (GLenum) format andPixelType: (GLenum) type;
+-(id) initCubeWithPixelFormat: (GLenum) format withPixelType: (GLenum) type;
+
+/** @deprecated Use initCubeWithPixelFormat:withPixelType: */
+-(id) initCubeWithPixelFormat: (GLenum) format andPixelType: (GLenum) type DEPRECATED_ATTRIBUTE;
 
 /**
  * Allocates and initializes an autoreleased instance from the specified texture properties,
@@ -1080,10 +1095,15 @@
  * CC3Texture is the root of a class-cluster. The object returned may be an instance of a
  * different class than the receiver.
  */
-+(id) textureCubeWithPixelFormat: (GLenum) format andPixelType: (GLenum) type;
++(id) textureCubeWithPixelFormat: (GLenum) format withPixelType: (GLenum) type;
+
+/** @deprecated Use textureCubeWithPixelFormat:withPixelType: */
++(id) textureCubeWithPixelFormat: (GLenum) format andPixelType: (GLenum) type DEPRECATED_ATTRIBUTE;
 
 /**
  * Initializes this instance from the specified texture properties, without providing content.
+ *
+ * The sideLength argument indicates the length, in pixels, of each side of the texture.
  *
  * Once initialized, the texture will be bound to the GL engine, with space allocated for six
  * texture faces of the specified size and pixel content. Content can be added later by using
@@ -1102,11 +1122,16 @@
  * CC3Texture is the root of a class-cluster. The object returned may be a different
  * instance of a different class than the receiver.
  */
--(id) initCubeWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type;
+-(id) initCubeWithSideLength: (GLuint) sideLength withPixelFormat: (GLenum) format withPixelType: (GLenum) type;
+
+/** @deprecated Use initCubeWithSize:withPixelFormat:withPixelType: */
+-(id) initCubeWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type DEPRECATED_ATTRIBUTE;
 
 /**
  * Allocates and initializes an autoreleased instance from the specified texture properties,
  * without providing content.
+ *
+ * The sideLength argument indicates the length, in pixels, of each side of the texture.
  *
  * Once initialized, the texture will be bound to the GL engine, with space allocated for a
  * texture of the specified size and pixel content. Content can be added later by using this
@@ -1125,7 +1150,10 @@
  * CC3Texture is the root of a class-cluster. The object returned may be an instance of a
  * different class than the receiver.
  */
-+(id) textureCubeWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type;
++(id) textureCubeWithSideLength: (GLuint) sideLength withPixelFormat: (GLenum) format withPixelType: (GLenum) type;
+
+/** @deprecated Use textureCubeWithSize:withPixelFormat:withPixelType: */
++(id) textureCubeWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type DEPRECATED_ATTRIBUTE;
 
 /**
  * Initializes this instance to have a unique solid color for each side of the cube.
@@ -1808,7 +1836,10 @@
  *
  * The value of the isUpsideDown is set to NO.
  */
--(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type;
+-(id) initWithSize: (CC3IntSize) size withPixelFormat: (GLenum) format withPixelType: (GLenum) type;
+
+/** @deprecated Use initWithSize:withPixelFormat:withPixelType: */
+-(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type DEPRECATED_ATTRIBUTE;
 
 /**
  * Initializes this instance containing pixel content of the specified size and solid, uniform color.
@@ -1816,7 +1847,7 @@
  * This method is useful for creating a blank tetxure canvas of a particular size and color.
  * By accessing the imageData property, the application can then draw pixels to this canvas.
  */
--(id) initWithSize: (CC3IntSize) size andColor: (ccColor4B) color;
+-(id) initWithSize: (CC3IntSize) size withColor: (ccColor4B) color;
 
 /**
  * Allocates and initializes an autoreleased instance containing pixel content of the 
@@ -1825,7 +1856,7 @@
  * This method is useful for creating a blank tetxure canvas of a particular size and color.
  * By accessing the imageData property, the application can then draw pixels to this canvas.
  */
-+(id) textureWithSize: (CC3IntSize) size andColor: (ccColor4B) color;
++(id) textureWithSize: (CC3IntSize) size withColor: (ccColor4B) color;
 
 /** Initializes this instance to represent the same GL texture as the specified CC3Texture. */
 -(id) initFromCC3Texture: (CC3Texture*) texture;
