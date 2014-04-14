@@ -857,7 +857,42 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope);
  * automatically from the scene via the semantic context of the uniform variable.
  *
  * An instance of this class does not set the state of the GL engine directly. Instead, it sets
- * the value of the actual uniform within the program that it overrides.
+ * the value of the actual uniform within the program and pure color program that it overrides.
  */
-@interface CC3GLSLUniformOverride : CC3GLSLUniform
+@interface CC3GLSLUniformOverride : CC3GLSLUniform {
+	CC3GLSLUniform* _programUniform;
+	CC3GLSLUniform* _pureColorProgramUniform;
+}
+
+/**
+ * If this instance is overriding the specified uniform, either from the program or the pure 
+ * color program, the value of the specified uniform is updated from the value of this instance.
+ *
+ * Returns whether the value of the specified uniform was updated.
+ */
+-(BOOL) updateIfOverriding: (CC3GLSLUniform*) uniform;
+
+
+#pragma mark Allocation and initialization
+
+/** 
+ * Initializes this instance to override the specified uniform, 
+ * plus the specified uniform in the related pure color program.
+ *
+ * The uniform parameter must not be nil. However, in many cases, the pureColorUniform 
+ * parameter can and will be nil.
+ */
+-(id) initForProgramUniform: (CC3GLSLUniform*) uniform
+ andPureColorProgramUniform: (CC3GLSLUniform*) pureColorUniform;
+
+/**
+ * Allocates and initializes an instance to override the specified uniform, 
+ * plus the specified uniform in the related pure color program.
+ *
+ * The uniform parameter must not be nil. However, in many cases, the pureColorUniform
+ * parameter can and will be nil.
+ */
++(id) uniformOverrideForProgramUniform: (CC3GLSLUniform*) uniform
+			andPureColorProgramUniform: (CC3GLSLUniform*) pureColorUniform;
+
 @end

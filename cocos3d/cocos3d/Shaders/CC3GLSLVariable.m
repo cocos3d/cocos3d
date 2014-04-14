@@ -706,6 +706,43 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 #pragma mark CC3GLSLUniformOverride
 
 @implementation CC3GLSLUniformOverride
+
+-(void) dealloc {
+	[_programUniform release];
+	[_pureColorProgramUniform release];
+	[super dealloc];
+}
+
+-(BOOL) updateIfOverriding: (CC3GLSLUniform*) uniform {
+	if (uniform == _programUniform || uniform == _pureColorProgramUniform) {
+		[uniform setValueFromUniform: self];
+		return YES;
+	}
+	return NO;
+}
+
 -(BOOL) updateGLValueWithVisitor: (CC3NodeDrawingVisitor*) visitor { return NO; }
+
+
+#pragma mark Allocation and initialization
+
+-(id) initForProgramUniform: (CC3GLSLUniform*) uniform
+ andPureColorProgramUniform: (CC3GLSLUniform*) pureColorUniform {
+	CC3Assert(uniform, @"The overridden uniform must not be nil.");
+	if ( (self = [super init]) ) {
+		[self populateFrom: uniform];
+		_programUniform = [uniform retain];						// retained
+		_pureColorProgramUniform = [pureColorUniform retain];	// retained
+	}
+	return self;
+	
+}
+
++(id) uniformOverrideForProgramUniform: (CC3GLSLUniform*) uniform
+			andPureColorProgramUniform: (CC3GLSLUniform*) pureColorUniform {
+	return [[[self alloc] initForProgramUniform: uniform
+					 andPureColorProgramUniform: pureColorUniform] autorelease];
+}
+
 @end
 

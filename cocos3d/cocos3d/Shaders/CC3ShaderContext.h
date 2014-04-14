@@ -32,9 +32,6 @@
 #import "CC3Shaders.h"
 #import "CC3GLSLVariable.h"
 
-// Legacy naming support
-#define CC3GLProgramContext				CC3ShaderContext
-#define CC3ShaderProgramContext			CC3ShaderContext
 
 #pragma mark -
 #pragma mark CC3ShaderContext
@@ -58,8 +55,8 @@
 @interface CC3ShaderContext : NSObject <NSCopying> {
 	CC3ShaderProgram* _program;
 	CC3ShaderProgram* _pureColorProgram;
-	NSMutableArray* _uniforms;
-	NSMutableDictionary* _uniformsByName;
+	NSMutableArray* _uniformOverrides;
+	NSMutableDictionary* _uniformOverridesByName;
 	BOOL _shouldEnforceCustomOverrides : 1;
 	BOOL _shouldEnforceVertexAttributes : 1;
 }
@@ -197,16 +194,27 @@
  */
 -(CC3GLSLUniform*) uniformOverrideForSemantic: (GLenum) semantic;
 
-/** 
+/**
  * Returns the uniform at the specified program location, or nil if no uniform is at the specified location.
  *
- * The specified uniformLocation value is the location assigned to the uniform by the GL engine, and available
- * through the location property of the uniform itself. It does not always correspond to the index of the
- * uniform in a particular array.
+ * The specified uniformLocation value is the location assigned to the uniform by the GL engine.
+ * This value may be different between the shader program in the program property of this context
+ * and the shader program in the pureColorProgram property of this context. The specified 
+ * uniformLocation must be the location of the uniform in the shader program in the program 
+ * property of this context.
  *
- * When retrieving a uniform variable using this method, be aware that the content value of any
- * uniform variable with a defined semantic is derived automatically from the environment, and
- * cannot be retrieved or set directly.
+ * Invoking this method more than once will return the same uniform override, and the content of the
+ * returned uniform is sticky, so the application does not need to keep track of the returned uniform,
+ * and only needs to make changes to the content of this uniform when it wants to change that
+ * content. Specifically, the application does not need to access, or set the content of, the uniform
+ * during each frame update or render cycle. Once set, the content of this uniform will automatically
+ * be applied to the GL engine for this context (typically a CC3MeshNode), on each render cycle.
+ *
+ * By invoking this method, an override uniform is created, and the application takes responsibility
+ * for populating the value of this overriden uniform, by invoking any of the set... methods on the
+ * returned uniform. If this method has been used to override a program uniform whose content can be
+ * extracted semantically from the environment, you can remove this override by invoking the
+ * removeUniformOverride: method with the uniform returned by this method.
  *
  * If the program has no uniform at the specified location, this method does nothing and returns nil.
  */
@@ -223,6 +231,9 @@
  * being populated within the program, which would result in a program execution error.
  */
 -(void) removeUniformOverride: (CC3GLSLUniform*) uniform;
+
+/** Removes all current uniform overrides. */
+-(void) removeAllUniformOverrides;
 
 
 #pragma mark Drawing
@@ -284,3 +295,7 @@
 -(NSString*) fullDescription;
 
 @end
+
+// Legacy naming support
+#define CC3GLProgramContext				CC3ShaderContext
+#define CC3ShaderProgramContext			CC3ShaderContext
