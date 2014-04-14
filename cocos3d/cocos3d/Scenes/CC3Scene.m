@@ -346,7 +346,7 @@
  */
 -(void) updateBillboards: (CCTime) dt {
 	for (CC3Billboard* bb in _billboards) [bb alignToCamera: _activeCamera];
-	LogTrace(@"%@ updated %u billboards", self, _billboards.count);
+	LogTrace(@"%@ updated %lu billboards", self, (unsigned long)_billboards.count);
 }
 
 /**
@@ -528,7 +528,7 @@
  * This is invoked after close3D, so the drawing of billboards occurs in 2D.
  */
 -(void) draw2DBillboardsWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	LogTrace(@"%@ drawing %i billboards", self, _billboards.count);
+	LogTrace(@"%@ drawing %lu billboards", self, (unsigned long)_billboards.count);
 	CC3Viewport vp = self.activeCamera.viewport;
 	CGRect localBounds = CGRectMake(0.0f, 0.0f, vp.w, vp.h);
 	for (CC3Billboard* bb in _billboards) [bb draw2dWithinBounds: localBounds];
@@ -775,9 +775,9 @@
 	}
 
 	for (int i = 0; i < touchCount; i++) {
-		LogTrace(@"%@ dispatching %@ with picked node %@ at %@ GL %@ touched node %@",
+		LogTrace(@"%@ dispatching %@ with picked node %@ at %@ touched node %@",
 				 self, NSStringFromTouchType(_touchQueue[i]), _pickedNode.touchableNode,
-				 NSStringFromCGPoint(_touchPoint), NSStringFromCGPoint(self.glTouchPoint), _pickedNode);
+				 NSStringFromCGPoint(_touchPoint), _pickedNode);
 		[_scene nodeSelected: _pickedNode.touchableNode byTouchEvent: _touchQueue[i] at: _touchPoint];
 	}
 	

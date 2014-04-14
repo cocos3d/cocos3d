@@ -1636,6 +1636,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * Light probes are not available when using OpenGL ES 1.1.
  */
 -(void) addLightProbes {
+#if !CC3_OGLES_1
 	// Load the cube texture that contains the lighting incident from all directions.
 	// Alternately, for an interesting effect, you can comment out the first line and
 	// uncomment the second line, to load a cube-texture that contains a different
@@ -1645,6 +1646,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 //	CC3Texture* lpTex = [CC3Texture textureCubeColoredForAxes];
 
 	[self addChild: [CC3LightProbe nodeWithTexture: lpTex]];
+#endif	// !CC3_OGLES_1
 }
 
 /**

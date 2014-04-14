@@ -156,7 +156,8 @@
  * each node as it is visited.
  */
 -(void) processAfterChildren: (CC3Node*) aNode {}
-					/**
+
+/**
  * Template method that prepares the visitor to perform a visitation run. This method
  * is invoked automatically prior to the first node being visited. It is not invoked
  * for each node visited.
@@ -460,7 +461,7 @@
 	CC3ShaderProgram* sp = self.currentShaderProgram;
 	_current2DTextureUnit = 0;
 	_currentCubeTextureUnit = sp ? sp.textureCubeStart : self.textureCount;
-	_currentLightProbeTextureUnit = sp.textureLightProbeStart;
+	_currentLightProbeTextureUnit = sp ? sp.textureLightProbeStart : self.textureCount;
 	_textureBindingMode = kCC3TextureBindingModeModel;
 }
 
@@ -501,7 +502,7 @@
 		[gl disableTexturingAt: tuIdx];
 	
 	// Disable remaining light probe textures
-	tuMax = sp.textureLightProbeStart + sp.textureLightProbeCount;
+	tuMax = (sp ? (sp.textureLightProbeStart + sp.textureLightProbeCount) : tuMax);
 	for (GLuint tuIdx = _currentLightProbeTextureUnit; tuIdx < tuMax; tuIdx++)
 		[gl disableTexturingAt: tuIdx];
 	

@@ -502,8 +502,8 @@
 		GLfloat totIntensity = CCC4FIntensity(totalLight);
 		GLfloat shadowIntensity =  (dIntensity / totIntensity) * _shadowIntensityFactor;
 		_stencilledShadowPainter.opacity = CCOpacityFromGLfloat(shadowIntensity);
-		LogTrace(@"%@ updated shadow intensity to %u from light illumination %@ against total illumination %@ and shadow intensity factor %.3f",
-					  self, _stencilledShadowPainter.opacity,
+		LogTrace(@"%@ updated shadow intensity to %.3f from light illumination %@ against total illumination %@ and shadow intensity factor %.3f",
+					  self, (float)_stencilledShadowPainter.opacity,
 					  NSStringFromCCC4F(self.diffuseColor), NSStringFromCCC4F(self.scene.totalIllumination), _shadowIntensityFactor);
 	}
 }
@@ -511,7 +511,7 @@
 // TODO - combine with other shadow techniques - how to make polymorphic?
 -(void) drawShadowsWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	if (_shadows && (self.visible || self.shouldCastShadowsWhenInvisible) ) {
-		LogTrace(@"%@ drawing %u shadows", self, _shadows.count);
+		LogTrace(@"%@ drawing %lu shadows", self, (unsigned long)_shadows.count);
 		[self configureStencilParameters: visitor];
 		
 		for (CC3ShadowVolumeMeshNode* sv in _shadows) [sv drawToStencilWithVisitor: visitor];

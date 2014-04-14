@@ -425,7 +425,7 @@
  *                                then uses the weighted average of the two results.
  *
  * The last four values above require that a mipmap be available, as indicated by the hasMipmap
- * property. If one of those value is set in this property, this property will only return either
+ * property. If one of those values is set in this property, this property will only return either
  * GL_NEAREST (for all GL_NEAREST... values) or GL_LINEAR (for all GL_LINEAR... values) until a
  * mipmap has been created. See the hasMipmap property for more information about mipmaps.
  *

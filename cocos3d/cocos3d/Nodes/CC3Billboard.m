@@ -983,8 +983,6 @@ static GLfloat deviceScaleFactor = 0.0f;
 		CGRect quadRect = [self makeRectFromQuad: CC2_QUADS[i]];
 		boundingRect = CGRectUnion(boundingRect, quadRect);
 	}
-	LogTrace(@"%@ bounding rect measured as %@ across %u active of %u possible particles",
-			 [self class], NSStringFromCGRect(boundingRect), particleIdx, totalParticles);
 	return boundingRect;
 }
 

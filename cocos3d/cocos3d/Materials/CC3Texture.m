@@ -217,6 +217,8 @@
 	[gl generateMipmapForTarget: target at: tuIdx];
 	_hasMipmap = YES;
 
+	[self markTextureParametersDirty];
+
 	LogRez(@"%@ generated mipmap in %.3f ms", self, GetRezActivityDuration() * 1000);
 }
 
@@ -1620,8 +1622,8 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 		pixelsHigh: (NSUInteger) height
 	   contentSize: (CGSize) size {
 	
-	LogTrace(@"Loading texture width %u height %u content size %@ format %i data %p",
-			 width, height, NSStringFromCGSize(size), pixelFormat, data);
+	LogTrace(@"Loading texture width %lu height %lu content size %@ format %i data %p",
+			 (unsigned long)width, (unsigned long)height, NSStringFromCGSize(size), pixelFormat, data);
 	if( (self = [super init]) ) {
 		CC2_TEX_SIZE = size;
 		CC2_TEX_WIDTH = width;
@@ -1647,9 +1649,6 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 		pixelsHigh: (NSUInteger) height
 contentSizeInPixels: (CGSize) sizeInPixels
 	  contentScale: (CGFloat) contentScale {
-
-	LogTrace(@"Loading texture width %u height %u content size %@ format %i data %p",
-			 width, height, NSStringFromCGSize(size), pixelFormat, data);
 	if( (self = [super init]) ) {
 		CC2_TEX_SIZE = sizeInPixels;
 		CC2_TEX_WIDTH = width;
@@ -1765,8 +1764,6 @@ contentSizeInPixels: (CGSize) sizeInPixels
 }
 
 -(id) initWithSize: (CC3IntSize) size withPixelFormat: (GLenum) format withPixelType: (GLenum) type {
-	LogTrace(@"Creating empty texture width %u height %u content size %@ format %i data %p",
-			 size.width, size.height, NSStringFromCGSize(size), pixelFormat, data);
 	if( (self = [super init]) ) {
 		[self resizeTo: size];
 		CC2_TEX_HAS_PREMULT_ALPHA = NO;

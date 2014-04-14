@@ -39,10 +39,6 @@ extern "C" {
 
 #pragma mark CC3VertexArray PVRPOD extensions
 
-@interface CC3VertexArray (PVRPODTemplateMethods)
-	-(void) setElementsFromCPODData: (CPODData*) aCPODData fromSPODMesh: (SPODMesh*) aSPODMesh;
-@end
-
 @implementation CC3VertexArray (PVRPOD)
 
 -(id) initFromCPODData: (PODClassPtr) aCPODData fromSPODMesh: (PODStructPtr) aSPODMesh {
@@ -125,11 +121,10 @@ extern "C" {
 
 @implementation CC3VertexColors (PVRPOD)
 
-// Element size must be 4 for colors. POD loader sometimes provides incorrect value.
-// Thanks to cocos3d user esmrg who contributed the fix for element size.
+// Element size must be 4 for colors. POD loader sometimes provides incorrect value!
 -(id) initFromCPODData: (PODClassPtr) aCPODData fromSPODMesh: (PODStructPtr) aSPODMesh {
 	if ( (self = [super initFromCPODData: aCPODData fromSPODMesh: aSPODMesh]) ) {
-		self.elementSize = 4;
+		_elementSize = 4;
 	}
 	return self;
 }

@@ -985,8 +985,7 @@
 	
 	[self markProjectionDirty];
 	
-	LogTrace(@"%@ updated from FOV: %.3f, Aspect: %.3f, Near: %.3f, Far: %.3f",
-			 self, fieldOfView, nearClip, nearClip, farClip);
+	LogTrace(@"%@ updated from right: %.3f, top: %.3f, near: %.3f, far: %.3f", self, right, top, near, far);
 }
 
 -(void) populateFrom: (GLfloat) fieldOfView

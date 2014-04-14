@@ -56,7 +56,7 @@
 
 -(void) dealloc {
 	[_light removeShadow: self];		// Will also set light to nil
-	LogTrace(@"Removed %@ from %@ leaving %i shadows", self, _light, _light.shadows.count);
+	LogTrace(@"Removed %@ from %@ leaving %lu shadows", self, _light, (unsigned long)_light.shadows.count);
 
 	_light = nil;			// weak reference
 	[super dealloc];

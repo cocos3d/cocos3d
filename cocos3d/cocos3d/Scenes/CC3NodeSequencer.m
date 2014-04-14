@@ -177,8 +177,8 @@
 -(BOOL) updateSequenceWithVisitor: (CC3NodeSequencerVisitor*) visitor {
 	[self identifyMisplacedNodesWithVisitor: visitor];
 	if (visitor.hasMisplacedNodes) {
-		LogTrace(@"%@ detected %u misplaced nodes: %@",
-				 self, visitor.misplacedNodes.count, visitor.misplacedNodes);
+		LogTrace(@"%@ detected %lu misplaced nodes: %@",
+				 self, (unsigned long)visitor.misplacedNodes.count, visitor.misplacedNodes);
 		for(CC3Node* aNode in visitor.misplacedNodes) {
 			if ([self remove: aNode withVisitor: visitor])
 				[self add: aNode withVisitor: visitor];
