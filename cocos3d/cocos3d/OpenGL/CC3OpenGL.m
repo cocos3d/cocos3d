@@ -257,17 +257,15 @@ static NSObject<CC3OpenGLDelegate>* _delegate = nil;
 	// interference between threads.
 	if ( !self.isRenderingContext ) return;
 
-#if COCOS2D_VERSION >= 0x020100
-	// If available, use cocos2d state management. This method can be invoked from outside
-	// the main rendering path (ie- during buffer loading), so cocos2d state must be honoured.
-	ccGLBindVAO(vaoId);
-
-#else
+#if CC3_CC2_RENDER_QUEUE || (COCOS2D_VERSION < 0x020100)
 	cc3_CheckGLPrim(vaoId, value_GL_VERTEX_ARRAY_BINDING, isKnown_GL_VERTEX_ARRAY_BINDING);
 	if ( !needsUpdate ) return;
 	glBindVertexArray(vaoId);
 	LogGLErrorTrace(@"glBindVertexArray(%u)", vaoId);
-
+#else
+	// If available, use cocos2d state management. This method can be invoked from outside
+	// the main rendering path (ie- during buffer loading), so cocos2d state must be honoured.
+	ccGLBindVAO(vaoId);
 #endif	// COCOS2D_VERSION >= 0x020100
 }
 
@@ -1070,7 +1068,7 @@ static NSObject<CC3OpenGLDelegate>* _delegate = nil;
 
 #pragma mark Aligning 2D & 3D state
 
--(void) alignFor2DDrawing {
+-(void) alignFor2DDrawingWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	
 	// Default GL states: GL_TEXTURE_2D, GL_VERTEX_ARRAY, GL_COLOR_ARRAY, GL_TEXTURE_COORD_ARRAY
 	
@@ -1098,27 +1096,27 @@ static NSObject<CC3OpenGLDelegate>* _delegate = nil;
 	// Ensure GL_MODELVIEW matrix is active under OGLES 1.1.
 	[self activateMatrixStack: GL_MODELVIEW];
 	
-	[self align2DStateCache];		// Align the 2D GL state cache with current settings
+	[self align2DStateCacheWithVisitor: visitor];	// Align the 2D GL state cache with current settings
 }
 
--(void) align2DStateCache {}
+-(void) align2DStateCacheWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
 
--(void) alignFor3DDrawing {
+-(void) alignFor3DDrawingWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	[self bindVertexArrayObject: 0];	// Ensure that a VAO was not left in place by cocos2d
-	[self align3DStateCache];
+	[self align3DStateCacheWithVisitor: visitor];
 }
 
--(void) align3DStateCache {
+-(void) align3DStateCacheWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	isKnownCap_GL_BLEND = NO;
 	isKnownBlendFunc = NO;
 	isKnown_GL_ARRAY_BUFFER_BINDING = NO;
 	isKnown_GL_ELEMENT_ARRAY_BUFFER_BINDING = NO;
 	CC3SetBit(&isKnown_GL_TEXTURE_BINDING_2D, 0, NO);	// Unknown texture in tex unit zero
 
-	[self align3DVertexAttributeState];
+	[self align3DVertexAttributeStateWithVisitor: visitor];
 }
 
--(void) align3DVertexAttributeState {}
+-(void) align3DVertexAttributeStateWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
 
 
 #pragma mark OpenGL resources

@@ -35,14 +35,29 @@
 #import "CC3OSExtensions.h"
 #import "CCTextureCache.h"
 
+@class CC3SurfaceManager;
+
 #if !CC3_CC2_CLASSIC
 #	import "CCNode_Private.h"
 #	import "CCDirector_Private.h"
 #	import "CCTexture_Private.h"
 #endif	// !CC3_CC2_CLASSIC
 
-#pragma mark -
-#pragma mark CCGLView & CC3GLView
+#if CC3_CC2_RENDER_QUEUE
+
+#define kCCVertexAttrib_MAX			4
+#define CC_BLEND_SRC				GL_ONE
+#define CC_BLEND_DST				GL_ONE_MINUS_SRC_ALPHA
+#define ccGLUseProgram(P)
+
+#else
+
+/** Dummy class for backwards compatibility with Cocos2D 3.x renderer. */
+@interface CCRenderer : NSObject
+@end
+
+#endif	// CC3_CC2_RENDER_QUEUE
+
 
 // Backwards compatibility to renamed Cocos2D entities
 #if CC3_CC2_CLASSIC
@@ -172,6 +187,9 @@ typedef CCColor* CCColorRef;
 #endif	// CC3_CC2_CLASSIC
 
 
+#pragma mark -
+#pragma mark CCGLView & CC3GLView
+
 #if CC3_IOS
 
 /** Under cocos2d 1.x iOS, create an alias CCGLView for EAGLView. */
@@ -179,9 +197,29 @@ typedef CCColor* CCColorRef;
 #	define CCGLView EAGLView
 #endif	// CC3_CC2_1
 
-
 /** Extension to support cocos3d functionality. */
 @interface CCGLView (CC3)
+
+/** Returns the GL color format of the pixels. */
+@property(nonatomic, readonly) GLenum colorFormat;
+
+/** Default Renderbuffer */
+@property (nonatomic,readonly) GLuint defaultFrameBuffer;
+
+/** MSAA Framebuffer */
+@property (nonatomic,readonly) GLuint msaaFrameBuffer;
+
+/** Color Renderbuffer */
+@property (nonatomic,readonly) GLuint colorRenderBuffer;
+
+/** MSAA Color Buffer */
+@property (nonatomic,readonly) GLuint msaaColorBuffer;
+
+/** Depth Buffer */
+@property (nonatomic,readonly) GLuint depthBuffer;
+
+/** The underlying view rendering surface. */
+@property(nonatomic, retain, readonly) CC3SurfaceManager* surfaceManager;
 
 /** Initializes this instance with the specified characteristics. */
 -(id) initWithFrame: (CGRect) frame

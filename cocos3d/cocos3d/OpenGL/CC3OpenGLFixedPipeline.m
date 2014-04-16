@@ -39,8 +39,8 @@
 -(void) initPlatformLimits;
 -(void) initVertexAttributes;
 -(void) initTextureUnits;
--(void) align3DStateCache;
--(void) align3DVertexAttributeState;
+-(void) align3DStateCacheWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+-(void) align3DVertexAttributeStateWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 @end
 
 @implementation CC3OpenGLFixedPipeline
@@ -195,8 +195,8 @@
 }
 
 // Mark position, color & first tex coords as unknown
--(void) align3DVertexAttributeState {
-	[super align3DVertexAttributeState];
+-(void) align3DVertexAttributeStateWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[super align3DVertexAttributeStateWithVisitor: visitor];
 
 	for (GLuint vaIdx = 0; vaIdx < value_MaxVertexAttribsUsed; vaIdx++) {
 		CC3VertexAttr* vaPtr = &vertexAttributes[vaIdx];
@@ -625,8 +625,8 @@
 
 #pragma mark Aligning 2D & 3D state
 
--(void) align3DStateCache {
-	[super align3DStateCache];
+-(void) align3DStateCacheWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[super align3DStateCacheWithVisitor: visitor];
 	
 	isKnownCap_GL_LIGHT = NO;
 	isKnown_GL_CURRENT_COLOR = NO;

@@ -868,7 +868,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * You can access this property from the onOpen method of this scene, or any time after.
  * This property is not valid before that time.
  */
-@property(nonatomic, retain, readonly) CC3GLViewSurfaceManager* viewSurfaceManager;
+@property(nonatomic, retain, readonly) CC3SurfaceManager* viewSurfaceManager;
 
 /**
  * The render surface being used to draw to the view on the screen.
@@ -1147,21 +1147,6 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  *
  * The value of this property is retrieved from the pickingSurface property of the surface
  * manager in the viewSurfaceManager property.
- *
- * For economy, if multisampling is not active and the viewSurface is readable, the
- * viewSurface can also be used as the picking surface. For that reason, if both of those
- * conditions hold, and this property has not been set to YES directly, this property will
- * return the same surface as the viewSurface property. Otherwise, this property will return
- * a surface dedicated for use in rendering the scene during node picking.
- *
- * You can force the use of a dedicated picking surface, even if multisampling is not in use
- * and the viewSurface is readable, by setting the shouldUseDedicatedPickingSurface property
- * of the viewSurfaceManager to YES. There are situations where this may be preferrable, such
- * as if there is no backdrop, and some of the objects contain  transparency. In that situation,
- * using the viewSurface for both view rendering and node picking rendering may result in 
- * unwanted visual artifacts on the transparent nodes during node picking resulting from touch
- * events. To avoid these artifacts, you can set the shouldUseDedicatedPickingSurface property
- * of the viewSurfaceManager to YES, at any time.
  */
 @property(nonatomic, retain, readonly) id<CC3RenderSurface> pickingSurface;
 

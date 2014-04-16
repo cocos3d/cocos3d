@@ -73,7 +73,7 @@
 	
 	CC3OpenGL.sharedGL.context = self.context;	// Set the primary GL context from this view
 	
-	_surfaceManager = [[CC3GLViewSurfaceManager alloc] initWithView: self];		// retained
+	_surfaceManager = [[CC3SurfaceManager alloc] initWithView: self];		// retained
 }
 
 -(void) reshape {

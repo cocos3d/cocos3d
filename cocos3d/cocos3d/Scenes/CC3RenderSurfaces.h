@@ -344,7 +344,7 @@
  * 
  * See the pixelFormat property for allowable values for the format parameter.
  */
--(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format;
+-(id) initWithSize: (CC3IntSize) size withPixelFormat: (GLenum) format;
 
 /**
  * Allocates and initializes an autoreleased instance and allocates off-screen storage space
@@ -356,7 +356,7 @@
  *
  * See the pixelFormat property for allowable values for the format parameter.
  */
-+(id) renderbufferWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format;
++(id) renderbufferWithSize: (CC3IntSize) size withPixelFormat: (GLenum) format;
 
 /**
  * Initializes this instance with the specified pixel format and with one sample per pixel.
@@ -384,7 +384,7 @@
  *
  * The size of this renderbuffer can be set by invoking the resizeTo: method.
  */
--(id) initWithPixelFormat: (GLenum) format andPixelSamples: (GLuint) samples;
+-(id) initWithPixelFormat: (GLenum) format withPixelSamples: (GLuint) samples;
 
 /**
  * Allocates and initializes an autoreleased instance with the specified pixel format and
@@ -394,7 +394,7 @@
  *
  * The size of the renderbuffer can be set by invoking the resizeTo: method.
  */
-+(id) renderbufferWithPixelFormat: (GLenum) format andPixelSamples: (GLuint) samples;
++(id) renderbufferWithPixelFormat: (GLenum) format withPixelSamples: (GLuint) samples;
 
 @end
 
@@ -433,6 +433,48 @@
 
 /** The ID used to identify the renderbuffer to the GL engine. Always returns zero. */
 @property(nonatomic, readonly) GLuint renderbufferID;
+
+
+#pragma mark Allocation and initialization
+
+/**
+ * Initializes this instance with the specified pixel format and renderbuffer ID.
+ *
+ * See the pixelFormat property for allowable values for the format parameter.
+ *
+ * The size of this renderbuffer can be set by invoking the resizeTo: method.
+ */
+-(id) initWithPixelFormat: (GLenum) format withRenderbufferID: (GLuint) rbID;
+
+/**
+ * Allocates and initializes an autoreleased instance with the specified pixel format,
+ * and renderbuffer ID.
+ *
+ * See the pixelFormat property for allowable values for the format parameter.
+ *
+ * The size of the renderbuffer can be set by invoking the resizeTo: method.
+ */
++(id) renderbufferWithPixelFormat: (GLenum) format withRenderbufferID: (GLuint) rbID;
+
+/**
+ * Initializes this instance with the specified pixel format, number of samples per pixel, 
+ * and renderbuffer ID.
+ *
+ * See the pixelFormat property for allowable values for the format parameter.
+ *
+ * The size of this renderbuffer can be set by invoking the resizeTo: method.
+ */
+-(id) initWithPixelFormat: (GLenum) format withPixelSamples: (GLuint) samples withRenderbufferID: (GLuint) rbID;
+
+/**
+ * Allocates and initializes an autoreleased instance with the specified pixel format, 
+ * number of samples per pixel, and renderbuffer ID.
+ *
+ * See the pixelFormat property for allowable values for the format parameter.
+ *
+ * The size of the renderbuffer can be set by invoking the resizeTo: method.
+ */
++(id) renderbufferWithPixelFormat: (GLenum) format withPixelSamples: (GLuint) samples withRenderbufferID: (GLuint) rbID;
 
 @end
 
@@ -957,6 +999,23 @@
 /** The ID used to identify the framebuffer to the GL engine. Always returns zero. */
 @property(nonatomic, readonly) GLuint framebufferID;
 
+
+#pragma mark Allocation and initialization
+
+/**
+ * Initializes this instance to the specified size and existing framebuffer ID.
+ *
+ * When attachments are assigned to this surface, each will be resized to the specified size.
+ */
+-(id) initWithSize: (CC3IntSize) size withFramebufferID: (GLuint) fbID;
+
+/**
+ * Allocates and initializes an autoreleased instance with the specified size and existing framebuffer ID.
+ *
+ * When attachments are assigned to the instance, each will be resized to the specified size.
+ */
++(id) surfaceWithSize: (CC3IntSize) size withFramebufferID: (GLuint) fbID;
+
 @end
 
 
@@ -1231,7 +1290,7 @@
 
 
 #pragma mark -
-#pragma mark CC3GLViewSurfaceManager
+#pragma mark CC3SurfaceManager
 
 /**
  * Manages the render surfaces used to render content to the OS view on the screen.
@@ -1246,17 +1305,13 @@
  * multisampleSurface property, and then once rendering is complete, the multisampled
  * surface is resolved onto the view surface.
  */
-@interface CC3GLViewSurfaceManager : NSObject {
-	CC3GLView* _view;
+@interface CC3SurfaceManager : NSObject {
 	NSMutableArray* _resizeableSurfaces;
 	CC3GLFramebuffer* _viewSurface;
 	CC3GLFramebuffer* _multisampleSurface;
 	CC3GLFramebuffer* _pickingSurface;
 	BOOL _shouldUseDedicatedPickingSurface : 1;
 }
-
-/** The GL view whose surface is being managed by this instance. */
-@property(nonatomic, assign, readonly) CC3GLView* view;
 
 /** The on-screen surface attached to the underlying core animation layer. */
 @property(nonatomic, retain) CC3GLFramebuffer* viewSurface;
@@ -1276,38 +1331,18 @@
  */
 @property(nonatomic, retain, readonly) CC3GLFramebuffer* renderingSurface;
 
-/**
+/** 
  * The surface to which rendering for picking should be directed.
- *
- * If the shouldUseDedicatedPickingSurface property returns NO, this property returns the 
- * surface in the viewSurface property. However, if the shouldUseDedicatedPickingSurface 
- * returns YES, this property returns a dedicated surface created just for picking.
  *
  * Lazy initialization is used in case touch picking is never actually used by the app.
  */
 @property(nonatomic, retain) CC3GLFramebuffer* pickingSurface;
 
 /**
- * Returns whether a dedicated surface should be created by the pickingSurface property.
- *
- * If this property returns NO, the pickingSurface property will return the surface in
- * the viewSurface property. However, if this property returns YES, the pickingSufrace
- * property will return a dedicated surface created just for picking.
- *
- * For economy, if multisampling is not active and the viewSurface is readable, the 
- * viewSurface can also be used as the picking surface. For that reason, if both of those
- * conditions hold, and this property has not been set to YES directly, this property will
- * return NO. Otherwise, this property will return YES.
- *
- * You can force the use of a dedicated picking surface, even if multisampling is not in
- * use and the viewSurface is readable, by directly setting this property to YES. There
- * are situations where this may be preferrable, such as if there is no backdrop, and
- * some of the objects contain transparency. In that situation, using the viewSurface
- * for both view rendering and node picking rendering may result in unwanted visual
- * artifacts on the transparent nodes during node picking resulting from touch events.
- * To avoid these artifacts, you can set this property to YES.
+ * @deprecated The picking surface is always dedicated. 
+ * This property always returns YES. Setting this property has no effect.
  */
-@property(nonatomic, assign) BOOL shouldUseDedicatedPickingSurface;
+@property(nonatomic, assign) BOOL shouldUseDedicatedPickingSurface __deprecated;
 
 /** The size of the rendering surface in pixels. */
 @property(nonatomic, readonly) CC3IntSize size;
@@ -1439,7 +1474,14 @@
 #pragma mark Allocation and initialization
 
 /** Initializes this instance for the specified view. */
--(id) initWithView: (CC3GLView*) view;
+-(id) initFromView: (CCGLView*) view;
+
+/** 
+ * Returns a singleton instance.
+ *
+ * This method must be invoked after the view has been established in the CCDirector.
+ */
++(id) sharedSurfaceManager;
 
 @end
 
@@ -1474,3 +1516,6 @@ GLenum CC3TexelFormatFromRenderbufferDepthFormat(GLenum rbFormat);
  * the format and type of texture to create to match the specified renderbuffer format.
  */
 GLenum CC3TexelTypeFromRenderbufferDepthFormat(GLenum rbFormat);
+
+// Legacy naming
+#define CC3GLViewSurfaceManager CC3SurfaceManager

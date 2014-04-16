@@ -56,7 +56,7 @@
  * The UIView displaying 3D content must be of this type.
  */
 @interface CC3GLView : CCGLView {
-	CC3GLViewSurfaceManager* _surfaceManager;
+	CC3SurfaceManager* _surfaceManager;
 }
 
 /** The OpenGL context used by this view. */
@@ -66,7 +66,7 @@
 @property(nonatomic, retain, readonly) CAEAGLLayer* layer;
 
 /** The underlying view rendering surface. */
-@property(nonatomic, retain, readonly) CC3GLViewSurfaceManager* surfaceManager;
+@property(nonatomic, retain, readonly) CC3SurfaceManager* surfaceManager;
 
 /** Returns the GL color format of the pixels. */
 @property(nonatomic, readonly) GLenum colorFormat;

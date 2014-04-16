@@ -90,7 +90,7 @@
 									 kEAGLDrawablePropertyColorFormat,
 									 nil];
 	CC2_CONTEXT = [CC3OpenGL.sharedGL.context retain];
-	_surfaceManager = [[CC3GLViewSurfaceManager alloc] initWithView: self];		// retained
+	_surfaceManager = [[CC3SurfaceManager alloc] initFromView: self];		// retained
 	
 	return YES;
 }

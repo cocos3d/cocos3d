@@ -310,6 +310,7 @@ typedef enum {
 	CC3SkinSection* _currentSkinSection;
 	id<CC3RenderSurface> _renderSurface;
 	CC3OpenGL* _gl;
+	CCRenderer* _ccRenderer;
 	CC3DataArray* _boneMatricesGlobal;
 	CC3DataArray* _boneMatricesEyeSpace;
 	CC3DataArray* _boneMatricesModelSpace;
@@ -346,6 +347,9 @@ typedef enum {
  * be lazily recreated when used on the next thread.
  */
 @property(nonatomic, readonly) CC3OpenGL* gl;
+
+/** The Cocos2D renderer. Available when using Cocos2D 3.1 and above. */
+@property(nonatomic, assign) CCRenderer* ccRenderer;
 
 /** 
  * Clears the reference in the gl property, so that it can be retrieved automatically on

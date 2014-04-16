@@ -531,7 +531,7 @@ static GLfloat deviceScaleFactor = 0.0f;
 	[super applyMaterialWithVisitor: visitor];
 	if (visitor.shouldDecorateNode) {
 		CC3OpenGL* gl = visitor.gl;
-		[gl alignFor2DDrawing];
+		[gl alignFor2DDrawingWithVisitor: visitor];
 		gl.depthMask = !_shouldDisableDepthMask;
 	}
 }
@@ -548,7 +548,7 @@ static GLfloat deviceScaleFactor = 0.0f;
  */
 -(void) drawMeshWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	if (visitor.shouldDecorateNode) {
-		[_billboard visit];		// Draw the 2D CCNode
+//		[_billboard visit];		// Draw the 2D CCNode
 	} else {
 		// We're drawing a colored box to allow this node to be picked by a touch.
 		// This is done by creating and drawing an underlying rectangle mesh that
@@ -563,7 +563,7 @@ static GLfloat deviceScaleFactor = 0.0f;
  * Don't configure anything if painting for node picking.
  */
 -(void) cleanupDrawingParameters: (CC3NodeDrawingVisitor*) visitor {
-	if (visitor.shouldDecorateNode) [visitor.gl alignFor3DDrawing];
+	if (visitor.shouldDecorateNode) [visitor.gl alignFor3DDrawingWithVisitor: visitor];
 	[super cleanupDrawingParameters: visitor];
 }
 
@@ -951,6 +951,34 @@ static GLfloat deviceScaleFactor = 0.0f;
 
 @implementation CCParticleSystemQuad (CC3)
 
+#if CC3_CC2_RENDER_QUEUE
+
+/** Find the rectangle that envelopes the specified particle. */
+-(CGRect) makeRectFromParticle: (_CCParticle*) pParticle {
+	float ps = pParticle->size;
+	float hs = ps * 0.5f;
+	return CGRectMake(pParticle->pos.x - hs, pParticle->pos.y - hs, ps, ps);
+}
+
+/** Build the bounding box to encompass the locations of all of the particles. */
+-(CGRect) measureBoundingBoxInPixels {
+	
+	// Must have at least one particle, otherwise simply return a zero rect
+	if (!_particles || _particleCount == 0) return CGRectZero;
+	
+	// Get the first particle as a starting point
+	CGRect boundingRect = [self makeRectFromParticle: &_particles[0]];
+	
+	// Iterate through all the remaining particles, taking the union of the current bounding
+	// rect and each particle rect to find the rectangle that bounds all the particles.
+	for(NSUInteger i = 1; i < _particleCount; i++)
+		boundingRect = CGRectUnion(boundingRect, [self makeRectFromParticle: &_particles[i]]);
+
+	return boundingRect;
+}
+
+#else
+
 /**
  * Find the absolute bottom left and top right from all four vertices in the quad,
  * assuming that the bl and tr of the quad are nominal representations and do not
@@ -972,19 +1000,19 @@ static GLfloat deviceScaleFactor = 0.0f;
 	
 	// Must have at least one quad, otherwise simply return a zero rect
 	if (!CC2_QUADS || CC2_PARTICLE_IDX == 0) return CGRectZero;
-
+	
 	// Get the first quad as a starting point
 	CGRect boundingRect = [self makeRectFromQuad: CC2_QUADS[0]];
 	
-	// Iterate through all the remaining quads, taking the union of the
-	// current bounding rect and each quad to find the rectangle that
-	// bounds all the quads.
-	for(NSUInteger i = 1; i < CC2_PARTICLE_IDX; i++) {
-		CGRect quadRect = [self makeRectFromQuad: CC2_QUADS[i]];
-		boundingRect = CGRectUnion(boundingRect, quadRect);
-	}
+	// Iterate through all the remaining quads, taking the union of the current
+	// bounding rect and each quad to find the rectangle that bounds all the quads.
+	for(NSUInteger i = 1; i < CC2_PARTICLE_IDX; i++)
+		boundingRect = CGRectUnion(boundingRect, [self makeRectFromQuad: CC2_QUADS[i]]);
+
 	return boundingRect;
 }
+
+#endif	// CC3_CC2_RENDER_QUEUE
 
 @end
 

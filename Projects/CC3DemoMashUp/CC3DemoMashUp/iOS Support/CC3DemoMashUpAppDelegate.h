@@ -27,12 +27,25 @@
  * http://en.wikipedia.org/wiki/MIT_License
  */
 
+#import "CC3Environment.h"
+
+#if CC3_CC2_CLASSIC
+
 #import <UIKit/UIKit.h>
 #import "CC3DeviceCameraOverlayUIViewController.h"
 
+/** App Delegate for Cocos2D below v3. */
 @interface CC3DemoMashUpAppDelegate : NSObject <UIApplicationDelegate> {
 	UIWindow* _window;
 	CC3DeviceCameraOverlayUIViewController* _viewController;
 }
 
 @end
+
+#else
+
+/** App Delegate for Cocos2D v3 and above. */
+@interface CC3DemoMashUpAppDelegate : CCAppDelegate
+@end
+
+#endif	// CC3_CC2_CLASSIC

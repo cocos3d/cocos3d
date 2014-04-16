@@ -172,9 +172,17 @@
 
 #pragma mark Drawing
 
+/** Drawing under Cocos2D 3.0 and before. */
 -(void) draw {
 	if (_shouldAlwaysUpdateViewport) [self updateViewport];
 	[_cc3Scene drawScene];
+}
+
+/** Drawing under Cocos2D 3.1 and after. */
+-(void) draw: (CCRenderer*) renderer transform: (const GLKMatrix4*) transform {
+	if (_shouldAlwaysUpdateViewport) [self updateViewport];
+	[renderer enqueueBlock: ^{ [_cc3Scene drawScene]; }
+				debugLabel: _cc3Scene.description];
 }
 
 

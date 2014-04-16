@@ -99,7 +99,18 @@
 								  depthFormat: self.viewDepthFormat
 						   preserveBackbuffer: NO
 							  numberOfSamples: self.viewPixelSamples];
+	[self replaceRenderer];
 }
+
+#if CC3_CC2_RENDER_QUEUE
+/** Replaces the renderer once the GL context has been created. */
+-(void) replaceRenderer {
+	[_renderer release];
+	_renderer = [[CCRenderer alloc] init];		// retained
+}
+#else
+-(void) replaceRenderer {}
+#endif	// CC3_CC2_RENDER_QUEUE
 
 -(CGRect) viewCreationBounds { return UIScreen.mainScreen.bounds; }
 
@@ -214,7 +225,6 @@ CC3_POP_NOSELECTOR
 +(id) sharedDirector { return super.sharedDirector; }
 #endif	// !CC3_CC2_1
 
-// CCDirector must be in portrait orientation for autorotation to work
 -(id) initWithNibName: (NSString*) nibNameOrNil bundle: (NSBundle*) nibBundleOrNil {
 	if( (self = [super initWithNibName: nibNameOrNil bundle: nibBundleOrNil]) ) {
 		_shouldUseRetina = NO;

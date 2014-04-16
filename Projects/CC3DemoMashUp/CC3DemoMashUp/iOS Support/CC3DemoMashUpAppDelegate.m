@@ -37,8 +37,9 @@
 
 #define kAnimationFrameRate		60		// Animation frame rate
 
-@implementation CC3DemoMashUpAppDelegate
+#if CC3_CC2_CLASSIC
 
+@implementation CC3DemoMashUpAppDelegate
 
 #if CC3_CC2_1
 /**
@@ -198,3 +199,49 @@
 }
 
 @end
+
+#else
+
+@implementation CC3DemoMashUpAppDelegate
+
+// This is the only app delegate method you need to implement when inheriting from CCAppDelegate.
+// This method is a good place to add one time setup code that only runs when your app is first launched.
+-(BOOL) application: (UIApplication*) application didFinishLaunchingWithOptions: (NSDictionary*) launchOptions {
+	
+	// Setup Cocos2D with reasonable defaults for everything.
+	// See CCAppDelegate.h for more options.
+	// With Cocos3D, you MUST include CCSetupDepthFormat as GL_DEPTH_COMPONENT16 or GL_DEPTH24_STENCIL8 !!
+	// If you want more flexibility, you can configure Cocos2D yourself instead of calling setupCocos2dWithOptions:.
+	[self setupCocos2dWithOptions:
+	 @{
+	   CCSetupDepthFormat: @GL_DEPTH24_STENCIL8,	// This app uses shadow volumes which require a stencil buffer
+	   CCSetupShowDebugStats: @(YES),				// Show the FPS and draw call label.
+	   CCSetupAnimationInterval: @(1.0 / kAnimationFrameRate),	// Framerate (defaults to 60 FPS).
+//	   CCSetupScreenOrientation: CCScreenOrientationPortrait,	// Run in portrait mode.
+	   }];
+	
+	return YES;
+}
+
+/** Returns the initial 2D CCScene. Our 2D scene contains a CC3Layer holding a 3D CC3Scene. */
+-(CCScene*) startScene {
+
+	// Create the customized CC3Layer that supports 3D rendering.
+	CC3Layer* cc3Layer = [CC3DemoMashUpLayer layer];
+	
+	// Create the customized 3D scene and attach it to the layer.
+	// Could also just create this inside the customer layer.
+	cc3Layer.cc3Scene = [CC3DemoMashUpScene scene];
+	
+	// Wrap the layer in a 2D scene and run it in the director
+	CCScene *scene = [CCScene node];
+	[scene addChild: cc3Layer];
+	return scene;
+}
+
+@end
+
+#endif	// CC3_CC2_CLASSIC
+
+
+

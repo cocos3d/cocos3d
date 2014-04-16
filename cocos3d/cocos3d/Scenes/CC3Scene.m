@@ -362,7 +362,7 @@
 
 #pragma mark Drawing
 
--(CC3GLViewSurfaceManager*) viewSurfaceManager { return self.controller.view.surfaceManager; }
+-(CC3SurfaceManager*) viewSurfaceManager { return CC3SurfaceManager.sharedSurfaceManager; }
 
 -(id<CC3RenderSurface>) viewSurface { return self.viewSurfaceManager.renderingSurface; }
 
@@ -425,7 +425,7 @@
 
 -(void) open3DWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"%@ opening the 3D scene", self);
-	[visitor.gl alignFor3DDrawing];
+	[visitor.gl alignFor3DDrawingWithVisitor: visitor];
 }
 
 -(void) close3DWithVisitor: (CC3NodeDrawingVisitor*) visitor {
@@ -434,7 +434,7 @@
 	CC3OpenGL* gl = visitor.gl;
 	
 	// Setup drawing configuration for cocos2d
-	[gl alignFor2DDrawing];
+	[gl alignFor2DDrawingWithVisitor: visitor];
 
 	// Re-align culling as expected by cocos2d
 	[gl enableCullFace: NO];
@@ -443,6 +443,7 @@
 
 	// Make sure the drawing surface is set back to the view surface
 	[self.viewSurface activate];
+	[gl bindRenderbuffer: self.viewSurfaceManager.viewColorBuffer.renderbufferID];
 
 	// Set depth testing to 2D values, and close depth testing,
 	// either by turning it off, or clearing the depth buffer
@@ -455,7 +456,7 @@
 	gl.viewport = CC3ViewportMake(0, 0, viewSize.width, viewSize.height);
 	[gl enableScissorTest: NO];
 
-	// Disable lights and fog. Done outside alignFor2DDrawing: because they apply to billboards
+	// Disable lights and fog. Done outside alignFor2DDrawingWithVisitor because they apply to billboards
 	[gl enableLighting: NO];
 	[gl enableTwoSidedLighting: NO];
 	for (CC3Light* lgt in _lights) [lgt turnOffWithVisitor: visitor];

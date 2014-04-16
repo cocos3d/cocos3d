@@ -296,11 +296,13 @@
 @synthesize shouldDecorateNode=_shouldDecorateNode;
 @synthesize isDrawingEnvironmentMap=_isDrawingEnvironmentMap;
 @synthesize currentColor=_currentColor;
+@synthesize ccRenderer=_ccRenderer;
 
 -(void) dealloc {
 	_drawingSequencer = nil;				// weak reference
 	_currentSkinSection = nil;				// weak reference
 	_gl = nil;								// weak reference
+	_ccRenderer = nil;						// weak reference
 	[_renderSurface release];
 	[_boneMatricesGlobal release];
 	[_boneMatricesEyeSpace release];
@@ -696,6 +698,7 @@
 -(id) init {
 	if ( (self = [super init]) ) {
 		_gl = nil;
+		_ccRenderer = nil;
 		_renderSurface = nil;
 		_drawingSequencer = nil;
 		_currentSkinSection = nil;

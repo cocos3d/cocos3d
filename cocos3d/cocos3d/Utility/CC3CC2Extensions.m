@@ -30,8 +30,19 @@
  */
 
 #import "CC3CC2Extensions.h"
+#import "CC3RenderSurfaces.h"
 #import "CC3Logging.h"
+#import "CCES2Renderer.h"
 #import "uthash.h"
+
+#if CC3_CC2_RENDER_QUEUE
+#else
+
+@implementation CCRenderer
+@end
+
+#endif	// CC3_CC2_RENDER_QUEUE
+
 
 #if !CC3_CC2_CLASSIC
 
@@ -53,7 +64,50 @@
 #endif	// !CC3_CC2_CLASSIC
 
 #if CC3_IOS
+
+@implementation CCES2Renderer (CC3)
+-(GLuint) depthBuffer { return _depthBuffer; }
+@end
+
+
+@interface CCGLView (TemplateMethods)
+-(unsigned int) convertPixelFormat:(NSString*) pixelFormat;
+@end
+
+#if COCOS2D_VERSION < 0x020100
+#	define CC2_REQUESTED_SAMPLES requestedSamples_
+#	define CC2_PIXEL_FORMAT pixelformat_
+#	define CC2_DEPTH_FORMAT depthFormat_
+#	define CC2_CONTEXT context_
+#	define CC2_SIZE size_
+#	define CC2_PRESERVE_BACKBUFFER preserveBackbuffer_
+#else
+#	define CC2_REQUESTED_SAMPLES _requestedSamples
+#	define CC2_PIXEL_FORMAT _pixelformat
+#	define CC2_DEPTH_FORMAT _depthFormat
+#	define CC2_CONTEXT _context
+#	define CC2_RENDERER ((id<CCESRenderer>)_renderer)
+#	define CC2_SIZE _size
+#	define CC2_PRESERVE_BACKBUFFER _preserveBackbuffer
+#endif
+
 @implementation CCGLView (CC3)
+
+-(GLenum) colorFormat { return [self convertPixelFormat: CC2_PIXEL_FORMAT]; }
+
+-(GLuint) defaultFrameBuffer { return [CC2_RENDERER defaultFrameBuffer]; }
+
+-(GLuint) msaaFrameBuffer { return [CC2_RENDERER msaaFrameBuffer]; }
+
+-(GLuint) colorRenderBuffer { return [CC2_RENDERER colorRenderBuffer]; }
+
+-(GLuint) msaaColorBuffer { return [CC2_RENDERER msaaColorBuffer]; }
+
+-(GLuint) depthBuffer { return [(CCES2Renderer*)CC2_RENDERER depthBuffer]; }
+
+-(CC3SurfaceManager*) surfaceManager {
+	return [[[CC3SurfaceManager alloc] initFromView: self] autorelease];
+}
 
 -(id) initWithFrame: (CGRect) frame
 		pixelFormat: (NSString*) colorFormat

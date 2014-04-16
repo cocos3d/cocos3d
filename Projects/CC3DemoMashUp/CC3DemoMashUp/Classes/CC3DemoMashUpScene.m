@@ -1988,7 +1988,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// Otherwise, we could have just used the simpler renderbuffer option for the depth buffer.
 	// Finally, we register the off-screen surface with the view's surface manager, so that the
 	// off-screen surface will be resized automatically whenever the view is resized.
-	CC3GLViewSurfaceManager* surfMgr = self.viewSurfaceManager;
+	CC3SurfaceManager* surfMgr = self.viewSurfaceManager;
 	CC3Texture* depthTexture = [CC3Texture textureWithPixelFormat: surfMgr.depthTexelFormat
 													withPixelType: surfMgr.depthTexelType];
 	_postProcSurface = [CC3GLFramebuffer colorTextureSurfaceWithSize: surfMgr.size

@@ -1243,14 +1243,14 @@ typedef struct {
  * it interferes with subsequent 2D rendering by cocos2d. However, such occurrances should be rare,
  * and in most circumstances you should never need to invoke this method.
  */
--(void) alignFor2DDrawing;
+-(void) alignFor2DDrawingWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /**
  * Aligns the state within the GL engine to be suitable for 3D drawing by cocos3d.
  *
  * This is invoked automatically during the transition from 2D to 3D drawing.
  */
--(void) alignFor3DDrawing;
+-(void) alignFor3DDrawingWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 
 #pragma mark OpenGL resources

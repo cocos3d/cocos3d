@@ -42,12 +42,7 @@
 	[super dealloc];
 }
 
-/** If not set directly, try to retrieve it from an ancestor controllable node. */
--(CC3ViewController*) controller {
-	if (!_controller) self.controller = super.controller;
-	CC3Assert(_controller, @"%@ requires a controller.", self);
-	return _controller;
-}
+-(CC3ViewController*) controller { return _controller; }
 
 -(void) setController: (CC3ViewController*) aController {
 	_controller = aController;		// weak reference
