@@ -114,15 +114,17 @@ static CC3ShaderSourceCode* _defaultShaderPreamble = nil;
 			  self, scCnt, visitor.sourceCompilationStringCount);
 	
 	// Submit the source code strings to the compiler
-	[CC3OpenGL.sharedGL compileShader: self.shaderID from: scCnt sourceCodeStrings: scStrings];
+	CC3OpenGL* gl = CC3OpenGL.sharedGL;
+	[gl compileShader: self.shaderID from: scCnt sourceCodeStrings: scStrings];
 	
-	CC3Assert([CC3OpenGL.sharedGL getShaderWasCompiled: self.shaderID],
+	CC3Assert([gl getShaderWasCompiled: self.shaderID],
 			  @"%@ failed to compile because:\n%@", self,
-			  [self localizeCompileErrors: [CC3OpenGL.sharedGL getLogForShader: self.shaderID]
-						 fromShaderSource: shSrcCode]);
+			  [self localizeCompileErrors: [gl getLogForShader: self.shaderID] fromShaderSource: shSrcCode]);
 	
+	[gl setDebugLabel: self.name forShader: self.shaderID];
+
 #if LOGGING_REZLOAD
-	NSString* compLog = [CC3OpenGL.sharedGL getLogForShader: self.shaderID];
+	NSString* compLog = [gl getLogForShader: self.shaderID];
 	LogRez(@"Compiled %@ in %.3f ms%@", self, GetRezActivityDuration() * 1000,
 		   (compLog ? [NSString stringWithFormat: @" with the following warnings:\n%@", compLog] : @""));
 #endif	// LOGGING_REZLOAD
@@ -530,14 +532,17 @@ static BOOL _defaultShouldAllowDefaultVariableValues = NO;
 	
 	MarkRezActivityStart();
 	
-	[CC3OpenGL.sharedGL linkShaderProgram: self.programID];
+	CC3OpenGL* gl = CC3OpenGL.sharedGL;
+	[gl linkShaderProgram: self.programID];
 	
-	CC3Assert([CC3OpenGL.sharedGL getShaderProgramWasLinked: self.programID],
+	CC3Assert([gl getShaderProgramWasLinked: self.programID],
 			  @"%@ could not be linked because:\n%@", self,
-			  [CC3OpenGL.sharedGL getLogForShaderProgram: self.programID]);
+			  [gl getLogForShaderProgram: self.programID]);
+
+	[gl setDebugLabel: self.name forShaderProgram: self.programID];
 	
 #if LOGGING_REZLOAD
-	NSString* linkLog = [CC3OpenGL.sharedGL getLogForShaderProgram: self.programID];
+	NSString* linkLog = [gl getLogForShaderProgram: self.programID];
 	LogRez(@"Linked %@ in %.3f ms%@", self, GetRezActivityDuration() * 1000,
 		   (linkLog ? [NSString stringWithFormat: @" with the following warnings:\n%@", linkLog] : @""));
 #endif	// LOGGING_REZLOAD
@@ -1498,6 +1503,7 @@ static CC3Cache* _shaderSourceCodeCache = nil;
 -(id<CC3RenderSurface>) prewarmingSurface {
 	if ( !_prewarmingSurface ) {
 		self.prewarmingSurface = [CC3GLFramebuffer surfaceWithSize: CC3IntSizeMake(4, 4)];
+		((CC3GLFramebuffer*)_prewarmingSurface).name = @"Prewarming surface";
 		_prewarmingSurface.colorAttachment = [CC3GLRenderbuffer renderbufferWithPixelFormat: GL_RGBA4];
 		[_prewarmingSurface validate];
 	}

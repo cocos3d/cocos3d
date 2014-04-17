@@ -1000,6 +1000,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// You can use the numberOfFacesPerSnapshot property to adjust how often the reflective faces
 	// are updated, to trade off real-time accuracy and performance.
 	_envMapTex = [CC3EnvironmentMapTexture textureCubeWithSideLength: 256];
+	_envMapTex.name = @"TeapotMirror";				// Give it a name to help with troubleshooting
 	_envMapTex.numberOfFacesPerSnapshot = 1.0f;		// Update only one side of the cube in each frame
 	
 	[_teapotTextured addTexture: _envMapTex];
@@ -1890,6 +1891,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// uses a more memory-efficient 16-bit RGB format. Similarly, since stencils will not
 	// be used, we allow a default 16-bit depth buffer to be used for this surface.
 	CC3GLFramebuffer*  tvSurface = [CC3GLFramebuffer colorTextureSurfaceWithSize: kTVTexSize isOpaque: YES];
+	tvSurface.name = @"Television";
 
 	// Now create a drawing visitor that will coordinate the drawing of the the TV screen
 	// Since the aspect of the TV screen surface is different than the main display, we don't
@@ -1995,6 +1997,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 													 withPixelFormat: surfMgr.colorTexelFormat
 													   withPixelType: surfMgr.colorTexelType
 												 withDepthAttachment: [CC3TextureFramebufferAttachment attachmentWithTexture: depthTexture]];
+	_postProcSurface.name = @"Post-proc surface";
 	[surfMgr addSurface: _postProcSurface];
 	
 	// Create a clip-space node that will render the off-screen color texture to the screen.

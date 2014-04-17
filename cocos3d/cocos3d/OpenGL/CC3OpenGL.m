@@ -1066,6 +1066,42 @@ static NSObject<CC3OpenGLDelegate>* _delegate = nil;
 -(void) releaseShaderCompiler {}
 
 
+#pragma mark Debugging support
+
+-(void) setDebugLabel: (NSString*) label forObject: (GLuint) objID ofType: (GLenum) objType {
+	glLabelObjectEXT(objType, objID, 0, label.UTF8String);
+	LogGLErrorTrace(@"glLabelObjectEXT(%@, %u, 0, %@)", NSStringFromGLEnum(objType), objID, label);
+}
+
+-(void) setDebugLabel: (NSString*) label forTexture: (GLuint) texID {
+	[self setDebugLabel: label forObject: texID ofType: GL_TEXTURE];
+}
+
+-(void) setDebugLabel: (NSString*) label forBuffer: (GLuint) buffID {
+	[self setDebugLabel: label forObject: buffID ofType: GL_BUFFER_OBJECT_EXT];
+}
+
+-(void) setDebugLabel: (NSString*) label forShader: (GLuint) shaderID {
+	[self setDebugLabel: label forObject: shaderID ofType: GL_SHADER_OBJECT_EXT];
+}
+
+-(void) setDebugLabel: (NSString*) label forShaderProgram: (GLuint) progID {
+	[self setDebugLabel: label forObject: progID ofType: GL_PROGRAM_OBJECT_EXT];
+}
+
+-(void) setDebugLabel: (NSString*) label forFramebuffer: (GLuint) fbID {
+	[self setDebugLabel: label forObject: fbID ofType: GL_FRAMEBUFFER];
+}
+
+-(void) setDebugLabel: (NSString*) label forRenderbuffer: (GLuint) rbID {
+	[self setDebugLabel: label forObject: rbID ofType: GL_RENDERBUFFER];
+}
+
+-(void) setDebugLabel: (NSString*) label forVertexArray: (GLuint) vaID {
+	[self setDebugLabel: label forObject: vaID ofType: GL_VERTEX_ARRAY_OBJECT_EXT];
+}
+
+
 #pragma mark Aligning 2D & 3D state
 
 -(void) alignFor2DDrawingWithVisitor: (CC3NodeDrawingVisitor*) visitor {

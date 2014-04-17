@@ -31,7 +31,7 @@
 
 #import "CC3Texture.h"
 
-@class CC3GLView, CC3Backgrounder;
+@class CC3GLView, CC3Backgrounder, CC3GLFramebuffer;
 
 
 #pragma mark -
@@ -272,13 +272,19 @@
 @protocol CC3FramebufferAttachment <CC3RenderSurfaceAttachment>
 
 /** Binds this attachment to the specified framebuffer, as the specified attachment type. */
--(void) bindToFramebuffer: (GLuint) framebufferID asAttachment: (GLenum) attachment;
+-(void) bindToFramebuffer: (CC3GLFramebuffer*) framebuffer asAttachment: (GLenum) attachment;
 
 /** 
  * Unbinds this buffer from the specified framebuffer, as the specified attachment type,
  * and leaves the framebuffer with no attachment of that type.
  */
--(void) unbindFromFramebuffer: (GLuint) framebufferID asAttachment: (GLenum) attachment;
+-(void) unbindFromFramebuffer: (CC3GLFramebuffer*) framebuffer asAttachment: (GLenum) attachment;
+
+/**
+ * Updates the name of this attachment from the name of the framebuffer and type of attachment.
+ * This is inovoked when the name of the framebuffer is changed.
+ */
+-(void) updateNameFromFramebuffer: (CC3GLFramebuffer*) framebuffer asAttachment: (GLenum) attachment;
 
 @end
 
@@ -296,7 +302,7 @@
  * GL memory. For the on-screen renderbuffer whose storage is shared by the view, use the
  * CC3IOSOnScreenGLRenderbuffer subclass.
  */
-@interface CC3GLRenderbuffer : NSObject <CC3FramebufferAttachment> {
+@interface CC3GLRenderbuffer : CC3Identifiable <CC3FramebufferAttachment> {
 	GLuint _rbID;
 	CC3IntSize _size;
 	GLenum _format;
@@ -628,13 +634,18 @@
  * surface that holds a particular type of drawn content: color, depth, or stencil content.
  * Typically, each of these attachments will be either a renderbuffer, a texture (to support
  * rendering to a texture, or nil, indicating that that type of content is not being rendered.
+ *
+ * You should consider setting the name propery of each instance, to distinguish them.
+ * The name will also appear in the debugger when capturing OpenGL frames. If you set the
+ * name before adding attachments, it will propagate to those attachments.
  */
-@interface CC3GLFramebuffer : NSObject <CC3RenderSurface> {
+@interface CC3GLFramebuffer : CC3Identifiable <CC3RenderSurface> {
 	GLuint _fbID;
 	CC3IntSize _size;
 	id<CC3FramebufferAttachment> _colorAttachment;
 	id<CC3FramebufferAttachment> _depthAttachment;
 	id<CC3FramebufferAttachment> _stencilAttachment;
+	BOOL _glLabelWasSet : 1;
 }
 
 /** The ID used to identify the framebuffer to the GL engine. */
@@ -758,8 +769,7 @@
  * Validates that this framebuffer has a valid configuration in the GL engine.
  *
  * This method should be invoked to validate the surface, once all attachments have been
- * set or resized. If the configuration is not valid, an error is logged, and, if the
- * GL_ERROR_ASSERTION_ENABLED compiler build setting is set, an assertion error is raised.
+ * added or resized. If the configuration is not valid, an assertion exception is raised.
  */
 -(BOOL) validate;
 
@@ -1516,6 +1526,9 @@ GLenum CC3TexelFormatFromRenderbufferDepthFormat(GLenum rbFormat);
  * the format and type of texture to create to match the specified renderbuffer format.
  */
 GLenum CC3TexelTypeFromRenderbufferDepthFormat(GLenum rbFormat);
+
+/** Returns a string combination of the framebuffer name and the attachment type. */
+NSString* CC3FramebufferAttachmentName(CC3GLFramebuffer* framebuffer, GLenum attachment);
 
 // Legacy naming
 #define CC3GLViewSurfaceManager CC3SurfaceManager

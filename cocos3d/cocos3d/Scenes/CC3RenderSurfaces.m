@@ -62,6 +62,12 @@
 	_rbID = 0;
 }
 
+/** If the renderbuffer has been created, set its debug label as well. */
+-(void) setName: (NSString*) name {
+	[super setName: name];
+	if (_rbID) [CC3OpenGL.sharedGL setDebugLabel: self.name forRenderbuffer: _rbID];
+}
+
 -(void) replacePixels: (CC3Viewport) rect withContent: (ccColor4B*) colorArray {
 	CC3AssertUnimplemented(@"replacePixels:withContent:");
 }
@@ -79,19 +85,30 @@
 
 #pragma mark Framebuffer attachment
 
--(void) bindToFramebuffer: (GLuint) framebufferID asAttachment: (GLenum) attachment {
-	[CC3OpenGL.sharedGL bindRenderbuffer: self.renderbufferID toFrameBuffer: framebufferID asAttachment: attachment];
+-(void) bindToFramebuffer: (CC3GLFramebuffer*) framebuffer asAttachment: (GLenum) attachment {
+	CC3OpenGL* gl = CC3OpenGL.sharedGL;
+	[gl bindRenderbuffer: self.renderbufferID
+		   toFrameBuffer: framebuffer.framebufferID
+			asAttachment: attachment];
+
+	if( !_name ) [self updateNameFromFramebuffer: framebuffer asAttachment: attachment];
 }
 
--(void) unbindFromFramebuffer: (GLuint) framebufferID asAttachment: (GLenum) attachment {
-	[CC3OpenGL.sharedGL bindRenderbuffer: 0 toFrameBuffer: framebufferID asAttachment: attachment];
+-(void) unbindFromFramebuffer: (CC3GLFramebuffer*) framebuffer asAttachment: (GLenum) attachment {
+	[CC3OpenGL.sharedGL bindRenderbuffer: 0
+						   toFrameBuffer: framebuffer.framebufferID
+							asAttachment: attachment];
+}
+
+-(void) updateNameFromFramebuffer: (CC3GLFramebuffer*) framebuffer asAttachment: (GLenum) attachment {
+	self.name = CC3FramebufferAttachmentName(framebuffer, attachment);
 }
 
 
 #pragma mark Allocation and initialization
 
--(id) init {
-	if ( (self = [super init]) ) {
+-(id) initWithTag:(GLuint) tag withName: (NSString*) name {
+	if ( (self = [super initWithTag: tag withName: name]) ) {
 		_rbID = 0;
 		_size = CC3IntSizeMake(0, 0);
 		_format = GL_ZERO;
@@ -168,9 +185,11 @@
 
 -(void) resizeTo: (CC3IntSize) size { _size = size; }
 
--(void) bindToFramebuffer: (GLuint) framebufferID asAttachment: (GLenum) attachment {}
+-(void) bindToFramebuffer: (CC3GLFramebuffer*) framebuffer asAttachment: (GLenum) attachment {
+	if( !_name ) [self updateNameFromFramebuffer: framebuffer asAttachment: attachment];
+}
 
--(void) unbindFromFramebuffer: (GLuint) framebufferID asAttachment: (GLenum) attachment {}
+-(void) unbindFromFramebuffer: (CC3GLFramebuffer*) framebuffer asAttachment: (GLenum) attachment {}
 
 
 #pragma mark Allocation and initialization
@@ -263,20 +282,27 @@
 
 -(GLenum) pixelFormat { return self.texture.pixelFormat; }
 
--(void) bindToFramebuffer: (GLuint) framebufferID asAttachment: (GLenum) attachment {
+-(void) bindToFramebuffer: (CC3GLFramebuffer*) framebuffer asAttachment: (GLenum) attachment {
 	[CC3OpenGL.sharedGL bindTexture2D: self.texture.textureID
 								 face: _face
 						  mipmapLevel: _mipmapLevel
-						toFrameBuffer: framebufferID
+						toFrameBuffer: framebuffer.framebufferID
 						 asAttachment: attachment];
+	[self updateNameFromFramebuffer: framebuffer asAttachment: attachment];
 }
 
--(void) unbindFromFramebuffer: (GLuint) framebufferID asAttachment: (GLenum) attachment {
+-(void) unbindFromFramebuffer: (CC3GLFramebuffer*) framebuffer asAttachment: (GLenum) attachment {
 	[CC3OpenGL.sharedGL bindTexture2D: 0
 								 face: _face
 						  mipmapLevel: _mipmapLevel
-						toFrameBuffer: framebufferID
+						toFrameBuffer: framebuffer.framebufferID
 						 asAttachment: attachment];
+}
+
+/** Only update the texture if it has not already been given a name, and if the framebuffer does have a name. */
+-(void) updateNameFromFramebuffer: (CC3GLFramebuffer*) framebuffer asAttachment: (GLenum) attachment {
+	CC3Texture* tex = self.texture;
+	if ( !tex.name && framebuffer.name ) tex.name = CC3FramebufferAttachmentName(framebuffer, attachment);
 }
 
 -(void) replacePixels: (CC3Viewport) rect withContent: (ccColor4B*) colorArray {
@@ -352,6 +378,19 @@
 	_fbID = 0;
 }
 
+/** 
+ * If the framebuffer has been created, set its debug label as well.
+ * And update the names of the attachments.
+ */
+-(void) setName: (NSString*) name {
+	[super setName: name];
+	if (_fbID) [CC3OpenGL.sharedGL setDebugLabel: self.name forFramebuffer: _fbID];
+
+	[_colorAttachment updateNameFromFramebuffer: self asAttachment: GL_COLOR_ATTACHMENT0];
+	[_depthAttachment updateNameFromFramebuffer: self asAttachment: GL_DEPTH_ATTACHMENT];
+	[_stencilAttachment updateNameFromFramebuffer: self asAttachment: GL_STENCIL_ATTACHMENT];
+}
+
 -(id<CC3FramebufferAttachment>) colorAttachment { return _colorAttachment; }
 
 -(void) setColorAttachment: (id<CC3FramebufferAttachment>) colorAttachment {
@@ -359,12 +398,12 @@
 		
 	[self ensureSizeOfAttachment: colorAttachment];		// must be done before attaching
 
-	[_colorAttachment unbindFromFramebuffer: self.framebufferID asAttachment: GL_COLOR_ATTACHMENT0];
+	[_colorAttachment unbindFromFramebuffer: self asAttachment: GL_COLOR_ATTACHMENT0];
 	
 	[_colorAttachment release];
 	_colorAttachment = [colorAttachment retain];
 	
-	[_colorAttachment bindToFramebuffer: self.framebufferID asAttachment: GL_COLOR_ATTACHMENT0];
+	[_colorAttachment bindToFramebuffer: self asAttachment: GL_COLOR_ATTACHMENT0];
 }
 
 -(id<CC3FramebufferAttachment>) depthAttachment { return _depthAttachment; }
@@ -374,12 +413,12 @@
 	
 	[self ensureSizeOfAttachment: depthAttachment];		// must be done before attaching
 	
-	[_depthAttachment unbindFromFramebuffer: self.framebufferID asAttachment: GL_DEPTH_ATTACHMENT];
+	[_depthAttachment unbindFromFramebuffer: self asAttachment: GL_DEPTH_ATTACHMENT];
 
 	[_depthAttachment release];
 	_depthAttachment = [depthAttachment retain];
 	
-	[_depthAttachment bindToFramebuffer: self.framebufferID asAttachment: GL_DEPTH_ATTACHMENT];
+	[_depthAttachment bindToFramebuffer: self asAttachment: GL_DEPTH_ATTACHMENT];
 
 	// Check for combined depth and stencil buffer
 	if ( CC3DepthFormatIncludesStencil(_depthAttachment.pixelFormat) )
@@ -393,12 +432,12 @@
 	
 	[self ensureSizeOfAttachment: stencilAttachment];		// must be done before attaching
 		
-	[_stencilAttachment unbindFromFramebuffer: self.framebufferID asAttachment: GL_STENCIL_ATTACHMENT];
+	[_stencilAttachment unbindFromFramebuffer: self asAttachment: GL_STENCIL_ATTACHMENT];
 
 	[_stencilAttachment release];
 	_stencilAttachment = [stencilAttachment retain];
 	
-	[_stencilAttachment bindToFramebuffer: self.framebufferID asAttachment: GL_STENCIL_ATTACHMENT];
+	[_stencilAttachment bindToFramebuffer: self asAttachment: GL_STENCIL_ATTACHMENT];
 }
 
 -(void) ensureSizeOfAttachment: (id<CC3FramebufferAttachment>) attachment {
@@ -435,9 +474,18 @@
 
 -(BOOL) validate {
 	CC3Assert(!CC3IntSizesAreEqual(self.size, kCC3IntSizeZero), @"%@ cannot have a zero size.", self);
-	return [CC3OpenGL.sharedGL checkFramebufferStatus: self.framebufferID];
+	CC3Assert([CC3OpenGL.sharedGL checkFramebufferStatus: self.framebufferID], @"%@ is incomplete.", self);
+	[self checkGLDebugLabel];
+	return YES;
 }
 
+/** Sets the GL debug label for the framebuffer, if required. */
+-(void) checkGLDebugLabel {
+	if (_fbID && !_glLabelWasSet) {
+		[CC3OpenGL.sharedGL setDebugLabel: self.name forFramebuffer: _fbID];
+		_glLabelWasSet = YES;
+	}
+}
 
 #pragma mark Content
 
@@ -530,16 +578,24 @@
 
 #pragma mark Allocation and initialization
 
--(id) init { return [self initWithSize: CC3IntSizeMake(0, 0)]; }
+-(id) initWithTag: (GLuint) tag withName: (NSString*) name {
+	if ( (self = [super initWithTag: tag withName: name]) ) {
+		_fbID = 0;
+		_size = CC3IntSizeMake(0, 0);
+		_colorAttachment = nil;
+		_depthAttachment = nil;
+		_stencilAttachment = nil;
+		_glLabelWasSet = NO;
+	}
+	return self;
+}
+
+-(id) init { return [super init]; }		// Keep compiler happy
 
 +(id) surface { return [[[self alloc] init] autorelease]; }
 
 -(id) initWithSize: (CC3IntSize) size {
-	if ( (self = [super init]) ) {
-		_fbID = 0;
-		_colorAttachment = nil;
-		_depthAttachment = nil;
-		_stencilAttachment = nil;
+	if ( (self = [self init]) ) {
 		_size = size;
 	}
 	return self;
@@ -650,7 +706,10 @@
 
 -(void) deleteGLFramebuffer {}
 
--(BOOL) validate { return YES; }
+-(BOOL) validate {
+	[self checkGLDebugLabel];
+	return YES;
+}
 
 
 #pragma mark Allocation and initialization
@@ -699,6 +758,12 @@
 	[super dealloc];
 }
 
+/** Set name of internal framebuffer. */
+-(void) setName: (NSString*) name {
+	[super setName: name];
+	_renderSurface.name = [NSString stringWithFormat: @"%@ surface", name];
+}
+
 
 #pragma mark Drawing
 
@@ -738,7 +803,7 @@
 		// Bind the texture face to the framebuffer
 		CC3TextureFramebufferAttachment* fbAtt = (CC3TextureFramebufferAttachment*)_renderSurface.colorAttachment;
 		fbAtt.face = _currentFace;
-		[fbAtt bindToFramebuffer: _renderSurface.framebufferID asAttachment: GL_COLOR_ATTACHMENT0];
+		[fbAtt bindToFramebuffer: _renderSurface asAttachment: GL_COLOR_ATTACHMENT0];
 		
 		// Point the camera towards the face
 		envMapCam.forwardDirection = self.cameraDirection;
@@ -1027,6 +1092,8 @@
 -(CC3GLFramebuffer*) pickingSurface {
 	if ( !_pickingSurface ) {
 		CC3GLFramebuffer* pickSurf = [CC3GLFramebuffer surfaceWithSize: _viewSurface.size];
+		pickSurf.name =@"Picking surface";
+		
 		pickSurf.colorAttachment = [CC3GLRenderbuffer renderbufferWithPixelFormat: _viewSurface.colorAttachment.pixelFormat];
 		
 		// Don't need stencil for picking, but otherwise match the rendering depth format
@@ -1198,6 +1265,7 @@
 		
 		CC3GLFramebuffer* vSurf = [CC3SystemOnScreenGLFramebuffer surfaceWithSize: viewSize
 																withFramebufferID: viewFramebufferID];
+		vSurf.name = @"Display surface";
 		vSurf.colorAttachment = [CC3SystemOnScreenGLRenderbuffer renderbufferWithPixelFormat: colorFormat
 																		  withRenderbufferID: view.colorRenderBuffer];
 		self.viewSurface = vSurf;
@@ -1205,6 +1273,7 @@
 		if (msaaFramebufferID) {
 			CC3GLFramebuffer* msSurf = [CC3SystemOnScreenGLFramebuffer surfaceWithSize: viewSize
 																	 withFramebufferID: msaaFramebufferID];
+			msSurf.name = @"Multisampling surface";
 			msSurf.colorAttachment = [CC3SystemOnScreenGLRenderbuffer renderbufferWithPixelFormat: colorFormat
 																			   withRenderbufferID: view.msaaColorBuffer];
 			self.multisampleSurface = msSurf;
@@ -1226,12 +1295,14 @@
 		// Set up the view surface and color render buffer
 		GLenum colorFormat = view.colorFormat;
 		CC3GLFramebuffer* vSurf = [CC3ViewFramebufferClass surface];
+		vSurf.name = @"Display surface";
 		vSurf.colorAttachment = [CC3ViewColorRenderbufferClass renderbufferWithPixelFormat: colorFormat];
 		self.viewSurface = vSurf;					// retained
 		
 		// If using multisampling, also set up off-screen multisample frame and render buffers
 		if (samples > 1) {
 			CC3GLFramebuffer* msSurf = [CC3GLFramebuffer surface];
+			msSurf.name = @"Multisampling surface";
 			msSurf.colorAttachment = [CC3GLRenderbuffer renderbufferWithPixelFormat: colorFormat
 																   withPixelSamples: samples];
 			self.multisampleSurface = msSurf;
@@ -1312,4 +1383,24 @@ GLenum CC3TexelTypeFromRenderbufferDepthFormat(GLenum rbFormat) {
 		default:
 			return GL_UNSIGNED_SHORT;
 	}
+}
+
+NSString* CC3FramebufferAttachmentName(CC3GLFramebuffer* framebuffer, GLenum attachment) {
+	NSString* attachmentName = nil;
+	switch (attachment) {
+		case GL_COLOR_ATTACHMENT0:
+			attachmentName = @"color";
+			break;
+		case GL_DEPTH_ATTACHMENT:
+			attachmentName = @"depth";
+			break;
+		case GL_STENCIL_ATTACHMENT:
+			attachmentName = @"stencil";
+			break;
+			
+		default:
+			attachmentName = @"unknown";
+			break;
+	}
+	return [NSString stringWithFormat: @"%@-%@", framebuffer.name, attachmentName];
 }

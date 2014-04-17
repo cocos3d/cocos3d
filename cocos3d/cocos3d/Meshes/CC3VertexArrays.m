@@ -351,6 +351,7 @@ static GLuint lastAssignedVertexArrayTag;
 		_bufferID = [gl generateBuffer];
 		[gl bindBuffer: _bufferID toTarget: targBuf];
 		[gl loadBufferTarget: targBuf withData: _vertices ofLength: buffSize forUse: _bufferUsage];
+		[gl setDebugLabel: self.name forBuffer: _bufferID];
 		[gl unbindBufferTarget: targBuf];
 	} else {
 		LogTrace(@"%@ NOT creating GL server buffer because shouldAllowVertexBuffering is %@ or buffer ID already set to %i",

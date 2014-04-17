@@ -1233,6 +1233,33 @@ typedef struct {
 -(void) releaseShaderCompiler;
 
 
+#pragma mark Debugging support
+
+/** Sets the debug label for the specified GL object of the specified type. */
+-(void) setDebugLabel: (NSString*) label forObject: (GLuint) objID ofType: (GLenum) objType;
+
+/** Sets the debug label for the specified texture. */
+-(void) setDebugLabel: (NSString*) label forTexture: (GLuint) texID;
+
+/** Sets the debug label for the specified buffer. */
+-(void) setDebugLabel: (NSString*) label forBuffer: (GLuint) buffID;
+
+/** Sets the debug label for the specified shader. */
+-(void) setDebugLabel: (NSString*) label forShader: (GLuint) shaderID;
+
+/** Sets the debug label for the specified shader program. */
+-(void) setDebugLabel: (NSString*) label forShaderProgram: (GLuint) progID;
+
+/** Sets the debug label for the specified framebuffer. */
+-(void) setDebugLabel: (NSString*) label forFramebuffer: (GLuint) fbID;
+
+/** Sets the debug label for the specified renderbuffer. */
+-(void) setDebugLabel: (NSString*) label forRenderbuffer: (GLuint) rbID;
+
+/** Sets the debug label for the specified vertex array. */
+-(void) setDebugLabel: (NSString*) label forVertexArray: (GLuint) vaID;
+
+
 #pragma mark Aligning 2D & 3D state
 
 /**

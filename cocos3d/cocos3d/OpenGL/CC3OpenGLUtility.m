@@ -32,19 +32,27 @@
 #import "CC3OpenGLUtility.h"
 
 #if CC3_OGLES_2
-
 #import "CC3OpenGLES2Compatibility.h"
+#endif	// CC3_OGLES_2
+
+#if CC3_OGLES_1
+#import "CC3OpenGLES1Compatibility.h"
+#endif	// CC3_OGLES_1
+
+#if CC3_OGL
+#import "CC3OpenGLCompatibility.h"
+#endif	// CC3_OGL
 
 char* CC3GLEnumName(GLenum gle) {
 	switch (gle) {
 		case GL_ZERO: return "GL_ZERO";
 		case GL_ONE: return "GL_ONE";
-//		case GL_TRUE: return "GL_TRUE";
-//		case GL_FALSE: return "GL_FALSE";
+//		case GL_FALSE: return "GL_FALSE";			// Same as GL_ZERO
+//		case GL_TRUE: return "GL_TRUE";				// Same as GL_ONE
 			
 		// Drawing Mode
-//		case GL_POINTS: return "GL_POINTS";
-//		case GL_LINES: return "GL_LINES";
+//		case GL_POINTS: return "GL_POINTS";			// Same as GL_ZERO
+//		case GL_LINES: return "GL_LINES";			// Same as GL_ONE
 		case GL_LINE_LOOP: return "GL_LINE_LOOP";
 		case GL_LINE_STRIP: return "GL_LINE_STRIP";
 		case GL_TRIANGLES: return "GL_TRIANGLES";
@@ -66,8 +74,6 @@ char* CC3GLEnumName(GLenum gle) {
 		case GL_POLYGON_OFFSET_UNITS: return "GL_POLYGON_OFFSET_UNITS";
 			
 		// Blending
-//		case GL_ZERO: return "GL_ZERO";
-//		case GL_ONE: return "GL_ONE";
 		case GL_SRC_COLOR: return "GL_SRC_COLOR";
 		case GL_ONE_MINUS_SRC_COLOR: return "GL_ONE_MINUS_SRC_COLOR";
 		case GL_SRC_ALPHA: return "GL_SRC_ALPHA";
@@ -85,33 +91,16 @@ char* CC3GLEnumName(GLenum gle) {
 		case GL_FRONT_AND_BACK: return "GL_FRONT_AND_BACK";
 			
 		// Capabilities
-//		case GL_FOG: return "GL_FOG";
-//		case GL_LIGHTING: return "GL_LIGHTING";
 		case GL_TEXTURE_2D: return "GL_TEXTURE_2D";
 		case GL_CULL_FACE: return "GL_CULL_FACE";
-//		case GL_ALPHA_TEST: return "GL_ALPHA_TEST";
 		case GL_BLEND: return "GL_BLEND";
-//		case GL_COLOR_LOGIC_OP: return "GL_COLOR_LOGIC_OP";
 		case GL_DITHER: return "GL_DITHER";
 		case GL_STENCIL_TEST: return "GL_STENCIL_TEST";
 		case GL_DEPTH_TEST: return "GL_DEPTH_TEST";
 		case GL_DEPTH_WRITEMASK: return "GL_DEPTH_WRITEMASK";
-//		case GL_POINT_SMOOTH: return "GL_POINT_SMOOTH";
-//		case GL_POINT_SPRITE_OES: return "GL_POINT_SPRITE_OES";
-//		case GL_LINE_SMOOTH: return "GL_LINE_SMOOTH";
 		case GL_SCISSOR_TEST: return "GL_SCISSOR_TEST";
-//		case GL_COLOR_MATERIAL: return "GL_COLOR_MATERIAL";
-//		case GL_NORMALIZE: return "GL_NORMALIZE";
-//		case GL_RESCALE_NORMAL: return "GL_RESCALE_NORMAL";
 		case GL_POLYGON_OFFSET_FILL: return "GL_POLYGON_OFFSET_FILL";
-//		case GL_VERTEX_ARRAY: return "GL_VERTEX_ARRAY";
-//		case GL_NORMAL_ARRAY: return "GL_NORMAL_ARRAY";
-//		case GL_COLOR_ARRAY: return "GL_COLOR_ARRAY";
-//		case GL_POINT_SIZE_ARRAY_OES: return "GL_POINT_SIZE_ARRAY_OES";
-//		case GL_TEXTURE_COORD_ARRAY: return "GL_TEXTURE_COORD_ARRAY";
-//		case GL_MULTISAMPLE: return "GL_MULTISAMPLE";
 		case GL_SAMPLE_ALPHA_TO_COVERAGE: return "GL_SAMPLE_ALPHA_TO_COVERAGE";
-//		case GL_SAMPLE_ALPHA_TO_ONE: return "GL_SAMPLE_ALPHA_TO_ONE";
 		case GL_SAMPLE_COVERAGE: return "GL_SAMPLE_COVERAGE";
 			
 		// Front face winding
@@ -121,19 +110,9 @@ char* CC3GLEnumName(GLenum gle) {
 
 			/* Misc GL state */
 		case GL_LINE_WIDTH: return "GL_LINE_WIDTH";
-//		case GL_POINT_SIZE: return "GL_POINT_SIZE";
-//		case GL_POINT_DISTANCE_ATTENUATION: return "GL_POINT_DISTANCE_ATTENUATION";
-//		case GL_POINT_FADE_THRESHOLD_SIZE: return "GL_POINT_FADE_THRESHOLD_SIZE";
-//		case GL_POINT_SIZE_MAX: return "GL_POINT_SIZE_MAX";
-//		case GL_POINT_SIZE_MIN: return "GL_POINT_SIZE_MIN";
 		case GL_SCISSOR_BOX: return "GL_SCISSOR_BOX";
 
 		// Fog
-//		case GL_FOG_COLOR: return "GL_FOG_COLOR";
-//		case GL_FOG_MODE: return "GL_FOG_MODE";
-//		case GL_FOG_DENSITY: return "GL_FOG_DENSITY";
-//		case GL_FOG_START: return "GL_FOG_START";
-//		case GL_FOG_END: return "GL_FOG_END";
 		case GL_EXP: return "GL_EXP";
 		case GL_EXP2: return "GL_EXP2";
 			
@@ -141,15 +120,10 @@ char* CC3GLEnumName(GLenum gle) {
 		case GL_DONT_CARE: return "GL_DONT_CARE";
 		case GL_FASTEST: return "GL_FASTEST";
 		case GL_NICEST: return "GL_NICEST";
-//		case GL_PERSPECTIVE_CORRECTION_HINT: return "GL_PERSPECTIVE_CORRECTION_HINT";
-//		case GL_POINT_SMOOTH_HINT: return "GL_POINT_SMOOTH_HINT";
-//		case GL_LINE_SMOOTH_HINT: return "GL_LINE_SMOOTH_HINT";
-//		case GL_FOG_HINT: return "GL_FOG_HINT";
 		case GL_GENERATE_MIPMAP_HINT: return "GL_GENERATE_MIPMAP_HINT";
 			
 		// Light parameter
 		case GL_LIGHT_MODEL_AMBIENT: return "GL_LIGHT_MODEL_AMBIENT";
-//		case GL_LIGHT_MODEL_TWO_SIDE: return "GL_LIGHT_MODEL_TWO_SIDE";
 		case GL_AMBIENT: return "GL_AMBIENT";
 		case GL_DIFFUSE: return "GL_DIFFUSE";
 		case GL_SPECULAR: return "GL_SPECULAR";
@@ -219,27 +193,10 @@ char* CC3GLEnumName(GLenum gle) {
 		case GL_MEDIUM_INT: return "GL_MEDIUM_INT";
 		case GL_HIGH_INT: return "GL_HIGH_INT";
 			
-		// LogicOp
-//		case GL_CLEAR: return "GL_CLEAR";
-//		case GL_AND: return "GL_AND";
-//		case GL_AND_REVERSE: return "GL_AND_REVERSE";
-//		case GL_COPY: return "GL_COPY";
-//		case GL_AND_INVERTED: return "GL_AND_INVERTED";
-//		case GL_NOOP: return "GL_NOOP";
-//		case GL_XOR: return "GL_XOR";
-//		case GL_OR: return "GL_OR";
-//		case GL_NOR: return "GL_NOR";
-//		case GL_EQUIV: return "GL_EQUIV";
-//		case GL_OR_REVERSE: return "GL_OR_REVERSE";
-//		case GL_COPY_INVERTED: return "GL_COPY_INVERTED";
-//		case GL_OR_INVERTED: return "GL_OR_INVERTED";
-//		case GL_NAND: return "GL_NAND";
-//		case GL_SET: return "GL_SET";
 
 		// MaterialParameter
 		case GL_EMISSION: return "GL_EMISSION";
 		case GL_SHININESS: return "GL_SHININESS";
-//		case GL_AMBIENT_AND_DIFFUSE: return "GL_AMBIENT_AND_DIFFUSE";
 		case GL_BLEND_SRC_RGB: return "GL_BLEND_SRC_RGB";
 		case GL_BLEND_SRC_ALPHA: return "GL_BLEND_SRC_ALPHA";
 		case GL_BLEND_DST_RGB: return "GL_BLEND_DST_RGB";
@@ -270,8 +227,6 @@ char* CC3GLEnumName(GLenum gle) {
 		case GL_TEXTURE_BINDING_2D: return "GL_TEXTURE_BINDING_2D";
 		case GL_TEXTURE_BINDING_CUBE_MAP: return "GL_TEXTURE_BINDING_CUBE_MAP";
 		case GL_ACTIVE_TEXTURE: return "GL_ACTIVE_TEXTURE";
-//		case GL_CLIENT_ACTIVE_TEXTURE: return "GL_CLIENT_ACTIVE_TEXTURE";
-//		case GL_MAX_TEXTURE_UNITS: return "GL_MAX_TEXTURE_UNITS";
 		case GL_TEXTURE0: return "GL_TEXTURE0";
 		case GL_TEXTURE1: return "GL_TEXTURE1";
 		case GL_TEXTURE2: return "GL_TEXTURE2";
@@ -318,9 +273,6 @@ char* CC3GLEnumName(GLenum gle) {
 		case GL_TEXTURE_WRAP_T: return "GL_TEXTURE_WRAP_T";
 		case GL_CLAMP_TO_EDGE: return "GL_CLAMP_TO_EDGE";
 		case GL_REPEAT: return "GL_REPEAT";
-//		case GL_GENERATE_MIPMAP: return "GL_GENERATE_MIPMAP";
-//		case GL_TRUE: return "GL_TRUE";
-//		case GL_FALSE: return "GL_FALSE";
 
 		// Texture Environment parameters
 		case GL_MAX_TEXTURE_SIZE: return "GL_MAX_TEXTURE_SIZE";
@@ -329,7 +281,6 @@ char* CC3GLEnumName(GLenum gle) {
 		case GL_TEXTURE_ENV_COLOR: return "GL_TEXTURE_ENV_COLOR";
 		case GL_MODULATE: return "GL_MODULATE";
 		case GL_DECAL: return "GL_DECAL";
-//		case GL_BLEND: return "GL_BLEND";
 		case GL_ADD: return "GL_ADD";
 		case GL_REPLACE: return "GL_REPLACE";
 		case GL_COMBINE: return "GL_COMBINE";
@@ -360,7 +311,6 @@ char* CC3GLEnumName(GLenum gle) {
 		case GL_OPERAND1_ALPHA: return "GL_OPERAND1_ALPHA";
 		case GL_OPERAND2_ALPHA: return "GL_OPERAND2_ALPHA";
 		case GL_ALPHA_SCALE: return "GL_ALPHA_SCALE";
-//		case GL_COORD_REPLACE_OES: return "GL_COORD_REPLACE_OES";
 
 		// Cube maps
 		case GL_TEXTURE_CUBE_MAP: return "GL_TEXTURE_CUBE_MAP";
@@ -372,35 +322,11 @@ char* CC3GLEnumName(GLenum gle) {
 		case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z: return "GL_TEXTURE_CUBE_MAP_NEGATIVE_Z";
 		case GL_MAX_CUBE_MAP_TEXTURE_SIZE: return "GL_MAX_CUBE_MAP_TEXTURE_SIZE";
 			
-		// Lights
-//		case GL_MAX_LIGHTS: return "GL_MAX_LIGHTS";
-//		case GL_LIGHT0: return "GL_LIGHT0";
-//		case GL_LIGHT1: return "GL_LIGHT1";
-//		case GL_LIGHT2: return "GL_LIGHT2";
-//		case GL_LIGHT3: return "GL_LIGHT3";
-//		case GL_LIGHT4: return "GL_LIGHT4";
-//		case GL_LIGHT5: return "GL_LIGHT5";
-//		case GL_LIGHT6: return "GL_LIGHT6";
-//		case GL_LIGHT7: return "GL_LIGHT7";
-			
-		// ClipPlane
-//		case GL_MAX_CLIP_PLANES: return "GL_MAX_CLIP_PLANES";
-//		case GL_CLIP_PLANE0: return "GL_CLIP_PLANE0";
-//		case GL_CLIP_PLANE1: return "GL_CLIP_PLANE1";
-//		case GL_CLIP_PLANE2: return "GL_CLIP_PLANE2";
-//		case GL_CLIP_PLANE3: return "GL_CLIP_PLANE3";
-//		case GL_CLIP_PLANE4: return "GL_CLIP_PLANE4";
-//		case GL_CLIP_PLANE5: return "GL_CLIP_PLANE5";
-			
 		// Buffer Objects
 		case GL_ARRAY_BUFFER: return "GL_ARRAY_BUFFER";
 		case GL_ELEMENT_ARRAY_BUFFER: return "GL_ELEMENT_ARRAY_BUFFER";
 		case GL_ARRAY_BUFFER_BINDING: return "GL_ARRAY_BUFFER_BINDING";
 		case GL_ELEMENT_ARRAY_BUFFER_BINDING: return "GL_ELEMENT_ARRAY_BUFFER_BINDING";
-//		case GL_VERTEX_ARRAY_BUFFER_BINDING: return "GL_VERTEX_ARRAY_BUFFER_BINDING";
-//		case GL_NORMAL_ARRAY_BUFFER_BINDING: return "GL_NORMAL_ARRAY_BUFFER_BINDING";
-//		case GL_COLOR_ARRAY_BUFFER_BINDING: return "GL_COLOR_ARRAY_BUFFER_BINDING";
-//		case GL_TEXTURE_COORD_ARRAY_BUFFER_BINDING: return "GL_TEXTURE_COORD_ARRAY_BUFFER_BINDING";
 		case GL_STATIC_DRAW: return "GL_STATIC_DRAW";
 		case GL_DYNAMIC_DRAW: return "GL_DYNAMIC_DRAW";
 		case GL_BUFFER_SIZE: return "GL_BUFFER_SIZE";
@@ -415,32 +341,9 @@ char* CC3GLEnumName(GLenum gle) {
 		case GL_VERTEX_ATTRIB_ARRAY_POINTER: return "GL_VERTEX_ATTRIB_ARRAY_POINTER";
 		case GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING: return "GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING";
 
-//		case GL_VERTEX_ARRAY_SIZE: return "GL_VERTEX_ARRAY_SIZE";
-//		case GL_VERTEX_ARRAY_TYPE: return "GL_VERTEX_ARRAY_TYPE";
-//		case GL_VERTEX_ARRAY_STRIDE: return "GL_VERTEX_ARRAY_STRIDE";
-//		case GL_NORMAL_ARRAY_TYPE: return "GL_NORMAL_ARRAY_TYPE";
-//		case GL_NORMAL_ARRAY_STRIDE: return "GL_NORMAL_ARRAY_STRIDE";
-//		case GL_COLOR_ARRAY_SIZE: return "GL_COLOR_ARRAY_SIZE";
-//		case GL_COLOR_ARRAY_TYPE: return "GL_COLOR_ARRAY_TYPE";
-//		case GL_COLOR_ARRAY_STRIDE: return "GL_COLOR_ARRAY_STRIDE";
-//		case GL_TEXTURE_COORD_ARRAY_SIZE: return "GL_TEXTURE_COORD_ARRAY_SIZE";
-//		case GL_TEXTURE_COORD_ARRAY_TYPE: return "GL_TEXTURE_COORD_ARRAY_TYPE";
-//		case GL_TEXTURE_COORD_ARRAY_STRIDE: return "GL_TEXTURE_COORD_ARRAY_STRIDE";
-//		case GL_POINT_SIZE_ARRAY_TYPE_OES: return "GL_POINT_SIZE_ARRAY_TYPE_OES";
-//		case GL_POINT_SIZE_ARRAY_STRIDE_OES: return "GL_POINT_SIZE_ARRAY_STRIDE_OES";
 
 		// Get pnames
-//		case GL_CURRENT_COLOR: return "GL_CURRENT_COLOR";
 		case GL_VIEWPORT: return "GL_VIEWPORT";
-//		case GL_MATRIX_MODE: return "GL_MATRIX_MODE";
-//		case GL_MODELVIEW_MATRIX: return "GL_MODELVIEW_MATRIX";
-//		case GL_PROJECTION_MATRIX: return "GL_PROJECTION_MATRIX";
-//		case GL_TEXTURE_MATRIX: return "GL_TEXTURE_MATRIX";
-//		case GL_MODELVIEW_STACK_DEPTH: return "GL_MODELVIEW_STACK_DEPTH";
-//		case GL_PROJECTION_STACK_DEPTH: return "GL_PROJECTION_STACK_DEPTH";
-//		case GL_TEXTURE_STACK_DEPTH: return "GL_TEXTURE_STACK_DEPTH";
-//		case GL_ALPHA_TEST_FUNC: return "GL_ALPHA_TEST_FUNC";
-//		case GL_ALPHA_TEST_REF: return "GL_ALPHA_TEST_REF";
 
 		// Clearing values
 		case GL_COLOR_CLEAR_VALUE: return "GL_COLOR_CLEAR_VALUE";
@@ -461,26 +364,6 @@ char* CC3GLEnumName(GLenum gle) {
 		case GL_INCR_WRAP: return "GL_INCR_WRAP";
 		case GL_DECR_WRAP: return "GL_DECR_WRAP";
 			
-		// OES_matrix_palette
-//		case GL_MAX_VERTEX_UNITS_OES: return "GL_MAX_VERTEX_UNITS_OES";
-//		case GL_MAX_PALETTE_MATRICES_OES: return "GL_MAX_PALETTE_MATRICES_OES";
-//		case GL_MATRIX_PALETTE_OES: return "GL_MATRIX_PALETTE_OES";
-//		case GL_MATRIX_INDEX_ARRAY_OES: return "GL_MATRIX_INDEX_ARRAY_OES";
-//		case GL_WEIGHT_ARRAY_OES: return "GL_WEIGHT_ARRAY_OES";
-//		case GL_CURRENT_PALETTE_MATRIX_OES: return "GL_CURRENT_PALETTE_MATRIX_OES";
-
-//		case GL_MATRIX_INDEX_ARRAY_SIZE_OES: return "GL_MATRIX_INDEX_ARRAY_SIZE_OES";
-//		case GL_MATRIX_INDEX_ARRAY_TYPE_OES: return "GL_MATRIX_INDEX_ARRAY_TYPE_OES";
-//		case GL_MATRIX_INDEX_ARRAY_STRIDE_OES: return "GL_MATRIX_INDEX_ARRAY_STRIDE_OES";
-//		case GL_MATRIX_INDEX_ARRAY_POINTER_OES: return "GL_MATRIX_INDEX_ARRAY_POINTER_OES";
-//		case GL_MATRIX_INDEX_ARRAY_BUFFER_BINDING_OES: return "GL_MATRIX_INDEX_ARRAY_BUFFER_BINDING_OES";
-			
-//		case GL_WEIGHT_ARRAY_SIZE_OES: return "GL_WEIGHT_ARRAY_SIZE_OES";
-//		case GL_WEIGHT_ARRAY_TYPE_OES: return "GL_WEIGHT_ARRAY_TYPE_OES";
-//		case GL_WEIGHT_ARRAY_STRIDE_OES: return "GL_WEIGHT_ARRAY_STRIDE_OES";
-//		case GL_WEIGHT_ARRAY_POINTER_OES: return "GL_WEIGHT_ARRAY_POINTER_OES";
-//		case GL_WEIGHT_ARRAY_BUFFER_BINDING_OES: return "GL_WEIGHT_ARRAY_BUFFER_BINDING_OES";
-
 		// Shaders
 		case GL_COMPILE_STATUS: return "GL_COMPILE_STATUS";
 		case GL_INFO_LOG_LENGTH: return "GL_INFO_LOG_LENGTH";
@@ -502,7 +385,6 @@ char* CC3GLEnumName(GLenum gle) {
 		case GL_READ_FRAMEBUFFER_APPLE: return "GL_READ_FRAMEBUFFER_APPLE";
 		case GL_DRAW_FRAMEBUFFER_APPLE: return "GL_DRAW_FRAMEBUFFER_APPLE";
 		case GL_READ_FRAMEBUFFER_BINDING_APPLE: return "GL_READ_FRAMEBUFFER_BINDING_APPLE";
-//		case GL_DRAW_FRAMEBUFFER_BINDING_APPLE: return "GL_DRAW_FRAMEBUFFER_BINDING_APPLE";
 
 		case GL_RENDERBUFFER: return "GL_RENDERBUFFER";
 		case GL_RENDERBUFFER_BINDING: return "GL_RENDERBUFFER_BINDING";
@@ -537,7 +419,245 @@ char* CC3GLEnumName(GLenum gle) {
 		case GL_EXTENSIONS: return "GL_EXTENSIONS";
 		case GL_PACK_ALIGNMENT: return "GL_PACK_ALIGNMENT";
 		case GL_UNPACK_ALIGNMENT: return "GL_UNPACK_ALIGNMENT";
+
+		case GL_BUFFER_OBJECT_EXT: return "GL_BUFFER_OBJECT_EXT";
+		case GL_SHADER_OBJECT_EXT: return "GL_SHADER_OBJECT_EXT";
+		case GL_PROGRAM_OBJECT_EXT: return "GL_PROGRAM_OBJECT_EXT";
+		case GL_VERTEX_ARRAY_OBJECT_EXT: return "GL_VERTEX_ARRAY_OBJECT_EXT";
+		case GL_QUERY_OBJECT_EXT: return "GL_QUERY_OBJECT_EXT";
+		case GL_PROGRAM_PIPELINE_OBJECT_EXT: return "GL_PROGRAM_PIPELINE_OBJECT_EXT";
 			
+			
+#if !CC3_GLSL
+		case GL_FOG: return "GL_FOG";
+		case GL_LIGHTING: return "GL_LIGHTING";
+		case GL_POINT_SIZE: return "GL_POINT_SIZE";
+		case GL_POINT_DISTANCE_ATTENUATION: return "GL_POINT_DISTANCE_ATTENUATION";
+		case GL_POINT_FADE_THRESHOLD_SIZE: return "GL_POINT_FADE_THRESHOLD_SIZE";
+		case GL_ALPHA_TEST: return "GL_ALPHA_TEST";
+		case GL_COLOR_LOGIC_OP: return "GL_COLOR_LOGIC_OP";
+		case GL_POINT_SMOOTH: return "GL_POINT_SMOOTH";
+		case GL_POINT_SPRITE: return "GL_POINT_SPRITE";
+		case GL_LINE_SMOOTH: return "GL_LINE_SMOOTH";
+		case GL_VERTEX_ARRAY: return "GL_VERTEX_ARRAY";
+		case GL_NORMAL_ARRAY: return "GL_NORMAL_ARRAY";
+		case GL_COLOR_ARRAY: return "GL_COLOR_ARRAY";
+		case GL_TEXTURE_COORD_ARRAY: return "GL_TEXTURE_COORD_ARRAY";
+		case GL_MULTISAMPLE: return "GL_MULTISAMPLE";
+		case GL_SAMPLE_ALPHA_TO_ONE: return "GL_SAMPLE_ALPHA_TO_ONE";
+
+		case GL_COLOR_MATERIAL: return "GL_COLOR_MATERIAL";
+		case GL_NORMALIZE: return "GL_NORMALIZE";
+		case GL_RESCALE_NORMAL: return "GL_RESCALE_NORMAL";
+		case GL_POINT_SIZE_MAX: return "GL_POINT_SIZE_MAX";
+		case GL_POINT_SIZE_MIN: return "GL_POINT_SIZE_MIN";
+		case GL_FOG_COLOR: return "GL_FOG_COLOR";
+		case GL_FOG_MODE: return "GL_FOG_MODE";
+		case GL_FOG_DENSITY: return "GL_FOG_DENSITY";
+		case GL_FOG_START: return "GL_FOG_START";
+		case GL_FOG_END: return "GL_FOG_END";
+
+		case GL_PERSPECTIVE_CORRECTION_HINT: return "GL_PERSPECTIVE_CORRECTION_HINT";
+		case GL_POINT_SMOOTH_HINT: return "GL_POINT_SMOOTH_HINT";
+		case GL_LINE_SMOOTH_HINT: return "GL_LINE_SMOOTH_HINT";
+		case GL_FOG_HINT: return "GL_FOG_HINT";
+		case GL_MAX_VERTEX_UNIFORM_COMPONENTS: return "GL_MAX_VERTEX_UNIFORM_COMPONENTS";
+		case GL_MAX_VARYING_FLOATS: return "GL_MAX_VARYING_FLOATS";
+		case GL_LIGHT_MODEL_TWO_SIDE: return "GL_LIGHT_MODEL_TWO_SIDE";
+		case GL_MAX_FRAGMENT_UNIFORM_COMPONENTS: return "GL_MAX_FRAGMENT_UNIFORM_COMPONENTS";
+		case GL_VERTEX_PROGRAM_POINT_SIZE: return "GL_VERTEX_PROGRAM_POINT_SIZE";
+		case GL_CLEAR: return "GL_CLEAR";
+		case GL_COPY: return "GL_COPY";
+		case GL_AND_INVERTED: return "GL_AND_INVERTED";
+		case GL_NOOP: return "GL_NOOP";
+		case GL_XOR: return "GL_XOR";
+		case GL_OR: return "GL_OR";
+		case GL_NOR: return "GL_NOR";
+		case GL_EQUIV: return "GL_EQUIV";
+		case GL_AND: return "GL_AND";
+		case GL_AND_REVERSE: return "GL_AND_REVERSE";
+		case GL_OR_REVERSE: return "GL_OR_REVERSE";
+		case GL_COPY_INVERTED: return "GL_COPY_INVERTED";
+		case GL_OR_INVERTED: return "GL_OR_INVERTED";
+		case GL_NAND: return "GL_NAND";
+		case GL_SET: return "GL_SET";
+		case GL_AMBIENT_AND_DIFFUSE: return "GL_AMBIENT_AND_DIFFUSE";
+		case GL_CLIENT_ACTIVE_TEXTURE: return "GL_CLIENT_ACTIVE_TEXTURE";
+		case GL_MAX_TEXTURE_UNITS: return "GL_MAX_TEXTURE_UNITS";
+		case GL_COORD_REPLACE: return "GL_COORD_REPLACE";
+		case GL_MAX_LIGHTS: return "GL_MAX_LIGHTS";
+		case GL_LIGHT0: return "GL_LIGHT0";
+		case GL_LIGHT1: return "GL_LIGHT1";
+		case GL_LIGHT2: return "GL_LIGHT2";
+		case GL_LIGHT3: return "GL_LIGHT3";
+		case GL_LIGHT4: return "GL_LIGHT4";
+		case GL_LIGHT5: return "GL_LIGHT5";
+		case GL_LIGHT6: return "GL_LIGHT6";
+		case GL_LIGHT7: return "GL_LIGHT7";
+		case GL_MAX_CLIP_PLANES: return "GL_MAX_CLIP_PLANES";
+		case GL_CLIP_PLANE0: return "GL_CLIP_PLANE0";
+		case GL_CLIP_PLANE1: return "GL_CLIP_PLANE1";
+		case GL_CLIP_PLANE2: return "GL_CLIP_PLANE2";
+		case GL_CLIP_PLANE3: return "GL_CLIP_PLANE3";
+		case GL_CLIP_PLANE4: return "GL_CLIP_PLANE4";
+		case GL_CLIP_PLANE5: return "GL_CLIP_PLANE5";
+
+		case GL_GENERATE_MIPMAP: return "GL_GENERATE_MIPMAP";
+		case GL_VERTEX_ARRAY_BUFFER_BINDING: return "GL_VERTEX_ARRAY_BUFFER_BINDING";
+		case GL_NORMAL_ARRAY_BUFFER_BINDING: return "GL_NORMAL_ARRAY_BUFFER_BINDING";
+		case GL_COLOR_ARRAY_BUFFER_BINDING: return "GL_COLOR_ARRAY_BUFFER_BINDING";
+		case GL_TEXTURE_COORD_ARRAY_BUFFER_BINDING: return "GL_TEXTURE_COORD_ARRAY_BUFFER_BINDING";
+		case GL_VERTEX_ARRAY_SIZE: return "GL_VERTEX_ARRAY_SIZE";
+		case GL_VERTEX_ARRAY_TYPE: return "GL_VERTEX_ARRAY_TYPE";
+		case GL_VERTEX_ARRAY_STRIDE: return "GL_VERTEX_ARRAY_STRIDE";
+		case GL_NORMAL_ARRAY_TYPE: return "GL_NORMAL_ARRAY_TYPE";
+		case GL_NORMAL_ARRAY_STRIDE: return "GL_NORMAL_ARRAY_STRIDE";
+		case GL_COLOR_ARRAY_SIZE: return "GL_COLOR_ARRAY_SIZE";
+		case GL_COLOR_ARRAY_TYPE: return "GL_COLOR_ARRAY_TYPE";
+		case GL_COLOR_ARRAY_STRIDE: return "GL_COLOR_ARRAY_STRIDE";
+		case GL_TEXTURE_COORD_ARRAY_SIZE: return "GL_TEXTURE_COORD_ARRAY_SIZE";
+		case GL_TEXTURE_COORD_ARRAY_TYPE: return "GL_TEXTURE_COORD_ARRAY_TYPE";
+		case GL_TEXTURE_COORD_ARRAY_STRIDE: return "GL_TEXTURE_COORD_ARRAY_STRIDE";
+		case GL_CURRENT_COLOR: return "GL_CURRENT_COLOR";
+		case GL_MATRIX_MODE: return "GL_MATRIX_MODE";
+		case GL_MODELVIEW_MATRIX: return "GL_MODELVIEW_MATRIX";
+		case GL_PROJECTION_MATRIX: return "GL_PROJECTION_MATRIX";
+		case GL_TEXTURE_MATRIX: return "GL_TEXTURE_MATRIX";
+		case GL_MODELVIEW_STACK_DEPTH: return "GL_MODELVIEW_STACK_DEPTH";
+		case GL_PROJECTION_STACK_DEPTH: return "GL_PROJECTION_STACK_DEPTH";
+		case GL_TEXTURE_STACK_DEPTH: return "GL_TEXTURE_STACK_DEPTH";
+		case GL_ALPHA_TEST_FUNC: return "GL_ALPHA_TEST_FUNC";
+		case GL_ALPHA_TEST_REF: return "GL_ALPHA_TEST_REF";
+		case GL_MAX_SAMPLES: return "GL_MAX_SAMPLES";
+
+			
+			
+			
+			
+		case GL_FOG: return "GL_FOG";
+		case GL_LIGHTING: return "GL_LIGHTING";
+		case GL_ALPHA_TEST: return "GL_ALPHA_TEST";
+		case GL_COLOR_LOGIC_OP: return "GL_COLOR_LOGIC_OP";
+		case GL_POINT_SMOOTH: return "GL_POINT_SMOOTH";
+		case GL_POINT_SPRITE_OES: return "GL_POINT_SPRITE_OES";
+		case GL_LINE_SMOOTH: return "GL_LINE_SMOOTH";
+		case GL_COLOR_MATERIAL: return "GL_COLOR_MATERIAL";
+		case GL_NORMALIZE: return "GL_NORMALIZE";
+		case GL_RESCALE_NORMAL: return "GL_RESCALE_NORMAL";
+		case GL_POINT_SIZE_ARRAY_OES: return "GL_POINT_SIZE_ARRAY_OES";
+		case GL_TEXTURE_COORD_ARRAY: return "GL_TEXTURE_COORD_ARRAY";
+		case GL_MULTISAMPLE: return "GL_MULTISAMPLE";
+		case GL_SAMPLE_ALPHA_TO_ONE: return "GL_SAMPLE_ALPHA_TO_ONE";
+		case GL_POINT_SIZE: return "GL_POINT_SIZE";
+		case GL_VERTEX_ARRAY: return "GL_VERTEX_ARRAY";
+		case GL_NORMAL_ARRAY: return "GL_NORMAL_ARRAY";
+		case GL_COLOR_ARRAY: return "GL_COLOR_ARRAY";
+		case GL_POINT_DISTANCE_ATTENUATION: return "GL_POINT_DISTANCE_ATTENUATION";
+		case GL_POINT_FADE_THRESHOLD_SIZE: return "GL_POINT_FADE_THRESHOLD_SIZE";
+		case GL_POINT_SIZE_MAX: return "GL_POINT_SIZE_MAX";
+		case GL_POINT_SIZE_MIN: return "GL_POINT_SIZE_MIN";
+		case GL_FOG_COLOR: return "GL_FOG_COLOR";
+		case GL_FOG_MODE: return "GL_FOG_MODE";
+		case GL_FOG_DENSITY: return "GL_FOG_DENSITY";
+		case GL_FOG_START: return "GL_FOG_START";
+		case GL_FOG_END: return "GL_FOG_END";
+		case GL_PERSPECTIVE_CORRECTION_HINT: return "GL_PERSPECTIVE_CORRECTION_HINT";
+		case GL_POINT_SMOOTH_HINT: return "GL_POINT_SMOOTH_HINT";
+		case GL_LINE_SMOOTH_HINT: return "GL_LINE_SMOOTH_HINT";
+		case GL_FOG_HINT: return "GL_FOG_HINT";
+		case GL_LIGHT_MODEL_TWO_SIDE: return "GL_LIGHT_MODEL_TWO_SIDE";
+		case GL_CLEAR: return "GL_CLEAR";
+		case GL_AND: return "GL_AND";
+		case GL_AND_REVERSE: return "GL_AND_REVERSE";
+		case GL_COPY: return "GL_COPY";
+		case GL_AND_INVERTED: return "GL_AND_INVERTED";
+		case GL_NOOP: return "GL_NOOP";
+		case GL_XOR: return "GL_XOR";
+		case GL_OR: return "GL_OR";
+		case GL_NOR: return "GL_NOR";
+		case GL_EQUIV: return "GL_EQUIV";
+		case GL_INVERT: return "GL_INVERT";
+		case GL_OR_REVERSE: return "GL_OR_REVERSE";
+		case GL_COPY_INVERTED: return "GL_COPY_INVERTED";
+		case GL_OR_INVERTED: return "GL_OR_INVERTED";
+		case GL_NAND: return "GL_NAND";
+		case GL_SET: return "GL_SET";
+		case GL_AMBIENT_AND_DIFFUSE: return "GL_AMBIENT_AND_DIFFUSE";
+		case GL_BLEND_SRC: return "GL_BLEND_SRC";
+		case GL_BLEND_DST: return "GL_BLEND_DST";
+		case GL_CLIENT_ACTIVE_TEXTURE: return "GL_CLIENT_ACTIVE_TEXTURE";
+		case GL_MAX_TEXTURE_UNITS: return "GL_MAX_TEXTURE_UNITS";
+		case GL_GENERATE_MIPMAP: return "GL_GENERATE_MIPMAP";
+		case GL_COORD_REPLACE_OES: return "GL_COORD_REPLACE_OES";
+		case GL_MAX_LIGHTS: return "GL_MAX_LIGHTS";
+		case GL_LIGHT0: return "GL_LIGHT0";
+		case GL_LIGHT1: return "GL_LIGHT1";
+		case GL_LIGHT2: return "GL_LIGHT2";
+		case GL_LIGHT3: return "GL_LIGHT3";
+		case GL_LIGHT4: return "GL_LIGHT4";
+		case GL_LIGHT5: return "GL_LIGHT5";
+		case GL_LIGHT6: return "GL_LIGHT6";
+		case GL_LIGHT7: return "GL_LIGHT7";
+			
+			// ClipPlane
+		case GL_MAX_CLIP_PLANES: return "GL_MAX_CLIP_PLANES";
+		case GL_CLIP_PLANE0: return "GL_CLIP_PLANE0";
+		case GL_CLIP_PLANE1: return "GL_CLIP_PLANE1";
+		case GL_CLIP_PLANE2: return "GL_CLIP_PLANE2";
+		case GL_CLIP_PLANE3: return "GL_CLIP_PLANE3";
+		case GL_CLIP_PLANE4: return "GL_CLIP_PLANE4";
+		case GL_CLIP_PLANE5: return "GL_CLIP_PLANE5";
+
+		case GL_VERTEX_ARRAY_BUFFER_BINDING: return "GL_VERTEX_ARRAY_BUFFER_BINDING";
+		case GL_NORMAL_ARRAY_BUFFER_BINDING: return "GL_NORMAL_ARRAY_BUFFER_BINDING";
+		case GL_COLOR_ARRAY_BUFFER_BINDING: return "GL_COLOR_ARRAY_BUFFER_BINDING";
+		case GL_TEXTURE_COORD_ARRAY_BUFFER_BINDING: return "GL_TEXTURE_COORD_ARRAY_BUFFER_BINDING";
+		case GL_VERTEX_ARRAY_SIZE: return "GL_VERTEX_ARRAY_SIZE";
+		case GL_VERTEX_ARRAY_TYPE: return "GL_VERTEX_ARRAY_TYPE";
+		case GL_VERTEX_ARRAY_STRIDE: return "GL_VERTEX_ARRAY_STRIDE";
+		case GL_NORMAL_ARRAY_TYPE: return "GL_NORMAL_ARRAY_TYPE";
+		case GL_NORMAL_ARRAY_STRIDE: return "GL_NORMAL_ARRAY_STRIDE";
+		case GL_COLOR_ARRAY_SIZE: return "GL_COLOR_ARRAY_SIZE";
+		case GL_COLOR_ARRAY_TYPE: return "GL_COLOR_ARRAY_TYPE";
+		case GL_COLOR_ARRAY_STRIDE: return "GL_COLOR_ARRAY_STRIDE";
+		case GL_TEXTURE_COORD_ARRAY_SIZE: return "GL_TEXTURE_COORD_ARRAY_SIZE";
+		case GL_TEXTURE_COORD_ARRAY_TYPE: return "GL_TEXTURE_COORD_ARRAY_TYPE";
+		case GL_TEXTURE_COORD_ARRAY_STRIDE: return "GL_TEXTURE_COORD_ARRAY_STRIDE";
+		case GL_POINT_SIZE_ARRAY_TYPE_OES: return "GL_POINT_SIZE_ARRAY_TYPE_OES";
+		case GL_POINT_SIZE_ARRAY_STRIDE_OES: return "GL_POINT_SIZE_ARRAY_STRIDE_OES";
+
+		case GL_CURRENT_COLOR: return "GL_CURRENT_COLOR";
+		case GL_MATRIX_MODE: return "GL_MATRIX_MODE";
+		case GL_MODELVIEW_MATRIX: return "GL_MODELVIEW_MATRIX";
+		case GL_PROJECTION_MATRIX: return "GL_PROJECTION_MATRIX";
+		case GL_TEXTURE_MATRIX: return "GL_TEXTURE_MATRIX";
+		case GL_MODELVIEW_STACK_DEPTH: return "GL_MODELVIEW_STACK_DEPTH";
+		case GL_PROJECTION_STACK_DEPTH: return "GL_PROJECTION_STACK_DEPTH";
+		case GL_TEXTURE_STACK_DEPTH: return "GL_TEXTURE_STACK_DEPTH";
+		case GL_ALPHA_TEST_FUNC: return "GL_ALPHA_TEST_FUNC";
+		case GL_ALPHA_TEST_REF: return "GL_ALPHA_TEST_REF";
+		case GL_MAX_VERTEX_UNITS_OES: return "GL_MAX_VERTEX_UNITS_OES";
+		case GL_MAX_PALETTE_MATRICES_OES: return "GL_MAX_PALETTE_MATRICES_OES";
+		case GL_MATRIX_PALETTE_OES: return "GL_MATRIX_PALETTE_OES";
+		case GL_MATRIX_INDEX_ARRAY_OES: return "GL_MATRIX_INDEX_ARRAY_OES";
+		case GL_WEIGHT_ARRAY_OES: return "GL_WEIGHT_ARRAY_OES";
+		case GL_CURRENT_PALETTE_MATRIX_OES: return "GL_CURRENT_PALETTE_MATRIX_OES";
+			
+		case GL_MATRIX_INDEX_ARRAY_SIZE_OES: return "GL_MATRIX_INDEX_ARRAY_SIZE_OES";
+		case GL_MATRIX_INDEX_ARRAY_TYPE_OES: return "GL_MATRIX_INDEX_ARRAY_TYPE_OES";
+		case GL_MATRIX_INDEX_ARRAY_STRIDE_OES: return "GL_MATRIX_INDEX_ARRAY_STRIDE_OES";
+		case GL_MATRIX_INDEX_ARRAY_POINTER_OES: return "GL_MATRIX_INDEX_ARRAY_POINTER_OES";
+		case GL_MATRIX_INDEX_ARRAY_BUFFER_BINDING_OES: return "GL_MATRIX_INDEX_ARRAY_BUFFER_BINDING_OES";
+			
+		case GL_WEIGHT_ARRAY_SIZE_OES: return "GL_WEIGHT_ARRAY_SIZE_OES";
+		case GL_WEIGHT_ARRAY_TYPE_OES: return "GL_WEIGHT_ARRAY_TYPE_OES";
+		case GL_WEIGHT_ARRAY_STRIDE_OES: return "GL_WEIGHT_ARRAY_STRIDE_OES";
+		case GL_WEIGHT_ARRAY_POINTER_OES: return "GL_WEIGHT_ARRAY_POINTER_OES";
+		case GL_WEIGHT_ARRAY_BUFFER_BINDING_OES: return "GL_WEIGHT_ARRAY_BUFFER_BINDING_OES";
+			
+			
+#endif	// !CC3_GLSL
+		
 		default:
 			printf("***ERROR: UNKNOWN_GLENUM (0x%04X)\n", gle);
 			return "UNKNOWN_GLENUM";
@@ -551,8 +671,10 @@ size_t CC3GLElementTypeSize(GLenum dataType) {
 		case GL_SHORT: return sizeof(GLshort);
 		case GL_UNSIGNED_SHORT: return sizeof(GLushort);
 		case GL_FIXED: return sizeof(GLfixed);
-		case GL_UNSIGNED_INT: return sizeof(GLuint);
 
+#if CC3_GLSL
+		case GL_UNSIGNED_INT: return sizeof(GLuint);
+			
 		case GL_INT: return sizeof(GLint);
 		case GL_INT_VEC2: return sizeof(GLint) * 2;
 		case GL_INT_VEC3: return sizeof(GLint) * 3;
@@ -570,13 +692,16 @@ size_t CC3GLElementTypeSize(GLenum dataType) {
 		case GL_FLOAT_VEC2: return sizeof(GLfloat) * 2;
 		case GL_FLOAT_VEC3: return sizeof(GLfloat) * 3;
 		case GL_FLOAT_VEC4: return sizeof(GLfloat) * 4;
-
+			
 		case GL_FLOAT_MAT2: return sizeof(GLfloat) * 2 * 2;
 		case GL_FLOAT_MAT3: return sizeof(GLfloat) * 3 * 3;
 		case GL_FLOAT_MAT4: return sizeof(GLfloat) * 4 * 4;
+#else
+		case GL_FLOAT: return sizeof(GLfloat);
+#endif	// CC3_GLSL
 			
 		default: return 0;
 	}	
 }
 
-#endif	// CC3_OGLES_2
+

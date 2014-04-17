@@ -42,7 +42,7 @@
 
 @implementation CC3Texture
 
-@synthesize textureID=_textureID, size=_size, coverage=_coverage, hasMipmap=_hasMipmap;
+@synthesize size=_size, coverage=_coverage, hasMipmap=_hasMipmap;
 @synthesize pixelFormat=_pixelFormat, pixelType=_pixelType;
 @synthesize hasAlpha=_hasAlpha, hasPremultipliedAlpha=_hasPremultipliedAlpha;
 @synthesize isUpsideDown=_isUpsideDown;
@@ -55,6 +55,11 @@
 	[_ccTextureContent release];
 
 	[super dealloc];
+}
+
+-(GLuint) textureID {
+	[self ensureGLTexture];
+	return _textureID;
 }
 
 -(void) ensureGLTexture { if (!_textureID) _textureID = CC3OpenGL.sharedGL.generateTexture; }
@@ -71,6 +76,17 @@
 		[CC3OpenGL.sharedGL deleteTexture: _textureID];
 	
 	_textureID = 0;
+}
+
+/** If the texture has been created, set its debug label as well. */
+-(void) setName: (NSString*) name {
+	[super setName: name];
+	[self checkGLDebugLabel];
+}
+
+/** Sets the GL debug label, if required. */
+-(void) checkGLDebugLabel {
+	if (_textureID) [CC3OpenGL.sharedGL setDebugLabel: self.name forTexture: _textureID];
 }
 
 -(BOOL) isPOTWidth { return (_size.width == CCNextPOT(_size.width)); }
@@ -128,8 +144,6 @@
 	
 	[self checkTextureOrientation: texContent];
 	
-	[self ensureGLTexture];
-	
 	_size = CC3IntSizeMake((GLint)texContent.pixelWidth, (GLint)texContent.pixelHeight);
 	_coverage = CGSizeMake(texContent.maxS, texContent.maxT);
 	_pixelFormat = texContent.pixelGLFormat;
@@ -141,7 +155,7 @@
 	CC3OpenGL* gl = CC3OpenGL.sharedGL;
 	GLuint tuIdx = 0;		// Choose the texture unit in which to work
 	
-	[gl bindTexture: _textureID toTarget: self.textureTarget at: tuIdx];
+	[gl bindTexture: self.textureID toTarget: self.textureTarget at: tuIdx];
 	[gl loadTexureImage: texContent.imageData
 			 intoTarget: target
 		  onMipmapLevel: 0
@@ -213,7 +227,7 @@
 	CC3OpenGL* gl = CC3OpenGL.sharedGL;
 	GLuint tuIdx = 0;	// Choose the texture unit in which to work
 	GLenum target = self.textureTarget;
-	[gl bindTexture: _textureID toTarget: target at: tuIdx];
+	[gl bindTexture: self.textureID toTarget: target at: tuIdx];
 	[gl generateMipmapForTarget: target at: tuIdx];
 	_hasMipmap = YES;
 
@@ -391,6 +405,7 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 -(BOOL) loadFromFile: (NSString*) aFilePath {
 	BOOL wasLoaded = [self loadTarget: self.textureTarget fromFile: aFilePath];
 	if (wasLoaded && self.class.shouldGenerateMipmaps) [self generateMipmap];
+	[self checkGLDebugLabel];
 	return wasLoaded;
 }
 
@@ -420,7 +435,7 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 	
 	CC3OpenGL* gl = CC3OpenGL.sharedGL;
 	GLuint tuIdx = 0;		// Choose the texture unit in which to work
-	[gl bindTexture: _textureID toTarget: self.textureTarget at: tuIdx];
+	[gl bindTexture: self.textureID toTarget: self.textureTarget at: tuIdx];
 	[gl loadTexureSubImage: (const GLvoid*) colorArray
 				intoTarget: target
 			 onMipmapLevel: 0
@@ -1034,6 +1049,7 @@ static ccTexParams _defaultCubeMapTextureParameters = { GL_LINEAR_MIPMAP_NEAREST
 	success &= [self loadCubeFace: GL_TEXTURE_CUBE_MAP_NEGATIVE_Z fromFile: negZFilePath];
 
 	if (success && self.class.shouldGenerateMipmaps) [self generateMipmap];
+	[self checkGLDebugLabel];
 	return success;
 }
 
