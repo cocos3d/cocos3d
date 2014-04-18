@@ -3872,4 +3872,14 @@ typedef enum {
  */
 @property(nonatomic, assign) BOOL shouldLogIntersectionMisses;
 
+/**
+ * Returns a marker string that is pushed onto the GL render stream prior to rendering
+ * this node. The group is popped from the GL render stream after this node is rendered.
+ *
+ * This property returns a NULL pointer. Subclasses that contain renderable content can 
+ * override to provide a meaningful string. Subclasses should avoid dynamically generating 
+ * this property on each access, since this property is accessed each time the node is rendered.
+ */
+@property(nonatomic, readonly) const char* renderStreamGroupMarker;
+
 @end

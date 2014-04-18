@@ -2281,4 +2281,6 @@ static ccColor4F directionMarkerColor = { 1.0, 0.0, 0.0, 1.0 };		// kCCC4FRed
 	for (CC3Node* child in _children) child.shouldLogIntersectionMisses = shouldLog;
 }
 
+-(const char*) renderStreamGroupMarker { return NULL; }
+
 @end

@@ -1068,6 +1068,27 @@ static NSObject<CC3OpenGLDelegate>* _delegate = nil;
 
 #pragma mark Debugging support
 
+-(void) pushGroupMarker: (NSString*) marker { [self pushGroupMarkerC: marker.UTF8String]; }
+
+-(void) pushGroupMarkerC: (const char*) marker {
+	glPushGroupMarkerEXT(0, marker);
+	LogGLErrorTrace(@"glPushGroupMarkerEXT(0, %@)", [NSString stringWithUTF8String: marker]);
+}
+
+-(void) popGroupMarker {
+	glPopGroupMarkerEXT();
+//	LogGLErrorTrace(@"glPopGroupMarkerEXT()");	// Log appears outside the group, which creates clutter.
+}
+
+-(void) insertEventMarker: (NSString*) marker { [self insertEventMarkerC: marker.UTF8String]; }
+
+-(void) insertEventMarkerC: (const char*) marker {
+	glInsertEventMarkerEXT(0, marker);
+	LogGLErrorTrace(@"glInsertEventMarkerEXT(0, %@)", [NSString stringWithUTF8String: marker]);
+}
+
+-(void) captureOpenGLFrame { [self insertEventMarkerC: "com.apple.GPUTools.event.debug-frame"]; }
+
 -(void) setDebugLabel: (NSString*) label forObject: (GLuint) objID ofType: (GLenum) objType {
 	glLabelObjectEXT(objType, objID, 0, label.UTF8String);
 	LogGLErrorTrace(@"glLabelObjectEXT(%@, %u, 0, %@)", NSStringFromGLEnum(objType), objID, label);

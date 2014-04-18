@@ -1235,6 +1235,57 @@ typedef struct {
 
 #pragma mark Debugging support
 
+/**
+ * Pushes the specified group marker into the GL command stream. This marker can be used
+ * by the debugger to organize the presentation of the commands in an OpenGL frame.
+ *
+ * This version must convert the specified marker string into a 'C' string in order to
+ * send it to the GL engine. For better performance, use the pushGroupMarkerC: version
+ * of this method, and consider using a static 'C' string, or caching the 'C' string to
+ * avoid creating it on each frame.
+ */
+-(void) pushGroupMarker: (NSString*) marker;
+
+/**
+ * Pushes the specified group marker into the GL command stream. This marker can be used
+ * by the debugger to organize the presentation of the commands in an OpenGL frame.
+ *
+ * For best performance, consider using a static string, or caching the string to avoid
+ * creating it on each frame.
+ */
+-(void) pushGroupMarkerC: (const char*) marker;
+
+/**
+ * Pops the current group marker from the GL command stream. 
+ *
+ * This is the complement to the pushGroupMarker: or pushGroupMarkerC: methods, 
+ * and you can use this method in conjunction with either of those methods.
+ */
+-(void) popGroupMarker;
+
+/**
+ * Inserts the specified marker into the GL command stream. This marker can be used
+ * by the debugger to organize the presentation of the commands in an OpenGL frame.
+ *
+ * This version must convert the specified marker string into a 'C' string in order to
+ * send it to the GL engine. For better performance, use the pushGroupMarkerC: version
+ * of this method, and consider using a static 'C' string, or caching the 'C' string to
+ * avoid creating it on each frame.
+ */
+-(void) insertEventMarker: (NSString*) marker;
+
+/**
+ * Inserts the specified marker into the GL command stream. This marker can be used
+ * by the debugger to organize the presentation of the commands in an OpenGL frame.
+ *
+ * For best performance, consider using a static string, or caching the string to avoid
+ * creating it on each frame.
+ */
+-(void) insertEventMarkerC: (const char*) marker;
+
+/** Capture the current OpenGL command stream frame, starting at this point. */
+-(void) captureOpenGLFrame;
+
 /** Sets the debug label for the specified GL object of the specified type. */
 -(void) setDebugLabel: (NSString*) label forObject: (GLuint) objID ofType: (GLenum) objType;
 

@@ -203,7 +203,8 @@
 	CC3ResourceNode* rezNode;
 
 	// The node to use as a backdrop for each scene.
-	_backdropTemplate = [CC3Backdrop nodeWithColor: ccc4f(0.2, 0.24, 0.43, 1.0)];
+	_backdropTemplate = [CC3Backdrop nodeWithName: @"Backdrop"
+										withColor: ccc4f(0.2, 0.24, 0.43, 1.0)];
 	[_backdropTemplate createGLBuffers];
 	[_backdropTemplate selectShaders];
 	

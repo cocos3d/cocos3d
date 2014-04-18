@@ -548,7 +548,10 @@ static GLfloat deviceScaleFactor = 0.0f;
  */
 -(void) drawMeshWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	if (visitor.shouldDecorateNode) {
+		CC3OpenGL* gl = visitor.gl;
+		[gl pushGroupMarkerC: "Draw 2D billboard"];
 //		[_billboard visit];		// Draw the 2D CCNode
+		[gl popGroupMarker];
 	} else {
 		// We're drawing a colored box to allow this node to be picked by a touch.
 		// This is done by creating and drawing an underlying rectangle mesh that

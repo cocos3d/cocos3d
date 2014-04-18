@@ -59,14 +59,16 @@
 	[_mesh release];
 	[_material release];
 	[_shaderContext release];
-
+	[self deleteRenderStreamGroupMarker];
+	
 	[super dealloc];
 }
 
 -(void) setName: (NSString*) aName {
 	super.name = aName;
 	[_mesh deriveNameFrom: self];
-	[_material deriveNameFrom: self];	// Don't lazy init material yet
+	[_material deriveNameFrom: self];		// Don't lazy init material yet
+	[self deleteRenderStreamGroupMarker];	// Reset the GL render stream marker
 }
 
 // Sets the name of the mesh if needed and marks the bounding volume as dirty.
@@ -559,6 +561,7 @@
 		_mesh = nil;
 		_material = nil;
 		_shaderContext = nil;
+		_renderStreamGroupMarker = NULL;
 		_shouldUseLightProbes = NO;
 		_shouldUseSmoothShading = YES;
 		_shouldCullBackFaces = YES;
@@ -1251,6 +1254,26 @@ globalIntersections: (CC3MeshIntersection*) intersections
 -(void) updateVertexWeightsGLBuffer { [self updateVertexBoneWeightsGLBuffer]; }
 
 -(void) updateVertexMatrixIndicesGLBuffer { [self updateVertexBoneIndicesGLBuffer]; }
+
+
+#pragma mark Developer support
+
+/** Lazily allocate and populate a char string built from the description property. */
+-(const char*) renderStreamGroupMarker {
+	if ( !_renderStreamGroupMarker ) {
+		NSString* desc = self.description;
+		NSUInteger buffLen = desc.length + 1;		// Plus null-term char
+		_renderStreamGroupMarker = calloc(buffLen, sizeof(char));
+		[desc getCString: _renderStreamGroupMarker maxLength: buffLen encoding: NSUTF8StringEncoding];
+	}
+	return _renderStreamGroupMarker;
+}
+
+ /** Delete the memory used by the render stream group marker string. */
+-(void) deleteRenderStreamGroupMarker {
+	free(_renderStreamGroupMarker);
+	_renderStreamGroupMarker = NULL;
+}
 
 @end
 

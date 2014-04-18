@@ -277,6 +277,24 @@
  */
 +(id) nodeWithColor: (ccColor4F) color;
 
+/**
+ * Allocates and initializes and autoreleased instance covered with the specified texture.
+ *
+ * The name property will be set to the specified name.
+ *
+ * This is a convenience method for a common use of this class.
+ */
++(id) nodeWithName: (NSString*) name withTexture: (CC3Texture*) texture;
+
+/**
+ * Allocates and initializes and autoreleased instance covered with the specified color.
+ *
+ * The name property will be set to the specified name.
+ *
+ * This is a convenience method for a common use of this class.
+ */
++(id) nodeWithName: (NSString*) name withColor: (ccColor4F) color;
+
 @end
 
 

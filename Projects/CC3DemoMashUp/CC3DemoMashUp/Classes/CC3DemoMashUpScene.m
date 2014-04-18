@@ -640,11 +640,12 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 
 /** 
  * Creates a clear-blue-sky backdrop. Or install a textured backdrop by uncommenting the 
- * second line of this method. See the notes for the backdrop property for more info.
+ * 2nd & 3rd lines of this method. See the notes for the backdrop property for more info.
  */
 -(void) addBackdrop {
-	self.backdrop = [CC3Backdrop nodeWithColor: kSkyColor];
-//	self.backdrop = [CC3Backdrop nodeWithTexture: [CC3Texture textureFromFile: kBrickTextureFile]];
+	self.backdrop = [CC3Backdrop nodeWithName: @"Backdrop" withColor: kSkyColor];
+//	self.backdrop = [CC3Backdrop nodeWithName: @"Backdrop"
+//								  withTexture: [CC3Texture textureFromFile: kBrickTextureFile]];
 }
 
 /**
@@ -2003,13 +2004,13 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// Create a clip-space node that will render the off-screen color texture to the screen.
 	// Load the node with shaders that convert the image into greyscale, making the scene
 	// appear as if it was filmed with black & white film.
-	_grayscaleNode = [CC3ClipSpaceNode nodeWithTexture: _postProcSurface.colorTexture];
+	_grayscaleNode = [CC3ClipSpaceNode nodeWithName: @"Grayscale post-processor" withTexture: _postProcSurface.colorTexture];
 	[_grayscaleNode applyEffectNamed: @"Grayscale" inPFXResourceFile: kPostProcPFXFile];
 	
 	// Create a clip-space node that will render the off-screen depth texture to the screen.
 	// Load the node with shaders that convert the depth values into greyscale, visualizing
 	// the depth of field as a grayscale gradient.
-	_depthImageNode = [CC3ClipSpaceNode nodeWithTexture: _postProcSurface.depthTexture];
+	_depthImageNode = [CC3ClipSpaceNode nodeWithName: @"Depth-map post-processor" withTexture: _postProcSurface.depthTexture];
 	[_depthImageNode applyEffectNamed: @"Depth" inPFXResourceFile: kPostProcPFXFile];
 
 #endif	// !CC3_OGLES_1

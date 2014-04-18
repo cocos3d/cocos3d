@@ -490,7 +490,8 @@
 -(void) checkStencilledShadowPainter {
 	if (self.hasShadows) {
 		if (!_stencilledShadowPainter)
-			self.stencilledShadowPainter = [CC3StencilledShadowPainterNode nodeWithColor: kCCC4FBlack];
+			self.stencilledShadowPainter = [CC3StencilledShadowPainterNode nodeWithName: @"Shadow painter"
+																			  withColor: kCCC4FBlack];
 	} else {
 		self.stencilledShadowPainter = nil;
 	}

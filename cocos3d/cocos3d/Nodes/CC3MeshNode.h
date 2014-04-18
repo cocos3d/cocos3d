@@ -93,6 +93,7 @@
 	CC3Mesh* _mesh;
 	CC3Material* _material;
 	CC3ShaderContext* _shaderContext;
+	char* _renderStreamGroupMarker;
 	GLenum _depthFunction;
 	GLfloat _decalOffsetFactor;
 	GLfloat _decalOffsetUnits;

@@ -453,7 +453,12 @@
 
 -(void) draw: (CC3Node*) aNode {
 	LogTrace(@"Drawing %@", aNode);
+	CC3OpenGL* gl = self.gl;
+	[gl pushGroupMarkerC: aNode.renderStreamGroupMarker];
+
 	[aNode drawWithVisitor: self];
+	
+	[gl popGroupMarker];
 	[self.performanceStatistics incrementNodesDrawn];
 }
 
