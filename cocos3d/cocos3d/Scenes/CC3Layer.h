@@ -134,6 +134,7 @@
 @interface CC3Layer : CC3ControllableLayer {
 	CC3Scene* _cc3Scene;
 	NSMutableArray* _cc3GestureRecognizers;
+	id<CCRenderCommand> _renderCommand;
 	BOOL _shouldAlwaysUpdateViewport : 1;
 }
 
@@ -358,3 +359,25 @@
 -(void) updateViewport;
 
 @end
+
+
+#if CC3_CC2_RENDER_QUEUE
+
+#pragma mark -
+#pragma mark CC3LayerRenderCommand
+
+/** A CCRenderCommand specialized for rendering 3D scenes from a CC3Layer. */
+@interface CC3LayerRenderCommand : NSObject <CCRenderCommand> {
+	CC3Layer* _cc3Layer;
+	char* _renderStreamGroupMarker;
+}
+
+/** Initializes this instance to render the specified CC3Layer. */
+-(instancetype) initWithCC3Layer: (CC3Layer*) layer;
+
+/** Allocates and initializes an instance to render the specified CC3Layer. */
++(instancetype) renderCommandWithCC3Layer: (CC3Layer*) layer;
+
+@end
+
+#endif	// CC3_CC2_RENDER_QUEUE
