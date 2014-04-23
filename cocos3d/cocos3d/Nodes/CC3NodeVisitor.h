@@ -311,6 +311,7 @@ typedef enum {
 	id<CC3RenderSurface> _renderSurface;
 	CC3OpenGL* _gl;
 	CCRenderer* _ccRenderer;
+	CCRenderer* _billboardCCRenderer;
 	CC3DataArray* _boneMatricesGlobal;
 	CC3DataArray* _boneMatricesEyeSpace;
 	CC3DataArray* _boneMatricesModelSpace;
@@ -320,6 +321,7 @@ typedef enum {
 	CC3Matrix4x4 _viewProjMatrix;
 	CC3Matrix4x3 _modelViewMatrix;
 	CC3Matrix4x4 _modelViewProjMatrix;
+	CC3Matrix4x4 _layerTransformMatrix;
 	ccColor4F _currentColor;
 	CC3TextureBindingMode _textureBindingMode;
 	GLuint _textureUnitCount;
@@ -348,16 +350,39 @@ typedef enum {
  */
 @property(nonatomic, readonly) CC3OpenGL* gl;
 
-/** The Cocos2D renderer. Available when using Cocos2D 3.1 and above. */
-@property(nonatomic, assign) CCRenderer* ccRenderer;
-
-/** 
+/**
  * Clears the reference in the gl property, so that it can be retrieved automatically on
  * the next access of the property. You can use this method before using this visitor on
  * a thread that is different  (and therefore likely a different GL engine context) than
  * the last thread on which this visitor was used.
  */
 -(void) clearGL;
+
+/** 
+ * The Cocos2D renderer. Available when using Cocos2D 3.1 and above. 
+ *
+ * If not set directly, this property will be lazily initialized on the first access to 
+ * either the renderer returned by the class-side CCRenderer currentRenderer property,
+ * if it exists, or to a new instance, if not.
+ */
+@property(nonatomic, retain) CCRenderer* ccRenderer;
+
+/** 
+ * The Cocos2D renderer for rendering 2D CCNodes embedded in the 3D scene when using
+ * Cocos2D 3.1 and above.
+ *
+ * CCNodes embedded in the 3D scene via CC3Billboard nodes must use a different renderer than
+ * the primary rendering loop, because the CC3Billboards are rendered as part of a single 
+ * rendering command for the entire 3D scene, and the CCNodes containedin the CC3Billboards
+ * cannot be added to the rendering queue, while the 3D scene is being drawn.
+ *
+ * If not set directly, this property will be lazily initialized on the first access to a 
+ * new instance, that matches the characteristics of the instance in the ccRenderer property.
+ */
+@property(nonatomic, retain) CCRenderer* billboardCCRenderer;
+
+/** Clears the ccRenderer and billboardCCRenderer properties. */
+-(void) clearCCRenderers;
 
 /**
  * The index of the current texture unit holding a 2D texture.
@@ -546,6 +571,9 @@ typedef enum {
 /** Returns the current model-view-projection matrix. */
 @property(nonatomic, readonly) CC3Matrix4x4* modelViewProjMatrix;
 
+/** Returns the current CC3Layer transform matrix. Available when using Cocos2D 3.1 and higher. */
+@property(nonatomic, readonly) CC3Matrix4x4* layerTransformMatrix;
+
 /**
  * Populates the current projection matrix from the specified matrix.
  *
@@ -562,6 +590,9 @@ typedef enum {
 
 /** Populates the current model-to-global matrix from the specified matrix. */
 -(void) populateModelMatrixFrom: (CC3Matrix*) modelMtx;
+
+/** Populates the current CC3Layer transform matrix from the specified matrix. */
+-(void) populateLayerTransformMatrixFrom: (CC3Matrix4x4*) layerMtx;
 
 /**
  * Returns a pointer to the bone matrix at the specified index, from the currentSkinSection,

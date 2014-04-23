@@ -368,7 +368,7 @@
  * If the nodes should be animated, use a CC3AnimatingVisitor instance, otherwise use
  * a normal CC3NodeUpdatingVisitor instance.
  */
--(id) updateVisitorClass { return [CC3AnimatingVisitor class]; }
+-(Class) updateVisitorClass { return [CC3AnimatingVisitor class]; }
 
 @end
 

@@ -64,6 +64,8 @@ static inline GLfloat CC3Det3x3(GLfloat a1, GLfloat a2, GLfloat a3,
  *
  * CC3Matrix4x4 offers several ways to access the matrix content. Content can be accessed
  * by element array index, by element column and row number, or as column vectors.
+ *
+ * CC3Matrix4x4 can be toll-free bridged with GLKMatrix4 by simply casting a reference back and forth.
  */
 typedef union {
 	/** The elements in array form. You can also simply cast the entire union to an array of GLfloats. */

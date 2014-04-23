@@ -48,6 +48,8 @@
 	_controller = aController;		// weak reference
 }
 
+-(CCGLView*) view { return _controller ? _controller.view : (CCGLView*)CCDirector.sharedDirector.view; }
+
 
 #pragma mark Allocation and initialization
 

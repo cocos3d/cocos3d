@@ -39,6 +39,11 @@
 #else
 
 @implementation CCRenderer
+
+-(void) invalidateState {}
+
+-(void) flush {}
+
 @end
 
 #endif	// CC3_CC2_RENDER_QUEUE
@@ -183,6 +188,14 @@
 #pragma mark CCNode extension
 
 @implementation CCNode (CC3)
+
+#if !CC3_CC2_RENDER_QUEUE
+
+-(void) visit: (CCRenderer*) renderer parentTransform: (const GLKMatrix4*)parentTransform {
+	[self visit];
+}
+
+#endif	// !CC3_CC2_RENDER_QUEUE
 
 #if CC3_CC2_CLASSIC
 

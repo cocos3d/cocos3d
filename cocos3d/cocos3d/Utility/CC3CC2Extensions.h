@@ -52,8 +52,19 @@
 
 #else
 
+/** Dummy protocol for backwards compatibility with Cocos2D 3.x renderer. */
+@protocol CCRenderCommand <NSObject>
+@end
+
 /** Dummy class for backwards compatibility with Cocos2D 3.x renderer. */
 @interface CCRenderer : NSObject
+
+/** Mark the renderer's cached GL state as invalid executing custom OpenGL code. */
+-(void) invalidateState;
+
+/** Render any currently queued commands. */
+-(void) flush;
+
 @end
 
 #endif	// CC3_CC2_RENDER_QUEUE
@@ -331,6 +342,13 @@ enum {
 
 /** Extension category to support cocos3d functionality. */
 @interface CCNode (CC3)
+
+#if !CC3_CC2_RENDER_QUEUE
+
+/** Backwards compatibility with Cocos2D 3.x renderer. Simply invoks visit. */
+-(void) visit: (CCRenderer*) renderer parentTransform: (const GLKMatrix4*)parentTransform;
+
+#endif	// !CC3_CC2_RENDER_QUEUE
 
 #if CC3_CC2_CLASSIC
 

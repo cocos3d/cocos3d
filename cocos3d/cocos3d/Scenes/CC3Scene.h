@@ -583,7 +583,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * returns CC3NodeUpdatingVisitor. Subclasses may override to customize the behaviour
  * of the updating visits.
  */
--(id) updateVisitorClass;
+-(Class) updateVisitorClass;
 
 /** @deprecated No longer used. */
 @property(nonatomic, retain) id transformVisitor DEPRECATED_ATTRIBUTE;
@@ -700,24 +700,27 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * This method is invoked when the objects in the CC3Scene are to be drawn.
  *
  * Typcially this method is invoked automatically from the draw method of the CC3Layer instance
- * on each frame rendering cycle. This method is invoked asynchronously to the model updating loop,
+ * on each frame rendering cycle. This method is invoked asynchronously to the model updating
  * to keep the processing of OpenGL ES drawing separate from model updates.
  *
  * This implementation establishes the 3D rendering environment, handles node picking, invokes
- * the drawSceneContentWithVisitor: method to draw the contents of this scene, reverts to the 2D rendering
- * environment of the CC3Layer, and renders any 2D overlay billboards.
- *
- * If you want to customize the scene rendering flow, such as performing multiple-passes, or
- * adding post-processing effects, you should override the drawSceneContentWithVisitor: method.
+ * the drawSceneContentWithVisitor: method to draw the contents of this scene, reverts to the
+ * 2D rendering environment of the CC3Layer, and renders any 2D overlay billboards.
  *
  * If the scene was touched by the user (finger or mouse), this method invokes the node picking
  * algorithm to determine the node that is under the touch point. This is performed prior to
  * invoking the drawSceneContentWithVisitor: method.
  *
+ * If you want to customize the scene rendering flow, such as performing multiple-passes, or
+ * adding post-processing effects, you should override the drawSceneContentWithVisitor: method.
+ *
  * This method is invoked automatically during each rendering frame. Usually, the application
  * never needs to invoke this method directly.
  */
--(void) drawScene;
+-(void) drawSceneWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+
+/** @deprecated Invokes the drawSceneWithVisitor: method with the viewDrawingVisitor property of this scene. */
+-(void) drawScene __deprecated;
 
 /**
  * Template method that draws the content of the scene.
@@ -1140,7 +1143,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * returns CC3NodePickingVisitor. Subclasses may override to customized the behaviour
  * of the drawing visits.
  */
--(id) pickVisitorClass;
+-(Class) pickVisitorClass;
 
 /** 
  * The render surface being used to draw when picking nodes from touch events.

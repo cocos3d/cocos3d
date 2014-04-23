@@ -45,6 +45,8 @@
 	CC3ViewController* _controller;
 }
 
+/** Returns the view on which this layer is being displayed. */
+@property(nonatomic, readonly) CCGLView* view;
 
 #pragma mark Device orientation support
 

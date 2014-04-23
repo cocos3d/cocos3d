@@ -75,6 +75,7 @@
 
 // Gesture support under Android is less sophisticated and more challenging than under iOS.
 // When running on Android, avoid using gestures, and use underlying touch events instead.
+// You can change this definition if you don't want to use gestures at all.
 #define kShouldUseGestures				(CC3_IOS && !APPORTABLE)
 
 @interface CC3Layer (TemplateMethods)
@@ -455,6 +456,8 @@
 #pragma mark Touch handling
 
 /**
+ * Handle touch move event under Cocos2D v2 and below.
+ *
  * The ccTouchMoved:withEvent: method is optional for the <CCTouchDelegateProtocol>.
  * The event dispatcher will not dispatch events for which there is no method
  * implementation. Since the touch-move events are both voluminous and seldom used,
@@ -465,6 +468,20 @@
  * This method will not be invoked if gestures have been enabled.
  */
 -(void) ccTouchMoved: (UITouch *)touch withEvent: (UIEvent *)event {
+	[self handleTouch: touch ofType: kCCTouchMoved];
+}
+
+/**
+ * Handle touch move event under Cocos2D v3 and above.
+ *
+ * The touchMoved:withEvent: method is optional. Since the touch-move events are both
+ * voluminous and seldom used, the implementation of this method has been left out of
+ * the default CC3Layer implementation. To receive and handle touch-move events for
+ * object picking, it must be implemented here.
+ *
+ * This method will not be invoked if gestures have been enabled.
+ */
+-(void) touchMoved: (UITouch*) touch withEvent: (UIEvent*) event {
 	[self handleTouch: touch ofType: kCCTouchMoved];
 }
 

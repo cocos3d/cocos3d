@@ -133,10 +133,9 @@
 	// Assign to a generic variable so we can uncomment options below to play with the capabilities
 	CC3ControllableLayer* controlledLayer = cc3Layer;
 	
-	// The 3D layer can run either directly in the scene, or it can run as a smaller
-	// "sub-window" within any standard CCLayer. So you can have a mostly 2D window,
-	// with a smaller 3D window embedded in it. To experiment with this smaller, square,
-	// embedded 3D window, uncomment the following lines:
+	// The 3D layer can run either directly in the scene, or it can run as a smaller "sub-window" within
+	// any standard CCLayer. So you can have a mostly 2D window, with a smaller 3D window embedded in it.
+	// To experiment with this smaller, square, embedded 3D window, uncomment the following lines:
 //	CGSize cs = cc3Layer.contentSize;		// The layer starts out "full-screen".
 //	GLfloat sideLen = MIN(cs.width, cs.height) - 100.0f;
 //	cc3Layer.contentSize = CGSizeMake(sideLen, sideLen);
@@ -147,7 +146,7 @@
 	// The smaller 3D layer can even be moved around on the screen dyanmically. To see this in
 	// action, uncomment the lines above as described, and also uncomment the following two lines.
 //	cc3Layer.position = ccp(0.0, 0.0);
-//	[cc3Layer runAction: [CCMoveTo actionWithDuration: 15.0 position: ccp(500.0, 250.0)]];
+//	[cc3Layer runAction: [CCActionMoveTo actionWithDuration: 15.0 position: ccp(500.0, 250.0)]];
 
 	// Set the layer in the controller
 	_viewController.controlledNode = controlledLayer;
@@ -228,6 +227,20 @@
 
 	// Create the customized CC3Layer that supports 3D rendering.
 	CC3Layer* cc3Layer = [CC3DemoMashUpLayer layer];
+	
+	// As an alternte to running "full-screen", the CC3Layer can run as a smaller "sub-window"
+	// within any standard CCNode. That allows you to have a mostly 2D window, with a smaller
+	// 3D window embedded in it. To experiment with this smaller, square, embedded 3D window,
+	// uncomment the following lines:
+//	CGSize cs = cc3Layer.contentSize;		// The layer starts out "full-screen".
+//	GLfloat sideLen = MIN(cs.width, cs.height) - 200.0f;
+//	cc3Layer.contentSize = CGSizeMake(sideLen, sideLen);
+//	cc3Layer.position = ccp(100.0, 100.0);
+	
+	// The smaller 3D layer can even be moved around on the screen dyanmically. To see this in
+	// action, uncomment the lines above as described, and also uncomment the following two lines.
+//	cc3Layer.position = ccp(0.0, 0.0);
+//	[cc3Layer runAction: [CCActionMoveTo actionWithDuration: 15.0 position: ccp(500.0, 250.0)]];
 	
 	// Create the customized 3D scene and attach it to the layer.
 	// Could also just create this inside the customer layer.

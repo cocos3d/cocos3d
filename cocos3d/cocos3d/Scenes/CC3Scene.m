@@ -40,6 +40,7 @@
 #import "CC3AffineMatrix.h"
 #import "CC3CC2Extensions.h"
 #import "CGPointExtension.h"
+#import "CCRenderer_private.h"
 #import "ccMacros.h"
 
 
@@ -357,7 +358,7 @@
  * returns CC3NodeUpdatingVisitor. Subclasses may override the visitor class to
  * customize the behaviour during update visits.
  */
--(id) updateVisitorClass { return [CC3NodeUpdatingVisitor class]; }
+-(Class) updateVisitorClass { return [CC3NodeUpdatingVisitor class]; }
 
 
 #pragma mark Drawing
@@ -529,10 +530,19 @@
  * This is invoked after close3D, so the drawing of billboards occurs in 2D.
  */
 -(void) draw2DBillboardsWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	if (_billboards.count == 0) return;
+	
 	LogTrace(@"%@ drawing %lu billboards", self, (unsigned long)_billboards.count);
 	CC3Viewport vp = self.activeCamera.viewport;
 	CGRect localBounds = CGRectMake(0.0f, 0.0f, vp.w, vp.h);
-	for (CC3Billboard* bb in _billboards) [bb draw2dWithinBounds: localBounds];
+
+	CCRenderer* renderer = visitor.billboardCCRenderer;
+	[renderer invalidateState];
+	
+	for (CC3Billboard* bb in _billboards)
+		[bb draw2dWithinBounds: localBounds withRenderer: renderer withVisitor: visitor];
+	
+	[renderer flush];
 }
 
 -(id) viewDrawVisitorClass { return [CC3NodeDrawingVisitor class]; }
@@ -699,7 +709,7 @@
 /** Default does nothing. Subclasses that handle touch events will override. */
 -(void) nodeSelected: (CC3Node*) aNode byTouchEvent: (uint) touchType at: (CGPoint) touchPoint {}
 
--(id) pickVisitorClass { return [CC3NodePickingVisitor class]; }
+-(Class) pickVisitorClass { return [CC3NodePickingVisitor class]; }
 
 -(BOOL) shouldDisplayPickingRender { return _shouldDisplayPickingRender; }
 

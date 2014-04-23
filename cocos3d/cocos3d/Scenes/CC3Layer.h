@@ -106,7 +106,7 @@
  * within a parent CCLayer like any other CCNode.
  * 
  * You can even dyanamically move your CC3Layer around within the window, by changing the
- * position property (for example, by using a CCMoveTo action).
+ * position property (for example, by using a CCActionMoveTo action).
  *
  * For most applications, you will create subclasses of both CC3Layer and CC3Scene.
  * The customized subclass of CC3Scene manages the behaviour of the 3D resources.
@@ -134,7 +134,7 @@
 @interface CC3Layer : CC3ControllableLayer {
 	CC3Scene* _cc3Scene;
 	NSMutableArray* _cc3GestureRecognizers;
-	id<CCRenderCommand> _renderCommand;
+	char* _renderStreamGroupMarker;
 	BOOL _shouldAlwaysUpdateViewport : 1;
 }
 
@@ -358,6 +358,19 @@
  */
 -(void) updateViewport;
 
+
+#pragma mark Developer support
+
+/**
+ * Returns a marker string that is pushed onto the GL render stream prior to rendering
+ * this node. The group is popped from the GL render stream after this node is rendered.
+ *
+ * This property returns a NULL pointer. Subclasses that contain renderable content can
+ * override to provide a meaningful string. Subclasses should avoid dynamically generating
+ * this property on each access, since this property is accessed each time the node is rendered.
+ */
+@property(nonatomic, readonly) const char* renderStreamGroupMarker;
+
 @end
 
 
@@ -369,14 +382,21 @@
 /** A CCRenderCommand specialized for rendering 3D scenes from a CC3Layer. */
 @interface CC3LayerRenderCommand : NSObject <CCRenderCommand> {
 	CC3Layer* _cc3Layer;
-	char* _renderStreamGroupMarker;
+	CC3NodeDrawingVisitor* _visitor;
 }
 
+/** 
+ * The drawing visitor to use when drawing the CC3Layer. 
+ *
+ * This property must be set before queing this command for rendering the CC3Layer.
+ */
+@property(nonatomic, retain) CC3NodeDrawingVisitor* visitor;
+
 /** Initializes this instance to render the specified CC3Layer. */
--(instancetype) initWithCC3Layer: (CC3Layer*) layer;
+-(instancetype) initForCC3Layer: (CC3Layer*) layer;
 
 /** Allocates and initializes an instance to render the specified CC3Layer. */
-+(instancetype) renderCommandWithCC3Layer: (CC3Layer*) layer;
++(instancetype) renderCommandForCC3Layer: (CC3Layer*) layer;
 
 @end
 

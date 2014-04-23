@@ -38,6 +38,7 @@
 #import "CC3NodeSequencer.h"
 #import "CC3VertexSkinning.h"
 #import "CC3GLView.h"
+#import "CCRenderer_private.h"
 
 @interface CC3Node (TemplateMethods)
 -(void) processUpdateBeforeTransform: (CC3NodeUpdatingVisitor*) visitor;
@@ -296,13 +297,14 @@
 @synthesize shouldDecorateNode=_shouldDecorateNode;
 @synthesize isDrawingEnvironmentMap=_isDrawingEnvironmentMap;
 @synthesize currentColor=_currentColor;
-@synthesize ccRenderer=_ccRenderer;
+@synthesize ccRenderer=_ccRenderer, billboardCCRenderer=_billboardCCRenderer;
 
 -(void) dealloc {
 	_drawingSequencer = nil;				// weak reference
 	_currentSkinSection = nil;				// weak reference
 	_gl = nil;								// weak reference
-	_ccRenderer = nil;						// weak reference
+	[_ccRenderer release];
+	[_billboardCCRenderer release];
 	[_renderSurface release];
 	[_boneMatricesGlobal release];
 	[_boneMatricesEyeSpace release];
@@ -317,6 +319,36 @@
 }
 
 -(void) clearGL { _gl = nil; }		// weak reference
+
+-(CCRenderer*) ccRenderer {
+#if CC3_CC2_RENDER_QUEUE
+	if (!_ccRenderer) {
+		_ccRenderer = [CCRenderer.currentRenderer retain];		// retained
+		if (!_ccRenderer) {
+			_ccRenderer = [[CCRenderer alloc] init];			// retained
+			_ccRenderer.globalShaderUniforms = [[CCDirector sharedDirector].globalShaderUniforms mutableCopy];
+		}
+	}
+#endif	// CC3_CC2_RENDER_QUEUE
+	return _ccRenderer;
+}
+
+-(CCRenderer*) billboardCCRenderer {
+#if CC3_CC2_RENDER_QUEUE
+	if (!_billboardCCRenderer) {
+		_billboardCCRenderer = [[CCRenderer alloc] init];	// retained
+		_billboardCCRenderer.globalShaderUniforms = [self.ccRenderer.globalShaderUniforms mutableCopy];
+	}
+#endif	// CC3_CC2_RENDER_QUEUE
+	return _billboardCCRenderer;
+}
+
+-(void) clearCCRenderers {
+	[_ccRenderer release];
+	_ccRenderer = nil;
+	[_billboardCCRenderer release];
+	_billboardCCRenderer = nil;
+}
 
 -(GLuint) current2DTextureUnit {
 	switch (_textureBindingMode) {
@@ -382,7 +414,6 @@
 			&& [self doesNodeIntersectFrustum: aNode];
 }
 
-/** If we're drawing in clip-space, ignore the frustum. */
 -(BOOL) doesNodeIntersectFrustum: (CC3Node*) aNode {
 	return [aNode doesIntersectFrustum: self.camera.frustum];
 }
@@ -450,6 +481,9 @@
 
 /** Close the camera. This is the compliment of the openCamera method. */
 -(void) closeCamera { [self.camera closeWithVisitor: self]; }
+
+
+#pragma mark Drawing
 
 -(void) draw: (CC3Node*) aNode {
 	LogTrace(@"Drawing %@", aNode);
@@ -607,6 +641,8 @@
 	return &_modelViewProjMatrix;
 }
 
+-(CC3Matrix4x4*) layerTransformMatrix { return &_layerTransformMatrix; }
+
 -(void) populateProjMatrixFrom: (CC3Matrix*) projMtx {
 	if ( !projMtx || _currentNode.shouldDrawInClipSpace)
 		CC3Matrix4x4PopulateIdentity(&_projMatrix);
@@ -635,16 +671,23 @@
 }
 
 -(void) populateModelMatrixFrom: (CC3Matrix*) modelMtx {
-	if ( !modelMtx )
-		CC3Matrix4x3PopulateIdentity(&_modelMatrix);
-	else
+	if (modelMtx)
 		[modelMtx populateCC3Matrix4x3: &_modelMatrix];
+	else
+		CC3Matrix4x3PopulateIdentity(&_modelMatrix);
 	
 	_isMVMtxDirty = YES;
 	_isMVPMtxDirty = YES;
 	
 	// For fixed rendering pipeline, also load onto the matrix stack
 	[self.gl loadModelviewMatrix: self.modelViewMatrix];
+}
+
+-(void) populateLayerTransformMatrixFrom: (CC3Matrix4x4*) layerMtx {
+	if (layerMtx)
+		CC3Matrix4x4PopulateFrom4x4(&_layerTransformMatrix, layerMtx);
+	else
+		CC3Matrix4x4PopulateIdentity(&_layerTransformMatrix);
 }
 
 -(CC3Matrix4x3*) globalBoneMatrixAt: (GLuint) index {
@@ -704,6 +747,7 @@
 	if ( (self = [super init]) ) {
 		_gl = nil;
 		_ccRenderer = nil;
+		_billboardCCRenderer = nil;
 		_renderSurface = nil;
 		_drawingSequencer = nil;
 		_currentSkinSection = nil;
@@ -976,7 +1020,7 @@
 
 
 #pragma mark -
-#pragma mark CC3NodeTransformingVisitor
+#pragma mark Deprecated CC3NodeTransformingVisitor
 
 @implementation CC3NodeTransformingVisitor
 -(BOOL) shouldLocalizeToStartingNode { return NO; }

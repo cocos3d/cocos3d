@@ -99,18 +99,7 @@
 								  depthFormat: self.viewDepthFormat
 						   preserveBackbuffer: NO
 							  numberOfSamples: self.viewPixelSamples];
-	[self replaceRenderer];
 }
-
-#if CC3_CC2_RENDER_QUEUE
-/** Replaces the renderer once the GL context has been created. */
--(void) replaceRenderer {
-	[_renderer release];
-	_renderer = [[CCRenderer alloc] init];		// retained
-}
-#else
--(void) replaceRenderer {}
-#endif	// CC3_CC2_RENDER_QUEUE
 
 -(CGRect) viewCreationBounds { return UIScreen.mainScreen.bounds; }
 

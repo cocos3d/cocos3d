@@ -44,7 +44,8 @@
 	self.cc3Scene = nil;			// Close, remove & release the scene
 	[self cc3RemoveAllGestureRecognizers];
 	[_cc3GestureRecognizers release];
-	[_renderCommand release];
+	[self deleteRenderStreamGroupMarker];
+
 	[super dealloc];
 }
 
@@ -60,6 +61,8 @@
 
 	 _cc3Scene.cc3Layer = self;								// Point the scene back here
 	 if (self.isRunningInActiveScene) [self openCC3Scene];	// If already running, open the new scene right away
+	 
+	 [self deleteRenderStreamGroupMarker];
 }
 
 
@@ -158,11 +161,11 @@
 
 -(void) cc3AddGestureRecognizer: (UIGestureRecognizer*) gesture {
 	[((NSMutableArray*)self.cc3GestureRecognizers) addObject: gesture];
-	[self.controller.view addGestureRecognizer: gesture];
+	[self.view addGestureRecognizer: gesture];
 }
 
 -(void) cc3RemoveGestureRecognizer: (UIGestureRecognizer*) gesture {
-	[self.controller.view removeGestureRecognizer: gesture];
+	[self.view removeGestureRecognizer: gesture];
 	[_cc3GestureRecognizers removeObjectIdenticalTo: gesture];
 }
 
@@ -175,23 +178,34 @@
 
 #pragma mark Drawing
 
-/** Drawing under Cocos2D 3.0 and before. */
--(void) draw {
+/** Draw the 3D scene with the specified drawing visitor. */
+-(void) drawSceneWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	if (_shouldAlwaysUpdateViewport) [self updateViewport];
-	[_cc3Scene drawScene];
+	[_cc3Scene drawSceneWithVisitor: visitor];
 }
+
+/** Drawing under Cocos2D 3.0 and before. */
+-(void) draw { [self drawSceneWithVisitor: _cc3Scene.viewDrawingVisitor]; }
 
 #if CC3_CC2_RENDER_QUEUE
 
 /** Drawing under Cocos2D 3.1 and after. */
 -(void) draw: (CCRenderer*) renderer transform: (const GLKMatrix4*) transform {
-	[renderer enqueueRenderCommand: self.renderCommand];
+	
+	// Let the drawing visitor know about the renderer and transform
+	CC3NodeDrawingVisitor* visitor = _cc3Scene.viewDrawingVisitor;
+	visitor.ccRenderer = renderer;
+	[visitor populateLayerTransformMatrixFrom: (CC3Matrix4x4*)transform];
+	
+	// Get a render command for this layer, tell it the visitor to use, and queue it
+	CC3LayerRenderCommand* renderCmd = self.renderCommand;
+	renderCmd.visitor = visitor;
+	[renderer enqueueRenderCommand: renderCmd];
 }
 
-/** Returns the CCRenderer render command to render this layer, lazily creating it if necessary.  */
--(id<CCRenderCommand>) renderCommand {
-	if ( !_renderCommand ) _renderCommand = [[CC3LayerRenderCommand alloc] initWithCC3Layer: self];	// retained
-	return _renderCommand;
+/** Returns a CCRenderer render command to render this layer.  */
+-(CC3LayerRenderCommand*) renderCommand {
+	return [CC3LayerRenderCommand renderCommandForCC3Layer: self];
 }
 
 #endif	// CC3_CC2_RENDER_QUEUE
@@ -430,6 +444,26 @@
 	return YES;
 }
 
+
+#pragma mark Developer support
+
+/** Lazily allocate and populate a char string built from the description property. */
+-(const char*) renderStreamGroupMarker {
+	if ( !_renderStreamGroupMarker ) {
+		NSString* desc = self.description;
+		NSUInteger buffLen = desc.length + 1;		// Plus null-term char
+		_renderStreamGroupMarker = calloc(buffLen, sizeof(char));
+		[desc getCString: _renderStreamGroupMarker maxLength: buffLen encoding: NSUTF8StringEncoding];
+	}
+	return _renderStreamGroupMarker;
+}
+
+/** Delete the memory used by the render stream group marker string. */
+-(void) deleteRenderStreamGroupMarker {
+	free(_renderStreamGroupMarker);
+	_renderStreamGroupMarker = NULL;
+}
+
 @end
 
 
@@ -444,18 +478,19 @@
 
 @implementation CC3LayerRenderCommand
 
+@synthesize visitor=_visitor;
+
 -(void) dealloc {
-	_cc3Layer = nil;		// Not retained
-	[self deleteRenderStreamGroupMarker];
+	[_cc3Layer release];
 	[super dealloc];
 }
 
 -(void) invoke: (CCRenderer*) renderer {
 	CC3OpenGL* gl = CC3OpenGL.sharedGL;
-	[gl pushGroupMarkerC: _renderStreamGroupMarker];
+	[gl pushGroupMarkerC: _cc3Layer.renderStreamGroupMarker];
 	
 	[renderer bindVAO: NO];
-	[_cc3Layer draw];
+	[_cc3Layer drawSceneWithVisitor: _visitor];
 	
 	[gl popGroupMarker];
 }
@@ -463,32 +498,16 @@
 
 #pragma mark Allocation and initialization
 
--(instancetype) initWithCC3Layer: (CC3Layer*) layer {
+-(instancetype) initForCC3Layer: (CC3Layer*) layer {
 	if((self = [super init])){
-		_cc3Layer = layer;			// not retained
-		[self initRenderStreamGroupMarker];
+		_cc3Layer = [layer retain];		// retained
 	}
 	
 	return self;
 }
 
-+(instancetype) renderCommandWithCC3Layer: (CC3Layer*) layer {
-	return [[[self alloc] initWithCC3Layer: layer] autorelease];
-}
-
-/** Allocate and populate a char string built from the CC3Layer description property. */
--(void) initRenderStreamGroupMarker {
-	[self deleteRenderStreamGroupMarker];		// Delete any previous string.
-	NSString* desc = _cc3Layer.description;
-	NSUInteger buffLen = desc.length + 1;		// Plus null-term char
-	_renderStreamGroupMarker = calloc(buffLen, sizeof(char));
-	[desc getCString: _renderStreamGroupMarker maxLength: buffLen encoding: NSUTF8StringEncoding];
-}
-
-/** Delete the memory used by the render stream group marker string. */
--(void) deleteRenderStreamGroupMarker {
-	free(_renderStreamGroupMarker);
-	_renderStreamGroupMarker = NULL;
++(instancetype) renderCommandForCC3Layer: (CC3Layer*) layer {
+	return [[[self alloc] initForCC3Layer: layer] autorelease];
 }
 
 @end

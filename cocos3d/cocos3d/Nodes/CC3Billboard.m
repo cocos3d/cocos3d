@@ -34,6 +34,7 @@
 #import "CC3Scene.h"
 #import "CC3CC2Extensions.h"
 #import "CC3OpenGLFixedPipeline.h"
+#import "CCRenderer_private.h"
 
 
 @interface CC3MeshNode (TemplateMethods)
@@ -72,10 +73,13 @@
 	// New 2D billboard
 	_billboard = [aCCNode retain];
 	_billboard.visible = self.visible;
+	
+#if CC3_CC2_CLASSIC
 	// Retrieve the blend function from the 2D node and align this 3D node's material with it.
-	if ([_billboard conformsToProtocol: @protocol(CCBlendProtocol)]) {
+	if ([_billboard conformsToProtocol: @protocol(CCBlendProtocol)])
 		self.blendFunc = ((id<CCBlendProtocol>)_billboard).blendFunc;
-	}
+#endif	// CC3_CC2_CLASSIC
+	
 	[self normalizeBillboardScaleToDevice];
 	if (self.isRunning) [self start2DBillboard];	// If running already, start scheduled activities on new billboard
 }
@@ -549,8 +553,13 @@ static GLfloat deviceScaleFactor = 0.0f;
 -(void) drawMeshWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	if (visitor.shouldDecorateNode) {
 		CC3OpenGL* gl = visitor.gl;
-		[gl pushGroupMarkerC: "Draw 2D billboard"];
-//		[_billboard visit];		// Draw the 2D CCNode
+		[gl pushGroupMarkerC: "Draw embedded 2D billboard"];
+
+		CCRenderer* renderer = visitor.billboardCCRenderer;
+		[renderer invalidateState];
+		[_billboard visit: renderer parentTransform: (GLKMatrix4*)visitor.modelViewProjMatrix];
+		[renderer flush];
+		
 		[gl popGroupMarker];
 	} else {
 		// We're drawing a colored box to allow this node to be picked by a touch.
@@ -601,9 +610,15 @@ static GLfloat deviceScaleFactor = 0.0f;
 	return YES;
 }
 
--(void) draw2dWithinBounds: (CGRect) bounds {
-	if(_shouldDrawAs2DOverlay && self.visible && [self doesIntersectBounds: bounds ])
-		[_billboard visit];
+-(void) draw2dWithinBounds: (CGRect) bounds
+			  withRenderer: (CCRenderer*) renderer
+			   withVisitor: (CC3NodeDrawingVisitor*) visitor {
+	if( !(_shouldDrawAs2DOverlay && self.visible && [self doesIntersectBounds: bounds ]) ) return;
+
+	CC3OpenGL* gl = visitor.gl;
+	[gl pushGroupMarkerC: "Draw overlay 2D billboard"];
+	[_billboard visit: renderer parentTransform: (GLKMatrix4*)visitor.layerTransformMatrix];
+	[gl popGroupMarker];
 }
 
 
