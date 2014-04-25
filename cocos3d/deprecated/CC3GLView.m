@@ -1,5 +1,5 @@
 /*
- * CC3GLView.h
+ * CC3GLView.m
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -25,11 +25,15 @@
  * THE SOFTWARE.
  *
  * http://en.wikipedia.org/wiki/MIT_License
+ * 
+ * See header file CC3GLView.h for full API documentation.
  */
 
-/** @file */	// Doxygen marker
+#import "CC3GLView.h"
 
-//#import "CC3GLContext.h"
-#import "CC3GLView-GL.h"
-#import "CC3GLView-GLES2.h"
-#import "CC3GLView-GLES1.h"
+
+#pragma mark -
+#pragma mark Deprecated CC3GLView
+
+@implementation CC3GLView
+@end

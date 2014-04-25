@@ -1222,8 +1222,10 @@ static NSObject<CC3OpenGLDelegate>* _delegate = nil;
 
 /** Template method to create and return the primary rendering OpenGL context. */
 -(CC3GLContext*) makeRenderingGLContext {
-	CC3AssertUnimplemented(@"makeRenderingGLContext");
-	return nil;
+	CC3GLContext* context = CCDirector.sharedDirector.ccGLView.context;
+	CC3Assert(context, @"OpenGL context not available. Be sure to install the CCGLView in"
+			  @" the CCDirector before attempting to process any OpenGL calls.");
+	return context;
 }
 
 /**

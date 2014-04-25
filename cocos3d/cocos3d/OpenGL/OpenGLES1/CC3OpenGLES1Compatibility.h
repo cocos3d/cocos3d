@@ -150,6 +150,13 @@
 #define GL_DEPTH_COMPONENT					0x1902
 #define GL_DEPTH_COMPONENT32				0x81A7
 
+#define GL_RGB4								0x804F
+#define GL_RGB5								0x8050
+#define GL_RGB16							0x8054
+#define GL_RGBA2							0x8055
+#define GL_RGB10_A2							0x8059
+#define GL_RGBA12							0x805A
+#define GL_RGBA16							0x805B
 
 // Shaders
 #define GL_FRAGMENT_SHADER					0x8B30

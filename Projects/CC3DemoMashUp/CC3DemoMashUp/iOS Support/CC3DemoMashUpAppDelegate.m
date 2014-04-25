@@ -213,9 +213,11 @@
 	// If you want more flexibility, you can configure Cocos2D yourself instead of calling setupCocos2dWithOptions:.
 	[self setupCocos2dWithOptions:
 	 @{
-	   CCSetupDepthFormat: @GL_DEPTH24_STENCIL8,	// This app uses shadow volumes which require a stencil buffer
-	   CCSetupShowDebugStats: @(YES),				// Show the FPS and draw call label.
+	   CCSetupDepthFormat: @GL_DEPTH24_STENCIL8,				// This app uses shadow volumes which require a stencil buffer
+	   CCSetupShowDebugStats: @(YES),							// Show the FPS and draw call label.
 	   CCSetupAnimationInterval: @(1.0 / kAnimationFrameRate),	// Framerate (defaults to 60 FPS).
+//	   CCSetupMultiSampling: @(YES),							// Use multisampling on the main view
+//	   CCSetupNumberOfSamples: @(4),							// Number of samples to use per pixel (max 4)
 //	   CCSetupScreenOrientation: CCScreenOrientationPortrait,	// Run in portrait mode.
 	   }];
 	

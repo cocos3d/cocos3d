@@ -34,7 +34,10 @@
 #import "CC3Scene.h"
 #import "CC3CC2Extensions.h"
 #import "CC3OpenGLFixedPipeline.h"
-#import "CCRenderer_private.h"
+
+#if CC3_CC2_RENDER_QUEUE
+#	import "CCRenderer_private.h"
+#endif	// CC3_CC2_RENDER_QUEUE
 
 
 @interface CC3MeshNode (TemplateMethods)

@@ -33,6 +33,7 @@
 #import "CC3RenderSurfaces.h"
 #import "CC3Logging.h"
 #import "CCES2Renderer.h"
+#import "CC3OpenGLUtility.h"
 #import "uthash.h"
 
 #if CC3_CC2_RENDER_QUEUE
@@ -68,11 +69,20 @@
 
 #endif	// !CC3_CC2_CLASSIC
 
-#if CC3_IOS
+#if COCOS2D_VERSION < 0x020100
+#	define CC2_DEPTH_BUFFER		depthBuffer_
+#	define CC2_SAMPLES_TO_USE	samplesToUse_
+#else
+#	define CC2_DEPTH_BUFFER		_depthBuffer
+#	define CC2_SAMPLES_TO_USE	_samplesToUse
+#endif
 
+#if CC3_IOS
 @implementation CCES2Renderer (CC3)
--(GLuint) depthBuffer { return _depthBuffer; }
+-(GLuint) depthBuffer { return CC2_DEPTH_BUFFER; }
+-(GLuint) pixelSamples { return CC2_SAMPLES_TO_USE; }
 @end
+#endif // CC3_IOS
 
 
 @interface CCGLView (TemplateMethods)
@@ -80,25 +90,29 @@
 @end
 
 #if COCOS2D_VERSION < 0x020100
-#	define CC2_REQUESTED_SAMPLES requestedSamples_
-#	define CC2_PIXEL_FORMAT pixelformat_
-#	define CC2_DEPTH_FORMAT depthFormat_
-#	define CC2_CONTEXT context_
-#	define CC2_SIZE size_
-#	define CC2_PRESERVE_BACKBUFFER preserveBackbuffer_
+#	define CC2_REQUESTED_SAMPLES	requestedSamples_
+#	define CC2_PIXEL_FORMAT			pixelformat_
+#	define CC2_DEPTH_FORMAT			depthFormat_
+#	define CC2_CONTEXT				context_
+#	define CC2_SIZE					size_
+#	define CC2_PRESERVE_BACKBUFFER	preserveBackbuffer_
 #else
-#	define CC2_REQUESTED_SAMPLES _requestedSamples
-#	define CC2_PIXEL_FORMAT _pixelformat
-#	define CC2_DEPTH_FORMAT _depthFormat
-#	define CC2_CONTEXT _context
-#	define CC2_RENDERER ((id<CCESRenderer>)_renderer)
-#	define CC2_SIZE _size
-#	define CC2_PRESERVE_BACKBUFFER _preserveBackbuffer
+#	define CC2_REQUESTED_SAMPLES	_requestedSamples
+#	define CC2_PIXEL_FORMAT			_pixelformat
+#	define CC2_DEPTH_FORMAT			_depthFormat
+#	define CC2_CONTEXT				_context
+#	define CC2_RENDERER				((id<CCESRenderer>)_renderer)
+#	define CC2_SIZE					_size
+#	define CC2_PRESERVE_BACKBUFFER	_preserveBackbuffer
 #endif
 
 @implementation CCGLView (CC3)
 
--(GLenum) colorFormat { return [self convertPixelFormat: CC2_PIXEL_FORMAT]; }
+#if CC3_IOS
+
+-(GLenum) pixelColorFormat { return [self convertPixelFormat: CC2_PIXEL_FORMAT]; }
+
+-(GLenum) pixelDepthFormat { return self.depthFormat; }
 
 -(GLuint) defaultFrameBuffer { return [CC2_RENDERER defaultFrameBuffer]; }
 
@@ -110,9 +124,9 @@
 
 -(GLuint) depthBuffer { return [(CCES2Renderer*)CC2_RENDERER depthBuffer]; }
 
--(CC3SurfaceManager*) surfaceManager {
-	return [[[CC3SurfaceManager alloc] initFromView: self] autorelease];
-}
+-(GLuint) requestedSamples { return CC2_REQUESTED_SAMPLES; }
+
+-(GLuint) pixelSamples { return [(CCES2Renderer*)CC2_RENDERER pixelSamples]; }
 
 -(id) initWithFrame: (CGRect) frame
 		pixelFormat: (NSString*) colorFormat
@@ -140,8 +154,53 @@
 						numberOfSamples: sampleCount] autorelease];
 }
 
-@end
 #endif	// CC3_IOS
+
+#if CC3_OSX
+
+-(GLenum) pixelColorFormat {
+	GLint screenIdx = 0;
+	GLint colorSize;
+	GLint alphaSize;
+	
+	NSOpenGLPixelFormat* pixFmt = self.pixelFormat;
+	[pixFmt getValues: &colorSize forAttribute:NSOpenGLPFAColorSize forVirtualScreen: screenIdx];
+	[pixFmt getValues: &alphaSize forAttribute:NSOpenGLPFAAlphaSize forVirtualScreen: screenIdx];
+	
+	return CC3GLColorFormatFromBitPlanes(colorSize, alphaSize);
+}
+									 
+-(GLenum) pixelDepthFormat {
+	GLint screenIdx = 0;
+	GLint depthSize;
+	GLint stencilSize;
+	
+	NSOpenGLPixelFormat* pixFmt = self.pixelFormat;
+	[pixFmt getValues: &depthSize forAttribute:NSOpenGLPFADepthSize forVirtualScreen: screenIdx];
+	[pixFmt getValues: &stencilSize forAttribute:NSOpenGLPFAStencilSize forVirtualScreen: screenIdx];
+	
+	return CC3GLDepthFormatFromBitPlanes(depthSize, stencilSize);
+}
+
+-(GLuint) defaultFrameBuffer { return 0; }
+
+-(GLuint) msaaFrameBuffer { return 0; }
+
+-(GLuint) colorRenderBuffer { return 0; }
+
+-(GLuint) msaaColorBuffer { return 0; }
+
+-(GLuint) depthBuffer { return 0; }
+
+-(CGSize) surfaceSize { return NSSizeToCGSize(self.bounds.size); }
+
+-(CC3GLContext*) context { return (CC3GLContext*)self.openGLContext; }
+
+#endif	// CC3_OSX
+
+
+
+@end
 
 #if !CC3_IOS
 

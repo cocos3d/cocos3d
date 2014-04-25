@@ -1876,19 +1876,6 @@
 			<key>Path</key>
 			<string>cocos3d/cocos3d/Nodes/CC3UtilityMeshNodes.m</string>
 		</dict>
-		<key>cocos3d/cocos3d/OpenGL/CC3GLView.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGL</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGL/CC3GLView.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
 		<key>cocos3d/cocos3d/OpenGL/CC3OpenGL.h</key>
 		<dict>
 			<key>Group</key>
@@ -2009,32 +1996,6 @@
 			<key>Path</key>
 			<string>cocos3d/cocos3d/OpenGL/CC3OpenGLUtility.m</string>
 		</dict>
-		<key>cocos3d/cocos3d/OpenGL/OpenGL/CC3GLView-GL.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGL</string>
-				<string>OpenGL</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGL/OpenGL/CC3GLView-GL.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGL/OpenGL/CC3GLView-GL.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGL</string>
-				<string>OpenGL</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGL/OpenGL/CC3GLView-GL.m</string>
-		</dict>
 		<key>cocos3d/cocos3d/OpenGL/OpenGL/CC3OpenGL2.h</key>
 		<dict>
 			<key>Group</key>
@@ -2075,32 +2036,6 @@
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
-		<key>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3GLView-GLES1.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGL</string>
-				<string>OpenGLES1</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3GLView-GLES1.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3GLView-GLES1.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGL</string>
-				<string>OpenGLES1</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3GLView-GLES1.m</string>
-		</dict>
 		<key>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3OpenGLES1.h</key>
 		<dict>
 			<key>Group</key>
@@ -2140,32 +2075,6 @@
 			<string>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3OpenGLES1Compatibility.h</string>
 			<key>TargetIndices</key>
 			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGL/OpenGLES2/CC3GLView-GLES2.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGL</string>
-				<string>OpenGLES2</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGL/OpenGLES2/CC3GLView-GLES2.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGL/OpenGLES2/CC3GLView-GLES2.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGL</string>
-				<string>OpenGLES2</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGL/OpenGLES2/CC3GLView-GLES2.m</string>
 		</dict>
 		<key>cocos3d/cocos3d/OpenGL/OpenGLES2/CC3OpenGLES2.h</key>
 		<dict>
@@ -3082,6 +2991,28 @@
 			<key>Path</key>
 			<string>cocos3d/deprecated/CC3GLMatrix.m</string>
 		</dict>
+		<key>cocos3d/deprecated/CC3GLView.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>deprecated</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/deprecated/CC3GLView.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/deprecated/CC3GLView.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>deprecated</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/deprecated/CC3GLView.m</string>
+		</dict>
 		<key>cocos3d/deprecated/CC3MatrixMath.h</key>
 		<dict>
 			<key>Group</key>
@@ -3389,7 +3320,6 @@
 		<string>cocos3d/cocos3d/Nodes/CC3ParametricMeshNodes.m</string>
 		<string>cocos3d/cocos3d/Nodes/CC3UtilityMeshNodes.h</string>
 		<string>cocos3d/cocos3d/Nodes/CC3UtilityMeshNodes.m</string>
-		<string>cocos3d/cocos3d/OpenGL/CC3GLView.h</string>
 		<string>cocos3d/cocos3d/OpenGL/CC3OpenGL.h</string>
 		<string>cocos3d/cocos3d/OpenGL/CC3OpenGL.m</string>
 		<string>cocos3d/cocos3d/OpenGL/CC3OpenGLFixedPipeline.h</string>
@@ -3400,18 +3330,12 @@
 		<string>cocos3d/cocos3d/OpenGL/CC3OpenGLProgPipeline.m</string>
 		<string>cocos3d/cocos3d/OpenGL/CC3OpenGLUtility.h</string>
 		<string>cocos3d/cocos3d/OpenGL/CC3OpenGLUtility.m</string>
-		<string>cocos3d/cocos3d/OpenGL/OpenGL/CC3GLView-GL.h</string>
-		<string>cocos3d/cocos3d/OpenGL/OpenGL/CC3GLView-GL.m</string>
 		<string>cocos3d/cocos3d/OpenGL/OpenGL/CC3OpenGL2.h</string>
 		<string>cocos3d/cocos3d/OpenGL/OpenGL/CC3OpenGL2.m</string>
 		<string>cocos3d/cocos3d/OpenGL/OpenGL/CC3OpenGLCompatibility.h</string>
-		<string>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3GLView-GLES1.h</string>
-		<string>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3GLView-GLES1.m</string>
 		<string>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3OpenGLES1.h</string>
 		<string>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3OpenGLES1.m</string>
 		<string>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3OpenGLES1Compatibility.h</string>
-		<string>cocos3d/cocos3d/OpenGL/OpenGLES2/CC3GLView-GLES2.h</string>
-		<string>cocos3d/cocos3d/OpenGL/OpenGLES2/CC3GLView-GLES2.m</string>
 		<string>cocos3d/cocos3d/OpenGL/OpenGLES2/CC3OpenGLES2.h</string>
 		<string>cocos3d/cocos3d/OpenGL/OpenGLES2/CC3OpenGLES2.m</string>
 		<string>cocos3d/cocos3d/OpenGL/OpenGLES2/CC3OpenGLES2Compatibility.h</string>
@@ -3487,6 +3411,8 @@
 		<string>cocos3d/deprecated/CC3ActionInterval.h</string>
 		<string>cocos3d/deprecated/CC3GLMatrix.h</string>
 		<string>cocos3d/deprecated/CC3GLMatrix.m</string>
+		<string>cocos3d/deprecated/CC3GLView.h</string>
+		<string>cocos3d/deprecated/CC3GLView.m</string>
 		<string>cocos3d/deprecated/CC3MatrixMath.h</string>
 		<string>cocos3d/deprecated/CC3MeshModel.h</string>
 		<string>cocos3d/deprecated/CC3MeshModel.m</string>

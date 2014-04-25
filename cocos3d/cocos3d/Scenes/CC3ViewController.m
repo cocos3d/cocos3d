@@ -31,6 +31,7 @@
 
 #import "CC3ViewController.h"
 #import "CC3ControllableLayer.h"
+#import "CC3Texture.h"
 #import "CC3Logging.h"
 
 
@@ -47,10 +48,10 @@
 
 -(void) setIsOverlayingDeviceCamera: (BOOL) isOverlayingDeviceCamera {}
 
--(CC3GLView*) view { return (CC3GLView*)super.view; }
+-(CCGLView*) view { return (CCGLView*)super.view; }
 
--(void) setView:(CC3GLView *)view {
-	CC3Assert(!view || [view isKindOfClass: [CC3GLView class]], @"%@ may only be attached to a CC3GLView. %@ is not of that class.", self, view);
+-(void) setView: (CCGLView*) view {
+	CC3Assert(!view || [view isKindOfClass: [CCGLView class]], @"%@ may only be attached to a CCGLView. %@ is not of that class.", self, view);
 	super.view = view;
 }
 

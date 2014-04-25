@@ -60,3 +60,10 @@ char* CC3GLEnumName(GLenum gle);
  * GL_BYTE, GL_UNSIGNED_BYTE, GL_SHORT, GL_UNSIGNED_SHORT, GL_FLOAT, GL_FIXED.
  */
 size_t CC3GLElementTypeSize(GLenum dataType);
+
+/** Returns the GL color format enum corresponding to the specified number of color and alpha bit planes. */
+GLenum CC3GLColorFormatFromBitPlanes(GLint colorCount, GLint alphaCount);
+
+/** Returns the GL depth format enum corresponding to the specified number of depth and stencil bit planes. */
+GLenum CC3GLDepthFormatFromBitPlanes(GLint depthCount, GLint stencilCount);
+

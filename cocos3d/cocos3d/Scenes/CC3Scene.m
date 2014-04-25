@@ -40,9 +40,11 @@
 #import "CC3AffineMatrix.h"
 #import "CC3CC2Extensions.h"
 #import "CGPointExtension.h"
-#import "CCRenderer_private.h"
 #import "ccMacros.h"
 
+#if CC3_CC2_RENDER_QUEUE
+#	import "CCRenderer_private.h"
+#endif	// CC3_CC2_RENDER_QUEUE
 
 #pragma mark -
 #pragma mark CC3Scene

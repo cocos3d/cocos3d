@@ -29,7 +29,7 @@
 
 /** @file */	// Doxygen marker
 
-#import "CC3GLView.h"
+#import "CC3Environment.h"
 
 // The superclass of the CC3ViewController depends on the platform
 #if CC3_OGLES_2
@@ -46,7 +46,7 @@
 #pragma mark -
 #pragma mark CC3ViewController interface
 
-/** An instance of CC3ViewController manages the CC3GLView to support the 3D environment. */
+/** An instance of CC3ViewController manages the CCGLView to support the 3D environment. */
 @interface CC3ViewController : CC3VCSuperclass {
 	CCNode* _controlledNode;
 }
@@ -68,8 +68,8 @@
  */
 @property(nonatomic, assign) BOOL isOverlayingDeviceCamera;
 
-/** The view of a CC3ViewController must be of type CC3GLView. */
-@property(nonatomic, retain) CC3GLView* view;
+/** The view of a CC3ViewController must be of type CCGLView. */
+@property(nonatomic, retain) CCGLView* view;
 
 /**
  * Starts the cocos2d/3d animation.

@@ -138,9 +138,6 @@
 
 #pragma mark Allocation and initialization
 
-/** The primary rendering context is set by the CC3GLView when it is loaded. */
--(CC3GLContext*) makeRenderingGLContext { return nil; }
-
 -(void) initPlatformLimits {
 	[super initPlatformLimits];
 	

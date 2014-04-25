@@ -87,12 +87,12 @@
 /**
  * Indicates the class of the view.
  *
- * This property is used by the loadView method as it creates the view, when the view property is first
- * accessed and the view property has not already been established.
+ * This property is used by the loadView method as it creates the view, when the view 
+ * property is first accessed and the view property has not already been established.
  *
- * The initial value of this property is CC3GLView. You can change the value returned by this property
- * prior to accessing the view property for the first time. Once the view property has been established,
- * reading this property returns the class property of the view itself.
+ * The initial value of this property is CCGLView. You can change the value returned by this
+ * property prior to accessing the view property for the first time. Once the view property 
+ * has been established, reading this property returns the class property of the view itself.
  */
 @property(nonatomic, retain) Class viewClass;
 

@@ -215,11 +215,7 @@ typedef struct {
 /** 
  * The OpenGL engine context.
  *
- * The initial value of this property depends on the platform. Under iOS, this property 
- * will be initialized to an appropriate OpenGL ES context during instance initialization.
- * Under OSX, this property will be set by the CC3GLView for the primary rendering context
- * (isRenderingContext property is YES), and will be initialized to a shared GL context
- * for background instances (isRenderingContext property is NO).
+ * The value of this property is automatically retrieved from the CCGLView.
  */
 @property(nonatomic, retain) CC3GLContext* context;
 

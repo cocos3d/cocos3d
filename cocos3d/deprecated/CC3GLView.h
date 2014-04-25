@@ -1,5 +1,5 @@
 /*
- * main.m
+ * CC3GLView.h
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -12,10 +12,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * 
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -27,11 +27,15 @@
  * http://en.wikipedia.org/wiki/MIT_License
  */
 
-#import <Cocoa/Cocoa.h>
+/** @file */	// Doxygen marker
 
-#import "cocos2d.h"
+#import "CC3Environment.h"
 
-int main(int argc, char *argv[]) {
-	[CCGLView load_];
-    return NSApplicationMain(argc,  (const char **) argv);
-}
+
+#pragma mark -
+#pragma mark Deprecated CC3GLView
+
+DEPRECATED_ATTRIBUTE
+/** @deprecated Use CCGLView instead. */
+@interface CC3GLView : CCGLView
+@end

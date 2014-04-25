@@ -37,8 +37,10 @@
 #import "CC3EnvironmentNodes.h"
 #import "CC3NodeSequencer.h"
 #import "CC3VertexSkinning.h"
-#import "CC3GLView.h"
-#import "CCRenderer_private.h"
+
+#if CC3_CC2_RENDER_QUEUE
+#	import "CCRenderer_private.h"
+#endif	// CC3_CC2_RENDER_QUEUE
 
 @interface CC3Node (TemplateMethods)
 -(void) processUpdateBeforeTransform: (CC3NodeUpdatingVisitor*) visitor;

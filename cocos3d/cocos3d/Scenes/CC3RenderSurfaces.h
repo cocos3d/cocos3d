@@ -31,7 +31,7 @@
 
 #import "CC3Texture.h"
 
-@class CC3GLView, CC3Backgrounder, CC3GLFramebuffer;
+@class CC3Backgrounder, CC3GLFramebuffer;
 
 
 #pragma mark -
@@ -52,8 +52,7 @@
 @property(nonatomic, readonly) GLenum pixelFormat;
 
 /**
- * Resizes this attachment to the specified size by allocating off-screen storage space
- * within GL memory.
+ * Resizes this attachment to the specified size by allocating storage space within GL memory.
  *
  * The size property is updated to reflect the new size.
  */
@@ -101,13 +100,13 @@
 /** The size of this surface in pixels. */
 @property(nonatomic, readonly) CC3IntSize size;
 
-/** 
- * Returns whether this surface is an off-screen surface.
+/**
+ * Returns whether this surface is an on-screen surface.
  *
- * Returns YES if this surface is rendering to off-screen memory, such as textures or
- * off-screen renderbuffers. Returns NO if this surface is rendering directly to the screen.
+ * The initial value of this property is NO. For instances that represent on-screen
+ * framebuffers, set this property to YES.
  */
-@property(nonatomic, readonly) BOOL isOffScreen;
+@property(nonatomic, assign) BOOL isOnScreen;
 
 /** 
  * The surface attachment to which color data is rendered.
@@ -170,9 +169,6 @@
  */
 -(void) clearColorAndDepthContent;
 
-/** Returns whether this surface supports reading the pixel content. */
-@property(nonatomic, readonly) BOOL isColorContentReadable;
-
 /**
  * Reads the content of the range of pixels defined by the specified rectangle from the
  * color attachment of this surface, into the specified array, which must be large enough
@@ -188,8 +184,8 @@
  * finished, the currently active surface will be restored. This allows color to be read from
  * one surface while rendering to another surface.
  *
- * Not all surfaces have readable color content. If the isColorContentReadable returns NO,
- * the content read using this method may be unpredictable and inaccurate.
+ * Not all surfaces have readable color content. In particular, content cannot be read from
+ * some system framebuffers.
  *
  * This method should be used with care, since it involves making a synchronous call to
  * query the state of the GL engine. This method will not return until the GL engine has
@@ -281,10 +277,10 @@
 -(void) unbindFromFramebuffer: (CC3GLFramebuffer*) framebuffer asAttachment: (GLenum) attachment;
 
 /**
- * Updates the name of this attachment from the name of the framebuffer and type of attachment.
- * This is inovoked when the name of the framebuffer is changed.
+ * If this attachment does not have a name assigned yet, it is derived from a combination
+ * of the name of the specified framebuffer and the type of attachment.
  */
--(void) updateNameFromFramebuffer: (CC3GLFramebuffer*) framebuffer asAttachment: (GLenum) attachment;
+-(void) deriveNameFromFramebuffer: (CC3GLFramebuffer*) framebuffer asAttachment: (GLenum) attachment;
 
 @end
 
@@ -295,18 +291,29 @@
 /**
  * Represents an OpenGL renderbuffer.
  *
- * CC3GLRenderbuffer implements the CC3FramebufferAttachment, allowing it to be attached to a
- * framebuffer.
+ * CC3GLRenderbuffer implements the CC3FramebufferAttachment, allowing it to be attached to
+ * a framebuffer. This class represents a general off-screen or on-screen GL renderbuffer, 
+ * whose storage is allocated from GL memory.
  *
- * This class represents a general off-screen renderbuffer, whose storage is allocated from
- * GL memory. For the on-screen renderbuffer whose storage is shared by the view, use the
- * CC3IOSOnScreenGLRenderbuffer subclass.
+ * Broadly speaking, there are two ways to instantiate an instance and manage the lifespan
+ * of the corresponding renderbuffer in the GL engine, these are described as follows.
+ *
+ * If you instantiate an instance without explicitly providing the ID of an existing OpenGL
+ * renderbuffer, a renderbuffer will automatically be created within the GL engine, as needed,
+ * and will automatically be deleted from the GL engine when the instance is deallocated.
+ *
+ * To map to an existing OpenGL renderbuffer, you can provide the value of the renderbufferID
+ * property during instance instantiation. In this case, the instance will not delete the
+ * renderbuffer from the GL engine when the instance is deallocated, and it is up to you to
+ * coordinate the lifespan of the instance and the GL renderbuffer. Do not use the instance
+ * once you have deleted the renderbuffer from the GL engine.
  */
 @interface CC3GLRenderbuffer : CC3Identifiable <CC3FramebufferAttachment> {
 	GLuint _rbID;
 	CC3IntSize _size;
 	GLenum _format;
 	GLuint _samples;
+	BOOL _isManagingGL : 1;
 }
 
 /** The ID used to identify the renderbuffer to the GL engine. */
@@ -330,6 +337,42 @@
 
 /** Returns the number of samples used to define each pixel. */
 @property(nonatomic, readonly) GLuint pixelSamples;
+
+/**
+ * Returns whether the renderbuffer in the GL engine is being managed by this instance.
+ *
+ * If the value of this property is YES, this instance is managing the renderbuffer in the GL
+ * engine, and when this instance is deallocated, the renderbuffer will automatically be deleted
+ * from the GL engine.
+ *
+ * If the value of this property is NO, this instance is NOT managing the renderbuffer in the
+ * GL engine, and when this instance is deallocated, the renderbuffer will NOT automatically
+ * be deleted from the GL engine.
+ *
+ * If the value of this property is NO, indicating the lifespan of the GL renderbuffer is not
+ * managed by this instance, it is up to you to coordinate the lifespan of this instance and
+ * the GL renderbuffer. Do not use this instance once you have deleted the renderbuffer from
+ * the GL engine.
+ *
+ * The value of this property also has an effect on the behaviour of the resizeTo: method.
+ * If this property is set to YES, the resizeTo: method resizes the memory allocation in the
+ * GL engine. If this property is set to NO, resizeTo: method has no effect on the memory
+ * allocation in the GL engine.
+ *
+ * The initial value of this property is NO. If this instance automatically generates a
+ * renderbuffer in the GL engine, this property is set to YES.
+ */
+@property(nonatomic, readonly) BOOL isManagingGL;
+
+/**
+ * If the isManagingGL property is set to YES, resizes this attachment to the specified size
+ * by allocating or reallocating storage space within GL memory. If the isManagingGL property
+ * is set to NO, the memory allocation in the GL engine remains unchanged.
+ *
+ * The size property is updated to reflect the new size, even if the isManagingGL property
+ * is set to NO.
+ */
+-(void) resizeTo: (CC3IntSize) size;
 
 
 #pragma mark Allocation and initialization
@@ -402,53 +445,17 @@
  */
 +(id) renderbufferWithPixelFormat: (GLenum) format withPixelSamples: (GLuint) samples;
 
-@end
-
-
-#pragma mark -
-#pragma mark CC3IOSOnScreenGLRenderbuffer
-
-/**
- * CC3IOSOnScreenGLRenderbuffer is a specialized renderbuffer whose contents are presented
- * to the screen, and whose storage is provided by the view under iOS.
- *
- * In this class, the implementation of the resizeTo: method does not allocate storage within
- * the GL engine, and sets the pixelFormat property by retrieving the value from the GL engine.
- */
-@interface CC3IOSOnScreenGLRenderbuffer : CC3GLRenderbuffer
-
-/**
- * Sets the size and retreives the pixelFormat property from the GL engine.
- *
- * As storage for renderbuffers of this class is provided by the view, this implementation
- * does not allocate storage space within GL memory.
- */
--(void) resizeTo: (CC3IntSize) size;
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3SystemOnScreenGLRenderbuffer
-
-/** 
- * Represents the virtual OpenGL framebuffer attachments with renderbufferID = 0,
- * used by some systems to present to a window.
- */
-@interface CC3SystemOnScreenGLRenderbuffer : CC3GLRenderbuffer
-
-/** The ID used to identify the renderbuffer to the GL engine. Always returns zero. */
-@property(nonatomic, readonly) GLuint renderbufferID;
-
-
-#pragma mark Allocation and initialization
-
 /**
  * Initializes this instance with the specified pixel format and renderbuffer ID.
  *
  * See the pixelFormat property for allowable values for the format parameter.
  *
  * The size of this renderbuffer can be set by invoking the resizeTo: method.
+ *
+ * The value of the isManagingGL property will be set to NO, indicating that this instance will
+ * not delete the renderbuffer from the GL engine when this instance is deallocated. It is up
+ * to you to coordinate the lifespan of this instance and the GL renderbuffer. Do not use this
+ * instance once you have deleted the renderbuffer from the GL engine.
  */
 -(id) initWithPixelFormat: (GLenum) format withRenderbufferID: (GLuint) rbID;
 
@@ -459,45 +466,44 @@
  * See the pixelFormat property for allowable values for the format parameter.
  *
  * The size of the renderbuffer can be set by invoking the resizeTo: method.
+ *
+ * The value of the isManagingGL property of the returned instance will be set to NO, indicating that
+ * the instance will not delete the renderbuffer from the GL engine when the returned instance is
+ * deallocated. It is up to you to coordinate the lifespan of the returned instance and the GL 
+ * renderbuffer. Do not use the returned instance once you have deleted the renderbuffer from the GL engine.
  */
 +(id) renderbufferWithPixelFormat: (GLenum) format withRenderbufferID: (GLuint) rbID;
 
 /**
- * Initializes this instance with the specified pixel format, number of samples per pixel, 
+ * Initializes this instance with the specified pixel format, number of samples per pixel,
  * and renderbuffer ID.
  *
  * See the pixelFormat property for allowable values for the format parameter.
  *
  * The size of this renderbuffer can be set by invoking the resizeTo: method.
+ *
+ * The value of the isManagingGL property will be set to NO, indicating that this instance will
+ * not delete the renderbuffer from the GL engine when this instance is deallocated. It is up
+ * to you to coordinate the lifespan of this instance and the GL renderbuffer. Do not use this
+ * instance once you have deleted the renderbuffer from the GL engine.
  */
 -(id) initWithPixelFormat: (GLenum) format withPixelSamples: (GLuint) samples withRenderbufferID: (GLuint) rbID;
 
 /**
- * Allocates and initializes an autoreleased instance with the specified pixel format, 
+ * Allocates and initializes an autoreleased instance with the specified pixel format,
  * number of samples per pixel, and renderbuffer ID.
  *
  * See the pixelFormat property for allowable values for the format parameter.
  *
  * The size of the renderbuffer can be set by invoking the resizeTo: method.
+ *
+ * The value of the isManagingGL property of the returned instance will be set to NO, indicating that
+ * the instance will not delete the renderbuffer from the GL engine when the returned instance is
+ * deallocated. It is up to you to coordinate the lifespan of the returned instance and the GL
+ * renderbuffer. Do not use the returned instance once you have deleted the renderbuffer from the GL engine.
  */
 +(id) renderbufferWithPixelFormat: (GLenum) format withPixelSamples: (GLuint) samples withRenderbufferID: (GLuint) rbID;
 
-@end
-
-
-#pragma mark -
-#pragma mark CC3OSXOnScreenGLRenderbuffer
-
-/** Represents the virtual OpenGL framebuffer attachments used by OSX to present to a window. */
-@interface CC3OSXOnScreenGLRenderbuffer : CC3SystemOnScreenGLRenderbuffer
-@end
-
-
-#pragma mark -
-#pragma mark CC3AndroidOnScreenGLRenderbuffer
-
-/** Represents the virtual OpenGL framebuffer attachments used by Android to present to a window. */
-@interface CC3AndroidOnScreenGLRenderbuffer : CC3SystemOnScreenGLRenderbuffer
 @end
 
 
@@ -631,11 +637,28 @@
  * Represents an OpenGL framebuffer.
  *
  * Framebuffers hold between one and three attachments. Each attachment represents a rendering
- * surface that holds a particular type of drawn content: color, depth, or stencil content.
+ * buffer that holds a particular type of drawn content: color, depth, or stencil content.
  * Typically, each of these attachments will be either a renderbuffer, a texture (to support
- * rendering to a texture, or nil, indicating that that type of content is not being rendered.
+ * rendering to a texture), or nil, indicating that that type of content is not being rendered.
  *
- * You should consider setting the name propery of each instance, to distinguish them.
+ * Broadly speaking, there are two ways to instantiate an instance and manage the lifespan 
+ * of the corresponding framebuffer in the GL engine, these are described as follows.
+ *
+ * If you instantiate an instance without explicitly providing the ID of an existing OpenGL
+ * framebuffer, a framebuffer will automatically be created within the GL engine, as needed,
+ * and will automatically be deleted from the GL engine when the instance is deallocated.
+ *
+ * To map to an existing OpenGL framebuffer, you can provide the value of the framebufferID 
+ * property during instance instantiation. In this case, the instance will not delete the 
+ * framebuffer from the GL engine when the instance is deallocated, and it is up to you to 
+ * coordinate the lifespan of the instance and the GL framebuffer. Do not use the instance 
+ * once you have deleted the framebuffer from the GL engine. 
+ *
+ * When creating an instance to map to an existing OpenGL framebuffer, the shouldBindGLAttachments
+ * property can be used to indicate whether or not attachments should be automatically bound to
+ * the framebuffer within the GL engine, as they are attached to an instance.
+ *
+ * You should consider setting the name property of each instance, to distinguish them.
  * The name will also appear in the debugger when capturing OpenGL frames. If you set the
  * name before adding attachments, it will propagate to those attachments.
  */
@@ -645,11 +668,90 @@
 	id<CC3FramebufferAttachment> _colorAttachment;
 	id<CC3FramebufferAttachment> _depthAttachment;
 	id<CC3FramebufferAttachment> _stencilAttachment;
+	BOOL _isOnScreen : 1;
+	BOOL _isManagingGL : 1;
+	BOOL _shouldBindGLAttachments : 1;
 	BOOL _glLabelWasSet : 1;
 }
 
-/** The ID used to identify the framebuffer to the GL engine. */
+/** 
+ * The ID used to identify the framebuffer to the GL engine.
+ *
+ * If the value of this property is not explicitly set during instance initialization, then the
+ * first time this property is accessed a framebuffer will automatically be generated in the GL
+ * engine, its ID set into this property, and the isManagingGL property will be set to YES.
+ */
 @property(nonatomic, readonly) GLuint framebufferID;
+
+/**
+ * Returns whether the framebuffer in the GL engine is being managed by this instance.
+ *
+ * If the value of this property is YES, this instance is managing the framebuffer in the
+ * GL engine, and when this instance is deallocated, the framebuffer will automatically be
+ * deleted from the GL engine. 
+ * 
+ * If the value of this property is NO, this instance is NOT managing the framebuffer in the
+ * GL engine, and when this instance is deallocated, the framebuffer will NOT automatically 
+ * be deleted from the GL engine.
+ *
+ * If the value of this property is NO, indicating the lifespan of the GL framebuffer is not 
+ * managed by this instance, it is up to you to coordinate the lifespan of this instance and 
+ * the GL framebuffer. Do not use this instance once you have deleted the framebuffer from 
+ * the GL engine.
+ *
+ * The initial value of this property is NO. If this instance automatically generates a 
+ * framebuffer in the GL engine, this property is set to YES.
+ */
+@property(nonatomic, readonly) BOOL isManagingGL;
+
+/**
+ * Indicates whether the attachments should be bound to this framebuffer within the GL 
+ * engine when they are attached to this framebuffer.
+ *
+ * If this property is set to YES, when an attachment is added to this framebuffer, within
+ * the GL engine, the existing attachment will be unbound from this framebuffer and the
+ * new attachment will be bound to this framebuffer. This is typically the desired behaviour
+ * when working with framebuffers and their attachments.
+ *
+ * If this property is set to NO, when an attachment is added to this framebuffer, no changes
+ * are made within the GL engine. Setting this property to NO can be useful when you want to
+ * construct an instance that matches an existing GL framebuffer and its attachments, that
+ * may have been created outside of Cocos3D. A key example of this is the framebuffers and
+ * renderbuffers used to display the content of the view.
+ *
+ * The initial value of this property is YES, indicating that any attachments added to this
+ * framebuffer will also be bound to this framebuffer within the GL engine.
+ *
+ * This property affects the behaviour colorAttachment, depthAttachment, stencilAttachment,
+ * colorTexture and depthTexture properties.
+ *
+ * This property affects different behaviour than the isManagingGL property, and does not
+ * depend on that property.
+ */
+@property(nonatomic, assign) BOOL shouldBindGLAttachments;
+
+/**
+ * Returns whether this framebuffer is an on-screen surface.
+ *
+ * The initial value of this property is NO. For instances that represent on-screen
+ * framebuffers, set this property to YES.
+ */
+@property(nonatomic, assign) BOOL isOnScreen;
+
+/**
+ * The size of this framebuffer surface in pixels.
+ *
+ * Returns the value of the same properties retrieved from any of the attachments (which
+ * must all have the same size for this framebuffer to be valid), or, if no attachments
+ * have been set, returns the value set during initialization.
+ *
+ * It is not possible to resize the surface directly. To do so, resize each of the attachments
+ * separately. Because attachments may be shared between surfaces, management of attachment 
+ * sizing is left to the application, to avoid resizing the same attachment more than once, 
+ * during any single resizing activity. You can use a CC3SurfaceManager to help coordinate 
+ * the sizes of related framebuffers and attachments.
+ */
+@property(nonatomic, readonly) CC3IntSize size;
 
 /**
  * The attachment to which color data is rendered.
@@ -657,9 +759,12 @@
  * Implementation of the CC3RenderSurface colorAttachment property. Framebuffer attachments
  * must also support the CC3FramebufferAttachment protocol.
  *
- * When this property is set, if the size propery of this surface is not zero, and the
- * attachment has no size, or has a size that is different than the size of this surface,
- * the attachment is resized.
+ * When this property is set:
+ *  - If the size property of this surface is not zero, and the attachment has no size, or 
+ *    has a size that is different than the size of this surface, the attachment is resized.
+ *  - If the shouldBindGLAttachments property is set to YES, the existing attachment is 
+ *    unbound from this framebuffer in the GL engine, and the new attachment is bound to 
+ *    this framebuffer in the GL engine.
  *
  * To save memory, attachments can be shared between surfaces of the same size, if the contents
  * of the attachment are only required for the duration of the rendering to each surface.
@@ -672,12 +777,14 @@
  * Implementation of the CC3RenderSurface depthAttachment property. Framebuffer attachments
  * must also support the CC3FramebufferAttachment protocol.
  *
- * When this property is set, if the size propery of this surface is not zero, and the
- * attachment has no size, or has a size that is different than the size of this surface,
- * the attachment is resized.
- *
- * When this property is set, if the depth format of the attachment includes a stencil component,
- * the stencilAttachment property is set to the this attachment as well.
+ * When this property is set:
+ *  - If the depth format of the attachment includes a stencil component, the stencilAttachment
+ *    property is set to the this attachment as well.
+ *  - If the size property of this surface is not zero, and the attachment has no size, or
+ *    has a size that is different than the size of this surface, the attachment is resized.
+ *  - If the shouldBindGLAttachments property is set to YES, the existing attachment is
+ *    unbound from this framebuffer in the GL engine, and the new attachment is bound to
+ *    this framebuffer in the GL engine.
  *
  * To save memory, attachments can be shared between surfaces of the same size, if the contents
  * of the attachment are only required for the duration of the rendering to each surface. For
@@ -692,9 +799,12 @@
  * Implementation of the CC3RenderSurface stencilAttachment property. Framebuffer attachments
  * must also support the CC3FramebufferAttachment protocol.
  *
- * When this property is set, if the size propery of this surface is not zero, and the
- * attachment has no size, or has a size that is different than the size of this surface,
- * the attachment is resized.
+ * When this property is set:
+ *  - If the size property of this surface is not zero, and the attachment has no size, or
+ *    has a size that is different than the size of this surface, the attachment is resized.
+ *  - If the shouldBindGLAttachments property is set to YES, the existing attachment is
+ *    unbound from this framebuffer in the GL engine, and the new attachment is bound to
+ *    this framebuffer in the GL engine.
  *
  * To save memory, attachments can be shared between surfaces of the same size, if the contents
  * of the attachment are only required for the duration of the rendering to each surface.
@@ -705,16 +815,11 @@
  * If color content is being rendered to a texture, this property can be used to access
  * that texture.
  *
- * Setting this property wraps the specified texture in a CC3TextureFramebufferAttachment
- * instance and sets it into the colorAttachment property.
- *
- * When this property is set, if the size propery of this surface is not zero, and the
- * texture has no size, or has a size that is different than the size of this surface,
- * the texture is resized.
- *
+ * This is a convenience property. Setting this property wraps the specified texture in a 
+ * CC3TextureFramebufferAttachment instance and sets it into the colorAttachment property. 
  * Reading this property returns the texture within the CC3TextureFramebufferAttachment
  * in the colorAttachment property. It is an error to attempt to read this property if the
- * depthAttachment property does not contain an instance of CC3TextureFramebufferAttachment.
+ * colorAttachment property does not contain an instance of CC3TextureFramebufferAttachment.
  *
  * To save memory, textures can be shared between surfaces of the same size, if the contents
  * of the texture are only required for the duration of the rendering to each surface.
@@ -725,14 +830,8 @@
  * If depth content is being rendered to a texture, this property can be used to access
  * that texture.
  *
- * Setting this property wraps the specified texture in a CC3TextureFramebufferAttachment
- * instance and sets it into the depthAttachment property, as well as the stencilAttachment
- * property, if the depth format of the texture includes a stencil component.
- *
- * When this property is set, if the size propery of this surface is not zero, and the
- * texture has no size, or has a size that is different than the size of this surface,
- * the texture is resized.
- *
+ * This is a convenience property. Setting this property wraps the specified texture in a
+ * CC3TextureFramebufferAttachment instance and sets it into the depthAttachment property.
  * Reading this property returns the texture within the CC3TextureFramebufferAttachment
  * in the depthAttachment property. It is an error to attempt to read this property if the
  * depthAttachment property does not contain an instance of CC3TextureFramebufferAttachment.
@@ -741,27 +840,6 @@
  * of the texture are only required for the duration of the rendering to each surface.
  */
 @property(nonatomic, retain) CC3Texture* depthTexture;
-
-/** 
- * The size of this framebuffer surface in pixels.
- *
- * Returns the value of the same properties retrieved from any of the attachments (which
- * must all have the same size for this framebuffer to be valid), or, if no attachments
- * have been set, returns the value set during initialization.
- *
- * It is not possible to resize the surface directly. To do so, resize each of the
- * attachments separately. Because attachments may be shared between surfaces, management
- * of attachment sizing is left to the application, to avoid resizing the same attachment
- * more than once, during any single resizing activity.
- */
-@property(nonatomic, readonly) CC3IntSize size;
-
-/**
- * Returns whether this surface is an off-screen surface.
- *
- * Always returns YES. Subclasses that are used for on-screen rendering will override.
- */
-@property(nonatomic, readonly) BOOL isOffScreen;
 
 /**
  * Implementation of the CC3RenderSurface validate method.
@@ -772,14 +850,6 @@
  * added or resized. If the configuration is not valid, an assertion exception is raised.
  */
 -(BOOL) validate;
-
-/** 
- * Returns whether this surface supports reading the pixel content.
- *
- * In general, the color content within a framebuffer is readable, and so this property always
- * returns YES. Specialized subclasses with unreadable color content may override to return NO.
- */
-@property(nonatomic, readonly) BOOL isColorContentReadable;
 
 
 #pragma mark Allocation and initialization
@@ -986,36 +1056,15 @@
 					withPixelType: (GLenum) pixelType
 			  withDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment;
 
-@end
-
-
-#pragma mark -
-#pragma mark CC3IOSOnScreenGLFramebuffer
-
-/** Represents a framebuffer used by iOS to present to a window. */
-@interface CC3IOSOnScreenGLFramebuffer : CC3GLFramebuffer
-@end
-
-
-#pragma mark -
-#pragma mark CC3SystemOnScreenGLFramebuffer
-
-/**
- * Represents the virtual OpenGL framebuffer with framebufferID = 0,
- * used by some systems to present to a window.
- */
-@interface CC3SystemOnScreenGLFramebuffer : CC3GLFramebuffer
-
-/** The ID used to identify the framebuffer to the GL engine. Always returns zero. */
-@property(nonatomic, readonly) GLuint framebufferID;
-
-
-#pragma mark Allocation and initialization
-
 /**
  * Initializes this instance to the specified size and existing framebuffer ID.
  *
  * When attachments are assigned to this surface, each will be resized to the specified size.
+ *
+ * The value of the isManagingGL property will be set to NO, indicating that this instance will
+ * not delete the framebuffer from the GL engine when this instance is deallocated. It is up 
+ * to you to coordinate the lifespan of this instance and the GL framebuffer. Do not use this
+ * instance once you have deleted the framebuffer from the GL engine.
  */
 -(id) initWithSize: (CC3IntSize) size withFramebufferID: (GLuint) fbID;
 
@@ -1023,37 +1072,13 @@
  * Allocates and initializes an autoreleased instance with the specified size and existing framebuffer ID.
  *
  * When attachments are assigned to the instance, each will be resized to the specified size.
+ *
+ * The value of the isManagingGL property of the returned instance will be set to NO, indicating that
+ * the instance will not delete the framebuffer from the GL engine when the returned instance is 
+ * deallocated. It is up to you to coordinate the lifespan of the returned instance and the GL 
+ * framebuffer. Do not use the returned instance once you have deleted the framebuffer from the GL engine.
  */
 +(id) surfaceWithSize: (CC3IntSize) size withFramebufferID: (GLuint) fbID;
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3OSXOnScreenGLFramebuffer
-
-/**
- * Represents the virtual OpenGL framebuffer used by OSX to present to a window.
- *
- * Each of the attachments should be a CC3OSXOnScreenGLRenderbuffer.
- */
-@interface CC3OSXOnScreenGLFramebuffer : CC3SystemOnScreenGLFramebuffer
-@end
-
-
-#pragma mark -
-#pragma mark CC3AndroidOnScreenGLFramebuffer
-
-/** Represents the virtual OpenGL framebuffer used by Android to present to a window. */
-@interface CC3AndroidOnScreenGLFramebuffer : CC3SystemOnScreenGLFramebuffer
-
-/**
- * Returns whether this surface supports reading the pixel content.
- *
- * The on-screen color content is not readable in the Android platform, 
- * and so this property always returns NO.
- */
-@property(nonatomic, readonly) BOOL isColorContentReadable;
 
 @end
 
@@ -1527,7 +1552,10 @@ GLenum CC3TexelFormatFromRenderbufferDepthFormat(GLenum rbFormat);
  */
 GLenum CC3TexelTypeFromRenderbufferDepthFormat(GLenum rbFormat);
 
-/** Returns a string combination of the framebuffer name and the attachment type. */
+/** 
+ * Returns a string combination of the framebuffer name and the attachment type, 
+ * or nil if the framebuffer does not have name.
+ */
 NSString* CC3FramebufferAttachmentName(CC3GLFramebuffer* framebuffer, GLenum attachment);
 
 // Legacy naming

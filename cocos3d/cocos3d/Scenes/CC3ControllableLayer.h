@@ -30,14 +30,14 @@
 /** @file */	// Doxygen marker
 
 #import "CC3ViewController.h"
-#import "CC3OSExtensions.h"
+#import "CC3CC2Extensions.h"
 
 #if CC3_CC2_CLASSIC
 #import "CCLayer.h"
 #endif
 
 /**
- * A CCLayer that keeps track of the CC3ViewController that is controlling the CC3GLView,
+ * A CCLayer that keeps track of the CC3ViewController that is controlling the CCGLView,
  * and provides support for overlaying the device camera, and adapting to changes to the
  * device orientation.
  */

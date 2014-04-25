@@ -34,8 +34,7 @@
 
 #import "CC3OSExtensions.h"
 #import "CCTextureCache.h"
-
-@class CC3SurfaceManager;
+#import <GLKit/GLKMatrix4.h>
 
 #if !CC3_CC2_CLASSIC
 #	import "CCNode_Private.h"
@@ -199,20 +198,21 @@ typedef CCColor* CCColorRef;
 
 
 #pragma mark -
-#pragma mark CCGLView & CC3GLView
+#pragma mark CCGLView
 
-#if CC3_IOS
-
+#if CC3_IOS && CC3_CC2_1
 /** Under cocos2d 1.x iOS, create an alias CCGLView for EAGLView. */
-#if CC3_CC2_1
 #	define CCGLView EAGLView
-#endif	// CC3_CC2_1
+#endif	// CC3_IOS && CC3_CC2_1
 
 /** Extension to support cocos3d functionality. */
 @interface CCGLView (CC3)
 
 /** Returns the GL color format of the pixels. */
-@property(nonatomic, readonly) GLenum colorFormat;
+@property(nonatomic, readonly) GLenum pixelColorFormat;
+
+/** Returns the GL depth format of the pixels. */
+@property(nonatomic, readonly) GLenum pixelDepthFormat;
 
 /** Default Renderbuffer */
 @property (nonatomic,readonly) GLuint defaultFrameBuffer;
@@ -230,7 +230,25 @@ typedef CCColor* CCColorRef;
 @property (nonatomic,readonly) GLuint depthBuffer;
 
 /** The underlying view rendering surface. */
-@property(nonatomic, retain, readonly) CC3SurfaceManager* surfaceManager;
+//@property(nonatomic, retain, readonly) CC3SurfaceManager* surfaceManager;
+
+#if CC3_IOS
+
+/**
+ * Returns the number of samples that was requested to be used to define each pixel.
+ *
+ * This may return a value that is different than the value returned by the pixelSamples
+ * property because that property is limited by the capabilities of the platform.
+ */
+@property(nonatomic, readonly) GLuint requestedSamples;
+
+/**
+ * Returns the actual number of samples used to define each pixel.
+ *
+ * This may return a value that is different than the value returned by the requestedSamples
+ * property because this property is limited by the capabilities of the platform.
+ */
+@property(nonatomic, readonly) GLuint pixelSamples;
 
 /** Initializes this instance with the specified characteristics. */
 -(id) initWithFrame: (CGRect) frame
@@ -246,8 +264,19 @@ typedef CCColor* CCColorRef;
  preserveBackbuffer: (BOOL) isRetained
 	numberOfSamples: (GLuint) sampleCount;
 
-@end
 #endif	// CC3_IOS
+
+#if CC3_OSX
+
+/** returns surface size in pixels */
+@property(nonatomic,readonly) CGSize surfaceSize;
+
+/** The OpenGL context used by this view. */
+@property(nonatomic, retain, readonly) CC3GLContext* context;
+
+#endif	// CC3_OSX
+
+@end
 
 /** Add state caching aliases for compatiblity with 2.1 and above */
 #if CC3_CC2_2 && COCOS2D_VERSION < 0x020100

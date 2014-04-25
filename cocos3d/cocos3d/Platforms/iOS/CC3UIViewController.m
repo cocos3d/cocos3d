@@ -30,6 +30,7 @@
  */
 
 #import "CC3UIViewController.h"
+#import "CC3Foundation.h"
 #import "CC3ControllableLayer.h"
 #import "CC3Logging.h"
 
@@ -59,7 +60,7 @@
 
 #if !CC3_CC2_1
 // In cocos2d 2.x and above, view is tracked separately and does not lazily init. Restore that functionality.
--(CC3GLView*) view {
+-(CCGLView*) view {
 	if ( !CC2_VIEW ) {
 		[self loadView];
 		[self viewDidLoad];
@@ -69,7 +70,7 @@
 #endif	// !CC3_CC2_1
 
 /** Ensure that retina display is established if required. */
--(void) setView:(CC3GLView *)view {
+-(void) setView: (CCGLView*) view {
 	[super setView: view];
 	[self checkRetinaDisplay];
 }
@@ -217,7 +218,7 @@ CC3_POP_NOSELECTOR
 -(id) initWithNibName: (NSString*) nibNameOrNil bundle: (NSBundle*) nibBundleOrNil {
 	if( (self = [super initWithNibName: nibNameOrNil bundle: nibBundleOrNil]) ) {
 		_shouldUseRetina = NO;
-		self.viewClass = [CC3GLView class];
+		self.viewClass = [CCGLView class];
 		self.viewBounds = UIScreen.mainScreen.bounds;
 		self.viewColorFormat = kEAGLColorFormatRGBA8;
 		self.viewDepthFormat = GL_DEPTH_COMPONENT16;

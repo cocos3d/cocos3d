@@ -30,6 +30,7 @@
  */
 
 #import "CC3OpenGLUtility.h"
+#import "CC3Logging.h"
 
 #if CC3_OGLES_2
 #import "CC3OpenGLES2Compatibility.h"
@@ -143,7 +144,6 @@ char* CC3GLEnumName(GLenum gle) {
 		case GL_FIXED: return "GL_FIXED";
 		case GL_UNSIGNED_INT: return "GL_UNSIGNED_INT";
 
-		case GL_INT: return "GL_INT";
 		case GL_INT_VEC2: return "GL_INT_VEC2";
 		case GL_INT_VEC3: return "GL_INT_VEC3";
 		case GL_INT_VEC4: return "GL_INT_VEC4";
@@ -169,12 +169,9 @@ char* CC3GLEnumName(GLenum gle) {
 		case GL_VERTEX_SHADER: return "GL_VERTEX_SHADER";
 		case GL_FRAGMENT_SHADER: return "GL_FRAGMENT_SHADER";
 		case GL_MAX_VERTEX_ATTRIBS: return "GL_MAX_VERTEX_ATTRIBS";
-		case GL_MAX_VERTEX_UNIFORM_VECTORS: return "GL_MAX_VERTEX_UNIFORM_VECTORS";
-		case GL_MAX_VARYING_VECTORS: return "GL_MAX_VARYING_VECTORS";
 		case GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS: return "GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS";
 		case GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS: return "GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS";
 		case GL_MAX_TEXTURE_IMAGE_UNITS: return "GL_MAX_TEXTURE_IMAGE_UNITS";
-		case GL_MAX_FRAGMENT_UNIFORM_VECTORS: return "GL_MAX_FRAGMENT_UNIFORM_VECTORS";
 		case GL_SHADER_TYPE: return "GL_SHADER_TYPE";
 		case GL_DELETE_STATUS: return "GL_DELETE_STATUS";
 		case GL_LINK_STATUS: return "GL_LINK_STATUS";
@@ -186,12 +183,6 @@ char* CC3GLEnumName(GLenum gle) {
 		case GL_ACTIVE_ATTRIBUTE_MAX_LENGTH: return "GL_ACTIVE_ATTRIBUTE_MAX_LENGTH";
 		case GL_SHADING_LANGUAGE_VERSION: return "GL_SHADING_LANGUAGE_VERSION";
 		case GL_CURRENT_PROGRAM: return "GL_CURRENT_PROGRAM";
-		case GL_LOW_FLOAT: return "GL_LOW_FLOAT";
-		case GL_MEDIUM_FLOAT: return "GL_MEDIUM_FLOAT";
-		case GL_HIGH_FLOAT: return "GL_HIGH_FLOAT";
-		case GL_LOW_INT: return "GL_LOW_INT";
-		case GL_MEDIUM_INT: return "GL_MEDIUM_INT";
-		case GL_HIGH_INT: return "GL_HIGH_INT";
 			
 
 		// MaterialParameter
@@ -368,7 +359,6 @@ char* CC3GLEnumName(GLenum gle) {
 		case GL_COMPILE_STATUS: return "GL_COMPILE_STATUS";
 		case GL_INFO_LOG_LENGTH: return "GL_INFO_LOG_LENGTH";
 		case GL_SHADER_SOURCE_LENGTH: return "GL_SHADER_SOURCE_LENGTH";
-		case GL_SHADER_COMPILER: return "GL_SHADER_COMPILER";
 			
 		// Framebuffers
 		case GL_FRAMEBUFFER: return "GL_FRAMEBUFFER";
@@ -378,13 +368,8 @@ char* CC3GLEnumName(GLenum gle) {
 		case GL_FRAMEBUFFER_COMPLETE: return "GL_FRAMEBUFFER_COMPLETE";
 		case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT: return "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT";
 		case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT: return "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT";
-		case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS: return "GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS";
-		case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE_APPLE: return "GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE_APPLE";
 		case GL_FRAMEBUFFER_UNSUPPORTED: return "GL_FRAMEBUFFER_UNSUPPORTED";
 		case GL_FRAMEBUFFER_BINDING: return "GL_FRAMEBUFFER_BINDING";
-		case GL_READ_FRAMEBUFFER_APPLE: return "GL_READ_FRAMEBUFFER_APPLE";
-		case GL_DRAW_FRAMEBUFFER_APPLE: return "GL_DRAW_FRAMEBUFFER_APPLE";
-		case GL_READ_FRAMEBUFFER_BINDING_APPLE: return "GL_READ_FRAMEBUFFER_BINDING_APPLE";
 
 		case GL_RENDERBUFFER: return "GL_RENDERBUFFER";
 		case GL_RENDERBUFFER_BINDING: return "GL_RENDERBUFFER_BINDING";
@@ -412,7 +397,6 @@ char* CC3GLEnumName(GLenum gle) {
 		case GL_DEPTH_STENCIL: return "GL_DEPTH_STENCIL";
 
 		// Miscellaneous & extensions
-		case GL_MAX_SAMPLES_APPLE: return "GL_MAX_SAMPLES_APPLE";
 		case GL_VENDOR: return "GL_VENDOR";
 		case GL_RENDERER: return "GL_RENDERER";
 		case GL_VERSION: return "GL_VERSION";
@@ -425,8 +409,27 @@ char* CC3GLEnumName(GLenum gle) {
 		case GL_PROGRAM_OBJECT_EXT: return "GL_PROGRAM_OBJECT_EXT";
 		case GL_VERTEX_ARRAY_OBJECT_EXT: return "GL_VERTEX_ARRAY_OBJECT_EXT";
 		case GL_QUERY_OBJECT_EXT: return "GL_QUERY_OBJECT_EXT";
-		case GL_PROGRAM_PIPELINE_OBJECT_EXT: return "GL_PROGRAM_PIPELINE_OBJECT_EXT";
 			
+#if CC3_IOS
+		case GL_INT: return "GL_INT";
+		case GL_MAX_VERTEX_UNIFORM_VECTORS: return "GL_MAX_VERTEX_UNIFORM_VECTORS";
+		case GL_MAX_VARYING_VECTORS: return "GL_MAX_VARYING_VECTORS";
+		case GL_MAX_FRAGMENT_UNIFORM_VECTORS: return "GL_MAX_FRAGMENT_UNIFORM_VECTORS";
+		case GL_LOW_FLOAT: return "GL_LOW_FLOAT";
+		case GL_MEDIUM_FLOAT: return "GL_MEDIUM_FLOAT";
+		case GL_HIGH_FLOAT: return "GL_HIGH_FLOAT";
+		case GL_LOW_INT: return "GL_LOW_INT";
+		case GL_MEDIUM_INT: return "GL_MEDIUM_INT";
+		case GL_HIGH_INT: return "GL_HIGH_INT";
+		case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS: return "GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS";
+		case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE_APPLE: return "GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE_APPLE";
+		case GL_SHADER_COMPILER: return "GL_SHADER_COMPILER";
+		case GL_READ_FRAMEBUFFER_APPLE: return "GL_READ_FRAMEBUFFER_APPLE";
+		case GL_DRAW_FRAMEBUFFER_APPLE: return "GL_DRAW_FRAMEBUFFER_APPLE";
+		case GL_READ_FRAMEBUFFER_BINDING_APPLE: return "GL_READ_FRAMEBUFFER_BINDING_APPLE";
+		case GL_MAX_SAMPLES_APPLE: return "GL_MAX_SAMPLES_APPLE";
+		case GL_PROGRAM_PIPELINE_OBJECT_EXT: return "GL_PROGRAM_PIPELINE_OBJECT_EXT";
+#endif	// CC3_IOS
 			
 #if !CC3_GLSL
 		case GL_FOG: return "GL_FOG";
@@ -675,7 +678,6 @@ size_t CC3GLElementTypeSize(GLenum dataType) {
 #if CC3_GLSL
 		case GL_UNSIGNED_INT: return sizeof(GLuint);
 			
-		case GL_INT: return sizeof(GLint);
 		case GL_INT_VEC2: return sizeof(GLint) * 2;
 		case GL_INT_VEC3: return sizeof(GLint) * 3;
 		case GL_INT_VEC4: return sizeof(GLint) * 4;
@@ -699,9 +701,54 @@ size_t CC3GLElementTypeSize(GLenum dataType) {
 #else
 		case GL_FLOAT: return sizeof(GLfloat);
 #endif	// CC3_GLSL
+
+#if CC3_OGLES_2
+		case GL_INT: return sizeof(GLint);
+#endif	// CC3_OGLES2
 			
 		default: return 0;
 	}	
 }
 
+GLenum CC3GLColorFormatFromBitPlanes(GLint colorCount, GLint alphaCount) {
+	LogTrace(@"Color buffer size: %i, alpha size: %i", colorCount, alphaCount);
+	switch (alphaCount) {
+		case 0:
+			switch (colorCount) {
+				case 12: return GL_RGB4;
+				case 15: return GL_RGB5;
+				case 24: return GL_RGB8;
+				case 48: return GL_RGB16;
+			}
+		case 1:
+			if (colorCount == 16) return GL_RGB5_A1;
+		case 2:
+			if (colorCount == 8) return GL_RGBA2;
+			if (colorCount == 32) return GL_RGB10_A2;
+		case 4:
+			if (colorCount == 16) return GL_RGBA4;
+		case 8:
+			if (colorCount == 32) return GL_RGBA8;
+		case 12:
+			if (colorCount == 48) return GL_RGBA12;
+		case 16:
+			if (colorCount == 64) return GL_RGBA16;
+	}
+	CC3AssertC(NO, @"Unrecognized color buffer bit plane combination: color %i, alpha: %i", colorCount, alphaCount);
+	return GL_ZERO;
+}
 
+GLenum CC3GLDepthFormatFromBitPlanes(GLint depthCount, GLint stencilCount) {
+	LogTrace(@"Depth buffer size: %i, stencil size: %i", depthCount, stencilCount);
+	
+	if (depthCount && stencilCount) return GL_DEPTH24_STENCIL8;
+	
+	switch (depthCount) {
+		case 0: return GL_ZERO;
+		case 16: return GL_DEPTH_COMPONENT16;
+		case 24: return GL_DEPTH_COMPONENT24;
+		case 32: return GL_DEPTH_COMPONENT32;
+	}
+	CC3AssertC(NO, @"Unrecognized depth buffer bit plane combination: depth %i, stencil: %i", depthCount, stencilCount);
+	return GL_ZERO;
+}
