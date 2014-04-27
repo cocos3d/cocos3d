@@ -484,7 +484,7 @@
 	[super dealloc];
 }
 
--(void) invoke: (CCRenderer*) renderer {
+-(void) invokeOnRenderer: (CCRenderer*) renderer {
 	CC3OpenGL* gl = CC3OpenGL.sharedGL;
 	[gl pushGroupMarkerC: _cc3Layer.renderStreamGroupMarker];
 	
