@@ -274,6 +274,12 @@ typedef CCColor* CCColorRef;
 /** The OpenGL context used by this view. */
 @property(nonatomic, retain, readonly) CC3GLContext* context;
 
+/** Dummy method for compatibility with iOS. */
+-(void) addGestureRecognizer: (UIGestureRecognizer*) gestureRecognizer;
+
+/** Dummy method for compatibility with iOS. */
+-(void) removeGestureRecognizer: (UIGestureRecognizer*) gestureRecognizer;
+
 #endif	// CC3_OSX
 
 @end

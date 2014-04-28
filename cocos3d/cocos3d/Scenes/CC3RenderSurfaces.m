@@ -42,7 +42,7 @@
 
 @implementation CC3GLRenderbuffer
 
-@synthesize size=_size, pixelFormat=_format, pixelSamples=_samples;
+@synthesize size=_size, pixelFormat=_format, pixelSamples=_samples, isManagingGL=_isManagingGL;
 
 -(void) dealloc {
 	[self deleteGLRenderbuffer];
@@ -55,20 +55,12 @@
 }
 
 -(void) ensureGLRenderbuffer {
-	if (_rbID) return;
-	
-	_rbID = CC3OpenGL.sharedGL.generateRenderbuffer;
-	_isManagingGL = YES;
+	if (_isManagingGL && !_rbID) _rbID = CC3OpenGL.sharedGL.generateRenderbuffer;
 }
 
 -(void) deleteGLRenderbuffer {
 	if (_isManagingGL && _rbID) [CC3OpenGL.sharedGL deleteRenderbuffer: _rbID];
 	_rbID = 0;
-}
-
--(BOOL) isManagingGL {
-	[self ensureGLRenderbuffer];
-	return _isManagingGL;
 }
 
 /** If the renderbuffer has been created, set its debug label as well. */
@@ -122,7 +114,7 @@
 		_size = CC3IntSizeMake(0, 0);
 		_format = GL_ZERO;
 		_samples = 1;
-		_isManagingGL = NO;
+		_isManagingGL = YES;
 	}
 	return self;
 }
@@ -171,6 +163,7 @@
 -(id) initWithPixelFormat: (GLenum) format withPixelSamples: (GLuint) samples withRenderbufferID: (GLuint) rbID {
 	if ( (self = [self initWithPixelFormat: format withPixelSamples: samples]) ) {
 		_rbID = rbID;
+		_isManagingGL = NO;
 	}
 	return self;
 }
@@ -309,7 +302,8 @@
 
 @implementation CC3GLFramebuffer
 
-@synthesize isOnScreen=_isOnScreen, shouldBindGLAttachments=_shouldBindGLAttachments;
+@synthesize isOnScreen=_isOnScreen, isManagingGL=_isManagingGL;
+@synthesize shouldBindGLAttachments=_shouldBindGLAttachments;
 
 -(void) dealloc {
 	[self deleteGLFramebuffer];
@@ -327,20 +321,12 @@
 }
 
 -(void) ensureGLFramebuffer {
-	if (_fbID) return;
-	
-	_fbID = CC3OpenGL.sharedGL.generateFramebuffer;
-	_isManagingGL = YES;
+	if (_isManagingGL && !_fbID) _fbID = CC3OpenGL.sharedGL.generateFramebuffer;
 }
 
 -(void) deleteGLFramebuffer {
 	if (_isManagingGL && _fbID) [CC3OpenGL.sharedGL deleteFramebuffer: _fbID];
 	_fbID = 0;
-}
-
--(BOOL) isManagingGL {
-	[self ensureGLFramebuffer];
-	return _isManagingGL;
 }
 
 /** 
@@ -560,7 +546,7 @@
 	if ( (self = [super initWithTag: tag withName: name]) ) {
 		_fbID = 0;
 		_size = CC3IntSizeMake(0, 0);
-		_isManagingGL = NO;
+		_isManagingGL = YES;
 		_shouldBindGLAttachments = YES;
 		_isOnScreen = NO;
 		_colorAttachment = nil;
@@ -652,6 +638,7 @@
 -(id) initWithSize: (CC3IntSize) size withFramebufferID: (GLuint) fbID {
 	if ( (self = [self initWithSize: size]) ) {
 		_fbID = fbID;
+		_isManagingGL = NO;
 	}
 	return self;
 }

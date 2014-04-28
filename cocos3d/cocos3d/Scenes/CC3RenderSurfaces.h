@@ -316,7 +316,13 @@
 	BOOL _isManagingGL : 1;
 }
 
-/** The ID used to identify the renderbuffer to the GL engine. */
+/**
+ * The ID used to identify the renderbuffer to the GL engine.
+ *
+ * If the value of this property is not explicitly set during instance initialization, then the
+ * first time this property is accessed a renderbuffer will automatically be generated in the GL
+ * engine, and its ID set into this property.
+ */
 @property(nonatomic, readonly) GLuint renderbufferID;
 
 /** 
@@ -355,22 +361,22 @@
  * the GL engine.
  *
  * The value of this property also has an effect on the behaviour of the resizeTo: method.
- * If this property is set to YES, the resizeTo: method resizes the memory allocation in the
- * GL engine. If this property is set to NO, resizeTo: method has no effect on the memory
+ * If this property returns YES, the resizeTo: method resizes the memory allocation in the
+ * GL engine. If this property returns NO, the resizeTo: method has no effect on the memory
  * allocation in the GL engine.
  *
- * The initial value of this property is NO. If this instance automatically generates a
- * renderbuffer in the GL engine, this property is set to YES.
+ * If this instance is initialized with with a specific value for the renderbufferID property,
+ * the value of this property will be NO, otherwise, the value of this property will be YES.
  */
 @property(nonatomic, readonly) BOOL isManagingGL;
 
 /**
- * If the isManagingGL property is set to YES, resizes this attachment to the specified size
+ * If the isManagingGL property returns YES, resizes this attachment to the specified size 
  * by allocating or reallocating storage space within GL memory. If the isManagingGL property
- * is set to NO, the memory allocation in the GL engine remains unchanged.
+ * returns NO, the memory allocation in the GL engine remains unchanged.
  *
  * The size property is updated to reflect the new size, even if the isManagingGL property
- * is set to NO.
+ * returns NO.
  */
 -(void) resizeTo: (CC3IntSize) size;
 
@@ -679,7 +685,7 @@
  *
  * If the value of this property is not explicitly set during instance initialization, then the
  * first time this property is accessed a framebuffer will automatically be generated in the GL
- * engine, its ID set into this property, and the isManagingGL property will be set to YES.
+ * engine, and its ID set into this property.
  */
 @property(nonatomic, readonly) GLuint framebufferID;
 
@@ -699,8 +705,8 @@
  * the GL framebuffer. Do not use this instance once you have deleted the framebuffer from 
  * the GL engine.
  *
- * The initial value of this property is NO. If this instance automatically generates a 
- * framebuffer in the GL engine, this property is set to YES.
+ * If this instance is initialized with with a specific value for the framebufferID property,
+ * the value of this property will be NO, otherwise, the value of this property will be YES.
  */
 @property(nonatomic, readonly) BOOL isManagingGL;
 

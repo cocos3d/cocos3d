@@ -196,6 +196,10 @@
 
 -(CC3GLContext*) context { return (CC3GLContext*)self.openGLContext; }
 
+-(void) addGestureRecognizer: (UIGestureRecognizer*) gestureRecognizer {}
+
+-(void) removeGestureRecognizer: (UIGestureRecognizer*) gestureRecognizer {}
+
 #endif	// CC3_OSX
 
 
