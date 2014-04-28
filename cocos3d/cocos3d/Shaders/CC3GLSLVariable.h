@@ -478,7 +478,7 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope);
  *
  * The type property of this instance must be GL_FLOAT_MAT3.
  */
--(void) setMatrix3x3: (CC3Matrix3x3*) value;
+-(void) setMatrix3x3: (const CC3Matrix3x3*) value;
 
 /**
  * Sets the element at the specified index in this uniform to the specified value.
@@ -489,7 +489,7 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope);
  *
  * The type property of this instance must be GL_FLOAT_MAT3.
  */
--(void) setMatrix3x3: (CC3Matrix3x3*) value at: (GLuint) index;
+-(void) setMatrix3x3: (const CC3Matrix3x3*) value at: (GLuint) index;
 
 /**
  * Sets the 4x4 value of this uniform from the specified 4x3 value, adding the last identity row.
@@ -499,7 +499,7 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope);
  *
  * The type property of this instance must be GL_FLOAT_MAT4.
  */
--(void) setMatrix4x3: (CC3Matrix4x3*) value;
+-(void) setMatrix4x3: (const CC3Matrix4x3*) value;
 
 /**
  * Sets the 4x4 element at the specified index in this uniform to the specified 4x3 value,
@@ -511,7 +511,7 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope);
  *
  * The type property of this instance must be GL_FLOAT_MAT4.
  */
--(void) setMatrix4x3: (CC3Matrix4x3*) value at: (GLuint) index;
+-(void) setMatrix4x3: (const CC3Matrix4x3*) value at: (GLuint) index;
 
 /**
  * Sets the value of this uniform to the specified value.
@@ -521,7 +521,7 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope);
  *
  * The type property of this instance must be GL_FLOAT_MAT4.
  */
--(void) setMatrix4x4: (CC3Matrix4x4*) value;
+-(void) setMatrix4x4: (const CC3Matrix4x4*) value;
 
 /**
  * Sets the element at the specified index in this uniform to the specified value.
@@ -532,7 +532,7 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope);
  *
  * The type property of this instance must be GL_FLOAT_MAT4.
  */
--(void) setMatrix4x4: (CC3Matrix4x4*) value at: (GLuint) index;
+-(void) setMatrix4x4: (const CC3Matrix4x4*) value at: (GLuint) index;
 
 /**
  * Sets the value of this uniform to the specified value.

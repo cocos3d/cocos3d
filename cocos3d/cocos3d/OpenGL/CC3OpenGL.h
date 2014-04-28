@@ -760,13 +760,13 @@ typedef struct {
 -(void) activatePaletteMatrixStack: (GLuint) pmIdx;
 
 /** Activates the modelview matrix stack and replaces the current matrix with the specified matrix. */
--(void) loadModelviewMatrix: (CC3Matrix4x3*) mtx;
+-(void) loadModelviewMatrix: (const CC3Matrix4x3*) mtx;
 
 /** Activates the projection matrix stack and replaces the current matrix with the specified matrix. */
--(void) loadProjectionMatrix: (CC3Matrix4x4*) mtx;
+-(void) loadProjectionMatrix: (const CC3Matrix4x4*) mtx;
 
 /** Activates the specified palette matrix stack and replaces the current matrix with the specified matrix. */
--(void) loadPaletteMatrix: (CC3Matrix4x3*) mtx at: (GLuint) pmIdx;
+-(void) loadPaletteMatrix: (const CC3Matrix4x3*) mtx at: (GLuint) pmIdx;
 
 /** Activates the modelview matrix stack, pushes it down one level, and copies the old top to the new top. */
 -(void) pushModelviewMatrixStack;

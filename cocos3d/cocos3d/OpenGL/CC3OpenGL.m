@@ -693,11 +693,11 @@ static NSObject<CC3OpenGLDelegate>* _delegate = nil;
 
 -(void) activatePaletteMatrixStack: (GLuint) pmIdx {}
 
--(void) loadModelviewMatrix: (CC3Matrix4x3*) mtx {}
+-(void) loadModelviewMatrix: (const CC3Matrix4x3*) mtx {}
 
--(void) loadProjectionMatrix: (CC3Matrix4x4*) mtx {}
+-(void) loadProjectionMatrix: (const CC3Matrix4x4*) mtx {}
 
--(void) loadPaletteMatrix: (CC3Matrix4x3*) mtx at: (GLuint) pmIdx {}
+-(void) loadPaletteMatrix: (const CC3Matrix4x3*) mtx at: (GLuint) pmIdx {}
 
 -(void) pushModelviewMatrixStack {}
 

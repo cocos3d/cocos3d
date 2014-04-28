@@ -321,7 +321,7 @@ typedef enum {
 	CC3Matrix4x4 _viewProjMatrix;
 	CC3Matrix4x3 _modelViewMatrix;
 	CC3Matrix4x4 _modelViewProjMatrix;
-	CC3Matrix4x4 _layerTransformMatrix;
+	GLKMatrix4 _layerTransformMatrix;
 	ccColor4F _currentColor;
 	CC3TextureBindingMode _textureBindingMode;
 	GLuint _textureUnitCount;
@@ -554,25 +554,25 @@ typedef enum {
 #pragma mark Environmental matrices
 
 /** Returns the current projection matrix. */
-@property(nonatomic, readonly) CC3Matrix4x4* projMatrix;
+@property(nonatomic, readonly) const CC3Matrix4x4* projMatrix;
 
 /** Returns the current view matrix. */
-@property(nonatomic, readonly) CC3Matrix4x3* viewMatrix;
+@property(nonatomic, readonly) const CC3Matrix4x3* viewMatrix;
 
 /** Returns the current model-to-global transform matrix. */
-@property(nonatomic, readonly) CC3Matrix4x3* modelMatrix;
+@property(nonatomic, readonly) const CC3Matrix4x3* modelMatrix;
 
 /** Returns the current view-projection matrix. */
-@property(nonatomic, readonly) CC3Matrix4x4* viewProjMatrix;
+@property(nonatomic, readonly) const CC3Matrix4x4* viewProjMatrix;
 
 /** Returns the current model-view matrix. */
-@property(nonatomic, readonly) CC3Matrix4x3* modelViewMatrix;
+@property(nonatomic, readonly) const CC3Matrix4x3* modelViewMatrix;
 
 /** Returns the current model-view-projection matrix. */
-@property(nonatomic, readonly) CC3Matrix4x4* modelViewProjMatrix;
+@property(nonatomic, readonly) const CC3Matrix4x4* modelViewProjMatrix;
 
-/** Returns the current CC3Layer transform matrix. Available when using Cocos2D 3.1 and higher. */
-@property(nonatomic, readonly) CC3Matrix4x4* layerTransformMatrix;
+/** Returns the current CC3Layer GLKMatrix4 transform matrix. Available when using Cocos2D 3.1 and higher. */
+@property(nonatomic, readonly) const GLKMatrix4* layerTransformMatrix;
 
 /**
  * Populates the current projection matrix from the specified matrix.
@@ -591,8 +591,8 @@ typedef enum {
 /** Populates the current model-to-global matrix from the specified matrix. */
 -(void) populateModelMatrixFrom: (CC3Matrix*) modelMtx;
 
-/** Populates the current CC3Layer transform matrix from the specified matrix. */
--(void) populateLayerTransformMatrixFrom: (CC3Matrix4x4*) layerMtx;
+/** Populates the current CC3Layer transform matrix from the specified GLKMatrix4 matrix. */
+-(void) populateLayerTransformMatrixFrom: (const GLKMatrix4*) layerMtx;
 
 /**
  * Returns a pointer to the bone matrix at the specified index, from the currentSkinSection,
@@ -601,7 +601,7 @@ typedef enum {
  * This method has meaning only during the drawing of the currentSkinSection. Attempting to
  * access this method at any other time will produced undefined results.
  */
--(CC3Matrix4x3*) globalBoneMatrixAt: (GLuint) index;
+-(const CC3Matrix4x3*) globalBoneMatrixAt: (GLuint) index;
 
 /**
  * Returns a pointer to the bone matrix at the specified index, from the currentSkinSection,
@@ -610,7 +610,7 @@ typedef enum {
  * This method has meaning only during the drawing of the currentSkinSection. Attempting to
  * access this method at any other time will produced undefined results.
  */
--(CC3Matrix4x3*) eyeSpaceBoneMatrixAt: (GLuint) index;
+-(const CC3Matrix4x3*) eyeSpaceBoneMatrixAt: (GLuint) index;
 
 /**
  * Returns a pointer to the bone matrix at the specified index, from the currentSkinSection,
@@ -619,7 +619,7 @@ typedef enum {
  * This method has meaning only during the drawing of the currentSkinSection. Attempting to
  * access this method at any other time will produced undefined results.
  */
--(CC3Matrix4x3*) modelSpaceBoneMatrixAt: (GLuint) index;
+-(const CC3Matrix4x3*) modelSpaceBoneMatrixAt: (GLuint) index;
 
 @end
 

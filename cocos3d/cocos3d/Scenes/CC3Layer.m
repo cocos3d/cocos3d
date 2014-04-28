@@ -194,7 +194,7 @@
 	// Let the drawing visitor know about the renderer and transform
 	CC3NodeDrawingVisitor* visitor = _cc3Scene.viewDrawingVisitor;
 	visitor.ccRenderer = renderer;
-	[visitor populateLayerTransformMatrixFrom: (CC3Matrix4x4*)transform];
+	[visitor populateLayerTransformMatrixFrom: transform];
 	
 	// Get a render command for this layer, tell it the visitor to use, and queue it
 	CC3LayerRenderCommand* renderCmd = self.renderCommand;

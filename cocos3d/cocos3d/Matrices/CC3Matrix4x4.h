@@ -65,7 +65,17 @@ static inline GLfloat CC3Det3x3(GLfloat a1, GLfloat a2, GLfloat a3,
  * CC3Matrix4x4 offers several ways to access the matrix content. Content can be accessed
  * by element array index, by element column and row number, or as column vectors.
  *
- * CC3Matrix4x4 can be toll-free bridged with GLKMatrix4 by simply casting a reference back and forth.
+ * Although CC3Matrix4x4 has the same internal structure as GLKMatrix4, the structures may
+ * have different byte alignment requirements. Avoid casting directly between GLKMatrix4
+ * and CC3Matrix4x4, as this is not guaranteed to work reliably. Instead, use the functions
+ * CC3Matrix4x4PopulateFromGLKMatrix4 and GLKMatrix4PopulateFromCC3Matrix4x4 to convert
+ * between the two structures.
+ *
+ * You can, however, reliably copy an array of GLKMatrix4s to an array of CC3Matrix4x4s,
+ * and vice-versa, by simply using memcpy, or equivalent memory copying function. This is
+ * also true of single CC3Matrix4x4 and GLKMatrix4 structures. Copying is successful because
+ * the array or pointer declarations will ensure the respective byte-alignment requirements,
+ * and since the internal structures are identical, the contents of the copy will be identical.
  */
 typedef union {
 	/** The elements in array form. You can also simply cast the entire union to an array of GLfloats. */
@@ -184,6 +194,28 @@ static inline void CC3Matrix4x4PopulateIdentity(CC3Matrix4x4* mtx) {
 /** Populates the specified matrix from the specified source matrix. */
 static inline void CC3Matrix4x4PopulateFrom4x4(CC3Matrix4x4* mtx, const CC3Matrix4x4* mtxSrc) {
 	memcpy(mtx, mtxSrc, sizeof(CC3Matrix4x4));
+}
+
+/**
+ * Populates the specified matrix from the specified source GLKMatrix4.
+ *
+ * Although CC3Matrix4x4 has the same internal structure as GLKMatrix4, the structures may
+ * have different byte alignment requirements. Avoid casting directly between GLKMatrix4
+ * and CC3Matrix4x4, as this is not guaranteed to work reliably.
+ */
+static inline void CC3Matrix4x4PopulateFromGLKMatrix4(CC3Matrix4x4* mtx, const GLKMatrix4* mtxSrc) {
+	memcpy(mtx, mtxSrc, sizeof(CC3Matrix4x4));
+}
+
+/**
+ * Populates the specified GLKMatrix4 from the specified source matrix.
+ *
+ * Although GLKMatrix4 has the same internal structure as CC3Matrix4x4, the structures may
+ * have different byte alignment requirements. Avoid casting directly between CC3Matrix4x4
+ * and GLKMatrix3, as this is not guaranteed to work reliably.
+ */
+static inline void GLKMatrix4PopulateFromCC3Matrix4x4(GLKMatrix4* mtx, const CC3Matrix4x4* mtxSrc) {
+	memcpy(mtx, mtxSrc, sizeof(GLKMatrix4));
 }
 
 /**

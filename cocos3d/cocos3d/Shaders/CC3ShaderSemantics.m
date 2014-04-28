@@ -378,7 +378,8 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	CC3SkinSection* skin;
 	CC3PointParticleEmitter* emitter;
 	CC3Matrix4x4 m4x4;
-	CC3Matrix4x3 m4x3,  mRslt4x3, tfmMtx, *pm4x3;
+	CC3Matrix4x3 m4x3,  mRslt4x3, tfmMtx;
+	const CC3Matrix4x3 *pm4x3;
 	CC3Matrix3x3 m3x3;
 	CC3Viewport vp;
 	CCTime sceneTime;

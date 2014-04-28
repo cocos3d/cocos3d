@@ -314,9 +314,9 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 
 -(void) setQuaternion: (CC3Quaternion) value at: (GLuint) index { [self setVector4: value at: index]; }
 
--(void) setMatrix3x3: (CC3Matrix3x3*) value { [self setMatrix3x3: value at: 0]; }
+-(void) setMatrix3x3: (const CC3Matrix3x3*) value { [self setMatrix3x3: value at: 0]; }
 
--(void) setMatrix3x3: (CC3Matrix3x3*) value at: (GLuint) index {
+-(void) setMatrix3x3: (const CC3Matrix3x3*) value at: (GLuint) index {
 	CC3Matrix3x3* varMtx = (CC3Matrix3x3*)_varValue;
 	switch (_type) {
 		case GL_FLOAT_MAT3:
@@ -329,9 +329,9 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 	}
 }
 
--(void) setMatrix4x3: (CC3Matrix4x3*) value { [self setMatrix4x3: value at: 0]; }
+-(void) setMatrix4x3: (const CC3Matrix4x3*) value { [self setMatrix4x3: value at: 0]; }
 
--(void) setMatrix4x3: (CC3Matrix4x3*) value at: (GLuint) index {
+-(void) setMatrix4x3: (const CC3Matrix4x3*) value at: (GLuint) index {
 	CC3Matrix4x4* varMtx = (CC3Matrix4x4*)_varValue;
 	switch (_type) {
 		case GL_FLOAT_MAT4:
@@ -344,9 +344,9 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 	}
 }
 
--(void) setMatrix4x4: (CC3Matrix4x4*) value { [self setMatrix4x4: value at: 0]; }
+-(void) setMatrix4x4: (const CC3Matrix4x4*) value { [self setMatrix4x4: value at: 0]; }
 
--(void) setMatrix4x4: (CC3Matrix4x4*) value at: (GLuint) index {
+-(void) setMatrix4x4: (const CC3Matrix4x4*) value at: (GLuint) index {
 	CC3Matrix4x4* varMtx = (CC3Matrix4x4*)_varValue;
 	switch (_type) {
 		case GL_FLOAT_MAT4:

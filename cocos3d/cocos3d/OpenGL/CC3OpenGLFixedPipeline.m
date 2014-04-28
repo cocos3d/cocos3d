@@ -531,7 +531,7 @@
 	LogGLErrorTrace(@"glMatrixMode(%@)", NSStringFromGLEnum(mode));
 }
 
--(void) loadModelviewMatrix: (CC3Matrix4x3*) mtx {
+-(void) loadModelviewMatrix: (const CC3Matrix4x3*) mtx {
 	if ( !self.isRenderingContext ) return;
 	
 	[self activateMatrixStack: GL_MODELVIEW];
@@ -541,7 +541,7 @@
 	LogGLErrorTrace(@"glLoadMatrixf(%@)", NSStringFromCC3Matrix4x4(&glMtx));
 }
 
--(void) loadProjectionMatrix: (CC3Matrix4x4*) mtx {
+-(void) loadProjectionMatrix: (const CC3Matrix4x4*) mtx {
 	if ( !self.isRenderingContext ) return;
 	
 	[self activateMatrixStack: GL_PROJECTION];
@@ -549,7 +549,7 @@
 	LogGLErrorTrace(@"glLoadMatrixf(%@)", NSStringFromCC3Matrix4x4(mtx));
 }
 
--(void) loadPaletteMatrix: (CC3Matrix4x3*) mtx at: (GLuint) pmIdx {
+-(void) loadPaletteMatrix: (const CC3Matrix4x3*) mtx at: (GLuint) pmIdx {
 	if ( !self.isRenderingContext ) return;
 	
 	[self activatePaletteMatrixStack: pmIdx];

@@ -142,7 +142,7 @@
 	kmGLMatrixMode(mode);
 }
 
--(void) loadModelviewMatrix: (CC3Matrix4x3*) mtx {
+-(void) loadModelviewMatrix: (const CC3Matrix4x3*) mtx {
 	if ( !self.isRenderingContext ) return;
 
 	[self activateMatrixStack: GL_MODELVIEW];
@@ -151,7 +151,7 @@
 	kmGLLoadMatrix((kmMat4*)&glMtx);
 }
 
--(void) loadProjectionMatrix: (CC3Matrix4x4*) mtx {
+-(void) loadProjectionMatrix: (const CC3Matrix4x4*) mtx {
 	if ( !self.isRenderingContext ) return;
 	
 	[self activateMatrixStack: GL_PROJECTION];

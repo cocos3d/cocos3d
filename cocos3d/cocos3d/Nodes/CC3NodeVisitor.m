@@ -609,13 +609,13 @@
 
 #pragma mark Environmental matrices
 
--(CC3Matrix4x4*) projMatrix { return &_projMatrix; }
+-(const CC3Matrix4x4*) projMatrix { return &_projMatrix; }
 
--(CC3Matrix4x3*) viewMatrix { return &_viewMatrix; }
+-(const CC3Matrix4x3*) viewMatrix { return &_viewMatrix; }
 
--(CC3Matrix4x3*) modelMatrix { return &_modelMatrix; }
+-(const CC3Matrix4x3*) modelMatrix { return &_modelMatrix; }
 
--(CC3Matrix4x3*) modelViewMatrix {
+-(const CC3Matrix4x3*) modelViewMatrix {
 	if (_isMVMtxDirty) {
 		CC3Matrix4x3Multiply(&_modelViewMatrix, &_viewMatrix, &_modelMatrix);
 		_isMVMtxDirty = NO;
@@ -623,7 +623,7 @@
 	return &_modelViewMatrix;
 }
 
--(CC3Matrix4x4*) viewProjMatrix {
+-(const CC3Matrix4x4*) viewProjMatrix {
 	if (_isVPMtxDirty) {
 		CC3Matrix4x4 v4x4;
 		CC3Matrix4x4PopulateFrom4x3(&v4x4, &_viewMatrix);
@@ -633,7 +633,7 @@
 	return &_viewProjMatrix;
 }
 
--(CC3Matrix4x4*) modelViewProjMatrix {
+-(const CC3Matrix4x4*) modelViewProjMatrix {
 	if (_isMVPMtxDirty) {
 		CC3Matrix4x4 m4x4;
 		CC3Matrix4x4PopulateFrom4x3(&m4x4, self.modelViewMatrix);
@@ -643,7 +643,7 @@
 	return &_modelViewProjMatrix;
 }
 
--(CC3Matrix4x4*) layerTransformMatrix { return &_layerTransformMatrix; }
+-(const GLKMatrix4*) layerTransformMatrix { return &_layerTransformMatrix; }
 
 -(void) populateProjMatrixFrom: (CC3Matrix*) projMtx {
 	if ( !projMtx || _currentNode.shouldDrawInClipSpace)
@@ -685,24 +685,21 @@
 	[self.gl loadModelviewMatrix: self.modelViewMatrix];
 }
 
--(void) populateLayerTransformMatrixFrom: (CC3Matrix4x4*) layerMtx {
-	if (layerMtx)
-		CC3Matrix4x4PopulateFrom4x4(&_layerTransformMatrix, layerMtx);
-	else
-		CC3Matrix4x4PopulateIdentity(&_layerTransformMatrix);
+-(void) populateLayerTransformMatrixFrom: (const GLKMatrix4*) layerMtx {
+	_layerTransformMatrix = (layerMtx) ? *layerMtx : GLKMatrix4Identity;
 }
 
--(CC3Matrix4x3*) globalBoneMatrixAt: (GLuint) index {
+-(const CC3Matrix4x3*) globalBoneMatrixAt: (GLuint) index {
 	[self ensureBoneMatrices: _boneMatricesGlobal forSpace: self.modelMatrix];
 	return [_boneMatricesGlobal elementAt: index];
 }
 
--(CC3Matrix4x3*) eyeSpaceBoneMatrixAt: (GLuint) index {
+-(const CC3Matrix4x3*) eyeSpaceBoneMatrixAt: (GLuint) index {
 	[self ensureBoneMatrices: _boneMatricesEyeSpace forSpace: self.modelViewMatrix];
 	return [_boneMatricesEyeSpace elementAt: index];
 }
 
--(CC3Matrix4x3*) modelSpaceBoneMatrixAt: (GLuint) index {
+-(const CC3Matrix4x3*) modelSpaceBoneMatrixAt: (GLuint) index {
 	[self ensureBoneMatrices: _boneMatricesModelSpace forSpace: NULL];
 	return [_boneMatricesModelSpace elementAt: index];
 }
@@ -715,7 +712,7 @@
  * Once populated, the bone matrix array is marked as being ready, so it won't be populated
  * again until being marked as not ready.
  */
--(void) ensureBoneMatrices: (CC3DataArray*) boneMatrices forSpace: (CC3Matrix4x3*) spaceMatrix {
+-(void) ensureBoneMatrices: (CC3DataArray*) boneMatrices forSpace: (const CC3Matrix4x3*) spaceMatrix {
 	if (boneMatrices.isReady) return;
 	
 	CC3Matrix4x3 sbMtx;

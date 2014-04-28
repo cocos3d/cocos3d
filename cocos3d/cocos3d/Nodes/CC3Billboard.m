@@ -34,6 +34,7 @@
 #import "CC3Scene.h"
 #import "CC3CC2Extensions.h"
 #import "CC3OpenGLFixedPipeline.h"
+#import "CC3Matrix4x4.h"
 
 #if CC3_CC2_RENDER_QUEUE
 #	import "CCRenderer_private.h"
@@ -558,9 +559,12 @@ static GLfloat deviceScaleFactor = 0.0f;
 		CC3OpenGL* gl = visitor.gl;
 		[gl pushGroupMarkerC: "Draw embedded 2D billboard"];
 
+		GLKMatrix4 mvpMtx;
+		GLKMatrix4PopulateFromCC3Matrix4x4(&mvpMtx, visitor.modelViewProjMatrix);
+		
 		CCRenderer* renderer = visitor.billboardCCRenderer;
 		[renderer invalidateState];
-		[_billboard visit: renderer parentTransform: (GLKMatrix4*)visitor.modelViewProjMatrix];
+		[_billboard visit: renderer parentTransform: &mvpMtx];
 		[renderer flush];
 		
 		[gl popGroupMarker];
@@ -620,7 +624,7 @@ static GLfloat deviceScaleFactor = 0.0f;
 
 	CC3OpenGL* gl = visitor.gl;
 	[gl pushGroupMarkerC: "Draw overlay 2D billboard"];
-	[_billboard visit: renderer parentTransform: (GLKMatrix4*)visitor.layerTransformMatrix];
+	[_billboard visit: renderer parentTransform: visitor.layerTransformMatrix];
 	[gl popGroupMarker];
 }
 

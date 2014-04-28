@@ -230,7 +230,20 @@ static inline BOOL CC3IntVector4sAreEqual(CC3IntVector4 v1, CC3IntVector4 v2) {
 #pragma mark -
 #pragma mark 3D cartesian vector structure and functions
 
-/** A vector in 3D space. */
+/** 
+ * A vector in 3D space. 
+ *
+ * Although CC3Vector has the same internal structure as GLKVector3, the structures may 
+ * have different byte alignment requirements. Avoid casting directly between GLKVector3 
+ * and CC3Vector, as this is not guaranteed to work reliably. Instead, use the functions
+ * CC3VectorFromGLKVector3 and GLKVector3FromCC3Vector to convert between the two structures.
+ *
+ * You can, however, reliably copy an array of GLKVector3s to an array of CC3Vectors, and 
+ * vice-versa, by simply using memcpy, or equivalent memory copying function. This is also 
+ * true of single CC3Vector and GLKVector3 structures. Copying is successful because the 
+ * array or pointer declarations will ensure the respective byte-alignment requirements, and
+ * since the internal structures are identical, the contents of the copy will be identical.
+ */
 typedef struct {
 	GLfloat x;			/**< The X-componenent of the vector. */
 	GLfloat y;			/**< The Y-componenent of the vector. */
@@ -292,6 +305,28 @@ static inline CC3Vector CC3VectorMake(GLfloat x, GLfloat y, GLfloat z) {
 
 /** Convenience alias macro to create CC3Vectors with less keystrokes. */
 #define cc3v(X,Y,Z) CC3VectorMake((X),(Y),(Z))
+
+/** 
+ * Returns a CC3Vector structure constructed from the specified GLKVector3 structure. 
+ *
+ * Although CC3Vector has the same internal structure as GLKVector3, the structures may 
+ * have different byte alignment requirements. Avoid casting directly between GLKVector3 
+ * and CC3Vector, as this is not guaranteed to work reliably.
+ */
+static inline CC3Vector CC3VectorFromGLKVector3(GLKVector3 glkv) {
+	return CC3VectorMake(glkv.x, glkv.y, glkv.z);
+}
+
+/**
+ * Returns a GLKVector3 structure constructed from the specified CC3Vector structure.
+ *
+ * Although GLKVector3 has the same internal structure as CC3Vector, the structures may 
+ * have different byte alignment requirements. Avoid casting directly between CC3Vector 
+ * and GLKVector3, as this is not guaranteed to work reliably.
+ */
+static inline GLKVector3 GLKVector3FromCC3Vector(CC3Vector cc3v) {
+	return GLKVector3Make(cc3v.x, cc3v.y, cc3v.z);
+}
 
 /** Returns whether the two vectors are equal by comparing their respective components. */
 static inline BOOL CC3VectorsAreEqual(CC3Vector v1, CC3Vector v2) {
@@ -598,6 +633,20 @@ static inline CC3Vector CC3EnsureMinScaleVector(CC3Vector scale) {
  *
  * This structure can be referenced as containing 4 individual XYZW axes components, 
  * or containing a 3D XYZ vector, plus a W component.
+ *
+ * Although CC3Vector4 and CC3Quaternion have the same internal structure as GLKVector4 and
+ * GLKQuaternion, the structures may have different byte alignment requirements. Avoid casting
+ * directly between GLKVector4 and CC3Vector4, or GLKQuaternion and CC3Quaternion, as this is
+ * not guaranteed to work reliably. Instead, use the functions CC3Vector4FromGLKVector4,
+ * GLKVector4FromCC3Vector4, CC3QuaternionFromGLKQuaterion, and GLKQuaternionFromCC3Quaternion
+ * to convert between the two structures.
+ *
+ * You can, however, reliably copy an array of GLKVector4s or GLKQuaternions to an array of 
+ * CC3Vector4s or CC3Quaternions, and vice-versa, by simply using memcpy, or equivalent memory
+ * copying function. This is also true of single CC3Vector4, CC3Quaternion, GLKVector4 and 
+ * GLKQuaterion structures. Copying is successful because the array or pointer declarations 
+ * will ensure the respective byte-alignment requirements, and since the internal structures
+ * are identical, the contents of the copy will be identical.
  */
 typedef struct {
 	union {
@@ -662,6 +711,28 @@ static inline CC3Vector4 CC3Vector4FromLocation(CC3Vector aLocation) {
  */
 static inline CC3Vector4 CC3Vector4FromDirection(CC3Vector aDirection) {
 	return CC3Vector4FromCC3Vector(aDirection, 0.0f);
+}
+
+/**
+ * Returns a CC3Vector4 structure constructed from the specified GLKVector4 structure.
+ *
+ * Although CC3Vector4 has the same internal structure as GLKVector4, the structures may
+ * have different byte alignment requirements. Avoid casting directly between GLKVector4
+ * and CC3Vector4, as this is not guaranteed to work reliably.
+ */
+static inline CC3Vector4 CC3Vector4FromGLKVector4(GLKVector4 glkv) {
+	return CC3Vector4Make(glkv.x, glkv.y, glkv.z, glkv.w);
+}
+
+/**
+ * Returns a GLKVector4 structure constructed from the specified CC3Vector4 structure.
+ *
+ * Although GLKVector4 has the same internal structure as CC3Vector4, the structures may
+ * have different byte alignment requirements. Avoid casting directly between CC3Vector4
+ * and GLKVector4, as this is not guaranteed to work reliably.
+ */
+static inline GLKVector4 GLKVector4FromCC3Vector4(CC3Vector4 cc3v) {
+	return GLKVector4Make(cc3v.x, cc3v.y, cc3v.z, cc3v.w);
 }
 
 /** @deprecated You can now use v.v instead. See the declaration of the CC3Vector4 structure. */
@@ -817,6 +888,28 @@ static inline CC3Quaternion CC3QuaternionMake(GLfloat x, GLfloat y, GLfloat z, G
 /** Returns a CC3Quaternion structure constructed from a 3D vector and a w component. */
 static inline CC3Quaternion CC3QuaternionFromCC3Vector(CC3Vector v, GLfloat w) {
 	return CC3Vector4FromCC3Vector(v, w);
+}
+
+/**
+ * Returns a CC3Quaternion structure constructed from the specified GLKQuaternion structure.
+ *
+ * Although CC3Quaternion has the same internal structure as GLKQuaternion, the structures may
+ * have different byte alignment requirements. Avoid casting directly between GLKQuaternion
+ * and CC3Quaternion, as this is not guaranteed to work reliably.
+ */
+static inline CC3Quaternion CC3QuaternionFromGLKQuaternion(GLKQuaternion glkq) {
+	return CC3QuaternionMake(glkq.x, glkq.y, glkq.z, glkq.w);
+}
+
+/**
+ * Returns a GLKQuaternion structure constructed from the specified CC3Quaternion structure.
+ *
+ * Although GLKQuaternion has the same internal structure as CC3Quaternion, the structures may
+ * have different byte alignment requirements. Avoid casting directly between CC3Quaternion
+ * and GLKQuaternion, as this is not guaranteed to work reliably.
+ */
+static inline GLKQuaternion GLKQuaternionFromCC3Quaternion(CC3Quaternion cc3q) {
+	return GLKQuaternionMake(cc3q.x, cc3q.y, cc3q.z, cc3q.w);
 }
 
 /** Returns whether the two quaterions are equal by comparing their respective components. */
