@@ -40,6 +40,9 @@
 #	import "CCRenderer_private.h"
 #endif	// CC3_CC2_RENDER_QUEUE
 
+@interface CCNode (PrivateMethods)
+@property(nonatomic, assign) ccBlendFunc blendFunc;		// Included here, because eprecated in Cocos2D 3.1
+@end
 
 @interface CC3MeshNode (TemplateMethods)
 -(void) configureDrawingParameters: (CC3NodeDrawingVisitor*) visitor;
@@ -78,11 +81,9 @@
 	_billboard = [aCCNode retain];
 	_billboard.visible = self.visible;
 	
-#if CC3_CC2_CLASSIC
 	// Retrieve the blend function from the 2D node and align this 3D node's material with it.
 	if ([_billboard conformsToProtocol: @protocol(CCBlendProtocol)])
-		self.blendFunc = ((id<CCBlendProtocol>)_billboard).blendFunc;
-#endif	// CC3_CC2_CLASSIC
+		self.blendFunc = _billboard.blendFunc;
 	
 	[self normalizeBillboardScaleToDevice];
 	if (self.isRunning) [self start2DBillboard];	// If running already, start scheduled activities on new billboard
