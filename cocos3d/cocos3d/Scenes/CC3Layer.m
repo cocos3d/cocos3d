@@ -120,6 +120,27 @@
 -(void) setOpacity: (CCOpacity) opacity { _cc3Scene.opacity = opacity; }
 
 
+#pragma mark Surfaces
+
+-(CC3LayerSurfaceManager*) surfaceManager {
+	if (!_surfaceManager) self.surfaceManager = [self.surfaceManagerClass surfaceManager];
+	return _surfaceManager;
+}
+
+-(void) setSurfaceManager: (CC3LayerSurfaceManager*) surfaceManager {
+	CC3Assert([surfaceManager isKindOfClass: self.surfaceManagerClass],
+			  @"The surface manager must be a type of %@", self.surfaceManagerClass);
+
+	if (surfaceManager == _surfaceManager) return;
+
+	[_surfaceManager release];
+	
+	_surfaceManager = [surfaceManager retain];
+	[self updateViewport];
+}
+
+-(Class) surfaceManagerClass { return CC3LayerSurfaceManager.class; }
+
 #pragma mark Updating layer
 
 /** Invoked from cocos2d when this layer is first displayed. Opens the 3D scene. */
@@ -229,8 +250,15 @@
 	BOOL isFullView = (CGPointEqualToPoint(gbb.origin, CGPointZero) &&
 					   CGSizeEqualToSize(gbb.size, viewSize));
 
+	// Convert the bounds of this layer to a viewport
+	CC3Viewport vp = CC3ViewportFromCGRect(gbb);
+	
+	// Set the viewport into the view surface and the camera
+	_surfaceManager.viewSurfaceOrigin = vp.origin;
+	_surfaceManager.size = vp.size;
+	
 	CC3Camera* cam = self.cc3Scene.activeCamera;
-	cam.viewport = CC3ViewportFromCGRect(gbb);
+	cam.viewport = vp;
 	cam.shouldClipToViewport = !isFullView;
 
 	[super updateViewport];

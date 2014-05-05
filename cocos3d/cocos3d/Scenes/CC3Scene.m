@@ -365,11 +365,11 @@
 
 #pragma mark Drawing
 
--(CC3SurfaceManager*) viewSurfaceManager { return CC3SurfaceManager.sharedSurfaceManager; }
+// Deprecated
+-(CC3ViewSurfaceManager*) viewSurfaceManager { return CC3ViewSurfaceManager.sharedViewSurfaceManager; }
+-(id<CC3RenderSurface>) viewSurface { return self.cc3Layer.surfaceManager.viewSurface; }
 
--(id<CC3RenderSurface>) viewSurface { return self.viewSurfaceManager.renderingSurface; }
-
--(id<CC3RenderSurface>) pickingSurface { return self.viewSurfaceManager.pickingSurface; }
+-(id<CC3RenderSurface>) pickingSurface { return self.cc3Layer.surfaceManager.pickingSurface; }
 
 -(void) drawScene { [self drawSceneWithVisitor: self.viewDrawingVisitor]; }
 	
@@ -445,8 +445,9 @@
 	gl.frontFace = GL_CCW;
 
 	// Make sure the drawing surface is set back to the view surface
-	[self.viewSurface activate];
-	[gl bindRenderbuffer: self.viewSurfaceManager.viewColorBuffer.renderbufferID];
+	id<CC3RenderSurface> viewSurface = CC3ViewSurfaceManager.sharedViewSurfaceManager.renderingSurface;
+	[viewSurface activate];
+	[((CC3GLRenderbuffer*)viewSurface.colorAttachment) bind];
 
 	// Set depth testing to 2D values, and close depth testing,
 	// either by turning it off, or clearing the depth buffer
@@ -716,7 +717,7 @@
 -(BOOL) shouldDisplayPickingRender { return _shouldDisplayPickingRender; }
 
 -(void) setShouldDisplayPickingRender: (BOOL) shouldDisplayPickingRender {
-	CC3Assert( !(shouldDisplayPickingRender && self.viewSurfaceManager.shouldUseDedicatedPickingSurface),
+	CC3Assert( !(shouldDisplayPickingRender && CC3ViewSurfaceManager.sharedViewSurfaceManager.shouldUseDedicatedPickingSurface),
 			  @"The node picking render surface is not visible to the view. Ensure multisampling is disabled,"
 			  @" and the shouldUseDedicatedPickingSurface property in the viewSurfaceManager is set to NO.");
 	_shouldDisplayPickingRender = shouldDisplayPickingRender;

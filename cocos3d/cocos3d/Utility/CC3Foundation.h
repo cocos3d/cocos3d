@@ -114,10 +114,18 @@ static inline BOOL CC3IntPointsAreEqual(CC3IntPoint p1, CC3IntPoint p2) {
 			(p1.y == p2.y);
 }
 
+/** Returns whether the specified point is zero, as specified by kCC3IntPointZero. */
+static inline BOOL CC3IntPointIsZero(CC3IntPoint p) { return CC3IntPointsAreEqual(p, kCC3IntPointZero); }
+
+/** Returns a point representing the sum of the two specified points, by add their respective components. */
+static inline CC3IntPoint CC3IntPointAdd(CC3IntPoint p1, CC3IntPoint p2) {
+	return	CC3IntPointMake(p1.x + p2.x, p1.y + p2.y);
+}
+
 /** An integer 2D size. */
 typedef struct {
-	GLint width;			/**< The width measurement. */
-	GLint height;			/**< The height measurement. */
+	GLsizei width;			/**< The width measurement. */
+	GLsizei height;			/**< The height measurement. */
 } CC3IntSize;
 
 /** A CC3IntSize of zero extent. */
@@ -147,6 +155,9 @@ static inline BOOL CC3IntSizesAreEqual(CC3IntSize s1, CC3IntSize s2) {
 	return	(s1.width == s2.width) &&
 			(s1.height == s2.height);
 }
+
+/** Returns whether the specified size is zero, as specified by kCC3IntSizeZero. */
+static inline BOOL CC3IntSizeIsZero(CC3IntSize s) { return CC3IntSizesAreEqual(s, kCC3IntSizeZero); }
 
 /** A struct representing an integer tessellation. */
 typedef CC3IntPoint CC3Tessellation;
@@ -2019,15 +2030,21 @@ static inline CC3AttenuationCoefficients CC3AttenuationCoefficientsLegalize(CC3A
  *
  * This can also be used for any rectangular group of pixels.
  */
-typedef struct {
-	GLint x;				/**< The X-position of the bottom-left corner of the viewport. */
-	GLint y;				/**< The Y-position of the bottom-left corner of the viewport. */
-	GLsizei w;				/**< The width of the viewport. */
-	GLsizei h;				/**< The height of the viewport. */
+typedef union {
+	struct {
+		GLint x;				/**< The X-position of the bottom-left corner of the viewport. */
+		GLint y;				/**< The Y-position of the bottom-left corner of the viewport. */
+		GLsizei w;				/**< The width of the viewport. */
+		GLsizei h;				/**< The height of the viewport. */
+	};
+	struct {
+		CC3IntPoint origin;		/**< The origin of the viewport. */
+		CC3IntSize size;		/**< The size of the viewport. */
+	};
 } CC3Viewport;
 
 /** An empty or undefined viewport. */
-static const CC3Viewport kCC3ViewportZero = { 0, 0, 0, 0 };
+static const CC3Viewport kCC3ViewportZero = { {0, 0, 0, 0} };
 
 /** Returns a string description of the specified CC3Viewport struct in the form "(x, y, w, h)" */
 static inline NSString* NSStringFromCC3Viewport(CC3Viewport vp) {
@@ -2046,7 +2063,10 @@ static inline CC3Viewport CC3ViewportMake(GLint x, GLint y, GLint w, GLint h) {
 
 /** Returns a CC3Viewport constructed from the specified origin and size. */
 static inline CC3Viewport CC3ViewportFromOriginAndSize(CC3IntPoint origin, CC3IntSize size) {
-	return CC3ViewportMake(origin.x, origin.y, size.width, size.height);
+	CC3Viewport vp;
+	vp.origin = origin;
+	vp.size = size;
+	return vp;
 }
 
 /** Returns whether the two viewports are equal by comparing their respective components. */
@@ -2077,6 +2097,14 @@ static inline CC3Viewport CC3ViewportFromCGRect(CGRect rect) {
 /** Returns a CGRect constructed from the specified viewport. */
 static inline CGRect CGRectFromCC3Viewport(CC3Viewport vp) {
 	return CGRectMake(vp.x, vp.y, vp.w, vp.h);
+}
+
+/** 
+ * Returns a CC3Viewport of the same size as the specified viewport, but whose origin is 
+ * translated from the origin of the specified viewport by the by the specified amount. 
+ */
+static inline CC3Viewport CC3ViewportTranslate(CC3Viewport vp, CC3IntPoint offset) {
+	return CC3ViewportFromOriginAndSize(CC3IntPointAdd(vp.origin, offset), vp.size);
 }
 
 

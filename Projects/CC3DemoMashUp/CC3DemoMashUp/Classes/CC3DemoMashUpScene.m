@@ -1891,8 +1891,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// required for the underlying texture, so we indicate the texture is opaque, which
 	// uses a more memory-efficient 16-bit RGB format. Similarly, since stencils will not
 	// be used, we allow a default 16-bit depth buffer to be used for this surface.
-	CC3GLFramebuffer*  tvSurface = [CC3GLFramebuffer colorTextureSurfaceWithSize: kTVTexSize isOpaque: YES];
+	CC3GLFramebuffer*  tvSurface = [CC3GLFramebuffer colorTextureSurfaceIsOpaque: YES];
 	tvSurface.name = @"Television";
+	tvSurface.size = kTVTexSize;
 
 	// Now create a drawing visitor that will coordinate the drawing of the the TV screen
 	// Since the aspect of the TV screen surface is different than the main display, we don't
@@ -1973,9 +1974,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * We want the surface that we create to match the dimensions and characteristics of the view,
  * and we want it to automatically adjust if the view dimensions change. To do that, we construct
  * the surface with the same size as the view's surface, and format the textures to be compatible
- * with the format of the view's surface. And then we register this new surface with the
- * viewSurfaceManager to have it automatically update the dimensions of the textures whenever
- * the dimensions of the view change.
+ * with the format of the view's surface. And then we register this new surface with the surface
+ * manager of the CC3Layer to have it automatically update the dimensions of the textures whenever
+ * the dimensions of the CC3Layer change.
  *
  * Since this method accesses the view's surface manager, it must be invoked after the
  * view has been created. This method is invoked from the onOpen method of this class,
@@ -1991,13 +1992,12 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// Otherwise, we could have just used the simpler renderbuffer option for the depth buffer.
 	// Finally, we register the off-screen surface with the view's surface manager, so that the
 	// off-screen surface will be resized automatically whenever the view is resized.
-	CC3SurfaceManager* surfMgr = self.viewSurfaceManager;
+	CC3ViewSurfaceManager* surfMgr = CC3ViewSurfaceManager.sharedViewSurfaceManager;
 	CC3Texture* depthTexture = [CC3Texture textureWithPixelFormat: surfMgr.depthTexelFormat
 													withPixelType: surfMgr.depthTexelType];
-	_postProcSurface = [CC3GLFramebuffer colorTextureSurfaceWithSize: surfMgr.size
-													 withPixelFormat: surfMgr.colorTexelFormat
-													   withPixelType: surfMgr.colorTexelType
-												 withDepthAttachment: [CC3TextureFramebufferAttachment attachmentWithTexture: depthTexture]];
+	_postProcSurface = [CC3GLFramebuffer colorTextureSurfaceWithPixelFormat: surfMgr.colorTexelFormat
+															  withPixelType: surfMgr.colorTexelType
+														withDepthAttachment: [CC3TextureFramebufferAttachment attachmentWithTexture: depthTexture]];
 	_postProcSurface.name = @"Post-proc surface";
 	[surfMgr addSurface: _postProcSurface];
 	

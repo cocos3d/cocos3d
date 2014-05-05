@@ -675,7 +675,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			return YES;
 		case kCC3SemanticCameraFrustum: {
 			// Applies the field of view angle to the narrower aspect.
-			vp = visitor.camera.viewport;
+			vp = visitor.renderSurface.viewport;
 			GLfloat aspect = (GLfloat) vp.w / (GLfloat) vp.h;
 			CC3Camera* cam = visitor.camera;
 			GLfloat fovWidth, fovHeight;
@@ -700,7 +700,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			return YES;
 		}
 		case kCC3SemanticViewport:
-			vp = visitor.camera.viewport;
+			vp = visitor.renderSurface.viewport;
 			[uniform setIntVector4: CC3IntVector4Make(vp.x, vp.y, vp.w, vp.h)];
 			return YES;
 			

@@ -1202,7 +1202,7 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
  * One can think of the GL coordinates as absolute and fixed relative to the portrait screen,
  * and the layer coordinates as relative to layer position and size.
  */
--(CGPoint) glPointFromCC2Point: (CGPoint) cc2Point;
+-(CGPoint) glPointFromCC2Point: (CGPoint) cc2Point __deprecated;
 
 /**
  * Converts the specified point, which is in the coordinate system of the 3D GL environment,
@@ -1218,7 +1218,7 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
  * One can think of the GL coordinates as absolute and fixed relative to the portrait screen,
  * and the layer coordinates as relative to layer position and size.
  */
--(CGPoint) cc2PointFromGLPoint: (CGPoint) glPoint;
+-(CGPoint) cc2PointFromGLPoint: (CGPoint) glPoint __deprecated;
 
 @end
 

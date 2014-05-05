@@ -1502,10 +1502,10 @@ static CC3Cache* _shaderSourceCodeCache = nil;
 
 -(id<CC3RenderSurface>) prewarmingSurface {
 	if ( !_prewarmingSurface ) {
-		self.prewarmingSurface = [CC3GLFramebuffer surfaceWithSize: CC3IntSizeMake(4, 4)];
+		self.prewarmingSurface = [CC3GLFramebuffer surface];
 		((CC3GLFramebuffer*)_prewarmingSurface).name = @"Prewarming surface";
 		_prewarmingSurface.colorAttachment = [CC3GLRenderbuffer renderbufferWithPixelFormat: GL_RGBA4];
-		[_prewarmingSurface validate];
+		_prewarmingSurface.size = CC3IntSizeMake(4, 4);
 	}
 	return _prewarmingSurface;
 }

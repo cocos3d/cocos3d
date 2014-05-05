@@ -798,10 +798,11 @@ static BOOL _shouldCacheAssociatedCCTextures = NO;
 	return [tex autorelease];
 }
 
+-(NSString*) description { return [NSString stringWithFormat: @"%@ (GLID: %u)", super.description, self.textureID]; }
+
 -(NSString*) fullDescription {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 100];
 	[desc appendFormat: @"%@", self.description];
-	[desc appendFormat: @" (ID: %u)", self.textureID];
 	[desc appendFormat: @" of type %@", (self.isTextureCube ? @"cube" : @"2D")];
 	[desc appendFormat: @", size: %@", NSStringFromCC3IntSize(self.size)];
 	[desc appendFormat: @", coverage: %@", NSStringFromCGSize(self.coverage)];

@@ -861,17 +861,11 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 /** Returns whether this instance is using a drawing sequencer. */
 @property(nonatomic, readonly) BOOL isUsingDrawingSequence;
 
-/**
- * The view's surface manager. 
- *
- * The returned object manages the surfaces that render directly to the view, including the
- * surfaces in the viewSurface and pickingSurface properties, and manages the resolution of 
- * anti-aliasing multisampling.
- *
- * You can access this property from the onOpen method of this scene, or any time after.
- * This property is not valid before that time.
+/** 
+ * @deprecated Access the view surface manager through singleton CC3ViewSurfaceManager 
+ * sharedViewSurfaceManager. Setting this property has no effect.
  */
-@property(nonatomic, retain, readonly) CC3SurfaceManager* viewSurfaceManager;
+@property(nonatomic, retain, readonly) CC3ViewSurfaceManager* viewSurfaceManager __deprecated;
 
 /**
  * The render surface being used to draw to the view on the screen.
@@ -881,7 +875,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  *
  * The value of this property is retrieved from the surface manager in the viewSurfaceManager property.
  */
-@property(nonatomic, retain, readonly) id<CC3RenderSurface> viewSurface;
+@property(nonatomic, retain, readonly) id<CC3RenderSurface> viewSurface __deprecated;
 
 /**
  * The visitor that is used to visit the nodes to draw them to the view on the screen.

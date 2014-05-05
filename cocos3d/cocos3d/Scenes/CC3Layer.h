@@ -31,6 +31,7 @@
 
 #import "CC3ControllableLayer.h"
 #import "CC3Scene.h"
+#import "CC3RenderSurfaces.h"
 
 /**
  * CC3Layer is a cocos2d CCLayer that supports full 3D rendering in combination with normal
@@ -133,10 +134,38 @@
  */
 @interface CC3Layer : CC3ControllableLayer {
 	CC3Scene* _cc3Scene;
+	CC3LayerSurfaceManager* _surfaceManager;
 	NSMutableArray* _cc3GestureRecognizers;
 	char* _renderStreamGroupMarker;
 	BOOL _shouldAlwaysUpdateViewport : 1;
 }
+
+
+#pragma mark Surfaces
+
+/**
+ * The surface manager that manages the surfaces associated with this layer.
+ *
+ * If this property is not explicitly set, it is initialized to an instance of the class
+ * returned by the surfaceManager class when this property is first accessed. At a minimum,
+ * the surface manager contains the pickingSurface used to pick nodes from touch events.
+ * If this layer will be using additional surfaces, you should consider subclassing the
+ * CC3LayerSurfaceManager class and overriding the surfaceManager property.
+ *
+ * When setting this property, the surfaces in the surface manager are automatically
+ * resized to the contentSize of this layer.
+ */
+@property(nonatomic, retain) CC3LayerSurfaceManager* surfaceManager;
+
+/**
+ * The class that will be used to automatically populate the surfaceManager property when
+ * it is first accessed.
+ *
+ * By default, this property returns the CC3LayerSurfaceManager class. If this layer will 
+ * be using additional surfaces, you should consider subclassing the CC3LayerSurfaceManager
+ * class and overriding this property to return that class.
+ */
+@property(nonatomic, readonly) Class surfaceManagerClass;
 
 
 #pragma mark iOS Gesture recognizers and touch handling

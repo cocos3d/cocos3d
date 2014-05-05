@@ -395,8 +395,7 @@
 -(void) alignCameraViewport {
 	// If the viewport of the camera has not been set directly, align it to the surface shape.
 	// Invoked during setter. Don't use getter, to avoid infinite recursion when camera is nil.
-	if ( CC3ViewportIsZero(_camera.viewport) )
-		_camera.viewport = CC3ViewportFromOriginAndSize(kCC3IntPointZero, self.renderSurface.size);
+	if ( CC3ViewportIsZero(_camera.viewport) ) _camera.viewport = self.renderSurface.viewport;
 }
 
 -(void) alignShotWith: (CC3NodeDrawingVisitor*) otherVisitor {
@@ -450,8 +449,15 @@
 	[self openCamera];
 }
 
-/** Activates the render surface. Subsequent GL drawing will be directed to this surface. */
--(void) activateRenderSurface { [self.renderSurface activate]; }
+/** 
+ * Activates the render surface and applies its viewport. 
+ * Subsequent GL drawing will be directed to this surface. 
+ */
+-(void) activateRenderSurface {
+	id<CC3RenderSurface> surface = self.renderSurface;
+	[surface activate];
+	self.gl.viewport = surface.viewport;
+}
 
 /** If this visitor was started on a CC3Scene node, set up for drawing an entire scene. */
 -(void) openScene {
@@ -821,21 +827,27 @@
  * Clears the depth buffer in case the primary scene rendering is using the same surface.
  */
 -(void) close {
-		
-	// Read the pixel from the framebuffer
+	id<CC3RenderSurface> surface = self.renderSurface;
+
+	// Get layer touch point and convert to pixels
+	CGPoint touchPoint = ccpMult(self.scene.touchedNodePicker.touchPoint,
+								 CCDirector.sharedDirector.contentScaleFactor);
+
+	// Convert the touch point to the coordinates of the surface viewport by offsetting
+	// the touch point by the surface viewport origin
+	CC3IntPoint vpTouchPoint = CC3IntPointAdd(CC3IntPointFromCGPoint(touchPoint), surface.viewport.origin);
+
+	// Read the pixel from the surface
 	ccColor4B pixColor;
-	CC3IntPoint touchPoint = CC3IntPointFromCGPoint([self.camera glPointFromCC2Point: self.scene.touchedNodePicker.touchPoint]);
-	[self.renderSurface readColorContentFrom: CC3ViewportMake(touchPoint.x, touchPoint.y, 1, 1) into: &pixColor];
+	[surface readColorContentFrom: CC3ViewportMake(vpTouchPoint.x, vpTouchPoint.y, 1, 1) into: &pixColor];
 	
 	// Fetch the node whose tags is mapped from the pixel color
 	[_pickedNode release];
 	_pickedNode = [[self.scene getNodeTagged: [self tagFromColor: pixColor]] retain];
 
 	LogTrace(@"%@ picked %@ from color %@ at position %@", self, _pickedNode,
-			 NSStringFromCCC4B(pixColor), NSStringFromCC3IntPoint(touchPoint));
+			 NSStringFromCCC4B(pixColor), NSStringFromCC3IntPoint(vpTouchPoint));
 	
-	[self.renderSurface clearDepthContent];
-
 	[super close];
 }
 

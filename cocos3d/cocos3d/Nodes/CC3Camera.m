@@ -315,7 +315,6 @@
 -(void) openWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"%@ opening with %@", self, visitor);
 	_isOpen = YES;
-	[self openViewportWithVisitor: visitor];
 	[self openProjectionWithVisitor: visitor];
 	[self openViewWithVisitor: visitor];
 }
@@ -325,14 +324,6 @@
 	_isOpen = NO;
 	[self closeViewWithVisitor: visitor];
 	[self closeProjectionWithVisitor: visitor];
-}
-
--(void) openViewportWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	LogTrace(@"%@ opening viewport %@ with %@", self, NSStringFromCC3Viewport(_viewport), visitor);
-	CC3OpenGL* gl = visitor.gl;
-	gl.viewport = _viewport;
-	[gl enableScissorTest: _shouldClipToViewport];
-	if (_shouldClipToViewport) gl.scissor = _viewport;
 }
 
 /** Template method that pushes the GL projection matrix stack, and loads the projectionMatrix into it. */
