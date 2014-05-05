@@ -37,7 +37,7 @@
 
 @implementation CC3Layer
 
-@synthesize cc3Scene=_cc3Scene, shouldAlwaysUpdateViewport=_shouldAlwaysUpdateViewport;
+@synthesize shouldAlwaysUpdateViewport=_shouldAlwaysUpdateViewport;
 
 - (void)dealloc {
 	self.cc3Scene = nil;			// Close, remove & release the scene
@@ -48,7 +48,12 @@
 	[super dealloc];
 }
 
- -(void) setCc3Scene: (CC3Scene*) aScene {
+-(CC3Scene*) cc3Scene {
+	if (!_cc3Scene) self.cc3Scene = [self.cc3SceneClass scene];
+	return _cc3Scene;
+}
+
+-(void) setCc3Scene: (CC3Scene*) aScene {
 	 if (aScene == _cc3Scene) return;
 
 	 [self closeCC3Scene];						// Close the old scene.
@@ -64,6 +69,32 @@
 	 [self deleteRenderStreamGroupMarker];
 }
 
+-(Class) cc3SceneClass {
+	Class sceneClass = nil;
+	NSString* baseName = nil;
+	NSString* layerClassName = NSStringFromClass(self.class);
+	
+	// If layer class name ends in "Layer", strip it and try some combinations
+	if ( [layerClassName hasSuffix: @"Layer"] ) {
+		baseName = [layerClassName substringToIndex: (layerClassName.length - @"Layer".length)];
+
+		// Try HelloLayer -> HelloScene
+		sceneClass = NSClassFromString([NSString stringWithFormat: @"%@Scene", baseName]);
+		if (sceneClass && [sceneClass isSubclassOfClass: CC3Scene.class]) return sceneClass;
+		
+		// Try HelloLayer -> Hello
+		sceneClass = NSClassFromString(baseName);
+		if (sceneClass && [sceneClass isSubclassOfClass: CC3Scene.class]) return sceneClass;
+	}
+
+	// Try Hello -> HelloScene (including HelloLayer -> HelloLayerScene)
+	sceneClass = NSClassFromString([NSString stringWithFormat: @"%@Scene", layerClassName]);
+	if (sceneClass && [sceneClass isSubclassOfClass: CC3Scene.class]) return sceneClass;
+	
+	CC3Assert(NO, @"%@ could not determine the appropriate class to instantiate to automatically populate the cc3Scene property.", self);
+	return nil;
+}
+
 
 #pragma mark Allocation and initialization
 
@@ -77,7 +108,7 @@
 
 -(void) initializeControls {}
 
--(NSString*) description { return [NSString stringWithFormat: @"%@ on %@", self.class, self.cc3Scene]; }
+-(NSString*) description { return [NSString stringWithFormat: @"%@ on %@", self.class, _cc3Scene]; }
 
 
 #pragma mark Transforming
@@ -111,13 +142,13 @@
 
 #pragma mark CCRGBAProtocol and CCBlendProtocol support
 
--(CCColorRef) color { return _cc3Scene.color; }
+-(CCColorRef) color { return self.cc3Scene.color; }
 
--(void)	setColor: (CCColorRef) color { _cc3Scene.color = color; }
+-(void)	setColor: (CCColorRef) color { self.cc3Scene.color = color; }
 
--(CCOpacity) opacity { return _cc3Scene.opacity; }
+-(CCOpacity) opacity { return self.cc3Scene.opacity; }
 
--(void) setOpacity: (CCOpacity) opacity { _cc3Scene.opacity = opacity; }
+-(void) setOpacity: (CCOpacity) opacity { self.cc3Scene.opacity = opacity; }
 
 
 #pragma mark Surfaces
@@ -155,7 +186,7 @@
 /** Invoked automatically either from onEnter, or if new scene attached and layer is running. */
 -(void) openCC3Scene {
 	[self updateViewport];			// Set the camera viewport
-	[_cc3Scene open];				// Open the scene
+	[self.cc3Scene open];			// Open the scene
 }
 
 /** Invoked from cocos2d when this layer is removed. Closes the 3D scene.  */
@@ -169,9 +200,9 @@
 -(void) onCloseCC3Layer {}
 
 /** Invoked automatically either from onExit, or if old scene removed and layer is running. */
--(void) closeCC3Scene { [_cc3Scene close]; }
+-(void) closeCC3Scene { [_cc3Scene close]; }	// Must not use property accessor!
 
--(void) update: (CCTime)dt { [_cc3Scene updateScene: dt]; }
+-(void) update: (CCTime)dt { [self.cc3Scene updateScene: dt]; }
 
 // Lazily initialized
 -(NSArray*) cc3GestureRecognizers {
@@ -201,11 +232,11 @@
 /** Draw the 3D scene with the specified drawing visitor. */
 -(void) drawSceneWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	if (_shouldAlwaysUpdateViewport) [self updateViewport];
-	[_cc3Scene drawSceneWithVisitor: visitor];
+	[self.cc3Scene drawSceneWithVisitor: visitor];
 }
 
 /** Drawing under Cocos2D 3.0 and before. */
--(void) draw { [self drawSceneWithVisitor: _cc3Scene.viewDrawingVisitor]; }
+-(void) draw { [self drawSceneWithVisitor: self.cc3Scene.viewDrawingVisitor]; }
 
 #if CC3_CC2_RENDER_QUEUE
 
@@ -213,7 +244,7 @@
 -(void) draw: (CCRenderer*) renderer transform: (const GLKMatrix4*) transform {
 	
 	// Let the drawing visitor know about the renderer and transform
-	CC3NodeDrawingVisitor* visitor = _cc3Scene.viewDrawingVisitor;
+	CC3NodeDrawingVisitor* visitor = self.cc3Scene.viewDrawingVisitor;
 	visitor.ccRenderer = renderer;
 	[visitor populateLayerTransformMatrixFrom: transform];
 	
@@ -467,7 +498,7 @@
 }
 
 -(BOOL) handleTouchType: (uint) touchType at: (CGPoint) touchPoint {
-	[_cc3Scene touchEvent: touchType at: touchPoint];
+	[self.cc3Scene touchEvent: touchType at: touchPoint];
 	return YES;
 }
 

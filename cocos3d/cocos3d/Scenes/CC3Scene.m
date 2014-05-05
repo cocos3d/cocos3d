@@ -200,6 +200,8 @@
 
 #pragma mark Allocation and initialization
 
+-(id) init { return [self initWithName: NSStringFromClass(self.class)]; }
+
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
 		_lights = [NSMutableArray new];			// retained

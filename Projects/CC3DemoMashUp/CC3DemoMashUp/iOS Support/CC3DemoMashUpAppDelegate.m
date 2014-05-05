@@ -31,7 +31,6 @@
 
 #import "CC3DemoMashUpAppDelegate.h"
 #import "CC3DemoMashUpLayer.h"
-#import "CC3DemoMashUpScene.h"
 #import "CC3CC2Extensions.h"
 
 
@@ -40,6 +39,31 @@
 #if CC3_CC2_CLASSIC
 
 @implementation CC3DemoMashUpAppDelegate
+
+#if CC3_CC2_2
+/**
+ * In cocos2d 2.x, the view controller and CCDirector are one and the same, and we create the
+ * controller using the singleton mechanism. To establish the correct CCDirector/UIViewController
+ * class, this MUST be performed before any other references to the CCDirector singleton!!
+ *
+ * NOTE: As of iOS6, supported device orientations are an intersection of the mask established for the
+ * UIViewController (as set in this method here), and the values specified in the project 'Info.plist'
+ * file, under the 'Supported interface orientations' and 'Supported interface orientations (iPad)'
+ * keys. Specifically, although the mask here is set to UIInterfaceOrientationMaskAll, to ensure that
+ * all orienatations are enabled under iOS6, be sure that those settings in the 'Info.plist' file also
+ * reflect all four orientation values. By default, the 'Info.plist' settings only enable the two
+ * landscape orientations. These settings can also be set on the Summary page of your project.
+ */
+-(void) establishDirectorController {
+	_viewController = CC3DeviceCameraOverlayUIViewController.sharedDirector;
+	_viewController.supportedInterfaceOrientations = UIInterfaceOrientationMaskAll;
+	_viewController.viewShouldUseStencilBuffer = YES;	// Shadow volumes make use of stencil buffer
+	_viewController.viewPixelSamples = 1;				// Set to 4 for antialiasing multisampling
+	_viewController.animationInterval = (1.0f / kAnimationFrameRate);
+	_viewController.displayStats = YES;
+	[_viewController enableRetinaDisplay: YES];
+}
+#endif	// CC3_CC2_2
 
 #if CC3_CC2_1
 /**
@@ -78,31 +102,6 @@
 	// This must be done after the GL view is assigned to the director!
 	[director enableRetinaDisplay: YES];
 }
-
-#else
-
-/**
- * In cocos2d 2.x, the view controller and CCDirector are one and the same, and we create the
- * controller using the singleton mechanism. To establish the correct CCDirector/UIViewController
- * class, this MUST be performed before any other references to the CCDirector singleton!!
- *
- * NOTE: As of iOS6, supported device orientations are an intersection of the mask established for the
- * UIViewController (as set in this method here), and the values specified in the project 'Info.plist'
- * file, under the 'Supported interface orientations' and 'Supported interface orientations (iPad)'
- * keys. Specifically, although the mask here is set to UIInterfaceOrientationMaskAll, to ensure that
- * all orienatations are enabled under iOS6, be sure that those settings in the 'Info.plist' file also
- * reflect all four orientation values. By default, the 'Info.plist' settings only enable the two
- * landscape orientations. These settings can also be set on the Summary page of your project.
- */
--(void) establishDirectorController {
-	_viewController = CC3DeviceCameraOverlayUIViewController.sharedDirector;
-	_viewController.supportedInterfaceOrientations = UIInterfaceOrientationMaskAll;
-	_viewController.viewShouldUseStencilBuffer = YES;	// Shadow volumes make use of stencil buffer
-	_viewController.viewPixelSamples = 1;				// Set to 4 for antialiasing multisampling
-	_viewController.animationInterval = (1.0f / kAnimationFrameRate);
-	_viewController.displayStats = YES;
-	[_viewController enableRetinaDisplay: YES];
-}
 #endif	// CC3_CC2_1
 
 -(void) applicationDidFinishLaunching: (UIApplication*) application {
@@ -125,10 +124,6 @@
 	
 	// Create the customized CC3Layer that supports 3D rendering.
 	CC3Layer* cc3Layer = [CC3DemoMashUpLayer layer];
-	
-	// Create the customized 3D scene and attach it to the layer.
-	// Could also just create this inside the customer layer.
-	cc3Layer.cc3Scene = [CC3DemoMashUpScene scene];
 	
 	// Assign to a generic variable so we can uncomment options below to play with the capabilities
 	CC3ControllableLayer* controlledLayer = cc3Layer;
@@ -243,10 +238,6 @@
 	// action, uncomment the lines above as described, and also uncomment the following two lines.
 //	cc3Layer.position = ccp(0.0, 0.0);
 //	[cc3Layer runAction: [CCActionMoveTo actionWithDuration: 15.0 position: ccp(500.0, 250.0)]];
-	
-	// Create the customized 3D scene and attach it to the layer.
-	// Could also just create this inside the customer layer.
-	cc3Layer.cc3Scene = [CC3DemoMashUpScene scene];
 	
 	// Wrap the layer in a 2D scene and run it in the director
 	CCScene *scene = [CCScene node];

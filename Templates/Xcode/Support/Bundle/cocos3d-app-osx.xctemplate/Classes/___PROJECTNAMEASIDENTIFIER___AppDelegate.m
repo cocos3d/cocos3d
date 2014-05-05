@@ -8,7 +8,6 @@
 
 #import "___PROJECTNAMEASIDENTIFIER___AppDelegate.h"
 #import "___PROJECTNAMEASIDENTIFIER___Layer.h"
-#import "___PROJECTNAMEASIDENTIFIER___Scene.h"
 
 @implementation ___PROJECTNAMEASIDENTIFIER___AppDelegate
 
@@ -40,7 +39,6 @@
 	_viewController.view = _glView;
 
 	CC3Layer* cc3Layer = [___PROJECTNAMEASIDENTIFIER___Layer layer];
-	cc3Layer.cc3Scene = [___PROJECTNAMEASIDENTIFIER___Scene scene];
 	_viewController.controlledNode = cc3Layer;
 	
 	// Wrap the layer in a 2D scene and run it in the director

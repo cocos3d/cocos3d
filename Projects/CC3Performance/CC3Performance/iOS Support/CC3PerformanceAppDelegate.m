@@ -31,7 +31,6 @@
 
 #import "CC3PerformanceAppDelegate.h"
 #import "CC3PerformanceLayer.h"
-#import "CC3PerformanceScene.h"
 
 
 #define kAnimationFrameRate		60		// Animation frame rate
@@ -119,7 +118,6 @@
 	
 	// Create the customized CC3Layer and CC3Scene.
 	CC3Layer* cc3Layer = [CC3PerformanceLayer layer];
-	cc3Layer.cc3Scene = [CC3PerformanceScene scene];
 	
 	// Set the layer in the controller
 	_viewController.controlledNode = cc3Layer;

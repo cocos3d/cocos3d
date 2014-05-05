@@ -416,7 +416,7 @@
  * Sets the globe rotating and makes it semi-transparent.
  */
 -(CC3Scene*) makeHUDScene {
-	CC3Scene* hudScene = [HUDScene nodeWithName: @"HUDScene"];
+	CC3Scene* hudScene = [HUDScene scene];
 	
 	CC3Node* globe = [[self.cc3Scene getNodeNamed: kGlobeName] copy];
 	globe.location = kCC3VectorZero;

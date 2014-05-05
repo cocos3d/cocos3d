@@ -140,6 +140,58 @@
 	BOOL _shouldAlwaysUpdateViewport : 1;
 }
 
+/**
+ * The CC3Scene instance that maintains the 3D models and draws the 3D content.
+ *
+ * If your application contains multiple 3D scenes, you can swap between these scenes
+ * by simply setting the value of this property to the new scene. The old CC3Scene
+ * instance is released. So if you want to swap that old scene back into this layer
+ * at some point in the future, you should cache it somewhere, or recreated it.
+ *
+ * When the old scene is released, it will clean up after itself, including all the
+ * nodes and meshes it contains.
+ *
+ * If this layer already has a CC3Scene assigned, the wasRemoved method of the existing 
+ * CC3Scene is invoked to stop and remove any CCActions running on it and any nodes it contains.
+ *
+ * You can set the shouldStopActionsWhenRemoved of the CC3Scene to NO if you want the CCActions
+ * attached to the scene and its nodes to be paused, but not stopped and removed. Be aware that
+ * CCActions that are paused, but not stopped, will retain the CC3Scene, and could be cause for
+ * memory leaks if not managed correctly. Please see the notes of the CC3Node
+ * shouldStopActionsWhenRemoved property and the CC3Node wasRemoved method for more information.
+ *
+ * Setting this property while this layer is being displayed automatically invokes the
+ * open method on the new scene to ensure that the transforms are up to date before the
+ * next frame is rendered.
+ *
+ * In many cases, you do not need to set this property directly. If you do not set this 
+ * property directly, an instance of the Class returned by the cc3SceneClass property is 
+ * automatically instantiated the first time this property is accessed.
+ */
+@property(nonatomic, strong) CC3Scene* cc3Scene;
+
+/**
+ * Returns the Class used to automatically instantiate a value for the cc3Scene property, 
+ * if that property is not set directly. 
+ *
+ * The value returned by this method is a subclass of CC3Scene.
+ *
+ * This implementation attempts to derive the appropriate scene class from the name of the
+ * class of this instance by looking for a subclass of CC3Scene whose name is one of the 
+ * following (searched in this order):
+ *   # If the class name of this instance ends in "Layer", it is stripped and "Scene" is
+ *     appended to the stripped result (eg. HelloLayer -> HelloScene).
+ *   # If the class name of this instance ends in "Layer", it is stripped (eg. HelloLayer -> Hello).
+ *   # "Scene" is appended to the class name of this instance (eg. Hello -> HelloScene, 
+ *     including HelloLayer -> HelloLayerScene).
+ *
+ * If that is not sufficient, you can override the getter method of this property in your 
+ * custom CC3Layer subclass to return whatever you want, or you can set the cc3Scene property
+ * directly. If you override this method, remember the value returned by this method must be 
+ * a subclass of CC3Scene.
+ */
+@property(nonatomic, readonly) Class cc3SceneClass;
+
 
 #pragma mark Surfaces
 
@@ -155,7 +207,7 @@
  * When setting this property, the surfaces in the surface manager are automatically
  * resized to the contentSize of this layer.
  */
-@property(nonatomic, retain) CC3LayerSurfaceManager* surfaceManager;
+@property(nonatomic, strong) CC3LayerSurfaceManager* surfaceManager;
 
 /**
  * The class that will be used to automatically populate the surfaceManager property when
@@ -306,32 +358,6 @@
  * can use this method to remove them.
  */
 -(void) onCloseCC3Layer;
-
-/**
- * The CC3Scene instance that maintains the 3D models and draws the 3D content.
- *
- * If your application contains multiple 3D scenes, you can swap between these scenes
- * by simply setting the value of this property to the new scene. The old CC3Scene
- * instance is released. So if you want to swap that old scene back into this layer
- * at some point in the future, you should cache it somewhere, or recreated it.
- *
- * When the old scene is released, it will clean up after itself, including all the
- * nodes and meshes it contains.
- *
- * If this layer already has a CC3Scene assigned, the wasRemoved method of the existing
- * CC3Scene to stop and remove any CCActions running on it and the nodes it contains.
- *
- * You can set the shouldStopActionsWhenRemoved of the CC3Scene to NO if you want the CCActions
- * attached to the scene and its nodes to be paused, but not stopped and removed. Be aware that
- * CCActions that are paused, but not stopped, will retain the CC3Scene, and could be cause for
- * memory leaks if not managed correctly. Please see the notes of the CC3Node
- * shouldStopActionsWhenRemoved property and the CC3Node wasRemoved method for more information.
- *
- * Setting this property while this layer is being displayed automatically invokes the
- * open method on the new scene to ensure that the transforms are up to date before the
- * next frame is rendered.
- */
-@property(nonatomic, strong) CC3Scene* cc3Scene;	
 
 /**
  * Indicates whether this layer should update the 3D viewport on each rendering frame.

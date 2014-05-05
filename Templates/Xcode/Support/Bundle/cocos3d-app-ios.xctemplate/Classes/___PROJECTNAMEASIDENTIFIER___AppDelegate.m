@@ -8,12 +8,38 @@
 
 #import "___PROJECTNAMEASIDENTIFIER___AppDelegate.h"
 #import "___PROJECTNAMEASIDENTIFIER___Layer.h"
-#import "___PROJECTNAMEASIDENTIFIER___Scene.h"
 #import "CC3CC2Extensions.h"
 
 #define kAnimationFrameRate		60		// Animation frame rate
 
+#if CC3_CC2_CLASSIC
+
 @implementation ___PROJECTNAMEASIDENTIFIER___AppDelegate
+
+#if CC3_CC2_2
+/**
+ * In cocos2d 2.x, the view controller and CCDirector are one and the same, and we create the
+ * controller using the singleton mechanism. To establish the correct CCDirector/UIViewController
+ * class, this MUST be performed before any other references to the CCDirector singleton!!
+ *
+ * NOTE: As of iOS6, supported device orientations are an intersection of the mask established for the
+ * UIViewController (as set in this method here), and the values specified in the project 'Info.plist'
+ * file, under the 'Supported interface orientations' and 'Supported interface orientations (iPad)'
+ * keys. Specifically, although the mask here is set to UIInterfaceOrientationMaskAll, to ensure that
+ * all orienatations are enabled under iOS6, be sure that those settings in the 'Info.plist' file also
+ * reflect all four orientation values. By default, the 'Info.plist' settings only enable the two
+ * landscape orientations. These settings can also be set on the Summary page of your project.
+ */
+-(void) establishDirectorController {
+	_viewController = CC3DeviceCameraOverlayUIViewController.sharedDirector;
+	_viewController.supportedInterfaceOrientations = UIInterfaceOrientationMaskAll;
+	_viewController.viewShouldUseStencilBuffer = NO;		// Set to YES if using shadow volumes
+	_viewController.viewPixelSamples = 1;					// Set to 4 for antialiasing multisampling
+	_viewController.animationInterval = (1.0f / kAnimationFrameRate);
+	_viewController.displayStats = YES;
+	[_viewController enableRetinaDisplay: YES];
+}
+#endif	// CC3_CC2_2
 
 #if CC3_CC2_1
 /**
@@ -52,31 +78,6 @@
 	// This must be done after the GL view is assigned to the director!
 	[director enableRetinaDisplay: YES];
 }
-
-#else
-
-/**
- * In cocos2d 2.x, the view controller and CCDirector are one and the same, and we create the
- * controller using the singleton mechanism. To establish the correct CCDirector/UIViewController
- * class, this MUST be performed before any other references to the CCDirector singleton!!
- *
- * NOTE: As of iOS6, supported device orientations are an intersection of the mask established for the
- * UIViewController (as set in this method here), and the values specified in the project 'Info.plist'
- * file, under the 'Supported interface orientations' and 'Supported interface orientations (iPad)'
- * keys. Specifically, although the mask here is set to UIInterfaceOrientationMaskAll, to ensure that
- * all orienatations are enabled under iOS6, be sure that those settings in the 'Info.plist' file also
- * reflect all four orientation values. By default, the 'Info.plist' settings only enable the two
- * landscape orientations. These settings can also be set on the Summary page of your project.
- */
--(void) establishDirectorController {
-	_viewController = CC3DeviceCameraOverlayUIViewController.sharedDirector;
-	_viewController.supportedInterfaceOrientations = UIInterfaceOrientationMaskAll;
-	_viewController.viewShouldUseStencilBuffer = NO;		// Set to YES if using shadow volumes
-	_viewController.viewPixelSamples = 1;					// Set to 4 for antialiasing multisampling
-	_viewController.animationInterval = (1.0f / kAnimationFrameRate);
-	_viewController.displayStats = YES;
-	[_viewController enableRetinaDisplay: YES];
-}
 #endif	// CC3_CC2_1
 
 -(void) applicationDidFinishLaunching: (UIApplication*) application {
@@ -99,10 +100,6 @@
 	
 	// Create the customized CC3Layer that supports 3D rendering.
 	CC3Layer* cc3Layer = [___PROJECTNAMEASIDENTIFIER___Layer layer];
-	
-	// Create the customized 3D scene and attach it to the layer.
-	// Could also just create this inside the customer layer.
-	cc3Layer.cc3Scene = [___PROJECTNAMEASIDENTIFIER___Scene scene];
 	
 	// Assign to a generic variable so we can uncomment options below to play with the capabilities
 	CC3ControllableLayer* controlledLayer = cc3Layer;
@@ -173,3 +170,58 @@
 }
 
 @end
+
+#else
+
+@implementation CC3DemoMashUpAppDelegate
+
+// This is the only app delegate method you need to implement when inheriting from CCAppDelegate.
+// This method is a good place to add one time setup code that only runs when your app is first launched.
+-(BOOL) application: (UIApplication*) application didFinishLaunchingWithOptions: (NSDictionary*) launchOptions {
+	
+	// Setup Cocos2D with reasonable defaults for everything.
+	// See CCAppDelegate.h for more options.
+	// With Cocos3D, you MUST include CCSetupDepthFormat as GL_DEPTH_COMPONENT16 or GL_DEPTH24_STENCIL8 !!
+	// If you want more flexibility, you can configure Cocos2D yourself instead of calling setupCocos2dWithOptions:.
+	[self setupCocos2dWithOptions:
+	 @{
+	   CCSetupDepthFormat: @GL_DEPTH16,							// Change to @GL_DEPTH24_STENCIL8 if using shadow volumes which require a stencil buffer
+	   CCSetupShowDebugStats: @(YES),							// Show the FPS and draw call label.
+	   CCSetupAnimationInterval: @(1.0 / kAnimationFrameRate),	// Framerate (defaults to 60 FPS).
+	   //	   CCSetupMultiSampling: @(YES),							// Use multisampling on the main view
+	   //	   CCSetupNumberOfSamples: @(4),							// Number of samples to use per pixel (max 4)
+	   //	   CCSetupScreenOrientation: CCScreenOrientationPortrait,	// Run in portrait mode.
+	   }];
+	
+	return YES;
+}
+
+/** Returns the initial 2D CCScene. Our 2D scene contains a CC3Layer holding a 3D CC3Scene. */
+-(CCScene*) startScene {
+	
+	// Create the customized CC3Layer that supports 3D rendering.
+	CC3Layer* cc3Layer = [CC3DemoMashUpLayer layer];
+	
+	// As an alternte to running "full-screen", the CC3Layer can run as a smaller "sub-window"
+	// within any standard CCNode. That allows you to have a mostly 2D window, with a smaller
+	// 3D window embedded in it. To experiment with this smaller, square, embedded 3D window,
+	// uncomment the following lines:
+//	CGSize cs = cc3Layer.contentSize;		// The layer starts out "full-screen".
+//	GLfloat sideLen = MIN(cs.width, cs.height) - 200.0f;
+//	cc3Layer.contentSize = CGSizeMake(sideLen, sideLen);
+//	cc3Layer.position = ccp(100.0, 100.0);
+	
+	// The smaller 3D layer can even be moved around on the screen dyanmically. To see this in
+	// action, uncomment the lines above as described, and also uncomment the following two lines.
+//	cc3Layer.position = ccp(0.0, 0.0);
+//	[cc3Layer runAction: [CCActionMoveTo actionWithDuration: 15.0 position: ccp(500.0, 250.0)]];
+	
+	// Wrap the layer in a 2D scene and run it in the director
+	CCScene *scene = [CCScene node];
+	[scene addChild: cc3Layer];
+	return scene;
+}
+
+@end
+
+#endif	// CC3_CC2_CLASSIC

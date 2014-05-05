@@ -32,9 +32,7 @@
 #import "MainViewController.h"
 #import "CC3DeviceCameraOverlayUIViewController.h"
 #import "CC3DemoMashUpLayer.h"
-#import "CC3DemoMashUpScene.h"
 #import "CC3PerformanceLayer.h"
-#import "CC3PerformanceScene.h"
 #import "MainLayer.h"
 
 
@@ -225,18 +223,10 @@
 -(CC3ControllableLayer*) makeDemo3DTilesLayer { return [MainLayer layer]; }
 
 /** Creates and returns a 3D layer and scene to display the CC3DemoMashUp demo scene. */
--(CC3Layer*) makeDemoMashUpLayer {
-	CC3Layer* cc3Layer = [CC3DemoMashUpLayer layer];
-	cc3Layer.cc3Scene = [CC3DemoMashUpScene scene];
-	return cc3Layer;
-}
+-(CC3Layer*) makeDemoMashUpLayer { return [CC3DemoMashUpLayer layer]; }
 
 /** Creates and returns a 3D layer and scene to display the CC3Performance demo scene. */
--(CC3Layer*) makePerformanceLayer {
-	CC3Layer* cc3Layer = [CC3PerformanceLayer layer];
-	cc3Layer.cc3Scene = [CC3PerformanceScene scene];
-	return cc3Layer;
-}
+-(CC3Layer*) makePerformanceLayer { return [CC3PerformanceLayer layer]; }
 
 
 #pragma mark User interface interaction
