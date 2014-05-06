@@ -12,8 +12,63 @@
 
 #define kAnimationFrameRate		60		// Animation frame rate
 
-#if CC3_CC2_CLASSIC
+#if !CC3_CC2_CLASSIC
 
+/** App Delegate for Cocos2D v3 and above. */
+@implementation ___PROJECTNAMEASIDENTIFIER___AppDelegate
+
+// This is the only app delegate method you need to implement when inheriting from CCAppDelegate.
+// This method is a good place to add one time setup code that only runs when your app is first launched.
+-(BOOL) application: (UIApplication*) application didFinishLaunchingWithOptions: (NSDictionary*) launchOptions {
+	
+	// Setup Cocos2D with reasonable defaults for everything.
+	// See CCAppDelegate.h for more options.
+	// With Cocos3D, you MUST include CCSetupDepthFormat as GL_DEPTH_COMPONENT16 or GL_DEPTH24_STENCIL8 !!
+	// If you want more flexibility, you can configure Cocos2D yourself instead of calling setupCocos2dWithOptions:.
+	[self setupCocos2dWithOptions:
+	 @{
+	   CCSetupDepthFormat: @GL_DEPTH_COMPONENT16,				// Change to @GL_DEPTH24_STENCIL8 if using shadow volumes which require a stencil buffer
+	   CCSetupShowDebugStats: @(YES),							// Show the FPS and draw call label.
+	   CCSetupAnimationInterval: @(1.0 / kAnimationFrameRate),	// Framerate (defaults to 60 FPS).
+//	   CCSetupMultiSampling: @(YES),							// Use multisampling on the main view
+//	   CCSetupNumberOfSamples: @(4),							// Number of samples to use per pixel (max 4)
+//	   CCSetupScreenOrientation: CCScreenOrientationPortrait,	// Run in portrait mode.
+	   }];
+	
+	return YES;
+}
+
+/** Returns the initial 2D CCScene. Our 2D scene contains a CC3Layer holding a 3D CC3Scene. */
+-(CCScene*) startScene {
+	
+	// Create the customized CC3Layer that supports 3D rendering.
+	CC3Layer* cc3Layer = [___PROJECTNAMEASIDENTIFIER___Layer layer];
+	
+	// As an alternte to running "full-screen", the CC3Layer can run as a smaller "sub-window"
+	// within any standard CCNode. That allows you to have a mostly 2D window, with a smaller
+	// 3D window embedded in it. To experiment with this smaller, square, embedded 3D window,
+	// uncomment the following lines:
+//	CGSize cs = cc3Layer.contentSize;		// The layer starts out "full-screen".
+//	GLfloat sideLen = MIN(cs.width, cs.height) - 200.0f;
+//	cc3Layer.contentSize = CGSizeMake(sideLen, sideLen);
+//	cc3Layer.position = ccp(100.0, 100.0);
+	
+	// The smaller 3D layer can even be moved around on the screen dyanmically. To see this in
+	// action, uncomment the lines above as described, and also uncomment the following two lines.
+//	cc3Layer.position = ccp(0.0, 0.0);
+//	[cc3Layer runAction: [CCActionMoveTo actionWithDuration: 15.0 position: ccp(500.0, 250.0)]];
+	
+	// Wrap the layer in a 2D scene and run it in the director
+	CCScene *scene = [CCScene node];
+	[scene addChild: cc3Layer];
+	return scene;
+}
+
+@end
+
+#else
+
+/** App Delegate for Cocos2D below v3. */
 @implementation ___PROJECTNAMEASIDENTIFIER___AppDelegate
 
 #if CC3_CC2_2
@@ -147,7 +202,7 @@
 									repeats: NO];
 	
 	// If dropping to 40fps is not an issue, remove above, and uncomment the following to avoid delay.
-	//	[self resumeApp];
+//	[self resumeApp];
 }
 
 -(void) applicationDidReceiveMemoryWarning: (UIApplication*) application {
@@ -171,57 +226,4 @@
 
 @end
 
-#else
-
-@implementation CC3DemoMashUpAppDelegate
-
-// This is the only app delegate method you need to implement when inheriting from CCAppDelegate.
-// This method is a good place to add one time setup code that only runs when your app is first launched.
--(BOOL) application: (UIApplication*) application didFinishLaunchingWithOptions: (NSDictionary*) launchOptions {
-	
-	// Setup Cocos2D with reasonable defaults for everything.
-	// See CCAppDelegate.h for more options.
-	// With Cocos3D, you MUST include CCSetupDepthFormat as GL_DEPTH_COMPONENT16 or GL_DEPTH24_STENCIL8 !!
-	// If you want more flexibility, you can configure Cocos2D yourself instead of calling setupCocos2dWithOptions:.
-	[self setupCocos2dWithOptions:
-	 @{
-	   CCSetupDepthFormat: @GL_DEPTH16,							// Change to @GL_DEPTH24_STENCIL8 if using shadow volumes which require a stencil buffer
-	   CCSetupShowDebugStats: @(YES),							// Show the FPS and draw call label.
-	   CCSetupAnimationInterval: @(1.0 / kAnimationFrameRate),	// Framerate (defaults to 60 FPS).
-	   //	   CCSetupMultiSampling: @(YES),							// Use multisampling on the main view
-	   //	   CCSetupNumberOfSamples: @(4),							// Number of samples to use per pixel (max 4)
-	   //	   CCSetupScreenOrientation: CCScreenOrientationPortrait,	// Run in portrait mode.
-	   }];
-	
-	return YES;
-}
-
-/** Returns the initial 2D CCScene. Our 2D scene contains a CC3Layer holding a 3D CC3Scene. */
--(CCScene*) startScene {
-	
-	// Create the customized CC3Layer that supports 3D rendering.
-	CC3Layer* cc3Layer = [CC3DemoMashUpLayer layer];
-	
-	// As an alternte to running "full-screen", the CC3Layer can run as a smaller "sub-window"
-	// within any standard CCNode. That allows you to have a mostly 2D window, with a smaller
-	// 3D window embedded in it. To experiment with this smaller, square, embedded 3D window,
-	// uncomment the following lines:
-//	CGSize cs = cc3Layer.contentSize;		// The layer starts out "full-screen".
-//	GLfloat sideLen = MIN(cs.width, cs.height) - 200.0f;
-//	cc3Layer.contentSize = CGSizeMake(sideLen, sideLen);
-//	cc3Layer.position = ccp(100.0, 100.0);
-	
-	// The smaller 3D layer can even be moved around on the screen dyanmically. To see this in
-	// action, uncomment the lines above as described, and also uncomment the following two lines.
-//	cc3Layer.position = ccp(0.0, 0.0);
-//	[cc3Layer runAction: [CCActionMoveTo actionWithDuration: 15.0 position: ccp(500.0, 250.0)]];
-	
-	// Wrap the layer in a 2D scene and run it in the director
-	CCScene *scene = [CCScene node];
-	[scene addChild: cc3Layer];
-	return scene;
-}
-
-@end
-
-#endif	// CC3_CC2_CLASSIC
+#endif	// !CC3_CC2_CLASSIC

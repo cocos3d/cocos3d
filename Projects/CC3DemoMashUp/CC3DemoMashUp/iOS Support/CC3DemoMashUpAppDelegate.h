@@ -29,7 +29,13 @@
 
 #import "CC3Environment.h"
 
-#if CC3_CC2_CLASSIC
+#if !CC3_CC2_CLASSIC
+
+/** App Delegate for Cocos2D v3 and above. */
+@interface CC3DemoMashUpAppDelegate : CCAppDelegate
+@end
+
+#else
 
 #import <UIKit/UIKit.h>
 #import "CC3DeviceCameraOverlayUIViewController.h"
@@ -39,13 +45,6 @@
 	UIWindow* _window;
 	CC3DeviceCameraOverlayUIViewController* _viewController;
 }
-
 @end
 
-#else
-
-/** App Delegate for Cocos2D v3 and above. */
-@interface CC3DemoMashUpAppDelegate : CCAppDelegate
-@end
-
-#endif	// CC3_CC2_CLASSIC
+#endif	// !CC3_CC2_CLASSIC

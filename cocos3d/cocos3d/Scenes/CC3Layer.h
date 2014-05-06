@@ -33,6 +33,11 @@
 #import "CC3Scene.h"
 #import "CC3RenderSurfaces.h"
 
+#if CC3_CC2_RENDER_QUEUE
+#	import	"CCRenderer_private.h"
+#endif	// CC3_CC2_RENDER_QUEUE
+
+
 /**
  * CC3Layer is a cocos2d CCLayer that supports full 3D rendering in combination with normal
  * cocos2d 2D rendering. It forms the bridge between the 2D and 3D drawing environments.

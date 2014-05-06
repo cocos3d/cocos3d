@@ -543,6 +543,8 @@
 	[super dealloc];
 }
 
+-(NSInteger) globalSortOrder { return 0; }
+
 -(void) invokeOnRenderer: (CCRenderer*) renderer {
 	CC3OpenGL* gl = CC3OpenGL.sharedGL;
 	[gl pushGroupMarkerC: _cc3Layer.renderStreamGroupMarker];
