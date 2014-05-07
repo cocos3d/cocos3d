@@ -1219,7 +1219,9 @@
 
 -(CC3IntPoint) viewSurfaceOrigin { return _viewSurface.origin; }
 
--(void) setViewSurfaceOrigin: (CC3IntPoint) viewSurfaceOrigin { _viewSurface.origin = viewSurfaceOrigin; }
+-(void) setViewSurfaceOrigin: (CC3IntPoint) viewSurfaceOrigin {
+	((CC3SurfaceSection*)self.viewSurface).origin = viewSurfaceOrigin;
+}
 
 /**
  * Lazily create a surface, using the color format of the view's color surface,

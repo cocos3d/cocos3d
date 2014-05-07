@@ -22,12 +22,13 @@
 -(BOOL) application: (UIApplication*) application didFinishLaunchingWithOptions: (NSDictionary*) launchOptions {
 	
 	// Setup Cocos2D with reasonable defaults for everything.
+	// With Cocos3D, you MUST include CCSetupDepthFormat as GL_DEPTH_COMPONENT16 or GL_DEPTH_COMPONENT24
+	// if you don't need shadow volumes, or GL_DEPTH24_STENCIL8 if you want to use shadow volumes.
 	// See CCAppDelegate.h for more options.
-	// With Cocos3D, you MUST include CCSetupDepthFormat as GL_DEPTH_COMPONENT16 or GL_DEPTH24_STENCIL8 !!
 	// If you want more flexibility, you can configure Cocos2D yourself instead of calling setupCocos2dWithOptions:.
 	[self setupCocos2dWithOptions:
 	 @{
-	   CCSetupDepthFormat: @GL_DEPTH_COMPONENT16,				// Change to @GL_DEPTH24_STENCIL8 if using shadow volumes which require a stencil buffer
+	   CCSetupDepthFormat: @GL_DEPTH_COMPONENT16,				// Change to @GL_DEPTH24_STENCIL8 if using shadow volumes, which require a stencil buffer
 	   CCSetupShowDebugStats: @(YES),							// Show the FPS and draw call label.
 	   CCSetupAnimationInterval: @(1.0 / kAnimationFrameRate),	// Framerate (defaults to 60 FPS).
 //	   CCSetupMultiSampling: @(YES),							// Use multisampling on the main view
