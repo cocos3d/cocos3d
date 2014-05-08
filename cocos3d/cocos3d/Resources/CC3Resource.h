@@ -133,7 +133,7 @@
  * Once this method has been successfully invoked, the application may immediately access the content
  * contained in this resource, through properties and methods defined by the concrete subclasses.
  */
--(BOOL) loadFromFile: (NSString*) aFilePath;
+-(BOOL) loadFromFile: (NSString*) filePath;
 
 /**
  * Template method that processes the contents of the file at the specified file path, which must
@@ -158,7 +158,7 @@
  * assertion error indicating that saving is not supported, and returns NO. Subclasses that manage
  * a resource type that can be saved will override this method to perform the saving activity.
  */
--(BOOL) saveToFile: (NSString*) aFilePath;
+-(BOOL) saveToFile: (NSString*) filePath;
 
 
 #pragma mark Allocation and initialization
@@ -197,7 +197,7 @@
  *
  * This method will return nil if the file could not be loaded.
  */
--(id) initFromFile: (NSString*) aFilePath;
+-(id) initFromFile: (NSString*) filePath;
 
 /**
  * Returns a resource instance loaded from the specified file.
@@ -227,7 +227,7 @@
  *
  * This method will return nil if the file is not in the cache and could not be loaded.
  */
-+(id) resourceFromFile: (NSString*) aFilePath;
++(id) resourceFromFile: (NSString*) filePath;
 
 /** 
  * Returns a resource name derived from the specified file path.
@@ -238,7 +238,7 @@
  *
  * This implementation returns the lastComponent of the specified file path.
  */
-+(NSString*) resourceNameFromFilePath: (NSString*) aFilePath;
++(NSString*) resourceNameFromFilePath: (NSString*) filePath;
 
 /**
  * Returns a description formatted as a source-code line for loading this resource from its file.

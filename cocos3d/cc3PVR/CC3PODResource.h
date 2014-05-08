@@ -243,7 +243,7 @@
  * loadFromFile: method, make any changes, and invoke this method to save the content back to a file.
  * Once saved, the build method can then be invoked to extract the content into component objects.
  */
--(BOOL) saveToFile: (NSString*) aFilePath;
+-(BOOL) saveToFile: (NSString*) filePath;
 
 /**
  * Saves the animation content of this resource to the file at the specified file path and
@@ -267,7 +267,7 @@
  * loadFromFile: method, make any changes, and invoke this method to save the content back to a file.
  * Once saved, the build method can then be invoked to extract the content into component objects.
  */
--(BOOL) saveAnimationToFile: (NSString*) aFilePath;
+-(BOOL) saveAnimationToFile: (NSString*) filePath;
 
 
 #pragma mark Accessing node data and building nodes

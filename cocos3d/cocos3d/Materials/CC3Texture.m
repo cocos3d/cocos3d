@@ -383,27 +383,27 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 
 #pragma mark Texture content and sizing
 
--(BOOL) loadTarget: (GLenum) target fromFile: (NSString*) aFilePath {
+-(BOOL) loadTarget: (GLenum) target fromFile: (NSString*) filePath {
 	
-	if (!_name) self.name = [self.class textureNameFromFilePath: aFilePath];
+	if (!_name) self.name = [self.class textureNameFromFilePath: filePath];
 	
 	MarkRezActivityStart();
 	
-	id content = [[self.textureContentClass alloc] initFromFile: aFilePath];
+	id content = [[self.textureContentClass alloc] initFromFile: filePath];
 	if ( !content ) {
-		LogError(@"%@ could not load texture from file %@", self, CC3EnsureAbsoluteFilePath(aFilePath));
+		LogError(@"%@ could not load texture from file %@", self, filePath);
 		return NO;
 	}
 	
 	[self bindTextureContent: content toTarget: target];
 	[content release];		// Could be big, so get rid of it immediately
 	
-	LogRez(@"%@ loaded from file %@ in %.3f ms", self, aFilePath, GetRezActivityDuration() * 1000);
+	LogRez(@"%@ loaded from file %@ in %.3f ms", self, filePath, GetRezActivityDuration() * 1000);
 	return YES;
 }
 
--(BOOL) loadFromFile: (NSString*) aFilePath {
-	BOOL wasLoaded = [self loadTarget: self.textureTarget fromFile: aFilePath];
+-(BOOL) loadFromFile: (NSString*) filePath {
+	BOOL wasLoaded = [self loadTarget: self.textureTarget fromFile: filePath];
 	if (wasLoaded && self.class.shouldGenerateMipmaps) [self generateMipmap];
 	[self checkGLDebugLabel];
 	return wasLoaded;
@@ -601,8 +601,8 @@ static BOOL _shouldCacheAssociatedCCTextures = NO;
 
 -(void) populateFrom: (CC3Texture*) another { CC3Assert(NO, @"%@ should not be copied.", self.class); }
 
-+(Class) textureClassForFile: (NSString*) aFilePath {
-	NSString* lcPath = aFilePath.lowercaseString;
++(Class) textureClassForFile: (NSString*) filePath {
+	NSString* lcPath = filePath.lowercaseString;
 	if ([lcPath hasSuffix: @".pvr"] ||
 		[lcPath hasSuffix: @".pvr.gz"] ||
 		[lcPath hasSuffix: @".pvr.ccz"] ) {
@@ -616,15 +616,15 @@ static BOOL _shouldCacheAssociatedCCTextures = NO;
  * the correct class, release this instance and instantiate and return an instance of the correct
  * class. If this IS the correct class, perform normal init and load the specified file.
  */
--(id) initFromFile: (NSString*) aFilePath {
-	Class texClz = [self.class textureClassForFile: aFilePath];
+-(id) initFromFile: (NSString*) filePath {
+	Class texClz = [self.class textureClassForFile: filePath];
 	if (self.class != texClz) {
 		[self release];
-		return [[texClz alloc] initFromFile: aFilePath];
+		return [[texClz alloc] initFromFile: filePath];
 	}
 	
 	if ( (self = [self init]) ) {
-		if ( ![self loadFromFile: aFilePath] ) {
+		if ( ![self loadFromFile: filePath] ) {
 			[self release];
 			return nil;
 		}
@@ -632,16 +632,16 @@ static BOOL _shouldCacheAssociatedCCTextures = NO;
 	return self;
 }
 
-+(id) textureFromFile: (NSString*) aFilePath {
-	id tex = [self getTextureNamed: [self textureNameFromFilePath: aFilePath]];
++(id) textureFromFile: (NSString*) filePath {
+	id tex = [self getTextureNamed: [self textureNameFromFilePath: filePath]];
 	if (tex) return tex;
 	
-	tex = [[[self textureClassForFile: aFilePath] alloc] initFromFile: aFilePath];
+	tex = [[[self textureClassForFile: filePath] alloc] initFromFile: filePath];
 	[self addTexture: tex];
 	return [tex autorelease];
 }
 
-+(NSString*) textureNameFromFilePath: (NSString*) aFilePath { return aFilePath.lastPathComponent; }
++(NSString*) textureNameFromFilePath: (NSString*) filePath { return filePath.lastPathComponent; }
 
 +(Class) textureClassForCGImage { return CC3Texture2D.class; }
 
@@ -1022,7 +1022,7 @@ static ccTexParams _defaultCubeMapTextureParameters = { GL_LINEAR_MIPMAP_NEAREST
 
 #pragma mark Texture file loading
 
--(BOOL) loadFromFile: (NSString*) aFilePath {
+-(BOOL) loadFromFile: (NSString*) filePath {
 	CC3Assert(NO, @"%@ is used to load six cube textures. It cannot load a single texture.", self);
 	return NO;
 }
@@ -1033,8 +1033,8 @@ static ccTexParams _defaultCubeMapTextureParameters = { GL_LINEAR_MIPMAP_NEAREST
 	[texContent release];		// Could be big, so get rid of it immediately
 }
 
--(BOOL) loadCubeFace: (GLenum) faceTarget fromFile: (NSString*) aFilePath {
-	return [self loadTarget: faceTarget fromFile: aFilePath];
+-(BOOL) loadCubeFace: (GLenum) faceTarget fromFile: (NSString*) filePath {
+	return [self loadTarget: faceTarget fromFile: filePath];
 }
 
 -(BOOL) loadFromFilesPosX: (NSString*) posXFilePath negX: (NSString*) negXFilePath
@@ -1340,12 +1340,12 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 	return [[((CC3TextureUnitTexture*)[self alloc]) initWithTexture: texture] autorelease];
 }
 
--(id) initFromFile: (NSString*) aFilePath {
-	return [self initWithTexture: [CC3Texture textureFromFile: aFilePath]];
+-(id) initFromFile: (NSString*) filePath {
+	return [self initWithTexture: [CC3Texture textureFromFile: filePath]];
 }
 
-+(id) textureFromFile: (NSString*) aFilePath {
-	return [[[self alloc] initFromFile: aFilePath] autorelease];
++(id) textureFromFile: (NSString*) filePath {
+	return [[[self alloc] initFromFile: filePath] autorelease];
 }
 
 -(id) initWithCGImage: (CGImageRef) cgImg {
@@ -1729,16 +1729,16 @@ contentSizeInPixels: (CGSize) sizeInPixels
 }
 #endif	// CC3_CC2_CLASSIC
 
--(id) initFromFile: (NSString*) aFilePath {
-	if ( [CC3STBImage shouldUseForFileExtension: aFilePath.pathExtension] )
-		return [self initFromSTBIFile: aFilePath];
+-(id) initFromFile: (NSString*) filePath {
+	if ( [CC3STBImage shouldUseForFileExtension: filePath.pathExtension] )
+		return [self initFromSTBIFile: filePath];
 	else
-		return [self initFromOSFile: aFilePath];
+		return [self initFromOSFile: filePath];
 }
 
--(id) initFromSTBIFile: (NSString*) aFilePath {
+-(id) initFromSTBIFile: (NSString*) filePath {
 	if( (self = [super init]) ) {
-		CC3STBImage* stbImage = [CC3STBImage imageFromFile: aFilePath];
+		CC3STBImage* stbImage = [CC3STBImage imageFromFile: filePath];
 		if (!stbImage) return nil;
 		
 		_imageData = stbImage.extractImageData;
@@ -1756,9 +1756,13 @@ contentSizeInPixels: (CGSize) sizeInPixels
 	return self;
 }
 
--(id) initFromOSFile: (NSString*) aFilePath {
+-(id) initFromOSFile: (NSString*) filePath {
 #if CC3_IOS
-	UIImage* uiImg = [UIImage imageWithContentsOfFile: CC3EnsureAbsoluteFilePath(aFilePath)];
+	// Resolve an absolute path in either the application bundle resource
+	// directory or the Cocos3D bundle resource directory.
+	NSString* absFilePath = CC3ResolveResourceFilePath(filePath);
+	LogErrorIf(!absFilePath, @"Could not locate texture file '%@' in either the application resources or the Cocos3D library resources", filePath);
+	UIImage* uiImg = [UIImage imageWithContentsOfFile: absFilePath];
 
 #if CC3_CC2_1
 #if COCOS2D_VERSION < 0x010100
@@ -1774,7 +1778,11 @@ contentSizeInPixels: (CGSize) sizeInPixels
 #endif	// CC_IOS
 	
 #if CC3_OSX
-	NSData* imgData = [NSData dataWithContentsOfFile: CC3EnsureAbsoluteFilePath(aFilePath)];
+	// Resolve an absolute path in either the application bundle resource
+	// directory or the Cocos3D bundle resource directory.
+	NSString* absFilePath = CC3ResolveResourceFilePath(filePath);
+	LogErrorIf(!absFilePath, @"Could not locate texture file '%@' in either the application resources or the Cocos3D library resources", filePath);
+	NSData* imgData = [NSData dataWithContentsOfFile: absFilePath];
 	NSBitmapImageRep* image = [NSBitmapImageRep imageRepWithData: imgData];
 	return [self initWithCGImage: image.CGImage];
 #endif	// CC_OSX

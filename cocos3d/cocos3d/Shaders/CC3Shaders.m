@@ -244,25 +244,25 @@ static CC3ShaderSourceCode* _defaultShaderPreamble = nil;
 	return shader;
 }
 
--(id) initFromSourceCodeFile: (NSString*) aFilePath {
-	return [self initFromSourceCode: [CC3ShaderSourceCode shaderSourceCodeFromFile: aFilePath]];
+-(id) initFromSourceCodeFile: (NSString*) filePath {
+	return [self initFromSourceCode: [CC3ShaderSourceCode shaderSourceCodeFromFile: filePath]];
 }
 
 // We don't delegate to shaderFromShaderSource: by retrieving the shader source, because the
 // shader source may have been dropped from its cache, even though the shader is still in its
 // cache. The result would be to constantly create and cache the shader source unnecessarily.
-+(id) shaderFromSourceCodeFile: (NSString*) aFilePath {
-	id shader = [self getShaderNamed: [CC3ShaderSourceCode shaderSourceCodeNameFromFilePath: aFilePath]];
++(id) shaderFromSourceCodeFile: (NSString*) filePath {
+	id shader = [self getShaderNamed: [CC3ShaderSourceCode shaderSourceCodeNameFromFilePath: filePath]];
 	if (shader) return shader;
 	
-	shader = [[[self alloc] initFromSourceCodeFile: aFilePath] autorelease];
+	shader = [[[self alloc] initFromSourceCodeFile: filePath] autorelease];
 	[self addShader: shader];
 	return shader;
 }
 
 // Deprecated
-+(NSString*) shaderNameFromFilePath: (NSString*) aFilePath {
-	return [CC3ShaderSourceCode shaderSourceCodeNameFromFilePath: aFilePath];
++(NSString*) shaderNameFromFilePath: (NSString*) filePath {
+	return [CC3ShaderSourceCode shaderSourceCodeNameFromFilePath: filePath];
 }
 
 -(NSString*) description {
@@ -1071,17 +1071,17 @@ static id<CC3ShaderMatcher> _shaderMatcher = nil;
 	return [trimmedLine hasPrefix: @"#import"] || [trimmedLine hasPrefix: @"#include"];
 }
 
-+(id) shaderSourceCodeFromFile: (NSString*) aFilePath {
-	NSString* shSrcName = [self shaderSourceCodeNameFromFilePath: aFilePath];
++(id) shaderSourceCodeFromFile: (NSString*) filePath {
+	NSString* shSrcName = [self shaderSourceCodeNameFromFilePath: filePath];
 	CC3ShaderSourceCode* shSrc = [self getShaderSourceCodeNamed: shSrcName];
 	if (shSrc) return shSrc;
 	
 	MarkRezActivityStart();
 	
+	NSString* absFilePath = CC3ResolveResourceFilePath(filePath);
+	CC3Assert(absFilePath, @"Could not locate GLSL file '%@' in either the application resources or the Cocos3D library resources", filePath);
+
 	NSError* err = nil;
-	NSString* absFilePath = CC3EnsureAbsoluteFilePath(aFilePath);
-	CC3Assert([[NSFileManager defaultManager] fileExistsAtPath: absFilePath],
-			  @"Could not load GLSL file '%@' because it could not be found", absFilePath);
 	NSString* srcCodeString = [NSString stringWithContentsOfFile: absFilePath encoding: NSUTF8StringEncoding error: &err];
 	CC3Assert(!err, @"Could not load GLSL file '%@' because %@, (code %li), failure reason %@",
 			  absFilePath, err.localizedDescription, (long)err.code, err.localizedFailureReason);
@@ -1089,11 +1089,11 @@ static id<CC3ShaderMatcher> _shaderMatcher = nil;
 	shSrc = [self shaderSourceCodeWithName: shSrcName fromSourceCodeString: srcCodeString];
 	shSrc.wasLoadedFromFile = YES;
 	
-	LogRez(@"Loaded GLSL source from file %@ in %.3f ms", aFilePath, GetRezActivityDuration() * 1000);
+	LogRez(@"Loaded GLSL source from file %@ in %.3f ms", filePath, GetRezActivityDuration() * 1000);
 	return shSrc;
 }
 
-+(NSString*) shaderSourceCodeNameFromFilePath: (NSString*) aFilePath { return aFilePath.lastPathComponent; }
++(NSString*) shaderSourceCodeNameFromFilePath: (NSString*) filePath { return filePath.lastPathComponent; }
 
 static Class _sourceCodeSubsectionClass = nil;
 

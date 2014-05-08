@@ -76,11 +76,15 @@
 
 #pragma mark File loading
 
--(BOOL) loadFromFile: (NSString*) aFilePath {
+-(BOOL) loadFromFile: (NSString*) filePath {
 
 	[self deleteImageData];		// Delete any existing image data first.
 	
-	NSString* absFilePath = CC3EnsureAbsoluteFilePath(aFilePath);
+	// Resolve an absolute path in either the application bundle resource
+	// directory or the Cocos3D bundle resource directory.
+	NSString* absFilePath = CC3ResolveResourceFilePath(filePath);
+	LogErrorIf(!absFilePath, @"Could not locate texture file '%@' in either the application resources or the Cocos3D library resources", filePath);
+
 	_imageData = stbi_load(absFilePath.UTF8String,
 						   (int*)&_size.width,
 						   (int*)&_size.height,
@@ -105,14 +109,14 @@
 	return self;
 }
 
--(id) initFromFile: (NSString*) aFilePath {
+-(id) initFromFile: (NSString*) filePath {
 	if ( (self = [self init]) ) {
-		if ( ![self loadFromFile: aFilePath] ) return nil;
+		if ( ![self loadFromFile: filePath] ) return nil;
 	}
 	return self;
 }
 
-+(id) imageFromFile: (NSString*) aFilePath { return [[[self alloc] initFromFile: aFilePath] autorelease]; }
++(id) imageFromFile: (NSString*) filePath { return [[[self alloc] initFromFile: filePath] autorelease]; }
 
 
 #pragma mark File types

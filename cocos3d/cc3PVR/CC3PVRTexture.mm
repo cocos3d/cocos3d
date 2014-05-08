@@ -127,12 +127,15 @@
 
 #if CC3_IOS
 
--(id) initFromFile: (NSString*) aFilePath {
+-(id) initFromFile: (NSString*) filePath {
 	if ( (self = [super init]) ) {
 		
+		// Resolve an absolute path in either the application bundle resource
+		// directory or the Cocos3D bundle resource directory.
 		// Split the path into directory and file names, sset the PVR read path
 		// to the directory and pass the unqualified file name to the parser.
-		NSString* absFilePath = CC3EnsureAbsoluteFilePath(aFilePath);
+		NSString* absFilePath = CC3ResolveResourceFilePath(filePath);
+		LogErrorIf(!absFilePath, @"Could not locate texture file '%@' in either the application resources or the Cocos3D library resources", filePath);
 		NSString* fileName = absFilePath.lastPathComponent;
 		NSString* dirName = absFilePath.stringByDeletingLastPathComponent;
 		
@@ -158,8 +161,8 @@
 
 #else
 
--(id) initFromFile: (NSString*) aFilePath {
-	LogError(@"Could not load texture %@ because PVR files are not supported on this platform.", aFilePath);
+-(id) initFromFile: (NSString*) filePath {
+	LogError(@"Could not load texture %@ because PVR files are not supported on this platform.", filePath);
 	return nil;
 }
 

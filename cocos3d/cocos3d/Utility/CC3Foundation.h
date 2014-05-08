@@ -2461,6 +2461,37 @@ static inline NSString* CC3EnsureAbsoluteFilePath(NSString* filePath) {
 	return [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent: filePath];
 }
 
+/**
+ * Resolves the specified file path as one of:
+ *   - An absolute path.
+ *   - A path within the application bundle resource directory.
+ *   - A path within the Cocos3D library bundle resource directory.
+ *
+ * This function checks for the existence of the file on each of the above paths, 
+ * in order, and returns an absolute path to the first file located.
+ *
+ * Since the paths are searched in the above order, the application can provide a resource
+ * file to override a standard Cocos3D library resource file by adding the file with the
+ * same name to the application bundle resource directory.
+ *
+ * Returns nil if the file could not be located in on any of the paths above.
+ */
+static inline NSString* CC3ResolveResourceFilePath(NSString* filePath) {
+	NSFileManager* fileMgr = NSFileManager.defaultManager;
+	NSString* fullPath;
+
+	fullPath = filePath;
+	if ( [fileMgr fileExistsAtPath: fullPath] ) return fullPath;
+	
+	fullPath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent: filePath];
+	if ( [fileMgr fileExistsAtPath: fullPath] ) return fullPath;
+	
+	fullPath = [[[NSBundle cocos3dResourcesBundle] resourcePath] stringByAppendingPathComponent: filePath];
+	if ( [fileMgr fileExistsAtPath: fullPath] ) return fullPath;
+	
+	return nil;
+}
+
 /** Returns whether the specified bit in the specified bitfield is set to one. */
 static inline BOOL CC3IsBitSet(GLbitfield bits, GLuint bitIdx) {
 	CC3AssertC(bitIdx < (8 * sizeof(bits)), @"Bit index %u is too large for the bitfield.", bitIdx);

@@ -284,7 +284,7 @@
  * the superclass (eg- initWithName:), set properties such as the shaderPreamble, and then
  * invoke the compileFromSource: method to compile this shader from GLSL source code.
  */
--(id) initFromSourceCodeFile: (NSString*) aFilePath;
+-(id) initFromSourceCodeFile: (NSString*) filePath;
 
 /**
  * Returns an instance compiled from GLSL source code loaded from the file at the specified file path.
@@ -319,10 +319,10 @@
  * invoke the compileFromSource: method to compile this shader from GLSL source code. Once
  * compiled, you can add the shader to the cache using the addShader: method.
  */
-+(id) shaderFromSourceCodeFile: (NSString*) aFilePath;
++(id) shaderFromSourceCodeFile: (NSString*) filePath;
 
 /** @deprecated Use the CC3ShaderSourceCode shaderSourceCodeNameFromFilePath: method instead. */
-+(NSString*) shaderNameFromFilePath: (NSString*) aFilePath DEPRECATED_ATTRIBUTE;
++(NSString*) shaderNameFromFilePath: (NSString*) filePath DEPRECATED_ATTRIBUTE;
 
 /**
  * Indicates whether this shader was loaded from a file.
@@ -1355,7 +1355,7 @@
  * CC3ShaderSourceCode is the abstract head of a class cluster. The class of the object returned
  * will be a subclass of CC3ShaderSourceCode, depending on the structure of the source code.
  */
-+(id) shaderSourceCodeFromFile: (NSString*) aFilePath;
++(id) shaderSourceCodeFromFile: (NSString*) filePath;
 
 /**
  * Returns a shader source code name derived from the specified file path.
@@ -1366,7 +1366,7 @@
  *
  * This implementation returns the lastComponent of the specified file path.
  */
-+(NSString*) shaderSourceCodeNameFromFilePath: (NSString*) aFilePath;
++(NSString*) shaderSourceCodeNameFromFilePath: (NSString*) filePath;
 
 /**
  * As shader source code is parsed and assembled using #import and #include directives,

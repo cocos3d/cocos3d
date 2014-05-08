@@ -2182,16 +2182,18 @@ bool CPVRTPFXParser::ParseShader(int nStartLine, int nEndLine, CPVRTString * con
 				shader.pszGLSLfile = (char*)malloc((strlen(str)+1) * sizeof(char));
 				strcpy(shader.pszGLSLfile, str);
 
-				CPVRTResourceFile GLSLFile(str);
-
-				if(!GLSLFile.IsOpen())
-				{
-					*pReturnError = PVRTStringFromFormattedStr("Error loading file '%s' in [%s] on line %d\n", str, pszBlockName, m_psContext->pnFileLineNumber[i]);
-					return false;
-				}
-				shader.pszGLSLcode = (char*)malloc((GLSLFile.Size()+1) * sizeof(char));
-				memcpy(shader.pszGLSLcode, (const char*) GLSLFile.DataPtr(), GLSLFile.Size());
-				shader.pszGLSLcode[GLSLFile.Size()] = '\0';
+// patched for cocos3d by Bill Hollings
+//				CPVRTResourceFile GLSLFile(str);
+//
+//				if(!GLSLFile.IsOpen())
+//				{
+//					*pReturnError = PVRTStringFromFormattedStr("Error loading file '%s' in [%s] on line %d\n", str, pszBlockName, m_psContext->pnFileLineNumber[i]);
+//					return false;
+//				}
+//				shader.pszGLSLcode = (char*)malloc((GLSLFile.Size()+1) * sizeof(char));
+//				memcpy(shader.pszGLSLcode, (const char*) GLSLFile.DataPtr(), GLSLFile.Size());
+//				shader.pszGLSLcode[GLSLFile.Size()] = '\0';
+// patched for cocos3d by Bill Hollings
 
 				shader.nFirstLineNumber = m_psContext->pnFileLineNumber[i];		// Mark position where GLSL file is defined.
 

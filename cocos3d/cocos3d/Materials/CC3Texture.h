@@ -682,7 +682,7 @@
  * CC3Texture is the root of a class-cluster. The object returned may be a different
  * instance of a different class than the receiver.
  */
--(id) initFromFile: (NSString*) aFilePath;
+-(id) initFromFile: (NSString*) filePath;
 
 /**
  * Returns an instance initialized by loading the single texture file at the specified file path.
@@ -725,7 +725,7 @@
  * CC3Texture is the root of a class-cluster. The object returned may be an instance of a
  * different class than the receiver.
  */
-+(id) textureFromFile: (NSString*) aFilePath;
++(id) textureFromFile: (NSString*) filePath;
 
 /**
  * Initializes this instance from the content in the specified CGImage.
@@ -1221,7 +1221,7 @@
  *
  * This implementation returns the lastComponent of the specified file path.
  */
-+(NSString*) textureNameFromFilePath: (NSString*) aFilePath;
++(NSString*) textureNameFromFilePath: (NSString*) filePath;
 
 /**
  * Returns a description formatted as a source-code line for loading this texture from a file.
@@ -1464,7 +1464,7 @@
  * This method does not automatically generate a mipmap. If you want a mipmap, you should
  * invoke the generateMipmap method once all six faces have been loaded.
  */
--(BOOL) loadCubeFace: (GLenum) faceTarget fromFile: (NSString*) aFilePath;
+-(BOOL) loadCubeFace: (GLenum) faceTarget fromFile: (NSString*) filePath;
 
 /**
  * Loads the six cube face textures at the specified file paths, and returns whether all
@@ -1819,7 +1819,7 @@
  *
  * The value of the isUpsideDown is set to YES.
  */
--(id) initFromFile: (NSString*) aFilePath;
+-(id) initFromFile: (NSString*) filePath;
 
 /** 
  * Initializes this instance from the content in the specified CGImage.
