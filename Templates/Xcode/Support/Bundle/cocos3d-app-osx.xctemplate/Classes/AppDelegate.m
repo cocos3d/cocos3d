@@ -1,15 +1,15 @@
 /**
- *  ___PROJECTNAMEASIDENTIFIER___AppDelegate.m
+ *  AppDelegate.m
  *  ___PROJECTNAME___
  *
  *  Created by ___FULLUSERNAME___ on ___DATE___.
  *  Copyright ___ORGANIZATIONNAME___ ___YEAR___. All rights reserved.
  */
 
-#import "___PROJECTNAMEASIDENTIFIER___AppDelegate.h"
+#import "AppDelegate.h"
 #import "___PROJECTNAMEASIDENTIFIER___Layer.h"
 
-@implementation ___PROJECTNAMEASIDENTIFIER___AppDelegate
+@implementation AppDelegate
 
 @synthesize window=_window, glView=_glView;
 

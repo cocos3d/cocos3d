@@ -5,24 +5,29 @@ Copyright (c) 2010-2014 [The Brenwill Workshop Ltd.](http://www.brenwill.com) Al
 Cocos3D
 =======
 
+*This document is written in [Markdown](http://en.wikipedia.org/wiki/Markdown) format. For best results, use a Markdown reader.*
+
 Table of Contents
 -----------------
 
-- About Cocos3D
-- Installation
-- Creating Your First Cocos3D Project
-- Demo Applications
-    - CC3DemoMashUp - demos all important Cocos3D features
-    - CC3Demo3DTiles - demos adding running many concurrent layers and scenes
-    - CC3Performance - demos performance capabilities and testing
-    - CC3DemoMultiScene - demos using Cocos3D with Xcode Storyboards
-- Cocos3D and Cocos2D Static Libraries
-- Cocos2D Version Compatibility
-- Compiling for Android
-- Documentation
-- Creating POD 3D Model Files
-- Demo Models
+- [About Cocos3D][]
+- [Installation][]
+- [Your First Cocos3D Project][]
+- [Learning Cocos3D][]
+- [Demo Applications][]
+    - [CC3DemoMashUp][] - demos all important Cocos3D features
+    - [CC3Demo3DTiles][] - demos adding running many concurrent layers and scenes
+    - [CC3Performance][] - demos performance capabilities and testing
+    - [CC3DemoMultiScene][] - demos using Cocos3D with Xcode Storyboards
+- [Adding Cocos3D to an existing Cocos2D Project][]
+- [Using Cocos3D with SpriteBuilder][]
+- [Cocos2D Version Compatibility][]
+- [Compiling for Android][]
+- [Creating POD 3D Model Files][]
+- [Demo Models][]
 
+
+<a name="about"></a>
 
 About Cocos3D
 -------------
@@ -99,6 +104,8 @@ sophisticated, dynamic 3D games and applications using Objective-C.
 - Includes demo applications and Xcode templates to get you up and running quickly.
 
 
+<a name="install"></a>
+
 Installation
 ------------
 
@@ -111,8 +118,7 @@ Installation
 	`Cocos2D 1.1` to use the simpler configurable fixed-pipeline of OpenGL ES 1.1 (iOS), 
 	and avoid the need to write GLSL shaders.
 
-2. Download the latest [stable Cocos3D release](http://cocos3d.org), or clone the
-   [Cocos3D GitHub repository](http://github.com/cocos3d/cocos3d).
+2. Get the latest Cocos3D release from the [Cocos3D GitHub repository](http://github.com/cocos3d/cocos3d).
 
 3. Unzip the Cocos3D distribution file.
 
@@ -157,7 +163,9 @@ Keep in mind that Cocos3D does not "patch" your Cocos2D installation. Instead, y
 Cocos3D alongside Cocos2D, and link to it using the installation script.
 
 
-Creating Your First Cocos3D Project
+<a name="project1"></a>
+
+Your First Cocos3D Project
 -----------------------------------
 
 The `install-cocos3d.sh` script also installs several convenient Xcode project templates.
@@ -173,12 +181,32 @@ work with, and which you previously downloaded and installed.
 The template project starts with a working 3D variation on the familiar *hello, world*
 application, which you can use as a starting point for your own application.
 
-When you ran the `install-cocos3d` script (see the Installation section above), it checked
+When you ran the `install-cocos3d` script (see the [Installation][] section above), it checked
 which versions of Cocos2D you have installed, and only installs those Cocos3D templates that 
 work with the major Cocos2D versions that you have installed. If you install a different major
 version of Cocos2D (3.0, 2.1 or 1.1), you can run the `install-cocos3d` script again to 
 automatically add the Cocos3D templates that are designed for that major version of Cocos2D.
 
+
+<a name="learning"></a>
+
+Learning Cocos3D
+----------------
+
+Wondering how to get started? View Harry Dart-O’Flynn’s wonderful [Starting Cocos3D](http://www.youtube.com/playlist?list=PLU4bmVOOYXK-fV0Wt-ES5n3k8qTTyqgYu) collection of video tutorials!
+
+To learn more about Cocos3D, please refer to the [Cocos3D Programming Guide](http://brenwill.com/2011/cocos3d-programming-guide/)
+and the latest [API documentation](http://brenwill.com/docs/cocos3d/2.0.0/api/).
+
+You can create a local copy of the API documentation using `Doxygen` to extract the documentation
+from the source files. There is a `Doxygen` configuration file to output the API documents in the
+same format as appears online in the folder Docs/API within the Cocos3D distribution.
+
+The best way to understand what Cocos3D can do is to look at the examples and code in the demo
+applications that are included in the Cocos3D distribution, as described in the [next section](#demos).
+
+
+<a name="demos"></a>
 
 Demo Applications
 -----------------
@@ -199,6 +227,8 @@ section titled *Cocos2D Version Compatibility*.
 
 The following demo apps are included in the Cocos3D distribution:
 
+
+<a name="cc3demomashup"></a>
 
 ###CC3DemoMashUp
 
@@ -309,6 +339,8 @@ including experimenting with:
 - Cocos2D CCSprite displaying the television screen rendered texture
 
 
+<a name="cc3demo3dtiles"></a>
+
 ###CC3Demo3DTiles
 
 A simple demo that lays out multiple small Cocos3D scenes as layers in a larger controllable
@@ -320,6 +352,8 @@ This demonstrates the ability to simply include 3D objects in an otherwise 2D ga
 techniques for optimizing under those conditions. It also demonstrates touch control when
 many 3D scene are visible concurrently.
 
+
+<a name="cc3performance"></a>
 
 ###CC3Performance
 
@@ -333,6 +367,8 @@ the performance of Cocos3D. You can also use this performance demo app to compar
 across different devices.
 
 
+<a name="cc3demomultiscene"></a>
+
 ###CC3DemoMultiScene
 
 This demo app is a sophisticated combination of the three demo apps listed above. It 
@@ -341,45 +377,147 @@ UIKit controls, you can load any of the Cocos3D demos listed above, then shut do
 running demo, and load a different Cocos3D demo.
 
 
-Cocos3D and Cocos2D Static Libraries
-------------------------------------
+<a name="cocos2d"></a>
 
-The Cocos3D distribution includes `Xcode` projects to build static libraries for Cocos3D and Cocos2D.
-These are available in the `cocos3d-iOS.xcworkspace` and `cocos3d-OSX.xcworkspace` Xcode workspaces,
-and the Xcode projects are also individually available in the `cocos3d-library` and `cocos2d-library`
-folders under the `Projects` folder in the Cocos3D distribution.
+Adding Cocos3D to an existing Cocos2D Project
+---------------------------------------------
 
-You can add these static library projects as sub-projects of your `Xcode` app project. Instructions
-for adding a static library to your app project are available through Apple's documentation, or
-can be found by searching the web. You can also reference how these static libraries have been
-added to the demo apps, also available in the `Projects` folder in the Cocos3D distribution.
+In addition to starting with a Cocos3D project template, you can also add the Cocos3D library to an 
+existing Cocos2D application (for example `MyCocos2DApp`), to allow you to add 3D content to your 
+existing 2D application or game.
 
-When adding Cocos3D files to your project, either as a static library, or as individual files, be 
-aware that, to ensure the highest performance, the Cocos3D libraries do not use Automatic Reference
-Counting (ARC). However, you can seamlessly use the Cocos3D library within an ARC-enabled application.
-The Cocos3D static library project provided with the Cocos3D distribution is already configured to 
-bypass ARC, and you can simply include this static library project as subproject to your application
-project, regardless of whether your application uses ARC or Manual Reference Counting (MRC).
+1. The first step is to use Xcode to create a Cocos3D static library subproject, and add it
+   to your Cocos2D Xcode project, as follows:
 
-Like any static library, the compiled Cocos3D static library includes only executable code, and does
-not include the standard Cocos3D GLSL shader files. If you use the Cocos3D static library in your
-application project, and want to use the standard Cocos3D GLSL shader files, you should also drag
-the `cocos3d-GLSL` folder in the Cocos3D distribution to the `Xcode` *Project Navigator* panel of your
-application project. One further step is required because, by default, `Xcode` treats these GLSL files
-as source code files, rather than resource files. After dragging the GLSL files to your application
-project in Xcode, select your project in the `Xcode` *Project Navigator*, select the *Build Phases* tab,
-and move all of the `.vsh` and `.fsh` files from the *Compile Sources* list to the *Copy Bundle Resources* list.
+	1. Open Xcode, and, in the menu bar, choose `File->New->Project...`. In the dialog box that opens,
+	   select the *Cocos3D iOS Static Library* project template from the *Cocos3D* group of iOS templates.
 
-Finally, the Cocos3D and Cocos2D static libraries require linking to certain other support libraries.
-To direct `Xcode` to link with these support libraries, in your application target build settings,
-make sure the **Other Linker Flags** (aka `OTHER_LDFLAGS`) entry includes the following entries:
-	-ObjC -lz -lstdc++
+	2. Name your new Xcode project *cocos3d*, and save it to the `MyCocos2DApp/MyCocos2DApp/Libraries`
+	   folder within your Cocos2D app.
+	   
+	3. Close the `cocos3d.xcodeproj` Xcode project that you just created.
 
-At the time of this release, the current version of Cocos2D is `3.0`, and by default, the 
-static library projects within the Cocos3D distribution are pre-configured to use that version.
-To build and run the static libraries with a different version of Cocos2D, follow the steps
-described below in the section titled *Cocos2D Version Compatibility*.
+	4. Open your `MyCocos2DApp.xcodeproj` Xcode project.
 
+	5. Drag the new Cocos3D static library Xcode subproject at `MyCocos2DApp/MyCocos2DApp/Libraries/cocos3d/cocos3d.xcodeproj`
+	   to the `Libraries` group in the *Project Navigator* panel of your `MyCocos2DApp` Xcode project.
+
+2. Next, within Xcode, you need to tell your Cocos2D app project how to link to the code 
+   and components of the Cocos3D subproject:
+
+	1. Select your `MyCocos2DApp` project in the Xcode *Project Navigator* panel.
+
+	2. Select the *Build Phases* tab of the `MyCocos2DApp` target
+		1. Open the *Target Dependencies* list and add both the `cocos3d` and `Cocos3DResources` targets to the list.
+		2. Open the *Link Binary with Libraries* list, and add the `libcocos3d.a` library to the list.
+		3. Open the *Copy Bundle Resources* list, and drag the `Cocos3DResources.bundle` item from the
+		   *Project Navigator* panel to the *Copy Bundle Resources* list (you can find `Cocos3DResources.bundle` 
+		   in the `Libraries/cocos3d.xcodeproj/Products` group folder).
+
+	3. Select the *Build Settings* tab
+		1. In the **Header Search Paths** (aka `HEADER_SEARCH_PATHS`) entry, add an entry to
+		   `"$(SRCROOT)/$(PROJECT_NAME)/Libraries/cocos3d/cocos3d"`, and mark it as `recursive`.
+		2. In the **Other Linker Flags** (aka `OTHER_LD_FLAGS`) entry, add an entry for `-lstdc++`.
+
+3. Cocos3D requires a depth buffer to provide 3D depth realism. You can add a depth buffer in your
+   application code in the `AppDelegate.m` file. In the `application:didFinishLaunchingWithOptions:`
+   method, add the following line in the constructor for the config dictionary passed to the 
+   `setupCocos2dWithOptions:` method:
+
+		CCSetupDepthFormat: @GL_DEPTH_COMPONENT16,         // Cocos3D requires a depth buffer
+		
+	This will create a basic 16-bit depth buffer, which covers most needs. If you want higher depth
+	accuracy, you can use @GL\_DEPTH\_COMPONENT24. And if you will be using shadow volume effects, use
+	@GL\_DEPTH24\_STENCIL8 to create a combined depth and stencil buffer.
+
+4. Add your custom `CC3Layer` and `CC3Scene` source files (`MyCC3Layer.h`, `MyCC3Layer.m`, `MyCC3Scene.h`,
+   and `MyCC3Scene.m`), and any 3D resources your app requires, to the `MyCocos2DApp` target of your 
+   `MyCocos2DApp.xcodeproj` Xcode project.
+
+5. You can add a 3D component by adding code similar to the following within one of your customized 
+   2D scene layouts (eg - `MyCocos2DScene.m`):
+
+		#import "MyCC3Layer.h"
+		
+		...
+		
+		CC3Layer* cc3Layer = [[MyCC3Layer alloc] init];
+		cc3Layer.contentSize = CGSizeMake(300.0, 200.0);
+		cc3Layer.position = CGPointMake(100.0, 100.0);
+		[self addChild: cc3Layer];
+
+
+<a name="spritebuilder"></a>
+
+Using Cocos3D with SpriteBuilder
+--------------------------------
+
+You can use Cocos3D to add 3D content to games created with [SpriteBuilder](http://www.spritebuilder.com).
+Adding Cocos3D to SpriteBuilder is similar to adding Cocos3D to an existing Cocos2D app, as described above
+in [Adding Cocos3D to an existing Cocos2D Project][]. To add Cocos3D your SpriteBuilder project, create your 
+SpriteBuilder app (for example `MySpriteBuilderApp.spritebuilder`) as you normally would, then follow these
+instructions to add the Cocos3D libraries:
+
+1. The first step is to use Xcode to create a Cocos3D static library subproject, and add it
+   to your SpriteBuilder Xcode project, as follows:
+
+	1. Open Xcode, and, in the menu bar, choose `File->New->Project...`. In the dialog box that opens,
+	   select the *Cocos3D iOS Static Library* project template from the *Cocos3D* group of iOS templates.
+
+	2. Name your new Xcode project *cocos3d*, and save it to the `MySpriteBuilderApp.spritebuilder/Source/libs`
+	   folder within your SpriteBuilder app.
+	   
+	3. Close the `cocos3d.xcodeproj` Xcode project that you just created.
+
+	4. Open your `MySpriteBuilderApp.xcodeproj` Xcode project.
+
+	5. Drag the new Cocos3D static library Xcode subproject at `MySpriteBuilderApp.spritebuilder/Source/libs/cocos3d/cocos3d.xcodeproj`
+	   to the `libs` group in the *Project Navigator* panel of your `MySpriteBuilderApp` Xcode project.
+
+2. Next, within Xcode, you need to tell your SpriteBuilder app project how to link to the code 
+   and components of the Cocos3D subproject:
+
+	1. Select your `MySpriteBuilderApp` project in the Xcode *Project Navigator* panel.
+
+	2. Select the *Build Phases* tab of the `MySpriteBuilderApp` target
+		1. Open the *Target Dependencies* list and add both the `cocos3d` and `Cocos3DResources` targets to the list.
+		2. Open the *Link Binary with Libraries* list, and add the `libcocos3d.a` library to the list.
+		3. Open the *Copy Bundle Resources* list, and drag the `Cocos3DResources.bundle` item from the
+		   *Project Navigator* panel to the *Copy Bundle Resources* list (you can find `Cocos3DResources.bundle` 
+		   in the `libs/cocos3d.xcodeproj/Products` group folder).
+
+	3. Select the *Build Settings* tab
+		1. In the **Header Search Paths** (aka `HEADER_SEARCH_PATHS`) entry, add an entry to
+		   `Source/libs/cocos3d/cocos3d`, and mark it as `recursive`.
+		2. In the **Other Linker Flags** (aka `OTHER_LD_FLAGS`) entry, add an entry for `-lstdc++`.
+
+3. Cocos3D requires a depth buffer to provide 3D depth realism. You can add a depth buffer in your
+   application code in the `AppDelegate.m` file. In the `AppContoller application:didFinishLaunchingWithOptions:`
+   method, add the following line somewhere ***before*** the call to `setupCocos2dWithOptions:`
+
+		cocos2dSetup[CCSetupDepthFormat] = @GL_DEPTH_COMPONENT16;        // Cocos3D requires a depth buffer
+		
+	This will create a basic 16-bit depth buffer, which covers most needs. If you want higher depth
+	accuracy, you can use GL\_DEPTH\_COMPONENT24. And if you will be using shadow volume effects, use
+	GL\_DEPTH24\_STENCIL8 to create a combined depth and stencil buffer.
+
+4. Add your custom `CC3Layer` and `CC3Scene` source files (`MyCC3Layer.h`, `MyCC3Layer.m`, `MyCC3Scene.h`,
+   and `MyCC3Scene.m`), and any 3D resources your app requires, to the `MySpriteBuilderApp` target of your 
+   `MySpriteBuilderApp.xcodeproj` Xcode project.
+
+5. You're now ready to add 3D content to your SpriteBuilder interface. As with any Cocos3D
+   application, you provide 3D content by creating a custom subclass of `CC3Layer`. Open your
+   `MySpriteBuilderApp.spritebuilder` project, and add your custom `CC3Layer` to your SpriteBuilder 
+   layout as follows:
+	1. Drag a *Node* from the SpriteBuilder component palette to your layout.
+	2. Set the *Custom class* property of the new component to the name of your custom `MyCC3Layer` class.
+	3. Set the *Content size* property to the size at which you want your want your 3D scene to be displayed.
+	4. *Save* and *Publish* your new SpriteBuilder layout.
+	5. Build and run your app from Xcode to see your new 3D content.
+	6. Repeat for all 3D sprites that you want to add to your SpriteBuilder scene.
+
+
+<a name="cocos2dversions"></a>
 
 Cocos2D Version Compatibility
 -----------------------------
@@ -396,7 +534,7 @@ demo apps and static libraries within the Cocos3D distribution are pre-configure
 that version. To build and run the demo apps or static libraries with a different version 
 of Cocos2D, follow the steps described here:
 
-1. Delete the reference to the *cocos2d* and *cocos2d-chipmunk* groups in the `Xcode` *Project Navigator*
+1. Delete the reference to the *cocos2d* and *cocos2d-chipmunk* groups in the Xcode *Project Navigator*
    panel. These groups can be found in the `cocos2d-library-iOS` or `cocos2d-library-OSX` project.
 2. Run the `install-cocos3d.sh` script again and identify the new version of `Cocos2D` to be linked.
    Keep in mind that you must link `Cocos2D` `3.0` or `Cocos2D 2.1` if you want to use 
@@ -404,11 +542,11 @@ of Cocos2D, follow the steps described here:
    `Cocos2D 1.1` if you want to use OpenGL ES 1.1 (iOS & Android) with a fixed rendering pipeline.
 3. Add the newly linked Cocos2D files to the project by dragging the `cocos2d` folder from the 
    Cocos3D distribution folder into the `cocos2d-library-iOS` or `cocos2d-library-OSX` 
-   project in the `Xcode` *Project Navigator* panel. When prompted for the target to add the source
+   project in the Xcode *Project Navigator* panel. When prompted for the target to add the source
    code to, select the `cocos2d` target.
 4. Add the newly linked Cocos2D Chipmunk files to the project by dragging the `cocos2d-chipmunk`
    folder from the Cocos3D distribution folder into the `cocos2d-library-iOS` or `cocos2d-library-OSX` 
-   project in the `Xcode` *Project Navigator* panel. When prompted for the target to add the source
+   project in the Xcode *Project Navigator* panel. When prompted for the target to add the source
    code to, select the `cocos2d-chipmunk` target.
 6. `Cocos2D` `3.0` uses Automatic Reference Counting (ARC). `Cocos2D` `2.1` and `Cocos2D` `1.1`
    do not. You must set the appropriate compiler build setting to ensure the compiler will use
@@ -442,36 +580,29 @@ of Cocos2D, follow the steps described here:
    contents of your `~/Library/Developer/Xcode/DerivedData` folder, and restart Xcode.
 
 
+<a name="android"></a>
+
 Compiling for Android
 ---------------------
 
 Cocos3D (along with Cocos2D) is written in Objective-C. Cocos3D has partnered with 
-[Apportable] ( http://www.apportable.com) to bring your 3D apps and games to the Android
+[Apportable](http://www.apportable.com) to bring your 3D apps and games to the Android
 platform. The Apportable SDK is a free SDK for porting Objective-C applications to Android.
 
 To build and install your app or game project for the Android platform:
 
 1. Download and install the Apportable SDK.
-2. Open a `Terminal` window and navigate to the `Xcode` project folder of your Cocos3D app.
+2. Open a `Terminal` window and navigate to the Xcode project folder of your Cocos3D app.
 3. Run the command: `apportable install` to build and install your Cocos3D app on an
    Android device connected to your computer.
 	
 Please refer to the Apportable SDK documentation for more information about building,
 installing, and debugging your app on Android. If you are building an OpenGL ES 1.1 app, 
-you will need to modify the `configuration.json` file in your `Xcode` project, as indicated
+you will need to modify the `configuration.json` file in your Xcode project, as indicated
 in that file.
 
 
-Documentation
--------------
-
-To learn more about Cocos3D, please refer to the [Cocos3D Programming Guide](http://brenwill.com/2011/cocos3d-programming-guide/)
-and the latest [API documentation] (http://brenwill.com/docs/cocos3d/2.0.0/api/).
-
-You can create a local copy of the API documentation using `Doxygen` to extract the documentation
-from the source files. There is a `Doxygen` configuration file to output the API documents in the
-same format as appears online in the folder Docs/API within the Cocos3D distribution.
-
+<a name="pod"></a>
 
 Creating POD 3D Model Files
 ---------------------------
@@ -492,9 +623,11 @@ for more info on where to get the *PVRGeoPOD* converter, and how to use it to ge
 
 If you are using *Blender* as your 3D editor, and have many `.blend` files to export to POD format,
 you can use the command-line batch tool available in the `Tools/Blender-POD Batch Converter`
-folder in the Cocos3D distribution. See the `README!.md` file in that folder for instructions.
-The *Blender-POD Batch Converter* tool was created by Cocos3D user Nikita Medvedev.
+folder in the Cocos3D distribution. See the `README.txt` file in that folder for instructions.
+The `Blender-POD Batch Converter` tool was created by Cocos3D user Nikita Medvedev.
 
+
+<a name="models"></a>
 
 Demo Models
 -----------
@@ -503,5 +636,24 @@ Some of the POD models that appear in the demo and template apps were designed i
 exported to POD files using the PowerVR *PVRGeoPOD* converter.
 
 As a reference for the creation of your own 3D models for use in Cocos3D, you can find the original
-Blender files and DAE files for these POD models in the `Models` folder in the Cocos3D distribution.
+*Blender* files for these POD models in the `Models` folder in the Cocos3D distribution.
+
+
+
+[About Cocos3D]: #about
+[Installation]: #install
+[Your First Cocos3D Project]: #project1
+[Demo Applications]: #demos
+[CC3DemoMashUp]: #cc3demomashup
+[CC3Demo3DTiles]: #cc3demo3dtiles
+[CC3Performance]: #cc3performance
+[CC3DemoMultiScene]: #cc3demomultiscene
+[Adding Cocos3D to an existing Cocos2D Project]: #cocos2d
+[Using Cocos3D with SpriteBuilder]: #spritebuilder
+[Cocos3D and Cocos2D Static Libraries]:
+[Cocos2D Version Compatibility]: #cocos2dversions
+[Compiling for Android]: #android
+[Learning Cocos3D]: #learning
+[Creating POD 3D Model Files]: #pod
+[Demo Models]: #models
 

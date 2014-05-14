@@ -13,7 +13,7 @@
 	<key>Concrete</key>
 	<true/>
 	<key>SortOrder</key>
-	<integer>2</integer>
+	<integer>3</integer>
 	<key>Ancestors</key>
 	<array>
 		<string>org.cocos3d.cocos3dProjOSX</string>

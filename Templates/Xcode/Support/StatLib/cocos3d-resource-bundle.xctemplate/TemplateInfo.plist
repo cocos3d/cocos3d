@@ -3,50 +3,40 @@
 <plist version="1.0">
 <dict>
 	<key>Identifier</key>
-	<string>org.cocos3d.cocos3dStatLib</string>
+	<string>org.cocos3d.cocos3dRezBundle</string>
 	<key>Description</key>
-	<string>Cocos3D as a static library for inclusion in other application projects. Your application project must also include Cocos2D libraries.</string>
+	<string>Cocos3D static library resources for inclusion in other projects.</string>
 	<key>Kind</key>
 	<string>Xcode.Xcode3.ProjectTemplateUnitKind</string>
 	<key>Concrete</key>
 	<false/>
 	<key>Ancestors</key>
 	<array>
-		<string>org.cocos3d.cocos3dBase</string>
-		<string>org.cocos3d.cocos3dLib</string>
+		<string>org.cocos3d.cocos3dGLSL</string>
 	</array>
 	<key>Targets</key>
 	<array>
 		<dict>
 			<key>ProductType</key>
-			<string>com.apple.product-type.library.static</string>
+			<string>com.apple.product-type.bundle</string>
 			<key>Name</key>
 			<string>___PACKAGENAME___</string>
+			<key>SharedSettings</key>
+			<dict>
+				<key>WRAPPER_EXTENSION</key>
+				<string>bundle</string>
+				<key>PRODUCT_NAME</key>
+				<string>___PACKAGENAME___</string>
+				<key>INFOPLIST_FILE</key>
+				<string>___PACKAGENAME___/___PACKAGENAME___-Info.plist</string>
+			</dict>
 			<key>BuildPhases</key>
 			<array>
-				<dict>
-					<key>Class</key>
-					<string>Sources</string>
-				</dict>
 				<dict>
 					<key>Class</key>
 					<string>Resources</string>
 				</dict>
 			</array>
-			<key>SharedSettings</key>
-			<dict>
-				<key>HEADER_SEARCH_PATHS</key>
-				<array>
-					<string>cocos2d/**</string>
-					<string>../cocos2d-iphone/**</string>
-					<string>../cocos2d/**</string>
-					<string>../Chipmunk/**</string>
-					<string>../ObjectAL/**</string>
-					<string>../kazmath/**</string>
-				</array>
-				<key>SKIP_INSTALL</key>
-				<string>YES</string>
-			</dict>
 		</dict>
 	</array>
 	<key>Definitions</key>
@@ -56,10 +46,16 @@
 			<key>Path</key>
 			<string>LICENSE_cocos3d.txt</string>
 		</dict>
+		<key>___PACKAGENAME___-Info.plist</key>
+		<dict>
+			<key>Path</key>
+			<string>___PACKAGENAME___-Info.plist</string>
+		</dict>
 	</dict>
 	<key>Nodes</key>
 	<array>
 		<string>LICENSE_cocos3d.txt</string>
+		<string>___PACKAGENAME___-Info.plist</string>
 	</array>
 </dict>
 </plist>

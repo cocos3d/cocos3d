@@ -94,11 +94,6 @@
 					<key>GCC_DYNAMIC_NO_PIC</key>
 					<string>NO</string>
 				</dict>
-				<key>Release</key>
-				<dict>
-					<key>COPY_PHASE_STRIP</key>
-					<string>YES</string>
-				</dict>
 			</dict>
 		</dict>
 		<dict>

@@ -43,8 +43,6 @@
 	<dict>
 		<key>SharedSettings</key>
 		<dict>
-			<key>IPHONEOS_DEPLOYMENT_TARGET</key>
-			<string>5.0</string>
 			<key>VALID_ARCHS</key>
 			<string>$(ARCHS_STANDARD)</string>
 		</dict>

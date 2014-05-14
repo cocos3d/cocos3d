@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Identifier</key>
+	<string>org.cocos3d.cocos3dStatLibProjIOS</string>
+	<key>Name</key>
+	<string>Cocos3D iOS Static Library</string>
+	<key>Description</key>
+	<string>A Cocos3D static library that can be added to any existing Cocos2D or SpriteBuilder project for iOS or Android devices.</string>
+	<key>Kind</key>
+	<string>Xcode.Xcode3.ProjectTemplateUnitKind</string>
+	<key>Concrete</key>
+	<true/>
+	<key>SortOrder</key>
+	<integer>0</integer>
+	<key>Ancestors</key>
+	<array>
+		<string>org.cocos3d.cocos3dProjIOS</string>
+		<string>org.cocos3d.cocos3dStatLibBase</string>
+	</array>
+	<key>Project</key>
+	<dict>
+		<key>SharedSettings</key>
+		<dict>
+			<key>VALID_ARCHS</key>
+			<string>$(ARCHS_STANDARD)</string>
+		</dict>
+	</dict>
+</dict>
+</plist>

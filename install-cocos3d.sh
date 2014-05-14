@@ -233,6 +233,12 @@ copy_project_templates() {
 		copy_files "$SRC_DIR" "$CC3_TEMPLATE_DIR" "Cocos3D iOS App with Cocos2D-v1 template"
 	fi
 
+# Copy static library templates
+	SRC_DIR="$TEMPLATE_SRC_DIR/cocos3d-stat-lib-proj-ios.xctemplate"
+	copy_files "$SRC_DIR" "$CC3_TEMPLATE_DIR" "Cocos3D iOS Static Library"
+	SRC_DIR="$TEMPLATE_SRC_DIR/cocos3d-stat-lib-proj-osx.xctemplate"
+	copy_files "$SRC_DIR" "$CC3_TEMPLATE_DIR" "Cocos3D OSX Static Library"
+
 # Copy Cocos3D library files
 	TEMPLATE="$BASE_DIR/cocos3d-lib"
 	DST_DIR="$CC3_TEMPLATE_DIR/$TEMPLATE.xctemplate"
@@ -245,6 +251,10 @@ copy_project_templates() {
 
 # Copy Cocos3D licenses
 	TEMPLATE="$STAT_LIB_DIR/cocos3d-stat-lib"
+	DST_DIR="$CC3_TEMPLATE_DIR/$TEMPLATE.xctemplate"
+	copy_file "LICENSE_cocos3d.txt" "." "$DST_DIR"
+
+	TEMPLATE="$STAT_LIB_DIR/cocos3d-resource-bundle"
 	DST_DIR="$CC3_TEMPLATE_DIR/$TEMPLATE.xctemplate"
 	copy_file "LICENSE_cocos3d.txt" "." "$DST_DIR"
 

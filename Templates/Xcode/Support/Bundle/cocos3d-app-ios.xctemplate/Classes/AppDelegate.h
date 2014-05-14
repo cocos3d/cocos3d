@@ -1,5 +1,5 @@
 /**
- *  ___PROJECTNAMEASIDENTIFIER___AppDelegate.h
+ *  AppDelegate.h
  *  ___PROJECTNAME___
  *
  *  Created by ___FULLUSERNAME___ on ___DATE___.
@@ -11,7 +11,7 @@
 #if !CC3_CC2_CLASSIC
 
 /** App Delegate for Cocos2D v3 and above. */
-@interface ___PROJECTNAMEASIDENTIFIER___AppDelegate : CCAppDelegate
+@interface AppDelegate : CCAppDelegate
 @end
 
 #else
@@ -20,7 +20,7 @@
 #import "CC3DeviceCameraOverlayUIViewController.h"
 
 /** App Delegate for Cocos2D below v3. */
-@interface ___PROJECTNAMEASIDENTIFIER___AppDelegate : NSObject <UIApplicationDelegate> {
+@interface AppDelegate : NSObject <UIApplicationDelegate> {
 	UIWindow* _window;
 	CC3DeviceCameraOverlayUIViewController* _viewController;
 }

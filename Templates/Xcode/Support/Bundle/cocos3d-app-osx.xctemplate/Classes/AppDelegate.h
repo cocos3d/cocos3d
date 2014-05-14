@@ -1,5 +1,5 @@
 /**
- *  ___PROJECTNAMEASIDENTIFIER___AppDelegate.h
+ *  AppDelegate.h
  *  ___PROJECTNAME___
  *
  *  Created by ___FULLUSERNAME___ on ___DATE___.
@@ -8,7 +8,7 @@
 
 #import "CC3NSViewController.h"
 
-@interface ___PROJECTNAMEASIDENTIFIER___AppDelegate : NSObject <NSApplicationDelegate> {
+@interface AppDelegate : NSObject <NSApplicationDelegate> {
 	NSWindow* _window;
 	CC3GLView* _glView;
 	CC3NSViewController* _viewController;

@@ -1,12 +1,12 @@
 /**
- *  ___PROJECTNAMEASIDENTIFIER___AppDelegate.m
+ *  AppDelegate.m
  *  ___PROJECTNAME___
  *
  *  Created by ___FULLUSERNAME___ on ___DATE___.
  *  Copyright ___ORGANIZATIONNAME___ ___YEAR___. All rights reserved.
  */
 
-#import "___PROJECTNAMEASIDENTIFIER___AppDelegate.h"
+#import "AppDelegate.h"
 #import "___PROJECTNAMEASIDENTIFIER___Layer.h"
 #import "CC3CC2Extensions.h"
 
@@ -15,7 +15,7 @@
 #if !CC3_CC2_CLASSIC
 
 /** App Delegate for Cocos2D v3 and above. */
-@implementation ___PROJECTNAMEASIDENTIFIER___AppDelegate
+@implementation AppDelegate
 
 // This is the only app delegate method you need to implement when inheriting from CCAppDelegate.
 // This method is a good place to add one time setup code that only runs when your app is first launched.
@@ -70,7 +70,7 @@
 #else
 
 /** App Delegate for Cocos2D below v3. */
-@implementation ___PROJECTNAMEASIDENTIFIER___AppDelegate
+@implementation AppDelegate
 
 #if CC3_CC2_2
 /**
@@ -136,7 +136,7 @@
 }
 #endif	// CC3_CC2_1
 
--(void) applicationDidFinishLaunching: (UIApplication*) application {
+-(BOOL) application: (UIApplication*) application didFinishLaunchingWithOptions: (NSDictionary*) launchOptions {
 	
 	// Establish the view controller and CCDirector (in cocos2d 2.x, these are one and the same)
 	[self establishDirectorController];

@@ -13,6 +13,8 @@
 			<dict>
 				<key>PRODUCT_NAME</key>
 				<string>$(TARGET_NAME)</string>
+				<key>CLANG_ENABLE_MODULES</key>
+				<string>YES</string>
 				<key>CLANG_ENABLE_OBJC_ARC</key>
 				<string>NO</string>
 				<key>CLANG_WARN_OBJC_EXPLICIT_OWNERSHIP_TYPE</key>

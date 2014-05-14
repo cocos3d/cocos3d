@@ -10,11 +10,6 @@
 	<array>
 		<string>org.cocos3d.cocos3dAppBase</string>
 	</array>
-	<key>Project</key>
-	<dict>
-		<key>SDK</key>
-		<string>iphoneos</string>
-	</dict>
 	<key>Targets</key>
 	<array>
 		<dict>
