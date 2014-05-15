@@ -95,6 +95,15 @@
 	return nil;
 }
 
+/** 
+ * Override to set the shouldAlwaysUpdateViewport to YES if the parent is not the root CCScene,
+ * so that the viewport will be updated as ancestor nodes are moved around.
+ */
+-(void) setParent:(CCNode *)parent {
+	[super setParent:parent];
+	self.shouldAlwaysUpdateViewport = (parent && ![parent isKindOfClass: CCScene.class]);
+}
+
 
 #pragma mark Allocation and initialization
 
@@ -140,6 +149,7 @@
 	[self updateViewport];
 }
 
+
 #pragma mark CCRGBAProtocol and CCBlendProtocol support
 
 -(CCColorRef) color { return self.cc3Scene.color; }
@@ -171,6 +181,7 @@
 }
 
 -(Class) surfaceManagerClass { return CC3LayerSurfaceManager.class; }
+
 
 #pragma mark Updating layer
 

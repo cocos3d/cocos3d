@@ -1,6 +1,6 @@
 //*****************************************************************************
 // This configuration file can be used with the Apportable SDK to build
-// this library to run on the Android mobile platform.
+// this application to run on the Android mobile platform.
 //
 // You can learn more about the Apportable SDK here: http://www.apportable.com/
 //*****************************************************************************
@@ -8,8 +8,7 @@
 {
   "configuration_format_version": 2,
 
-  "default_target": {"project": "cocos3d-library-iOS", "project_config": "Debug", "target": "cocos3d"},
-
+  "default_target": {"project": "___PROJECTNAMEASIDENTIFIER___", "project_config": "Debug", "target": "___PROJECTNAMEASIDENTIFIER___"},
 
   // Dictionary of global configuration parameters.
   // These parameters are not taken from the xcode project,
@@ -64,8 +63,8 @@
     //   "write_external_storage"
     //   "write_settings"
     //   "xperia"
-	"FEATURES": ["opengles2"],
-//	"FEATURES": [],					// If using OpenGLES 1.1
+    "FEATURES": ["opengles2"],	// If using OpenGLES 2.0
+//	"FEATURES": [],				// If using OpenGLES 1.1
 
     // Preferred way of handling URLs in the code.
     // Leave it null for most cases.
@@ -85,7 +84,7 @@
 
     // Path to the image to use for the app's icon.
     // Usually something like "./Icon.png".
-    // "ICON": "",
+    "ICON": "___PROJECTNAMEASIDENTIFIER___/Resources/Icon-72@2x.png",
 
     // A regular expression to determine which assets
     // should be compressed when building the final app.
@@ -169,11 +168,11 @@
     // or the value can be a dictionary specifying the value and the
     // environment that it should be used in, e.g.,
     // "SOME_DEFINE": {"value": "\"yep its building on android\"", "env": {"TARGET_OS": "android"}}
-	"defines": {},
+    "defines": {},
    
     // A list of dependencies.  Typically these correspond to
     // frameworks in the xcode project.
-	  "deps": ["AudioToolbox", "AVFoundation"],
+    "deps": ["AudioToolbox", "AVFoundation"],
     
     // A list of source files (e.g. .m, .mm, .c, .cc, and .cpp) files to build.
     // Source files can be a string, e.g. "./main.c", or a dictionary specifying

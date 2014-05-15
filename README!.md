@@ -512,9 +512,12 @@ instructions to add the Cocos3D libraries:
 	1. Drag a *Node* from the SpriteBuilder component palette to your layout.
 	2. Set the *Custom class* property of the new component to the name of your custom `MyCC3Layer` class.
 	3. Set the *Content size* property to the size at which you want your want your 3D scene to be displayed.
-	4. *Save* and *Publish* your new SpriteBuilder layout.
-	5. Build and run your app from Xcode to see your new 3D content.
-	6. Repeat for all 3D sprites that you want to add to your SpriteBuilder scene.
+	4. When first placed, the `MyCC3Layer` component will be added as a child of the root node of the 
+	   SpriteBuilder scene. If you want the `MyCC3Layer` node to move as part of another node, you can use 
+	   the SpriteBuilder timeline hierarchy to reposition the node to be a child of a different parent.
+	5. *Save* and *Publish* your new SpriteBuilder layout.
+	6. Build and run your app from Xcode to see your new 3D content.
+	7. Repeat for all 3D sprites that you want to add to your SpriteBuilder scene.
 
 
 <a name="cocos2dversions"></a>
