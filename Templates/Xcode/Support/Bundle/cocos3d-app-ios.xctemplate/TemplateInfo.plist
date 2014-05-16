@@ -29,25 +29,25 @@
 	</array>
 	<key>Definitions</key>
 	<dict>
-		<key>Classes/___PROJECTNAMEASIDENTIFIER___AppDelegate.h</key>
+		<key>Classes/AppDelegate.h</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>Classes</string>
 			</array>
 			<key>Path</key>
-			<string>Classes/___PROJECTNAMEASIDENTIFIER___AppDelegate.h</string>
+			<string>Classes/AppDelegate.h</string>
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
-		<key>Classes/___PROJECTNAMEASIDENTIFIER___AppDelegate.m</key>
+		<key>Classes/AppDelegate.m</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>Classes</string>
 			</array>
 			<key>Path</key>
-			<string>Classes/___PROJECTNAMEASIDENTIFIER___AppDelegate.m</string>
+			<string>Classes/AppDelegate.m</string>
 		</dict>
 		<key>main.m</key>
 		<dict>
@@ -286,8 +286,8 @@
 	</dict>
 	<key>Nodes</key>
 	<array>
-		<string>Classes/___PROJECTNAMEASIDENTIFIER___AppDelegate.h</string>
-		<string>Classes/___PROJECTNAMEASIDENTIFIER___AppDelegate.m</string>
+		<string>Classes/AppDelegate.h</string>
+		<string>Classes/AppDelegate.m</string>
 		<string>main.m</string>
 		<string>Resources/Info.plist</string>
 		<string>Resources/Icons/Icon-29.png</string>
