@@ -41,9 +41,7 @@
 
 @interface CC3MeshNode (TemplateMethods)
 -(id) shadowVolumeClass;
--(void) applyLocalTransforms;
 -(void) configureDrawingParameters: (CC3NodeDrawingVisitor*) visitor;
--(void) cleanupDrawingParameters: (CC3NodeDrawingVisitor*) visitor;
 @end
 
 

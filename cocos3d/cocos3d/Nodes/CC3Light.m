@@ -254,7 +254,7 @@
 }
 
 /** Scaling does not apply to lights. */
--(void) applyScaling {}
+-(void) applyScalingTo: (CC3Matrix*) matrix {}
 
 /**
  * Scaling does not apply to lights. Return the globalScale of the parent node,

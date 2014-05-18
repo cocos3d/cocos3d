@@ -231,7 +231,7 @@
  * resulting in unwanted clipping around the fringes of the view. For this reason, an inverse
  * scale of 1/10 is applied to the transform to counteract this effect.
  */
--(void) applyScaling { [_globalTransformMatrix scaleBy: CC3VectorInvert(self.globalScale)]; }
+-(void) applyScalingTo: (CC3Matrix*) matrix { [matrix scaleBy: CC3VectorInvert(self.globalScale)]; }
 
 /**
  * Scaling does not apply to cameras. Return the globalScale of the parent node, 

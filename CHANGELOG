@@ -190,6 +190,8 @@ Cocos3D 2.0.0 - 2014/04/30
 
 - Added CC3LightProbe class to support texture-based scene lighting
 
+- Added CC3Node localTransformMatrix property and rotateByAngle:aroundAxis:atLocation: method.
+
 - Added several additional quaternion functions in CC3Foundation files, including quaternion multiplication, conjucation, and inversion.
 - Added CC3Node texture property as a convenience for changing the primary texture for all descendant mesh nodes.
 - Added CC3Assert macro function as an improvement to the NSAssert() family of function macros:
