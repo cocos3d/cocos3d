@@ -173,7 +173,7 @@
    
     // A list of dependencies.  Typically these correspond to
     // frameworks in the xcode project.
-	  "deps": ["AudioToolbox", "AVFoundation"],
+	"deps": ["AudioToolbox", "AVFoundation", "GLKit"],
     
     // A list of source files (e.g. .m, .mm, .c, .cc, and .cpp) files to build.
     // Source files can be a string, e.g. "./main.c", or a dictionary specifying
