@@ -34,6 +34,10 @@
 #import "CC3Environment.h"
 #import "CC3CC2Extensions.h"
 
+@interface CC3Scene (ProtectedMethods)
+-(void) setDeprecatedCC3Layer: (CC3Layer*) cc3Layer;
+@end
+
 
 @implementation CC3Layer
 
@@ -58,12 +62,12 @@
 
 	 [self closeCC3Scene];						// Close the old scene.
 	 [_cc3Scene wasRemoved];					// Stop actions in old scene (if shouldStopActionsWhenRemoved set).
-	 _cc3Scene.cc3Layer = nil;					// Detach this layer from old scene.
+	 _cc3Scene.deprecatedCC3Layer = nil;		// Detach this layer from old scene.
 
 	 [_cc3Scene release];
 	 _cc3Scene = [aScene retain];
 
-	 _cc3Scene.cc3Layer = self;								// Point the scene back here
+	 _cc3Scene.deprecatedCC3Layer = self;					// Point the scene back here
 	 if (self.isRunningInActiveScene) [self openCC3Scene];	// If already running, open the new scene right away
 	 
 	 [self deleteRenderStreamGroupMarker];

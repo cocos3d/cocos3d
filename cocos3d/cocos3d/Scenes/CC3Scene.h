@@ -256,22 +256,6 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 @property(nonatomic, readonly) BOOL isScene;
 
 /**
- * The CC3Layer that is holding this 3D scene.
- *
- * This property is set automatically when this scene is assigned to the CC3Layer.
- * The application should not set this property directly.
- */
-@property(nonatomic, assign) CC3Layer* cc3Layer;
-
-/**
- * The controller that is controlling the view displaying this scene.
- * 
- * This property is retrieved from the same property on the CC3Layer holding this scene,
- * and is made available to support delegation from this 3D scene.
- */
-@property(nonatomic, retain, readonly) CC3ViewController* controller;
-
-/**
  * The 3D camera that is currently displaying the scene of this scene.
  *
  * You can set this property directly to a camera that you create, or if this property is not
@@ -585,9 +569,6 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  */
 -(Class) updateVisitorClass;
 
-/** @deprecated No longer used. */
-@property(nonatomic, retain) id transformVisitor __deprecated;
-
 /**
  * The value of this property is used as the lower limit accepted by the updateScene: method.
  * Values sent to the updateScene: method that are smaller than this maximum will be clamped
@@ -718,9 +699,6 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * never needs to invoke this method directly.
  */
 -(void) drawSceneWithVisitor: (CC3NodeDrawingVisitor*) visitor;
-
-/** @deprecated Invokes the drawSceneWithVisitor: method with the viewDrawingVisitor property of this scene. */
--(void) drawScene __deprecated;
 
 /**
  * Template method that draws the content of the scene.
@@ -861,22 +839,6 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 /** Returns whether this instance is using a drawing sequencer. */
 @property(nonatomic, readonly) BOOL isUsingDrawingSequence;
 
-/** 
- * @deprecated Access the view surface manager through singleton CC3ViewSurfaceManager 
- * sharedViewSurfaceManager. Setting this property has no effect.
- */
-@property(nonatomic, retain, readonly) CC3ViewSurfaceManager* viewSurfaceManager __deprecated;
-
-/**
- * The render surface being used to draw to the view on the screen.
- *
- * When this render surface is active, all drawing activity is rendered to the framebuffer
- * attached to the view.
- *
- * The value of this property is retrieved from the surface manager in the viewSurfaceManager property.
- */
-@property(nonatomic, retain, readonly) id<CC3RenderSurface> viewSurface __deprecated;
-
 /**
  * The visitor that is used to visit the nodes to draw them to the view on the screen.
  *
@@ -925,12 +887,6 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 
 /** @deprecated Depth clearing is now handled by app in drawSceneContentWithVisitor:. */
 @property(nonatomic, assign) BOOL shouldClearDepthBuffer;
-
-/** @deprecated Use the shouldClearDepthBuffer propety instead. */
-@property(nonatomic, assign) BOOL shouldClearDepthBufferBefore3D __deprecated;
-
-/** @deprecated Use the shouldClearDepthBuffer propety instead. */
-@property(nonatomic, assign) BOOL shouldClearDepthBufferBefore2D __deprecated;
 
 
 #pragma mark Touch handling
@@ -1139,14 +1095,6 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  */
 -(Class) pickVisitorClass;
 
-/** 
- * The render surface being used to draw when picking nodes from touch events.
- *
- * The value of this property is retrieved from the pickingSurface property of the surface
- * manager in the viewSurfaceManager property.
- */
-@property(nonatomic, retain, readonly) id<CC3RenderSurface> pickingSurface;
-
 /**
  * When set to YES, the scene will be displayed on the screen as rendered while picking a
  * node from a touch event, instead of the normal scene display render.
@@ -1155,6 +1103,54 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * from touch events.
  */
 @property(nonatomic, assign) BOOL shouldDisplayPickingRender;
+
+
+#pragma mark Deprecated
+
+/**
+ * @deprecated
+ * This property has been fomally deprecated to better support multiple CC3Layers displaying
+ * a single CC3Scene from different perspectives (different cameras). If you want to dedicate
+ * a single CC3Layer to a single CC3Scene, and hold a back reference to that layer within the
+ * scene, you should create and manage that reference in your custom CC3Scene class.
+ *
+ * The CC3Layer that is holding this 3D scene. This property is set automatically when this
+ * scene is assigned to the CC3Layer.
+ */
+@property(nonatomic, assign) CC3Layer* cc3Layer __deprecated;
+
+/** @deprecated You should reference this directly through the view. */
+@property(nonatomic, retain, readonly) CC3ViewController* controller __deprecated;
+
+/** @deprecated Invokes the drawSceneWithVisitor: method with the viewDrawingVisitor property of this scene. */
+-(void) drawScene __deprecated;
+
+/**
+ * @deprecated Access the view surface manager through singleton CC3ViewSurfaceManager
+ * sharedViewSurfaceManager. Setting this property has no effect.
+ */
+@property(nonatomic, retain, readonly) CC3ViewSurfaceManager* viewSurfaceManager __deprecated;
+
+/**
+ * @deprecated Access the viewSurface property of the surface manager found in the
+ * CC3Layer or CC3NodeDrawingVisitor surfaceManager property.
+ */
+@property(nonatomic, retain, readonly) id<CC3RenderSurface> viewSurface __deprecated;
+
+/**
+ * @deprecated Access the pickingSurface property of the surface manager found in the
+ * CC3Layer or CC3NodeDrawingVisitor surfaceManager property.
+ */
+@property(nonatomic, retain, readonly) id<CC3RenderSurface> pickingSurface __deprecated;
+
+/** @deprecated No longer used. */
+@property(nonatomic, retain) id transformVisitor __deprecated;
+
+/** @deprecated Use the shouldClearDepthBuffer propety instead. */
+@property(nonatomic, assign) BOOL shouldClearDepthBufferBefore3D __deprecated;
+
+/** @deprecated Use the shouldClearDepthBuffer propety instead. */
+@property(nonatomic, assign) BOOL shouldClearDepthBufferBefore2D __deprecated;
 
 @end
 

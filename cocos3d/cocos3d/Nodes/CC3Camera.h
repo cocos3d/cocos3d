@@ -1080,32 +1080,30 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
 #pragma mark 3D <-> 2D mapping functionality
 
 /**
- * Projects the specified global 3D scene location onto a 2D position in the viewport
- * coordinate space, indicating where on the screen this 3D location will be seen.
- * The 2D position can be read from the X and Y components of the returned 3D location.
+ * Projects the specified global 3D scene location onto a 2D position in the display coordinate
+ * space, indicating where on the CC3Layer this 3D location will be seen. The 2D position can be
+ * read from the X and Y components of the returned 3D location, and is measured in points in
+ * the coordinate system of the CC3Layer.
  *
  * The specified location should be in global coordinates. If you are invoking this method to
  * project the location of a CC3Node, you should use the globalLocation property of the node.
- * For objects that are moving, the updated globalLocation is available in the updateAfterTransform:
- * method of your customized CC3Scene.
  *
  * The Z-component of the returned location indicates the distance from the camera to the specified
- * location, with a positive value indicating that the specified location is in front of the camera,
- * and a negative value indicating that the specified location is behind the camera.
+ * location, in global coordinates, with a positive value indicating that the specified location is in
+ * front of the camera, and a negative value indicating that the specified location is behind the camera.
  *
  * Any 3D scene location can be either in front of or behind the camera, and both cases will be 
  * projected onto the 2D space of the viewport plane. If you are only interested in the case when
  * the specified location is in front of the camera (potentially visible to the camera), check
  * that the Z-component of the returned location is positive.
- *
- * This method takes into account the orientation of the device (portrait, landscape). 
  */
 -(CC3Vector) projectLocation: (CC3Vector) aGlobal3DLocation;
 
 /**
- * Projects the specified 3D location, in the local coordinate system of the specified node, onto a 2D
- * position in the viewport coordinate space. This indicates where on the screen this point on the node
- * will be seen. The 2D position can be read from the X and Y components of the returned 3D location.
+ * Projects the specified 3D location, in the local coordinate system of the specified node, 
+ * onto a 2D position in the display coordinate space, indicating where on the CC3Layer this
+ * 3D location will be seen. The 2D position can be read from the X and Y components of the
+ * returned 3D location, and is measured in points in the coordinate system of the CC3Layer.
  *
  * The specified location should be in the local coordinates of the specified node.
  *
@@ -1117,21 +1115,26 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
  * projected onto the 2D space of the viewport plane. If you are only interested in the case when
  * the specified location is in front of the camera (potentially visible to the camera), check
  * that the Z-component of the returned location is positive.
- *
- * This method takes into account the orientation of the device (portrait, landscape). 
  */
 -(CC3Vector) projectLocation: (CC3Vector) aLocal3DLocation onNode: (CC3Node*) aNode;
 
 /**
- * Projects the globalLocation of the specified node onto a 2D position in the viewport coordinate
- * space, by invoking the projectLocation: method of this camera, passing the node's globalLocation.
- * See the notes of the projectLocation: method for more info about the content of the returned vector.
- *
- * During any frame update, for objects that are moving, the updated globalLocation is
- * available in the updateAfterTransform: method of your customized CC3Scene.
+ * Projects the globalLocation of the specified node onto a 2D position in the display coordinate
+ * space, indicating where on the CC3Layer this 3D location will be seen. The 2D position can be
+ * read from the X and Y components of the returned 3D location, and is measured in points in
+ * the coordinate system of the CC3Layer.
  *
  * In addition to returning the projected 2D location, this method also sets that value
  * into the projectedLocation property of the node, for future access.
+ *
+ * The Z-component of the returned location indicates the distance from the camera to the specified
+ * location, in global coordinates, with a positive value indicating that the specified location is in
+ * front of the camera, and a negative value indicating that the specified location is behind the camera.
+ *
+ * Any 3D scene location can be either in front of or behind the camera, and both cases will be
+ * projected onto the 2D space of the viewport plane. If you are only interested in the case when
+ * the specified location is in front of the camera (potentially visible to the camera), check
+ * that the Z-component of the returned location is positive.
  */
 -(CC3Vector) projectNode: (CC3Node*) aNode;
 
@@ -1187,37 +1190,10 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
  */
 -(CC3Vector4) unprojectPoint:(CGPoint)cc2Point ontoPlane: (CC3Plane) plane;
 
-/**
- * Converts the specified point, which is in the coordinate system of the cocos2d layer,
- * into the coordinate system used by the 3D GL environment, taking into consideration
- * the size and position of the layer/viewport.
- *
- * The cocos2d layer coordinates are relative, and measured from the bottom-left corner
- * of the layer, which might not be in the corner of the UIView or screen.
- *
- * The GL cocordinates are absolute, relative to the bottom-left corner of the underlying
- * UIView, which does not rotate with device orientation, is always in portait orientation,
- * and is always in the corner of the screen.
- *
- * One can think of the GL coordinates as absolute and fixed relative to the portrait screen,
- * and the layer coordinates as relative to layer position and size.
- */
+/** @deprecated */
 -(CGPoint) glPointFromCC2Point: (CGPoint) cc2Point __deprecated;
 
-/**
- * Converts the specified point, which is in the coordinate system of the 3D GL environment,
- * into the coordinate system used by the cocos2d layer, taking into consideration the size
- * and position of the layer/viewport.
- *
- * The cocos2d layer coordinates are relative, and measured from the bottom-left corner
- * of the layer, which might not be in the corner of the UIView or screen.
- *
- * The GL cocordinates are absolute, relative to the bottom-left corner of the underlying
- * UIView, which is always in the corner of the screen.
- *
- * One can think of the GL coordinates as absolute and fixed relative to the portrait screen,
- * and the layer coordinates as relative to layer position and size.
- */
+/** @deprecated */
 -(CGPoint) cc2PointFromGLPoint: (CGPoint) glPoint __deprecated;
 
 @end

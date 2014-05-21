@@ -664,16 +664,16 @@ typedef enum {
 @property(nonatomic, assign) GLfloat cameraDistanceProduct;
 
 /**
- * The current location of this node, as projected onto the 2D viewport coordinate space.
- * For most purposes, this is where this node will appear on the screen or window.
- * The 2D position can be read from the X and Y components of the returned 3D location.
+ * The current location of this node, as projected onto a 2D position in the display coordinate
+ * space, indicating where on the CC3Layer this 3D location will be seen. 
  *
- * The initial value of this property is kCC3VectorZero. To set this property, pass this
- * node as the argument to the projectNode: method of the active camera, which can be
- * retrieved from the activeCamera property of the CC3Scene. The application should usually
- * not set this property directly. For more information, see the notes for the projectNode:
- * method of CC3Camera.
+ * The initial value of this property is kCC3VectorZero. To set the value of this property, 
+ * pass this node as the argument to the projectNode: method of a CC3Camera. For more 
+ * information, see the notes for the projectNode: method of CC3Camera.
  *
+ * The 2D position can be read from the X and Y components of the returned 3D location, 
+ * and is measured in points in the coordinate system of the CC3Layer.
+ * 
  * The Z-component of the returned location indicates the distance from the camera to this
  * node, with a positive value indicating that this node is in front of the camera, and a
  * negative value indicating that it is behind the camera. If you are only interested in
@@ -683,27 +683,21 @@ typedef enum {
  * When several nodes overlap a 2D position on the screen, you can also use the Z-component
  * of the projectedLocation property of each of the nodes to determine which node is closest
  * the camera, and is therefore "on-top" visually. This can be useful when trying to select
- * a 3D node from an iOS touch event position.
- *
- * The returned value takes into account the orientation of the device (portrait, landscape). 
+ * a 3D node from a touch event position.
  */
-@property(nonatomic, assign) CC3Vector projectedLocation;
+@property(nonatomic, readonly) CC3Vector projectedLocation;
 
 /**
- * The current position of this node, as projected onto the 2D viewport coordinate space,
- * returned as a 2D point. For most purposes, this is where this node will appear on the
- * screen or window.
+ * The current position of this node, as projected onto a 2D position in the display coordinate
+ * space, indicating where on the CC3Layer this 3D location will be seen.
  *
- * This value is derived from the X and Y coordinates of the projectedLocation property.
- * If this node is behind the camera, both the X and Y coordinates of the returned point
- * will have the value -kCC3MaxGLfloat.
+ * This is a convenience property. The value of this property is derived from the X and Y 
+ * coordinates of the projectedLocation property. If this node is behind the camera, both 
+ * the X and Y coordinates of the returned point will have the value -kCC3MaxGLfloat.
  *
- * The initial value of this property is CGPointZero. To set this property, pass this
- * node as the argument to the projectNode: method of the active camera, which can be
- * retrieved from the activeCamera property of the CC3Scene. For more information, see
- * the notes for the projectNode: method of CC3Camera.
- *
- * The returned value takes into account the orientation of the device (portrait, landscape). 
+ * The initial value of this property is (-kCC3MaxGLfloat, -kCC3MaxGLfloat). To set the value
+ * of this property, pass this node as the argument to the projectNode: method of a CC3Camera. 
+ * For more information, see the notes for the projectNode: method of CC3Camera.
  */
 @property(nonatomic, readonly) CGPoint projectedPosition;
 

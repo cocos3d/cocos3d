@@ -218,6 +218,8 @@ Cocos3D 2.0.0 - 2014/04/30
 
 - [API change] Renamed CC3Node transformMatrix, transformMatrixInverted and parentTransformMatrix to  globalTransformMatrix, globalTransformMatrixInverted and parentGlobalTransformMatrix, respectively and deprecated originals.
 
+- [API change] CC3Scene cc3Layer property deprecated to better support multiple CC3Layers displaying different views of the same CC3Scene.
+
 - [API change] Class CC3VertexWeights renamed to CC3VertexBoneWeights and the former deprecated.
 	- many methods in CC3Node, CC3MeshNode, CC3Mesh & CC3VertexBoneWeights renamed and deprecated to replace concept of vertex unit with bone influence
 - [API change] Class CC3VertexMatrixIndices renamed to CC3VertexBoneIndices and the former deprecated.

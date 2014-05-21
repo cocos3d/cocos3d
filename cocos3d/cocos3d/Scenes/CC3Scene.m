@@ -56,7 +56,7 @@
 
 @implementation CC3Scene
 
-@synthesize cc3Layer=_cc3Layer, ambientLight=_ambientLight, touchedNodePicker=_touchedNodePicker;
+@synthesize ambientLight=_ambientLight, touchedNodePicker=_touchedNodePicker;
 @synthesize minUpdateInterval=_minUpdateInterval, maxUpdateInterval=_maxUpdateInterval;
 @synthesize drawingSequenceVisitor=_drawingSequenceVisitor;
 @synthesize viewDrawingVisitor=_viewDrawingVisitor, shadowVisitor=_shadowVisitor;
@@ -75,7 +75,7 @@
 -(void) dealloc {
 	LogInfo(@"Deallocating %@ on thread %@", self, NSThread.currentThread);
 	
-	self.cc3Layer = nil;					// Use setter to make nil
+	self.deprecatedCC3Layer = nil;			// Use setter to make nil
 	self.backdrop = nil;					// Use setter to stop any actions
 	self.fog = nil;							// Use setter to stop any actions
 	self.activeCamera = nil;				// Use setter to release and make nil
@@ -99,6 +99,15 @@
 }
 
 -(BOOL) isScene { return YES; }
+
+// Deprecated
+-(CC3Layer*) cc3Layer { return _cc3Layer; }
+-(void) setCc3Layer:(CC3Layer *)cc3Layer { self.deprecatedCC3Layer = cc3Layer; }
+-(void) setDeprecatedCC3Layer: (CC3Layer*) cc3Layer {
+	if (cc3Layer == _cc3Layer) return;
+	[_cc3Layer release];
+	_cc3Layer = [cc3Layer retain];
+}
 
 -(CC3ViewController*) controller { return _cc3Layer.controller; }
 
@@ -367,12 +376,6 @@
 
 #pragma mark Drawing
 
-// Deprecated
--(CC3ViewSurfaceManager*) viewSurfaceManager { return CC3ViewSurfaceManager.sharedViewSurfaceManager; }
--(id<CC3RenderSurface>) viewSurface { return self.cc3Layer.surfaceManager.viewSurface; }
-
--(id<CC3RenderSurface>) pickingSurface { return self.cc3Layer.surfaceManager.pickingSurface; }
-
 -(void) drawScene { [self drawSceneWithVisitor: self.viewDrawingVisitor]; }
 	
 -(void) drawSceneWithVisitor: (CC3NodeDrawingVisitor*) visitor {
@@ -415,7 +418,6 @@
 }
 
 -(void) drawBackdropWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	if (self.controller.isOverlayingDeviceCamera) return;
 	[visitor visit: self.backdrop];
 }
 
@@ -724,6 +726,13 @@
 			  @" and the shouldUseDedicatedPickingSurface property in the viewSurfaceManager is set to NO.");
 	_shouldDisplayPickingRender = shouldDisplayPickingRender;
 }
+
+
+#pragma mark Deprecated
+
+-(CC3ViewSurfaceManager*) viewSurfaceManager { return CC3ViewSurfaceManager.sharedViewSurfaceManager; }
+-(id<CC3RenderSurface>) viewSurface { return self.cc3Layer.surfaceManager.viewSurface; }
+-(id<CC3RenderSurface>) pickingSurface { return self.cc3Layer.surfaceManager.pickingSurface; }
 
 @end
 

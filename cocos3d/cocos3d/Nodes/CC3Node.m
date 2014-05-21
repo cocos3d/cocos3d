@@ -55,7 +55,7 @@
 
 @synthesize parent=_parent, children=_children;
 @synthesize rotator=_rotator, location=_location, scale=_scale;
-@synthesize projectedLocation=_projectedLocation, visible=_visible;
+@synthesize visible=_visible, isRunning=_isRunning;
 @synthesize boundingVolume=_boundingVolume, boundingVolumePadding=_boundingVolumePadding;
 @synthesize shouldInheritTouchability=_shouldInheritTouchability;
 @synthesize shouldAllowTouchableWhenInvisible=_shouldAllowTouchableWhenInvisible;
@@ -63,7 +63,6 @@
 @synthesize shouldUseFixedBoundingVolume=_shouldUseFixedBoundingVolume;
 @synthesize shouldStopActionsWhenRemoved=_shouldStopActionsWhenRemoved;
 @synthesize cameraDistanceProduct=_cameraDistanceProduct;
-@synthesize isRunning=_isRunning;
 
 -(void) dealloc {
 	self.target = nil;							// Removes myself as listener
@@ -234,10 +233,16 @@
 +(GLfloat) defaultScaleTolerance { return 0.0f; }
 +(void) setDefaultScaleTolerance: (GLfloat) aTolerance {}
 
+-(CC3Vector) projectedLocation { return _projectedLocation; }
+
+// Protected setter
+-(void) setProjectedLocation: (CC3Vector) projectedLocation { _projectedLocation = projectedLocation; }
+
 // Derived from projected location, but only if in front of the camera
 -(CGPoint) projectedPosition {
-	return (_projectedLocation.z > 0.0)
-				? ccp(_projectedLocation.x, _projectedLocation.y)
+	CC3Vector projLoc = self.projectedLocation;
+	return (projLoc.z > 0.0)
+				? ccp(projLoc.x, projLoc.y)
 				: ccp(-kCC3MaxGLfloat, -kCC3MaxGLfloat);
 }
 
