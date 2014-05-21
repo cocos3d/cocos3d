@@ -685,10 +685,10 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
 +(void) setDefaultBlendFunc: (ccBlendFunc) aBlendFunc;
 
 /** @deprecated Moved to CC3MeshNode. */
-@property(nonatomic, retain) CC3ShaderContext* shaderContext DEPRECATED_ATTRIBUTE;
+@property(nonatomic, retain) CC3ShaderContext* shaderContext __deprecated;
 
 /** @deprecated Moved to CC3MeshNode. */
-@property(nonatomic, retain) CC3ShaderProgram* shaderProgram DEPRECATED_ATTRIBUTE;
+@property(nonatomic, retain) CC3ShaderProgram* shaderProgram __deprecated;
 
 
 #pragma mark Textures
@@ -836,7 +836,7 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
 @property(nonatomic, readonly) BOOL hasTexturePremultipliedAlpha;
 
 /** @deprecated Renamed to hasTexturePremultipliedAlpha. */
-@property(nonatomic, readonly) BOOL hasPremultipliedAlpha DEPRECATED_ATTRIBUTE;
+@property(nonatomic, readonly) BOOL hasPremultipliedAlpha __deprecated;
 
 /**
  * Returns whether the opacity of each of the material colors (ambient, diffuse, specular and emission)

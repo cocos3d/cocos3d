@@ -586,7 +586,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 -(Class) updateVisitorClass;
 
 /** @deprecated No longer used. */
-@property(nonatomic, retain) id transformVisitor DEPRECATED_ATTRIBUTE;
+@property(nonatomic, retain) id transformVisitor __deprecated;
 
 /**
  * The value of this property is used as the lower limit accepted by the updateScene: method.
@@ -927,10 +927,10 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 @property(nonatomic, assign) BOOL shouldClearDepthBuffer;
 
 /** @deprecated Use the shouldClearDepthBuffer propety instead. */
-@property(nonatomic, assign) BOOL shouldClearDepthBufferBefore3D DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) BOOL shouldClearDepthBufferBefore3D __deprecated;
 
 /** @deprecated Use the shouldClearDepthBuffer propety instead. */
-@property(nonatomic, assign) BOOL shouldClearDepthBufferBefore2D DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) BOOL shouldClearDepthBufferBefore2D __deprecated;
 
 
 #pragma mark Touch handling

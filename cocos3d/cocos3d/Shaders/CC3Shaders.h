@@ -322,7 +322,7 @@
 +(id) shaderFromSourceCodeFile: (NSString*) filePath;
 
 /** @deprecated Use the CC3ShaderSourceCode shaderSourceCodeNameFromFilePath: method instead. */
-+(NSString*) shaderNameFromFilePath: (NSString*) filePath DEPRECATED_ATTRIBUTE;
++(NSString*) shaderNameFromFilePath: (NSString*) filePath __deprecated;
 
 /**
  * Indicates whether this shader was loaded from a file.
@@ -1196,10 +1196,10 @@
 +(void) setShaderMatcher: (id<CC3ShaderMatcher>) shaderMatcher;
 
 /** @deprecated Renamed to shaderMatcher. */
-+(id<CC3ShaderMatcher>) programMatcher DEPRECATED_ATTRIBUTE;
++(id<CC3ShaderMatcher>) programMatcher __deprecated;
 
 /** @deprecated Renamed to setShaderMatcher:. */
-+(void) setProgramMatcher: (id<CC3ShaderMatcher>) programMatcher DEPRECATED_ATTRIBUTE;
++(void) setProgramMatcher: (id<CC3ShaderMatcher>) programMatcher __deprecated;
 
 @end
 

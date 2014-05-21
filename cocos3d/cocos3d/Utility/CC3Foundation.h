@@ -747,7 +747,7 @@ static inline GLKVector4 GLKVector4FromCC3Vector4(CC3Vector4 cc3v) {
 }
 
 /** @deprecated You can now use v.v instead. See the declaration of the CC3Vector4 structure. */
-CC3Vector CC3VectorFromTruncatedCC3Vector4(CC3Vector4 v) DEPRECATED_ATTRIBUTE;
+CC3Vector CC3VectorFromTruncatedCC3Vector4(CC3Vector4 v) __deprecated;
 
 /** Returns whether the two vectors are equal by comparing their respective components. */
 static inline BOOL CC3Vector4sAreEqual(CC3Vector4 v1, CC3Vector4 v2) {
@@ -880,7 +880,7 @@ static inline CC3Vector4 CC3Vector4Difference(CC3Vector4 minuend, CC3Vector4 sub
 static const CC3Quaternion kCC3QuaternionIdentity = { { {0.0, 0.0, 0.0} }, 1.0 };
 
 /** @deprecated Replaced by kCC3QuaternionIdentity. */
-static const CC3Vector4 kCC3Vector4QuaternionIdentity DEPRECATED_ATTRIBUTE = { { {0.0, 0.0, 0.0} }, 1.0 };
+static const CC3Vector4 kCC3Vector4QuaternionIdentity __deprecated = { { {0.0, 0.0, 0.0} }, 1.0 };
 
 /** A CC3Vector4 of zero length at the origin. */
 static const CC3Quaternion kCC3QuaternionZero = { { {0.0, 0.0, 0.0} }, 0.0 };
@@ -935,7 +935,7 @@ static inline BOOL CC3QuaternionIsZero(CC3Quaternion q) { return CC3Vector4IsZer
 static inline BOOL CC3QuaternionIsNull(CC3Quaternion q) { return CC3Vector4IsNull(q); }
 
 /** @deprecated You can now use q.v instead. See the declaration of the CC3Quaterion/CC3Vector4 structure. */
-CC3Vector CC3VectorFromQuaternion(CC3Quaternion q) DEPRECATED_ATTRIBUTE;
+CC3Vector CC3VectorFromQuaternion(CC3Quaternion q) __deprecated;
 
 /** Returns a quaternion that is the negative of the specified quaterion in all dimensions, including W. */
 static inline CC3Quaternion CC3QuaternionNegate(CC3Quaternion q) { return CC3Vector4Negate(q); }
@@ -1064,7 +1064,7 @@ CC3Vector CC3RotationFromQuaternion(CC3Quaternion aQuaternion);
 CC3Quaternion CC3QuaternionSlerp(CC3Quaternion q1, CC3Quaternion q2, GLfloat blendFactor);
 
 /** @deprecated Replaced by CC3QuaternionSlerp. */
-CC3Vector4 CC3Vector4Slerp(CC3Vector4 v1, CC3Vector4 v2, GLfloat blendFactor) DEPRECATED_ATTRIBUTE;
+CC3Vector4 CC3Vector4Slerp(CC3Vector4 v1, CC3Vector4 v2, GLfloat blendFactor) __deprecated;
 
 /**
  * Returns the specified vector rotated by the specified quaternion.
@@ -1183,7 +1183,7 @@ typedef struct {
 } CC3TexturedVertex;
 
 /** @deprecated Misspelling of CC3TexturedVertex. */
-typedef CC3TexturedVertex CCTexturedVertex DEPRECATED_ATTRIBUTE;
+typedef CC3TexturedVertex CCTexturedVertex __deprecated;
 
 /** Returns a string description of the specified textured vertex. */
 static inline NSString* NSStringFromCC3TexturedVertex(CC3TexturedVertex vertex) {
@@ -1409,7 +1409,7 @@ CC3Vector4 CC3RayIntersectionWithBoxSide(CC3Ray aRay, CC3Box bb,
 										 CC3Vector sideNormal, CC3Vector4 prevHit);
 
 /** @deprecated Renamed to CC3Box. */
-typedef CC3Box CC3BoundingBox DEPRECATED_ATTRIBUTE;
+typedef CC3Box CC3BoundingBox __deprecated;
 
 /** @deprecated Renamed to kCC3BoxZero. */
 #define kCC3BoundingBoxZero		kCC3BoxZero
@@ -1418,67 +1418,67 @@ typedef CC3Box CC3BoundingBox DEPRECATED_ATTRIBUTE;
 #define kCC3BoundingBoxNull		kCC3BoxNull
 
 /** @deprecated Renamed to NSStringFromCC3Box. */
-NSString* NSStringFromCC3BoundingBox(CC3Box bb) DEPRECATED_ATTRIBUTE;
+NSString* NSStringFromCC3BoundingBox(CC3Box bb) __deprecated;
 
 /** @deprecated Renamed to CC3BoxFromMinMax. */
-CC3Box CC3BoundingBoxFromMinMax(CC3Vector minVtx, CC3Vector maxVtx) DEPRECATED_ATTRIBUTE;
+CC3Box CC3BoundingBoxFromMinMax(CC3Vector minVtx, CC3Vector maxVtx) __deprecated;
 
 /** @deprecated Renamed to CC3BoxMake. */
 CC3Box CC3BoundingBoxMake(GLfloat minX, GLfloat minY, GLfloat minZ,
-						  GLfloat maxX, GLfloat maxY, GLfloat maxZ) DEPRECATED_ATTRIBUTE;
+						  GLfloat maxX, GLfloat maxY, GLfloat maxZ) __deprecated;
 
 /** @deprecated Renamed to CC3BoxesAreEqual. */
-BOOL CC3BoundingBoxesAreEqual(CC3Box bb1, CC3Box bb2) DEPRECATED_ATTRIBUTE;
+BOOL CC3BoundingBoxesAreEqual(CC3Box bb1, CC3Box bb2) __deprecated;
 
 /** @deprecated Renamed to CC3BoxIsZero. */
-BOOL CC3BoundingBoxIsZero(CC3Box bb) DEPRECATED_ATTRIBUTE;
+BOOL CC3BoundingBoxIsZero(CC3Box bb) __deprecated;
 
 /** @deprecated Renamed to CC3BoxIsNull. */
-BOOL CC3BoundingBoxIsNull(CC3Box bb) DEPRECATED_ATTRIBUTE;
+BOOL CC3BoundingBoxIsNull(CC3Box bb) __deprecated;
 
 /** @deprecated Renamed to CC3BoxCenter. */
-CC3Vector CC3BoundingBoxCenter(CC3Box bb) DEPRECATED_ATTRIBUTE;
+CC3Vector CC3BoundingBoxCenter(CC3Box bb) __deprecated;
 
 /** @deprecated Renamed to CC3BoxSize. */
-CC3Vector CC3BoundingBoxSize(CC3Box bb) DEPRECATED_ATTRIBUTE;
+CC3Vector CC3BoundingBoxSize(CC3Box bb) __deprecated;
 
 /** @deprecated Renamed to CC3BoxContainsLocation. */
-BOOL CC3BoundingBoxContainsLocation(CC3Box bb, CC3Vector aLoc) DEPRECATED_ATTRIBUTE;
+BOOL CC3BoundingBoxContainsLocation(CC3Box bb, CC3Vector aLoc) __deprecated;
 
 /** @deprecated Renamed to CC3BoxEngulfLocation. */
-CC3Box CC3BoundingBoxEngulfLocation(CC3Box bb, CC3Vector aLoc) DEPRECATED_ATTRIBUTE;
+CC3Box CC3BoundingBoxEngulfLocation(CC3Box bb, CC3Vector aLoc) __deprecated;
 
 /** @deprecated Renamed to CC3BoxUnion. */
-CC3Box CC3BoundingBoxUnion(CC3Box bb1, CC3Box bb2) DEPRECATED_ATTRIBUTE;
+CC3Box CC3BoundingBoxUnion(CC3Box bb1, CC3Box bb2) __deprecated;
 
 /** @deprecated Renamed to CC3BoxAddPadding. */
-CC3Box CC3BoundingBoxAddPadding(CC3Box bb, CC3Vector padding) DEPRECATED_ATTRIBUTE;
+CC3Box CC3BoundingBoxAddPadding(CC3Box bb, CC3Vector padding) __deprecated;
 
 /** @deprecated Renamed to CC3BoxAddUniformPadding. */
-CC3Box CC3BoundingBoxAddUniformPadding(CC3Box bb, GLfloat padding) DEPRECATED_ATTRIBUTE;
+CC3Box CC3BoundingBoxAddUniformPadding(CC3Box bb, GLfloat padding) __deprecated;
 
 /** @deprecated Renamed to CC3BoxTranslate. */
-CC3Box CC3BoundingBoxTranslate(CC3Box bb, CC3Vector offset) DEPRECATED_ATTRIBUTE;
+CC3Box CC3BoundingBoxTranslate(CC3Box bb, CC3Vector offset) __deprecated;
 
 /** @deprecated Renamed to CC3BoxTranslateFractionally. */
 CC3Box CC3BoundingBoxTranslateFractionally(CC3Box bb,
-										   CC3Vector offsetScale) DEPRECATED_ATTRIBUTE;
+										   CC3Vector offsetScale) __deprecated;
 
 /** @deprecated Renamed to CC3BoxMoveCenterToOrigin. */
-CC3Box CC3BoundingBoxMoveCenterToOrigin(CC3Box bb) DEPRECATED_ATTRIBUTE;
+CC3Box CC3BoundingBoxMoveCenterToOrigin(CC3Box bb) __deprecated;
 
 /** @deprecated Renamed to CC3BoxScale. */
-CC3Box CC3BoundingBoxScale(CC3Box bb, CC3Vector scale) DEPRECATED_ATTRIBUTE;
+CC3Box CC3BoundingBoxScale(CC3Box bb, CC3Vector scale) __deprecated;
 
 /** @deprecated Renamed to CC3BoxScaleUniform. */
-CC3Box CC3BoundingBoxScaleUniform(CC3Box bb, GLfloat scale) DEPRECATED_ATTRIBUTE;
+CC3Box CC3BoundingBoxScaleUniform(CC3Box bb, GLfloat scale) __deprecated;
 
 /** @deprecated Renamed to CC3RayIntersectionWithBox. */
-CC3Vector CC3RayIntersectionWithBoundingBox(CC3Ray aRay, CC3Box bb) DEPRECATED_ATTRIBUTE;
+CC3Vector CC3RayIntersectionWithBoundingBox(CC3Ray aRay, CC3Box bb) __deprecated;
 
 /** @deprecated Renamed to CC3RayIntersectionWithBoxSide. */
 CC3Vector4 CC3RayIntersectionWithBoundingBoxSide(CC3Ray aRay, CC3Box bb,
-												 CC3Vector sideNormal, CC3Vector4 prevHit) DEPRECATED_ATTRIBUTE;
+												 CC3Vector sideNormal, CC3Vector4 prevHit) __deprecated;
 
 
 #pragma mark -
@@ -1871,10 +1871,10 @@ CC3Vector4 CC3RayIntersectionWithPlane(CC3Ray ray, CC3Plane plane);
 CC3Vector CC3TriplePlaneIntersection(CC3Plane p1, CC3Plane p2, CC3Plane p3);
 
 /** @deprecated Renamed to CC3PlaneFromLocations */
-CC3Plane CC3PlaneFromPoints(CC3Vector v1, CC3Vector v2, CC3Vector v3) DEPRECATED_ATTRIBUTE;
+CC3Plane CC3PlaneFromPoints(CC3Vector v1, CC3Vector v2, CC3Vector v3) __deprecated;
 
 /** @deprecated Replaced with CC3DistanceFromPlane. */
-GLfloat CC3DistanceFromNormalizedPlane(CC3Plane p, CC3Vector v) DEPRECATED_ATTRIBUTE;
+GLfloat CC3DistanceFromNormalizedPlane(CC3Plane p, CC3Vector v) __deprecated;
 
 
 #pragma mark -
@@ -1942,7 +1942,7 @@ BOOL CC3DoesRayIntersectSphere(CC3Ray aRay, CC3Sphere aSphere);
 CC3Vector CC3RayIntersectionWithSphere(CC3Ray aRay, CC3Sphere aSphere);
 
 /** @deprecated Renamed to CC3RayIntersectionWithSphere. */
-CC3Vector CC3RayIntersectionOfSphere(CC3Ray aRay, CC3Sphere aSphere) DEPRECATED_ATTRIBUTE;
+CC3Vector CC3RayIntersectionOfSphere(CC3Ray aRay, CC3Sphere aSphere) __deprecated;
 
 /**
  * Returns the coefficients of the quadratic equation that describes the points of
@@ -1984,7 +1984,7 @@ typedef struct {
 static const CC3AttenuationCoefficients kCC3AttenuationNone = {1.0, 0.0, 0.0};
 
 /** Deprecated. Use kCC3AttenuationNone instead. */
-static const CC3AttenuationCoefficients kCC3ParticleSizeAttenuationNone DEPRECATED_ATTRIBUTE = {1.0, 0.0, 0.0};
+static const CC3AttenuationCoefficients kCC3ParticleSizeAttenuationNone __deprecated = {1.0, 0.0, 0.0};
 
 /**
  * Returns a string description of the specified CC3AttenuationCoefficients struct

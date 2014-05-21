@@ -189,7 +189,7 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
 @property(nonatomic, assign) CC3AttenuationCoefficients attenuation;
 
 /** @deprecated Property renamed to attenuation */
-@property(nonatomic, assign) CC3AttenuationCoefficients attenuationCoefficients DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) CC3AttenuationCoefficients attenuationCoefficients __deprecated;
 
 /**
  * When a copy is made of this node, indicates whether this node should copy the value

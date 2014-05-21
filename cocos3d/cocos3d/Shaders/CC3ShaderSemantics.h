@@ -252,10 +252,10 @@ typedef enum {
 	kCC3SemanticMax = 0xFFFF,					/**< Maximum value for an app-specific custom semantic. */
 	
 	// DEPRECATED
-	kCC3SemanticVertexWeights DEPRECATED_ATTRIBUTE = kCC3SemanticVertexBoneWeights,			/**< @deprecated Renamed to kCC3SemanticVertexBoneWeights. */
-	kCC3SemanticVertexMatrixIndices DEPRECATED_ATTRIBUTE = kCC3SemanticVertexBoneIndices,	/**< @deprecated Renamed to kCC3SemanticVertexBoneIndices. */
-	kCC3SemanticBonesPerVertex DEPRECATED_ATTRIBUTE = kCC3SemanticVertexBoneCount,			/**< @deprecated Renamed to kCC3SemanticVertexBoneCount. */
-	kCC3SemanticBoneCount DEPRECATED_ATTRIBUTE = kCC3SemanticBatchBoneCount,				/**< @deprecated Renamed to kCC3SemanticBatchBoneCount. */
+	kCC3SemanticVertexWeights __deprecated = kCC3SemanticVertexBoneWeights,			/**< @deprecated Renamed to kCC3SemanticVertexBoneWeights. */
+	kCC3SemanticVertexMatrixIndices __deprecated = kCC3SemanticVertexBoneIndices,	/**< @deprecated Renamed to kCC3SemanticVertexBoneIndices. */
+	kCC3SemanticBonesPerVertex __deprecated = kCC3SemanticVertexBoneCount,			/**< @deprecated Renamed to kCC3SemanticVertexBoneCount. */
+	kCC3SemanticBoneCount __deprecated = kCC3SemanticBatchBoneCount,				/**< @deprecated Renamed to kCC3SemanticBatchBoneCount. */
 
 } CC3Semantic;
 
@@ -530,7 +530,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
  * approach. For new iOS applications, and for all OSX applications, you should use the semantic
  * uniform name mappings defined by the populateWithDefaultVariableNameMappings method.
  */
--(void) populateWithStructuredVariableNameMappings DEPRECATED_ATTRIBUTE;
+-(void) populateWithStructuredVariableNameMappings __deprecated;
 
 /**
  * @deprecated
@@ -548,7 +548,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
  * It is provided here to provide backwards compatibility for shaders already developed
  * using these legacy mappings.
  */
--(void) populateWithLegacyVariableNameMappings DEPRECATED_ATTRIBUTE;
+-(void) populateWithLegacyVariableNameMappings __deprecated;
 
 @end
 

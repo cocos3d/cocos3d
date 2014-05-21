@@ -50,8 +50,8 @@ static const GLfloat kCC3DefaultNearClippingDistance = 1.0f;
 static const GLfloat kCC3DefaultFarClippingDistance = 1000.0f;
 
 // Deprecated
-static const GLfloat kCC3DefaultNearClippingPlane DEPRECATED_ATTRIBUTE = 1.0f;
-static const GLfloat kCC3DefaultFarClippingPlane DEPRECATED_ATTRIBUTE = 1000.0f;
+static const GLfloat kCC3DefaultNearClippingPlane __deprecated = 1.0f;
+static const GLfloat kCC3DefaultFarClippingPlane __deprecated = 1000.0f;
 
 /**
  * Default padding around a node when framed by the camera using one of the
@@ -272,7 +272,7 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
 @property(nonatomic, assign) GLfloat nearClippingDistance;
 
 /** @deprecated Renamed to nearClippingDistance. */
-@property(nonatomic, assign) GLfloat nearClippingPlane DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) GLfloat nearClippingPlane __deprecated;
 
 /**
  * The distance from the camera to the clipping plane of the camera's frustrum
@@ -281,7 +281,7 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
 @property(nonatomic, assign) GLfloat farClippingDistance;
 
 /** @deprecated Renamed to farClippingDistance. */
-@property(nonatomic, assign) GLfloat farClippingPlane DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) GLfloat farClippingPlane __deprecated;
 
 /**
  * The viewport to which the camera will render its view.
@@ -314,7 +314,7 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
 @property(nonatomic, strong, readonly) CC3Matrix* viewMatrix;
 
 /** @deprecated Renamed to viewMatrix for a more accurate semantic. */
-@property(nonatomic, strong, readonly) CC3Matrix* modelviewMatrix DEPRECATED_ATTRIBUTE;
+@property(nonatomic, strong, readonly) CC3Matrix* modelviewMatrix __deprecated;
 
 /**
  * The projection matrix that takes the camera's modelview and projects it to the viewport.
@@ -1369,22 +1369,22 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
 -(void) populateFrom: (GLfloat) fieldOfView
 		   andAspect: (GLfloat) aspect
 		 andNearClip: (GLfloat) nearClip
-		  andFarClip: (GLfloat) farClip DEPRECATED_ATTRIBUTE;;
+		  andFarClip: (GLfloat) farClip __deprecated;;
 
 /** @deprecated Renamed to markDirty. */
--(void) markPlanesDirty DEPRECATED_ATTRIBUTE;
+-(void) markPlanesDirty __deprecated;
 
 /** @deprecated Use the same property on the camera instead. */
-@property(nonatomic, strong, readonly) CC3Matrix* viewMatrix DEPRECATED_ATTRIBUTE;
+@property(nonatomic, strong, readonly) CC3Matrix* viewMatrix __deprecated;
 
 /** @deprecated Renamed to viewMatrix for a more accurate semantic. */
-@property(nonatomic, strong, readonly) CC3Matrix* modelviewMatrix DEPRECATED_ATTRIBUTE;
+@property(nonatomic, strong, readonly) CC3Matrix* modelviewMatrix __deprecated;
 
 /** @deprecated Renamed to doesIntersectLocation:. */
--(BOOL) doesIntersectPointAt: (CC3Vector) aLocation DEPRECATED_ATTRIBUTE;
+-(BOOL) doesIntersectPointAt: (CC3Vector) aLocation __deprecated;
 
 /** @deprecated Renamed to doesIntersectLocation:. */
--(BOOL) doesIntersectSphereAt: (CC3Vector) aLocation withRadius: (GLfloat) radius DEPRECATED_ATTRIBUTE;
+-(BOOL) doesIntersectSphereAt: (CC3Vector) aLocation withRadius: (GLfloat) radius __deprecated;
 
 @end
 

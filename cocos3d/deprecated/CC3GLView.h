@@ -35,7 +35,7 @@
 #pragma mark -
 #pragma mark Deprecated CC3GLView
 
-DEPRECATED_ATTRIBUTE
+__deprecated
 /** @deprecated Use CCGLView instead. */
 @interface CC3GLView : CCGLView
 @end

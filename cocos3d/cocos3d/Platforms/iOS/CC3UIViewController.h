@@ -285,13 +285,13 @@
 #pragma mark Deprecated functionality
 
 /** @deprecated Use the supportedInterfaceOrientations property to define the allowed orientations. */
-@property(nonatomic, assign) BOOL doesAutoRotate DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) BOOL doesAutoRotate __deprecated;
 
 /** @deprecated Use the supportedInterfaceOrientations property to define the allowed orientations. */
-@property(nonatomic, assign) UIDeviceOrientation defaultCCDeviceOrientation DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) UIDeviceOrientation defaultCCDeviceOrientation __deprecated;
 
 /** @deprecated Set superclass controlledNode property and run layer in CCScene on CCDirector instead. */
--(void) runSceneOnNode: (CCNode*) aNode DEPRECATED_ATTRIBUTE;
+-(void) runSceneOnNode: (CCNode*) aNode __deprecated;
 
 @end
 
@@ -303,7 +303,7 @@
 /** @deprecated Replaced with CC3DeviceCameraOverlayUIViewController. */
 #define CCNodeController CC3DeviceCameraOverlayUIViewController
 
-DEPRECATED_ATTRIBUTE
+__deprecated
 /**
  * Deprecated and unused.
  * @deprecated This protocol is no longer needed, as the methods of this protocol have been

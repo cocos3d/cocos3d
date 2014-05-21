@@ -636,10 +636,10 @@
 +(void) setShouldCacheAssociatedCCTextures: (BOOL) shouldCache;
 
 /** @deprecated Renamed to ccTexture. */
-@property(nonatomic, retain, readonly) 	CCTexture* ccTexture2D DEPRECATED_ATTRIBUTE;
+@property(nonatomic, retain, readonly) 	CCTexture* ccTexture2D __deprecated;
 
 /** @deprecated Use the ccTexture property instead. */
--(CCTexture*) asCCTexture2D DEPRECATED_ATTRIBUTE;
+-(CCTexture*) asCCTexture2D __deprecated;
 
 
 #pragma mark Allocation and Initialization
@@ -785,7 +785,7 @@
 -(id) initWithPixelFormat: (GLenum) format withPixelType: (GLenum) type;
 
 /** @deprecated Use initWithPixelFormat:withPixelType: */
--(id) initWithPixelFormat: (GLenum) format andPixelType: (GLenum) type DEPRECATED_ATTRIBUTE;
+-(id) initWithPixelFormat: (GLenum) format andPixelType: (GLenum) type __deprecated;
 
 /**
  * Allocates and initializes an autoreleased instance from the specified texture properties,
@@ -810,7 +810,7 @@
 +(id) textureWithPixelFormat: (GLenum) format withPixelType: (GLenum) type;
 
 /** @deprecated Use textureWithPixelFormat:withPixelType: */
-+(id) textureWithPixelFormat: (GLenum) format andPixelType: (GLenum) type DEPRECATED_ATTRIBUTE;
++(id) textureWithPixelFormat: (GLenum) format andPixelType: (GLenum) type __deprecated;
 
 /**
  * Initializes this instance from the specified texture properties, without providing content.
@@ -835,7 +835,7 @@
 -(id) initWithSize: (CC3IntSize) size withPixelFormat: (GLenum) format withPixelType: (GLenum) type;
 
 /** @deprecated Use initWithSize:withPixelFormat:withPixelType: */
--(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type DEPRECATED_ATTRIBUTE;
+-(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type __deprecated;
 
 /**
  * Allocates and initializes an autoreleased instance from the specified texture properties,
@@ -861,7 +861,7 @@
 +(id) textureWithSize: (CC3IntSize) size withPixelFormat: (GLenum) format withPixelType: (GLenum) type;
 
 /** @deprecated Use textureWithSize:withPixelFormat:withPixelType: */
-+(id) textureWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type DEPRECATED_ATTRIBUTE;
++(id) textureWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type __deprecated;
 
 /**
  * Initializes this instance containing pixel content of the specified size and solid, 
@@ -1073,7 +1073,7 @@
 -(id) initCubeWithPixelFormat: (GLenum) format withPixelType: (GLenum) type;
 
 /** @deprecated Use initCubeWithPixelFormat:withPixelType: */
--(id) initCubeWithPixelFormat: (GLenum) format andPixelType: (GLenum) type DEPRECATED_ATTRIBUTE;
+-(id) initCubeWithPixelFormat: (GLenum) format andPixelType: (GLenum) type __deprecated;
 
 /**
  * Allocates and initializes an autoreleased instance from the specified texture properties,
@@ -1098,7 +1098,7 @@
 +(id) textureCubeWithPixelFormat: (GLenum) format withPixelType: (GLenum) type;
 
 /** @deprecated Use textureCubeWithPixelFormat:withPixelType: */
-+(id) textureCubeWithPixelFormat: (GLenum) format andPixelType: (GLenum) type DEPRECATED_ATTRIBUTE;
++(id) textureCubeWithPixelFormat: (GLenum) format andPixelType: (GLenum) type __deprecated;
 
 /**
  * Initializes this instance from the specified texture properties, without providing content.
@@ -1125,7 +1125,7 @@
 -(id) initCubeWithSideLength: (GLuint) sideLength withPixelFormat: (GLenum) format withPixelType: (GLenum) type;
 
 /** @deprecated Use initCubeWithSize:withPixelFormat:withPixelType: */
--(id) initCubeWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type DEPRECATED_ATTRIBUTE;
+-(id) initCubeWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type __deprecated;
 
 /**
  * Allocates and initializes an autoreleased instance from the specified texture properties,
@@ -1153,7 +1153,7 @@
 +(id) textureCubeWithSideLength: (GLuint) sideLength withPixelFormat: (GLenum) format withPixelType: (GLenum) type;
 
 /** @deprecated Use textureCubeWithSize:withPixelFormat:withPixelType: */
-+(id) textureCubeWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type DEPRECATED_ATTRIBUTE;
++(id) textureCubeWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type __deprecated;
 
 /**
  * Initializes this instance to have a unique solid color for each side of the cube.
@@ -1839,7 +1839,7 @@
 -(id) initWithSize: (CC3IntSize) size withPixelFormat: (GLenum) format withPixelType: (GLenum) type;
 
 /** @deprecated Use initWithSize:withPixelFormat:withPixelType: */
--(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type DEPRECATED_ATTRIBUTE;
+-(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type __deprecated;
 
 /**
  * Initializes this instance containing pixel content of the specified size and solid, uniform color.

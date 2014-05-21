@@ -94,22 +94,22 @@
  * CC3UIViewController is set to match the new orientation. Override didUpdateContentSizeFrom:
  * to react to this change.
  */
-@property(nonatomic, assign) BOOL alignContentSizeWithDeviceOrientation DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) BOOL alignContentSizeWithDeviceOrientation __deprecated;
 
 /** @deprecated CC3ControllableLayer no longer draws a backdrop. Use CC3Scene backdrop property instead. */
-@property(nonatomic, readonly) BOOL isColored DEPRECATED_ATTRIBUTE;
+@property(nonatomic, readonly) BOOL isColored __deprecated;
 
 /** @deprecated Use init instead. */
--(id) initWithColor: (ccColor4B) color DEPRECATED_ATTRIBUTE;
+-(id) initWithColor: (ccColor4B) color __deprecated;
 
 /** @deprecated Use layer instead. */
-+(id) layerWithColor: (ccColor4B) color DEPRECATED_ATTRIBUTE;
++(id) layerWithColor: (ccColor4B) color __deprecated;
 
 /** @deprecated Use init instead. The controller property is set automatically when the layer, or an ancestor is assigned to a controller. */
--(id) initWithController: (CC3ViewController*) controller DEPRECATED_ATTRIBUTE;
+-(id) initWithController: (CC3ViewController*) controller __deprecated;
 
 /** @deprecated Use layer instead. The controller property is set automatically when the layer, or an ancestor is assigned to a controller. */
-+(id) layerWithController: (CC3ViewController*) controller DEPRECATED_ATTRIBUTE;
++(id) layerWithController: (CC3ViewController*) controller __deprecated;
 
 @end
 

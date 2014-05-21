@@ -36,7 +36,7 @@
 #pragma mark -
 #pragma mark Deprecated vertex array mesh and vertex locations bounding volumes
 
-DEPRECATED_ATTRIBUTE
+__deprecated
 /**
  * Deprecated.
  * @deprecated Functionality moved to CC3Mesh.
@@ -44,7 +44,7 @@ DEPRECATED_ATTRIBUTE
 @interface CC3VertexArrayMesh : CC3Mesh
 @end
 
-DEPRECATED_ATTRIBUTE
+__deprecated
 /**
  * Deprecated.
  * @deprecated Functionality moved to parent CC3NodeCenterOfGeometryBoundingVolume class.
@@ -52,7 +52,7 @@ DEPRECATED_ATTRIBUTE
 @interface CC3VertexLocationsBoundingVolume : CC3NodeCenterOfGeometryBoundingVolume
 @end
 
-DEPRECATED_ATTRIBUTE
+__deprecated
 /**
  * Deprecated.
  * @deprecated Functionality moved to parent CC3NodeSphericalBoundingVolume class.
@@ -60,7 +60,7 @@ DEPRECATED_ATTRIBUTE
 @interface CC3VertexLocationsSphericalBoundingVolume : CC3NodeSphericalBoundingVolume
 @end
 
-DEPRECATED_ATTRIBUTE
+__deprecated
 /**
  * Deprecated.
  * @deprecated Functionality moved to parent CC3NodeBoxBoundingVolume class.

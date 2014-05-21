@@ -95,7 +95,7 @@
 -(id) autoreleasedCopy;
 
 /** @deprecated Renamed to autoreleasedCopy to satisfy naming paradigm for copy... methods. */
--(id) copyAutoreleased DEPRECATED_ATTRIBUTE;
+-(id) copyAutoreleased __deprecated;
 
 @end
 

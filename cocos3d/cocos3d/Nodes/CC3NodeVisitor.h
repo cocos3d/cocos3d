@@ -903,7 +903,7 @@ typedef enum {
 #pragma mark -
 #pragma mark Deprecated CC3NodeTransformingVisitor
 
-DEPRECATED_ATTRIBUTE
+__deprecated
 /** @deprecated No longer needed. CC3Node transforms are calculated lazily, without using a visitor. */
 @interface CC3NodeTransformingVisitor : CC3NodeVisitor
 
@@ -925,7 +925,7 @@ DEPRECATED_ATTRIBUTE
 #pragma mark -
 #pragma mark Deprecated CC3NodeBoundingBoxVisitor
 
-DEPRECATED_ATTRIBUTE
+__deprecated
 /** @deprecated Use boundingBox or globalBoundingBox properties of CC3Node, instead. */
 @interface CC3NodeBoundingBoxVisitor : CC3NodeVisitor {
 	BOOL _shouldLocalizeToStartingNode : 1;
@@ -933,9 +933,9 @@ DEPRECATED_ATTRIBUTE
 }
 
 /** @deprecated Use boundingBox or globalBoundingBox properties of CC3Node, instead. */
-@property(nonatomic, readonly) CC3Box boundingBox DEPRECATED_ATTRIBUTE;
+@property(nonatomic, readonly) CC3Box boundingBox __deprecated;
 
 /** @deprecated */
-@property(nonatomic, assign) BOOL shouldLocalizeToStartingNode DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) BOOL shouldLocalizeToStartingNode __deprecated;
 
 @end

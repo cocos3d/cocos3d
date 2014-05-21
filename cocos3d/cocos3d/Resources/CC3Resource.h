@@ -333,28 +333,28 @@
 #pragma mark Deprecated functionality
 
 /** @deprecated Property moved to CC3NodesResource subclass. */
-@property( nonatomic, retain, readonly) NSArray* nodes DEPRECATED_ATTRIBUTE;
+@property( nonatomic, retain, readonly) NSArray* nodes __deprecated;
 
 /** @deprecated Property moved to CC3NodesResource subclass. */
-@property(nonatomic, assign) BOOL expectsVerticallyFlippedTextures DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) BOOL expectsVerticallyFlippedTextures __deprecated;
 
 /**
  * @deprecated Use the loadFromFile: method instead, which supports both absolute
  * file paths and file paths that are relative to the resources directory.
  */
--(BOOL) loadFromResourceFile: (NSString*) aRezPath DEPRECATED_ATTRIBUTE;
+-(BOOL) loadFromResourceFile: (NSString*) aRezPath __deprecated;
 
 /**
  * @deprecated Use the initFromFile: method instead, which supports both absolute
  * file paths and file paths that are relative to the resources directory.
  */
--(id) initFromResourceFile: (NSString*) aRezPath DEPRECATED_ATTRIBUTE;
+-(id) initFromResourceFile: (NSString*) aRezPath __deprecated;
 
 /**
  * @deprecated Use the resourceFromFile: method instead, which supports both
  * absolute file paths and file paths that are relative to the resources directory.
  */
-+(id) resourceFromResourceFile: (NSString*) aRezPath DEPRECATED_ATTRIBUTE;
++(id) resourceFromResourceFile: (NSString*) aRezPath __deprecated;
 
 /** @deprecated Property moved to CC3NodesResource subclass. */
 +(BOOL) defaultExpectsVerticallyFlippedTextures;

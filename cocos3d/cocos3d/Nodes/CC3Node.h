@@ -3294,7 +3294,7 @@ typedef enum {
 @property(nonatomic, assign, getter=isTouchEnabled) BOOL touchEnabled;
 
 /** @deprecated Property renamed to touchEnabled, with getter isTouchEnabled. */
--(void) setIsTouchEnabled: (BOOL) canTouch __deprecated;
+//-(void) setIsTouchEnabled: (BOOL) canTouch __deprecated;
 
 /**
  * Indicates whether this node will respond to UI touch events.

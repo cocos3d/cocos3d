@@ -1516,20 +1516,20 @@
 #pragma mark Deprecated
 
 /** @deprecated Use initCubeWithSideLength:withDepthAttachment: instead. */
--(instancetype) initCubeWithDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment DEPRECATED_ATTRIBUTE;
+-(instancetype) initCubeWithDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment __deprecated;
 
 /** @deprecated Use textureCubeWithSideLength:withDepthAttachment: instead. */
-+(instancetype) textureCubeWithDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment DEPRECATED_ATTRIBUTE;
++(instancetype) textureCubeWithDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment __deprecated;
 
 /** @deprecated Use initCubeWithSideLength:withColorPixelFormat:withColorPixelType:withDepthAttachment: instead. */
 -(instancetype) initCubeWithColorPixelFormat: (GLenum) colorFormat
 						   andColorPixelType: (GLenum) colorType
-						  andDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment DEPRECATED_ATTRIBUTE;
+						  andDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment __deprecated;
 
 /** @deprecated Use textureCubeWithSideLength:withColorPixelFormat:withColorPixelType:withDepthAttachment: instead. */
 +(instancetype) textureCubeWithColorPixelFormat: (GLenum) colorFormat
 							  andColorPixelType: (GLenum) colorType
-							 andDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment DEPRECATED_ATTRIBUTE;
+							 andDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment __deprecated;
 
 @end
 

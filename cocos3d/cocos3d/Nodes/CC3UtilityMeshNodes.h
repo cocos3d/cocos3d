@@ -85,7 +85,7 @@
 @interface CC3LineNode : CC3MeshNode
 
 /** @deprecated Property renamed to lineSmoothingHint on CC3MeshNode. */
-@property(nonatomic, assign) GLenum performanceHint DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) GLenum performanceHint __deprecated;
 
 @end
 
@@ -617,10 +617,10 @@
 #pragma mark Deprecated functionality
 
 /** @deprecated Use diffuseColor property instead. */
-@property(nonatomic, assign) ccColor4F floatColor DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) ccColor4F floatColor __deprecated;
 
 /** @deprecated Use CCActions to control the fog characteristics. */
--(void) update: (CCTime)dt DEPRECATED_ATTRIBUTE;
+-(void) update: (CCTime)dt __deprecated;
 
 @end
 

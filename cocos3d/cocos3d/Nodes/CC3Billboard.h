@@ -583,7 +583,7 @@
 }
 
 /** @deprecated Use the superclass vertices property instead. */
-@property(nonatomic, readonly) CC3Vector* globalBoundingRectVertices DEPRECATED_ATTRIBUTE;
+@property(nonatomic, readonly) CC3Vector* globalBoundingRectVertices __deprecated;
 
 @end
 
@@ -625,7 +625,7 @@
 @property(nonatomic, assign) CC3AttenuationCoefficients particleSizeAttenuation;
 
 /** @deprecated Property renamed to particleSizeAttenuation. */
-@property(nonatomic, assign) CC3AttenuationCoefficients particleSizeAttenuationCoefficients DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) CC3AttenuationCoefficients particleSizeAttenuationCoefficients __deprecated;
 
 /**
  * Indicates whether scheduled updates of the contained 2D billboard should continue when this node

@@ -179,7 +179,7 @@
 @property(nonatomic, retain, readonly) NSArray* textures;
 
 /** @deprecated Use the CC3Texture class-side property defaultTextureParameters instead. */
-@property(nonatomic, assign) ccTexParams textureParameters DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) ccTexParams textureParameters __deprecated;
 
 /** The number of frames of animation in the POD file. */
 @property(nonatomic, readonly) GLuint animationFrameCount;
@@ -394,7 +394,7 @@
 -(CC3Mesh*) meshAtIndex: (uint) meshIndex;
 
 /** @deprecated Renamed to meshAtIndex:. */
--(CC3Mesh*) meshModelAtIndex: (uint) meshIndex DEPRECATED_ATTRIBUTE;
+-(CC3Mesh*) meshModelAtIndex: (uint) meshIndex __deprecated;
 
 /**
  * Template method that extracts and builds the meshes from the underlying data.

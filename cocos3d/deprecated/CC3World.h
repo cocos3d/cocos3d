@@ -40,23 +40,23 @@
 /** Support for legacy. */
 #define kCC3DefaultLightColorAmbientWorld kCC3DefaultLightColorAmbientScene
 
-DEPRECATED_ATTRIBUTE
+__deprecated
 /** @deprecated CC3World renamed to CC3Scene. */
 @interface CC3World : CC3Scene
 
 /** @deprecated CC3World renamed to CC3Scene. Use CC3Scene scene instead. */
-+(id) world DEPRECATED_ATTRIBUTE;
++(id) world __deprecated;
 
 /** @deprecated Renamed to initializeScene. */
--(void) initializeWorld DEPRECATED_ATTRIBUTE;
+-(void) initializeWorld __deprecated;
 
 /** @deprecated Renamed to updateScene:. */
--(void) updateWorld: (CCTime)dt DEPRECATED_ATTRIBUTE;
+-(void) updateWorld: (CCTime)dt __deprecated;
 
 /** @deprecated Renamed to updateScene. */
--(void) updateWorld DEPRECATED_ATTRIBUTE;
+-(void) updateWorld __deprecated;
 
 /** @deprecated Renamed to drawScene. */
--(void) drawWorld DEPRECATED_ATTRIBUTE;
+-(void) drawWorld __deprecated;
 
 @end

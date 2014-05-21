@@ -972,7 +972,7 @@ typedef struct {
 @property(nonatomic, readonly) GLuint maxNumberOfBoneInfluencesPerVertex;
 
 /** @deprecated Renamed to maxNumberOfBoneInfluencesPerVertex. */
-@property(nonatomic, readonly) GLuint maxNumberOfVertexUnits DEPRECATED_ATTRIBUTE;
+@property(nonatomic, readonly) GLuint maxNumberOfVertexUnits __deprecated;
 
 /**
  * Returns the maximum number of pixel samples supported by the platform,
@@ -1136,7 +1136,7 @@ typedef struct {
 -(void) deleteShader: (GLuint) shaderID;
 
 /** @deprecated Use the compileShader:from:sourceCodeStrings: method instead. */
--(void) compileShader: (GLuint) shaderID fromSourceCodeStrings: (NSArray*) glslSources DEPRECATED_ATTRIBUTE;
+-(void) compileShader: (GLuint) shaderID fromSourceCodeStrings: (NSArray*) glslSources __deprecated;
 
 /**
  * Compiles the specified shader from the specified number of GLSL source code strings, 

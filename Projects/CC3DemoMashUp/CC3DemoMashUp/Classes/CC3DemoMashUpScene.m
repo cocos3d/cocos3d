@@ -2449,7 +2449,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 //	mask.shaderContext.pureColorProgram.shouldAllowDefaultVariableValues = YES;
 
 	// Make the mask touchable and animate it.
-	mask.isTouchEnabled = YES;
+	mask.touchEnabled = YES;
 	[mask runAction: [[CC3ActionAnimate actionWithDuration: 10.0] repeatForever]];
 }
 
@@ -2494,7 +2494,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	[self addChild: mask];
 	
 	// Make the mask touchable and animate it.
-	mask.isTouchEnabled = YES;
+	mask.touchEnabled = YES;
 	[mask runAction: [CC3ActionRotateForever actionWithRotationRate: cc3v(0.0, 30.0, 0.0)]];
 }
 
