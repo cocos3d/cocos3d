@@ -1197,9 +1197,9 @@
 
 
 #pragma mark -
-#pragma mark CC3LayerSurfaceManager
+#pragma mark CC3SceneDrawingSurfaceManager
 
-@implementation CC3LayerSurfaceManager
+@implementation CC3SceneDrawingSurfaceManager
 
 -(void) dealloc {
 	[_viewSurface release];

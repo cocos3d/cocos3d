@@ -139,7 +139,7 @@
  */
 @interface CC3Layer : CC3ControllableLayer {
 	CC3Scene* _cc3Scene;
-	CC3LayerSurfaceManager* _surfaceManager;
+	CC3SceneDrawingSurfaceManager* _surfaceManager;
 	NSMutableArray* _cc3GestureRecognizers;
 	char* _renderStreamGroupMarker;
 	BOOL _shouldAlwaysUpdateViewport : 1;
@@ -201,25 +201,26 @@
 #pragma mark Surfaces
 
 /**
- * The surface manager that manages the surfaces associated with this layer.
+ * The surface manager that manages the surfaces associated with this layer, and used
+ * to render the scene from this layer.
  *
  * If this property is not explicitly set, it is initialized to an instance of the class
  * returned by the surfaceManager class when this property is first accessed. At a minimum,
  * the surface manager contains the pickingSurface used to pick nodes from touch events.
  * If this layer will be using additional surfaces, you should consider subclassing the
- * CC3LayerSurfaceManager class and overriding the surfaceManager property.
+ * CC3SceneDrawingSurfaceManager class and overriding the surfaceManagerClass property.
  *
  * When setting this property, the surfaces in the surface manager are automatically
  * resized to the contentSize of this layer.
  */
-@property(nonatomic, strong) CC3LayerSurfaceManager* surfaceManager;
+@property(nonatomic, strong) CC3SceneDrawingSurfaceManager* surfaceManager;
 
 /**
  * The class that will be used to automatically populate the surfaceManager property when
  * it is first accessed.
  *
- * By default, this property returns the CC3LayerSurfaceManager class. If this layer will 
- * be using additional surfaces, you should consider subclassing the CC3LayerSurfaceManager
+ * By default, this property returns the CC3SceneDrawingSurfaceManager class. If this layer will 
+ * be using additional surfaces, you should consider subclassing the CC3SceneDrawingSurfaceManager
  * class and overriding this property to return that class.
  */
 @property(nonatomic, readonly) Class surfaceManagerClass;

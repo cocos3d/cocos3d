@@ -66,6 +66,7 @@
 @synthesize deltaFrameTime=_deltaFrameTime, backdrop=_backdrop, fog=_fog;
 @synthesize lights=_lights, lightProbes=_lightProbes;
 @synthesize elapsedTimeSinceOpened=_elapsedTimeSinceOpened;
+@synthesize shouldDisplayPickingRender=_shouldDisplayPickingRender;
 
 /**
  * Descendant nodes will be removed by superclass. Their removal may invoke
@@ -103,11 +104,7 @@
 // Deprecated
 -(CC3Layer*) cc3Layer { return _cc3Layer; }
 -(void) setCc3Layer:(CC3Layer *)cc3Layer { self.deprecatedCC3Layer = cc3Layer; }
--(void) setDeprecatedCC3Layer: (CC3Layer*) cc3Layer {
-	if (cc3Layer == _cc3Layer) return;
-	[_cc3Layer release];
-	_cc3Layer = [cc3Layer retain];
-}
+-(void) setDeprecatedCC3Layer: (CC3Layer*) cc3Layer { _cc3Layer = cc3Layer; }	// Not retained
 
 -(CC3ViewController*) controller { return _cc3Layer.controller; }
 
@@ -389,7 +386,7 @@
 
 	[self open3DWithVisitor: visitor];
 	
-	[_touchedNodePicker pickTouchedNode];
+	[_touchedNodePicker pickTouchedNodeWithVisitor: visitor];
 	
 	if (!_shouldDisplayPickingRender) [self drawSceneContentWithVisitor: visitor];
 
@@ -718,15 +715,6 @@
 
 -(Class) pickVisitorClass { return [CC3NodePickingVisitor class]; }
 
--(BOOL) shouldDisplayPickingRender { return _shouldDisplayPickingRender; }
-
--(void) setShouldDisplayPickingRender: (BOOL) shouldDisplayPickingRender {
-	CC3Assert( !(shouldDisplayPickingRender && CC3ViewSurfaceManager.sharedViewSurfaceManager.shouldUseDedicatedPickingSurface),
-			  @"The node picking render surface is not visible to the view. Ensure multisampling is disabled,"
-			  @" and the shouldUseDedicatedPickingSurface property in the viewSurfaceManager is set to NO.");
-	_shouldDisplayPickingRender = shouldDisplayPickingRender;
-}
-
 
 #pragma mark Deprecated
 
@@ -773,13 +761,14 @@
 			 NSStringFromCGPoint(_touchPoint), _queuedTouchCount);
 }
 
--(void) pickTouchedNode {
+-(void) pickTouchedNodeWithVisitor: (CC3NodeDrawingVisitor*) visitor; {
 	if ( !(_wasTouched || _scene.shouldDisplayPickingRender) ) return;
 	
 	_wasPicked = _wasTouched;
 	_wasTouched = NO;
 	
 	// Draw the scene for node picking. Don't bother drawing the backdrop.
+	[_pickVisitor alignShotWith: visitor];
 	[_pickVisitor visit: _scene];
 	
 	self.pickedNode = _pickVisitor.pickedNode;

@@ -352,31 +352,26 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
  * initializeScene method can focus on loading the artifacts of the 3D scene.
  */
 -(void) initCustomState {
-	
 	_isManagingShadows = NO;
 	_playerDirectionControl = CGPointZero;
 	_playerLocationControl = CGPointZero;
 	
 	// The order in which meshes are drawn to the GL engine can be tailored to your needs.
-	// The default is to draw opaque objects first, then alpha-blended objects in reverse
-	// Z-order. Since this example has lots of similar teapots and robots to draw in this
-	// example, we choose to also group objects by meshes here, while also drawing opaque
-	// objects first, and translucent objects in reverse Z-order.
+	// The default is to draw opaque objects first, then alpha-blended objects in reverse Z-order.
+	// ([CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirst]).
 	//
 	// To experiment with an alternate drawing order, set a different node sequence sorter
-	// by uncommenting one of the lines here and commenting out the others. The third option
-	// performs no grouping and draws the objects in the order they are added to the scene below.
-	// The fourth option does not use a drawing sequencer, and draws the objects hierarchically
-	// instead. With this, notice that the transparent beach ball now appears opaque, because
-	// it  was added first, and is traversed ahead of other objects in the hierarchical assembly,
-	// resulting it in being drawn first, and so it cannot blend with the background.
+	// by uncommenting one of the lines here and commenting out the others. The last option
+	// does not use a drawing sequencer, and draws the objects hierarchically instead.
+	// With this, notice that the transparent beach ball now appears opaque, because it
+	// was added first, and is traversed ahead of other objects in the hierarchical assembly,
+	// resulting it in being drawn first, and so it cannot blend with the background objects.
 	//
 	// You can of course write your own node sequencers to customize to your specific
 	// app needs. Best to change the node sequencer before any model objects are added.
-	self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirst];
-	//	self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirstGroupMeshes];
-	//	self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirstGroupTextures];
-	//	self.drawingSequencer = nil;
+//	self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirstGroupMeshes];
+//	self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirstGroupTextures];
+//	self.drawingSequencer = nil;
 }
 
 /**
@@ -2699,15 +2694,19 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// environment-map cube-map texture for it by taking snapshots of the scene in all
 	// six axis directions from its position.
 	[self generateTeapotEnvironmentMapWithVisitor: visitor];
+
+	// When post-processing, we render to a temporary off-screen surface.
+	// We remember the original surface in this variable.
+	id<CC3RenderSurface> origSurface;
 	
 	// If we are post-processing the rendered scene image, draw to an off-screen surface,
-	// clearing if first. Otherwise, draw to view surface directly, without clearing because
+	// clearing it first. Otherwise, draw to view surface directly, without clearing because
 	// it was done at the beginning of the rendering cycle.
 	if (self.isPostProcessing) {
+		origSurface = visitor.renderSurface;
 		visitor.renderSurface = _postProcSurface;
 		[_postProcSurface clearColorAndDepthContent];
-	} else
-		visitor.renderSurface = self.viewSurface;
+	}
 	
 	[self drawBackdropWithVisitor: visitor];	// Draw the backdrop if it exists
 	[visitor visit: self];						// Draw the scene components
@@ -2726,7 +2725,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 		CC3Viewport vvp = visitor.camera.viewport;
 		visitor.camera.viewport = kCC3ViewportZero;
 		
-		visitor.renderSurface = self.viewSurface;		// Ensure drawing to the view
+		visitor.renderSurface = origSurface;		// Ensure drawing to the original surface
 		[visitor visit: self.postProcessingNode];
 
 		visitor.camera.viewport = vvp;		// Now set the viewport back to the layer's size.

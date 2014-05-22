@@ -167,12 +167,12 @@
 
 #pragma mark Surfaces
 
--(CC3LayerSurfaceManager*) surfaceManager {
+-(CC3SceneDrawingSurfaceManager*) surfaceManager {
 	if (!_surfaceManager) self.surfaceManager = [self.surfaceManagerClass surfaceManager];
 	return _surfaceManager;
 }
 
--(void) setSurfaceManager: (CC3LayerSurfaceManager*) surfaceManager {
+-(void) setSurfaceManager: (CC3SceneDrawingSurfaceManager*) surfaceManager {
 	CC3Assert([surfaceManager isKindOfClass: self.surfaceManagerClass],
 			  @"The surface manager must be a type of %@", self.surfaceManagerClass);
 
@@ -184,7 +184,7 @@
 	[self updateViewport];
 }
 
--(Class) surfaceManagerClass { return CC3LayerSurfaceManager.class; }
+-(Class) surfaceManagerClass { return CC3SceneDrawingSurfaceManager.class; }
 
 
 #pragma mark Updating layer
@@ -246,7 +246,12 @@
 
 /** Draw the 3D scene with the specified drawing visitor. */
 -(void) drawSceneWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+
+	// Ensure the visitor uses the surface manager of this layer
+	visitor.surfaceManager = self.surfaceManager;
+	
 	if (_shouldAlwaysUpdateViewport) [self updateViewport];
+	
 	[self.cc3Scene drawSceneWithVisitor: visitor];
 }
 

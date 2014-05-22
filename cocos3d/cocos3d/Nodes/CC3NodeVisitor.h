@@ -36,7 +36,7 @@
 #import "CC3OpenGL.h"
 
 @class CC3Node, CC3MeshNode, CC3Camera, CC3Light, CC3LightProbe;
-@class CC3Scene, CC3ShaderProgram;
+@class CC3Scene, CC3ShaderProgram, CC3SceneDrawingSurfaceManager;
 @class CC3Material, CC3TextureUnit, CC3Mesh, CC3NodeSequencer, CC3SkinSection;
 @protocol CC3RenderSurface;
 
@@ -308,6 +308,7 @@ typedef enum {
 @interface CC3NodeDrawingVisitor : CC3NodeVisitor {
 	CC3NodeSequencer* _drawingSequencer;
 	CC3SkinSection* _currentSkinSection;
+	CC3SceneDrawingSurfaceManager* _surfaceManager;
 	id<CC3RenderSurface> _renderSurface;
 	CC3OpenGL* _gl;
 	CCRenderer* _ccRenderer;
@@ -335,6 +336,9 @@ typedef enum {
 	BOOL _isMVMtxDirty : 1;
 	BOOL _isMVPMtxDirty : 1;
 }
+
+
+#pragma mark Drawing
 
 /** 
  * Returns the OpenGL engine context.
@@ -474,7 +478,8 @@ typedef enum {
 /**
  * Aligns this visitor to use the same camera and rendering surface as the specified visitor.
  *
- * The camera and renderSurface properties of this visitor are set to those of the specified visitor.
+ * The camera, surfaceManager, and renderSurface properties of this visitor are set to
+ * those of the specified visitor.
  *
  * You can use this method to ensure that a secondary visitor (such as a shadow visitor, 
  * or picking visitor), makes use of the same camera and surface as the primary visitor.
@@ -498,12 +503,24 @@ typedef enum {
 #pragma mark Accessing scene content
 
 /**
+ * The surface manager that manages the surfaces to which this visitor can render.
+ *
+ * Setting this property also clears the renderSurface property, so that, if not explicitly set
+ * to another surface, it will be initialized to a surface retrieved from the new surface manager.
+ *
+ * During normal rendering, this property is set by the CC3Layer prior to rendering a CC3Scene.
+ */
+@property(nonatomic, retain) CC3SceneDrawingSurfaceManager* surfaceManager;
+
+/**
  * The rendering surface to which this visitor is rendering.
  *
  * The surface will be activated at the beginning of each visitation run.
  *
- * If not set beforehand, this property will be initialized to the value of the 
- * defaultRenderSurface property the first time it is accessed.
+ * You can set this property at any time to direct rendering to any on-screen or off-screen surface. 
+ * If not set directly, this property will be set to the value of the defaultRenderSurface property
+ * the next time it is accessed. If you have set this property to an specific surface temporarily,
+ * you can automatically revert to the defaultRenderSurface by simply setting this property to nil.
  *
  * This property is is not cleared at the end of the visitation run. It is retained so that
  * this visitor can be used to render multiple node assemblies and complete multiple drawing
@@ -512,10 +529,12 @@ typedef enum {
 @property(nonatomic, retain) id<CC3RenderSurface> renderSurface;
 
 /**
- * Template property that returns the initial value of the renderSurface property.
+ * Template property that returns the default value used to automatically
+ * set the value of the renderSurface property.
  *
- * This implementation returns the scene's viewSurface. Since it relies on the scene property
- * haveing a value, this property will be nil unless a visitation run is in progress.
+ * This implementation returns the value of the viewSurface property of the 
+ * CC3SceneDrawingSurfaceManager held in the surfaceManager property. This
+ * is a subsection of the on-screen view surface.
  *
  * Subclasses may override to return a different surface.
  */
@@ -669,6 +688,25 @@ typedef enum {
  * will quadruple the tag value, etc.
  */
 @property(nonatomic, assign) GLuint tagColorShift;
+
+/**
+ * Template property that returns the default value used to automatically
+ * set the value of the renderSurface property.
+ *
+ * Overridden to return the value of the pickingSurface property of the
+ * CC3SceneDrawingSurfaceManager held in the surfaceManager property.
+ */
+@property(nonatomic, readonly) id<CC3RenderSurface> defaultRenderSurface;
+
+/**
+ * Aligns this visitor to use the same camera as the specified visitor.
+ *
+ * The camera and surfaceManager properties of this visitor are set to those of the specified visitor.
+ *
+ * The renderSurface property is left cleared, so that the defaultRenderSurface property will set
+ * it to the pickingSurface of the surfaceManager, when the renderSurface property is next accessed.
+ */
+-(void) alignShotWith: (CC3NodeDrawingVisitor*) otherVisitor;
 
 @end
 

@@ -1541,7 +1541,6 @@ static CC3Cache* _shaderSourceCodeCache = nil;
 
 	pwNode.shaderProgram = program;
 	pwVisitor.renderSurface = pwSurface;
-	[pwSurface activate];
 	[pwVisitor visit: pwNode];
 	
 	// Release visitor state so it won't interfere with later deallocations

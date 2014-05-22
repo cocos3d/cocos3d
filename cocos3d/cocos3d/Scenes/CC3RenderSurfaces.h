@@ -1561,9 +1561,9 @@
  * You can add surfaces to an instance of this manager, using the addSurface: method, and 
  * then invoke the size property on this instance to resize all of the surfaces together.
  *
- * Specialized subclasses include CC3LayerSurfaceManager, for managing surfaces used by a
- * CC3Layer, and CC3ViewSurfaceManager, used by the system to manage the surfaces used to
- * render to the OS view.
+ * Specialized subclasses include CC3SceneDrawingSurfaceManager, for managing surfaces used
+ * by a CC3Layer to render a CC3Scene, and CC3ViewSurfaceManager, used by the system to manage
+ * the surfaces used to render to the OS view.
  *
  * You can create your own subclasses of this class to manage off-screen surfaces used by
  * your application, if you have several surfaces whose sizes can change dynamically, and
@@ -1628,7 +1628,7 @@
 
 
 #pragma mark -
-#pragma mark CC3LayerSurfaceManager
+#pragma mark CC3SceneDrawingSurfaceManager
 
 /**
  * Manages the render surfaces that are tied to the size of a CC3Layer. Each CC3Layer contains
@@ -1636,19 +1636,26 @@
  * is changed, which, in turn, resizes all managed surfaces.
  *
  * Wraps the view surface and picking surface. The viewSurface represents a surface section on 
- * the primary view surface. The picking surface is used to render the CC3Scene for node picking.
- 
+ * the primary on-screen view surface. The picking surface is a (typically) off-screen surface 
+ * used to render the CC3Scene for node picking.
+ *
  * You can add additional surfaces that should be tied to the size of the CC3Layer. Typically,
  * this may include any post-processing surfaces used to render effects within the CC3Layer. 
  * If doing so, you should consider subclassing this class in order to provide convenient 
  * property access to the additional surfaces added to your customized CC3Layer's surface manager.
  */
-@interface CC3LayerSurfaceManager : CC3SurfaceManager {
+@interface CC3SceneDrawingSurfaceManager : CC3SurfaceManager {
 	CC3SurfaceSection* _viewSurface;
 	id<CC3RenderSurface> _pickingSurface;
 }
 
-/** Returns the surface to which rendering for the view should be directed. */
+/** 
+ * Returns the surface to which on-screen rendering to the view should be directed.
+ *
+ * This surface represents a section on the primary on-screen view surface retrieved from
+ * CC3ViewSurfaceManager.sharedViewSurfaceManager.renderingSurface. The bounds of this surface
+ * section are determined by the viewSurfaceOrigin and size properties of this instance.
+ */
 @property(nonatomic, retain, readonly) id<CC3RenderSurface> viewSurface;
 
 /**
@@ -1662,7 +1669,13 @@
  */
 @property(nonatomic, assign) CC3IntPoint viewSurfaceOrigin;
 
-/** Returns the surface to which rendering for picking should be directed. */
+/** 
+ * Returns the surface to which rendering for picking should be directed.
+ *
+ * If not set directly, this property will be lazily initialized to an off-screen surface
+ * with the same size and color format as the surface in the viewSurface property, and with
+ * a new non-multisampling and non-stencilling depth buffer.
+ */
 @property(nonatomic, readonly, retain) id<CC3RenderSurface> pickingSurface;
 
 @end

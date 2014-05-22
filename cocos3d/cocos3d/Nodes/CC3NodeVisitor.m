@@ -307,6 +307,7 @@
 	_gl = nil;								// weak reference
 	[_ccRenderer release];
 	[_billboardCCRenderer release];
+	[_surfaceManager release];
 	[_renderSurface release];
 	[_boneMatricesGlobal release];
 	[_boneMatricesEyeSpace release];
@@ -395,10 +396,11 @@
 -(void) alignCameraViewport {
 	// If the viewport of the camera has not been set directly, align it to the surface shape.
 	// Invoked during setter. Don't use getter, to avoid infinite recursion when camera is nil.
-	if ( CC3ViewportIsZero(_camera.viewport) ) _camera.viewport = self.renderSurface.viewport;
+	if ( CC3ViewportIsZero(_camera.viewport) ) _camera.viewport = _renderSurface.viewport;
 }
 
 -(void) alignShotWith: (CC3NodeDrawingVisitor*) otherVisitor {
+	self.surfaceManager = otherVisitor.surfaceManager;
 	self.camera = otherVisitor.camera;
 	self.renderSurface = otherVisitor.renderSurface;
 }
@@ -562,12 +564,23 @@
 
 #pragma mark Accessing scene contents
 
+-(CC3SceneDrawingSurfaceManager*) surfaceManager { return _surfaceManager; }
+
+-(void) setSurfaceManager: (CC3SceneDrawingSurfaceManager*) surfaceManager {
+	if (surfaceManager == _surfaceManager) return;
+	[_surfaceManager release];
+	_surfaceManager = [surfaceManager retain];
+	self.renderSurface = nil;
+}
+
 -(id<CC3RenderSurface>) renderSurface {
 	if ( !_renderSurface ) self.renderSurface = self.defaultRenderSurface;
+	CC3Assert(_renderSurface, @"%@ could not determine a default rendering surface."
+			  @" Prior to rendering, set the renderSurface property or surfaceManager property.", self);
 	return _renderSurface;
 }
 
--(id<CC3RenderSurface>) defaultRenderSurface { return self.scene.viewSurface; }
+-(id<CC3RenderSurface>) defaultRenderSurface { return self.surfaceManager.viewSurface; }
 
 -(void) setRenderSurface: (id<CC3RenderSurface>) renderSurface {
 	if (renderSurface == _renderSurface) return;
@@ -753,6 +766,7 @@
 		_gl = nil;
 		_ccRenderer = nil;
 		_billboardCCRenderer = nil;
+		_surfaceManager = nil;
 		_renderSurface = nil;
 		_drawingSequencer = nil;
 		_currentSkinSection = nil;
@@ -854,7 +868,16 @@
 
 #pragma mark Drawing
 
--(id<CC3RenderSurface>) defaultRenderSurface { return self.scene.pickingSurface; }
+-(id<CC3RenderSurface>) defaultRenderSurface {
+	return (self.scene.shouldDisplayPickingRender
+			? self.surfaceManager.viewSurface
+			: self.surfaceManager.pickingSurface);
+}
+
+-(void) alignShotWith: (CC3NodeDrawingVisitor*) otherVisitor {
+	self.surfaceManager = otherVisitor.surfaceManager;		// Also clears renderSurface property
+	self.camera = otherVisitor.camera;
+}
 
 /**
  * Overridden because what matters here is not visibility, but touchability.

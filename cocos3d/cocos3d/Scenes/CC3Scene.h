@@ -1086,7 +1086,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 
 /**
  * Returns the class of visitor that will be instantiated in the touchedNodePicker
- * pickTouchedNode method, in order to paint each node a unique color so that
+ * pickTouchedNodeWithVisitor: method, in order to paint each node a unique color so that
  * the node under the touched pixel can be identified.
  *
  * The returned class must be a subclass of CC3NodePickingVisitor. This implementation
@@ -1100,7 +1100,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * node from a touch event, instead of the normal scene display render.
  *
  * This is a development-time diagnostic property, that can be used to debug node picking
- * from touch events.
+ * from touch events. The initial value of this property is NO.
  */
 @property(nonatomic, assign) BOOL shouldDisplayPickingRender;
 
@@ -1114,8 +1114,9 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * a single CC3Layer to a single CC3Scene, and hold a back reference to that layer within the
  * scene, you should create and manage that reference in your custom CC3Scene class.
  *
- * The CC3Layer that is holding this 3D scene. This property is set automatically when this
- * scene is assigned to the CC3Layer.
+ * The CC3Layer that is holding this 3D scene. This property is set automatically when this scene
+ * is assigned to the CC3Layer. If assigning this instance to multiple CC3Layers, this property 
+ * will hold a reference to the CC3Layer to which this instance was most recently attached.
  */
 @property(nonatomic, assign) CC3Layer* cc3Layer __deprecated;
 
@@ -1217,8 +1218,8 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * The currently picked node.
  *
  * The value of this property is ephemeral, and contains a non-nil value only during node
- * picking from touch handling. The value is set by the pickTouchedNode method, and is 
- * cleared by the dispatchPickedNode method.
+ * picking from touch handling. The value is set by the pickTouchedNodeWithVisitor: method,
+ * and is cleared by the dispatchPickedNode method.
  */
 @property(nonatomic, retain) CC3Node* pickedNode;
 
@@ -1231,7 +1232,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * kCCTouchEnded, or kCCTouchCancelled.
  *
  * The event is queued internally, and the node is picked asychronously during the
- * next rendering frame when the pickTouchedNode method is automatically invoked.
+ * next rendering frame when the pickTouchedNodeWithVisitor: method is automatically invoked.
  */
 -(void) pickNodeFromTouchEvent: (uint) tType at: (CGPoint) tPoint;
 
@@ -1252,15 +1253,19 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * The coloring-and-picking algorithm is run only once per touch event, and is not
  * run during rendering frames when there has been no touch event received.
  *
+ * Rendering for node picking uses a specialized internal drawing visitor. The specified
+ * visitor is not used to render the scene for node picking. Instead, the internal drawing
+ * visitor is aligned with the specified visitor, and is then used to render the scene.
+ *
  * This method is invoked automatically whenever a touch event occurs. Usually, the
  * application never needs to invoke this method directly.
  */
--(void) pickTouchedNode;
+-(void) pickTouchedNodeWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /**
  * Invoked by the CC3Scene during update operations, in the update loop that occurs
- * occurs just after a touch event has been received by the touchEvent:at: method,
- * and after a node has been picked as a result, by the pickTouchedNode method.
+ * occurs just after a touch event has been received by the touchEvent:at: method, and
+ * after a node has been picked as a result, by the pickTouchedNodeWithVisitor: method.
  *
  * This implementation invokes the nodeSelected:byTouchEvent:at: method on the CC3Scene instance.
  *
