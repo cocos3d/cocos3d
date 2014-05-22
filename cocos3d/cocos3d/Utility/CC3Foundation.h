@@ -325,7 +325,7 @@ static inline CC3Vector CC3VectorMake(GLfloat x, GLfloat y, GLfloat z) {
  * and CC3Vector, as this is not guaranteed to work reliably.
  */
 static inline CC3Vector CC3VectorFromGLKVector3(GLKVector3 glkv) {
-	return CC3VectorMake(glkv.x, glkv.y, glkv.z);
+	return CC3VectorMake(glkv.v[0], glkv.v[1], glkv.v[2]);
 }
 
 /**
@@ -732,7 +732,7 @@ static inline CC3Vector4 CC3Vector4FromDirection(CC3Vector aDirection) {
  * and CC3Vector4, as this is not guaranteed to work reliably.
  */
 static inline CC3Vector4 CC3Vector4FromGLKVector4(GLKVector4 glkv) {
-	return CC3Vector4Make(glkv.x, glkv.y, glkv.z, glkv.w);
+	return CC3Vector4Make(glkv.v[0], glkv.v[1], glkv.v[2], glkv.v[3]);
 }
 
 /**
@@ -909,7 +909,7 @@ static inline CC3Quaternion CC3QuaternionFromCC3Vector(CC3Vector v, GLfloat w) {
  * and CC3Quaternion, as this is not guaranteed to work reliably.
  */
 static inline CC3Quaternion CC3QuaternionFromGLKQuaternion(GLKQuaternion glkq) {
-	return CC3QuaternionMake(glkq.x, glkq.y, glkq.z, glkq.w);
+	return CC3QuaternionMake(glkq.q[0], glkq.q[1], glkq.q[2], glkq.q[3]);
 }
 
 /**
