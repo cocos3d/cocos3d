@@ -1089,6 +1089,16 @@ static NSObject<CC3OpenGLDelegate>* _delegate = nil;
 
 -(void) captureOpenGLFrame { [self insertEventMarkerC: "com.apple.GPUTools.event.debug-frame"]; }
 
+#if APPORTABLE
+-(void) setDebugLabel: (NSString*) label forObject: (GLuint) objID ofType: (GLenum) objType {}
+-(void) setDebugLabel: (NSString*) label forTexture: (GLuint) texID {}
+-(void) setDebugLabel: (NSString*) label forBuffer: (GLuint) buffID {}
+-(void) setDebugLabel: (NSString*) label forShader: (GLuint) shaderID {}
+-(void) setDebugLabel: (NSString*) label forShaderProgram: (GLuint) progID {}
+-(void) setDebugLabel: (NSString*) label forFramebuffer: (GLuint) fbID {}
+-(void) setDebugLabel: (NSString*) label forRenderbuffer: (GLuint) rbID {}
+-(void) setDebugLabel: (NSString*) label forVertexArray: (GLuint) vaID {}
+#else
 -(void) setDebugLabel: (NSString*) label forObject: (GLuint) objID ofType: (GLenum) objType {
 	glLabelObjectEXT(objType, objID, 0, label.UTF8String);
 	LogGLErrorTrace(@"glLabelObjectEXT(%@, %u, 0, %@)", NSStringFromGLEnum(objType), objID, label);
@@ -1121,6 +1131,7 @@ static NSObject<CC3OpenGLDelegate>* _delegate = nil;
 -(void) setDebugLabel: (NSString*) label forVertexArray: (GLuint) vaID {
 	[self setDebugLabel: label forObject: vaID ofType: GL_VERTEX_ARRAY_OBJECT_EXT];
 }
+#endif	// APPORTABLE
 
 
 #pragma mark Aligning 2D & 3D state
