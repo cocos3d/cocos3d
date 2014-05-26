@@ -288,13 +288,17 @@
 #pragma mark Texture transformations
 
 /**
- * Indicates whether this instance will flip the texture vertically during loading.
+ * Indicates whether this instance will flip the texture vertically during loading, in order
+ * to ensure that the texture is oriented upside up.
  *
  * Under iOS and OSX, most textures are loaded into memory upside-down because of the
  * difference in vertical orientation between the OpenGL and CoreGraphics coordinate systems.
  *
- * If this property is set to YES during loading, the texture will be flipped in memory so
- * that it is oriented the right way up.
+ * If this property is set to YES during loading, and the texture has been loaded upside down,
+ * the texture will be flipped in memory so that it is oriented the right way up.
+ *
+ * If this property is set to NO during loading, and the texture has been loaded upside up,
+ * the texture will be flipped in memory so that it is oriented upside down.
  *
  * It is possible to compensate for an upside-down using texture coordinates. You can set
  * this property to NO prior to loading in order to leave the texture upside-down and use
@@ -1761,8 +1765,8 @@
  * Indicates whether this texture is upside-down.
  *
  * The vertical axis of the coordinate system of OpenGL is inverted relative to the CoreGraphics
- * view coordinate system. As a result, any texture content created from a CGImage will be upside
- * down. This includes texture content loaded from a file by an instance of this class.
+ * view coordinate system. As a result, texture content created from a CGImage will be upside down. 
+ * This includes texture content loaded from a file by an instance of this class.
  */
 @property(nonatomic, readonly) BOOL isUpsideDown;
 

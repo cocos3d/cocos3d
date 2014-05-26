@@ -416,7 +416,7 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 
 -(void) checkTextureOrientation: (CC3Texture2DContent*) texContent {
 	BOOL flipHorz = self.shouldFlipHorizontallyOnLoad;
-	BOOL flipVert = texContent.isUpsideDown && self.shouldFlipVerticallyOnLoad;
+	BOOL flipVert = !XOR(texContent.isUpsideDown, self.shouldFlipVerticallyOnLoad);
 	
 	if (flipHorz && flipVert)
 		[texContent rotateHalfCircle];		// Do both in one pass
@@ -1679,7 +1679,7 @@ contentSizeInPixels: (CGSize) sizeInPixels
 		CC2_TEX_CONTENT_SCALE = contentScale;
 		
 		_imageData = data;
-		_isUpsideDown = YES;			// Assume upside down
+		_isUpsideDown = (COCOS2D_VERSION < 0x030100);	// Cocos2D 3.1 & above takes care of flipping
 		[self updateFromPixelFormat];
 	}
 	return self;
