@@ -42,6 +42,7 @@
 @implementation CC3Layer
 
 @synthesize shouldAlwaysUpdateViewport=_shouldAlwaysUpdateViewport;
+@synthesize shouldTrackViewSize=_shouldTrackViewSize;
 
 - (void)dealloc {
 	self.cc3Scene = nil;			// Close, remove & release the scene
@@ -112,6 +113,7 @@
 #pragma mark Allocation and initialization
 
 -(instancetype) init {
+	_shouldTrackViewSize = YES;		// Could be overridden during init if contentSize set to something other than view size
 	if( (self = [super init]) ) {
 		_shouldAlwaysUpdateViewport = NO;
 		[self initializeControls];
@@ -285,12 +287,16 @@
 #pragma mark CC3ControllableLayer support
 
 /**
- * Invoked automatically when the content size has changed.
- * Updates the viewport to match the new layer dimensions.
+ * Invoked automatically when the content size has changed. Updates the viewport to match
+ * the new layer dimensions, and keeps track of whether the layer covers the full view.
  */
 -(void) didUpdateContentSizeFrom: (CGSize) oldSize {
 	[super didUpdateContentSizeFrom: oldSize];
+	
 	[self updateViewport];
+	
+	if ( !CGSizeEqualToSize(self.contentSize, CCDirector.sharedDirector.viewSize) )
+		self.shouldTrackViewSize = NO;
 }
 
 -(void) updateViewport {
@@ -316,10 +322,19 @@
 }
 
 /**
- * Invoked automatically when the window has been resized while running in OSX.
- * Resize this layer to fill the window.
+ * Invoked automatically when the OS view has been resized.
+ * Ensure view surfaces are resized, and if appropriate, resize this layer.
  */
--(void) reshapeProjection: (CGSize) newWindowSize { self.contentSize = newWindowSize; }
+-(void) viewDidResizeTo: (CGSize) newViewSize {
+
+	// Ensure the size of all view surfaces is updated to match new view size.
+	CC3ViewSurfaceManager.sharedViewSurfaceManager.size = CC3IntSizeFromCGSize(newViewSize);
+	
+	// If this layer should track the size of the view, update the size of this layer.
+	if (self.shouldTrackViewSize) self.contentSize = newViewSize;
+
+	[super viewDidResizeTo:newViewSize];	// Propagate to descendants
+}
 
 
 #pragma mark Touch handling

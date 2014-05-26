@@ -563,12 +563,15 @@ enum {
 /** Converts an NSEvent (typically a mouse event) to the local coordinates of this node. */
 -(CGPoint) cc3ConvertNSEventToNodeSpace: (NSEvent*) event;
 
+#if (COCOS2D_VERSION < 0x030100)
 /**
- * Invoked automatically when the window has been resized while running in OSX.
+ * Invoked automatically when the OS view has been resized.
+ *
  * This implementation simply propagates the same method to the children.
- * Subclasses may override to actually do something when the window resizes.
+ * Subclasses may override to actually do something when the view resizes.
  */
--(void) reshapeProjection: (CGSize) newWindowSize;
+-(void) viewDidResizeTo: (CGSize) newViewSize;
+#endif	// (COCOS2D_VERSION < 0x030100)
 
 @end
 
@@ -763,6 +766,9 @@ enum {
 
 /** Content scaling factor. Does nothing, as content scaling factor only applies to CCDirectorIOS. */
 @property(nonatomic, assign) CGFloat contentScaleFactor;
+
+/** The size of the view. */
+@property(nonatomic, readonly) CGSize designSize;
 
 #endif	//CC3_CC2_CLASSIC
 

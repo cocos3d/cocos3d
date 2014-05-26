@@ -59,7 +59,7 @@
 -(id) init {
 	if ( (self = [ super init ]) ){
 		self.anchorPoint = ccp(0.0f, 0.0f);
-		[self setContentSize: [CCDirector sharedDirector].designSize];
+		[self setContentSize: CCDirector.sharedDirector.designSize];
 	}
 	
 	return( self );
@@ -426,9 +426,11 @@
 #endif	// CC3_OSX
 }
 
--(void) reshapeProjection: (CGSize) newWindowSize {
-	for (CCNode* child in self.children) [child reshapeProjection: newWindowSize];
+#if (COCOS2D_VERSION < 0x030100)
+-(void) viewDidResizeTo: (CGSize) newViewSize {
+	for (CCNode* child in self.children) [child viewDidResizeTo: newViewSize];
 }
+#endif	// (COCOS2D_VERSION < 0x030100)
 
 @end
 
@@ -629,6 +631,9 @@
 
 -(void) setContentScaleFactor: (CGFloat) contentScaleFactor {}
 
+-(CGSize) designSize { return self.winSize; }
+
+
 #endif	//CC3_CC2_CLASSIC
 
 @end
@@ -678,11 +683,13 @@
 
 @implementation CCDirectorMac (CC3)
 
--(void) reshapeProjection: (CGSize) newWindowSize {
-	[super reshapeProjection: newWindowSize];
+#if (COCOS2D_VERSION < 0x030100)
+-(void) reshapeProjection: (CGSize) newViewSize {
+	[super reshapeProjection: newViewSize];
 	if (self.resizeMode == kCCDirectorResize_NoScale)
-		[self.runningScene reshapeProjection: newWindowSize];
+		[self.runningScene viewDidResizeTo: newViewSize];
 }
+#endif	// (COCOS2D_VERSION < 0x030100)
 
 @end
 
@@ -697,6 +704,13 @@
 #if !CC3_CC2_1
 -(NSTimeInterval) displayLinkTime { return CC2_LAST_DISPLAY_TIME; }
 #endif
+
+#if (COCOS2D_VERSION < 0x030100)
+-(void) reshapeProjection: (CGSize) newViewSize {
+	[super reshapeProjection: newViewSize];
+	[self.runningScene viewDidResizeTo: newViewSize];
+}
+#endif	// (COCOS2D_VERSION < 0x030100)
 
 /** Uncomment to log a debug message whenever the frame time is unexpectedly extended. */
 //-(void) drawScene {

@@ -143,6 +143,7 @@
 	NSMutableArray* _cc3GestureRecognizers;
 	char* _renderStreamGroupMarker;
 	BOOL _shouldAlwaysUpdateViewport : 1;
+	BOOL _shouldTrackViewSize : 1;
 }
 
 /**
@@ -384,6 +385,22 @@
  * layer in a manner that is not automatically propagated to the CC3Scene viewport.
  */
 @property(nonatomic, assign) BOOL shouldAlwaysUpdateViewport;
+
+/**
+ * Indicates whether this layer should track the size of the underlying view.
+ *
+ * If the value of this property is YES, when the size of the underlying view changes 
+ * (eg- through a device rotation on iOS, or a window resizing on OSX), the contentSize
+ * property of this layer will be set to the new size of the view.
+ *
+ * The initial value of this property is YES. It is automatically set to NO if the contentSize
+ * property of this layer is set to a value other than the size of the underlying view. 
+ *
+ * You can directly set the value of this property if you have some other sizing management
+ * scheme, but be aware that this property will be set to NO each time the contentSize property
+ * is set to a value that is not the same size of the view.
+ */
+@property(nonatomic, assign) BOOL shouldTrackViewSize;
 
 /**
  * This method is invoked periodically when the components in the CC3Scene are to be updated.
