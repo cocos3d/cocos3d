@@ -30,40 +30,16 @@
  */
 
 #import "CC3ViewController.h"
-#import "CC3ControllableLayer.h"
-#import "CC3Texture.h"
 #import "CC3Logging.h"
 
 
 @implementation CC3ViewController
-
-@synthesize controlledNode=_controlledNode;
-
--(void) dealloc {
-	[_controlledNode release];
-	[super dealloc];
-}
-
--(BOOL) isOverlayingDeviceCamera { return NO; }
-
--(void) setIsOverlayingDeviceCamera: (BOOL) isOverlayingDeviceCamera {}
 
 -(CCGLView*) view { return (CCGLView*)super.view; }
 
 -(void) setView: (CCGLView*) view {
 	CC3Assert(!view || [view isKindOfClass: [CCGLView class]], @"%@ may only be attached to a CCGLView. %@ is not of that class.", self, view);
 	super.view = view;
-}
-
--(CCNode*) controlledNode { return _controlledNode; }
-
--(void) setControlledNode: (CCNode*) aNode {
-	if (aNode == _controlledNode) return;
-	
-	[_controlledNode release];
-	_controlledNode = [aNode retain];
-	
-	aNode.controller = self;
 }
 
 #if CC3_IOS && !CC3_CC2_1
@@ -84,21 +60,16 @@
 
 -(void) resumeAnimation { [CCDirector.sharedDirector resume]; }
 
--(void) terminateOpenGL {
-	self.controlledNode = nil;
-	
-	// If the controller is not combined with the director, clear the view separately.
-	// Then, end the CCDirector.
-	if ( ![self isKindOfClass: CCDirector.class] ) self.view = nil;
-	[self endDirector];
-	
-	[CC3OpenGL terminateOpenGL];
-}
 
--(void) endDirector {
-	CC3Texture.shouldCacheAssociatedCCTextures = NO;
-	[CCDirector.sharedDirector end];
-}
+#pragma mark Deprecated
+
+-(CCNode*) controlledNode { return nil; }
+
+-(void) setControlledNode: (CCNode*) aNode {}
+
+-(BOOL) isOverlayingDeviceCamera { return NO; }
+
+-(void) setIsOverlayingDeviceCamera: (BOOL) isOverlayingDeviceCamera {}
 
 @end
 

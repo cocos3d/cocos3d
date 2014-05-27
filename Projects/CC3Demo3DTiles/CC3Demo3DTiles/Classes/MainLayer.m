@@ -189,8 +189,8 @@
  * This method will be invoked for the first time when this layer is first initialized,
  * which is before the controls and templates have been created.
  */
--(void) didUpdateContentSizeFrom: (CGSize) oldSize {
-	[super didUpdateContentSizeFrom: oldSize];
+-(void) contentSizeChanged {
+	[super contentSizeChanged];
 	[self positionControls];
 	[self addTiles];
 }

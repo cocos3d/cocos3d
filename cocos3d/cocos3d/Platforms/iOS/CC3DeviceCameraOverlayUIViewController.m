@@ -30,12 +30,12 @@
  */
 
 #import "CC3DeviceCameraOverlayUIViewController.h"
+#import "CC3OpenGL.h"
 
 #if CC3_IOS
 
 #if CC3_AV_CAPTURE_SUPPORTED
 
-#import "CC3ControllableLayer.h"
 #import "CC3Logging.h"
 #import <AVFoundation/AVCaptureInput.h>
 #import <AVFoundation/AVCaptureDevice.h>
@@ -58,9 +58,10 @@
 	if(aBool != self.isOverlayingDeviceCamera) {
 		if(!aBool || self.isDeviceCameraAvailable) {
 
-			// Before switching, if the CCNode is running, send it onExit to stop it
-			BOOL nodeRunning = _controlledNode.isRunningInActiveScene;
-			if(nodeRunning) [_controlledNode onExit];
+			// Before switching, if a scene is running, send it onExit to stop it
+			CCScene* runningScene = CCDirector.sharedDirector.runningScene;
+			BOOL nodeRunning = runningScene.isRunningInActiveScene;
+			if(nodeRunning) [runningScene onExit];
 
 			// Let subclasses of this controller know about the pending change
 			[self willChangeIsOverlayingDeviceCamera];
@@ -68,7 +69,7 @@
 			// Update the value
 			_isOverlayingDeviceCamera = aBool;
 
-			if(aBool) {
+			if(_isOverlayingDeviceCamera) {
 				// If overlaying, set the background color to clear, and add the picker view.
 				UIView* myView = self.view;
 				UIWindow* window = myView.window;
@@ -83,11 +84,15 @@
 				[_deviceCameraView removeFromSuperview];
 			}
 
+			// If this layer is overlaying the device camera, the GL clear color is
+			// set to transparent black, otherwise it is set to opaque black.
+			CC3OpenGL.sharedGL.clearColor = _isOverlayingDeviceCamera ? kCCC4FBlackTransparent : kCCC4FBlack;
+
 			// Let subclasses of this controller know that the change has happened
 			[self didChangeIsOverlayingDeviceCamera];
 
-			// After switching, if the CCNode was running, send it onEnter to restart it
-			if(nodeRunning) [_controlledNode onEnter];
+			// After switching, if the CCScene was running, send it onEnter to restart it
+			if(nodeRunning) [runningScene onEnter];
 		}
 	}
 }

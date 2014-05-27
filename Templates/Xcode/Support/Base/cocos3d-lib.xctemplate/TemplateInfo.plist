@@ -2225,6 +2225,30 @@
 			<key>Path</key>
 			<string>cocos3d/cocos3d/Platforms/CC3OSExtensions.m</string>
 		</dict>
+		<key>cocos3d/cocos3d/Platforms/CC3ViewController.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Platforms</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Platforms/CC3ViewController.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cocos3d/Platforms/CC3ViewController.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Platforms</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Platforms/CC3ViewController.m</string>
+		</dict>
 		<key>cocos3d/cocos3d/Platforms/iOS/CC3DeviceCameraOverlayUIViewController.h</key>
 		<dict>
 			<key>Group</key>
@@ -2451,30 +2475,6 @@
 			<key>Path</key>
 			<string>cocos3d/cocos3d/Resources/CC3ResourceNode.m</string>
 		</dict>
-		<key>cocos3d/cocos3d/Scenes/CC3ControllableLayer.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>Scenes</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/Scenes/CC3ControllableLayer.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/Scenes/CC3ControllableLayer.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>Scenes</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/Scenes/CC3ControllableLayer.m</string>
-		</dict>
 		<key>cocos3d/cocos3d/Scenes/CC3Layer.h</key>
 		<dict>
 			<key>Group</key>
@@ -2570,30 +2570,6 @@
 			</array>
 			<key>Path</key>
 			<string>cocos3d/cocos3d/Scenes/CC3Scene.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/Scenes/CC3ViewController.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>Scenes</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/Scenes/CC3ViewController.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/Scenes/CC3ViewController.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>Scenes</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/Scenes/CC3ViewController.m</string>
 		</dict>
 		<key>cocos3d/cocos3d/Shaders/CC3GLSLVariable.h</key>
 		<dict>
@@ -2966,6 +2942,18 @@
 			</array>
 			<key>Path</key>
 			<string>cocos3d/deprecated/CC3ActionInterval.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/deprecated/CC3ControllableLayer.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>deprecated</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/deprecated/CC3ControllableLayer.h</string>
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
@@ -3348,6 +3336,8 @@
 		<string>cocos3d/cocos3d/Platforms/CC3Environment.h</string>
 		<string>cocos3d/cocos3d/Platforms/CC3OSExtensions.h</string>
 		<string>cocos3d/cocos3d/Platforms/CC3OSExtensions.m</string>
+		<string>cocos3d/cocos3d/Platforms/CC3ViewController.h</string>
+		<string>cocos3d/cocos3d/Platforms/CC3ViewController.m</string>
 		<string>cocos3d/cocos3d/Platforms/iOS/CC3DeviceCameraOverlayUIViewController.h</string>
 		<string>cocos3d/cocos3d/Platforms/iOS/CC3DeviceCameraOverlayUIViewController.m</string>
 		<string>cocos3d/cocos3d/Platforms/iOS/CC3IOSExtensions.h</string>
@@ -3366,8 +3356,6 @@
 		<string>cocos3d/cocos3d/Resources/CC3Resource.m</string>
 		<string>cocos3d/cocos3d/Resources/CC3ResourceNode.h</string>
 		<string>cocos3d/cocos3d/Resources/CC3ResourceNode.m</string>
-		<string>cocos3d/cocos3d/Scenes/CC3ControllableLayer.h</string>
-		<string>cocos3d/cocos3d/Scenes/CC3ControllableLayer.m</string>
 		<string>cocos3d/cocos3d/Scenes/CC3Layer.h</string>
 		<string>cocos3d/cocos3d/Scenes/CC3Layer.m</string>
 		<string>cocos3d/cocos3d/Scenes/CC3NodeSequencer.h</string>
@@ -3376,8 +3364,6 @@
 		<string>cocos3d/cocos3d/Scenes/CC3RenderSurfaces.m</string>
 		<string>cocos3d/cocos3d/Scenes/CC3Scene.h</string>
 		<string>cocos3d/cocos3d/Scenes/CC3Scene.m</string>
-		<string>cocos3d/cocos3d/Scenes/CC3ViewController.h</string>
-		<string>cocos3d/cocos3d/Scenes/CC3ViewController.m</string>
 		<string>cocos3d/cocos3d/Shaders/CC3GLSLVariable.h</string>
 		<string>cocos3d/cocos3d/Shaders/CC3GLSLVariable.m</string>
 		<string>cocos3d/cocos3d/Shaders/CC3ShaderContext.h</string>
@@ -3409,6 +3395,7 @@
 		<string>cocos3d/cocos3d/Utility/CC3Rotator.h</string>
 		<string>cocos3d/cocos3d/Utility/CC3Rotator.m</string>
 		<string>cocos3d/deprecated/CC3ActionInterval.h</string>
+		<string>cocos3d/deprecated/CC3ControllableLayer.h</string>
 		<string>cocos3d/deprecated/CC3GLMatrix.h</string>
 		<string>cocos3d/deprecated/CC3GLMatrix.m</string>
 		<string>cocos3d/deprecated/CC3GLView.h</string>

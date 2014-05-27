@@ -1367,25 +1367,20 @@ typedef struct {
 /** 
  * Terminates the current use of OpenGL by this application.
  *
- * Terminates OpenGL and deletes all GL contexts, serving all threads. Also clears all caches
- * that contain content that uses OpenGL, including:
+ * Terminates the CCDirector.sharedDirector singleton. Terminates OpenGL and deletes all GL contexts,
+ * serving all threads. Also clears all caches that contain content that uses OpenGL, including:
  * 	 - CC3Resource
  *   - CC3Texture
  *   - CC3ShaderProgram
  *   - CC3Shader
  *   - CC3ShaderSourceCode
  *
- * To ensure that further OpenGL calls are not attempted, before invoking this method, you 
- * should release all CC3Scenes and CC3ViewControllers that you have created or loaded, along
- * with any cocos2d components, and that the CCDirector singleton has been ended.
+ * You can invoke this method when your app no longer needs support for OpenGL, or will not
+ * use OpenGL for a significant amount of time, in order to free up app and OpenGL memory
+ * used by your application.
  *
- * CC3ViewController also provides a terminateOpenGL convenience method that will take care of
- * all of that for you, and then will invoke this method. Unless you have special requirements,
- * use that CC3ViewController terminateOpenGL method, instead of invoking this method directly.
- *
- * You can invoke this method (or preferrably the CC3ViewController terminateOpenGL method) 
- * when your app no longer needs support for OpenGL, or will not use OpenGL for a significant
- * amount of time, in order to free up app and OpenGL memory used by your application.
+ * To ensure that further OpenGL calls are not attempted, before invoking this method, you should
+ * release all CC3Scenes that you have created or loaded, along with any Cocos2D components.
  *
  * To ensure that that the current GL activity has finished before pulling the rug out from
  * under it, this request is queued for each existing context, on the thread for which the
@@ -1411,7 +1406,7 @@ typedef struct {
  *
  * Note that, in order to ensure that OpenGL is free to shutdown, this method forces the
  * CC3Texture shouldCacheAssociatedCCTextures class-side property to NO, so that any
- * background loading that is currently occurring will not cache cocos2d textures.
+ * background loading that is currently occurring will not cache Cocos2D textures.
  * If you had set this property to YES, and intend to restart OpenGL at some point, then
  * you might want to set it back to YES before reloading 3D resources again.
  *

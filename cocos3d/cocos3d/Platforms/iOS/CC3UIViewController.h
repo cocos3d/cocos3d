@@ -40,11 +40,8 @@
 /**
  * CC3UIViewController extends CC3ViewController to provide functionality specific to iOS.
  *
- * An instance of CC3UIViewController manages a single CCNode (typically a CCLayer) as changes
- * occur to the device orientation (portrait, landscape, etc).
- *
  * The loadView method of this controller will automatically create the correct type and configuration of a
- * view suitable for use with cocos3d. You can customize the creation of this view by setting the viewClass,
+ * view suitable for use with Cocos3D. You can customize the creation of this view by setting the viewClass,
  * viewBounds, viewColorFormat, viewDepthFormat, viewShouldUseStencilBuffer, and viewPixelSamples properties
  * prior to accessing the view property of this controller for the first time.
  *

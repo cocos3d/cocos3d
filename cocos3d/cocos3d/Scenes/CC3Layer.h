@@ -29,7 +29,6 @@
 
 /** @file */	// Doxygen marker
 
-#import "CC3ControllableLayer.h"
 #import "CC3Scene.h"
 #import "CC3RenderSurfaces.h"
 
@@ -137,7 +136,7 @@
  *   -# When compiling with versions of cocos2d prior to 3.0, schedule regular updates in
  *      your CC3Layer instance by invoking the scheduleUpdate method.
  */
-@interface CC3Layer : CC3ControllableLayer {
+@interface CC3Layer : CCLayer {
 	CC3Scene* _cc3Scene;
 	CC3SceneDrawingSurfaceManager* _surfaceManager;
 	NSMutableArray* _cc3GestureRecognizers;

@@ -229,11 +229,11 @@
 
 -(void) cc3AddGestureRecognizer: (UIGestureRecognizer*) gesture {
 	[((NSMutableArray*)self.cc3GestureRecognizers) addObject: gesture];
-	[self.view addGestureRecognizer: gesture];
+	[CCDirector.sharedDirector.view addGestureRecognizer: gesture];
 }
 
 -(void) cc3RemoveGestureRecognizer: (UIGestureRecognizer*) gesture {
-	[self.view removeGestureRecognizer: gesture];
+	[CCDirector.sharedDirector.view removeGestureRecognizer: gesture];
 	[_cc3GestureRecognizers removeObjectIdenticalTo: gesture];
 }
 
@@ -284,14 +284,14 @@
 #endif	// CC3_CC2_RENDER_QUEUE
 
 
-#pragma mark CC3ControllableLayer support
+#pragma mark Resizing support
 
 /**
  * Invoked automatically when the content size has changed. Updates the viewport to match
  * the new layer dimensions, and keeps track of whether the layer covers the full view.
  */
--(void) didUpdateContentSizeFrom: (CGSize) oldSize {
-	[super didUpdateContentSizeFrom: oldSize];
+-(void) contentSizeChanged {
+	[super contentSizeChanged];
 	
 	[self updateViewport];
 	

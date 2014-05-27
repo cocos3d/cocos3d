@@ -161,7 +161,7 @@
 }
 
 -(void)applicationWillTerminate: (UIApplication*) application {
-	[_viewController terminateOpenGL];
+	[CC3OpenGL terminateOpenGL];
 }
 
 -(void) applicationSignificantTimeChange: (UIApplication*) application {

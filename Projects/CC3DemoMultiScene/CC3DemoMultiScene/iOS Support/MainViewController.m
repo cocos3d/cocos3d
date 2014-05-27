@@ -196,7 +196,7 @@
  */
 -(void) close3DController {
 	if (_cc3Controller) {
-		[_cc3Controller terminateOpenGL];
+		[CC3OpenGL terminateOpenGL];
 		_cc3Controller = nil;
 	} else {
 		[self loadSelected3DScene];

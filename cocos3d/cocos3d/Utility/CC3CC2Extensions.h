@@ -42,6 +42,9 @@
 #	import "CCTexture_Private.h"
 #endif	// !CC3_CC2_CLASSIC
 
+@class CC3ViewController;
+
+
 #if CC3_CC2_RENDER_QUEUE
 
 #define kCCVertexAttrib_MAX			4
@@ -584,6 +587,22 @@ enum {
 /** Extension category to support cocos3d functionality. */
 @interface CCLayer (CC3)
 
+/** 
+ * The controller controlling the scene.
+ *
+ * Under iOS and Cocos2D v2 & v3, returns the CCDirector singleton.
+ * Setting this property has no effect.
+ */
+@property(nonatomic, readonly) CC3ViewController* controller __deprecated;
+
+/** The view displaying this layer. */
+@property(nonatomic, readonly) CCGLView* view __deprecated;
+
+#if CC3_CC2_CLASSIC
+/** Callback invoked when the contentSize property of this layer changes. */
+-(void) contentSizeChanged;
+#endif	// CC3_CC2_CLASSIC
+
 #if COCOS2D_VERSION < 0x020100
 /** Backwards compatibility for setter renamed in cocos2d 2.1. */
 -(void) setTouchEnabled: (BOOL) isTouchEnabled;
@@ -602,6 +621,9 @@ enum {
 @property (nonatomic, assign) NSInteger mousePriority;
 #endif
 #endif	// CC3_OSX
+
+/** Allocates and initializes a layer. */
++(id) layer;
 
 @end
 

@@ -230,6 +230,11 @@ Cocos3D 2.0.0 - 2014/04/30
 
 - [API change] Replaced use of CCArray with NSArray.
 
+- [API change] CC3ViewController no longer controls a specific CCNode
+	- [API change] Removed CC3ControllableLayer class. CC3Layer now direct subclass of CCLayer.
+	- Size changes due to view size changes are handled via propagation of viewDidResizeTo: method invoked from CCDirector reshapeProjection:
+	- Added CC3Layer shouldTrackViewSize property to allow CC3Layer to track the view size
+
 - CC3DeviceCameraOverlayUIViewController now uses AVFoundation framework instead of UIImagePickerController to display device camera behind 3D scene for Augmented Reality apps.
 
 - CC3PODNode userData and podUserDataSize properties now populated from user data in POD files.

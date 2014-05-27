@@ -36,7 +36,7 @@
 
 #define kAnimationFrameRate		60		// Animation frame rate
 
-#if !CC3_CC2_CLASSIC
+#if !CC3_CC2_CLASSIC	//================================================================
 
 /** App Delegate for Cocos2D v3 and above. */
 @implementation CC3DemoMashUpAppDelegate
@@ -75,7 +75,7 @@
 	// Create the customized CC3Layer that supports 3D rendering.
 	CC3Layer* cc3Layer = [CC3DemoMashUpLayer layer];
 	
-	// As an alternte to running "full-screen", the CC3Layer can run as a smaller "sub-window"
+	// As an alternate to running "full-screen", the CC3Layer can run as a smaller "sub-window"
 	// within any standard CCNode. That allows you to have a mostly 2D window, with a smaller
 	// 3D window embedded in it. To experiment with this smaller, square, embedded 3D window,
 	// uncomment the following lines:
@@ -97,7 +97,9 @@
 
 @end
 
-#else
+
+#else	//================================================================================
+
 
 /** App Delegate for Cocos2D below v3. */
 @implementation CC3DemoMashUpAppDelegate
@@ -177,8 +179,10 @@
 	_window.rootViewController = _viewController;
 	[_window makeKeyAndVisible];
 	
-	// Set to YES for Augmented Reality 3D overlay on device camera.
-	// This must be done after the window is made visible!
+	// Set to YES for Augmented Reality 3D overlay on device camera. This must be done after
+	// the window is made visible! The 3D scene contains a solid backdrop. To see the device
+	// camera behind the 3D scene, remove this backdrop, by commenting out the addBackdrop
+	// invocation in the initializeScene method of CC3DemoMashUpScene.
 //	_viewController.isOverlayingDeviceCamera = YES;
 	
 	
@@ -187,30 +191,23 @@
 	// Create the customized CC3Layer that supports 3D rendering.
 	CC3Layer* cc3Layer = [CC3DemoMashUpLayer layer];
 	
-	// Assign to a generic variable so we can uncomment options below to play with the capabilities
-	CC3ControllableLayer* controlledLayer = cc3Layer;
-	
-	// The 3D layer can run either directly in the scene, or it can run as a smaller "sub-window" within
-	// any standard CCLayer. So you can have a mostly 2D window, with a smaller 3D window embedded in it.
-	// To experiment with this smaller, square, embedded 3D window, uncomment the following lines:
+	// As an alternate to running "full-screen", the CC3Layer can run as a smaller "sub-window"
+	// within any standard CCNode. That allows you to have a mostly 2D window, with a smaller
+	// 3D window embedded in it. To experiment with this smaller, square, embedded 3D window,
+	// uncomment the following lines:
 //	CGSize cs = cc3Layer.contentSize;		// The layer starts out "full-screen".
-//	GLfloat sideLen = MIN(cs.width, cs.height) - 100.0f;
+//	GLfloat sideLen = MIN(cs.width, cs.height) - 200.0f;
 //	cc3Layer.contentSize = CGSizeMake(sideLen, sideLen);
-//	cc3Layer.position = ccp(50.0, 50.0);
-//	controlledLayer = [CC3ControllableLayer layer];
-//	[controlledLayer addChild: cc3Layer];
+//	cc3Layer.position = ccp(100.0, 100.0);
 	
 	// The smaller 3D layer can even be moved around on the screen dyanmically. To see this in
 	// action, uncomment the lines above as described, and also uncomment the following two lines.
 //	cc3Layer.position = ccp(0.0, 0.0);
 //	[cc3Layer runAction: [CCActionMoveTo actionWithDuration: 15.0 position: ccp(500.0, 250.0)]];
 
-	// Set the layer in the controller
-	_viewController.controlledNode = controlledLayer;
-
-	// Wrap the layer in a 2D scene and run it in the director
+	// Wrap the 3D layer in a 2D scene and run it in the director
 	CCScene *scene = [CCScene node];
-	[scene addChild: controlledLayer];
+	[scene addChild: cc3Layer];
 	[CCDirector.sharedDirector runWithScene: scene];
 }
 
@@ -247,7 +244,7 @@
 }
 
 -(void)applicationWillTerminate: (UIApplication*) application {
-	[_viewController terminateOpenGL];
+	[CC3OpenGL terminateOpenGL];
 }
 
 -(void) applicationSignificantTimeChange: (UIApplication*) application {

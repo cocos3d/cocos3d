@@ -291,8 +291,8 @@
  * Move the location joystick to keep it in the bottom right corner of this layer
  * and the switch view button to keep it centered between the two joysticks.
  */
--(void) didUpdateContentSizeFrom: (CGSize) oldSize {
-	[super didUpdateContentSizeFrom: oldSize];
+-(void) contentSizeChanged {
+	[super contentSizeChanged];
 	[self positionButtons];
 	[self positionStatsLabels];
 }

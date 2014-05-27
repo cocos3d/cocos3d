@@ -31,7 +31,6 @@
 
 #import "CC3UIViewController.h"
 #import "CC3Foundation.h"
-#import "CC3ControllableLayer.h"
 #import "CC3Logging.h"
 
 #if CC3_IOS
@@ -195,18 +194,6 @@ CC3_POP_NOSELECTOR
 
 	 return CC3UIInterfaceOrientationMaskIncludesUIOrientation(_supportedInterfaceOrientations, uiOrientation);
 }
-
--(void) didRotateFromInterfaceOrientation: (UIInterfaceOrientation) uiOrientation {
-	[super didRotateFromInterfaceOrientation: uiOrientation];
- 	[_controlledNode viewDidRotateFrom: uiOrientation to: self.interfaceOrientation];
-}
-
--(void) viewDidLayoutSubviews {
-	[super viewDidLayoutSubviews];
-	_controlledNode.contentSize = self.view.bounds.size;
-}
-
--(BOOL) isOverlayingDeviceCamera { return NO; }
 
 
 #pragma mark Instance initialization and management

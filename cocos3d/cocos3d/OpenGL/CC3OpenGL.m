@@ -1333,6 +1333,7 @@ static NSThread* _renderThread = nil;
 
 +(void) terminateOpenGL {
 	CC3Texture.shouldCacheAssociatedCCTextures = NO;
+	[CCDirector.sharedDirector end];
 	[_renderGL terminate];
 	[_bgGL terminate];
 }

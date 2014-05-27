@@ -62,10 +62,10 @@
 	_viewController = [CC3NSViewController new];	// retained
 	_viewController.view = _glView;
 	
+	// Create the customized CC3Layer that supports 3D rendering.
 	CC3Layer* cc3Layer = [CC3DemoMashUpLayer layer];
-	cc3Layer.cc3Scene = [CC3DemoMashUpScene scene];
-	_viewController.controlledNode = cc3Layer;
 	
+	// Wrap the 3D layer in a 2D scene and run it in the director
 	CCScene *scene = [CCScene node];
 	[scene addChild: cc3Layer];
 	[director runWithScene: scene];
@@ -75,9 +75,8 @@
 	return YES;
 }
 
--(void) dealloc {
-	[_viewController terminateOpenGL];
-}
+-(void) dealloc { [CC3OpenGL terminateOpenGL]; }
+
 
 #pragma mark AppDelegate - IBActions
 

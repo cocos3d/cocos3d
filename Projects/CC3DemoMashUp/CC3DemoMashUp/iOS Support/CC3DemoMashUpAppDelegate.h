@@ -29,18 +29,32 @@
 
 #import "CC3Environment.h"
 
-#if !CC3_CC2_CLASSIC
+#if !CC3_CC2_CLASSIC	//================================================================
 
-/** App Delegate for Cocos2D v3 and above. */
+/** 
+ * App Delegate for Cocos2D v3 and above.
+ *
+ * This makes use of the simplified start-up configuration of Cocos2D v3. If you would like
+ * to display the scene over the device controller, you can still use the alternate technique
+ * of using a CC3DeviceCameraOverlayUIViewController, as described below for Cocos2D before v3.
+ */
 @interface CC3DemoMashUpAppDelegate : CCAppDelegate
 @end
 
-#else
+
+#else	//================================================================================
+
 
 #import <UIKit/UIKit.h>
 #import "CC3DeviceCameraOverlayUIViewController.h"
 
-/** App Delegate for Cocos2D below v3. */
+/** 
+ * App Delegate for Cocos2D below v3. 
+ *
+ * This makes use of CC3DeviceCameraOverlayUIViewController to optionally display the scene 
+ * over the device controller. You can also use this approach with Cocos2D v3 as well, instead
+ * of using the CCAppDelegate as described above.
+ */
 @interface CC3DemoMashUpAppDelegate : NSObject <UIApplicationDelegate> {
 	UIWindow* _window;
 	CC3DeviceCameraOverlayUIViewController* _viewController;

@@ -34,6 +34,7 @@
 #import "CC3Logging.h"
 #import "CCES2Renderer.h"
 #import "CC3OpenGLUtility.h"
+#import "CC3ViewController.h"
 #import "uthash.h"
 
 #if CC3_CC2_RENDER_QUEUE
@@ -275,6 +276,7 @@
 	self.mouseEnabled = shouldEnable;
 }
 
+
 #endif	// CC3_CC2_CLASSIC
 
 #if !CC3_CC2_CLASSIC
@@ -442,9 +444,38 @@
 
 @implementation CCLayer (CC3)
 
+-(CC3ViewController*) controller {
+#if (CC3_IOS && !CC3_CC2_1)
+	CC3ViewController* vc = (CC3ViewController*)(CCDirector.sharedDirector);
+	if ( [vc isKindOfClass: [CC3ViewController class]] ) return vc;
+#endif	// (CC3_IOS && !CC3_CC2_1)
+	return nil;
+}
+
+-(CCGLView*) view { return self.controller.view; }
+
 #if COCOS2D_VERSION < 0x020100
 -(void) setTouchEnabled: (BOOL) isTouchEnabled { self.isTouchEnabled = isTouchEnabled; }
 #endif
+
+/** Invoke callbacks when size changes. */
+-(void) setContentSize: (CGSize) aSize {
+	CGSize oldSize = self.contentSize;
+	[super setContentSize: aSize];
+	if( !CGSizeEqualToSize(aSize, oldSize) ) {
+		[self didUpdateContentSizeFrom: oldSize];	// Legacy callback support
+#if CC3_CC2_CLASSIC
+		[self contentSizeChanged];					// Invoked by super in Cocos2D v3
+#endif	// CC3_CC2_CLASSIC
+	}
+}
+
+// Deprecated
+-(void) didUpdateContentSizeFrom: (CGSize) oldSize {}
+
+#if CC3_CC2_CLASSIC
+-(void) contentSizeChanged {}
+#endif	// CC3_CC2_CLASSIC
 
 #if CC3_IOS
 -(NSInteger) mousePriority { return 0; }
@@ -458,6 +489,8 @@
 -(void) setMousePriority: (NSInteger) priority {}
 #endif
 #endif	// CC3_OSX
+
++(id) layer { return [[[self alloc] init] autorelease]; }
 
 @end
 
