@@ -62,6 +62,11 @@
 #define kButtonRingFileName			@"ButtonRing48x48.png"
 
 
+@interface CC3Layer (ProtectedMethods)
+-(void) drawSceneWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+@end
+
+
 @implementation CC3PerformanceLayer
 
 /**
@@ -315,8 +320,9 @@
 #define kStatisticsReportingInterval 0.5
 
 /** Overridden to update the performance statistics labels. */
--(void) draw {
-	[super draw];
+-(void) drawSceneWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[super drawSceneWithVisitor: visitor];
+	
 	CC3PerformanceStatistics* stats = self.cc3Scene.performanceStatistics;
 	if (stats.accumulatedFrameTime >= kStatisticsReportingInterval) {
 

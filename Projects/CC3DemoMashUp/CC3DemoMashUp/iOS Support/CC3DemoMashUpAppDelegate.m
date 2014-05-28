@@ -36,7 +36,7 @@
 
 #define kAnimationFrameRate		60		// Animation frame rate
 
-#if !CC3_CC2_CLASSIC	//================================================================
+#if CC3_CC2_RENDER_QUEUE	//================================================================
 
 /** App Delegate for Cocos2D v3 and above. */
 @implementation CC3DemoMashUpAppDelegate
@@ -55,15 +55,10 @@
 	   CCSetupDepthFormat: @GL_DEPTH24_STENCIL8,				// This app uses shadow volumes which require a stencil buffer
 	   CCSetupShowDebugStats: @(YES),							// Show the FPS and draw call label.
 	   CCSetupAnimationInterval: @(1.0 / kAnimationFrameRate),	// Framerate (defaults to 60 FPS).
-	   
-#if (COCOS2D_VERSION >= 0x030100)
 	   CCSetupScreenOrientation: CCScreenOrientationAll,		// Support all device orientations dyanamically
-#else
-	   CCSetupScreenOrientation: CCScreenOrientationLandscape,	// Display in landscape
-#endif	// (COCOS2D_VERSION >= 0x030100)
 	   
-	   //	   CCSetupMultiSampling: @(YES),							// Use multisampling on the main view
-	   //	   CCSetupNumberOfSamples: @(4),							// Number of samples to use per pixel (max 4)
+//	   CCSetupMultiSampling: @(YES),							// Use multisampling on the main view
+//	   CCSetupNumberOfSamples: @(4),							// Number of samples to use per pixel (max 4)
 	   }];
 	
 	return YES;
@@ -104,9 +99,9 @@
 /** App Delegate for Cocos2D below v3. */
 @implementation CC3DemoMashUpAppDelegate
 
-#if CC3_CC2_2
+#if !CC3_CC2_1
 /**
- * In cocos2d 2.x, the view controller and CCDirector are one and the same, and we create the
+ * In cocos2d 2.1 and 3.0, the view controller and CCDirector are one and the same, and we create the
  * controller using the singleton mechanism. To establish the correct CCDirector/UIViewController
  * class, this MUST be performed before any other references to the CCDirector singleton!!
  *
@@ -127,9 +122,9 @@
 	_viewController.displayStats = YES;
 	[_viewController enableRetinaDisplay: YES];
 }
-#endif	// CC3_CC2_2
 
-#if CC3_CC2_1
+#else
+
 /**
  * In cocos2d 1.x, the view controller and CCDirector are different objects.
  *
@@ -166,9 +161,9 @@
 	// This must be done after the GL view is assigned to the director!
 	[director enableRetinaDisplay: YES];
 }
-#endif	// CC3_CC2_1
+#endif	// !CC3_CC2_1
 
--(void) applicationDidFinishLaunching: (UIApplication*) application {
+-(BOOL) application: (UIApplication*) application didFinishLaunchingWithOptions: (NSDictionary*) launchOptions {
 
 	// Establish the view controller and CCDirector (in cocos2d 2.x, these are one and the same)
 	[self establishDirectorController];
@@ -209,6 +204,8 @@
 	CCScene *scene = [CCScene node];
 	[scene addChild: cc3Layer];
 	[CCDirector.sharedDirector runWithScene: scene];
+	
+	return YES;
 }
 
 -(void) applicationWillResignActive: (UIApplication*) application {
@@ -253,7 +250,7 @@
 
 @end
 
-#endif	// !CC3_CC2_CLASSIC
+#endif	// CC3_CC2_RENDER_QUEUE
 
 
 

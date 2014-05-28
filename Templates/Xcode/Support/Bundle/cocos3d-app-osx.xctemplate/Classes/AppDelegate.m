@@ -52,7 +52,7 @@
 }
 
 -(void) dealloc {
-	[_viewController terminateOpenGL];
+	[CC3OpenGL terminateOpenGL];
 }
 
 #pragma mark AppDelegate - IBActions

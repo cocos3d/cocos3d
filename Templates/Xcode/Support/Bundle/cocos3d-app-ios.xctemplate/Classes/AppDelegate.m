@@ -12,7 +12,8 @@
 
 #define kAnimationFrameRate		60		// Animation frame rate
 
-#if !CC3_CC2_CLASSIC
+
+#if CC3_CC2_RENDER_QUEUE	//================================================================
 
 /** App Delegate for Cocos2D v3 and above. */
 @implementation AppDelegate
@@ -31,9 +32,9 @@
 	   CCSetupDepthFormat: @GL_DEPTH_COMPONENT16,				// Change to @GL_DEPTH24_STENCIL8 if using shadow volumes, which require a stencil buffer
 	   CCSetupShowDebugStats: @(YES),							// Show the FPS and draw call label.
 	   CCSetupAnimationInterval: @(1.0 / kAnimationFrameRate),	// Framerate (defaults to 60 FPS).
+	   CCSetupScreenOrientation: CCScreenOrientationAll,		// Support all device orientations dyanamically
 //	   CCSetupMultiSampling: @(YES),							// Use multisampling on the main view
 //	   CCSetupNumberOfSamples: @(4),							// Number of samples to use per pixel (max 4)
-//	   CCSetupScreenOrientation: CCScreenOrientationPortrait,	// Run in portrait mode.
 	   }];
 	
 	return YES;
@@ -67,12 +68,14 @@
 
 @end
 
-#else
+
+#else	//================================================================================
+
 
 /** App Delegate for Cocos2D below v3. */
 @implementation AppDelegate
 
-#if CC3_CC2_2
+#if !CC3_CC2_1
 /**
  * In cocos2d 2.x, the view controller and CCDirector are one and the same, and we create the
  * controller using the singleton mechanism. To establish the correct CCDirector/UIViewController
@@ -95,9 +98,9 @@
 	_viewController.displayStats = YES;
 	[_viewController enableRetinaDisplay: YES];
 }
-#endif	// CC3_CC2_2
 
-#if CC3_CC2_1
+#else
+
 /**
  * In cocos2d 1.x, the view controller and CCDirector are different objects.
  *
@@ -134,7 +137,7 @@
 	// This must be done after the GL view is assigned to the director!
 	[director enableRetinaDisplay: YES];
 }
-#endif	// CC3_CC2_1
+#endif	// !CC3_CC2_1
 
 -(BOOL) application: (UIApplication*) application didFinishLaunchingWithOptions: (NSDictionary*) launchOptions {
 	
@@ -157,32 +160,26 @@
 	// Create the customized CC3Layer that supports 3D rendering.
 	CC3Layer* cc3Layer = [___PROJECTNAMEASIDENTIFIER___Layer layer];
 	
-	// Assign to a generic variable so we can uncomment options below to play with the capabilities
-	CC3ControllableLayer* controlledLayer = cc3Layer;
-	
-	// The 3D layer can run either directly in the scene, or it can run as a smaller
-	// "sub-window" within any standard CCLayer. So you can have a mostly 2D window,
-	// with a smaller 3D window embedded in it. To experiment with this smaller, square,
-	// embedded 3D window, uncomment the following lines:
+	// As an alternate to running "full-screen", the CC3Layer can run as a smaller "sub-window"
+	// within any standard CCNode. That allows you to have a mostly 2D window, with a smaller
+	// 3D window embedded in it. To experiment with this smaller, square, embedded 3D window,
+	// uncomment the following lines:
 //	CGSize cs = cc3Layer.contentSize;		// The layer starts out "full-screen".
-//	GLfloat sideLen = MIN(cs.width, cs.height) - 100.0f;
+//	GLfloat sideLen = MIN(cs.width, cs.height) - 200.0f;
 //	cc3Layer.contentSize = CGSizeMake(sideLen, sideLen);
-//	cc3Layer.position = ccp(50.0, 50.0);
-//	controlledLayer = [CC3ControllableLayer layer];
-//	[controlledLayer addChild: cc3Layer];
+//	cc3Layer.position = ccp(100.0, 100.0);
 	
 	// The smaller 3D layer can even be moved around on the screen dyanmically. To see this in
 	// action, uncomment the lines above as described, and also uncomment the following two lines.
 //	cc3Layer.position = ccp(0.0, 0.0);
-//	[cc3Layer runAction: [CCMoveTo actionWithDuration: 15.0 position: ccp(500.0, 250.0)]];
-	
-	// Set the layer in the controller
-	_viewController.controlledNode = controlledLayer;
+//	[cc3Layer runAction: [CCActionMoveTo actionWithDuration: 15.0 position: ccp(500.0, 250.0)]];
 	
 	// Wrap the layer in a 2D scene and run it in the director
 	CCScene *scene = [CCScene node];
-	[scene addChild: controlledLayer];
+	[scene addChild: cc3Layer];
 	[CCDirector.sharedDirector runWithScene: scene];
+	
+	return YES;
 }
 
 -(void) applicationWillResignActive: (UIApplication*) application {
@@ -218,7 +215,7 @@
 }
 
 -(void)applicationWillTerminate: (UIApplication*) application {
-	[_viewController terminateOpenGL];
+	[CC3OpenGL terminateOpenGL];
 }
 
 -(void) applicationSignificantTimeChange: (UIApplication*) application {
@@ -227,4 +224,4 @@
 
 @end
 
-#endif	// !CC3_CC2_CLASSIC
+#endif	// CC3_CC2_RENDER_QUEUE

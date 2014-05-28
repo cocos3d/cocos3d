@@ -38,6 +38,10 @@
 -(void) setDeprecatedCC3Layer: (CC3Layer*) cc3Layer;
 @end
 
+@interface CCLayer (ProtectedMethods)
+-(void) contentSizeChanged;
+@end
+
 
 @implementation CC3Layer
 
@@ -286,10 +290,6 @@
 
 #pragma mark Resizing support
 
-/**
- * Invoked automatically when the content size has changed. Updates the viewport to match
- * the new layer dimensions, and keeps track of whether the layer covers the full view.
- */
 -(void) contentSizeChanged {
 	[super contentSizeChanged];
 	

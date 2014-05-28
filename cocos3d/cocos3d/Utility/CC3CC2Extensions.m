@@ -437,8 +437,6 @@
 @end
 
 
-#if CC3_CC2_CLASSIC
-
 #pragma mark -
 #pragma mark CCLayer extension
 
@@ -454,9 +452,7 @@
 
 -(CCGLView*) view { return self.controller.view; }
 
-#if COCOS2D_VERSION < 0x020100
--(void) setTouchEnabled: (BOOL) isTouchEnabled { self.isTouchEnabled = isTouchEnabled; }
-#endif
++(id) layer { return [[[self alloc] init] autorelease]; }
 
 /** Invoke callbacks when size changes. */
 -(void) setContentSize: (CGSize) aSize {
@@ -474,26 +470,31 @@
 -(void) didUpdateContentSizeFrom: (CGSize) oldSize {}
 
 #if CC3_CC2_CLASSIC
+
 -(void) contentSizeChanged {}
-#endif	// CC3_CC2_CLASSIC
 
 #if CC3_IOS
 -(NSInteger) mousePriority { return 0; }
 -(void) setMousePriority: (NSInteger) priority {}
 #endif	// CC3_IOS
 
+#if (COCOS2D_VERSION < 0x020100)
+-(void) setTouchEnabled: (BOOL) isTouchEnabled { self.isTouchEnabled = isTouchEnabled; }
+
 #if CC3_OSX
-#if COCOS2D_VERSION < 0x020100
 -(void) setMouseEnabled: (BOOL) isMouseEnabled { self.isMouseEnabled = isMouseEnabled; }
 -(NSInteger) mousePriority { return 0; }
 -(void) setMousePriority: (NSInteger) priority {}
-#endif
 #endif	// CC3_OSX
 
-+(id) layer { return [[[self alloc] init] autorelease]; }
+#endif	// (COCOS2D_VERSION < 0x020100)
+
+#endif	// CC3_CC2_CLASSIC
 
 @end
 
+
+#if CC3_CC2_CLASSIC
 
 #pragma mark -
 #pragma mark CCSprite extension

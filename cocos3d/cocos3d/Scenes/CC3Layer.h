@@ -72,15 +72,6 @@
  *   - projection and unprojection between the 2D and 3D coordinate systems, including
  *     projecting touch events onto 3D nodes, will not work correctly.
  *
- * CC3Layer directly descends from CC3ControllableLayer, which means that it requires and
- * is controlled by a CC3ViewController instance. In addition to linking the 3D scene to
- * the view, the controller provides:
- *   - Automatic resizing of the scene viewport when the contentSize of this layer changes.
- *   - The CC3Layer can be overlaid on a device camera image stream so that both the 2D and
- *     3D scenes can participate in an augmented reality view perspective.
- *
- * Either or both of these features can be turned on or off.
- *
  * When compiling with versions of cocos2d prior to 3.0, to make use of the standard cocos2d
  * model updatating functionality to update and animate the 3D scene, use the scheduleUpdate
  * method of CC3Layer to invoke periodic callbacks to the update: method of the CC3Layer 
@@ -328,6 +319,15 @@
 
 
 #pragma mark Updating layer
+
+/**
+ * Callback invoked when the contentSize property of this layer changes.
+ *
+ * This implementation updates the viewport to match the new layer dimensions, and keeps
+ * track of whether the layer covers the full view. Subclasses may override to perform
+ * activities such as adjusting the layout of buttons and controls to fit the new size.
+ */
+-(void) contentSizeChanged;
 
 /**
  * Template method that is invoked automatically immediately after this layer has

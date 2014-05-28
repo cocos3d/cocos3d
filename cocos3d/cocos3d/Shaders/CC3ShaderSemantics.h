@@ -144,7 +144,7 @@ typedef enum {
 	kCC3SemanticCameraLocationModelSpace,		/**< (vec3) Location of the camera in local coordinates of model (not camera). */
 	kCC3SemanticCameraFrustum,					/**< (vec4) Dimensions of the camera frustum (FOV width (radians), FOV height (radians), near clip, far clip). */
 	kCC3SemanticCameraFrustumDepth,				/**< (vec4) The depth of the camera frustum (far clip, near clip, -(f+n)/(f-n), -2nf/(f-n)). */
-	kCC3SemanticViewport,						/**< (int4) The viewport rectangle in pixels (x, y, width, height). */
+	kCC3SemanticViewport,						/**< (vec4 or ivec4) The viewport rectangle in pixels (x, y, width, height). */
 	
 	// MATERIALS --------------
 	kCC3SemanticColor,							/**< (vec4) Color when lighting & materials are not in use. */

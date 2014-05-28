@@ -33,16 +33,28 @@
 #import "CC3Camera.h"
 #import "CC3Light.h"
 #import "CC3Actions.h"
+#import "CC3PODResourceNode.h"
 #import "CC3UtilityMeshNodes.h"
+#import "CC3VertexSkinning.h"
 #import "CGPointExtension.h"
 
-#define kTileLightIndex		0
-#define kLampName			@"Lamp"
+// Model names
+#define kBoxName				@"Box"
+#define kBeachBallName			@"BeachBall"
+#define kDieCubeName			@"Cube"
+#define kMascotName				@"cocos2d_3dmodel_unsubdivided"
 
-@interface TileScene (TemplateMethods)
--(ccColor3B) pickNodeColor;
--(void) rotateMainNodeFromSwipeAt: (CGPoint) touchPoint;
-@end
+// File names
+#define kBeachBallFileName		@"BeachBall.pod"
+#define kMascotPODFile			@"cocos3dMascot.pod"
+#define kDieCubePODFile			@"DieCube.pod"
+
+#define kTileLightIndex			0
+#define kLampName				@"Lamp"
+
+#define kGlideAnimationTrack	1
+#define kFlapAnimationTrack		2
+
 
 @implementation TileScene
 
@@ -56,6 +68,9 @@
 	// There are no translucent nodes that need to be reordered.
 	self.drawingSequencer = [CC3NodeArraySequencer sequencerWithEvaluator: [CC3LocalContentNodeAcceptor evaluator]];
 	self.drawingSequencer.allowSequenceUpdates = NO;
+
+	// Add a standard backdrop
+	self.backdrop = [CC3Backdrop nodeWithColor: ccc4f(0.2, 0.24, 0.43, 1.0)];
 
 	// Create the camera, place it back a bit, and add it to the scene
 	CC3Camera* cam = [CC3Camera nodeWithName: @"Camera"];
@@ -79,7 +94,13 @@
 	// Turn off ambient lighting so that when the lamp is removed,
 	// lighting will be completely disabled.
 	self.ambientLight = kCCC4FBlackTransparent;
+	
+	// Select the main node for the scene
+	[self selectMainNode];
 }
+
+
+#pragma mark Main node
 
 -(CC3Node*) mainNode { return _mainNode; }
 
@@ -89,8 +110,148 @@
 	[self addChild: aNode];
 }
 
+/** Selects the main node from the collection of templates. */
+-(void) selectMainNode {
+	// Choose either to display a random model in each tile, or the same model
+	// in each tile by uncommenting one of these lines and commenting out the other.
+	CC3Node* aNode = [[self.nodeTemplates objectAtIndex: CC3RandomUIntBelow(self.nodeTemplates.count)] copy];
+//	CC3Node* aNode = [[self.nodeTemplates objectAtIndex: 0] copy];	// Choose any index below template count
+
+	// The shouldColorTile property is actually tracked by the userData property!
+	if (aNode.shouldColorTile) aNode.color = self.randomColor;
+
+	// If the node is animated, initiate a CC3ActionAnimate action on it
+	if (aNode.containsAnimation) {
+
+		// The dragon model now contains three animation tracks: a gliding track, a flapping
+		// track, and the original concatenation of animation loaded from the POD file into
+		// track zero. We want the dragon flying and flapping its wings. So, we give the flapping
+		// track a weight of one, and the gliding and original tracks a weighting of zero.
+		[aNode setAnimationBlendingWeight: 0.0f onTrack: 0];
+		[aNode setAnimationBlendingWeight: 0.0f onTrack: kGlideAnimationTrack];
+		[aNode setAnimationBlendingWeight: 1.0f onTrack: kFlapAnimationTrack];
+
+		// Create the CC3ActionAnimate action to run the animation. The duration is randomized so
+		// that when multiple dragons are visible, they are not all flapping in unison.
+		CCTime flapTime = CC3RandomFloatBetween(1.0, 2.0);
+		[aNode runAction: [[CC3ActionAnimate actionWithDuration: flapTime onTrack: kFlapAnimationTrack] repeatForever]];
+	}
+
+	self.mainNode = aNode;		// Set the node as the main node of this scene, for easy access
+}
+
+/** Returns a random color. */
+-(CCColorRef) randomColor {
+	switch (CC3RandomUIntBelow(6)) {
+		case 0:
+			return CCColorRefFromCCC4F(kCCC4FRed);
+		case 1:
+			return CCColorRefFromCCC4F(kCCC4FGreen);
+		case 2:
+			return CCColorRefFromCCC4F(kCCC4FBlue);
+		case 3:
+			return CCColorRefFromCCC4F(kCCC4FYellow);
+		case 4:
+			return CCColorRefFromCCC4F(kCCC4FOrange);
+		case 5:
+		default:
+			return CCColorRefFromCCC4F(kCCC4FWhite);
+	}
+}
+
 /** When the scene opens up, move the camera to frame the main node of the scene. */
 -(void) onOpen { [self.activeCamera moveToShowAllOf: _mainNode withPadding: 0.1]; }
+
+
+#pragma mark Node Templates
+
+/** Array of templates, used by all instances. */
+static NSMutableArray* _nodeTemplates = nil;
+
+/**
+ * Returns an array of template nodes. The array is lazily created and populated the first
+ * time this method is invoked, which must originate from within the initializeScene method
+ * to ensure that any GL activity is bracketed by the appropriate GL init and cleanup actions.
+ */
+-(NSArray*) nodeTemplates {
+	if (!_nodeTemplates) {
+		_nodeTemplates = [NSMutableArray array];
+		[self initializeTemplates];
+	}
+	return _nodeTemplates;
+}
+
+/** 
+ * Initialize the node templates. This must be invoked from within the TileScene initializeScene
+ * method to ensure that any GL activity is bracketed by the appropriate GL init and cleanup actions.
+ */
+-(void) initializeTemplates {
+	CC3Node* n;
+	CC3MeshNode* mn;
+	CC3ResourceNode* rezNode;
+	
+	// Make a simple box template available. Only 6 faces per node.
+	mn = [CC3BoxNode nodeWithName: kBoxName];
+	[mn populateAsSolidBox: CC3BoxFromMinMax(cc3v(-1.0, -1.0, -1.0), cc3v( 1.0,  1.0,  1.0))];
+	mn.shouldColorTile = YES;
+	[self configureAndAddTemplate: mn];
+	
+	// Mascot model from POD resource.
+	rezNode = [CC3PODResourceNode nodeFromFile: kMascotPODFile
+			  expectsVerticallyFlippedTextures: YES];
+	mn = [rezNode getMeshNodeNamed: kMascotName];
+	[mn moveMeshOriginToCenterOfGeometry];
+	mn.rotation = cc3v(0.0, -90.0, 0.0);
+	[self configureAndAddTemplate: mn];
+	
+	// Die cube model from POD resource.
+	rezNode = [CC3PODResourceNode nodeFromFile: kDieCubePODFile];
+	n = [rezNode getNodeNamed: kDieCubeName];
+	[self configureAndAddTemplate: n];
+	
+	// Beachball from POD resource with no texture, but with several subnodes
+	rezNode = [CC3PODResourceNode nodeFromFile: kBeachBallFileName];
+	n = [rezNode getNodeNamed: kBeachBallName];
+	n.isOpaque = YES;
+	[self configureAndAddTemplate: n];
+	
+	// Animated dragon from POD resource
+	// The model animation that was loaded from the POD into track zero is a concatenation of
+	// several separate movements, such as gliding and flapping. Extract the distinct movements
+	// from the base animation and add those distinct movement animations as separate tracks.
+	rezNode = [CC3PODResourceNode nodeFromFile: @"Dragon.pod"];
+	n = [rezNode getNodeNamed: @"Dragon.pod-SoftBody"];
+	[n addAnimationFromFrame: 0 toFrame: 60 asTrack: kGlideAnimationTrack];
+	[n addAnimationFromFrame: 61 toFrame: 108 asTrack: kFlapAnimationTrack];
+	
+	[n ensureRigidSkeleton];	// Dragon skeleton contains no scale, so animate as a rigid skeleton.
+	
+#if !CC3_GLSL
+	// The fixed pipeline of OpenGL ES 1.1 cannot make use of the tangent-space normal
+	// mapping texture that is applied to the dragon, and the result is that the dragon
+	// looks black. Extract the diffuse texture (from texture unit 1), remove all texture,
+	// and set the diffuse texture as the only texture (in texture unit 0).
+	CC3MeshNode* dgnBody = [rezNode getMeshNodeNamed: @"Dragon"];
+	CC3Material* dgnMat = dgnBody.material;
+	CC3Texture* dgnTex = [dgnMat textureForTextureUnit: 1];
+	[dgnMat removeAllTextures];
+	dgnMat.texture = dgnTex;
+#endif
+	
+	[self configureAndAddTemplate: n];
+}
+
+/**
+ * Provides standard configuration for the specified template model,
+ * and add it to the list of templates.
+ */
+-(void) configureAndAddTemplate: (CC3Node*) templateNode {
+	templateNode.touchEnabled = YES;
+	[templateNode selectShaders];
+	[templateNode createGLBuffers];
+	[templateNode releaseRedundantContent];
+	[_nodeTemplates addObject: templateNode];
+}
 
 
 #pragma mark Touch events

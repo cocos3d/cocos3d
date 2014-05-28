@@ -30,11 +30,13 @@
 #import "CC3Scene.h"
 
 /**
- * A CC3Scene that is specialized to display only a single main node, and is
- * optimized so that many TileScenes can be displayed on the screen simultaneouly.
+ * A CC3Scene that is specialized to display only a single main node, and is optimized
+ * so that many TileScenes can be displayed on the screen simultaneouly.
  *
- * Each tile scene contains its own camera and lamp, so that different perspectives
- * and lighting conditions can be applied to each TileScene.
+ * Each tile scene contains its own camera and lamp, so that different perspectives and lighting
+ * conditions can be applied to each TileScene. The main node of each scene is selected at random
+ * from a collection of node templates, and the position of the light is selected at random for
+ * each scene, so that each scene instance appears a little different than other instances.
  * 
  * To simplify using this scene with different main objects, the camera automatically
  * focuses on and frames the main object when the scene first opens up.

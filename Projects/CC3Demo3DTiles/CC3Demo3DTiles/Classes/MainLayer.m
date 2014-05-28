@@ -72,6 +72,10 @@
 #define kGridPadding			(4 * kControlPositionScale)
 #define kMinTileSideLen			(8 * kControlPositionScale)
 
+@interface CCLayer (ProtectedMethods)
+-(void) contentSizeChanged;
+@end
+
 
 // MainLayer implementation
 @implementation MainLayer
@@ -79,10 +83,7 @@
 -(id) init {
 	if( (self = [super init]) ) {
 		_tiles = [NSMutableArray array];
-		_templates = [NSMutableArray array];
-		_backdropTemplate = nil;
 		_tilesPerSide = 1;
-		[self initializeTemplates];
 		[self initializeControls];
 		[self addTiles];
 	}
@@ -94,12 +95,6 @@
 
 /** Initialize all the 2D user controls. */
 -(void) initializeControls {
-	
-	// Turn depth testing off for 2D content to improve performance and allow us to reduce
-	// the clearing of the depth buffer when transitioning from the 3D scene to the 2D scene.
-	// See the notes for the CC3Scene shouldClearDepthBufferBefore2D property for more info.
-	[[CCDirector sharedDirector] setDepthTest: NO];
-
 	[self addLabel];
 	[self addButtons];
 	[self positionControls];
@@ -195,82 +190,6 @@
 	[self addTiles];
 }
 
-#pragma mark Model Templates
-
--(void) initializeTemplates {
-	CC3Node* n;
-	CC3MeshNode* mn;
-	CC3ResourceNode* rezNode;
-
-	// The node to use as a backdrop for each scene.
-	_backdropTemplate = [CC3Backdrop nodeWithName: @"Backdrop"
-										withColor: ccc4f(0.2, 0.24, 0.43, 1.0)];
-	[_backdropTemplate createGLBuffers];
-	[_backdropTemplate selectShaders];
-	
-	// Make a simple box template available. Only 6 faces per node.
-	mn = [CC3BoxNode nodeWithName: kBoxName];
-	[mn populateAsSolidBox: CC3BoxFromMinMax(cc3v(-1.0, -1.0, -1.0), cc3v( 1.0,  1.0,  1.0))];
-	mn.shouldColorTile = YES;
-	[self configureAndAddTemplate: mn];
-	
-	// Mascot model from POD resource.
-	rezNode = [CC3PODResourceNode nodeFromFile: kMascotPODFile
-			  expectsVerticallyFlippedTextures: YES];
-	mn = [rezNode getMeshNodeNamed: kMascotName];
-	[mn moveMeshOriginToCenterOfGeometry];
-	mn.rotation = cc3v(0.0, -90.0, 0.0);
-	[self configureAndAddTemplate: mn];
-	
-	// Die cube model from POD resource.
-	rezNode = [CC3PODResourceNode nodeFromFile: kDieCubePODFile];
-	n = [rezNode getNodeNamed: kDieCubeName];
-	[self configureAndAddTemplate: n];
-	
-	// Beachball from POD resource with no texture, but with several subnodes
-	rezNode = [CC3PODResourceNode nodeFromFile: kBeachBallFileName];
-	n = [rezNode getNodeNamed: kBeachBallName];
-	n.isOpaque = YES;
-	[self configureAndAddTemplate: n];
-
-	// Animated dragon from POD resource
-	// The model animation that was loaded from the POD into track zero is a concatenation of
-	// several separate movements, such as gliding and flapping. Extract the distinct movements
-	// from the base animation and add those distinct movement animations as separate tracks.
-	rezNode = [CC3PODResourceNode nodeFromFile: @"Dragon.pod"];
-	n = [rezNode getNodeNamed: @"Dragon.pod-SoftBody"];
-	_glideTrack = [n addAnimationFromFrame: 0 toFrame: 60];
-	_flapTrack = [n addAnimationFromFrame: 61 toFrame: 108];
-
-	[n ensureRigidSkeleton];	// Dragon skeleton contains no scale, so animate as a rigid skeleton.
-
-#if !CC3_GLSL
-	// The fixed pipeline of OpenGL ES 1.1 cannot make use of the tangent-space normal
-	// mapping texture that is applied to the dragon, and the result is that the dragon
-	// looks black. Extract the diffuse texture (from texture unit 1), remove all texture,
-	// and set the diffuse texture as the only texture (in texture unit 0).
-	CC3MeshNode* dgnBody = [rezNode getMeshNodeNamed: @"Dragon"];
-	CC3Material* dgnMat = dgnBody.material;
-	CC3Texture* dgnTex = [dgnMat textureForTextureUnit: 1];
-	[dgnMat removeAllTextures];
-	dgnMat.texture = dgnTex;
-#endif
-
-	[self configureAndAddTemplate: n];
-}
-
-/**
- * Provides standard configuration for the specified template model,
- * and add it to the list of templates.
- */
--(void) configureAndAddTemplate: (CC3Node*) templateNode {
-	templateNode.touchEnabled = YES;
-	[templateNode selectShaders];
-	[templateNode createGLBuffers];
-	[templateNode releaseRedundantContent];
-	[_templates addObject: templateNode];
-}
-
 
 #pragma mark Tiling
 
@@ -298,78 +217,16 @@
 }
 
 /**
- * Creates a new CC3Layer with the specified bounds, creates a new CC3Scene,
+ * Creates a new CC3Layer with the specified bounds, containing a new CC3Scene,
  * and adds the CC3Layer to this layer.
  */
 -(void) addTileIn: (CGRect) bounds {
 	CC3Layer* tileLayer = [TileLayer layer];
 	tileLayer.position = bounds.origin;
 	tileLayer.contentSize = bounds.size;
-	tileLayer.cc3Scene = [self makeScene];
 	[self addChild: tileLayer];
 	[_tiles addObject: tileLayer];
-}
-
-/**
- * Creates a new scene and chooses one of the template nodes
- * and sets it as the main node of the scene.
- */
--(CC3Scene*) makeScene {
-
-	// In no templates are available, return a nil scene.
-	if (_templates.count == 0) return nil;
-		
-	TileScene* scene = [TileScene scene];		// A new scene
-	
-	// Add the backdrop to the scene.
-	scene.backdrop = [_backdropTemplate copy];
-	
-	// Choose either to display a random model in each tile, or the same model
-	// in each tile by uncommenting one of these lines and commenting out the other.
-	CC3Node* aNode = [[_templates objectAtIndex: CC3RandomUIntBelow(_templates.count)] copy];
-//	CC3Node* aNode = [[templates objectAtIndex: 0] copy];	// Choose any index below template count
-
-	// The shouldColorTile property is actually tracked by the userData property!
-	if (aNode.shouldColorTile) aNode.color = [self pickNodeColor];
-	
-	// If the node is animated, initiate a CC3ActionAnimate action on it
-	if (aNode.containsAnimation) {
-		
-		// The dragon model now contains three animation tracks: a gliding track, a flapping
-		// track, and the original concatenation of animation loaded from the POD file into
-		// track zero. We want the dragon flying and flapping its wings. So, we give the flapping
-		// track a weight of one, and the gliding and original tracks a weighting of zero.
-		[aNode setAnimationBlendingWeight: 0.0f onTrack: 0];
-		[aNode setAnimationBlendingWeight: 0.0f onTrack: _glideTrack];
-		[aNode setAnimationBlendingWeight: 1.0f onTrack: _flapTrack];
-
-		// Create the CC3ActionAnimate action to run the animation. The duration is randomized so
-		// that when multiple dragons are visible, they are not all flapping in unison.
-		CCTime flapTime = CC3RandomFloatBetween(1.0, 2.0);
-		[aNode runAction: [[CC3ActionAnimate actionWithDuration: flapTime onTrack: _flapTrack] repeatForever]];
-	}
-	
-	scene.mainNode = aNode;		// Set the node as the main node of the scene, for easy access
-
-	return scene;
-}
-
--(CCColorRef) pickNodeColor {
-	switch (CC3RandomUIntBelow(6)) {
-		case 0:
-			return CCColorRefFromCCC4F(kCCC4FRed);
-		case 1:
-			return CCColorRefFromCCC4F(kCCC4FGreen);
-		case 2:
-			return CCColorRefFromCCC4F(kCCC4FBlue);
-		case 3:
-			return CCColorRefFromCCC4F(kCCC4FYellow);
-		case 4:
-			return CCColorRefFromCCC4F(kCCC4FOrange);
-		case 5:
-		default:
-			return CCColorRefFromCCC4F(kCCC4FWhite);
-	}
+	LogDebug(@"Adding tile in bounds: %@", NSStringFromCGRect(bounds));
 }
 
 -(void) removeTiles {
@@ -380,9 +237,7 @@
 
 #pragma mark Updating
 
--(void) update: (CCTime)dt {
-	for (CC3Layer* tile in _tiles) [tile update: dt];
-}
+-(void) update: (CCTime)dt { for (CC3Layer* tile in _tiles) [tile update: dt]; }
 
 /**
  * The user has pressed the increase nodes button.

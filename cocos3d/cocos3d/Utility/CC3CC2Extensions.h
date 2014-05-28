@@ -579,8 +579,6 @@ enum {
 @end
 
 
-#if CC3_CC2_CLASSIC
-
 #pragma mark -
 #pragma mark CCLayer extension
 
@@ -598,35 +596,35 @@ enum {
 /** The view displaying this layer. */
 @property(nonatomic, readonly) CCGLView* view __deprecated;
 
-#if CC3_CC2_CLASSIC
-/** Callback invoked when the contentSize property of this layer changes. */
--(void) contentSizeChanged;
-#endif	// CC3_CC2_CLASSIC
+/** Allocates and initializes a layer. */
++(id) layer;
 
-#if COCOS2D_VERSION < 0x020100
-/** Backwards compatibility for setter renamed in cocos2d 2.1. */
--(void) setTouchEnabled: (BOOL) isTouchEnabled;
-#endif
+#if CC3_CC2_CLASSIC
 
 #if CC3_IOS
 /** Dummy property for compatibility with apps that run both OSX and IOS. */
 @property (nonatomic, assign) NSInteger mousePriority;
 #endif	// CC3_IOS
 
+#if (COCOS2D_VERSION < 0x020100)
+/** Backwards compatibility for setter renamed in cocos2d 2.1. */
+-(void) setTouchEnabled: (BOOL) isTouchEnabled;
+
 #if CC3_OSX
-#if COCOS2D_VERSION < 0x020100
 /** Backwards compatibility for setter renamed in cocos2d 2.1. */
 -(void) setMouseEnabled: (BOOL) isMouseEnabled;
 /** Backwards compatibility for setter renamed in cocos2d 2.1. */
 @property (nonatomic, assign) NSInteger mousePriority;
-#endif
 #endif	// CC3_OSX
 
-/** Allocates and initializes a layer. */
-+(id) layer;
+#endif	// (COCOS2D_VERSION < 0x020100)
+
+#endif	// CC3_CC2_CLASSIC
 
 @end
 
+
+#if CC3_CC2_CLASSIC
 
 #pragma mark -
 #pragma mark CCSprite extension
