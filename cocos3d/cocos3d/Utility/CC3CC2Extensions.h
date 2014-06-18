@@ -33,6 +33,7 @@
 /* Base library of extensions to cocos2d to support cocos3d. */
 
 #import "CC3OSExtensions.h"
+#import "CC3ViewController.h"
 #import "CCTextureCache.h"
 #import <GLKit/GLKMatrix4.h>
 
@@ -41,8 +42,6 @@
 #	import "CCDirector_Private.h"
 #	import "CCTexture_Private.h"
 #endif	// !CC3_CC2_CLASSIC
-
-@class CC3ViewController;
 
 
 #if CC3_CC2_RENDER_QUEUE

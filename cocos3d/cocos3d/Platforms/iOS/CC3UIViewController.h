@@ -32,7 +32,8 @@
 #import "CC3ViewController.h"
 #import "CC3CC2Extensions.h"
 
-#if CC3_IOS
+
+#if (CC3_IOS && !CC3_CC2_RENDER_QUEUE)
 
 #pragma mark -
 #pragma mark CC3UIViewController interface
@@ -292,7 +293,7 @@
 
 @end
 
-#endif // CC3_IOS
+#endif // (CC3_IOS && !CC3_CC2_RENDER_QUEUE)
 
 
 #pragma mark Deprecated CCNodeController interface and ControlledCCNodeProtocol protocol

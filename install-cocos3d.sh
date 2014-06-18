@@ -362,7 +362,7 @@ link_cocos2d_templates_v3() {
 	# Remove current links and re-create new link directory
 	clear_cocos2d_links
 
-	# Primary Cocos2D codebase and license
+	# Primary Cocos2D code and license
 	SRC_DIR="$CC2_DIST_DIR/Support/Libraries/lib_cocos2d.xctemplate/Libraries"
 	link_dir "$SRC_DIR/cocos2d" "$CC2_DIR" "cocos2d"
 	copy_file "LICENSE_cocos2d.txt" "$SRC_DIR" "$CC2_DIR"
@@ -371,21 +371,26 @@ link_cocos2d_templates_v3() {
 	SRC_DIR="$CC2_DIST_DIR/Support/Libraries/lib_cocos2d-ui.xctemplate/Libraries"
 	link_dir "$SRC_DIR/cocos2d-ui" "$CC2_DIR" "cocos2d-ui"
 
-	# Kazmath library
-	SRC_DIR="$CC2_DIST_DIR/Support/Libraries/lib_kazmath.xctemplate/Libraries"
-	link_dir "$SRC_DIR/kazmath" "$CC2_DIR" "kazmath"
-	copy_file "LICENSE_Kazmath.txt" "$SRC_DIR" "$CC2_DIR"
+	# CCBReader code and license
+	SRC_DIR="$CC2_DIST_DIR/Support/Libraries/lib_ccbreader.xctemplate/Libraries"
+	link_dir "$SRC_DIR/CCBReader" "$CC2_DIR" "cocos2d"
+	copy_file "LICENSE_CCBReader.txt" "$SRC_DIR" "$CC2_DIR"
 
-	# ObjectAL
+	# ObjectAL library
 	SRC_DIR="$CC2_DIST_DIR/Support/Libraries/lib_objectal.xctemplate/Libraries"
-	link_dir "$SRC_DIR/ObjectAL" "$CC2_DIR" "CocosDenshion"
+	link_dir "$SRC_DIR/ObjectAL" "$CC2_DIR" "ObjectAL"
 
-	# Chipmunk library
+	# Chipmunk library and license
 	SRC_DIR="$CC2_DIST_DIR/Support/Libraries/lib_chipmunk.xctemplate/Libraries"
 	link_dir "$SRC_DIR/Chipmunk/chipmunk/include" "$CC2_CHPMK_DIR/chipmunk" "Chipmunk includes"
 	link_dir "$SRC_DIR/Chipmunk/chipmunk/src" "$CC2_CHPMK_DIR/chipmunk" "Chipmunk source"
 	link_dir "$SRC_DIR/Chipmunk/objectivec" "$CC2_CHPMK_DIR" "Objective Chipmunk"
 	copy_file "LICENSE_Chipmunk.txt" "$SRC_DIR" "$CC2_CHPMK_DIR"
+
+	# Kazmath library and license (Cocos2D 3.0 only)
+	SRC_DIR="$CC2_DIST_DIR/Support/Libraries/lib_kazmath.xctemplate/Libraries"
+	link_dir "$SRC_DIR/kazmath" "$CC2_DIR" "kazmath"
+	copy_file "LICENSE_Kazmath.txt" "$SRC_DIR" "$CC2_DIR"
 
 }
 

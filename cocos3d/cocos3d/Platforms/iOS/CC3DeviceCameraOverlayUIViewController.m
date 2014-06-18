@@ -59,9 +59,10 @@
 		if(!aBool || self.isDeviceCameraAvailable) {
 
 			// Before switching, if a scene is running, send it onExit to stop it
-			CCScene* runningScene = CCDirector.sharedDirector.runningScene;
-			BOOL nodeRunning = runningScene.isRunningInActiveScene;
-			if(nodeRunning) [runningScene onExit];
+			CCDirector* director = CCDirector.sharedDirector;
+			CCScene* runningScene = director.runningScene;
+			BOOL sceneWasRunning = runningScene.isRunningInActiveScene;
+			if(sceneWasRunning) [runningScene onExit];
 
 			// Let subclasses of this controller know about the pending change
 			[self willChangeIsOverlayingDeviceCamera];
@@ -69,17 +70,19 @@
 			// Update the value
 			_isOverlayingDeviceCamera = aBool;
 
+			// Get the GL view to be overlaid
+			UIView* glView = director.view;
+
 			if(_isOverlayingDeviceCamera) {
 				// If overlaying, set the background color to clear, and add the picker view.
-				UIView* myView = self.view;
-				UIWindow* window = myView.window;
-				myView.backgroundColor = [UIColor clearColor];
+				UIWindow* window = glView.window;
+				glView.backgroundColor = [UIColor clearColor];
 				[window addSubview: self.deviceCameraView];
-				[window bringSubviewToFront: myView];
+				[window bringSubviewToFront: glView];
 				[_deviceCameraView.layer.session startRunning];
 			} else {
 				// If reverting, remove the clear background color, and remove the picker view from the window.
-				self.view.backgroundColor = nil;
+				glView.backgroundColor = nil;
 				[_deviceCameraView.layer.session stopRunning];
 				[_deviceCameraView removeFromSuperview];
 			}
@@ -92,7 +95,7 @@
 			[self didChangeIsOverlayingDeviceCamera];
 
 			// After switching, if the CCScene was running, send it onEnter to restart it
-			if(nodeRunning) [runningScene onEnter];
+			if(sceneWasRunning) [runningScene onEnter];
 		}
 	}
 }
@@ -116,7 +119,9 @@
 		AVCaptureSession* avSession = [[[AVCaptureSession alloc] init] autorelease];
 		[avSession addInput: avInput];
 		
-		_deviceCameraView = [[CC3AVCameraView alloc] initWithFrame: self.view.frame];	// retained
+		UIView* glView = CCDirector.sharedDirector.view;
+		CGRect vf = glView.frame;
+		_deviceCameraView = [[CC3AVCameraView alloc] initWithFrame: vf];	// retained
 		
 		AVCaptureVideoPreviewLayer* avLayer = _deviceCameraView.layer;
 		avLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;

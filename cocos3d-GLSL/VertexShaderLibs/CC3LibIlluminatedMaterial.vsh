@@ -121,7 +121,7 @@ highp vec4 illuminationFrom(int ltIdx) {
 	highp vec3 ltPos = u_cc3LightPositionModel[ltIdx].xyz;
 	
 	// Directional light. Position is expected to be a normalized direction!
-	if (u_cc3LightPositionModel[ltIdx].w == 0.0) return highp vec4(ltPos, 1.0);
+	if (u_cc3LightPositionModel[ltIdx].w == 0.0) return vec4(ltPos, 1.0);
 	
 	// Positional light. Find the directional vector from vertex to light, but don't normalize yet.
 	ltPos -= vtxPosition.xyz;
@@ -131,7 +131,7 @@ highp vec4 illuminationFrom(int ltIdx) {
 	// Light-vertex vector is transformed to global-space to take length measurement in global coords.
 	if (u_cc3LightAttenuation[ltIdx] != kAttenuationNone) {
 		highp float ltDist = length(u_cc3MatrixModel* vec4(ltPos, 0.0));
-		highp vec3 distAtten = highp vec3(1.0, ltDist, ltDist * ltDist);
+		highp vec3 distAtten = vec3(1.0, ltDist, ltDist * ltDist);
 		highp float distIntensity = 1.0 / dot(distAtten, u_cc3LightAttenuation[ltIdx]);	// needs highp
 		intensity *= min(abs(distIntensity), 1.0);
 	}
@@ -151,7 +151,7 @@ highp vec4 illuminationFrom(int ltIdx) {
 		}
 	}
 	
-	return highp vec4(ltPos, intensity);	// Return combined light direction & intensity
+	return vec4(ltPos, intensity);	// Return combined light direction & intensity
 }
 
 /**

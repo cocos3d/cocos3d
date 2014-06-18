@@ -15,7 +15,7 @@ Table of Contents
 - [Your First Cocos3D Project][]
 - [Learning Cocos3D][]
 - [Demo Applications][]
-    - [CC3DemoMashUp][] - demos all important Cocos3D features
+    - [CC3DemoMashUp][] - demos all key Cocos3D features
     - [CC3Demo3DTiles][] - demos adding running many concurrent layers and scenes
     - [CC3Performance][] - demos performance capabilities and testing
     - [CC3DemoMultiScene][] - demos using Cocos3D with Xcode Storyboards

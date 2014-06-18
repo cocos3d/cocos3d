@@ -34,7 +34,6 @@
 #import "CC3Logging.h"
 #import "CCES2Renderer.h"
 #import "CC3OpenGLUtility.h"
-#import "CC3ViewController.h"
 #import "uthash.h"
 
 #if CC3_CC2_RENDER_QUEUE
@@ -450,7 +449,7 @@
 	return nil;
 }
 
--(CCGLView*) view { return self.controller.view; }
+-(CCGLView*) view { return (CCGLView*)self.controller.view; }
 
 +(id) layer { return [[[self alloc] init] autorelease]; }
 

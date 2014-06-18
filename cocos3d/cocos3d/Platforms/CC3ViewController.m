@@ -33,6 +33,8 @@
 #import "CC3Logging.h"
 
 
+#if (!CC3_CC2_RENDER_QUEUE)
+
 @implementation CC3ViewController
 
 -(CCGLView*) view { return (CCGLView*)super.view; }
@@ -72,4 +74,6 @@
 -(void) setIsOverlayingDeviceCamera: (BOOL) isOverlayingDeviceCamera {}
 
 @end
+
+#endif // (!CC3_CC2_RENDER_QUEUE)
 

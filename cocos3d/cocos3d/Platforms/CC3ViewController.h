@@ -31,7 +31,20 @@
 
 #import "CC3Environment.h"
 
-// The superclass of the CC3ViewController depends on the platform
+
+// CC3ViewController and its subclasses are not used for Cocos2D 3.1 and above.
+#if CC3_CC2_RENDER_QUEUE
+
+#if CC3_IOS
+#	define CC3ViewController	UIViewController
+#endif
+#if CC3_OSX
+#	define CC3ViewController	NSViewController
+#endif
+
+#else
+
+// For Cocos2D 3.0 and below, the superclass of the CC3ViewController depends on the platform.
 #if CC3_OGLES_2
 #	define CC3VCSuperclass CCDirectorDisplayLink
 #endif
@@ -101,3 +114,4 @@
 
 @end
 
+#endif // CC3_CC2_RENDER_QUEUE

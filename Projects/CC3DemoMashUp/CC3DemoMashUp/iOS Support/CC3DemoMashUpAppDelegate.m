@@ -60,6 +60,11 @@
 //	   CCSetupMultiSampling: @(YES),							// Use multisampling on the main view
 //	   CCSetupNumberOfSamples: @(4),							// Number of samples to use per pixel (max 4)
 	   }];
+
+	// To overlay the device camera, uncomment the following lines to use a specialized view controller
+//	_viewController = [[CC3DeviceCameraOverlayUIViewController alloc] init];
+//	_viewController.view = CCDirector.sharedDirector.view;
+//	_viewController.isOverlayingDeviceCamera = YES;
 	
 	return YES;
 }
@@ -204,7 +209,10 @@
 	CCScene *scene = [CCScene node];
 	[scene addChild: cc3Layer];
 	[CCDirector.sharedDirector runWithScene: scene];
+
 	
+	_viewController.isOverlayingDeviceCamera = YES;
+
 	return YES;
 }
 

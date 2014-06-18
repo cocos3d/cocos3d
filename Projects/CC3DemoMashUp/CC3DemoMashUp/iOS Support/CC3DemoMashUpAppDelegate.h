@@ -31,6 +31,8 @@
 
 #if CC3_CC2_RENDER_QUEUE	//================================================================
 
+#import "CC3DeviceCameraOverlayUIViewController.h"
+
 /** 
  * App Delegate for Cocos2D v3 and above.
  *
@@ -38,7 +40,9 @@
  * when using Cocos2D 3.1 and above, because Cocos2D 3.1 initialization requires that the 
  * OpenGL view (and context) is available during CCDirector initialization.
  */
-@interface CC3DemoMashUpAppDelegate : CCAppDelegate
+@interface CC3DemoMashUpAppDelegate : CCAppDelegate {
+	CC3DeviceCameraOverlayUIViewController* _viewController;
+}
 @end
 
 

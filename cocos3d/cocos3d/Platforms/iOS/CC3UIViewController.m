@@ -33,7 +33,8 @@
 #import "CC3Foundation.h"
 #import "CC3Logging.h"
 
-#if CC3_IOS
+
+#if (CC3_IOS && !CC3_CC2_RENDER_QUEUE)
 
 #pragma mark CC3UIViewController implementation
 
@@ -250,4 +251,4 @@ CC3_POP_NOSELECTOR
 
 @end
 
-#endif // CC3_IOS
+#endif // (CC3_IOS && !CC3_CC2_RENDER_QUEUE)
