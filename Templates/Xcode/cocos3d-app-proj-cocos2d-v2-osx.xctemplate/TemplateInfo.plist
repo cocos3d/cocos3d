@@ -5,7 +5,7 @@
 	<key>Identifier</key>
 	<string>org.cocos3d.cocos3dAppProjCocos2d-v2OSX</string>
 	<key>Name</key>
-	<string>Cocos3D OSX App with Cocos2D-v2</string>
+	<string>Cocos3D with Cocos2D-v2</string>
 	<key>Description</key>
 	<string>A basic Cocos3D application that uses Cocos2D v2 and OpenGL on a Mac running OSX. This template requires that Cocos2D v2 is installed.</string>
 	<key>Kind</key>
@@ -17,6 +17,7 @@
 	<key>Ancestors</key>
 	<array>
 		<string>org.cocos3d.cocos3dProjOSX</string>
+		<string>org.cocos3d.cocos3dAppCocos2d-v2OSX</string>
 	</array>
 	<key>Components</key>
 	<array>
@@ -31,12 +32,6 @@
 			<string>org.cocos3d.cocos3dStatLib</string>
 			<key>Name</key>
 			<string>cocos3d</string>
-		</dict>
-		<dict>
-			<key>Identifier</key>
-			<string>org.cocos3d.cocos3dAppCocos2d-v2OSX</string>
-			<key>Name</key>
-			<string>___PACKAGENAME___</string>
 		</dict>
 	</array>
 </dict>

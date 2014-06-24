@@ -49,6 +49,8 @@
 				<string>YES</string>
 				<key>ALWAYS_SEARCH_USER_PATHS</key>
 				<string>NO</string>
+				<key>OTHER_CFLAGS</key>
+				<string>-U__STRICT_ANSI__</string>
 			</dict>
 		</dict>
 	</array>

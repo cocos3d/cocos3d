@@ -24,6 +24,7 @@
 				<string>AudioToolbox</string>
 				<string>AVFoundation</string>
 				<string>Foundation</string>
+				<string>GLKit</string>
 				<string>OpenAL</string>
 				<string>OpenGL</string>
 				<string>QuartzCore</string>

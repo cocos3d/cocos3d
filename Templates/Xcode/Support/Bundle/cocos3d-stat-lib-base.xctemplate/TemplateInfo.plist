@@ -6,24 +6,14 @@
 	<string>org.cocos3d.cocos3dStatLibBase</string>
 	<key>Kind</key>
 	<string>Xcode.Xcode3.ProjectTemplateUnitKind</string>
-	<key>Components</key>
+	<key>Ancestors</key>
 	<array>
-		<dict>
-			<key>Identifier</key>
-			<string>org.cocos3d.cocos3dStatLib</string>
-			<key>Name</key>
-			<string>cocos3d</string>
-		</dict>
-		<dict>
-			<key>Identifier</key>
-			<string>org.cocos3d.cocos3dRezBundle</string>
-			<key>Name</key>
-			<string>Cocos3DResources</string>
-		</dict>
+		<string>org.cocos3d.cocos3dStatLib</string>
+		<string>org.cocos3d.cocos3dGLSL</string>
 	</array>
 	<key>Definitions</key>
 	<dict>
-		<key>README!.md</key>
+		<key>../README!.md</key>
 		<dict>
 			<key>Path</key>
 			<string>README!.md</string>
@@ -31,7 +21,7 @@
 	</dict>
 	<key>Nodes</key>
 	<array>
-		<string>README!.md</string>
+		<string>../README!.md</string>
 	</array>
 </dict>
 </plist>

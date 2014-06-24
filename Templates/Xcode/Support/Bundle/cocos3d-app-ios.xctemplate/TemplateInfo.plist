@@ -20,6 +20,7 @@
 				<string>CoreGraphics</string>
 				<string>CoreText</string>
 				<string>Foundation</string>
+				<string>GLKit</string>
 				<string>OpenAL</string>
 				<string>OpenGLES</string>
 				<string>QuartzCore</string>

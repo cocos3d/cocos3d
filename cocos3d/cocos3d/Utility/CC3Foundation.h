@@ -649,7 +649,7 @@ static inline CC3Vector CC3EnsureMinScaleVector(CC3Vector scale) {
  * GLKQuaternion, the structures may have different byte alignment requirements. Avoid casting
  * directly between GLKVector4 and CC3Vector4, or GLKQuaternion and CC3Quaternion, as this is
  * not guaranteed to work reliably. Instead, use the functions CC3Vector4FromGLKVector4,
- * GLKVector4FromCC3Vector4, CC3QuaternionFromGLKQuaterion, and GLKQuaternionFromCC3Quaternion
+ * GLKVector4FromCC3Vector4, CC3QuaternionFromGLKQuaternion, and GLKQuaternionFromCC3Quaternion
  * to convert between the two structures.
  *
  * You can, however, reliably copy an array of GLKVector4s or GLKQuaternions to an array of 

@@ -112,8 +112,8 @@ Installation
 1. The Cocos3D framework works with [Cocos2D](http://www.cocos2d-iphone.org). Before installing
    Cocos3D, you must [download](http://www.cocos2d-iphone.org/download) and install Cocos2D.<br/><br/>
 
-	The same Cocos3D distribution can be used with `Cocos2D 3.0`, `Cocos2D 2.1` or `Cocos2D 1.1`.
-	Link to `Cocos2D 3.0` or `Cocos2D 2.1` to make use of the more advanced shader-based 
+	The same Cocos3D distribution can be used with `Cocos2D 3.x`, `Cocos2D 2.1` or `Cocos2D 1.1`.
+	Link to `Cocos2D 3.x` or `Cocos2D 2.1` to make use of the more advanced shader-based 
 	programmable-pipeline available with OpenGL ES 2.0 (iOS) or OpenGL (OSX). Or link to 
 	`Cocos2D 1.1` to use the simpler configurable fixed-pipeline of OpenGL ES 1.1 (iOS), 
 	and avoid the need to write GLSL shaders.
@@ -141,7 +141,7 @@ Installation
 		./install-cocos3d.sh -2 v3
 		./install-cocos3d.sh -2 "../cocos2d-iphone-release-3.0-RC4"
 
-	The first format will link the Cocos3D demo apps to the `Cocos2D 3.0` template libraries 
+	The first format will link the Cocos3D demo apps to the `Cocos2D 3.x` template libraries 
 	that you have most recently installed. When using this format, you must have previously 
 	installed the corresponding version of Cocos2D. This installation format is suitable for 
 	most Cocos3D development activities.</br></br>
@@ -170,13 +170,27 @@ Your First Cocos3D Project
 
 The `install-cocos3d.sh` script also installs several convenient Xcode project templates.
 
-To get started with your first Cocos3D project, open Xcode, click on the File->New->NewProject...
+To get started with your first Cocos3D project, open Xcode, click on the `File->New->NewProject...`
 menu selection, and select one of the templates in the `Cocos3D` group under either the
-`iOS` or `OS X` sections.
+`iOS` or `OS X` section.
 
-The same Cocos3D distribution can be used with `Cocos2D 3.0`, `Cocos2D 2.1` or `Cocos2D 1.1`.
+The same Cocos3D distribution can be used with `Cocos2D 3.x`, `Cocos2D 2.1` or `Cocos2D 1.1`.
 Choose the Cocos3D template that corresponds to the version of Cocos2D that you want to
 work with, and which you previously downloaded and installed.
+
+The template project is complete, but Xcode does not automatically create the dependencies 
+between the targets within the project. You can do this as follows:
+
+1. Once the template project opens, select your project (eg. `MyCocos2DApp`) in the Xcode 
+   *Project Navigator* panel.
+
+2. Select the `MyCocos2DApp` target.
+
+3. Select the *Build Phases* tab of the `MyCocos2DApp` target.
+
+4. Open the *Target Dependencies* list and add the `cocos3d`, `cocos2d`, and `cocos2d-chipmunk` 
+   (if it exists) targets to the list. The `cocos2d-chipmunk` target will only exist if you
+   are using `Cocos2D 3.x`.
 
 The template project starts with a working 3D variation on the familiar *hello, world*
 application, which you can use as a starting point for your own application.
@@ -184,7 +198,7 @@ application, which you can use as a starting point for your own application.
 When you ran the `install-cocos3d` script (see the [Installation][] section above), it checked
 which versions of Cocos2D you have installed, and only installs those Cocos3D templates that 
 work with the major Cocos2D versions that you have installed. If you install a different major
-version of Cocos2D (3.0, 2.1 or 1.1), you can run the `install-cocos3d` script again to 
+version of Cocos2D (3.x, 2.1 or 1.1), you can run the `install-cocos3d` script again to 
 automatically add the Cocos3D templates that are designed for that major version of Cocos2D.
 
 
@@ -220,7 +234,7 @@ For convenience, to access all of the demos together, open either the `cocos3d-i
 or `cocos3d-OSX.xcworkspace` Xcode workspace. You can also open each demo project individually
 in the Projects folder.
 
-At the time of this release, the current version of Cocos2D is `3.0`, and by default, the demo
+At the time of this release, the current version of Cocos2D is `3.1`, and by default, the demo
 apps within the Cocos3D distribution are pre-configured to use that version. To build and run
 the demo apps with a different version of Cocos2D, follow the steps described below in the 
 section titled *Cocos2D Version Compatibility*.
@@ -390,7 +404,8 @@ existing 2D application or game.
    to your Cocos2D Xcode project, as follows:
 
 	1. Open Xcode, and, in the menu bar, choose `File->New->Project...`. In the dialog box that opens,
-	   select the *Cocos3D iOS Static Library* project template from the *Cocos3D* group of iOS templates.
+	   select the *Cocos3D Static Library* project template from the *Cocos3D* group of either the iOS 
+	   or OSX templates.
 
 	2. Name your new Xcode project *cocos3d*, and save it to the `MyCocos2DApp/MyCocos2DApp/Libraries`
 	   folder within your Cocos2D app.
@@ -400,7 +415,12 @@ existing 2D application or game.
 	4. Open your `MyCocos2DApp.xcodeproj` Xcode project.
 
 	5. Drag the new Cocos3D static library Xcode subproject at `MyCocos2DApp/MyCocos2DApp/Libraries/cocos3d/cocos3d.xcodeproj`
-	   to the `Libraries` group in the *Project Navigator* panel of your `MyCocos2DApp` Xcode project.
+	   to the `MyCocos2DApp/Libraries` group in the *Project Navigator* panel of your `MyCocos2DApp` Xcode project.
+
+	6. Drag the Cocos3D GLSL shader folder at `MyCocos2DApp/MyCocos2DApp/Libraries/cocos3d/cocos3d/cocos3d-GLSL`
+	   to the `MyCocos2DApp` group in the *Project Navigator* panel of your `MyCocos2DApp` Xcode project.
+	   When prompted for the target to add the source code to, select the `MyCocos2DApp` target. Once added, 
+	   these files will appear in the *Copy Bundle Resources* list on the *Build Phases* tab of the `MyCocos2DApp` target.
 
 2. Next, within Xcode, you need to tell your Cocos2D app project how to link to the code 
    and components of the Cocos3D subproject:
@@ -408,27 +428,25 @@ existing 2D application or game.
 	1. Select your `MyCocos2DApp` project in the Xcode *Project Navigator* panel.
 
 	2. Select the *Build Phases* tab of the `MyCocos2DApp` target
-		1. Open the *Target Dependencies* list and add both the `cocos3d` and `Cocos3DResources` targets to the list.
+		1. Open the *Target Dependencies* list and add the `cocos3d` target to the list.
 		2. Open the *Link Binary with Libraries* list, and add the `libcocos3d.a` library to the list.
-		3. Open the *Copy Bundle Resources* list, and drag the `Cocos3DResources.bundle` item from the
-		   *Project Navigator* panel to the *Copy Bundle Resources* list (you can find `Cocos3DResources.bundle` 
-		   in the `Libraries/cocos3d.xcodeproj/Products` group folder).
 
 	3. Select the *Build Settings* tab
 		1. In the **Header Search Paths** (aka `HEADER_SEARCH_PATHS`) entry, add an entry to
-		   `"$(SRCROOT)/$(PROJECT_NAME)/Libraries/cocos3d/cocos3d"`, and mark it as `recursive`.
+		   `"$(SRCROOT)/$(PROJECT_NAME)/Libraries/cocos3d/cocos3d/cocos3d"` (including the quote marks),
+		   and mark it as `recursive`.
 		2. In the **Other Linker Flags** (aka `OTHER_LD_FLAGS`) entry, add an entry for `-lstdc++`.
 
 3. Cocos3D requires a depth buffer to provide 3D depth realism. You can add a depth buffer in your
-   application code in the `AppDelegate.m` file. In the `application:didFinishLaunchingWithOptions:`
+   application code in the `AppDelegate.m` file. For Cocos2D 3.x, in the `application:didFinishLaunchingWithOptions:`
    method, add the following line in the constructor for the config dictionary passed to the 
    `setupCocos2dWithOptions:` method:
 
 		CCSetupDepthFormat: @GL_DEPTH_COMPONENT16,         // Cocos3D requires a depth buffer
 		
 	This will create a basic 16-bit depth buffer, which covers most needs. If you want higher depth
-	accuracy, you can use @GL\_DEPTH\_COMPONENT24. And if you will be using shadow volume effects, use
-	@GL\_DEPTH24\_STENCIL8 to create a combined depth and stencil buffer.
+	accuracy, you can use @GL\_DEPTH\_COMPONENT24\_OES. And if you will be using shadow volume effects, use
+	@GL\_DEPTH24\_STENCIL8\_OES to create a combined depth and stencil buffer.
 
 4. Add your custom `CC3Layer` and `CC3Scene` source files (`MyCC3Layer.h`, `MyCC3Layer.m`, `MyCC3Scene.h`,
    and `MyCC3Scene.m`), and any 3D resources your app requires, to the `MyCocos2DApp` target of your 
@@ -474,21 +492,23 @@ instructions to add the Cocos3D libraries:
 	5. Drag the new Cocos3D static library Xcode subproject at `MySpriteBuilderApp.spritebuilder/Source/libs/cocos3d/cocos3d.xcodeproj`
 	   to the `libs` group in the *Project Navigator* panel of your `MySpriteBuilderApp` Xcode project.
 
+	6. Drag the Cocos3D GLSL shader folder at `MySpriteBuilderApp.spritebuilder/Source/libs/cocos3d/cocos3d/cocos3d-GLSL`
+	   to the *Project Navigator* panel of your `MySpriteBuilderApp` Xcode project.
+	   When prompted for the target to add the source code to, select the `MySpriteBuilderApp` target. Once added, 
+	   these files will appear in the *Copy Bundle Resources* list on the *Build Phases* tab of the `MySpriteBuilderApp` target.
+
 2. Next, within Xcode, you need to tell your SpriteBuilder app project how to link to the code 
    and components of the Cocos3D subproject:
 
 	1. Select your `MySpriteBuilderApp` project in the Xcode *Project Navigator* panel.
 
 	2. Select the *Build Phases* tab of the `MySpriteBuilderApp` target
-		1. Open the *Target Dependencies* list and add both the `cocos3d` and `Cocos3DResources` targets to the list.
+		1. Open the *Target Dependencies* list and add the `cocos3d` target to the list.
 		2. Open the *Link Binary with Libraries* list, and add the `libcocos3d.a` library to the list.
-		3. Open the *Copy Bundle Resources* list, and drag the `Cocos3DResources.bundle` item from the
-		   *Project Navigator* panel to the *Copy Bundle Resources* list (you can find `Cocos3DResources.bundle` 
-		   in the `libs/cocos3d.xcodeproj/Products` group folder).
 
 	3. Select the *Build Settings* tab
 		1. In the **Header Search Paths** (aka `HEADER_SEARCH_PATHS`) entry, add an entry to
-		   `Source/libs/cocos3d/cocos3d`, and mark it as `recursive`.
+		   `"Source/libs/cocos3d/cocos3d/cocos3d"` (including the quote marks), and mark it as `recursive`.
 		2. In the **Other Linker Flags** (aka `OTHER_LD_FLAGS`) entry, add an entry for `-lstdc++`.
 
 3. Cocos3D requires a depth buffer to provide 3D depth realism. You can add a depth buffer in your
@@ -498,8 +518,8 @@ instructions to add the Cocos3D libraries:
 		cocos2dSetup[CCSetupDepthFormat] = @GL_DEPTH_COMPONENT16;        // Cocos3D requires a depth buffer
 		
 	This will create a basic 16-bit depth buffer, which covers most needs. If you want higher depth
-	accuracy, you can use GL\_DEPTH\_COMPONENT24. And if you will be using shadow volume effects, use
-	GL\_DEPTH24\_STENCIL8 to create a combined depth and stencil buffer.
+	accuracy, you can use GL\_DEPTH\_COMPONENT24\_OES. And if you will be using shadow volume effects, use
+	GL\_DEPTH24\_STENCIL8\_OES to create a combined depth and stencil buffer.
 
 4. Add your custom `CC3Layer` and `CC3Scene` source files (`MyCC3Layer.h`, `MyCC3Layer.m`, `MyCC3Scene.h`,
    and `MyCC3Scene.m`), and any 3D resources your app requires, to the `MySpriteBuilderApp` target of your 
@@ -525,56 +545,57 @@ instructions to add the Cocos3D libraries:
 Cocos2D Version Compatibility
 -----------------------------
 
-Cocos3D under iOS and Android is compatible with `Cocos2D` `3.0` and `Cocos2D` `2.1`, for 
+Cocos3D under iOS and Android is compatible with `Cocos2D` `3.x` and `Cocos2D` `2.1`, for 
 using programmable-pipeline OpenGL ES 2.0, and is compatible with `Cocos2D` `1.1`, for 
 using fixed-pipeline OpenGL ES 1.1.
 
-Cocos3D under OSX is compatible with `Cocos2D` `3.0` and `Cocos2D` `2.1`, for using
+Cocos3D under OSX is compatible with `Cocos2D` `3.x` and `Cocos2D` `2.1`, for using
 programmable-pipeline OpenGL. Cocos3D is not compatible with `Cocos2D` `1.1` under OSX.
 
-At the time of this release, the current version of Cocos2D is `3.0`, and by default, the 
-demo apps and static libraries within the Cocos3D distribution are pre-configured to use 
-that version. To build and run the demo apps or static libraries with a different version 
-of Cocos2D, follow the steps described here:
+At the time of this release, the current version of Cocos2D is `3.1`, and by default, the demo
+apps within the Cocos3D distribution are pre-configured to use that version. To build and run
+the demo apps with a different version of Cocos2D, follow the steps described here:
 
-1. Delete the reference to the *cocos2d* and *cocos2d-chipmunk* groups in the Xcode *Project Navigator*
-   panel. These groups can be found in the `cocos2d-library-iOS` or `cocos2d-library-OSX` project.
-2. Run the `install-cocos3d.sh` script again and identify the new version of `Cocos2D` to be linked.
-   Keep in mind that you must link `Cocos2D` `3.0` or `Cocos2D 2.1` if you want to use 
-   OpenGL ES 2.0 (iOS) or OpenGL (OSX) with a programmable rendering pipeline, and you must link
-   `Cocos2D 1.1` if you want to use OpenGL ES 1.1 (iOS & Android) with a fixed rendering pipeline.
-3. Add the newly linked Cocos2D files to the project by dragging the `cocos2d` folder from the 
+1. In the Xcode *Project Navigator* panel, delete the reference to the *cocos2d* group in the
+   `cocos2d-library-iOS` or `cocos2d-library-OSX` project.
+2. In the Xcode *Project Navigator* panel, delete the reference to the *cocos2d-chipmunk* group
+   in the `cocos2d-chipmunk-library-iOS` or `cocos2d-chipmunk-library-OSX` project.
+3. Run the `install-cocos3d.sh` script again and identify the new version of `Cocos2D` to be linked.
+   Keep in mind that you must link `Cocos2D` `3.x` or `Cocos2D 2.1` if you want to use 
+   OpenGL ES 2.0 (iOS & Android) or OpenGL (OSX) with a programmable rendering pipeline, and you must
+   link `Cocos2D 1.1` if you want to use OpenGL ES 1.1 (iOS & Android) with a fixed rendering pipeline.
+4. Add the newly linked Cocos2D files to the project by dragging the `cocos2d` folder from the 
    Cocos3D distribution folder into the `cocos2d-library-iOS` or `cocos2d-library-OSX` 
    project in the Xcode *Project Navigator* panel. When prompted for the target to add the source
    code to, select the `cocos2d` target.
-4. Add the newly linked Cocos2D Chipmunk files to the project by dragging the `cocos2d-chipmunk`
-   folder from the Cocos3D distribution folder into the `cocos2d-library-iOS` or `cocos2d-library-OSX` 
-   project in the Xcode *Project Navigator* panel. When prompted for the target to add the source
-   code to, select the `cocos2d-chipmunk` target.
-6. `Cocos2D` `3.0` uses Automatic Reference Counting (ARC). `Cocos2D` `2.1` and `Cocos2D` `1.1`
+5. Add the newly linked Cocos2D Chipmunk files to the project by dragging the `cocos2d-chipmunk`
+   folder from the Cocos3D distribution folder into the `cocos2d-chipmunk-library-iOS` or 
+   `cocos2d-chipmunk-library-OSX` project in the Xcode *Project Navigator* panel. When prompted
+   for the target to add the source code to, select the `cocos2d-chipmunk` target.
+6. `Cocos2D` `3.x` uses Automatic Reference Counting (ARC). `Cocos2D` `2.1` and `Cocos2D` `1.1`
    do not. You must set the appropriate compiler build setting to ensure the compiler will use
    the correct technique.
 	1. In the `cocos2d-library-iOS` or `cocos2d-library-OSX` project, select the `cocos2d` 
 	   target in your project settings.
 	2. Select the *Build Settings* tab.
 	3. Locate the **Objective-C Automatic Reference Counting** (aka `CLANG_ENABLE_OBJC_ARC`)
-	   setting for the `cocos2d` target. If you are now linking to `Cocos2D` `3.0`, set this
+	   setting for the `cocos2d` target. If you are now linking to `Cocos2D` `3.x`, set this
 	   property to `YES`. If you are now linking to `Cocos2D` `2.1` or `Cocos2D` `1.1`, set 
 	   this property to NO. Make sure you change only the setting for the `cocos2d` target 
 	   within your project. Do not change the setting for the `cocos2d-library-iOS` or 
 	   `cocos2d-library-OSX` project itself.
-	4. The `cocos2d-chipmunk` part of the `Cocos2D` `3.0` library does *not* use ARC. Ensure
+	4. The `cocos2d-chipmunk` part of the `Cocos2D` `3.x` library does *not* use ARC. Ensure
 	   the **Objective-C Automatic Reference Counting** (aka `CLANG_ENABLE_OBJC_ARC`) setting
 	   of the `cocos2d-chipmunk` target is always set to NO.
-7. `Cocos2D` `3.0` supports compiling to the ARM64 architecture. `Cocos2D` `2.1` and
+7. `Cocos2D` `3.x` supports compiling to the ARM64 architecture. `Cocos2D` `2.1` and
    `Cocos2D` `1.1` do *not* support compiling to the ARM64 architecture. Because of this,
    by default, the **Valid Architectures** (aka `VALID_ARCHS`) build setting for all demo 
    Xcode Projects in the Cocos3D distribution is set to `$(ARCHS_STANDARD_32_BIT)` (which 
    resolves to **armv7 armv7s**), so that the demo projects will compile with all versions
-   of `Cocos2D`. If you are now linking to `Cocos2D` `3.0`, you can set this property to
+   of `Cocos2D`. If you are now linking to `Cocos2D` `3.x`, you can set this property to
    `$(ARCHS_STANDARD)` (or simply remove this setting from the Project), in all demo Projects,
    to allow compilation to include the ARM64 architecture.
-8. As a development optimization, if you are now linking to `Cocos2D` `3.0`, you can set the 
+8. As a development optimization, if you are now linking to `Cocos2D` `3.x`, you can set the 
    value of the **Build Active Architecture Only** (aka `ONLY_ACTIVE_ARCH`) build setting in 
    the *Debug* configuration in all demo projects to `YES`. You should not do this if you are
    linking to `Cocos2D` `2.1` or `Cocos2D` `1.1`, as this will prohibit you from building

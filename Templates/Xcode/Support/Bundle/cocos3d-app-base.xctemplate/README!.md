@@ -16,6 +16,20 @@ Getting Started
 This starter application presents a 3D take on the ubiquitous ***hello, world*** application,
 and can be compiled to run on any iOS devices.
 
+This project is complete, but Xcode does not automatically create the dependencies 
+between the targets within this project. You can do this as follows:
+
+1. Once this template project opens, select your `___PROJECTNAMEASIDENTIFIER___` project in the 
+   Xcode *Project Navigator* panel.
+
+2. Select the `___PROJECTNAMEASIDENTIFIER___` target.
+
+3. Select the *Build Phases* tab of the `___PROJECTNAMEASIDENTIFIER___` target.
+
+4. Open the *Target Dependencies* list and add the `cocos3d`, `cocos2d`, and `cocos2d-chipmunk` 
+   (if it exists) targets to the list. The `cocos2d-chipmunk` target will only exist if you
+   are using `Cocos2D 3.x`.
+
 The content of the scene is constructed in the `initializeScene` method in the
 `___PROJECTNAMEASIDENTIFIER___Scene.m` file. To add your own 3D content, edit that method.
 

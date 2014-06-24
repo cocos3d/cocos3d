@@ -5,7 +5,7 @@
 	<key>Identifier</key>
 	<string>org.cocos3d.cocos3dStatLibProjOSX</string>
 	<key>Name</key>
-	<string>Cocos3D OSX Static Library</string>
+	<string>Cocos3D Static Library</string>
 	<key>Description</key>
 	<string>A Cocos3D static library that can be added to any existing Cocos2D or SpriteBuilder project for a Mac running OSX.</string>
 	<key>Kind</key>

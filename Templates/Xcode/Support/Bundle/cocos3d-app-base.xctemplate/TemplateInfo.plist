@@ -36,13 +36,13 @@
 			<dict>
 				<key>INFOPLIST_FILE</key>
 				<string>___PACKAGENAME___/Resources/Info.plist</string>
+				<key>CLANG_ENABLE_OBJC_ARC</key>
+				<string>YES</string>
 				<key>HEADER_SEARCH_PATHS</key>
 				<array>
 					<string>cocos3d/**</string>
 					<string>cocos2d/**</string>
 				</array>
-				<key>CLANG_ENABLE_OBJC_ARC</key>
-				<string>YES</string>
 			</dict>
 		</dict>
 	</array>
@@ -97,7 +97,7 @@
 			<key>Path</key>
 			<string>Resources/hello-world.pod</string>
 		</dict>
-		<key>README!.md</key>
+		<key>../README!.md</key>
 		<dict>
 			<key>Path</key>
 			<string>README!.md</string>
@@ -112,7 +112,7 @@
 		<string>Classes/___PROJECTNAMEASIDENTIFIER___Scene.h</string>
 		<string>Classes/___PROJECTNAMEASIDENTIFIER___Scene.m</string>
 		<string>Resources/hello-world.pod</string>
-		<string>README!.md</string>
+		<string>../README!.md</string>
 	</array>
 </dict>
 </plist>

@@ -5,7 +5,7 @@
 	<key>Identifier</key>
 	<string>org.cocos3d.cocos3dStatLibProjIOS</string>
 	<key>Name</key>
-	<string>Cocos3D iOS Static Library</string>
+	<string>Cocos3D Static Library</string>
 	<key>Description</key>
 	<string>A Cocos3D static library that can be added to any existing Cocos2D or SpriteBuilder project for iOS or Android devices.</string>
 	<key>Kind</key>
@@ -27,21 +27,5 @@
 			<string>$(ARCHS_STANDARD)</string>
 		</dict>
 	</dict>
-	<key>Definitions</key>
-	<dict>
-		<key>../___PROJECTNAMEASIDENTIFIER___.approj/configuration.json</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>Apportable</string>
-			</array>
-			<key>Path</key>
-			<string>Apportable/configuration.json</string>
-		</dict>
-	</dict>
-	<key>Nodes</key>
-	<array>
-		<string>../___PROJECTNAMEASIDENTIFIER___.approj/configuration.json</string>
-	</array>
 </dict>
 </plist>

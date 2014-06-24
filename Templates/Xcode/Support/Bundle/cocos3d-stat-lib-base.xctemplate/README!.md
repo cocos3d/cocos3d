@@ -31,19 +31,24 @@ and how to work within the framework.
 Adding this Cocos3D Static Library to an existing Cocos2D Project
 -----------------------------------------------------------------
 
-You can add this Cocos3D static library (for example `ThisCocos3DStatLib.xcodeproj`) to an existing Cocos2D 
+You can add this Cocos3D static library project (`___PROJECTNAMEASIDENTIFIER___.xcodeproj`) to an existing Cocos2D
 application (for example `MyCocos2DApp`), to allow you to add 3D content to your existing 2D application or game.
 
 1. The first step is to add this Cocos3D static library project as a subproject to your Cocos2D Xcode project,
    as follows:
 
-	1. Copy this Cocos3D static library Xcode project (`ThisCocos3DStatLib`) to the 
-	   `MyCocos2DApp/MyCocos2DApp/Libraries` folder within your Cocos2D app.
+	1. Copy the top level `___PROJECTNAMEASIDENTIFIER___` folder to the `MyCocos2DApp/MyCocos2DApp/Libraries` 
+	   folder within your Cocos2D app.
 	   
 	2. Open your `MyCocos2DApp.xcodeproj` Xcode project.
 
-	3. Drag this Cocos3D static library Xcode subproject at `MyCocos2DApp/MyCocos2DApp/Libraries/ThisCocos3DStatLib/ThisCocos3DStatLib.xcodeproj`
+	3. Drag this Cocos3D static library Xcode subproject at `MyCocos2DApp/MyCocos2DApp/Libraries/___PROJECTNAMEASIDENTIFIER___/___PROJECTNAMEASIDENTIFIER___.xcodeproj`
 	   to the `Libraries` group in the *Project Navigator* panel of your `MyCocos2DApp` Xcode project.
+
+	4. Drag the Cocos3D GLSL shader folder at `MyCocos2DApp/MyCocos2DApp/Libraries/___PROJECTNAMEASIDENTIFIER___/___PROJECTNAMEASIDENTIFIER___/cocos3d-GLSL`
+	   to the `MyCocos2DApp` group in the *Project Navigator* panel of your `MyCocos2DApp` Xcode project.
+	   When prompted for the target to add the source code to, select the `MyCocos2DApp` target. Once added, 
+	   these files will appear in the *Copy Bundle Resources* list on the *Build Phases* tab of the `MyCocos2DApp` target.
 
 2. Next, within Xcode, you need to tell your Cocos2D app project how to link to the code 
    and components of this Cocos3D static library subproject:
@@ -51,15 +56,13 @@ application (for example `MyCocos2DApp`), to allow you to add 3D content to your
 	1. Select your `MyCocos2DApp` project in the Xcode *Project Navigator* panel.
 
 	2. Select the *Build Phases* tab of the `MyCocos2DApp` target
-		1. Open the *Target Dependencies* list and add both the `cocos3d` and `Cocos3DResources` targets to the list.
+		1. Open the *Target Dependencies* list and add the `cocos3d` target to the list.
 		2. Open the *Link Binary with Libraries* list, and add the `libcocos3d.a` library to the list.
-		3. Open the *Copy Bundle Resources* list, and drag the `Cocos3DResources.bundle` item from the
-		   *Project Navigator* panel to the *Copy Bundle Resources* list (you can find `Cocos3DResources.bundle` 
-		   in the `Libraries/ThisCocos3DStatLib.xcodeproj/Products` group folder).
 
 	3. Select the *Build Settings* tab
 		1. In the **Header Search Paths** (aka `HEADER_SEARCH_PATHS`) entry, add an entry to
-		   `"$(SRCROOT)/$(PROJECT_NAME)/Libraries/ThisCocos3DStatLib/cocos3d"`, and mark it as `recursive`.
+		   `"$(SRCROOT)/$(PROJECT_NAME)/Libraries/___PROJECTNAMEASIDENTIFIER___/___PROJECTNAMEASIDENTIFIER___/cocos3d"` 
+		   (including the quote marks), and mark it as `recursive`.
 		2. In the **Other Linker Flags** (aka `OTHER_LD_FLAGS`) entry, add an entry for `-lstdc++`.
 
 3. Cocos3D requires a depth buffer to provide 3D depth realism. You can add a depth buffer in your
@@ -70,8 +73,8 @@ application (for example `MyCocos2DApp`), to allow you to add 3D content to your
 		CCSetupDepthFormat: @GL_DEPTH_COMPONENT16,         // Cocos3D requires a depth buffer
 		
 	This will create a basic 16-bit depth buffer, which covers most needs. If you want higher depth
-	accuracy, you can use @GL\_DEPTH\_COMPONENT24. And if you will be using shadow volume effects, use
-	@GL\_DEPTH24\_STENCIL8 to create a combined depth and stencil buffer.
+	accuracy, you can use @GL\_DEPTH\_COMPONENT24\_OES. And if you will be using shadow volume effects, use
+	@GL\_DEPTH24\_STENCIL8\_OES to create a combined depth and stencil buffer.
 
 4. Add your custom `CC3Layer` and `CC3Scene` source files (`MyCC3Layer.h`, `MyCC3Layer.m`, `MyCC3Scene.h`,
    and `MyCC3Scene.m`), and any 3D resources your app requires, to the `MyCocos2DApp` target of your 
@@ -95,19 +98,24 @@ Adding this Cocos3D Static Library to a SpriteBuilder Project
 
 You can use Cocos3D to add 3D content to games created with [SpriteBuilder](http://www.spritebuilder.com).
 Adding Cocos3D to SpriteBuilder is similar to adding Cocos3D to an existing Cocos2D app, as described in 
-the previous section. You can add this Cocos3D static library (for example `ThisCocos3DStatLib.xcodeproj`) 
+the previous section. You can add this Cocos3D static library (`___PROJECTNAMEASIDENTIFIER___.xcodeproj`)
 to your SpriteBuilder app (for example `MySpriteBuilderApp.spritebuilder`) as follows:
 
 1. The first step is to add this Cocos3D static library project as a subproject to your SpriteBuilder Xcode 
    project, as follows:
 
-	1. Copy this Cocos3D static library Xcode project (`ThisCocos3DStatLib`) to the 
-	   `MySpriteBuilderApp.spritebuilder/Source/libs` folder within your SpriteBuilder app.
+	1. Copy the top level `___PROJECTNAMEASIDENTIFIER___` folder to the `MySpriteBuilderApp.spritebuilder/Source/libs` 
+	   folder within your SpriteBuilder app.
 	   
 	2. Open your `MySpriteBuilderApp.xcodeproj` Xcode project.
 
-	3. Drag this Cocos3D static library Xcode subproject at `MySpriteBuilderApp.spritebuilder/Source/libs/ThisCocos3DStatLib/ThisCocos3DStatLib.xcodeproj`
+	3. Drag this Cocos3D static library Xcode subproject at `MySpriteBuilderApp.spritebuilder/Source/libs/___PROJECTNAMEASIDENTIFIER___/___PROJECTNAMEASIDENTIFIER___.xcodeproj`
 	   to the `libs` group in the *Project Navigator* panel of your `MySpriteBuilderApp` Xcode project.
+
+	4. Drag the Cocos3D GLSL shader folder at `MySpriteBuilderApp.spritebuilder/Source/libs/___PROJECTNAMEASIDENTIFIER___/___PROJECTNAMEASIDENTIFIER___/cocos3d-GLSL`
+	   to the *Project Navigator* panel of your `MySpriteBuilderApp` Xcode project.
+	   When prompted for the target to add the source code to, select the `MySpriteBuilderApp` target. Once added, 
+	   these files will appear in the *Copy Bundle Resources* list on the *Build Phases* tab of the `MySpriteBuilderApp` target.
 
 2. Next, within Xcode, you need to tell your SpriteBuilder app project how to link to the code 
    and components of the Cocos3D subproject:
@@ -115,15 +123,13 @@ to your SpriteBuilder app (for example `MySpriteBuilderApp.spritebuilder`) as fo
 	1. Select your `MySpriteBuilderApp` project in the Xcode *Project Navigator* panel.
 
 	2. Select the *Build Phases* tab of the `MySpriteBuilderApp` target
-		1. Open the *Target Dependencies* list and add both the `cocos3d` and `Cocos3DResources` targets to the list.
+		1. Open the *Target Dependencies* list and add the `cocos3d` target to the list.
 		2. Open the *Link Binary with Libraries* list, and add the `libcocos3d.a` library to the list.
-		3. Open the *Copy Bundle Resources* list, and drag the `Cocos3DResources.bundle` item from the
-		   *Project Navigator* panel to the *Copy Bundle Resources* list (you can find `Cocos3DResources.bundle` 
-		   in the `libs/ThisCocos3DStatLib.xcodeproj/Products` group folder).
 
 	3. Select the *Build Settings* tab
 		1. In the **Header Search Paths** (aka `HEADER_SEARCH_PATHS`) entry, add an entry to
-		   `Source/libs/ThisCocos3DStatLib/cocos3d`, and mark it as `recursive`.
+		   `"Source/libs/___PROJECTNAMEASIDENTIFIER___/___PROJECTNAMEASIDENTIFIER___/cocos3d"` (including the quote marks),
+		   and mark it as `recursive`.
 		2. In the **Other Linker Flags** (aka `OTHER_LD_FLAGS`) entry, add an entry for `-lstdc++`.
 
 3. Cocos3D requires a depth buffer to provide 3D depth realism. You can add a depth buffer in your
@@ -133,8 +139,8 @@ to your SpriteBuilder app (for example `MySpriteBuilderApp.spritebuilder`) as fo
 		cocos2dSetup[CCSetupDepthFormat] = @GL_DEPTH_COMPONENT16;        // Cocos3D requires a depth buffer
 		
 	This will create a basic 16-bit depth buffer, which covers most needs. If you want higher depth
-	accuracy, you can use GL\_DEPTH\_COMPONENT24. And if you will be using shadow volume effects, use
-	GL\_DEPTH24\_STENCIL8 to create a combined depth and stencil buffer.
+	accuracy, you can use GL\_DEPTH\_COMPONENT24\_OES. And if you will be using shadow volume effects, use
+	GL\_DEPTH24\_STENCIL8\_OES to create a combined depth and stencil buffer.
 
 4. Add your custom `CC3Layer` and `CC3Scene` source files (`MyCC3Layer.h`, `MyCC3Layer.m`, `MyCC3Scene.h`,
    and `MyCC3Scene.m`), and any 3D resources your app requires, to the `MySpriteBuilderApp` target of your 
@@ -153,67 +159,6 @@ to your SpriteBuilder app (for example `MySpriteBuilderApp.spritebuilder`) as fo
 	5. *Save* and *Publish* your new SpriteBuilder layout.
 	6. Build and run your app from Xcode to see your new 3D content.
 	7. Repeat for all 3D sprites that you want to add to your SpriteBuilder scene.
-
-
-Cocos2D Version Compatibility
------------------------------
-
-Cocos3D under iOS and Android is compatible with `Cocos2D` `3.0` and `Cocos2D` `2.1`, for 
-using programmable-pipeline OpenGL ES 2.0, and is compatible with `Cocos2D` `1.1`, for 
-using fixed-pipeline OpenGL ES 1.1.
-
-Cocos3D under OSX is compatible with `Cocos2D` `3.0` and `Cocos2D` `2.1`, for using
-programmable-pipeline OpenGL. Cocos3D is not compatible with `Cocos2D` `1.1` under OSX.
-
-At the time of this release, the current version of Cocos2D is `3.0`, and by default, the 
-demo apps and static libraries within the Cocos3D distribution are pre-configured to use 
-that version. To build and run the demo apps or static libraries with a different version 
-of Cocos2D, follow the steps described here:
-
-1. Delete the reference to the *cocos2d* and *cocos2d-chipmunk* groups in the Xcode *Project Navigator*
-   panel. These groups can be found in the `cocos2d-library-iOS` or `cocos2d-library-OSX` project.
-2. Run the `install-cocos3d.sh` script again and identify the new version of `Cocos2D` to be linked.
-   Keep in mind that you must link `Cocos2D` `3.0` or `Cocos2D 2.1` if you want to use 
-   OpenGL ES 2.0 (iOS) or OpenGL (OSX) with a programmable rendering pipeline, and you must link
-   `Cocos2D 1.1` if you want to use OpenGL ES 1.1 (iOS & Android) with a fixed rendering pipeline.
-3. Add the newly linked Cocos2D files to the project by dragging the `cocos2d` folder from the 
-   Cocos3D distribution folder into the `cocos2d-library-iOS` or `cocos2d-library-OSX` 
-   project in the Xcode *Project Navigator* panel. When prompted for the target to add the source
-   code to, select the `cocos2d` target.
-4. Add the newly linked Cocos2D Chipmunk files to the project by dragging the `cocos2d-chipmunk`
-   folder from the Cocos3D distribution folder into the `cocos2d-library-iOS` or `cocos2d-library-OSX` 
-   project in the Xcode *Project Navigator* panel. When prompted for the target to add the source
-   code to, select the `cocos2d-chipmunk` target.
-6. `Cocos2D` `3.0` uses Automatic Reference Counting (ARC). `Cocos2D` `2.1` and `Cocos2D` `1.1`
-   do not. You must set the appropriate compiler build setting to ensure the compiler will use
-   the correct technique.
-	1. In the `cocos2d-library-iOS` or `cocos2d-library-OSX` project, select the `cocos2d` 
-	   target in your project settings.
-	2. Select the *Build Settings* tab.
-	3. Locate the **Objective-C Automatic Reference Counting** (aka `CLANG_ENABLE_OBJC_ARC`)
-	   setting for the `cocos2d` target. If you are now linking to `Cocos2D` `3.0`, set this
-	   property to `YES`. If you are now linking to `Cocos2D` `2.1` or `Cocos2D` `1.1`, set 
-	   this property to NO. Make sure you change only the setting for the `cocos2d` target 
-	   within your project. Do not change the setting for the `cocos2d-library-iOS` or 
-	   `cocos2d-library-OSX` project itself.
-	4. The `cocos2d-chipmunk` part of the `Cocos2D` `3.0` library does *not* use ARC. Ensure
-	   the **Objective-C Automatic Reference Counting** (aka `CLANG_ENABLE_OBJC_ARC`) setting
-	   of the `cocos2d-chipmunk` target is always set to NO.
-7. `Cocos2D` `3.0` supports compiling to the ARM64 architecture. `Cocos2D` `2.1` and
-   `Cocos2D` `1.1` do *not* support compiling to the ARM64 architecture. Because of this,
-   by default, the **Valid Architectures** (aka `VALID_ARCHS`) build setting for all demo 
-   Xcode Projects in the Cocos3D distribution is set to `$(ARCHS_STANDARD_32_BIT)` (which 
-   resolves to **armv7 armv7s**), so that the demo projects will compile with all versions
-   of `Cocos2D`. If you are now linking to `Cocos2D` `3.0`, you can set this property to
-   `$(ARCHS_STANDARD)` (or simply remove this setting from the Project), in all demo Projects,
-   to allow compilation to include the ARM64 architecture.
-8. As a development optimization, if you are now linking to `Cocos2D` `3.0`, you can set the 
-   value of the **Build Active Architecture Only** (aka `ONLY_ACTIVE_ARCH`) build setting in 
-   the *Debug* configuration in all demo projects to `YES`. You should not do this if you are
-   linking to `Cocos2D` `2.1` or `Cocos2D` `1.1`, as this will prohibit you from building
-   the demo apps on devices that use the ARM64 processor.
-9. If you have already built the demo app using the old version of `Cocos2D`, delete the 
-   contents of your `~/Library/Developer/Xcode/DerivedData` folder, and restart Xcode.
 
 
 Compiling for Android
