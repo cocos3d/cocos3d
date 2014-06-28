@@ -1084,7 +1084,7 @@
 				A9D8ED4B17A6009300FB443C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Release;
 		};
 		A9D8ED4C17A6009300FB443C /* Build configuration list for PBXNativeTarget "cocos2d" */ = {
 			isa = XCConfigurationList;
@@ -1093,7 +1093,7 @@
 				A9D8ED4E17A6009300FB443C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

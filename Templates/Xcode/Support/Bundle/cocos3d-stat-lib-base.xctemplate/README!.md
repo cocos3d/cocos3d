@@ -42,7 +42,7 @@ application (for example `MyCocos2DApp`), to allow you to add 3D content to your
 	   
 	2. Open your `MyCocos2DApp.xcodeproj` Xcode project.
 
-	3. Drag this Cocos3D static library Xcode subproject at `MyCocos2DApp/MyCocos2DApp/Libraries/___PROJECTNAMEASIDENTIFIER___/___PROJECTNAMEASIDENTIFIER___.xcodeproj`
+	3. Drag the Cocos3D static library Xcode subproject at `MyCocos2DApp/MyCocos2DApp/Libraries/___PROJECTNAMEASIDENTIFIER___/___PROJECTNAMEASIDENTIFIER___.xcodeproj`
 	   to the `Libraries` group in the *Project Navigator* panel of your `MyCocos2DApp` Xcode project.
 
 	4. Drag the Cocos3D GLSL shader folder at `MyCocos2DApp/MyCocos2DApp/Libraries/___PROJECTNAMEASIDENTIFIER___/___PROJECTNAMEASIDENTIFIER___/cocos3d-GLSL`
@@ -56,8 +56,8 @@ application (for example `MyCocos2DApp`), to allow you to add 3D content to your
 	1. Select your `MyCocos2DApp` project in the Xcode *Project Navigator* panel.
 
 	2. Select the *Build Phases* tab of the `MyCocos2DApp` target
-		1. Open the *Target Dependencies* list and add the `cocos3d` target to the list.
-		2. Open the *Link Binary with Libraries* list, and add the `libcocos3d.a` library to the list.
+		1. Open the *Target Dependencies* list and add the `___PROJECTNAMEASIDENTIFIER___` target to the list.
+		2. Open the *Link Binary with Libraries* list, and add the `lib___PROJECTNAMEASIDENTIFIER___.a` library to the list.
 
 	3. Select the *Build Settings* tab
 		1. In the **Header Search Paths** (aka `HEADER_SEARCH_PATHS`) entry, add an entry to
@@ -109,7 +109,7 @@ to your SpriteBuilder app (for example `MySpriteBuilderApp.spritebuilder`) as fo
 	   
 	2. Open your `MySpriteBuilderApp.xcodeproj` Xcode project.
 
-	3. Drag this Cocos3D static library Xcode subproject at `MySpriteBuilderApp.spritebuilder/Source/libs/___PROJECTNAMEASIDENTIFIER___/___PROJECTNAMEASIDENTIFIER___.xcodeproj`
+	3. Drag the Cocos3D static library Xcode subproject at `MySpriteBuilderApp.spritebuilder/Source/libs/___PROJECTNAMEASIDENTIFIER___/___PROJECTNAMEASIDENTIFIER___.xcodeproj`
 	   to the `libs` group in the *Project Navigator* panel of your `MySpriteBuilderApp` Xcode project.
 
 	4. Drag the Cocos3D GLSL shader folder at `MySpriteBuilderApp.spritebuilder/Source/libs/___PROJECTNAMEASIDENTIFIER___/___PROJECTNAMEASIDENTIFIER___/cocos3d-GLSL`
@@ -123,8 +123,8 @@ to your SpriteBuilder app (for example `MySpriteBuilderApp.spritebuilder`) as fo
 	1. Select your `MySpriteBuilderApp` project in the Xcode *Project Navigator* panel.
 
 	2. Select the *Build Phases* tab of the `MySpriteBuilderApp` target
-		1. Open the *Target Dependencies* list and add the `cocos3d` target to the list.
-		2. Open the *Link Binary with Libraries* list, and add the `libcocos3d.a` library to the list.
+		1. Open the *Target Dependencies* list and add the `___PROJECTNAMEASIDENTIFIER___` target to the list.
+		2. Open the *Link Binary with Libraries* list, and add the `lib___PROJECTNAMEASIDENTIFIER___.a` library to the list.
 
 	3. Select the *Build Settings* tab
 		1. In the **Header Search Paths** (aka `HEADER_SEARCH_PATHS`) entry, add an entry to

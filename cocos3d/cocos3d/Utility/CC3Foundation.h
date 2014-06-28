@@ -2481,7 +2481,7 @@ static inline NSString* CC3ResolveResourceFilePath(NSString* filePath) {
 	NSString* fullPath;
 
 	fullPath = filePath;
-	if ( [fileMgr fileExistsAtPath: fullPath] ) return fullPath;
+	if ( fullPath.isAbsolutePath && [fileMgr fileExistsAtPath: fullPath] ) return fullPath;
 	
 	fullPath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent: filePath];
 	if ( [fileMgr fileExistsAtPath: fullPath] ) return fullPath;
