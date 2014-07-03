@@ -675,52 +675,6 @@ enum {
 
 
 #pragma mark -
-#pragma mark CCTexture extension
-
-/** Extension category to support cocos3d functionality. */
-@interface CCTexture (CC3)
-
-/**
- * If a CCTexture with the specified name does not already exist in the CCTextureCache,
- * this texture is added to the CCTextureCache under that name.
- *
- * If a texture already exists in the cache under the specified name, or if the specified
- * name is nil, this texture is not added to the cache.
- */
--(void) addToCacheWithName: (NSString*) texName;
-
-#if CC3_CC2_CLASSIC
-
-/** Legacy support for renamed pixelsWide property. */
-@property(nonatomic,readonly) NSUInteger pixelWidth;
-
-/** Legacy support for renamed pixelsHigh property. */
-@property(nonatomic,readonly) NSUInteger pixelHeight;
-
-#endif	// CC3_CC2_CLASSIC
-
-@end
-
-
-#pragma mark -
-#pragma mark CCTextureCache extension
-
-/** Extension category to support cocos3d functionality. */
-@interface CCTextureCache (CC3)
-
-/** 
- * If a texture with the specified name does not already exist in this cache, the specified
- * texture is added under the specified name.
- *
- * If a texture already exists in this cache under the specified name, or if either the 
- * specified texture or specified name is nil, the texture is not added to the cache.
- */
--(void) addTexture: (CCTexture*) tex2D named: (NSString*) texName;
-
-@end
-
-
-#pragma mark -
 #pragma mark CCDirector extension
 
 /** Extension category to support cocos3d functionality. */

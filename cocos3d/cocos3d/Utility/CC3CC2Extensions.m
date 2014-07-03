@@ -538,66 +538,6 @@
 
 
 #pragma mark -
-#pragma mark CCTexture extension
-
-@implementation CCTexture (CC3)
-
--(void) addToCacheWithName: (NSString*) texName {
-	[CCTextureCache.sharedTextureCache addTexture: self named: texName];
-}
-
-#if CC3_CC2_CLASSIC
--(NSUInteger) pixelWidth { return self.pixelsWide; }
-
-/** Legacy name for pixelHeight. */
--(NSUInteger) pixelHeight { return self.pixelsHigh; }
-
-#endif	// CC3_CC2_CLASSIC
-
-@end
-
-
-#pragma mark -
-#pragma mark CCTextureCache extension
-
-@implementation CCTextureCache (CC3)
-
-#if CC3_CC2_1
-#	define CC2_DICT_LOCK		dictLock_
-#	define CC2_TEX_DICT			textures_
-
--(void) addTexture: (CCTexture*) tex2D named: (NSString*) texName {
-	if ( !tex2D ) return;
-
-	[CC2_DICT_LOCK lock];
-	[CC2_TEX_DICT setObject: tex2D forKey: texName];
-	[CC2_DICT_LOCK unlock];
-}
-
-#else	// CC2 2 and above
-#	define CC2_DICT_QUEUE		_dictQueue
-
-#if COCOS2D_VERSION < 0x020100
-#	define CC2_TEX_DICT			textures_
-#else
-#	define CC2_TEX_DICT			_textures
-#endif	// COCOS2D_VERSION < 0x020100
-
--(void) addTexture: (CCTexture*) tex2D named: (NSString*) texName {
-	if ( !tex2D || !texName ) return;
-	
-	dispatch_sync(CC2_DICT_QUEUE, ^{
-		if ( ![CC2_TEX_DICT objectForKey: texName] )
-			[CC2_TEX_DICT setObject: tex2D forKey: texName];
-	});
-}
-
-#endif	// CC3_CC2_1
-
-@end
-
-
-#pragma mark -
 #pragma mark CCDirector extension
 
 #if COCOS2D_VERSION < 0x020100

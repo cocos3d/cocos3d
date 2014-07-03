@@ -26,7 +26,7 @@
  *
  * http://en.wikipedia.org/wiki/MIT_License
  *
- * The cocos3d mascot model was created by Alexandru Barbulescu, and used here
+ * The Cocos3D mascot model was created by Alexandru Barbulescu, and used here
  * by permission. Further rights may be claimed for that model.
  * 
  * See header file CC3DemoMashUpScene.h for full API documentation.
@@ -55,6 +55,7 @@
 #import "CC3PFXResource.h"
 #import "CC3BitmapLabelNode.h"
 #import "CC3EnvironmentNodes.h"
+#import "CCTextureCache.h"
 
 
 // File names
@@ -211,7 +212,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	[self addMeshHose];				// Attach a point particle hose to the hand of the animated robot.
 									// The hose is turned on and off when the robot arm is touched.
 	
-	[self addSun];					// Add a cocos2d particle emitter as the sun in the sky.
+	[self addSun];					// Add a Cocos2D particle emitter as the sun in the sky.
 	
 	[self addSpotlight];			// Add a spotlight to the camera.
 									// This spotlight will be turned on when the sun is turned off.
@@ -318,7 +319,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 									// PFX file. Under OpenGL ES 1.1, mask appears with a default texture.
 
 	DramaticPause();				// Pause dramatically
-	[self addMascots];				// Add the cocos3d mascot.
+	[self addMascots];				// Add the Cocos3D mascot.
 
 	DramaticPause();				// Pause dramatically
 	[self addDragon];				// Add a flying dragon that demos blending between animation tracks
@@ -628,7 +629,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	
 	// Use a standard CCActionFadeIn to fade the node in over the specified duration
 	if (duration > 0.0f) {
-		aNode.opacity = 0;	// Needed for cocos2d 1.x, which doesn't start fade-in from zero opacity
+		aNode.opacity = 0;	// Needed for Cocos2D 1.x, which doesn't start fade-in from zero opacity
 		[aNode runAction: [CCActionFadeIn actionWithDuration: duration]];
 	}
 }
@@ -650,11 +651,23 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 -(void) addGround {
 	_ground = [CC3PlaneNode nodeWithName: kGroundName];
 	[_ground populateAsDiskWithRadius: 1500 andTessellation: CC3TessellationMake(8, 32)];
-	_ground.texture = [CC3Texture textureFromFile: kGroundTextureFile];
 
-	// To experiment with repeating textures, uncomment the following line
-	[_ground repeatTexture: (ccTex2F){10, 10}];	// Grass
-//	[_ground repeatTexture: (ccTex2F){3, 3}];	// MountainGrass
+	// To demonstrate that a Cocos3D CC3Texture can be created from an existing Cocos2D CCTexture,
+	// we first load a CCTexture, and create the CC3Texture from it. We then assign the CC3Texture
+	// a unique name and add it to the texture cache it so it will be available for later use.
+	CCTexture* tex2D = [CCTextureCache.sharedTextureCache  addImage: kGroundTextureFile];
+	CC3Texture* tex3D = [CC3Texture textureWithCCTexture: tex2D];
+	tex3D.name = kGroundTextureFile;
+	[CC3Texture addTexture: tex3D];
+	_ground.texture = tex3D;
+
+	// To simply load a Cocos3D texture directly, without first loading a Cocos2D texture,
+	// comment out the lines above, and uncomment the following line.
+//	_ground.texture = [CC3Texture textureFromFile: kGroundTextureFile];
+
+	// The ground uses a repeating texture
+	[_ground repeatTexture: (ccTex2F){10, 10}];		// Grass
+//	[_ground repeatTexture: (ccTex2F){3, 3}];		// MountainGrass
 	
 	_ground.location = cc3v(0.0, -100.0, 0.0);
 	_ground.rotation = cc3v(-90.0, 180.0, 0.0);
@@ -1217,15 +1230,15 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 }
 
 /**
- * Add a label attached to the robot arm. This is created using a cocos2d label object wrapped
+ * Add a label attached to the robot arm. This is created using a Cocos2D label object wrapped
  * in a CC3Billboard to turn it into a 3D object.
  *
  * Unfortunately, this label will not play nicely with the fog, because it contains transparent parts
  * that should be discarded by the fragment shader so that the deptth component is not written to the
  * depth buffer. This would allow the fog to show through (see the cylindrical text example in this 
- * demo for an example of how that works. But since this is a cocos2d component, it would require
- * changing the cocos2d shaders to get it to work. There's no point in doing that, because it would
- * be better to simply use 3D text instead of a cocos2d text component.
+ * demo for an example of how that works. But since this is a Cocos2D component, it would require
+ * changing the Cocos2D shaders to get it to work. There's no point in doing that, because it would
+ * be better to simply use 3D text instead of a Cocos2D text component.
  */
 -(void) addProjectedLabel {
 	CCLabelTTF* bbLabel = [CCLabelTTF labelWithString: @"Whoa...I'm dizzy!"
@@ -1475,12 +1488,12 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 }
 
 /**
- * Loads a POD file containing the cocos3d mascot, and creates a copy of it so that we have
+ * Loads a POD file containing the Cocos3D mascot, and creates a copy of it so that we have
  * two mascots. One mascot always stares back at the camera, regardless of where the camera
  * moves to. The other is distracted by the rainbow teapot and its gaze follows the teapot
  * as the rainbow teapot moves.
  *
- * The cocos2d/cocos3d mascot model was created by Alexandru Barbulescu, and used by permission.
+ * The Cocos2D/Cocos3D mascot model was created by Alexandru Barbulescu, and used by permission.
  */
 -(void) addMascots {
 
@@ -1544,12 +1557,12 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 }
 
 /**
- * Adds a sun in the sky, in the form of a standard cocos2d particle emitter,
+ * Adds a sun in the sky, in the form of a standard Cocos2D particle emitter,
  * held in the 3D scene by a CC3Billboard. The sun is a very large particle
  * emitter, and you should notice a drop in frame rate when it is visible.
  */
 -(void) addSun {
-	// Create the cocos2d 2D particle emitter.
+	// Create the Cocos2D 2D particle emitter.
 	CCParticleSystem* emitter = [CCParticleSun node];
 	emitter.position = ccp(0.0, 0.0);
 	
@@ -1932,8 +1945,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	_isTVOn = NO;		// Indicate TV is displaying test card
 	
 	// Demonstrate the ability to extract a CCTexture from a CC3Texture.
-	// For some interesting fun, extract a cocos2d CCTexture instance from the texture
-	// underpinning the TV surface, and replace the cocos2d label node in the billboard held
+	// For some interesting fun, extract a Cocos2D CCTexture instance from the texture
+	// underpinning the TV surface, and replace the Cocos2D label node in the billboard held
 	// by the robot arm with a CCSprite holding the CCTexture. The robot arm ends up holding
 	// a smaller version of the TV screen. You have to touch the TV screen to activate it.
 	// Because the TV screen is only updated with new rendered content when the big-screen
@@ -1944,7 +1957,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// also change the optimization line in the drawSceneContentWithVisitor: method, and invoke
 	// the drawToTVScreen method on each loop, to have both TV's show live video at all times.
 //	CCSprite* portableTV = [CCSprite spriteWithTexture: [tvSurface.colorTexture ccTexture]];
-//	portableTV.flipY = YES;
+//	portableTV.flipY = CCTexture.texturesAreLoadedUpsideDown;		// Cocos2D 3.1 & above takes care of flipping
 //	CC3Billboard* bb = (CC3Billboard*)[self getNodeNamed: kBillboardName];
 //	bb.uniformScale = 0.1;
 //	bb.billboard = portableTV;
@@ -2511,7 +2524,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * Blend Swap at http://www.blendswap.com/blends/view/67196. It is used here under a
  * Creative Commons Attribution 3.0 CC-BY license, requiring attribution to the author.
  * All animation was added to the model after acquisition. The animated and modified
- * Blender model is available in the Models folder of the cocos3d distribution.
+ * Blender model is available in the Models folder of the Cocos3D distribution.
  * The dragon POD file was created by exporting directly to POD from within Blender.
  */
 -(void) addDragon {
@@ -2588,7 +2601,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 }
 
 /**
- * Adds a temporary fiery explosion on top of the specified node, using a cocos2d
+ * Adds a temporary fiery explosion on top of the specified node, using a Cocos2D
  * CCParticleSystem. The explosion is set to a short duration, and when the particle
  * system has exhausted, the CC3ParticleSystem node along with the CCParticleSystem
  * billboard it contains are automatically removed from the 3D scene.
@@ -2890,7 +2903,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 //	[self.activeCamera moveWithDuration: kCameraMoveDuration toShowAllOf: self];
 //	self.shouldDrawWireframeBox = YES;
 
-	// Or uncomment this line to have the camera pan and zoom to focus on the cocos3d mascot.
+	// Or uncomment this line to have the camera pan and zoom to focus on the Cocos3D mascot.
 //	[self.activeCamera moveWithDuration: kCameraMoveDuration toShowAllOf: mascot];
 }
 
@@ -3398,7 +3411,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * various shadowing options for the touched node. If not in "managing shadows" mode,
  * the actions described here occur.
  *
- * Most nodes are simply temporarily highlighted by running a cocos2d tinting action on
+ * Most nodes are simply temporarily highlighted by running a Cocos2D tinting action on
  * the emission color property of the node (which affects the emission color property of
  * the materials underlying the node).
  *
@@ -3556,7 +3569,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * on the ground corresponding to the touch-point. As the teapot is placed, we set off
  * a fiery explosion using a 2D particle system for dramatic effect. This demonstrates
  * the ability to drop objects into the 3D scene using touch events, along with the
- * ability to add cocos2d CCParticleSystems into the 3D scene.
+ * ability to add Cocos2D CCParticleSystems into the 3D scene.
  */
 -(void) touchGroundAt: (CGPoint) touchPoint {
 	CC3Plane groundPlane = _ground.plane;
