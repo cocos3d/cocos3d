@@ -89,10 +89,8 @@
 //	cc3Layer.position = ccp(0.0, 0.0);
 //	[cc3Layer runAction: [CCActionMoveTo actionWithDuration: 15.0 position: ccp(500.0, 250.0)]];
 	
-	// Wrap the layer in a 2D scene and run it in the director
-	CCScene *scene = [CCScene node];
-	[scene addChild: cc3Layer];
-	return scene;
+	// Wrap the layer in a 2D scene and return the 2D scene.
+	return [cc3Layer asCCScene];
 }
 
 @end
@@ -206,12 +204,7 @@
 //	[cc3Layer runAction: [CCActionMoveTo actionWithDuration: 15.0 position: ccp(500.0, 250.0)]];
 
 	// Wrap the 3D layer in a 2D scene and run it in the director
-	CCScene *scene = [CCScene node];
-	[scene addChild: cc3Layer];
-	[CCDirector.sharedDirector runWithScene: scene];
-
-	
-	_viewController.isOverlayingDeviceCamera = YES;
+	[CCDirector.sharedDirector runWithScene: [cc3layer asCCScene]];
 
 	return YES;
 }

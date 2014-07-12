@@ -38,7 +38,7 @@
 -(void) setDeprecatedCC3Layer: (CC3Layer*) cc3Layer;
 @end
 
-@interface CCLayer (ProtectedMethods)
+@interface CCNode (ProtectedMethods)
 -(void) contentSizeChanged;
 @end
 

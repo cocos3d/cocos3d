@@ -234,10 +234,6 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	LogInfo(@"The structure of this scene is: %@", [self structureDescription]);
 }
 
-/** Define a thread-pausing macro. */
-#define kDramaticPauseDuration	0.25f
-#define DramaticPause()			[NSThread sleepForTimeInterval: kDramaticPauseDuration]
-
 /**
  * Adds additional scene content dynamically and asynchronously.
  *
@@ -257,71 +253,71 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
  */
 -(void) addSceneContentAsynchronously {
 
-	DramaticPause();				// Pause dramatically
+	[self pauseDramatically];
 	[self addAxisMarkers];			// Add colored teapots to mark each coordinate axis
 
-	DramaticPause();				// Pause dramatically
+	[self pauseDramatically];
 	[self addLightMarker];			// Add a small white teapot to show the direction toward the light
 
-	DramaticPause();				// Pause dramatically
+	[self pauseDramatically];
 	[self addBitmapLabel];			// Add a bitmapped string label
 
-	DramaticPause();				// Pause dramatically
+	[self pauseDramatically];
 	[self addSkinnedMallet];		// Adds a flexible mallet to the scene, showing bone skinning.
 
-	DramaticPause();				// Pause dramatically
+	[self pauseDramatically];
 	[self addSkinnedRunners];		// Adds two running figures to the scene, showing bone skinning.
 
-	DramaticPause();				// Pause dramatically
+	[self pauseDramatically];
 	[self addDieCube];				// Add a game die whose rotation is controlled by touch-swipe user action
 
-	DramaticPause();				// Pause dramatically
+	[self pauseDramatically];
 	[self addTexturedCube];			// Add another cube, this one textured, below the die cube.
 
-	DramaticPause();				// Pause dramatically
+	[self pauseDramatically];
 	[self addGlobe];				// Add a rotating globe from a parametric sphere covered by a texture
 
-	DramaticPause();				// Pause dramatically
+	[self pauseDramatically];
 	[self addFloatingRing];			// Add a large yellow band floating above the ground, using a texture
 									// containing transparency. The band as a whole fades in and out
 									// periodically. This demonstrates managing opacity and translucency
 									// at both the texture and material level.
 
-	DramaticPause();				// Pause dramatically
+	[self pauseDramatically];
 	[self addBeachBall];			// Add a transparent bouncing beach ball...exported from Blender
 
-	DramaticPause();				// Pause dramatically
+	[self pauseDramatically];
 	[self addTelevision];			// Add a television showing the view from the runner camera
 									// This demonstrates dynamic rendering-to-texture capabilities.
 									// Must be added after the skinned runners.
 
-	DramaticPause();				// Pause dramatically
+	[self pauseDramatically];
 	[self addTeapotAndSatellite];	// Add a large textured teapot with a smaller satellite teapot
 
-	DramaticPause();				// Pause dramatically
+	[self pauseDramatically];
 	[self addBrickWall];			// Add a brick wall that can block the path of the satellite teapot
 									// This must happen after camera is loaded (in addRobot).
 
-	DramaticPause();
+	[self pauseDramatically];
 	[self addWoodenSign];			// Add the multi-texture wooden sign.
 									// This must happen after camera is loaded (in addRobot).
 
-	DramaticPause();				// Pause dramatically
+	[self pauseDramatically];
 	[self addFloatingHead];			// Add the bump-mapped floating head.
 									// This must happen after camera is loaded (in addRobot).
 
-	DramaticPause();				// Pause dramatically
+	[self pauseDramatically];
 	[self addReflectiveMask];		// Adds a floating mask that uses GLSL shaders loaded via a PowerVR
 									// PFX file. Under OpenGL ES 1.1, mask appears with a default texture.
 
-	DramaticPause();				// Pause dramatically
+	[self pauseDramatically];
 	[self addEtchedMask];			// Adds a floating mask that uses GLSL shaders loaded via a PowerVR
 									// PFX file. Under OpenGL ES 1.1, mask appears with a default texture.
 
-	DramaticPause();				// Pause dramatically
+	[self pauseDramatically];
 	[self addMascots];				// Add the Cocos3D mascot.
 
-	DramaticPause();				// Pause dramatically
+	[self pauseDramatically];
 	[self addDragon];				// Add a flying dragon that demos blending between animation tracks
 
 	// Log a list of the shader programs that are being used by the scene. During development,
@@ -345,6 +341,21 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	[CC3PFXResource removeAllResources];
 
 	LogRez(@"Finished loading on background thread!");
+}
+
+
+/** 
+ * When loading in the background, periodically pause the loading to phase the scene in over time.
+ * We put an explicit test here, because if the CC3Backgrounder shouldRunTasksOnRequestingThread
+ * property is set to YES, the addSceneContentAsynchronously method will be run in the foreground, 
+ * and we don't want to add any unncessary delays in that case.
+ */
+-(void) pauseDramatically {
+	if (!CC3OpenGL.sharedGL.isRenderingContext) {
+		NSTimeInterval pauseDuration = 0.25f;
+		LogRez(@"Pausing for %i milliseconds before loading next resource", (int)(pauseDuration * 1000));
+		[NSThread sleepForTimeInterval: pauseDuration];
+	}
 }
 
 /**

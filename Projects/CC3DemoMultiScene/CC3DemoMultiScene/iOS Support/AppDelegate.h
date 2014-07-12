@@ -29,22 +29,11 @@
 
 
 #import <UIKit/UIKit.h>
-#import "MainViewController.h"
 
 @interface AppDelegate : UIResponder <UIApplicationDelegate> {
 	UIWindow* _window;
-	MainViewController* _mainViewController;
 }
 
 @property (nonatomic, strong) IBOutlet UIWindow* window;
-
-/** 
- * The main view controller of the app. 
- * 
- * This is retained here once the app is launched, so that this AppDelegate can access
- * it to retrieve the current CC3ViewController, in order to interact with it to change
- * animation characteristics when the app becomes active or inactive.
- */
-@property (nonatomic, strong) IBOutlet MainViewController* mainViewController;
 
 @end

@@ -13,11 +13,18 @@
 		A91CC36E18E8FD7500D2D8E0 /* HUDLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = A91CC36718E8FD7500D2D8E0 /* HUDLayer.m */; };
 		A91CC36F18E8FD7500D2D8E0 /* HUDScene.m in Sources */ = {isa = PBXBuildFile; fileRef = A91CC36918E8FD7500D2D8E0 /* HUDScene.m */; };
 		A91CC37018E8FD7500D2D8E0 /* Models.m in Sources */ = {isa = PBXBuildFile; fileRef = A91CC36B18E8FD7500D2D8E0 /* Models.m */; };
+		A928D0DE196348A000195782 /* IntroScene.m in Sources */ = {isa = PBXBuildFile; fileRef = A928D0DD196348A000195782 /* IntroScene.m */; };
 		A92B423718BE3EAF0026B00F /* CCNodeAdornments.m in Sources */ = {isa = PBXBuildFile; fileRef = A92B423218BE3EAF0026B00F /* CCNodeAdornments.m */; };
 		A92B423818BE3EAF0026B00F /* CCNodeExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = A92B423418BE3EAF0026B00F /* CCNodeExtensions.m */; };
 		A92B423918BE3EAF0026B00F /* Joystick.m in Sources */ = {isa = PBXBuildFile; fileRef = A92B423618BE3EAF0026B00F /* Joystick.m */; };
 		A946375A18898F9D0097E355 /* Images-iOS.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A946375918898F9D0097E355 /* Images-iOS.xcassets */; };
 		A946375C188990BE0097E355 /* libcocos2d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A9D4F67A18888F9B00382DDC /* libcocos2d.a */; };
+		A96513E5196B34A10021F61B /* cubelight_NegX.png in Resources */ = {isa = PBXBuildFile; fileRef = A96513DF196B34A10021F61B /* cubelight_NegX.png */; };
+		A96513E6196B34A10021F61B /* cubelight_NegY.png in Resources */ = {isa = PBXBuildFile; fileRef = A96513E0196B34A10021F61B /* cubelight_NegY.png */; };
+		A96513E7196B34A10021F61B /* cubelight_NegZ.png in Resources */ = {isa = PBXBuildFile; fileRef = A96513E1196B34A10021F61B /* cubelight_NegZ.png */; };
+		A96513E8196B34A10021F61B /* cubelight_PosX.png in Resources */ = {isa = PBXBuildFile; fileRef = A96513E2196B34A10021F61B /* cubelight_PosX.png */; };
+		A96513E9196B34A10021F61B /* cubelight_PosY.png in Resources */ = {isa = PBXBuildFile; fileRef = A96513E3196B34A10021F61B /* cubelight_PosY.png */; };
+		A96513EA196B34A10021F61B /* cubelight_PosZ.png in Resources */ = {isa = PBXBuildFile; fileRef = A96513E4196B34A10021F61B /* cubelight_PosZ.png */; };
 		A96E1FF818EB76770080FA2F /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A96E1FF718EB76770080FA2F /* CoreText.framework */; };
 		A996523B195485610056A068 /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A996523A195485610056A068 /* GLKit.framework */; };
 		A9A9C43518886E8000659FAC /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9A9C43418886E8000659FAC /* Foundation.framework */; };
@@ -246,6 +253,8 @@
 		A91CC36918E8FD7500D2D8E0 /* HUDScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HUDScene.m; sourceTree = "<group>"; };
 		A91CC36A18E8FD7500D2D8E0 /* Models.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Models.h; sourceTree = "<group>"; };
 		A91CC36B18E8FD7500D2D8E0 /* Models.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Models.m; sourceTree = "<group>"; };
+		A928D0DC196348A000195782 /* IntroScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IntroScene.h; sourceTree = "<group>"; };
+		A928D0DD196348A000195782 /* IntroScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IntroScene.m; sourceTree = "<group>"; };
 		A92B423118BE3EAF0026B00F /* CCNodeAdornments.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCNodeAdornments.h; sourceTree = "<group>"; };
 		A92B423218BE3EAF0026B00F /* CCNodeAdornments.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CCNodeAdornments.m; sourceTree = "<group>"; };
 		A92B423318BE3EAF0026B00F /* CCNodeExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCNodeExtensions.h; sourceTree = "<group>"; };
@@ -253,6 +262,12 @@
 		A92B423518BE3EAF0026B00F /* Joystick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Joystick.h; sourceTree = "<group>"; };
 		A92B423618BE3EAF0026B00F /* Joystick.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Joystick.m; sourceTree = "<group>"; };
 		A946375918898F9D0097E355 /* Images-iOS.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = "Images-iOS.xcassets"; path = "../Common/Images-iOS.xcassets"; sourceTree = "<group>"; };
+		A96513DF196B34A10021F61B /* cubelight_NegX.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cubelight_NegX.png; sourceTree = "<group>"; };
+		A96513E0196B34A10021F61B /* cubelight_NegY.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cubelight_NegY.png; sourceTree = "<group>"; };
+		A96513E1196B34A10021F61B /* cubelight_NegZ.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cubelight_NegZ.png; sourceTree = "<group>"; };
+		A96513E2196B34A10021F61B /* cubelight_PosX.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cubelight_PosX.png; sourceTree = "<group>"; };
+		A96513E3196B34A10021F61B /* cubelight_PosY.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cubelight_PosY.png; sourceTree = "<group>"; };
+		A96513E4196B34A10021F61B /* cubelight_PosZ.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cubelight_PosZ.png; sourceTree = "<group>"; };
 		A96E1FF718EB76770080FA2F /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
 		A996523A195485610056A068 /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = System/Library/Frameworks/GLKit.framework; sourceTree = SDKROOT; };
 		A9A9C43118886E8000659FAC /* CC3DemoMultiScene.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CC3DemoMultiScene.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -490,6 +505,19 @@
 			path = ../Common/Code/Controls;
 			sourceTree = "<group>";
 		};
+		A96513DE196B34A10021F61B /* LightProbe */ = {
+			isa = PBXGroup;
+			children = (
+				A96513DF196B34A10021F61B /* cubelight_NegX.png */,
+				A96513E0196B34A10021F61B /* cubelight_NegY.png */,
+				A96513E1196B34A10021F61B /* cubelight_NegZ.png */,
+				A96513E2196B34A10021F61B /* cubelight_PosX.png */,
+				A96513E3196B34A10021F61B /* cubelight_PosY.png */,
+				A96513E4196B34A10021F61B /* cubelight_PosZ.png */,
+			);
+			path = LightProbe;
+			sourceTree = "<group>";
+		};
 		A9A9C42818886E8000659FAC = {
 			isa = PBXGroup;
 			children = (
@@ -706,6 +734,7 @@
 				A9CCA83018E35EBD00DDDBDC /* IntroducingPOD_float.pod */,
 				A9CCA83118E35EBD00DDDBDC /* JoystickThumb.png */,
 				A9CCA83218E35EBD00DDDBDC /* LaunchImages */,
+				A96513DE196B34A10021F61B /* LightProbe */,
 				A9CCA83718E35EBD00DDDBDC /* mallet.png */,
 				A9CCA83818E35EBD00DDDBDC /* mallet.pod */,
 				A9CCA83918E35EBD00DDDBDC /* Masks */,
@@ -848,6 +877,8 @@
 				A9D4F6971889741900382DDC /* main.m */,
 				A9D4F6981889741900382DDC /* MainViewController.h */,
 				A9D4F6991889741900382DDC /* MainViewController.m */,
+				A928D0DC196348A000195782 /* IntroScene.h */,
+				A928D0DD196348A000195782 /* IntroScene.m */,
 			);
 			name = "iOS Support";
 			path = "CC3DemoMultiScene/iOS Support";
@@ -882,7 +913,7 @@
 		A9A9C42918886E8000659FAC /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0510;
+				LastUpgradeCheck = 0600;
 				ORGANIZATIONNAME = "The Brenwill Workshop Ltd.";
 				TargetAttributes = {
 					A9A9C43018886E8000659FAC = {
@@ -970,6 +1001,8 @@
 				A9CCA8A118E35EBD00DDDBDC /* MountainGrass.jpg in Resources */,
 				A9C5829F19531CCC00A5C7AD /* CC3ClipSpaceNoTexture.fsh in Resources */,
 				A9C582BA19531CCC00A5C7AD /* CC3ClipSpaceTexturable.vsh in Resources */,
+				A96513EA196B34A10021F61B /* cubelight_PosZ.png in Resources */,
+				A96513E9196B34A10021F61B /* cubelight_PosY.png in Resources */,
 				A9C582B819531CCC00A5C7AD /* CC3LibVertexPositionPointSprite.vsh in Resources */,
 				A9CCA87818E35EBD00DDDBDC /* fps_images_1.png in Resources */,
 				A9CCA87618E35EBD00DDDBDC /* fps_images-ipadhd.png in Resources */,
@@ -986,6 +1019,7 @@
 				A9CCA89D18E35EBD00DDDBDC /* NormalMap.png in Resources */,
 				A904C55B18888F220070C47F /* cocos2d-library-iOS.xcodeproj in Resources */,
 				A9CCA86318E35EBD00DDDBDC /* BallBoxTexture.png in Resources */,
+				A96513E8196B34A10021F61B /* cubelight_PosX.png in Resources */,
 				A9CCA89818E35EBD00DDDBDC /* BrushedSteel.png in Resources */,
 				A9C582A419531CCC00A5C7AD /* CC3NoTextureReflect.fsh in Resources */,
 				A9CCA8B218E35EBD00DDDBDC /* tex_base.bmp in Resources */,
@@ -1037,10 +1071,12 @@
 				A9CCA8A418E35EBD00DDDBDC /* PostProc.pfx in Resources */,
 				A9CCA89A18E35EBD00DDDBDC /* BumpMap.vsh in Resources */,
 				A9CCA89C18E35EBD00DDDBDC /* EtchedMask.pod in Resources */,
+				A96513E6196B34A10021F61B /* cubelight_NegY.png in Resources */,
 				A9C5829919531CCC00A5C7AD /* CC3LibTexturableBumpMapTangentSpace.fsh in Resources */,
 				A9C582BE19531CCC00A5C7AD /* CC3TexturableRigidBones.vsh in Resources */,
 				A9CCA89118E35EBD00DDDBDC /* Default-568h@2x.png in Resources */,
 				A9C582B019531CCC00A5C7AD /* CC3LibDefaultPrecision.vsh in Resources */,
+				A96513E7196B34A10021F61B /* cubelight_NegZ.png in Resources */,
 				A9CCA88818E35EBD00DDDBDC /* Icon-57@2x.png in Resources */,
 				A9CCA87718E35EBD00DDDBDC /* fps_images.png in Resources */,
 				A9CCA88C18E35EBD00DDDBDC /* Icon-72@2x.png in Resources */,
@@ -1078,6 +1114,7 @@
 				A9C5829719531CCC00A5C7AD /* CC3LibSingleTexture2D.fsh in Resources */,
 				A9CCA85E18E35EBD00DDDBDC /* arial16.png in Resources */,
 				A9CCA89218E35EBD00DDDBDC /* Default-Landscape~ipad.png in Resources */,
+				A96513E5196B34A10021F61B /* cubelight_NegX.png in Resources */,
 				A9CCA8B318E35EBD00DDDBDC /* tex_base.png in Resources */,
 				A9CCA87B18E35EBD00DDDBDC /* GrassWithLeaves.jpg in Resources */,
 				A9CCA88718E35EBD00DDDBDC /* Icon-57.png in Resources */,
@@ -1118,6 +1155,7 @@
 				A91CC36F18E8FD7500D2D8E0 /* HUDScene.m in Sources */,
 				A92B423918BE3EAF0026B00F /* Joystick.m in Sources */,
 				A91CC36E18E8FD7500D2D8E0 /* HUDLayer.m in Sources */,
+				A928D0DE196348A000195782 /* IntroScene.m in Sources */,
 				A91CC36D18E8FD7500D2D8E0 /* CC3DemoMashUpScene.m in Sources */,
 				A91CC36C18E8FD7500D2D8E0 /* CC3DemoMashUpLayer.m in Sources */,
 				A92B423818BE3EAF0026B00F /* CCNodeExtensions.m in Sources */,

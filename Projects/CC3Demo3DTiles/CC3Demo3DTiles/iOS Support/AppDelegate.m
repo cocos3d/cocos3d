@@ -64,14 +64,10 @@
 
 /** Returns the initial 2D CCScene. Our 2D scene contains a CC3Layer holding a 3D CC3Scene. */
 -(CCScene*) startScene {
-	
-	// Create the main layer. It will create multiple CC3Layers inside it.
-	CC3Layer* cc3Layer = [MainLayer layer];
-	
-	// Wrap the layer in a 2D scene and run it in the director
-	CCScene *scene = [CCScene node];
-	[scene addChild: cc3Layer];
-	return scene;
+
+	// Create the customized CC3Layer that supports 3D rendering,
+	// wrap the layer in a 2D scene and return the 2D scene.
+	return [[MainLayer layer] asCCScene];
 }
 
 @end
@@ -109,13 +105,8 @@
 	
 	// ******** START OF COCOS3D SETUP CODE... ********
 	
-	// Create the main layer. It will create multiple CC3Layers inside it.
-	CCLayer* mainLayer = [MainLayer layer];
-	
-	// Run the layer in the director
-	CCScene *scene = [CCScene node];
-	[scene addChild: mainLayer];
-	[director runWithScene: scene];
+	// Create the customized CC3Layer and CC3Scene, and run it in the CCDirector.
+	[CCDirector.sharedDirector runWithScene: [[MainLayer layer] asCCScene]];
 	
 	return YES;
 }

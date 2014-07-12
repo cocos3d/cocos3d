@@ -331,21 +331,21 @@
 		// Drawing statistics
 		[_frameRateLabel setString: [NSString stringWithFormat: @"fps: %.0f", stats.frameRate]];
 		[_nodesVisitedForDrawingLabel setString: [NSString stringWithFormat: @"nodes: %.0f",
-												 stats.averageNodesVisitedForDrawingPerFrame]];
+												  stats.averageNodesVisitedForDrawingPerFrame]];
 		[_nodesDrawnLabel setString: [NSString stringWithFormat: @"drawn: %.0f",
-									 stats.averageNodesDrawnPerFrame]];
+									  stats.averageNodesDrawnPerFrame]];
 		[_drawCallsLabel setString: [NSString stringWithFormat: @"gl calls: %.0f",
-									stats.averageDrawingCallsMadePerFrame]];
+									 stats.averageDrawingCallsMadePerFrame]];
 		[_facesPresentedLabel setString: [NSString stringWithFormat: @"faces: %.0f",
-										 stats.averageFacesPresentedPerFrame]];
-
+										  stats.averageFacesPresentedPerFrame]];
+		
 		// Update statistics
 		[_updateRateLabel setString: [NSString stringWithFormat: @"ups: %.0f", stats.updateRate]];
 		[_nodesUpdatedLabel setString: [NSString stringWithFormat: @"nodes: %.0f",
-									   stats.averageNodesUpdatedPerUpdate]];
+										stats.averageNodesUpdatedPerUpdate]];
 		[_nodesTransformedLabel setString: [NSString stringWithFormat: @"xfmed: %.0f",
-										   stats.averageNodesTransformedPerUpdate]];
-
+											stats.averageNodesTransformedPerUpdate]];
+		
 		[stats reset];
 	}
 }

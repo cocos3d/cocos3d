@@ -1245,7 +1245,14 @@ static NSObject<CC3OpenGLDelegate>* _delegate = nil;
  * This implementation creates the background GL context from the primary rendering context,
  * using a sharegroup, so that the two can share GL objects.
  */
--(CC3GLContext*) makeBackgroundGLContext { return [_renderGL.context asSharedContext]; }
+-(CC3GLContext*) makeBackgroundGLContext {
+	CC3Assert(_renderGL, @"The background OpenGL context cannot be created until after the"
+			  @" rendering OpenGL context has been created on the main rendering thread."
+			  @" Ensure that you invoke [CC3OpenGL sharedContext] from the main thread,"
+			  @" prior to invoking it on a background thread.");
+	
+	return [_renderGL.context asSharedContext];
+}
 
 /** Template method to retrieve the GL platform limits. */
 -(void) initPlatformLimits {

@@ -380,6 +380,13 @@ enum {
 /** Extension category to support cocos3d functionality. */
 @interface CCNode (CC3)
 
+/**
+ * Convenience method that wraps this node in a CCScene instance, and returns the CCScene instance.
+ *
+ * This node will be held as a child node of the returned CCScene instance.
+ */
+-(CCScene*) asCCScene;
+
 #if !CC3_CC2_RENDER_QUEUE
 
 /** Backwards compatibility with Cocos2D 3.x renderer. Simply invoks visit. */

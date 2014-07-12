@@ -96,7 +96,7 @@
 
 -(void) runBlockAsync: (void (^)(void)) block { [self runBlock: block waitUntilDone: NO]; }
 
--(void) runBlockSync: (void (^)(void)) block { [self runBlock: block waitUntilDone: NO]; }
+-(void) runBlockSync: (void (^)(void)) block { [self runBlock: block waitUntilDone: YES]; }
 
 -(void) runBlock: (void (^)(void)) block waitUntilDone: (BOOL) wait {
 	[self performSelector: @selector(runBlockNow:)

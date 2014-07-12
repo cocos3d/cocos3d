@@ -283,9 +283,15 @@
 -(void) open {
 	_timeAtOpen = NSDate.timeIntervalSinceReferenceDate;
 	_elapsedTimeSinceOpened = 0;
+	
 	[self play];
 	[self updateScene];
+
+	// Establish 3D environment, run scene open behaviour, then tear 3D environment down.
+	CC3NodeDrawingVisitor* visitor = self.viewDrawingVisitor;
+	[self open3DWithVisitor: visitor];
 	[self onOpen];
+	[self close3DWithVisitor: visitor];
 }
 
 -(void) onOpen {}

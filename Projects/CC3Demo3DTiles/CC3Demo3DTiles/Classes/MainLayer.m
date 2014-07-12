@@ -72,7 +72,7 @@
 #define kGridPadding			(4 * kControlPositionScale)
 #define kMinTileSideLen			(8 * kControlPositionScale)
 
-@interface CCLayer (ProtectedMethods)
+@interface CCNode (ProtectedMethods)
 -(void) contentSizeChanged;
 @end
 
@@ -226,7 +226,6 @@
 	tileLayer.contentSize = bounds.size;
 	[self addChild: tileLayer];
 	[_tiles addObject: tileLayer];
-	LogDebug(@"Adding tile in bounds: %@", NSStringFromCGRect(bounds));
 }
 
 -(void) removeTiles {

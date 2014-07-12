@@ -1,5 +1,5 @@
 /*
- * AppDelegate.m
+ * IntroScene.h
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -10,7 +10,7 @@
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
+ * copies of the Software , and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
  * The above copyright notice and this permission notice shall be included in
@@ -25,46 +25,16 @@
  * THE SOFTWARE.
  *
  * http://en.wikipedia.org/wiki/MIT_License
- *
- * See header file AppDelegate.h for full API documentation.
  */
 
-#import "AppDelegate.h"
-#import "CC3OpenGL.h"
+#import "CCScene.h"
+#import "CCLabelTTF.h"
+#import "CCNodeColor.h"
 
-@implementation AppDelegate
-
-@synthesize window=_window;
-
--(BOOL) application: (UIApplication*) application didFinishLaunchingWithOptions: (NSDictionary*) launchOptions {
-    return YES;
-}
-							
--(void) applicationWillResignActive: (UIApplication*) application {
-	[CCDirector.sharedDirector pause];
-}
-
--(void) applicationDidBecomeActive: (UIApplication*) application {
-	[CCDirector.sharedDirector resume];
-}
-
--(void) applicationDidReceiveMemoryWarning: (UIApplication*) application {
-}
-
--(void) applicationDidEnterBackground: (UIApplication*) application {
-	[CCDirector.sharedDirector stopAnimation];
-}
-
--(void) applicationWillEnterForeground: (UIApplication*) application {
-	[CCDirector.sharedDirector startAnimation];
-}
-
--(void)applicationWillTerminate: (UIApplication*) application {
-	[CC3OpenGL terminateOpenGL];
-}
-
--(void) applicationSignificantTimeChange: (UIApplication*) application {
-	[CCDirector.sharedDirector setNextDeltaTimeZero: YES];
+/** A static 2D introductory scene, containing no 3D content. */
+@interface IntroScene : CCScene {
+	CCLabelTTF* _label;
+	CCNodeColor* _background;
 }
 
 @end

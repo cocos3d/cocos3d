@@ -252,6 +252,12 @@
 
 @implementation CCNode (CC3)
 
+-(CCScene*) asCCScene {
+	CCScene *scene = [CCScene node];
+	[scene addChild: self];
+	return scene;
+}
+
 #if !CC3_CC2_RENDER_QUEUE
 
 -(void) visit: (CCRenderer*) renderer parentTransform: (const GLKMatrix4*)parentTransform {
@@ -261,6 +267,8 @@
 #endif	// !CC3_CC2_RENDER_QUEUE
 
 #if CC3_CC2_CLASSIC
+
+-(void) contentSizeChanged {}
 
 -(BOOL) isRunningInActiveScene { return self.isRunning; }
 
@@ -469,8 +477,6 @@
 -(void) didUpdateContentSizeFrom: (CGSize) oldSize {}
 
 #if CC3_CC2_CLASSIC
-
--(void) contentSizeChanged {}
 
 #if CC3_IOS
 -(NSInteger) mousePriority { return 0; }
