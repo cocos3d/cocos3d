@@ -90,6 +90,12 @@
  */
 -(CC3DemoMashUpScene*) mashUpScene { return (CC3DemoMashUpScene*) self.cc3Scene; }
 
+
+-(void) setCc3Scene: (CC3Scene*) aScene {
+	[super setCc3Scene: aScene];
+	self.mashUpScene.primaryCC3DemoMashUpLayer = self;	// Point the scene back here
+}
+
 -(void) initializeControls {
 	
 	// Set the userInteractionEnabled property to NO to control the scene using gestures,

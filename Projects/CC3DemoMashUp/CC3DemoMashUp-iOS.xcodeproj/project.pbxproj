@@ -18,8 +18,6 @@
 		A901CF72186F90EC00A26A40 /* Reflection.png in Resources */ = {isa = PBXBuildFile; fileRef = A901CF68186F90EC00A26A40 /* Reflection.png */; };
 		A901CF73186F90EC00A26A40 /* ReflectiveEffects.pfx in Resources */ = {isa = PBXBuildFile; fileRef = A901CF69186F90EC00A26A40 /* ReflectiveEffects.pfx */; };
 		A901CF74186F90EC00A26A40 /* ReflectiveMask.pod in Resources */ = {isa = PBXBuildFile; fileRef = A901CF6A186F90EC00A26A40 /* ReflectiveMask.pod */; };
-		A91032131952130700C07AF5 /* libcocos2d-chipmunk.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A910320E195212E500C07AF5 /* libcocos2d-chipmunk.a */; };
-		A91032141952130700C07AF5 /* libcocos2d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A9103208195212DB00C07AF5 /* libcocos2d.a */; };
 		A911536A1723A27F004A87FC /* EnvMap.pfx in Resources */ = {isa = PBXBuildFile; fileRef = A91153631723A27F004A87FC /* EnvMap.pfx */; };
 		A911536B1723A27F004A87FC /* EnvMapNegX.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A91153641723A27F004A87FC /* EnvMapNegX.jpg */; };
 		A911536C1723A27F004A87FC /* EnvMapNegY.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A91153651723A27F004A87FC /* EnvMapNegY.jpg */; };
@@ -49,7 +47,6 @@
 		A92DA7CB1427B5980051AFFA /* Shine48x48.png in Resources */ = {isa = PBXBuildFile; fileRef = A92DA7A91427B5980051AFFA /* Shine48x48.png */; };
 		A92DA7CE1427B5980051AFFA /* SunlightButton48x48.png in Resources */ = {isa = PBXBuildFile; fileRef = A92DA7AC1427B5980051AFFA /* SunlightButton48x48.png */; };
 		A92DA7D11427B5980051AFFA /* ZoomButton48x48.png in Resources */ = {isa = PBXBuildFile; fileRef = A92DA7AF1427B5980051AFFA /* ZoomButton48x48.png */; };
-		A92E872C17A6E5F8003B859E /* libcocos3d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A92E872317A6E4DA003B859E /* libcocos3d.a */; };
 		A933812E14E09E9000FCA181 /* Earth_1024.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A933812D14E09E9000FCA181 /* Earth_1024.jpg */; };
 		A93B2AA91695E6A6007144C7 /* Arial32BMGlyph.fnt in Resources */ = {isa = PBXBuildFile; fileRef = A93B2AA71695E6A6007144C7 /* Arial32BMGlyph.fnt */; };
 		A93B2AAA1695E6A6007144C7 /* Arial32BMGlyph.png in Resources */ = {isa = PBXBuildFile; fileRef = A93B2AA81695E6A6007144C7 /* Arial32BMGlyph.png */; };
@@ -98,6 +95,9 @@
 		A99CD83815866E1C00B5BAC3 /* BallBoxTexture.png in Resources */ = {isa = PBXBuildFile; fileRef = A99CD83715866E1C00B5BAC3 /* BallBoxTexture.png */; };
 		A9AAF0081525E41000E1620A /* Bricks-Red.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A9AAF0071525E41000E1620A /* Bricks-Red.jpg */; };
 		A9AE3D7D14E46118002805DA /* Stamp.png in Resources */ = {isa = PBXBuildFile; fileRef = A9AE3D7C14E46118002805DA /* Stamp.png */; };
+		A9B117F419719CE800E357A3 /* libcocos2d-chipmunk.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A910320E195212E500C07AF5 /* libcocos2d-chipmunk.a */; };
+		A9B117F519719CE800E357A3 /* libcocos2d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A9103208195212DB00C07AF5 /* libcocos2d.a */; };
+		A9B117F619719CE800E357A3 /* libcocos3d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A92E872317A6E4DA003B859E /* libcocos3d.a */; };
 		A9BC697418C5586100B67E11 /* Head_diffuse.bmp in Resources */ = {isa = PBXBuildFile; fileRef = A9BC697318C5586100B67E11 /* Head_diffuse.bmp */; };
 		A9C5816719531C5300A5C7AD /* CC3LibDefaultPrecision.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C5813519531C5200A5C7AD /* CC3LibDefaultPrecision.fsh */; };
 		A9C5816819531C5300A5C7AD /* CC3LibDualSidedFragmentColor.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C5813619531C5200A5C7AD /* CC3LibDualSidedFragmentColor.fsh */; };
@@ -419,9 +419,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A92E872C17A6E5F8003B859E /* libcocos3d.a in Frameworks */,
-				A91032141952130700C07AF5 /* libcocos2d.a in Frameworks */,
-				A91032131952130700C07AF5 /* libcocos2d-chipmunk.a in Frameworks */,
+				A9B117F419719CE800E357A3 /* libcocos2d-chipmunk.a in Frameworks */,
+				A9B117F519719CE800E357A3 /* libcocos2d.a in Frameworks */,
+				A9B117F619719CE800E357A3 /* libcocos3d.a in Frameworks */,
 				DC6640030F83B3EA000B3E49 /* AudioToolbox.framework in Frameworks */,
 				506EDBA5102F4C9F00A389B3 /* AVFoundation.framework in Frameworks */,
 				DCCBF1B70F6022AE0040855A /* CoreGraphics.framework in Frameworks */,
@@ -1105,10 +1105,6 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				INFOPLIST_FILE = "$(SRCROOT)/CC3DemoMashUp/iOS Support/Info.plist";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"/Users/bill/Documents/Dev/iOSProjects/cocos3d/cocos3d-bh/Projects/cocos2d-library/build/Debug-iphoneos",
-				);
 				PRODUCT_NAME = CC3DemoMashUp;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -1120,10 +1116,6 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				INFOPLIST_FILE = "$(SRCROOT)/CC3DemoMashUp/iOS Support/Info.plist";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"/Users/bill/Documents/Dev/iOSProjects/cocos3d/cocos3d-bh/Projects/cocos2d-library/build/Debug-iphoneos",
-				);
 				PRODUCT_NAME = CC3DemoMashUp;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

@@ -39,6 +39,8 @@
 #import "CC3RenderSurfaces.h"
 #import "Models.h"
 
+@class CC3DemoMashUpLayer;
+
 
 #pragma mark -
 #pragma mark CC3DemoMashUpScene
@@ -602,6 +604,7 @@ typedef enum {
  * teapot mesh instance, but can be transformed separately, and covered with different materials.
  */
 @interface CC3DemoMashUpScene : CC3Scene {
+	CC3DemoMashUpLayer* __weak _primaryCC3DemoMashUpLayer;
 	CGPoint _playerDirectionControl;
 	CGPoint _playerLocationControl;
 	CC3Vector _cameraMoveStartLocation;
@@ -651,6 +654,21 @@ typedef enum {
 	BOOL _isManagingShadows : 1;
 	BOOL _isTVOn : 1;
 }
+
+/**
+ * A weak reference back to the primary CC3DemoMashUpLayer that is displaying this scene.
+ *
+ * This back-reference allows activities within the scene to modify user interface interactions, 
+ * such as enabling/disabling controls ro opening other view/layers.
+ *
+ * This property has been fomally deprecated to better support multiple CC3Layers displaying
+ * a single CC3Scene from different perspectives (different cameras). If you want to dedicate
+ * a single CC3Layer to a single CC3Scene, and hold a back reference to that layer within the
+ * scene, you should create and manage that reference in your custom CC3Scene class.
+ *
+ * This property is set automatically when this scene is assigned to the CC3DemoMashUpLayer.
+ */
+@property(nonatomic, weak) CC3DemoMashUpLayer* primaryCC3DemoMashUpLayer;
 
 /**
  * This property controls the velocity of the change in direction of the 3D camera

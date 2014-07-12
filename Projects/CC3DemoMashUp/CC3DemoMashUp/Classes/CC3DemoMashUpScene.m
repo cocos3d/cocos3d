@@ -170,6 +170,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 
 @implementation CC3DemoMashUpScene
 
+@synthesize primaryCC3DemoMashUpLayer=_primaryCC3DemoMashUpLayer;
 @synthesize playerDirectionControl=_playerDirectionControl;
 @synthesize playerLocationControl=_playerLocationControl;
 @synthesize isManagingShadows=_isManagingShadows;
@@ -3451,12 +3452,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	if (aNode == _ground) {
 		[self touchGroundAt: touchPoint];
 	} else if (aNode == _beachBall) {
-		// If the beach ball is touched toggle its opacity.
 		[self touchBeachBallAt: touchPoint];
-		
-		// For fun, uncomment the following line to draw wireframe boxes around the beachball
-//	aNode.shouldDrawWireframeBox = !aNode.shouldDrawWireframeBox;
-		
 	} else if (aNode == _brickWall) {
 		[self touchBrickWallAt: touchPoint];
 	} else if (aNode == _woodenSign) {
@@ -3506,7 +3502,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 
 	// If the globe was touched, toggle the opening of a HUD window displaying it up close.
 	} else if (aNode == _globe ) {
-		[((CC3DemoMashUpLayer*)self.cc3Layer) toggleGlobeHUDFromTouchAt: touchPoint];
+		CC3DemoMashUpLayer* layer = self.primaryCC3DemoMashUpLayer;		// Create strong reference to weak property
+		[layer toggleGlobeHUDFromTouchAt: touchPoint];
 	}
 }
 
@@ -3615,6 +3612,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// need to dig into one of its mesh node segments to determine its opacity.
 	CCOpacity bbOpacity = [_beachBall getNodeNamed: kBeachBallWhiteSegment].opacity;
 	_beachBall.opacity = (bbOpacity == kCCOpacityFull) ? (kCCOpacityFull * 0.75) : kCCOpacityFull;
+
+	// For fun, uncomment the following line to draw wireframe boxes around the beachball component meshes
+//	_beachBall.shouldDrawAllLocalContentWireframeBoxes = !_beachBall.shouldDrawAllLocalContentWireframeBoxes;
 }
 
 /** When the brick wall is touched, slide it back and forth to open or close it. */
