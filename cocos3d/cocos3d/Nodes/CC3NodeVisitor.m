@@ -329,7 +329,7 @@
 		_ccRenderer = [CCRenderer.currentRenderer retain];		// retained
 		if (!_ccRenderer) {
 			_ccRenderer = [[CCRenderer alloc] init];			// retained
-			_ccRenderer.globalShaderUniforms = [[CCDirector sharedDirector].globalShaderUniforms mutableCopy];
+			_ccRenderer.globalShaderUniforms = [[CCDirector.sharedDirector.globalShaderUniforms mutableCopy] autorelease];
 		}
 	}
 #endif	// CC3_CC2_RENDER_QUEUE
@@ -340,7 +340,7 @@
 #if CC3_CC2_RENDER_QUEUE
 	if (!_billboardCCRenderer) {
 		_billboardCCRenderer = [[CCRenderer alloc] init];	// retained
-		_billboardCCRenderer.globalShaderUniforms = [self.ccRenderer.globalShaderUniforms mutableCopy];
+		_billboardCCRenderer.globalShaderUniforms = [[self.ccRenderer.globalShaderUniforms mutableCopy] autorelease];
 	}
 #endif	// CC3_CC2_RENDER_QUEUE
 	return _billboardCCRenderer;

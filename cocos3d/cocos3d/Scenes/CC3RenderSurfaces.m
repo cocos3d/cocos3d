@@ -1171,8 +1171,7 @@
 	[self removeSurface: currSurf];
 	[currSurf release];
 
-	[surface retain];
-	[self setValue: surface forKey: ivarName];
+	[self setValue: surface forKey: ivarName];		// Retained
 	[self addSurface: surface];
 }
 

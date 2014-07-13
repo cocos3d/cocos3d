@@ -147,6 +147,7 @@
 												&pvrHeader) == PVR_SUCCESS;
 		if ( !wasLoaded ) {
 			LogError(@"Could not load texture %@.", absFilePath);
+			[self release];
 			return nil;
 		}
 		_size = CC3IntSizeMake(pvrHeader.u32Width, pvrHeader.u32Height);

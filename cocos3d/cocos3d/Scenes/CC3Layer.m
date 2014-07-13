@@ -48,10 +48,13 @@
 @synthesize shouldAlwaysUpdateViewport=_shouldAlwaysUpdateViewport;
 @synthesize shouldTrackViewSize=_shouldTrackViewSize;
 
-- (void)dealloc {
+-(void) dealloc {
 	self.cc3Scene = nil;			// Close, remove & release the scene
+	[_surfaceManager release];
+	
 	[self cc3RemoveAllGestureRecognizers];
 	[_cc3GestureRecognizers release];
+
 	[self deleteRenderStreamGroupMarker];
 
 	[super dealloc];
@@ -575,6 +578,7 @@
 
 -(void) dealloc {
 	[_cc3Layer release];
+	[_visitor release];
 	[super dealloc];
 }
 
