@@ -2904,10 +2904,16 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// the off-screen surfaces created in addPostProcessing.
 	[self addFog];
 	
-	// Add additional scene content dynamically and asynchronously, on a background thread
-	// after rendering has begun on the rendering thread, using the CC3Backgrounder singleton.
-	// Asynchronous loading must be initiated after the scene has been attached to the view.
-	// It cannot be started in the initializeScene method.
+	// Here, we add additional scene content dynamically and asynchronously on a background thread
+	// using the CC3Backgrounder singleton. Asynchronous loading must be initiated after the scene
+	// has been attached to the view, and should not be started in the initializeScene method.
+	// When running on Android, background loading can cause threading conflicts within the GL engine,
+	// depending on the device, and must be handled with extreme care. Because of this, if running
+	// under Android, we turn background loading off here and the addSceneContentAsynchronously
+	// method will run immediately on this thread, before further processing is performed.
+#if APPORTABLE
+	CC3Backgrounder.sharedBackgrounder.shouldRunTasksOnRequestingThread = YES;
+#endif
 	[CC3Backgrounder.sharedBackgrounder runBlock: ^{ [self addSceneContentAsynchronously]; }];
 
 	// Uncomment the first line to have the camera move to show the entire scene.
