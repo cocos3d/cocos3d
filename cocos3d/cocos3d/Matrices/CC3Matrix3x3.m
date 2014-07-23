@@ -32,7 +32,7 @@
 #import "CC3Matrix3x3.h"
 
 
-NSString* NSStringFromCC3Matrix3x3(CC3Matrix3x3* mtxPtr) {
+NSString* NSStringFromCC3Matrix3x3(const CC3Matrix3x3* mtxPtr) {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 200];
 	[desc appendFormat: @"\n\t[%.6f, %.6f, %.6f", mtxPtr->c1r1, mtxPtr->c2r1, mtxPtr->c3r1];
 	[desc appendFormat: @"\n\t %.6f, %.6f, %.6f", mtxPtr->c1r2, mtxPtr->c2r2, mtxPtr->c3r2];

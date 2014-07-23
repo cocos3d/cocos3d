@@ -99,7 +99,15 @@
 	// Create the window, make the controller (and its view) the root of the window, and present the window
 	_window = [[UIWindow alloc] initWithFrame: UIScreen.mainScreen.bounds];
 	[_window addSubview: director.view];
+
+#if CC3_CC2_1
+	UIViewController* viewController = [UIViewController new];
+	viewController.view = director.view;
+	_window.rootViewController = viewController;
+#else
 	_window.rootViewController = director;
+#endif	// CC3_CC2_1
+
 	[_window makeKeyAndVisible];
 	
 	

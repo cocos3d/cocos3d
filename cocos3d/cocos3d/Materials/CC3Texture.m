@@ -1503,7 +1503,7 @@ static CGFloat _dummyContentScale;
 #	define CC2_TEX_HAS_MIPMAP hasMipmaps_
 #	define CC2_TEX_ANTIALIASED _dummyAntiAliased
 #	define CC2_TEX_CONTENT_SCALE _dummyContentScale
-#endif
+#endif	// COCOS2D_VERSION >= 0x030000
 
 @implementation CC3Texture2DContent
 
@@ -1916,7 +1916,11 @@ contentSizeInPixels: (CGSize) sizeInPixels
 	return 0;
 }
 
+#if CC3_CC2_1
+-(BOOL) hasMipmap { return NO; }
+#else
 -(BOOL) hasMipmap { return CC2_TEX_HAS_MIPMAP; }
+#endif	// CC3_CC2_1
 
 -(BOOL) isUpsideDown { return self.class.texturesAreLoadedUpsideDown; }
 

@@ -42,6 +42,7 @@
 #define glClearDepth					glClearDepthf
 #define glGenerateMipmap				glGenerateMipmapOES
 #define glBindVertexArray				glBindVertexArrayOES
+#define glBlendFuncSeparate				glBlendFuncSeparateOES
 
 // Framebuffers
 #define glGenFramebuffers				glGenFramebuffersOES
@@ -159,12 +160,31 @@
 #define GL_RGBA16							0x805B
 
 // Shaders
-#define GL_FRAGMENT_SHADER					0x8B30
-#define GL_VERTEX_SHADER					0x8B31
-#define GL_ACTIVE_UNIFORMS					0x8B86
-#define GL_ACTIVE_UNIFORM_MAX_LENGTH		0x8B87
-#define GL_ACTIVE_ATTRIBUTES				0x8B89
-#define GL_ACTIVE_ATTRIBUTE_MAX_LENGTH		0x8B8A
+#define GL_FRAGMENT_SHADER                               0x8B30
+#define GL_VERTEX_SHADER                                 0x8B31
+#define GL_MAX_VERTEX_ATTRIBS                            0x8869
+#define GL_MAX_VERTEX_UNIFORM_VECTORS                    0x8DFB
+#define GL_MAX_VARYING_VECTORS                           0x8DFC
+#define GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS              0x8B4D
+#define GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS                0x8B4C
+#define GL_MAX_TEXTURE_IMAGE_UNITS                       0x8872
+#define GL_MAX_FRAGMENT_UNIFORM_VECTORS                  0x8DFD
+#define GL_SHADER_TYPE                                   0x8B4F
+#define GL_DELETE_STATUS                                 0x8B80
+#define GL_LINK_STATUS                                   0x8B82
+#define GL_VALIDATE_STATUS                               0x8B83
+#define GL_ATTACHED_SHADERS                              0x8B85
+#define GL_ACTIVE_UNIFORMS                               0x8B86
+#define GL_ACTIVE_UNIFORM_MAX_LENGTH                     0x8B87
+#define GL_ACTIVE_ATTRIBUTES                             0x8B89
+#define GL_ACTIVE_ATTRIBUTE_MAX_LENGTH                   0x8B8A
+#define GL_SHADING_LANGUAGE_VERSION                      0x8B8C
+#define GL_CURRENT_PROGRAM                               0x8B8D
+
+#define GL_COMPILE_STATUS                                0x8B81
+#define GL_INFO_LOG_LENGTH                               0x8B84
+#define GL_SHADER_SOURCE_LENGTH                          0x8B88
+#define GL_SHADER_COMPILER                               0x8DFA
 
 #define GL_INT								0x1404
 #define GL_FLOAT_VEC2						0x8B50
@@ -183,6 +203,43 @@
 #define GL_SAMPLER_2D						0x8B5E
 #define GL_SAMPLER_CUBE						0x8B60
 
+// Shader Precision-Specified Types
+#define GL_LOW_FLOAT                                     0x8DF0
+#define GL_MEDIUM_FLOAT                                  0x8DF1
+#define GL_HIGH_FLOAT                                    0x8DF2
+#define GL_LOW_INT                                       0x8DF3
+#define GL_MEDIUM_INT                                    0x8DF4
+#define GL_HIGH_INT                                      0x8DF5
+
+// Data types
+#define GL_UNSIGNED_INT						0x1405
+
+// Separate Blend Functions
+#define GL_BLEND_DST_RGB                                 0x80C8
+#define GL_BLEND_SRC_RGB                                 0x80C9
+#define GL_BLEND_DST_ALPHA                               0x80CA
+#define GL_BLEND_SRC_ALPHA                               0x80CB
+#define GL_CONSTANT_COLOR                                0x8001
+#define GL_ONE_MINUS_CONSTANT_COLOR                      0x8002
+#define GL_CONSTANT_ALPHA                                0x8003
+#define GL_ONE_MINUS_CONSTANT_ALPHA                      0x8004
+#define GL_BLEND_COLOR                                   0x8005
+
+// Vertex Arrays
+#define GL_VERTEX_ATTRIB_ARRAY_ENABLED                   0x8622
+#define GL_VERTEX_ATTRIB_ARRAY_SIZE                      0x8623
+#define GL_VERTEX_ATTRIB_ARRAY_STRIDE                    0x8624
+#define GL_VERTEX_ATTRIB_ARRAY_TYPE                      0x8625
+#define GL_VERTEX_ATTRIB_ARRAY_NORMALIZED                0x886A
+#define GL_VERTEX_ATTRIB_ARRAY_POINTER                   0x8645
+#define GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING            0x889F
+
+// Debug label extentions
+#define GL_SHADER_OBJECT_EXT                                    0x8B48
+#define GL_PROGRAM_OBJECT_EXT                                   0x8B40
+#define GL_QUERY_OBJECT_EXT                                     0x9153
+
+#define GL_PROGRAM_PIPELINE_OBJECT_EXT                          0x8A4F
 
 // General symbolic constants
 #ifndef GL_INCR_WRAP

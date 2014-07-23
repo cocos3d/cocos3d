@@ -141,11 +141,8 @@
  */
 -(void) establishDirectorController {
 	
-	// Establish the type of CCDirector to use.
-	// Try to use CADisplayLink director and if it fails (SDK < 3.1) use the default director.
-	// This must be the first thing we do and must be done before establishing view controller.
-	if( ! [CCDirector setDirectorType: kCCDirectorTypeDisplayLink] )
-		[CCDirector setDirectorType: kCCDirectorTypeDefault];
+	// Use CADisplayLink director for better animation.
+	CCDirector.directorType = kCCDirectorTypeDisplayLink;
 	
 	// Create the view controller for the 3D view.
 	_viewController = [CC3DeviceCameraOverlayUIViewController new];
@@ -204,7 +201,7 @@
 //	[cc3Layer runAction: [CCActionMoveTo actionWithDuration: 15.0 position: ccp(500.0, 250.0)]];
 
 	// Wrap the 3D layer in a 2D scene and run it in the director
-	[CCDirector.sharedDirector runWithScene: [cc3layer asCCScene]];
+	[CCDirector.sharedDirector runWithScene: [cc3Layer asCCScene]];
 
 	return YES;
 }

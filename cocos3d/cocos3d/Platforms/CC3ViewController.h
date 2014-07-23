@@ -46,13 +46,14 @@
 
 // For Cocos2D 3.0 and below, the superclass of the CC3ViewController depends on the platform.
 #if CC3_OGLES_2
-#	define CC3VCSuperclass CCDirectorDisplayLink
+#	define CC3VCSuperclass		CCDirectorDisplayLink
 #endif
 #if CC3_OGLES_1
-#	define CC3VCSuperclass UIViewController
+#	define CC3VCSuperclass		UIViewController
+#	define CCGLView				EAGLView
 #endif
 #if CC3_OGL
-#	define CC3VCSuperclass NSViewController
+#	define CC3VCSuperclass		NSViewController
 #endif
 
 

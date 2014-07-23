@@ -69,7 +69,7 @@
 	CC3VertexArray* va = [super vertexArrayForAttribute: attribute withVisitor: visitor];
 	return va ? va : visitor.currentMesh.vertexLocations;
 }
-#endif	// CC3_OGL
+#endif	// CC3_GLSL
 
 
 #pragma mark Textures

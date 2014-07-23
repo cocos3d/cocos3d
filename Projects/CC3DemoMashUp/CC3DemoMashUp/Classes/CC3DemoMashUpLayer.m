@@ -90,10 +90,9 @@
  */
 -(CC3DemoMashUpScene*) mashUpScene { return (CC3DemoMashUpScene*) self.cc3Scene; }
 
-
--(void) setCc3Scene: (CC3Scene*) aScene {
+-(void) setCc3Scene: (CC3DemoMashUpScene*) aScene {
 	[super setCc3Scene: aScene];
-	self.mashUpScene.primaryCC3DemoMashUpLayer = self;	// Point the scene back here
+	aScene.primaryCC3DemoMashUpLayer = self;	// Point the scene back here
 }
 
 -(void) initializeControls {

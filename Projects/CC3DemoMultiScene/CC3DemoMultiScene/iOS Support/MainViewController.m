@@ -96,6 +96,15 @@
 
 #pragma mark 3D scene and display layer
 
+#if CC3_CC2_CLASSIC
+
+/** Opens the specified 2D scene (containing the 3D scene). */
+-(void) openScene: (CCScene*) ccScene {
+	[CCDirector.sharedDirector replaceScene: ccScene];
+}
+
+#else
+
 /** Opens the specified 2D scene (containing the 3D scene), using a randomly-selected transition. */
 -(void) openScene: (CCScene*) ccScene {
 	[CCDirector.sharedDirector replaceScene: ccScene withTransition: [self getRandomTransition]];
@@ -138,6 +147,8 @@
 			return [CCTransition transitionPushWithDirection: direction duration: duration];
 	}
 }
+
+#endif	// CC3_CC2_CLASSIC
 
 /** Creates and returns a CCScene containing the 3D content of the CC3Demo3DTiles demo. */
 -(CCScene*) makeDemo3DTilesScene { return [[MainLayer layer] asCCScene]; }
@@ -207,6 +218,11 @@
 							   numberOfSamples: 1];
 
 	// Create and configure the CCDirector singleton.
+#if CC3_CC2_1
+	// Use CADisplayLink director for better animation.
+	CCDirector.directorType = kCCDirectorTypeDisplayLink;
+#endif	// CC3_CC2_1
+
 	CCDirector* director = CCDirector.sharedDirector;
 	director.animationInterval = (1.0f / kAnimationFrameRate);
 	director.displayStats = YES;

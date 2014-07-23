@@ -304,7 +304,7 @@
 
 #pragma mark Drawing
 
--(void) setCc3Scene:(CC3Scene *) aCC3Scene {
+-(void) setCc3Scene:(CC3PerformanceScene *) aCC3Scene {
 	[super setCc3Scene: aCC3Scene];
 
 	// To get histograms of update and drawing rates, use
@@ -313,7 +313,7 @@
 	aCC3Scene.performanceStatistics = [CC3PerformanceStatistics statistics];
 //	aCC3Scene.performanceStatistics = [CC3PerformanceStatisticsHistogram statistics];
 
-	[_nodeNameLabel setString: self.performanceScene.templateNode.name];
+	[_nodeNameLabel setString: aCC3Scene.templateNode.name];
 }
 
 //Specifies how often stats should be updated, in seconds

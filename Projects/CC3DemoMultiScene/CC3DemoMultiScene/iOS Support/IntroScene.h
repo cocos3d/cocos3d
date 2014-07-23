@@ -27,14 +27,22 @@
  * http://en.wikipedia.org/wiki/MIT_License
  */
 
+#import "CC3Environment.h"
 #import "CCScene.h"
 #import "CCLabelTTF.h"
-#import "CCNodeColor.h"
+
+#if CC3_CC2_CLASSIC
+#	import "CCLayer.h"
+#	define CCBackgroundClass	CCLayerColor
+#else
+#	import "CCNodeColor.h"
+#	define CCBackgroundClass	CCNodeColor
+#endif	// CC3_CC2_CLASSIC
 
 /** A static 2D introductory scene, containing no 3D content. */
 @interface IntroScene : CCScene {
 	CCLabelTTF* _label;
-	CCNodeColor* _background;
+	CCBackgroundClass* _background;
 }
 
 @end

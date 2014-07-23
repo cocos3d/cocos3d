@@ -31,7 +31,7 @@
 
 #import "IntroScene.h"
 #import "CC3Logging.h"
-#import "CC3Environment.h"
+#import "CC3CC2Extensions.h"
 
 /** Cocos2D v3 auto-scales images for Retina. Cocos2D v2 & v1 do not. This affects controls sizes. */
 #if CC3_CC2_CLASSIC
@@ -61,7 +61,7 @@
  */
 -(void) viewDidResizeTo: (CGSize) newViewSize {
 	self.contentSize = newViewSize;
-	[super viewDidResizeTo:newViewSize];	// Propagate to descendants
+	[super viewDidResizeTo: newViewSize];	// Propagate to descendants
 }
 
 /**
@@ -80,6 +80,15 @@
 	_label.position = ccp(cs.width / 2.0f, cs.height / 2.0f);
 }
 
+#if CC3_CC2_1
+/** For earlier Cocos2D, viewDidResizeTo: is invoked too early for initial layout. */
+-(void) onEnter {
+	self.contentSize = CCDirector.sharedDirector.winSize;
+	[super onEnter];
+}
+#endif	// CC3_CC2_1
+
+
 
 #pragma mark Allocation and initialization
 
@@ -92,14 +101,21 @@
 
 /** Adds a colored background and a label telling the user how to select a 3D scene to display. */
 -(void) initializeContent {
-	_background = [CCNodeColor nodeWithColor:[CCColor colorWithRed: 0.3f green: 0.3f blue: 0.3f alpha: 1.0f]];
+#if CC3_CC2_CLASSIC
+	_background = [CCLayerColor layerWithColor: ccc4(77, 77, 77, 255)];
+#else
+	_background = [CCNodeColor nodeWithColor: [CCColor colorWithRed: 0.3f green: 0.3f blue: 0.3f alpha: 1.0f]];
+#endif	// CC3_CC2_CLASSIC
 	[self addChild: _background];
 	
 	// Add a label, position it by its center, and scale it for the device
 	_label = [CCLabelTTF labelWithString: @"Use the buttons below\nto select a demo"
 								fontName: @"Chalkduster"
 								fontSize: 36.0f];
+#if !CC3_CC2_1
 	_label.horizontalAlignment = CCTextAlignmentCenter;
+#endif	// !CC3_CC2_1
+
 	[_label setAnchorPoint: ccp(0.5, 0.5)];
 	_label.scale = kControlSizeScale;
 	[self addChild: _label];

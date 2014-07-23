@@ -118,7 +118,7 @@ typedef union {
 } CC3Matrix4x4;
 
 /** Returns a string description of the specified CC3Matrix4x4, including contents. */
-NSString* NSStringFromCC3Matrix4x4(CC3Matrix4x4* mtxPtr);
+NSString* NSStringFromCC3Matrix4x4(const CC3Matrix4x4* mtxPtr);
 
 
 #pragma mark Heterogeneous matrix population

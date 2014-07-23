@@ -32,9 +32,15 @@
 #import "CC3CC2Extensions.h"
 #import "CC3RenderSurfaces.h"
 #import "CC3Logging.h"
-#import "CCES2Renderer.h"
 #import "CC3OpenGLUtility.h"
+#import "CC3ViewController.h"
 #import "uthash.h"
+
+#if CC3_CC2_1
+#	import "ES1Renderer.h"
+#else
+#	import "CCES2Renderer.h"
+#endif
 
 #if CC3_CC2_RENDER_QUEUE
 #else
@@ -69,6 +75,12 @@
 
 #endif	// !CC3_CC2_CLASSIC
 
+#if CC3_CC2_1
+#	define CCESRendererImpl		ES1Renderer
+#else
+#	define CCESRendererImpl		CCES2Renderer
+#endif	// CC3_CC2_1
+
 #if COCOS2D_VERSION < 0x020100
 #	define CC2_DEPTH_BUFFER		depthBuffer_
 #	define CC2_SAMPLES_TO_USE	samplesToUse_
@@ -77,12 +89,19 @@
 #	define CC2_SAMPLES_TO_USE	_samplesToUse
 #endif
 
-#if CC3_IOS
+#if CC3_OGLES_2
 @implementation CCES2Renderer (CC3)
 -(GLuint) depthBuffer { return CC2_DEPTH_BUFFER; }
 -(GLuint) pixelSamples { return CC2_SAMPLES_TO_USE; }
 @end
-#endif // CC3_IOS
+#endif // CC3_OGLES_2
+
+#if CC3_OGLES_1
+@implementation ES1Renderer (CC3)
+-(GLuint) depthBuffer { return CC2_DEPTH_BUFFER; }
+-(GLuint) pixelSamples { return CC2_SAMPLES_TO_USE; }
+@end
+#endif // CC3_OGLES_1
 
 
 @interface CCGLView (TemplateMethods)
@@ -94,6 +113,7 @@
 #	define CC2_PIXEL_FORMAT			pixelformat_
 #	define CC2_DEPTH_FORMAT			depthFormat_
 #	define CC2_CONTEXT				context_
+#	define CC2_RENDERER				renderer_
 #	define CC2_SIZE					size_
 #	define CC2_PRESERVE_BACKBUFFER	preserveBackbuffer_
 #else
@@ -101,7 +121,7 @@
 #	define CC2_PIXEL_FORMAT			_pixelformat
 #	define CC2_DEPTH_FORMAT			_depthFormat
 #	define CC2_CONTEXT				_context
-#	define CC2_RENDERER				((id<CCESRenderer>)_renderer)
+#	define CC2_RENDERER				_renderer
 #	define CC2_SIZE					_size
 #	define CC2_PRESERVE_BACKBUFFER	_preserveBackbuffer
 #endif
@@ -122,11 +142,11 @@
 
 -(GLuint) msaaColorBuffer { return [CC2_RENDERER msaaColorBuffer]; }
 
--(GLuint) depthBuffer { return [(CCES2Renderer*)CC2_RENDERER depthBuffer]; }
-
 -(GLuint) requestedSamples { return CC2_REQUESTED_SAMPLES; }
 
--(GLuint) pixelSamples { return [(CCES2Renderer*)CC2_RENDERER pixelSamples]; }
+-(GLuint) depthBuffer { return [(CCESRendererImpl*)CC2_RENDERER depthBuffer]; }
+
+-(GLuint) pixelSamples { return [(CCESRendererImpl*)CC2_RENDERER pixelSamples]; }
 
 -(id) initWithFrame: (CGRect) frame
 		pixelFormat: (NSString*) colorFormat
@@ -494,6 +514,27 @@
 
 #endif	// (COCOS2D_VERSION < 0x020100)
 
+#endif	// CC3_CC2_CLASSIC
+
+@end
+
+
+#pragma mark -
+#pragma mark CCScene extension
+
+@implementation CCScene (CC3)
+
+-(CCScene*) asCCScene { return self; }
+
+/** Invoke callbacks when size changes. */
+#if CC3_CC2_CLASSIC
+-(void) setContentSize: (CGSize) aSize {
+	CGSize oldSize = self.contentSize;
+	[super setContentSize: aSize];
+	if( !CGSizeEqualToSize(aSize, oldSize) ) {
+		[self contentSizeChanged];					// Invoked by super in Cocos2D v3
+	}
+}
 #endif	// CC3_CC2_CLASSIC
 
 @end

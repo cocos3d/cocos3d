@@ -29,7 +29,7 @@
 
 /** @file */	// Doxygen marker
 
-#import "CC3Environment.h"
+#import "CC3CC2Extensions.h"
 
 
 #pragma mark -
