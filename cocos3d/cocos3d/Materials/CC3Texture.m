@@ -1977,7 +1977,7 @@ GLenum CC3PixelGLFormatFromCCTexturePixelFormat(CCTexturePixelFormat pixelFormat
 		case CCTexturePixelFormat_AI88:		return GL_LUMINANCE_ALPHA;
 		case CCTexturePixelFormat_A8:		return GL_ALPHA;
 		default:
-			CC3AssertC(NO, @"Could not map OpenGL texel format from unexpected CCTexturePixelFormat %u", pixelFormat);
+			CC3AssertC(NO, @"Could not map OpenGL texel format from unexpected CCTexturePixelFormat %lu", (unsigned long)pixelFormat);
 			return GL_ZERO;
 	}
 }
@@ -1992,7 +1992,7 @@ GLenum CC3PixelGLTypeFromCCTexturePixelFormat(CCTexturePixelFormat pixelFormat) 
 		case CCTexturePixelFormat_AI88:		return GL_UNSIGNED_BYTE;
 		case CCTexturePixelFormat_A8:		return GL_UNSIGNED_BYTE;
 		default:
-			CC3AssertC(NO, @"Could not map OpenGL texel type from unexpected CCTexturePixelFormat %u", pixelFormat);
+			CC3AssertC(NO, @"Could not map OpenGL texel type from unexpected CCTexturePixelFormat %lu", (unsigned long)pixelFormat);
 			return GL_ZERO;
 	}
 }
