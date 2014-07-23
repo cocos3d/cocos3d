@@ -27,12 +27,11 @@
  * http://en.wikipedia.org/wiki/MIT_License
  */
 
-#import "CC3NSViewController.h"
+#import "CC3Environment.h"
 
 @interface CC3DemoMashUpAppDelegate : NSObject <NSApplicationDelegate> {
 	NSWindow* _window;
 	CCGLView* _glView;
-	CC3NSViewController* _viewController;
 }
 
 /** The window in which the app is displayed. */

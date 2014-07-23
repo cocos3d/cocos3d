@@ -2327,32 +2327,6 @@
 			<key>Path</key>
 			<string>cocos3d/cocos3d/Platforms/iOS/CC3UIViewController.m</string>
 		</dict>
-		<key>cocos3d/cocos3d/Platforms/OSX/CC3NSViewController.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>Platforms</string>
-				<string>OSX</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/Platforms/OSX/CC3NSViewController.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/Platforms/OSX/CC3NSViewController.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>Platforms</string>
-				<string>OSX</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/Platforms/OSX/CC3NSViewController.m</string>
-		</dict>
 		<key>cocos3d/cocos3d/Platforms/OSX/CC3OSXExtensions.h</key>
 		<dict>
 			<key>Group</key>
@@ -3035,6 +3009,28 @@
 			<key>Path</key>
 			<string>cocos3d/deprecated/CC3MeshModel.m</string>
 		</dict>
+		<key>cocos3d/deprecated/CC3NSViewController.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>deprecated</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/deprecated/CC3NSViewController.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/deprecated/CC3NSViewController.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>deprecated</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/deprecated/CC3NSViewController.m</string>
+		</dict>
 		<key>cocos3d/deprecated/CC3TargettingNode.h</key>
 		<dict>
 			<key>Group</key>
@@ -3344,8 +3340,6 @@
 		<string>cocos3d/cocos3d/Platforms/iOS/CC3IOSExtensions.m</string>
 		<string>cocos3d/cocos3d/Platforms/iOS/CC3UIViewController.h</string>
 		<string>cocos3d/cocos3d/Platforms/iOS/CC3UIViewController.m</string>
-		<string>cocos3d/cocos3d/Platforms/OSX/CC3NSViewController.h</string>
-		<string>cocos3d/cocos3d/Platforms/OSX/CC3NSViewController.m</string>
 		<string>cocos3d/cocos3d/Platforms/OSX/CC3OSXExtensions.h</string>
 		<string>cocos3d/cocos3d/Platforms/OSX/CC3OSXExtensions.m</string>
 		<string>cocos3d/cocos3d/Resources/CC3DataStreams.h</string>
@@ -3403,6 +3397,8 @@
 		<string>cocos3d/deprecated/CC3MatrixMath.h</string>
 		<string>cocos3d/deprecated/CC3MeshModel.h</string>
 		<string>cocos3d/deprecated/CC3MeshModel.m</string>
+		<string>cocos3d/deprecated/CC3NSViewController.h</string>
+		<string>cocos3d/deprecated/CC3NSViewController.m</string>
 		<string>cocos3d/deprecated/CC3TargettingNode.h</string>
 		<string>cocos3d/deprecated/CC3TargettingNode.m</string>
 		<string>cocos3d/deprecated/CC3VertexArrayMesh.h</string>

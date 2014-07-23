@@ -57,18 +57,12 @@
 	[_window center];
 	
 	// ******** START OF COCOS3D SETUP CODE... ********
-
-	// Create the view controller to coordinate the CC3Layer and window view
-	_viewController = [CC3NSViewController new];	// retained
-	_viewController.view = _glView;
 	
 	// Create the customized CC3Layer that supports 3D rendering.
 	CC3Layer* cc3Layer = [CC3DemoMashUpLayer layer];
 	
 	// Wrap the 3D layer in a 2D scene and run it in the director
-	CCScene *scene = [CCScene node];
-	[scene addChild: cc3Layer];
-	[director runWithScene: scene];
+	[CCDirector.sharedDirector runWithScene: [cc3Layer asCCScene]];
 }
 
 -(BOOL) applicationShouldTerminateAfterLastWindowClosed: (NSApplication*) theApplication {

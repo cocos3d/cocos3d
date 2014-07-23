@@ -59,11 +59,9 @@
 	// action, uncomment the lines above as described, and also uncomment the following two lines.
 //	cc3Layer.position = ccp(0.0, 0.0);
 //	[cc3Layer runAction: [CCActionMoveTo actionWithDuration: 15.0 position: ccp(500.0, 250.0)]];
-	
-	// Wrap the layer in a 2D scene and run it in the director
-	CCScene *scene = [CCScene node];
-	[scene addChild: cc3Layer];
-	return scene;
+
+	// Wrap the 3D layer in a 2D scene and return it
+	return [cc3Layer asCCScene];
 }
 
 @end
@@ -174,10 +172,8 @@
 //	cc3Layer.position = ccp(0.0, 0.0);
 //	[cc3Layer runAction: [CCActionMoveTo actionWithDuration: 15.0 position: ccp(500.0, 250.0)]];
 	
-	// Wrap the layer in a 2D scene and run it in the director
-	CCScene *scene = [CCScene node];
-	[scene addChild: cc3Layer];
-	[CCDirector.sharedDirector runWithScene: scene];
+	// Wrap the 3D layer in a 2D scene and run it in the director
+	[CCDirector.sharedDirector runWithScene: [cc3Layer asCCScene]];
 	
 	return YES;
 }

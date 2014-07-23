@@ -6,12 +6,11 @@
  *  Copyright ___ORGANIZATIONNAME___ ___YEAR___. All rights reserved.
  */
 
-#import "CC3NSViewController.h"
+#import "CC3Environment.h"
 
 @interface AppDelegate : NSObject <NSApplicationDelegate> {
 	NSWindow* _window;
 	CCGLView* _glView;
-	CC3NSViewController* _viewController;
 }
 
 /** The window in which the app is displayed. */

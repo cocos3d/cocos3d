@@ -37,7 +37,8 @@
 #pragma mark -
 #pragma mark CC3NSViewController interface
 
-/** CC3NSViewController extends CC3ViewController to provide functionality specific to OSX. */
+__deprecated
+/** @deprecated No longer required for OSX. */
 @interface CC3NSViewController : CC3ViewController {}
 @end
 
