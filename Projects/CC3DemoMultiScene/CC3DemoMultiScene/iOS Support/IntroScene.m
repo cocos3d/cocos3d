@@ -112,8 +112,13 @@
 	_label = [CCLabelTTF labelWithString: @"Use the buttons below\nto select a demo"
 								fontName: @"Chalkduster"
 								fontSize: 36.0f];
-#if !CC3_CC2_1
-	_label.horizontalAlignment = CCTextAlignmentCenter;
+
+// Align horizontally
+#if CC3_CC2_1												// Cocos2D 1.1 has not alignment option
+#elif CC3_CC2_2
+	_label.horizontalAlignment = kCCTextAlignmentCenter;	// Cocos2D 2.1
+#else
+	_label.horizontalAlignment = CCTextAlignmentCenter;		// Cocos2D 3.x
 #endif	// !CC3_CC2_1
 
 	[_label setAnchorPoint: ccp(0.5, 0.5)];
@@ -122,7 +127,5 @@
 	
 	[self positionContent];
 }
-
-
 
 @end
