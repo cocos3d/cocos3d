@@ -10,6 +10,8 @@
 
 #if CC3_CC2_RENDER_QUEUE	//================================================================
 
+#import "CC3DeviceCameraOverlayUIViewController.h"
+
 /**
  * App Delegate for Cocos2D v3 and above.
  *

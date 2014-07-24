@@ -56,15 +56,16 @@
 	   CCSetupShowDebugStats: @(YES),							// Show the FPS and draw call label.
 	   CCSetupAnimationInterval: @(1.0 / kAnimationFrameRate),	// Framerate (defaults to 60 FPS).
 	   CCSetupScreenOrientation: CCScreenOrientationAll,		// Support all device orientations dyanamically
-	   
 //	   CCSetupMultiSampling: @(YES),							// Use multisampling on the main view
 //	   CCSetupNumberOfSamples: @(4),							// Number of samples to use per pixel (max 4)
 	   }];
 
-	// To overlay the device camera, uncomment the following lines to use a specialized view controller
-//	_viewController = [[CC3DeviceCameraOverlayUIViewController alloc] init];
-//	_viewController.view = CCDirector.sharedDirector.view;
-//	_viewController.isOverlayingDeviceCamera = YES;
+	// For an Augmented Reality 3D overlay on the device camera, uncomment the following lines.
+	// This must be done after the window is made visible. The 3D scene contains a solid backdrop.
+	// To see the device camera behind the 3D scene, remove this backdrop, by commenting out the
+	// addBackdrop invocation in the initializeScene method of CC3DemoMashUpScene.
+//	CC3DeviceCameraOverlayUIViewController* viewController = [[CC3DeviceCameraOverlayUIViewController alloc] init];
+//	viewController.isOverlayingDeviceCamera = YES;
 	
 	return YES;
 }
@@ -174,10 +175,10 @@
 	_window.rootViewController = _viewController;
 	[_window makeKeyAndVisible];
 	
-	// Set to YES for Augmented Reality 3D overlay on device camera. This must be done after
-	// the window is made visible! The 3D scene contains a solid backdrop. To see the device
-	// camera behind the 3D scene, remove this backdrop, by commenting out the addBackdrop
-	// invocation in the initializeScene method of CC3DemoMashUpScene.
+	// For an Augmented Reality 3D overlay on the device camera, uncomment the following line.
+	// This must be done after the window is made visible. The 3D scene contains a solid backdrop.
+	// To see the device camera behind the 3D scene, remove this backdrop, by commenting out the
+	// addBackdrop invocation in the initializeScene method of CC3DemoMashUpScene.
 //	_viewController.isOverlayingDeviceCamera = YES;
 	
 	

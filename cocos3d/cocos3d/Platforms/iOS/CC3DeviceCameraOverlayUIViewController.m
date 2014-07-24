@@ -58,12 +58,6 @@
 	if(aBool != self.isOverlayingDeviceCamera) {
 		if(!aBool || self.isDeviceCameraAvailable) {
 
-			// Before switching, if a scene is running, send it onExit to stop it
-			CCDirector* director = CCDirector.sharedDirector;
-			CCScene* runningScene = director.runningScene;
-			BOOL sceneWasRunning = runningScene.isRunningInActiveScene;
-			if(sceneWasRunning) [runningScene onExit];
-
 			// Let subclasses of this controller know about the pending change
 			[self willChangeIsOverlayingDeviceCamera];
 
@@ -71,17 +65,18 @@
 			_isOverlayingDeviceCamera = aBool;
 
 			// Get the GL view to be overlaid
+			CCDirector* director = CCDirector.sharedDirector;
 			UIView* glView = director.view;
 
 			if(_isOverlayingDeviceCamera) {
-				// If overlaying, set the background color to clear, and add the picker view.
-				UIWindow* window = glView.window;
+				// If overlaying, set the background color to clear, and add the camera view.
 				glView.backgroundColor = [UIColor clearColor];
+				UIWindow* window = glView.window;
 				[window addSubview: self.deviceCameraView];
-				[window bringSubviewToFront: glView];
+				[window sendSubviewToBack: _deviceCameraView];
 				[_deviceCameraView.layer.session startRunning];
 			} else {
-				// If reverting, remove the clear background color, and remove the picker view from the window.
+				// If reverting, remove the clear background color, and remove the camera view from the window.
 				glView.backgroundColor = nil;
 				[_deviceCameraView.layer.session stopRunning];
 				[_deviceCameraView removeFromSuperview];
@@ -89,13 +84,14 @@
 
 			// If this layer is overlaying the device camera, the GL clear color is
 			// set to transparent black, otherwise it is set to opaque black.
-			CC3OpenGL.sharedGL.clearColor = _isOverlayingDeviceCamera ? kCCC4FBlackTransparent : kCCC4FBlack;
+			ccColor4F backgroundColor = _isOverlayingDeviceCamera ? kCCC4FBlackTransparent : kCCC4FBlack;
+			CC3OpenGL.sharedGL.clearColor = backgroundColor;
+#if CC3_CC2_RENDER_QUEUE
+			director.runningScene.colorRGBA = [CCColor colorWithCcColor4f: backgroundColor];
+#endif	// CC3_CC2_RENDER_QUEUE
 
 			// Let subclasses of this controller know that the change has happened
 			[self didChangeIsOverlayingDeviceCamera];
-
-			// After switching, if the CCScene was running, send it onEnter to restart it
-			if(sceneWasRunning) [runningScene onEnter];
 		}
 	}
 }
@@ -111,18 +107,18 @@
 	return _deviceCameraView || [UIImagePickerController isSourceTypeAvailable: UIImagePickerControllerSourceTypeCamera];
 }
 
+/** Lazily creates the view that will display the image from the device camera. */
 -(CC3AVCameraView*) deviceCameraView {
 	if ( !_deviceCameraView && self.isDeviceCameraAvailable ) {
+		
+		CGRect viewFrame = CCDirector.sharedDirector.view.window.bounds;
+		_deviceCameraView = [[CC3AVCameraView alloc] initWithFrame: viewFrame];	// retained
 		
 		AVCaptureDevice* camDevice = [AVCaptureDevice defaultDeviceWithMediaType: AVMediaTypeVideo];
 		AVCaptureInput* avInput = [AVCaptureDeviceInput deviceInputWithDevice: camDevice error: nil];
 		AVCaptureSession* avSession = [[[AVCaptureSession alloc] init] autorelease];
 		[avSession addInput: avInput];
-		
-		UIView* glView = CCDirector.sharedDirector.view;
-		CGRect vf = glView.frame;
-		_deviceCameraView = [[CC3AVCameraView alloc] initWithFrame: vf];	// retained
-		
+
 		AVCaptureVideoPreviewLayer* avLayer = _deviceCameraView.layer;
 		avLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
 		avLayer.session = avSession;

@@ -37,6 +37,13 @@
 //	   CCSetupNumberOfSamples: @(4),							// Number of samples to use per pixel (max 4)
 	   }];
 	
+	// For an Augmented Reality 3D overlay on the device camera, uncomment the following lines.
+	// This must be done after the window is made visible. The 3D scene contains a solid backdrop.
+	// To see the device camera behind the 3D scene, remove this backdrop, by commenting out the
+	// addBackdrop invocation in the initializeScene method of CC3DemoMashUpScene.
+//	CC3DeviceCameraOverlayUIViewController* viewController = [[CC3DeviceCameraOverlayUIViewController alloc] init];
+//	viewController.isOverlayingDeviceCamera = YES;
+	
 	return YES;
 }
 
@@ -148,8 +155,10 @@
 	_window.rootViewController = _viewController;
 	[_window makeKeyAndVisible];
 	
-	// Set to YES for an Augmented Reality 3D overlay on device camera.
-	// This must be done after the window is made visible!
+	// For an Augmented Reality 3D overlay on the device camera, uncomment the following line.
+	// This must be done after the window is made visible. The 3D scene contains a solid backdrop.
+	// To see the device camera behind the 3D scene, remove this backdrop, by commenting out the
+	// addBackdrop invocation in the initializeScene method of CC3DemoMashUpScene.
 //	_viewController.isOverlayingDeviceCamera = YES;
 
 	
