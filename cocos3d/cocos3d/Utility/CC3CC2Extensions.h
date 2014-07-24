@@ -35,6 +35,7 @@
 #import "CC3OSExtensions.h"
 #import "CC3ViewController.h"
 #import "CCTextureCache.h"
+#import "CC3EAGLView.h"
 #import <GLKit/GLKMatrix4.h>
 
 #if !CC3_CC2_CLASSIC
@@ -201,11 +202,6 @@ typedef CCColor* CCColorRef;
 
 #pragma mark -
 #pragma mark CCGLView
-
-#if CC3_IOS && CC3_CC2_1
-/** Under cocos2d 1.x iOS, create an alias CCGLView for EAGLView. */
-#	define CCGLView EAGLView
-#endif	// CC3_IOS && CC3_CC2_1
 
 /** Extension to support cocos3d functionality. */
 @interface CCGLView (CC3)

@@ -2036,6 +2036,32 @@
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
+		<key>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3EAGLView.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>OpenGL</string>
+				<string>OpenGLES1</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3EAGLView.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3EAGLView.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>OpenGL</string>
+				<string>OpenGLES1</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3EAGLView.m</string>
+		</dict>
 		<key>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3OpenGLES1.h</key>
 		<dict>
 			<key>Group</key>
@@ -3317,6 +3343,8 @@
 		<string>cocos3d/cocos3d/OpenGL/OpenGL/CC3OpenGL2.h</string>
 		<string>cocos3d/cocos3d/OpenGL/OpenGL/CC3OpenGL2.m</string>
 		<string>cocos3d/cocos3d/OpenGL/OpenGL/CC3OpenGLCompatibility.h</string>
+		<string>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3EAGLView.h</string>
+		<string>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3EAGLView.m</string>
 		<string>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3OpenGLES1.h</string>
 		<string>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3OpenGLES1.m</string>
 		<string>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3OpenGLES1Compatibility.h</string>

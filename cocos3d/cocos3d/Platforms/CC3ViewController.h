@@ -30,6 +30,7 @@
 /** @file */	// Doxygen marker
 
 #import "CC3Environment.h"
+#import "CC3EAGLView.h"
 
 
 // CC3ViewController and its subclasses are not used for Cocos2D 3.1 and above.
@@ -50,7 +51,6 @@
 #endif
 #if CC3_OGLES_1
 #	define CC3VCSuperclass		UIViewController
-#	define CCGLView				EAGLView
 #endif
 #if CC3_OGL
 #	define CC3VCSuperclass		NSViewController
