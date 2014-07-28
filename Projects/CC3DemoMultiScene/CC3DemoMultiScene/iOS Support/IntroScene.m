@@ -55,12 +55,9 @@
 
 @implementation IntroScene
 
-/**
- * Invoked automatically when the OS view has been resized.
- * Resizes this instance to match the view size.
- */
+/** Invoked automatically when the OS view has been resized. Resize this layer to match the new view shape. */
 -(void) viewDidResizeTo: (CGSize) newViewSize {
-	self.contentSize = newViewSize;
+	self.contentSize = CCNodeSizeFromViewSize(newViewSize);
 	[super viewDidResizeTo: newViewSize];	// Propagate to descendants
 }
 

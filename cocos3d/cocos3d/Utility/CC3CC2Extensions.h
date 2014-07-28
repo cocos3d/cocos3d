@@ -818,6 +818,16 @@ enum {
 #pragma mark -
 #pragma mark Miscellaneous extensions and functions
 
+/** 
+ * Returns the size of a CCNode that will cover the specified view size, 
+ * taking into consideration whether the view is a Retina view.
+ */
+static inline CGSize CCNodeSizeFromViewSize(CGSize viewSize) {
+	GLfloat viewScaleFactor = 1.0f / CCDirector.sharedDirector.contentScaleFactor;
+	return CGSizeMake(viewSize.width * viewScaleFactor,
+					  viewSize.height * viewScaleFactor);
+}
+
 /** Returns the name of the specified touch type. */
 NSString* NSStringFromTouchType(uint tType);
 

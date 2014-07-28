@@ -334,9 +334,9 @@
 	CC3ViewSurfaceManager.sharedViewSurfaceManager.size = CC3IntSizeFromCGSize(newViewSize);
 	
 	// If this layer should track the size of the view, update the size of this layer.
-	if (self.shouldTrackViewSize) self.contentSize = newViewSize;
+	if (self.shouldTrackViewSize) self.contentSize = CCNodeSizeFromViewSize(newViewSize);
 
-	[super viewDidResizeTo:newViewSize];	// Propagate to descendants
+	[super viewDidResizeTo: newViewSize];	// Propagate to descendants
 }
 
 
