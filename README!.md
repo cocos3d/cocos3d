@@ -435,7 +435,7 @@ existing 2D application or game.
 		1. In the **Header Search Paths** (aka `HEADER_SEARCH_PATHS`) entry, add an entry to
 		   `"$(SRCROOT)/$(PROJECT_NAME)/Libraries/cocos3d/cocos3d/cocos3d"` (including the quote marks),
 		   and mark it as `recursive`.
-		2. In the **Other Linker Flags** (aka `OTHER_LD_FLAGS`) entry, add an entry for `-lstdc++`.
+		2. In the **Other Linker Flags** (aka `OTHER_LDFLAGS`) entry, add an entry for `-lstdc++`.
 
 3. Cocos3D requires a depth buffer to provide 3D depth realism. You can add a depth buffer in your
    application code in the `AppDelegate.m` file. For Cocos2D 3.x, in the `application:didFinishLaunchingWithOptions:`
@@ -480,7 +480,7 @@ instructions to add the Cocos3D libraries:
    to your SpriteBuilder Xcode project, as follows:
 
 	1. Open Xcode, and, in the menu bar, choose `File->New->Project...`. In the dialog box that opens,
-	   select the *Cocos3D iOS Static Library* project template from the *Cocos3D* group of iOS templates.
+	   select the *Cocos3D Static Library* project template from the *Cocos3D* group of iOS templates.
 
 	2. Name your new Xcode project *cocos3d*, and save it to the `MySpriteBuilderApp.spritebuilder/Source/libs`
 	   folder within your SpriteBuilder app.
