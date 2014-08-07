@@ -134,6 +134,6 @@
  *
  * Returns nil if the file could not be loaded.
  */
--(id) initFromFile: (NSString*) aFilePath;
+-(id) initFromFile: (NSString*) filePath;
 
 @end

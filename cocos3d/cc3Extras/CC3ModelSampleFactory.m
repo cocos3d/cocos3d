@@ -137,6 +137,10 @@
 		vCols[i].b = 255 * (vLocs[i].z - vlMin.z) / vlRange.z;
 		vCols[i].a = 255;
 	}
+
+	// To allow the color of the individual vertices to be changed at a later time, the vertex
+	// colors are retained in memory by setting the shouldReleaseRedundantContent property to NO.
+	_teapotVertexColors.shouldReleaseRedundantContent = NO;
 	
 	// Progamatically create a texture array to map an arbitrary texture to the mesh vertices
 	// in the X-Y plane. This would never happen in practice. Normally, the texture array would
@@ -148,6 +152,10 @@
 		vTexCoord[i].u = (vLocs[i].x - vlMin.x) / vlRange.x;
 		vTexCoord[i].v = (vLocs[i].y - vlMin.y) / vlRange.y;
 	}
+
+	// To allow textures of differing sizes to be assigned to this mesh, the texture coordinates
+	// are retained in memory by setting the shouldReleaseRedundantContent property to NO.
+	_teapotVertexTextureCoordinates.shouldReleaseRedundantContent = NO;
 }
 
 // Initialize several teapot meshes that can be reused in many teapots.

@@ -31,15 +31,80 @@
 
 #import "CC3PerformanceAppDelegate.h"
 #import "CC3PerformanceLayer.h"
-#import "CC3PerformanceScene.h"
 
 
 #define kAnimationFrameRate		60		// Animation frame rate
 
+#if CC3_CC2_RENDER_QUEUE	//================================================================
+
+/** App Delegate for Cocos2D v3 and above. */
 @implementation CC3PerformanceAppDelegate
 
+// This is the only app delegate method you need to implement when inheriting from CCAppDelegate.
+// This method is a good place to add one time setup code that only runs when your app is first launched.
+-(BOOL) application: (UIApplication*) application didFinishLaunchingWithOptions: (NSDictionary*) launchOptions {
+	
+	// Setup Cocos2D with reasonable defaults for everything.
+	// With Cocos3D, you MUST include CCSetupDepthFormat as GL_DEPTH_COMPONENT16 or GL_DEPTH_COMPONENT24
+	// if you don't need shadow volumes, or GL_DEPTH24_STENCIL8 if you want to use shadow volumes.
+	// See CCAppDelegate.h for more options.
+	// If you want more flexibility, you can configure Cocos2D yourself instead of calling setupCocos2dWithOptions:.
+	[self setupCocos2dWithOptions:
+	 @{
+	   CCSetupDepthFormat: @GL_DEPTH_COMPONENT16,				// 3D rendering requires a depth buffer
+	   CCSetupShowDebugStats: @(YES),							// Show the FPS and draw call label.
+	   CCSetupAnimationInterval: @(1.0 / kAnimationFrameRate),	// Framerate (defaults to 60 FPS).
+	   CCSetupScreenOrientation: CCScreenOrientationAll,		// Support all device orientations dyanamically
+//	   CCSetupMultiSampling: @(YES),							// Use multisampling on the main view
+//	   CCSetupNumberOfSamples: @(4),							// Number of samples to use per pixel (max 4)
+	   }];
+	
+	return YES;
+}
 
-#if CC3_CC2_1
+/** Returns the initial 2D CCScene. Our 2D scene contains a CC3Layer holding a 3D CC3Scene. */
+-(CCScene*) startScene {
+	
+	// Create the customized CC3Layer that supports 3D rendering,
+	// wrap the layer in a 2D scene and return the 2D scene.
+	return [[CC3PerformanceLayer layer] asCCScene];
+}
+
+@end
+
+
+#else	//================================================================================
+
+
+/** App Delegate for Cocos2D below v3. */
+@implementation CC3PerformanceAppDelegate
+
+#if !CC3_CC2_1
+/**
+ * In cocos2d 2.x, the view controller and CCDirector are one and the same, and we create the
+ * controller using the singleton mechanism. To establish the correct CCDirector/UIViewController
+ * class, this MUST be performed before any other references to the CCDirector singleton!!
+ *
+ * NOTE: As of iOS6, supported device orientations are an intersection of the mask established for the
+ * UIViewController (as set in this method here), and the values specified in the project 'Info.plist'
+ * file, under the 'Supported interface orientations' and 'Supported interface orientations (iPad)'
+ * keys. Specifically, although the mask here is set to UIInterfaceOrientationMaskAll, to ensure that
+ * all orienatations are enabled under iOS6, be sure that those settings in the 'Info.plist' file also
+ * reflect all four orientation values. By default, the 'Info.plist' settings only enable the two
+ * landscape orientations. These settings can also be set on the Summary page of your project.
+ */
+-(void) establishDirectorController {
+	_viewController = CC3DeviceCameraOverlayUIViewController.sharedDirector;
+	_viewController.supportedInterfaceOrientations = UIInterfaceOrientationMaskAll;
+	_viewController.viewShouldUseStencilBuffer = NO;	// No shadow volumes in this app
+	_viewController.viewPixelSamples = 1;				// Set to 4 for antialiasing multisampling
+	_viewController.animationInterval = (1.0f / kAnimationFrameRate);
+	_viewController.displayStats = YES;
+	[_viewController enableRetinaDisplay: YES];
+}
+
+#else
+
 /**
  * In cocos2d 1.x, the view controller and CCDirector are different objects.
  *
@@ -53,14 +118,11 @@
  */
 -(void) establishDirectorController {
 	
-	// Establish the type of CCDirector to use.
-	// Try to use CADisplayLink director and if it fails (SDK < 3.1) use the default director.
-	// This must be the first thing we do and must be done before establishing view controller.
-	if( ! [CCDirector setDirectorType: kCCDirectorTypeDisplayLink] )
-		[CCDirector setDirectorType: kCCDirectorTypeDefault];
+	// Use CADisplayLink director for better animation.
+	CCDirector.directorType = kCCDirectorTypeDisplayLink;
 	
 	// Create the view controller for the 3D view.
-	_viewController = [CC3UIViewController new];
+	_viewController = [CC3DeviceCameraOverlayUIViewController new];
 	_viewController.supportedInterfaceOrientations = UIInterfaceOrientationMaskAll;
 	_viewController.viewShouldUseStencilBuffer = YES;	// Shadow volumes make use of stencil buffer
 	_viewController.viewPixelSamples = 1;				// Set to 4 for antialiasing multisampling
@@ -76,34 +138,9 @@
 	// This must be done after the GL view is assigned to the director!
 	[director enableRetinaDisplay: YES];
 }
+#endif	// !CC3_CC2_1
 
-#else
-
-/**
- * In cocos2d 2.x, the view controller and CCDirector are one and the same, and we create the
- * controller using the singleton mechanism. To establish the correct CCDirector/UIViewController
- * class, this MUST be performed before any other references to the CCDirector singleton!!
- *
- * NOTE: As of iOS6, supported device orientations are an intersection of the mask established for the
- * UIViewController (as set in this method here), and the values specified in the project 'Info.plist'
- * file, under the 'Supported interface orientations' and 'Supported interface orientations (iPad)'
- * keys. Specifically, although the mask here is set to UIInterfaceOrientationMaskAll, to ensure that
- * all orienatations are enabled under iOS6, be sure that those settings in the 'Info.plist' file also
- * reflect all four orientation values. By default, the 'Info.plist' settings only enable the two
- * landscape orientations. These settings can also be set on the Summary page of your project.
- */
--(void) establishDirectorController {
-	_viewController = CC3UIViewController.sharedDirector;
-	_viewController.supportedInterfaceOrientations = UIInterfaceOrientationMaskAll;
-	_viewController.viewShouldUseStencilBuffer = NO;	// No shadow volumes in this app
-	_viewController.viewPixelSamples = 1;				// Set to 4 for antialiasing multisampling
-	_viewController.animationInterval = (1.0f / kAnimationFrameRate);
-	_viewController.displayStats = YES;
-	[_viewController enableRetinaDisplay: YES];
-}
-#endif	// CC3_CC2_1
-
--(void) applicationDidFinishLaunching: (UIApplication*) application {
+-(BOOL) application: (UIApplication*) application didFinishLaunchingWithOptions: (NSDictionary*) launchOptions {
 	
 	// Establish the view controller and CCDirector (in cocos2d 2.x, these are one and the same)
 	[self establishDirectorController];
@@ -114,20 +151,17 @@
 	_window.rootViewController = _viewController;
 	[_window makeKeyAndVisible];
 	
+	// Set to YES for Augmented Reality 3D overlay on device camera.
+	// This must be done after the window is made visible!
+//	_viewController.isOverlayingDeviceCamera = YES;
+	
 	
 	// ******** START OF COCOS3D SETUP CODE... ********
 	
-	// Create the customized CC3Layer and CC3Scene.
-	CC3Layer* cc3Layer = [CC3PerformanceLayer layer];
-	cc3Layer.cc3Scene = [CC3PerformanceScene scene];
+	// Create the customized CC3Layer and CC3Scene, and run it in the CCDirector.
+	[CCDirector.sharedDirector runWithScene: [[CC3PerformanceLayer layer] asCCScene]];
 	
-	// Set the layer in the controller
-	_viewController.controlledNode = cc3Layer;
-	
-	// Run the layer in the director
-	CCScene *scene = [CCScene node];
-	[scene addChild: cc3Layer];
-	[CCDirector.sharedDirector runWithScene: scene];
+	return YES;
 }
 
 -(void) applicationWillResignActive: (UIApplication*) application {
@@ -163,7 +197,7 @@
 }
 
 -(void)applicationWillTerminate: (UIApplication*) application {
-	[_viewController terminateOpenGL];
+	[CC3OpenGL terminateOpenGL];
 }
 
 -(void) applicationSignificantTimeChange: (UIApplication*) application {
@@ -171,3 +205,5 @@
 }
 
 @end
+
+#endif	// CC3_CC2_RENDER_QUEUE

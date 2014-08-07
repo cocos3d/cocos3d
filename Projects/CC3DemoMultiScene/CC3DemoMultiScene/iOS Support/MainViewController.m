@@ -30,66 +30,57 @@
  */
 
 #import "MainViewController.h"
-#import "CC3DeviceCameraOverlayUIViewController.h"
 #import "CC3DemoMashUpLayer.h"
-#import "CC3DemoMashUpScene.h"
 #import "CC3PerformanceLayer.h"
-#import "CC3PerformanceScene.h"
 #import "MainLayer.h"
+#import "IntroScene.h"
+#import "CC3CC2Extensions.h"
 
 
 #define kAnimationFrameRate		60		// Animation frame rate
 
+
 @implementation MainViewController
 
-@synthesize cc3Controller=_cc3Controller;
 @synthesize cc3FrameView=_cc3FrameView;
 @synthesize sceneSelectorControl=_sceneSelectorControl;
 @synthesize progressView=_progressView;
+
 
 #pragma mark 3D scene selection
 
 /**
  * Received from the specified segmented control.
  *
- * Take note of which 3D scene has been selected, disable further user interation during the initial
- * loading of the new 3D scene, and trigger the closing of the current 3D scene. The new 3D scene
- * will be loaded once the current 3D scene has been closed. Since closing the current 3D scene
- * is performed asynchonously, we get a callback when that is complete, and we can then load the
- * new scene from there.
+ * Takes note of which 3D scene has been selected, disables further user interaction
+ * during the loading of, and transition to, the new 3D scene.
  */
 -(IBAction) requestChange3DSceneFromSegmentControl: (UISegmentedControl*) sender {
 	_selectedScene = (SelectedScene)sender.selectedSegmentIndex;
 	[self disableUI];
-	[_cc3Controller.view removeFromSuperview];
 
-	// The delay added here before closing the current 3D scene gives the UI a chance
-	// to refresh before the scene closing operation starts.
-	[self performSelector: @selector(close3DController) withObject: nil afterDelay: 0];
+	// The delay and disconnect added here gives the UI a chance to refresh
+	// before the scene-loading operation starts.
+	[self performSelector: @selector(loadSelected3DScene) withObject: nil afterDelay: 0];
 }
 
-/**
- * Opens a new 3D controller, with a new, previously selected, 3D scene.
- * This method is invoked asynchronously from the didTerminateOpenGL callback.
- */
+/** Opens a new 3D controller, with a new, previously selected, 3D scene, and re-enables the UI. */
 -(void) loadSelected3DScene {
 	switch (_selectedScene) {
 		case kSelectedSceneMashUp:
 			LogInfo(@"MashUp scene selected");
-			[self open3DControllerWithShadows: YES];
-			[self open3DLayer: [self makeDemoMashUpLayer]];
+			[self openScene: [self makeDemoMashUpScene]];
 			break;
 		case kSelectedSceneTiles:
 			LogInfo(@"Tiles scene selected");
-			[self open3DControllerWithShadows: NO];
-			[self open3DLayer: [self makeDemo3DTilesLayer]];
+			[self openScene: [self makeDemo3DTilesScene]];
 			break;
 		case kSelectedScenePerformance:
 			LogInfo(@"Performance scene selected");
-			[self open3DControllerWithShadows: NO];
-			[self open3DLayer: [self makePerformanceLayer]];
+			[self openScene: [self makePerformanceScene]];
 			break;
 		case kSelectedSceneNone:
+			[self openScene: [self makeIntroScene]];
 		default:
 			LogInfo(@"No scene selected");
 			break;
@@ -97,169 +88,96 @@
 
 	// Enable the UI only after a short delay. This gives the main thread loop a chance to drain
 	// any touch events on the controls accumulated while they were disabled, before enabling them.
-	// It also allows any background loading in the 3D scene, that is started when the view is
-	// first opened, to start before possibly queuing a request to close the OpenGL environment,
-	// which must be processed after (not before) the background loading starts. Although a
-	// shorter delay is possible, we've chosen 0.5 seconds as visually appealing, as it appears
-	// more deliberate than, say, a 0.2 second delay.
+	// Although a shorter delay is possible, we've chosen 0.5 seconds as visually appealing, as it
+	// appears more deliberate than, say, a 0.2 second delay.
 	[self performSelector: @selector(enableUI) withObject: nil afterDelay: 0.5];
-}
-
-/** 
- * Creates and opens a new 3D controller. The supportShadows argument indicates whether the
- * controller should be configured to support shadows. The frame of the GL view is set to 
- * fill the framing container view.
- */
--(void) open3DControllerWithShadows: (BOOL) supportShadows {
-	CC3Assert(!_cc3Controller, @"%@ already exists. Close it before opening it again.", _cc3Controller);
-	
-	// Ensure the 3D controller has been created, set its view bounds to fill the placeholder
-	// frame view that is part of the parent view controller, and add the 3D view to the frame view.
-	_cc3Controller = [self makeCC3ControllerWithShadows: supportShadows];
-	_cc3Controller.view.frame = [_cc3FrameView bounds];
-	[_cc3FrameView addSubview: _cc3Controller.view];
-}
-
-#if CC3_CC2_1
-/**
- * In cocos2d 1.x, the view controller and CCDirector are different objects.
- *
- * NOTE: As of iOS6, supported device orientations are an intersection of the mask established for the
- * UIViewController (as set in this method here), and the values specified in the project 'Info.plist'
- * file, under the 'Supported interface orientations' and 'Supported interface orientations (iPad)'
- * keys. Specifically, although the mask here is set to UIInterfaceOrientationMaskAll, to ensure that
- * all orienatations are enabled under iOS6, be sure that those settings in the 'Info.plist' file also
- * reflect all four orientation values. By default, the 'Info.plist' settings only enable the two
- * landscape orientations. These settings can also be set on the Summary page of your project.
- */
--(CC3UIViewController*) makeCC3ControllerWithShadows: (BOOL) supportShadows {
-	
-	// Establish the type of CCDirector to use.
-	// Try to use CADisplayLink director and if it fails (SDK < 3.1) use the default director.
-	// This must be the first thing we do and must be done before establishing view controller.
-	if( ! [CCDirector setDirectorType: kCCDirectorTypeDisplayLink] )
-		[CCDirector setDirectorType: kCCDirectorTypeDefault];
-	
-	// Create the view controller for the 3D view.
-	CC3UIViewController* cc3VC = [CC3DeviceCameraOverlayUIViewController new];
-	cc3VC.supportedInterfaceOrientations = UIInterfaceOrientationMaskAll;
-	cc3VC.viewShouldUseStencilBuffer = supportShadows;	// Shadow volumes make use of stencil buffer
-	cc3VC.viewPixelSamples = 1;							// Set to 4 for antialiasing multisampling
-	
-	// Create the CCDirector, set the frame rate, and attach the view.
-	CCDirector *director = CCDirector.sharedDirector;
-	director.runLoopCommon = YES;		// Improves display link integration with UIKit
-	director.animationInterval = (1.0f / kAnimationFrameRate);
-	director.displayFPS = YES;
-	director.openGLView = cc3VC.view;
-	
-	// Enables High Res mode on Retina Displays and maintains low res on all other devices
-	// This must be done after the GL view is assigned to the director!
-	[director enableRetinaDisplay: YES];
-
-	return cc3VC;
-}
-
-#else
-
-/**
- * In cocos2d 2.x, the view controller and CCDirector are one and the same, and we create the
- * controller using the singleton mechanism. To establish the correct CCDirector/UIViewController
- * class, this MUST be performed before any other references to the CCDirector singleton!!
- *
- * NOTE: As of iOS6, supported device orientations are an intersection of the mask established for the
- * UIViewController (as set in this method here), and the values specified in the project 'Info.plist'
- * file, under the 'Supported interface orientations' and 'Supported interface orientations (iPad)'
- * keys. Specifically, although the mask here is set to UIInterfaceOrientationMaskAll, to ensure that
- * all orienatations are enabled under iOS6, be sure that those settings in the 'Info.plist' file also
- * reflect all four orientation values. By default, the 'Info.plist' settings only enable the two
- * landscape orientations. These settings can also be set on the Summary page of your project.
- */
--(CC3UIViewController*) makeCC3ControllerWithShadows: (BOOL) supportShadows {
-	CC3UIViewController* cc3VC = CC3DeviceCameraOverlayUIViewController.sharedDirector;
-	cc3VC.supportedInterfaceOrientations = UIInterfaceOrientationMaskAll;
-	cc3VC.viewShouldUseStencilBuffer = supportShadows;	// Shadow volumes make use of stencil buffer
-	cc3VC.viewPixelSamples = 1;							// Set to 4 for antialiasing multisampling
-	cc3VC.animationInterval = (1.0f / kAnimationFrameRate);
-	cc3VC.displayStats = YES;
-	[cc3VC enableRetinaDisplay: YES];
-	return cc3VC;
-}
-#endif	// CC3_CC2_1
-
-/**
- * Closes the current 3D controller, removes the controller's view from the view hierarchy,
- * and shuts down all OpenGL behaviour.
- *
- * If a current controller exists, once it is closed, and OpenGL is terminated, the 
- * didTerminateOpenGL callback will trigger the loading of the new selected 3D scene.
- * If there is no current controller to close, no callback will be sent, so load the
- * new selected 3D scene immediately.
- */
--(void) close3DController {
-	if (_cc3Controller) {
-		[_cc3Controller terminateOpenGL];
-		_cc3Controller = nil;
-	} else {
-		[self loadSelected3DScene];
-	}
 }
 
 
 #pragma mark 3D scene and display layer
 
-/** Opens the specified 3D layer (containing a 3D scene), on the 3D controller. */
--(void) open3DLayer: (CC3ControllableLayer*) layer3D {
-	CC3Assert(_cc3Controller, @"The view controller for %@ has not be created.", layer3D);
+#if CC3_CC2_CLASSIC
+
+/** Opens the specified 2D scene (containing the 3D scene). */
+-(void) openScene: (CCScene*) ccScene {
+	[CCDirector.sharedDirector replaceScene: ccScene];
+}
+
+#else
+
+/** Opens the specified 2D scene (containing the 3D scene), using a randomly-selected transition. */
+-(void) openScene: (CCScene*) ccScene {
+	[CCDirector.sharedDirector replaceScene: ccScene withTransition: [self getRandomTransition]];
+}
+
+/** Returns a Cocos2D scene transition of a randomly-selected style and direction. */
+-(CCTransition*) getRandomTransition {
 	
-	// Set the 3D layer in the 3D controller
-	_cc3Controller.controlledNode = layer3D;
+	// Select a random transition direction
+	CCTransitionDirection direction = CCTransitionDirectionInvalid;
+	switch (CC3RandomUIntBelow(4)) {
+		case 0:
+			direction = CCTransitionDirectionUp;
+			break;
+		case 1:
+			direction = CCTransitionDirectionDown;
+			break;
+		case 2:
+			direction = CCTransitionDirectionRight;
+			break;
+		case 3:
+		default:
+			direction = CCTransitionDirectionLeft;
+			break;
+	}
 	
-	// Wrap the 3D layer in a 2D scene and run it in the director
-	CCScene* cc2Scene = [CCScene node];
-	[cc2Scene addChild: layer3D];
-	[CCDirector.sharedDirector runWithScene: cc2Scene];
+	// Create and return a transition of a random type.
+	NSTimeInterval duration = 1.0;
+	switch (CC3RandomUIntBelow(6)) {
+		case 0:
+			return [CCTransition transitionCrossFadeWithDuration: duration];
+		case 1:
+			return [CCTransition transitionFadeWithDuration: duration];
+		case 2:
+			return [CCTransition transitionMoveInWithDirection: direction duration: duration];
+		case 3:
+			return [CCTransition transitionRevealWithDirection: direction duration: duration];
+		case 4:
+		default:
+			return [CCTransition transitionPushWithDirection: direction duration: duration];
+	}
 }
 
-/** Creates and returns a 3D layer and scene to display the CC3Demo3DTiles demo scene. */
--(CC3ControllableLayer*) makeDemo3DTilesLayer { return [MainLayer layer]; }
+#endif	// CC3_CC2_CLASSIC
 
-/** Creates and returns a 3D layer and scene to display the CC3DemoMashUp demo scene. */
--(CC3Layer*) makeDemoMashUpLayer {
-	CC3Layer* cc3Layer = [CC3DemoMashUpLayer layer];
-	cc3Layer.cc3Scene = [CC3DemoMashUpScene scene];
-	return cc3Layer;
-}
+/** Creates and returns a CCScene containing the 3D content of the CC3Demo3DTiles demo. */
+-(CCScene*) makeDemo3DTilesScene { return [[MainLayer layer] asCCScene]; }
 
-/** Creates and returns a 3D layer and scene to display the CC3Performance demo scene. */
--(CC3Layer*) makePerformanceLayer {
-	CC3Layer* cc3Layer = [CC3PerformanceLayer layer];
-	cc3Layer.cc3Scene = [CC3PerformanceScene scene];
-	return cc3Layer;
-}
+/** Creates and returns a CCScene containing the 3D content of the CC3DemoMashUp demo. */
+-(CCScene*) makeDemoMashUpScene { return [[CC3DemoMashUpLayer layer] asCCScene]; }
+
+/** Creates and returns a CCScene containing the 3D content of the CC3Performance demo. */
+-(CCScene*) makePerformanceScene { return [[CC3PerformanceLayer layer] asCCScene]; }
+
+/** Creates and returns a static 2D layer instructing the user to select a demo. */
+-(CCScene*) makeIntroScene { return [IntroScene node]; }
 
 
 #pragma mark User interface interaction
 
-/** Disables user interaction. */
+/** Disables user interaction and runs a progress view during scene loading. */
 -(void) disableUI {
-	[_progressView startAnimating];
 	_sceneSelectorControl.enabled = NO;
+
+	// Depending on order views were added, the progress view might be behind the GL view. Bring it to the front.
+	[_cc3FrameView bringSubviewToFront: _progressView];
+	[_progressView startAnimating];
 }
 
-/** Enables user interaction. */
+/** Stops the progress view and enables user interaction. */
 -(void) enableUI {
 	[_progressView stopAnimating];
 	_sceneSelectorControl.enabled = YES;
-}
-
-/**
- * This callback method (from the CC3OpenGLDelegate protocol) is invoked once the current
- * 3D scene has been closed, and OpenGL has been terminated. Loads the new selected 3D scene.
- */
--(void) didTerminateOpenGL {
-	LogInfo(@"OpenGL is dead. Long live OpenGL! on %@", NSThread.currentThread);
-	[self loadSelected3DScene];
 }
 
 
@@ -268,22 +186,52 @@
 /** After device rotation, re-align the frame of the GL view to fill the frame view. */
 -(void) viewDidLayoutSubviews {
 	[super viewDidLayoutSubviews];
-	_cc3Controller.view.frame = [_cc3FrameView bounds];
+	CCDirector.sharedDirector.view.frame = _cc3FrameView.bounds;
 }
 
 /** 
- * Adds this controller as the delegate of the OpenGL context,
- * so that we can be notified when the OpenGL context is terminated.
+ * Once this controller's view is loaded, create the CCGLView and add it to the framing view.
+ *
+ * Since the user interface allows the same 3D scene to be repeatedly loaded and removed,
+ * we cannot use background resource loading, because GL objects must be deleted using the 
+ * same GL context on which they were loaded. To ensure we don't run into trouble when 3D 
+ * scenes are removed, we turn background loading off here.
  */
 -(void) viewDidLoad {
     [super viewDidLoad];
-	CC3OpenGL.delegate = self;
+	[_cc3FrameView addSubview: [self createGLView]];
+	CC3Backgrounder.sharedBackgrounder.shouldRunTasksOnRequestingThread = YES;
 }
 
-/** If the view disappears, shut down the 3D controller and scene. */
--(void)viewWillDisappear: (BOOL) animated {
-    [self close3DController];
-	[super viewWillDisappear: animated];
+/** 
+ * Creates and returns the CCGLView.
+ * Also creates the CCDirector singleton, links it to the CCGLView, 
+ * and sets an initial static 2D intro scene.
+ */
+-(CCGLView*) createGLView {
+	
+	// Create the view first, since it creates the GL context, which CCDirector expects during init.
+	CCGLView* glView = [CCGLView viewWithFrame: _cc3FrameView.bounds
+								   pixelFormat: kEAGLColorFormatRGBA8
+								   depthFormat: GL_DEPTH24_STENCIL8		// Shadow volumes require a stencil
+							preserveBackbuffer: NO
+							   numberOfSamples: 1];
+
+	// Create and configure the CCDirector singleton.
+#if CC3_CC2_1
+	// Use CADisplayLink director for better animation.
+	CCDirector.directorType = kCCDirectorTypeDisplayLink;
+#endif	// CC3_CC2_1
+
+	CCDirector* director = CCDirector.sharedDirector;
+	director.animationInterval = (1.0f / kAnimationFrameRate);
+	director.displayStats = YES;
+	director.view = glView;
+
+	// Run the initial static 2D intro scene
+	[director runWithScene: [[self makeIntroScene] asCCScene]];
+	
+	return glView;
 }
 
 @end

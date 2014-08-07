@@ -44,6 +44,7 @@
 
 @interface CC3Node (TemplateMethods)
 -(void) notifyTransformListeners;
+-(void) setProjectedLocation: (CC3Vector) projectedLocation;
 @end
 
 @implementation CC3Camera
@@ -231,7 +232,7 @@
  * resulting in unwanted clipping around the fringes of the view. For this reason, an inverse
  * scale of 1/10 is applied to the transform to counteract this effect.
  */
--(void) applyScaling { [_globalTransformMatrix scaleBy: CC3VectorInvert(self.globalScale)]; }
+-(void) applyScalingTo: (CC3Matrix*) matrix { [matrix scaleBy: CC3VectorInvert(self.globalScale)]; }
 
 /**
  * Scaling does not apply to cameras. Return the globalScale of the parent node, 
@@ -315,7 +316,6 @@
 -(void) openWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"%@ opening with %@", self, visitor);
 	_isOpen = YES;
-	[self openViewportWithVisitor: visitor];
 	[self openProjectionWithVisitor: visitor];
 	[self openViewWithVisitor: visitor];
 }
@@ -325,14 +325,6 @@
 	_isOpen = NO;
 	[self closeViewWithVisitor: visitor];
 	[self closeProjectionWithVisitor: visitor];
-}
-
--(void) openViewportWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	LogTrace(@"%@ opening viewport %@ with %@", self, NSStringFromCC3Viewport(_viewport), visitor);
-	CC3OpenGL* gl = visitor.gl;
-	gl.viewport = _viewport;
-	[gl enableScissorTest: _shouldClipToViewport];
-	if (_shouldClipToViewport) gl.scissor = _viewport;
 }
 
 /** Template method that pushes the GL projection matrix stack, and loads the projectionMatrix into it. */
@@ -746,11 +738,13 @@
 	// Normalize the vector so that each component is between 0 and 1 by calculating ( v = (v + 1) / 2 ).
 	projectedLoc = CC3VectorAverage(projectedLoc, kCC3VectorUnitCube);
 	
-	// Map the X & Y components of the projected location (now between 0 and 1) to viewport coordinates.
 	CC3Assert(_viewport.h > 0 && _viewport.w > 0, @"%@ does not have a valid viewport: %@.",
 			  self, NSStringFromCC3Viewport(_viewport));
-	projectedLoc.x = _viewport.x + (_viewport.w * projectedLoc.x);
-	projectedLoc.y = _viewport.y + (_viewport.h * projectedLoc.y);
+	
+	// Map the X & Y components of the projected location (now between 0 and 1) to display coordinates.
+	GLfloat g2p = 1.0f / CCDirector.sharedDirector.contentScaleFactor;
+	projectedLoc.x *= ((GLfloat)_viewport.w * g2p);
+	projectedLoc.y *= ((GLfloat)_viewport.h * g2p);
 	
 	// Using the vector from the camera to the 3D location, determine whether or not the
 	// 3D location is in front of the camera by using the dot-product of that vector and
@@ -763,27 +757,23 @@
 	GLfloat frontOrBack = SIGN(CC3VectorDot(camToLocVector, self.globalForwardDirection));
 	projectedLoc.z = frontOrBack * camToLocDist;
 	
-	// Map the projected point to the device orientation then return it
-	CGPoint ppt = [self cc2PointFromGLPoint: ccp(projectedLoc.x, projectedLoc.y)];
-	CC3Vector orientedLoc = cc3v(ppt.x, ppt.y, projectedLoc.z);
-	
 	LogTrace(@"%@ projecting location %@ to %@ and orienting with device to %@ using viewport %@",
-				  self, NSStringFromCC3Vector(a3DLocation), NSStringFromCC3Vector(projectedLoc),
-				  NSStringFromCC3Vector(orientedLoc), NSStringFromCC3Viewport(_viewport));
-	return orientedLoc;
+			 self, NSStringFromCC3Vector(a3DLocation), NSStringFromCC3Vector(projectedLoc),
+			 NSStringFromCC3Vector(orientedLoc), NSStringFromCC3Viewport(_viewport));
+	return projectedLoc;
 }
 
 -(CC3Vector) projectLocation: (CC3Vector) aLocal3DLocation onNode: (CC3Node*) aNode {
 	return [self projectLocation: [aNode.globalTransformMatrix transformLocation: aLocal3DLocation]];
 }
 
+// Deprecated - scale from points to pixels, then add the viewport corner.
 -(CGPoint) glPointFromCC2Point: (CGPoint) cc2Point {
-	// Scale from points to pixels, then add the viewport corner.
 	return ccpAdd(ccpMult(cc2Point, CCDirector.sharedDirector.contentScaleFactor), ccp(_viewport.x, _viewport.y));
 }
 
+// Deprecated - subtract the viewport corner, then scale from pixels to points.
 -(CGPoint) cc2PointFromGLPoint: (CGPoint) glPoint {
-	// Subtract the viewport corner, then scale from pixels to points.
 	return ccpMult(ccpSub(glPoint, ccp(_viewport.x, _viewport.y)), 1.0f / CCDirector.sharedDirector.contentScaleFactor);
 }
 
@@ -985,8 +975,7 @@
 	
 	[self markProjectionDirty];
 	
-	LogTrace(@"%@ updated from FOV: %.3f, Aspect: %.3f, Near: %.3f, Far: %.3f",
-			 self, fieldOfView, nearClip, nearClip, farClip);
+	LogTrace(@"%@ updated from right: %.3f, top: %.3f, near: %.3f, far: %.3f", self, right, top, near, far);
 }
 
 -(void) populateFrom: (GLfloat) fieldOfView

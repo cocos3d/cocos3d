@@ -174,12 +174,12 @@
  * @deprecated Under ARC, the userData property is an object that is automatically released
  * when this instance is deallocated.
  */
--(void) releaseUserData DEPRECATED_ATTRIBUTE;
+-(void) releaseUserData __deprecated;
 
 /**
  * @deprecated Use userData instead. The userData and sharedUserData properties are now the same.
  */
-@property(nonatomic, retain) NSObject* sharedUserData DEPRECATED_ATTRIBUTE;
+@property(nonatomic, retain) NSObject* sharedUserData __deprecated;
 
 
 #pragma mark Allocation and initialization

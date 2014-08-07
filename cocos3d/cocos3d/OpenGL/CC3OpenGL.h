@@ -215,11 +215,7 @@ typedef struct {
 /** 
  * The OpenGL engine context.
  *
- * The initial value of this property depends on the platform. Under iOS, this property 
- * will be initialized to an appropriate OpenGL ES context during instance initialization.
- * Under OSX, this property will be set by the CC3GLView for the primary rendering context
- * (isRenderingContext property is YES), and will be initialized to a shared GL context
- * for background instances (isRenderingContext property is NO).
+ * The value of this property is automatically retrieved from the CCGLView.
  */
 @property(nonatomic, retain) CC3GLContext* context;
 
@@ -751,6 +747,9 @@ typedef struct {
  */
 -(void) enablePointSpriteCoordReplace: (BOOL) onOff at: (GLuint) tuIdx;
 
+/** Returns a string description of the current texture object bindings for each texture unit. */
+-(NSString*) dumpTextureBindings;
+
 
 #pragma mark Matrices
 
@@ -761,13 +760,13 @@ typedef struct {
 -(void) activatePaletteMatrixStack: (GLuint) pmIdx;
 
 /** Activates the modelview matrix stack and replaces the current matrix with the specified matrix. */
--(void) loadModelviewMatrix: (CC3Matrix4x3*) mtx;
+-(void) loadModelviewMatrix: (const CC3Matrix4x3*) mtx;
 
 /** Activates the projection matrix stack and replaces the current matrix with the specified matrix. */
--(void) loadProjectionMatrix: (CC3Matrix4x4*) mtx;
+-(void) loadProjectionMatrix: (const CC3Matrix4x4*) mtx;
 
 /** Activates the specified palette matrix stack and replaces the current matrix with the specified matrix. */
--(void) loadPaletteMatrix: (CC3Matrix4x3*) mtx at: (GLuint) pmIdx;
+-(void) loadPaletteMatrix: (const CC3Matrix4x3*) mtx at: (GLuint) pmIdx;
 
 /** Activates the modelview matrix stack, pushes it down one level, and copies the old top to the new top. */
 -(void) pushModelviewMatrixStack;
@@ -973,7 +972,7 @@ typedef struct {
 @property(nonatomic, readonly) GLuint maxNumberOfBoneInfluencesPerVertex;
 
 /** @deprecated Renamed to maxNumberOfBoneInfluencesPerVertex. */
-@property(nonatomic, readonly) GLuint maxNumberOfVertexUnits DEPRECATED_ATTRIBUTE;
+@property(nonatomic, readonly) GLuint maxNumberOfVertexUnits __deprecated;
 
 /**
  * Returns the maximum number of pixel samples supported by the platform,
@@ -1137,7 +1136,7 @@ typedef struct {
 -(void) deleteShader: (GLuint) shaderID;
 
 /** @deprecated Use the compileShader:from:sourceCodeStrings: method instead. */
--(void) compileShader: (GLuint) shaderID fromSourceCodeStrings: (NSArray*) glslSources DEPRECATED_ATTRIBUTE;
+-(void) compileShader: (GLuint) shaderID fromSourceCodeStrings: (NSArray*) glslSources __deprecated;
 
 /**
  * Compiles the specified shader from the specified number of GLSL source code strings, 
@@ -1230,6 +1229,84 @@ typedef struct {
 -(void) releaseShaderCompiler;
 
 
+#pragma mark Debugging support
+
+/**
+ * Pushes the specified group marker into the GL command stream. This marker can be used
+ * by the debugger to organize the presentation of the commands in an OpenGL frame.
+ *
+ * This version must convert the specified marker string into a 'C' string in order to
+ * send it to the GL engine. For better performance, use the pushGroupMarkerC: version
+ * of this method, and consider using a static 'C' string, or caching the 'C' string to
+ * avoid creating it on each frame.
+ */
+-(void) pushGroupMarker: (NSString*) marker;
+
+/**
+ * Pushes the specified group marker into the GL command stream. This marker can be used
+ * by the debugger to organize the presentation of the commands in an OpenGL frame.
+ *
+ * For best performance, consider using a static string, or caching the string to avoid
+ * creating it on each frame.
+ */
+-(void) pushGroupMarkerC: (const char*) marker;
+
+/**
+ * Pops the current group marker from the GL command stream. 
+ *
+ * This is the complement to the pushGroupMarker: or pushGroupMarkerC: methods, 
+ * and you can use this method in conjunction with either of those methods.
+ */
+-(void) popGroupMarker;
+
+/**
+ * Inserts the specified marker into the GL command stream. This marker can be used
+ * by the debugger to organize the presentation of the commands in an OpenGL frame.
+ *
+ * This version must convert the specified marker string into a 'C' string in order to
+ * send it to the GL engine. For better performance, use the pushGroupMarkerC: version
+ * of this method, and consider using a static 'C' string, or caching the 'C' string to
+ * avoid creating it on each frame.
+ */
+-(void) insertEventMarker: (NSString*) marker;
+
+/**
+ * Inserts the specified marker into the GL command stream. This marker can be used
+ * by the debugger to organize the presentation of the commands in an OpenGL frame.
+ *
+ * For best performance, consider using a static string, or caching the string to avoid
+ * creating it on each frame.
+ */
+-(void) insertEventMarkerC: (const char*) marker;
+
+/** Capture the current OpenGL command stream frame, starting at this point. */
+-(void) captureOpenGLFrame;
+
+/** Sets the debug label for the specified GL object of the specified type. */
+-(void) setDebugLabel: (NSString*) label forObject: (GLuint) objID ofType: (GLenum) objType;
+
+/** Sets the debug label for the specified texture. */
+-(void) setDebugLabel: (NSString*) label forTexture: (GLuint) texID;
+
+/** Sets the debug label for the specified buffer. */
+-(void) setDebugLabel: (NSString*) label forBuffer: (GLuint) buffID;
+
+/** Sets the debug label for the specified shader. */
+-(void) setDebugLabel: (NSString*) label forShader: (GLuint) shaderID;
+
+/** Sets the debug label for the specified shader program. */
+-(void) setDebugLabel: (NSString*) label forShaderProgram: (GLuint) progID;
+
+/** Sets the debug label for the specified framebuffer. */
+-(void) setDebugLabel: (NSString*) label forFramebuffer: (GLuint) fbID;
+
+/** Sets the debug label for the specified renderbuffer. */
+-(void) setDebugLabel: (NSString*) label forRenderbuffer: (GLuint) rbID;
+
+/** Sets the debug label for the specified vertex array. */
+-(void) setDebugLabel: (NSString*) label forVertexArray: (GLuint) vaID;
+
+
 #pragma mark Aligning 2D & 3D state
 
 /**
@@ -1240,14 +1317,14 @@ typedef struct {
  * it interferes with subsequent 2D rendering by cocos2d. However, such occurrances should be rare,
  * and in most circumstances you should never need to invoke this method.
  */
--(void) alignFor2DDrawing;
+-(void) alignFor2DDrawingWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /**
  * Aligns the state within the GL engine to be suitable for 3D drawing by cocos3d.
  *
  * This is invoked automatically during the transition from 2D to 3D drawing.
  */
--(void) alignFor3DDrawing;
+-(void) alignFor3DDrawingWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 
 #pragma mark OpenGL resources
@@ -1290,25 +1367,20 @@ typedef struct {
 /** 
  * Terminates the current use of OpenGL by this application.
  *
- * Terminates OpenGL and deletes all GL contexts, serving all threads. Also clears all caches
- * that contain content that uses OpenGL, including:
+ * Terminates the CCDirector.sharedDirector singleton. Terminates OpenGL and deletes all GL contexts,
+ * serving all threads. Also clears all caches that contain content that uses OpenGL, including:
  * 	 - CC3Resource
  *   - CC3Texture
  *   - CC3ShaderProgram
  *   - CC3Shader
  *   - CC3ShaderSourceCode
  *
- * To ensure that further OpenGL calls are not attempted, before invoking this method, you 
- * should release all CC3Scenes and CC3ViewControllers that you have created or loaded, along
- * with any cocos2d components, and that the CCDirector singleton has been ended.
+ * You can invoke this method when your app no longer needs support for OpenGL, or will not
+ * use OpenGL for a significant amount of time, in order to free up app and OpenGL memory
+ * used by your application.
  *
- * CC3ViewController also provides a terminateOpenGL convenience method that will take care of
- * all of that for you, and then will invoke this method. Unless you have special requirements,
- * use that CC3ViewController terminateOpenGL method, instead of invoking this method directly.
- *
- * You can invoke this method (or preferrably the CC3ViewController terminateOpenGL method) 
- * when your app no longer needs support for OpenGL, or will not use OpenGL for a significant
- * amount of time, in order to free up app and OpenGL memory used by your application.
+ * To ensure that further OpenGL calls are not attempted, before invoking this method, you should
+ * release all CC3Scenes that you have created or loaded, along with any Cocos2D components.
  *
  * To ensure that that the current GL activity has finished before pulling the rug out from
  * under it, this request is queued for each existing context, on the thread for which the
@@ -1334,7 +1406,7 @@ typedef struct {
  *
  * Note that, in order to ensure that OpenGL is free to shutdown, this method forces the
  * CC3Texture shouldCacheAssociatedCCTextures class-side property to NO, so that any
- * background loading that is currently occurring will not cache cocos2d textures.
+ * background loading that is currently occurring will not cache Cocos2D textures.
  * If you had set this property to YES, and intend to restart OpenGL at some point, then
  * you might want to set it back to YES before reloading 3D resources again.
  *

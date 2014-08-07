@@ -575,13 +575,13 @@
 +(id) visitorWithScene: (CC3Scene*) aCC3Scene;
 
 /** @deprecated Renamed to scene. */
-@property(nonatomic, retain) CC3Scene* world DEPRECATED_ATTRIBUTE;
+@property(nonatomic, retain) CC3Scene* world __deprecated;
 
 /** @deprecated Renamed to initWithScene:. */
--(id) initWithWorld: (CC3Scene*) aCC3Scene DEPRECATED_ATTRIBUTE;
+-(id) initWithWorld: (CC3Scene*) aCC3Scene __deprecated;
 
 /** @deprecated Renamed to visitorWithScene:. */
-+(id) visitorWithWorld: (CC3Scene*) aCC3Scene DEPRECATED_ATTRIBUTE;
++(id) visitorWithWorld: (CC3Scene*) aCC3Scene __deprecated;
 
 /** Indicates whether the misplacedNodes property contains nodes. */
 @property(nonatomic, readonly) BOOL hasMisplacedNodes;

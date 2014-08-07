@@ -229,6 +229,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  */
 @interface CC3Scene : CC3Node {
 	NSMutableArray* _lights;
+	NSMutableArray* _lightProbes;
 	NSMutableArray* _billboards;
 	CC3Layer* _cc3Layer;
 	CC3Camera* _activeCamera;
@@ -253,22 +254,6 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 
 /** Returns whether this node is a scene. Returns YES. */
 @property(nonatomic, readonly) BOOL isScene;
-
-/**
- * The CC3Layer that is holding this 3D scene.
- *
- * This property is set automatically when this scene is assigned to the CC3Layer.
- * The application should not set this property directly.
- */
-@property(nonatomic, assign) CC3Layer* cc3Layer;
-
-/**
- * The controller that is controlling the view displaying this scene.
- * 
- * This property is retrieved from the same property on the CC3Layer holding this scene,
- * and is made available to support delegation from this 3D scene.
- */
-@property(nonatomic, retain, readonly) CC3ViewController* controller;
 
 /**
  * The 3D camera that is currently displaying the scene of this scene.
@@ -304,12 +289,22 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 /**
  * Returns the lights currently illuminating this scene.
  *
- * This is a read-only convenience property. You should not change the contents of the
- * array returned by this method. To add a light to the scene, add the light to a parent
- * node (or the scene itself) using the addChild: method. To remove a light from the scene,
- * invoke the remove method on the light itself, or the removeChild: method on its parent.
+ * This is a read-only convenience property. You should not change the contents of the array
+ * returned by this method. To add a light to the scene, add it to a parent node (or the scene 
+ * itself) using the addChild: method. To remove a light from the scene, invoke the remove 
+ * method on the light itself, or the removeChild: method on its parent.
  */
 @property(nonatomic, retain, readonly) NSArray* lights;
+
+/**
+ * Returns the light probes currently illuminating this scene.
+ *
+ * This is a read-only convenience property. You should not change the contents of the array
+ * returned by this method. To add a light probe to the scene, add it to a parent node (or the
+ * scene itself) using the addChild: method. To remove a light probe from the scene, invoke the
+ * remove method on the light probe itself, or the removeChild: method on its parent.
+ */
+@property(nonatomic, retain, readonly) NSArray* lightProbes;
 
 /**
  * To create a backdrop for this scene, set this to a CC3Backdrop instance, covered with
@@ -572,10 +567,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * returns CC3NodeUpdatingVisitor. Subclasses may override to customize the behaviour
  * of the updating visits.
  */
--(id) updateVisitorClass;
-
-/** @deprecated No longer used. */
-@property(nonatomic, retain) id transformVisitor DEPRECATED_ATTRIBUTE;
+-(Class) updateVisitorClass;
 
 /**
  * The value of this property is used as the lower limit accepted by the updateScene: method.
@@ -689,24 +681,24 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * This method is invoked when the objects in the CC3Scene are to be drawn.
  *
  * Typcially this method is invoked automatically from the draw method of the CC3Layer instance
- * on each frame rendering cycle. This method is invoked asynchronously to the model updating loop,
+ * on each frame rendering cycle. This method is invoked asynchronously to the model updating
  * to keep the processing of OpenGL ES drawing separate from model updates.
  *
  * This implementation establishes the 3D rendering environment, handles node picking, invokes
- * the drawSceneContentWithVisitor: method to draw the contents of this scene, reverts to the 2D rendering
- * environment of the CC3Layer, and renders any 2D overlay billboards.
- *
- * If you want to customize the scene rendering flow, such as performing multiple-passes, or
- * adding post-processing effects, you should override the drawSceneContentWithVisitor: method.
+ * the drawSceneContentWithVisitor: method to draw the contents of this scene, reverts to the
+ * 2D rendering environment of the CC3Layer, and renders any 2D overlay billboards.
  *
  * If the scene was touched by the user (finger or mouse), this method invokes the node picking
  * algorithm to determine the node that is under the touch point. This is performed prior to
  * invoking the drawSceneContentWithVisitor: method.
  *
+ * If you want to customize the scene rendering flow, such as performing multiple-passes, or
+ * adding post-processing effects, you should override the drawSceneContentWithVisitor: method.
+ *
  * This method is invoked automatically during each rendering frame. Usually, the application
  * never needs to invoke this method directly.
  */
--(void) drawScene;
+-(void) drawSceneWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /**
  * Template method that draws the content of the scene.
@@ -782,12 +774,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  */
 -(void) drawSceneContentForEnvironmentMapWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
-/**
- * Template method that draws the static backdrop in the backdrop property, if it exists.
- *
- * The backdrop is not drawn if this scene is being drawn overlaid on the device camera image,
- * as indicated by the isOverlayingDeviceCamera property of this scene's view controller.
- */
+/** Template method that draws the static backdrop in the backdrop property, if it exists. */
 -(void) drawBackdropWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /**
@@ -848,28 +835,6 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 @property(nonatomic, readonly) BOOL isUsingDrawingSequence;
 
 /**
- * The view's surface manager. 
- *
- * The returned object manages the surfaces that render directly to the view, including the
- * surfaces in the viewSurface and pickingSurface properties, and manages the resolution of 
- * anti-aliasing multisampling.
- *
- * You can access this property from the onOpen method of this scene, or any time after.
- * This property is not valid before that time.
- */
-@property(nonatomic, retain, readonly) CC3GLViewSurfaceManager* viewSurfaceManager;
-
-/**
- * The render surface being used to draw to the view on the screen.
- *
- * When this render surface is active, all drawing activity is rendered to the framebuffer
- * attached to the view.
- *
- * The value of this property is retrieved from the surface manager in the viewSurfaceManager property.
- */
-@property(nonatomic, retain, readonly) id<CC3RenderSurface> viewSurface;
-
-/**
  * The visitor that is used to visit the nodes to draw them to the view on the screen.
  *
  * This property defaults to an instance of the class returned by the viewDrawVisitorClass method.
@@ -917,12 +882,6 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 
 /** @deprecated Depth clearing is now handled by app in drawSceneContentWithVisitor:. */
 @property(nonatomic, assign) BOOL shouldClearDepthBuffer;
-
-/** @deprecated Use the shouldClearDepthBuffer propety instead. */
-@property(nonatomic, assign) BOOL shouldClearDepthBufferBefore3D DEPRECATED_ATTRIBUTE;
-
-/** @deprecated Use the shouldClearDepthBuffer propety instead. */
-@property(nonatomic, assign) BOOL shouldClearDepthBufferBefore2D DEPRECATED_ATTRIBUTE;
 
 
 #pragma mark Touch handling
@@ -1122,46 +1081,72 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 
 /**
  * Returns the class of visitor that will be instantiated in the touchedNodePicker
- * pickTouchedNode method, in order to paint each node a unique color so that
+ * pickTouchedNodeWithVisitor: method, in order to paint each node a unique color so that
  * the node under the touched pixel can be identified.
  *
  * The returned class must be a subclass of CC3NodePickingVisitor. This implementation
  * returns CC3NodePickingVisitor. Subclasses may override to customized the behaviour
  * of the drawing visits.
  */
--(id) pickVisitorClass;
-
-/** 
- * The render surface being used to draw when picking nodes from touch events.
- *
- * The value of this property is retrieved from the pickingSurface property of the surface
- * manager in the viewSurfaceManager property.
- *
- * For economy, if multisampling is not active and the viewSurface is readable, the
- * viewSurface can also be used as the picking surface. For that reason, if both of those
- * conditions hold, and this property has not been set to YES directly, this property will
- * return the same surface as the viewSurface property. Otherwise, this property will return
- * a surface dedicated for use in rendering the scene during node picking.
- *
- * You can force the use of a dedicated picking surface, even if multisampling is not in use
- * and the viewSurface is readable, by setting the shouldUseDedicatedPickingSurface property
- * of the viewSurfaceManager to YES. There are situations where this may be preferrable, such
- * as if there is no backdrop, and some of the objects contain  transparency. In that situation,
- * using the viewSurface for both view rendering and node picking rendering may result in 
- * unwanted visual artifacts on the transparent nodes during node picking resulting from touch
- * events. To avoid these artifacts, you can set the shouldUseDedicatedPickingSurface property
- * of the viewSurfaceManager to YES, at any time.
- */
-@property(nonatomic, retain, readonly) id<CC3RenderSurface> pickingSurface;
+-(Class) pickVisitorClass;
 
 /**
  * When set to YES, the scene will be displayed on the screen as rendered while picking a
  * node from a touch event, instead of the normal scene display render.
  *
  * This is a development-time diagnostic property, that can be used to debug node picking
- * from touch events.
+ * from touch events. The initial value of this property is NO.
  */
 @property(nonatomic, assign) BOOL shouldDisplayPickingRender;
+
+
+#pragma mark Deprecated
+
+/**
+ * @deprecated
+ * This property has been fomally deprecated to better support multiple CC3Layers displaying
+ * a single CC3Scene from different perspectives (different cameras). If you want to dedicate
+ * a single CC3Layer to a single CC3Scene, and hold a back reference to that layer within the
+ * scene, you should create and manage that reference in your custom CC3Scene class.
+ *
+ * The CC3Layer that is holding this 3D scene. This property is set automatically when this scene
+ * is assigned to the CC3Layer. If assigning this instance to multiple CC3Layers, this property 
+ * will hold a reference to the CC3Layer to which this instance was most recently attached.
+ */
+@property(nonatomic, assign) CC3Layer* cc3Layer __deprecated;
+
+/** @deprecated You should reference this directly through the view. */
+@property(nonatomic, retain, readonly) CC3ViewController* controller __deprecated;
+
+/** @deprecated Invokes the drawSceneWithVisitor: method with the viewDrawingVisitor property of this scene. */
+-(void) drawScene __deprecated;
+
+/**
+ * @deprecated Access the view surface manager through singleton CC3ViewSurfaceManager
+ * sharedViewSurfaceManager. Setting this property has no effect.
+ */
+@property(nonatomic, retain, readonly) CC3ViewSurfaceManager* viewSurfaceManager __deprecated;
+
+/**
+ * @deprecated Access the viewSurface property of the surface manager found in the
+ * CC3Layer or CC3NodeDrawingVisitor surfaceManager property.
+ */
+@property(nonatomic, retain, readonly) id<CC3RenderSurface> viewSurface __deprecated;
+
+/**
+ * @deprecated Access the pickingSurface property of the surface manager found in the
+ * CC3Layer or CC3NodeDrawingVisitor surfaceManager property.
+ */
+@property(nonatomic, retain, readonly) id<CC3RenderSurface> pickingSurface __deprecated;
+
+/** @deprecated No longer used. */
+@property(nonatomic, retain) id transformVisitor __deprecated;
+
+/** @deprecated Use the shouldClearDepthBuffer propety instead. */
+@property(nonatomic, assign) BOOL shouldClearDepthBufferBefore3D __deprecated;
+
+/** @deprecated Use the shouldClearDepthBuffer propety instead. */
+@property(nonatomic, assign) BOOL shouldClearDepthBufferBefore2D __deprecated;
 
 @end
 
@@ -1228,8 +1213,8 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * The currently picked node.
  *
  * The value of this property is ephemeral, and contains a non-nil value only during node
- * picking from touch handling. The value is set by the pickTouchedNode method, and is 
- * cleared by the dispatchPickedNode method.
+ * picking from touch handling. The value is set by the pickTouchedNodeWithVisitor: method,
+ * and is cleared by the dispatchPickedNode method.
  */
 @property(nonatomic, retain) CC3Node* pickedNode;
 
@@ -1242,7 +1227,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * kCCTouchEnded, or kCCTouchCancelled.
  *
  * The event is queued internally, and the node is picked asychronously during the
- * next rendering frame when the pickTouchedNode method is automatically invoked.
+ * next rendering frame when the pickTouchedNodeWithVisitor: method is automatically invoked.
  */
 -(void) pickNodeFromTouchEvent: (uint) tType at: (CGPoint) tPoint;
 
@@ -1263,15 +1248,19 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * The coloring-and-picking algorithm is run only once per touch event, and is not
  * run during rendering frames when there has been no touch event received.
  *
+ * Rendering for node picking uses a specialized internal drawing visitor. The specified
+ * visitor is not used to render the scene for node picking. Instead, the internal drawing
+ * visitor is aligned with the specified visitor, and is then used to render the scene.
+ *
  * This method is invoked automatically whenever a touch event occurs. Usually, the
  * application never needs to invoke this method directly.
  */
--(void) pickTouchedNode;
+-(void) pickTouchedNodeWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /**
  * Invoked by the CC3Scene during update operations, in the update loop that occurs
- * occurs just after a touch event has been received by the touchEvent:at: method,
- * and after a node has been picked as a result, by the pickTouchedNode method.
+ * occurs just after a touch event has been received by the touchEvent:at: method, and
+ * after a node has been picked as a result, by the pickTouchedNodeWithVisitor: method.
  *
  * This implementation invokes the nodeSelected:byTouchEvent:at: method on the CC3Scene instance.
  *

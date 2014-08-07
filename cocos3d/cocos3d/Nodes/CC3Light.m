@@ -146,7 +146,7 @@
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName withLightIndex: (GLuint) ltIndx {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		if (ltIndx == UINT_MAX) return nil;		// All the lights have been used already.
+		if (ltIndx == kCC3MaxGLuint) return nil;		// All the lights have been used already.
 			
 		_lightIndex = ltIndx;
 		_shadows = nil;
@@ -254,7 +254,7 @@
 }
 
 /** Scaling does not apply to lights. */
--(void) applyScaling {}
+-(void) applyScalingTo: (CC3Matrix*) matrix {}
 
 /**
  * Scaling does not apply to lights. Return the globalScale of the parent node,
@@ -490,7 +490,8 @@
 -(void) checkStencilledShadowPainter {
 	if (self.hasShadows) {
 		if (!_stencilledShadowPainter)
-			self.stencilledShadowPainter = [CC3StencilledShadowPainterNode nodeWithColor: kCCC4FBlack];
+			self.stencilledShadowPainter = [CC3StencilledShadowPainterNode nodeWithName: @"Shadow painter"
+																			  withColor: kCCC4FBlack];
 	} else {
 		self.stencilledShadowPainter = nil;
 	}
@@ -502,8 +503,8 @@
 		GLfloat totIntensity = CCC4FIntensity(totalLight);
 		GLfloat shadowIntensity =  (dIntensity / totIntensity) * _shadowIntensityFactor;
 		_stencilledShadowPainter.opacity = CCOpacityFromGLfloat(shadowIntensity);
-		LogTrace(@"%@ updated shadow intensity to %u from light illumination %@ against total illumination %@ and shadow intensity factor %.3f",
-					  self, _stencilledShadowPainter.opacity,
+		LogTrace(@"%@ updated shadow intensity to %.3f from light illumination %@ against total illumination %@ and shadow intensity factor %.3f",
+					  self, (float)_stencilledShadowPainter.opacity,
 					  NSStringFromCCC4F(self.diffuseColor), NSStringFromCCC4F(self.scene.totalIllumination), _shadowIntensityFactor);
 	}
 }
@@ -511,7 +512,7 @@
 // TODO - combine with other shadow techniques - how to make polymorphic?
 -(void) drawShadowsWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	if (_shadows && (self.visible || self.shouldCastShadowsWhenInvisible) ) {
-		LogTrace(@"%@ drawing %u shadows", self, _shadows.count);
+		LogTrace(@"%@ drawing %lu shadows", self, (unsigned long)_shadows.count);
 		[self configureStencilParameters: visitor];
 		
 		for (CC3ShadowVolumeMeshNode* sv in _shadows) [sv drawToStencilWithVisitor: visitor];
@@ -584,7 +585,7 @@ static GLuint lightPoolStartIndex = 0;
 
 /**
  * Assigns and returns the next available light index from the pool.
- * If no more lights are available, returns UINT_MAX.
+ * If no more lights are available, returns kCC3MaxGLuint.
  */
 -(GLuint) nextLightIndex {
 	BOOL* indexPool = [[self class] lightIndexPool];
@@ -597,7 +598,7 @@ static GLuint lightPoolStartIndex = 0;
 		}
 	}
 	CC3Assert(NO, @"Too many lights. Only %u lights may be created.", platformMaxLights);
-	return UINT_MAX;
+	return kCC3MaxGLuint;
 }
 
 /** Returns the specified light index to the pool. */
@@ -1012,7 +1013,7 @@ static GLuint lightPoolStartIndex = 0;
 #pragma mark -
 #pragma mark CC3Node extension for lights
 
-@implementation CC3Node (Lighting)
+@implementation CC3Node (CC3Light)
 
 -(BOOL) isLight { return NO; }
 

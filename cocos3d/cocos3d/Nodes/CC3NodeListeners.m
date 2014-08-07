@@ -103,7 +103,7 @@
 }
 
 -(void) notifyTransformListeners {
-	LogTrace(@"%@ notifying %i transform listeners", _node, self.count);
+	LogTrace(@"%@ notifying %lu transform listeners", _node, (unsigned long)self.count);
 	[self lock];
 	for (NSValue* xlWrap in _transformListenerWrappers)
 		[[self getListenerFrom: xlWrap] nodeWasTransformed: _node];

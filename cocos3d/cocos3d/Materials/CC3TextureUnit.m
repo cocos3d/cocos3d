@@ -276,8 +276,6 @@
 	glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA, _alphaOperand0);
 	glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_ALPHA, _alphaOperand1);
 	glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND2_ALPHA, _alphaOperand2);
-	
-	LogTrace(@"%@ bound to texture unit %u", self, tuIdx);
 }
 #endif	// !CC3_GLSL
 
@@ -319,8 +317,6 @@
 	glTexEnvi(GL_TEXTURE_ENV, GL_SRC1_ALPHA, GL_CONSTANT);
 	glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA, GL_SRC_ALPHA);
 	glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_ALPHA, GL_SRC_ALPHA);
-	
-	LogTrace(@"%@ bound to texture unit %u", self, tuIdx);
 }
 #endif	// !CC3_GLSL
 

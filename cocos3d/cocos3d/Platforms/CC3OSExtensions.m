@@ -96,7 +96,7 @@
 
 -(void) runBlockAsync: (void (^)(void)) block { [self runBlock: block waitUntilDone: NO]; }
 
--(void) runBlockSync: (void (^)(void)) block { [self runBlock: block waitUntilDone: NO]; }
+-(void) runBlockSync: (void (^)(void)) block { [self runBlock: block waitUntilDone: YES]; }
 
 -(void) runBlock: (void (^)(void)) block waitUntilDone: (BOOL) wait {
 	[self performSelector: @selector(runBlockNow:)
@@ -173,6 +173,31 @@
 	for (NSString* line in rawLines)
 		[terminatedLines addObject: [line stringByAppendingString: terminator]];
 	return terminatedLines;
+}
+
+@end
+
+
+#pragma mark -
+#pragma mark NSBundle extensions
+
+@implementation NSBundle (CC3)
+
+#define kCocos3DResourcesBundlePathDefault		@"Cocos3DResources.bundle"
+
+static NSString* _cocos3dResourcesBundlePath = nil;
+
++(NSString*) cocos3dResourcesBundlePath {
+	if (!_cocos3dResourcesBundlePath) self.cocos3dResourcesBundlePath = kCocos3DResourcesBundlePathDefault;
+	return _cocos3dResourcesBundlePath;
+}
+
++(void) setCocos3dResourcesBundlePath: (NSString*) bundlePath {
+	_cocos3dResourcesBundlePath = [bundlePath retain];
+}
+
++(NSBundle*) cocos3dResourcesBundle {
+	return [NSBundle bundleWithPath: CC3EnsureAbsoluteFilePath(self.cocos3dResourcesBundlePath)];
 }
 
 @end

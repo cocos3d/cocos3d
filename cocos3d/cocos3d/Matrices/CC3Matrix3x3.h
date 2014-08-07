@@ -59,6 +59,18 @@ static inline GLfloat CC3Det2x2(GLfloat a1, GLfloat a2, GLfloat b1, GLfloat b2) 
  *
  * CC3Matrix3x3 offers several ways to access the matrix content. Content can be accessed
  * by element array index, by element column and row number, or as column vectors.
+ *
+ * Although CC3Matrix3x3 has the same internal structure as GLKMatrix3, the structures may
+ * have different byte alignment requirements. Avoid casting directly between GLKMatrix3
+ * and CC3Matrix3x3, as this is not guaranteed to work reliably. Instead, use the functions
+ * CC3Matrix3x3PopulateFromGLKMatrix3 and GLKMatrix3PopulateFromCC3Matrix3x3 to convert 
+ * between the two structures.
+ *
+ * You can, however, reliably copy an array of GLKMatrix3s to an array of CC3Matrix3x3s, 
+ * and vice-versa, by simply using memcpy, or equivalent memory copying function. This is
+ * also true of single CC3Matrix3x3 and GLKMatrix3 structures. Copying is successful because
+ * the array or pointer declarations will ensure the respective byte-alignment requirements, 
+ * and since the internal structures are identical, the contents of the copy will be identical.
  */
 typedef union {
 	/** The elements in array form. You can also simply cast the entire union to an array of GLfloats. */
@@ -92,7 +104,7 @@ typedef union {
 } CC3Matrix3x3;
 
 /** Returns a string description of the specified CC3Matrix3x3, including contents. */
-NSString* NSStringFromCC3Matrix3x3(CC3Matrix3x3* mtxPtr);
+NSString* NSStringFromCC3Matrix3x3(const CC3Matrix3x3* mtxPtr);
 
 
 #pragma mark Matrix population
@@ -120,6 +132,28 @@ static inline void CC3Matrix3x3PopulateIdentity(CC3Matrix3x3* mtx) {
 /** Populates the specified matrix from the specified source matrix. */
 static inline void CC3Matrix3x3PopulateFrom3x3(CC3Matrix3x3* mtx, const CC3Matrix3x3* mtxSrc) {
 	memcpy(mtx, mtxSrc, sizeof(CC3Matrix3x3));
+}
+
+/** 
+ * Populates the specified matrix from the specified source GLKMatrix3.
+ *
+ * Although CC3Matrix3x3 has the same internal structure as GLKMatrix3, the structures may
+ * have different byte alignment requirements. Avoid casting directly between GLKMatrix3
+ * and CC3Matrix3x3, as this is not guaranteed to work reliably.
+ */
+static inline void CC3Matrix3x3PopulateFromGLKMatrix3(CC3Matrix3x3* mtx, const GLKMatrix3* mtxSrc) {
+	memcpy(mtx, mtxSrc, sizeof(CC3Matrix3x3));
+}
+
+/**
+ * Populates the specified GLKMatrix3 from the specified source matrix.
+ *
+ * Although GLKMatrix3 has the same internal structure as CC3Matrix3x3, the structures may
+ * have different byte alignment requirements. Avoid casting directly between CC3Matrix3x3
+ * and GLKMatrix3, as this is not guaranteed to work reliably.
+ */
+static inline void GLKMatrix3PopulateFromCC3Matrix3x3(GLKMatrix3* mtx, const CC3Matrix3x3* mtxSrc) {
+	memcpy(mtx, mtxSrc, sizeof(GLKMatrix3));
 }
 
 /**

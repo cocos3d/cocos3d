@@ -27,19 +27,18 @@
  * http://en.wikipedia.org/wiki/MIT_License
  */
 
-#import "CC3NSViewController.h"
+#import "CC3Environment.h"
 
 @interface CC3DemoMashUpAppDelegate : NSObject <NSApplicationDelegate> {
 	NSWindow* _window;
-	CC3GLView* _glView;
-	CC3NSViewController* _viewController;
+	CCGLView* _glView;
 }
 
 /** The window in which the app is displayed. */
 @property (strong) IBOutlet NSWindow* window;
 
 /** The view in which the 3D scene is displayed. */
-@property (strong) IBOutlet CC3GLView* glView;
+@property (strong) IBOutlet CCGLView* glView;
 
 /** Toggles the screen between standard and full-screen. */
 -(IBAction) toggleFullScreen: (id) sender;

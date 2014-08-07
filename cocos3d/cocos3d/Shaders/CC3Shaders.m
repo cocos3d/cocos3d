@@ -114,15 +114,17 @@ static CC3ShaderSourceCode* _defaultShaderPreamble = nil;
 			  self, scCnt, visitor.sourceCompilationStringCount);
 	
 	// Submit the source code strings to the compiler
-	[CC3OpenGL.sharedGL compileShader: self.shaderID from: scCnt sourceCodeStrings: scStrings];
+	CC3OpenGL* gl = CC3OpenGL.sharedGL;
+	[gl compileShader: self.shaderID from: scCnt sourceCodeStrings: scStrings];
 	
-	CC3Assert([CC3OpenGL.sharedGL getShaderWasCompiled: self.shaderID],
+	CC3Assert([gl getShaderWasCompiled: self.shaderID],
 			  @"%@ failed to compile because:\n%@", self,
-			  [self localizeCompileErrors: [CC3OpenGL.sharedGL getLogForShader: self.shaderID]
-						 fromShaderSource: shSrcCode]);
+			  [self localizeCompileErrors: [gl getLogForShader: self.shaderID] fromShaderSource: shSrcCode]);
 	
+	[gl setDebugLabel: self.name forShader: self.shaderID];
+
 #if LOGGING_REZLOAD
-	NSString* compLog = [CC3OpenGL.sharedGL getLogForShader: self.shaderID];
+	NSString* compLog = [gl getLogForShader: self.shaderID];
 	LogRez(@"Compiled %@ in %.3f ms%@", self, GetRezActivityDuration() * 1000,
 		   (compLog ? [NSString stringWithFormat: @" with the following warnings:\n%@", compLog] : @""));
 #endif	// LOGGING_REZLOAD
@@ -242,25 +244,25 @@ static CC3ShaderSourceCode* _defaultShaderPreamble = nil;
 	return shader;
 }
 
--(id) initFromSourceCodeFile: (NSString*) aFilePath {
-	return [self initFromSourceCode: [CC3ShaderSourceCode shaderSourceCodeFromFile: aFilePath]];
+-(id) initFromSourceCodeFile: (NSString*) filePath {
+	return [self initFromSourceCode: [CC3ShaderSourceCode shaderSourceCodeFromFile: filePath]];
 }
 
 // We don't delegate to shaderFromShaderSource: by retrieving the shader source, because the
 // shader source may have been dropped from its cache, even though the shader is still in its
 // cache. The result would be to constantly create and cache the shader source unnecessarily.
-+(id) shaderFromSourceCodeFile: (NSString*) aFilePath {
-	id shader = [self getShaderNamed: [CC3ShaderSourceCode shaderSourceCodeNameFromFilePath: aFilePath]];
++(id) shaderFromSourceCodeFile: (NSString*) filePath {
+	id shader = [self getShaderNamed: [CC3ShaderSourceCode shaderSourceCodeNameFromFilePath: filePath]];
 	if (shader) return shader;
 	
-	shader = [[[self alloc] initFromSourceCodeFile: aFilePath] autorelease];
+	shader = [[[self alloc] initFromSourceCodeFile: filePath] autorelease];
 	[self addShader: shader];
 	return shader;
 }
 
 // Deprecated
-+(NSString*) shaderNameFromFilePath: (NSString*) aFilePath {
-	return [CC3ShaderSourceCode shaderSourceCodeNameFromFilePath: aFilePath];
++(NSString*) shaderNameFromFilePath: (NSString*) filePath {
+	return [CC3ShaderSourceCode shaderSourceCodeNameFromFilePath: filePath];
 }
 
 -(NSString*) description {
@@ -357,6 +359,7 @@ static CC3Cache* _shaderCache = nil;
 @synthesize maxAttributeNameLength=_maxAttributeNameLength;
 @synthesize texture2DCount=_texture2DCount;
 @synthesize textureCubeCount=_textureCubeCount;
+@synthesize textureLightProbeCount=_textureLightProbeCount;
 @synthesize shouldAllowDefaultVariableValues=_shouldAllowDefaultVariableValues;
 
 -(void) dealloc {
@@ -512,6 +515,15 @@ static BOOL _defaultShouldAllowDefaultVariableValues = NO;
 }
 
 
+#pragma mark Textures
+
+-(GLuint) texture2DStart { return 0; }
+
+-(GLuint) textureCubeStart { return _texture2DCount; }
+
+-(GLuint) textureLightProbeStart { return _texture2DCount + _textureCubeCount; }
+
+
 #pragma mark Linking
 
 -(void) link {
@@ -520,14 +532,17 @@ static BOOL _defaultShouldAllowDefaultVariableValues = NO;
 	
 	MarkRezActivityStart();
 	
-	[CC3OpenGL.sharedGL linkShaderProgram: self.programID];
+	CC3OpenGL* gl = CC3OpenGL.sharedGL;
+	[gl linkShaderProgram: self.programID];
 	
-	CC3Assert([CC3OpenGL.sharedGL getShaderProgramWasLinked: self.programID],
+	CC3Assert([gl getShaderProgramWasLinked: self.programID],
 			  @"%@ could not be linked because:\n%@", self,
-			  [CC3OpenGL.sharedGL getLogForShaderProgram: self.programID]);
+			  [gl getLogForShaderProgram: self.programID]);
+
+	[gl setDebugLabel: self.name forShaderProgram: self.programID];
 	
 #if LOGGING_REZLOAD
-	NSString* linkLog = [CC3OpenGL.sharedGL getLogForShaderProgram: self.programID];
+	NSString* linkLog = [gl getLogForShaderProgram: self.programID];
 	LogRez(@"Linked %@ in %.3f ms%@", self, GetRezActivityDuration() * 1000,
 		   (linkLog ? [NSString stringWithFormat: @" with the following warnings:\n%@", linkLog] : @""));
 #endif	// LOGGING_REZLOAD
@@ -584,6 +599,7 @@ static BOOL _defaultShouldAllowDefaultVariableValues = NO;
 	[_uniformsDrawScope removeAllObjects];
 	_texture2DCount = 0;
 	_textureCubeCount = 0;
+	_textureLightProbeCount = 0;
 }
 
 /** Let the delegate configure the uniform, and then update the texture counts. */
@@ -593,6 +609,7 @@ static BOOL _defaultShouldAllowDefaultVariableValues = NO;
 	if (var.semantic == kCC3SemanticTextureSampler) _texture2DCount += var.size;
 	if (var.semantic == kCC3SemanticTexture2DSampler) _texture2DCount += var.size;
 	if (var.semantic == kCC3SemanticTextureCubeSampler) _textureCubeCount += var.size;
+	if (var.semantic == kCC3SemanticTextureLightProbeSampler) _textureLightProbeCount += var.size;
 }
 
 /** Adds the specified uniform to the appropriate internal collection, based on variable scope. */
@@ -726,6 +743,7 @@ static BOOL _defaultShouldAllowDefaultVariableValues = NO;
 		_maxAttributeNameLength = 0;
 		_texture2DCount = 0;
 		_textureCubeCount = 0;
+		_textureLightProbeCount = 0;
 		_isSceneScopeDirty = YES;	// start out dirty for auto-loaded programs
 		_semanticDelegate = nil;
 		_shouldAllowDefaultVariableValues = self.class.defaultShouldAllowDefaultVariableValues;
@@ -1053,17 +1071,17 @@ static id<CC3ShaderMatcher> _shaderMatcher = nil;
 	return [trimmedLine hasPrefix: @"#import"] || [trimmedLine hasPrefix: @"#include"];
 }
 
-+(id) shaderSourceCodeFromFile: (NSString*) aFilePath {
-	NSString* shSrcName = [self shaderSourceCodeNameFromFilePath: aFilePath];
++(id) shaderSourceCodeFromFile: (NSString*) filePath {
+	NSString* shSrcName = [self shaderSourceCodeNameFromFilePath: filePath];
 	CC3ShaderSourceCode* shSrc = [self getShaderSourceCodeNamed: shSrcName];
 	if (shSrc) return shSrc;
 	
 	MarkRezActivityStart();
 	
+	NSString* absFilePath = CC3ResolveResourceFilePath(filePath);
+	CC3Assert(absFilePath, @"Could not locate GLSL file '%@' in either the application resources or the Cocos3D library resources", filePath);
+
 	NSError* err = nil;
-	NSString* absFilePath = CC3EnsureAbsoluteFilePath(aFilePath);
-	CC3Assert([[NSFileManager defaultManager] fileExistsAtPath: absFilePath],
-			  @"Could not load GLSL file '%@' because it could not be found", absFilePath);
 	NSString* srcCodeString = [NSString stringWithContentsOfFile: absFilePath encoding: NSUTF8StringEncoding error: &err];
 	CC3Assert(!err, @"Could not load GLSL file '%@' because %@, (code %li), failure reason %@",
 			  absFilePath, err.localizedDescription, (long)err.code, err.localizedFailureReason);
@@ -1071,11 +1089,11 @@ static id<CC3ShaderMatcher> _shaderMatcher = nil;
 	shSrc = [self shaderSourceCodeWithName: shSrcName fromSourceCodeString: srcCodeString];
 	shSrc.wasLoadedFromFile = YES;
 	
-	LogRez(@"Loaded GLSL source from file %@ in %.3f ms", aFilePath, GetRezActivityDuration() * 1000);
+	LogRez(@"Loaded GLSL source from file %@ in %.3f ms", filePath, GetRezActivityDuration() * 1000);
 	return shSrc;
 }
 
-+(NSString*) shaderSourceCodeNameFromFilePath: (NSString*) aFilePath { return aFilePath.lastPathComponent; }
++(NSString*) shaderSourceCodeNameFromFilePath: (NSString*) filePath { return filePath.lastPathComponent; }
 
 static Class _sourceCodeSubsectionClass = nil;
 
@@ -1484,9 +1502,10 @@ static CC3Cache* _shaderSourceCodeCache = nil;
 
 -(id<CC3RenderSurface>) prewarmingSurface {
 	if ( !_prewarmingSurface ) {
-		self.prewarmingSurface = [CC3GLFramebuffer surfaceWithSize: CC3IntSizeMake(4, 4)];
+		self.prewarmingSurface = [CC3GLFramebuffer surface];
+		((CC3GLFramebuffer*)_prewarmingSurface).name = @"Prewarming surface";
 		_prewarmingSurface.colorAttachment = [CC3GLRenderbuffer renderbufferWithPixelFormat: GL_RGBA4];
-		[_prewarmingSurface validate];
+		_prewarmingSurface.size = CC3IntSizeMake(4, 4);
 	}
 	return _prewarmingSurface;
 }
@@ -1522,7 +1541,6 @@ static CC3Cache* _shaderSourceCodeCache = nil;
 
 	pwNode.shaderProgram = program;
 	pwVisitor.renderSurface = pwSurface;
-	[pwSurface activate];
 	[pwVisitor visit: pwNode];
 	
 	// Release visitor state so it won't interfere with later deallocations

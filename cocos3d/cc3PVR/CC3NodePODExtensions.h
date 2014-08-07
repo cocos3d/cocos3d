@@ -77,7 +77,7 @@
 @property(nonatomic, assign) GLint podTargetIndex;
 
 /** @deprecated The user data loaded from the POD file is now held in the userData property as an NSData instance. */
-@property(nonatomic, assign) GLuint podUserDataSize DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) GLuint podUserDataSize __deprecated;
 
 /** Indicates whether this POD is a base node, meaning that it has no parent. */
 @property(nonatomic, readonly) BOOL isBasePODNode;

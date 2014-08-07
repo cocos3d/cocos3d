@@ -34,7 +34,15 @@
 #import "CC3Scene.h"
 #import "CC3CC2Extensions.h"
 #import "CC3OpenGLFixedPipeline.h"
+#import "CC3Matrix4x4.h"
 
+#if CC3_CC2_RENDER_QUEUE
+#	import "CCRenderer_private.h"
+#endif	// CC3_CC2_RENDER_QUEUE
+
+@interface CCNode (PrivateMethods)
+@property(nonatomic, assign) ccBlendFunc blendFunc;		// Included here, because eprecated in Cocos2D 3.1
+@end
 
 @interface CC3MeshNode (TemplateMethods)
 -(void) configureDrawingParameters: (CC3NodeDrawingVisitor*) visitor;
@@ -72,10 +80,11 @@
 	// New 2D billboard
 	_billboard = [aCCNode retain];
 	_billboard.visible = self.visible;
+	
 	// Retrieve the blend function from the 2D node and align this 3D node's material with it.
-	if ([_billboard conformsToProtocol: @protocol(CCBlendProtocol)]) {
-		self.blendFunc = ((id<CCBlendProtocol>)_billboard).blendFunc;
-	}
+	if ([_billboard conformsToProtocol: @protocol(CCBlendProtocol)])
+		self.blendFunc = _billboard.blendFunc;
+	
 	[self normalizeBillboardScaleToDevice];
 	if (self.isRunning) [self start2DBillboard];	// If running already, start scheduled activities on new billboard
 }
@@ -531,7 +540,7 @@ static GLfloat deviceScaleFactor = 0.0f;
 	[super applyMaterialWithVisitor: visitor];
 	if (visitor.shouldDecorateNode) {
 		CC3OpenGL* gl = visitor.gl;
-		[gl alignFor2DDrawing];
+		[gl alignFor2DDrawingWithVisitor: visitor];
 		gl.depthMask = !_shouldDisableDepthMask;
 	}
 }
@@ -548,7 +557,18 @@ static GLfloat deviceScaleFactor = 0.0f;
  */
 -(void) drawMeshWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	if (visitor.shouldDecorateNode) {
-		[_billboard visit];		// Draw the 2D CCNode
+		CC3OpenGL* gl = visitor.gl;
+		[gl pushGroupMarkerC: "Draw embedded 2D billboard"];
+
+		GLKMatrix4 mvpMtx;
+		GLKMatrix4PopulateFromCC3Matrix4x4(&mvpMtx, visitor.modelViewProjMatrix);
+		
+		CCRenderer* renderer = visitor.billboardCCRenderer;
+		[renderer invalidateState];
+		[_billboard visit: renderer parentTransform: &mvpMtx];
+		[renderer flush];
+		
+		[gl popGroupMarker];
 	} else {
 		// We're drawing a colored box to allow this node to be picked by a touch.
 		// This is done by creating and drawing an underlying rectangle mesh that
@@ -563,7 +583,7 @@ static GLfloat deviceScaleFactor = 0.0f;
  * Don't configure anything if painting for node picking.
  */
 -(void) cleanupDrawingParameters: (CC3NodeDrawingVisitor*) visitor {
-	if (visitor.shouldDecorateNode) [visitor.gl alignFor3DDrawing];
+	if (visitor.shouldDecorateNode) [visitor.gl alignFor3DDrawingWithVisitor: visitor];
 	[super cleanupDrawingParameters: visitor];
 }
 
@@ -598,9 +618,15 @@ static GLfloat deviceScaleFactor = 0.0f;
 	return YES;
 }
 
--(void) draw2dWithinBounds: (CGRect) bounds {
-	if(_shouldDrawAs2DOverlay && self.visible && [self doesIntersectBounds: bounds ])
-		[_billboard visit];
+-(void) draw2dWithinBounds: (CGRect) bounds
+			  withRenderer: (CCRenderer*) renderer
+			   withVisitor: (CC3NodeDrawingVisitor*) visitor {
+	if( !(_shouldDrawAs2DOverlay && self.visible && [self doesIntersectBounds: bounds ]) ) return;
+
+	CC3OpenGL* gl = visitor.gl;
+	[gl pushGroupMarkerC: "Draw overlay 2D billboard"];
+	[_billboard visit: renderer parentTransform: visitor.layerTransformMatrix];
+	[gl popGroupMarker];
 }
 
 
@@ -951,6 +977,34 @@ static GLfloat deviceScaleFactor = 0.0f;
 
 @implementation CCParticleSystemQuad (CC3)
 
+#if CC3_CC2_RENDER_QUEUE
+
+/** Find the rectangle that envelopes the specified particle. */
+-(CGRect) makeRectFromParticle: (_CCParticle*) pParticle {
+	float ps = pParticle->size;
+	float hs = ps * 0.5f;
+	return CGRectMake(pParticle->pos.x - hs, pParticle->pos.y - hs, ps, ps);
+}
+
+/** Build the bounding box to encompass the locations of all of the particles. */
+-(CGRect) measureBoundingBoxInPixels {
+	
+	// Must have at least one particle, otherwise simply return a zero rect
+	if (!_particles || _particleCount == 0) return CGRectZero;
+	
+	// Get the first particle as a starting point
+	CGRect boundingRect = [self makeRectFromParticle: &_particles[0]];
+	
+	// Iterate through all the remaining particles, taking the union of the current bounding
+	// rect and each particle rect to find the rectangle that bounds all the particles.
+	for(NSUInteger i = 1; i < _particleCount; i++)
+		boundingRect = CGRectUnion(boundingRect, [self makeRectFromParticle: &_particles[i]]);
+
+	return boundingRect;
+}
+
+#else
+
 /**
  * Find the absolute bottom left and top right from all four vertices in the quad,
  * assuming that the bl and tr of the quad are nominal representations and do not
@@ -972,21 +1026,19 @@ static GLfloat deviceScaleFactor = 0.0f;
 	
 	// Must have at least one quad, otherwise simply return a zero rect
 	if (!CC2_QUADS || CC2_PARTICLE_IDX == 0) return CGRectZero;
-
+	
 	// Get the first quad as a starting point
 	CGRect boundingRect = [self makeRectFromQuad: CC2_QUADS[0]];
 	
-	// Iterate through all the remaining quads, taking the union of the
-	// current bounding rect and each quad to find the rectangle that
-	// bounds all the quads.
-	for(NSUInteger i = 1; i < CC2_PARTICLE_IDX; i++) {
-		CGRect quadRect = [self makeRectFromQuad: CC2_QUADS[i]];
-		boundingRect = CGRectUnion(boundingRect, quadRect);
-	}
-	LogTrace(@"%@ bounding rect measured as %@ across %u active of %u possible particles",
-			 [self class], NSStringFromCGRect(boundingRect), particleIdx, totalParticles);
+	// Iterate through all the remaining quads, taking the union of the current
+	// bounding rect and each quad to find the rectangle that bounds all the quads.
+	for(NSUInteger i = 1; i < CC2_PARTICLE_IDX; i++)
+		boundingRect = CGRectUnion(boundingRect, [self makeRectFromQuad: CC2_QUADS[i]]);
+
 	return boundingRect;
 }
+
+#endif	// CC3_CC2_RENDER_QUEUE
 
 @end
 

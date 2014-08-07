@@ -30,8 +30,31 @@
  */
 
 #import "CC3CC2Extensions.h"
+#import "CC3RenderSurfaces.h"
 #import "CC3Logging.h"
+#import "CC3OpenGLUtility.h"
+#import "CC3ViewController.h"
 #import "uthash.h"
+
+#if CC3_CC2_1
+#	import "ES1Renderer.h"
+#else
+#	import "CCES2Renderer.h"
+#endif
+
+#if CC3_CC2_RENDER_QUEUE
+#else
+
+@implementation CCRenderer
+
+-(void) invalidateState {}
+
+-(void) flush {}
+
+@end
+
+#endif	// CC3_CC2_RENDER_QUEUE
+
 
 #if !CC3_CC2_CLASSIC
 
@@ -42,7 +65,7 @@
 -(id) init {
 	if ( (self = [ super init ]) ){
 		self.anchorPoint = ccp(0.0f, 0.0f);
-		[self setContentSize: [CCDirector sharedDirector].designSize];
+		[self setContentSize: CCDirector.sharedDirector.designSize];
 	}
 	
 	return( self );
@@ -52,8 +75,78 @@
 
 #endif	// !CC3_CC2_CLASSIC
 
-#if CC3_IOS
+#if CC3_CC2_1
+#	define CCESRendererImpl		ES1Renderer
+#else
+#	define CCESRendererImpl		CCES2Renderer
+#endif	// CC3_CC2_1
+
+#if COCOS2D_VERSION < 0x020100
+#	define CC2_DEPTH_BUFFER		depthBuffer_
+#	define CC2_SAMPLES_TO_USE	samplesToUse_
+#else
+#	define CC2_DEPTH_BUFFER		_depthBuffer
+#	define CC2_SAMPLES_TO_USE	_samplesToUse
+#endif
+
+#if CC3_OGLES_2
+@implementation CCES2Renderer (CC3)
+-(GLuint) depthBuffer { return CC2_DEPTH_BUFFER; }
+-(GLuint) pixelSamples { return CC2_SAMPLES_TO_USE; }
+@end
+#endif // CC3_OGLES_2
+
+#if CC3_OGLES_1
+@implementation ES1Renderer (CC3)
+-(GLuint) depthBuffer { return CC2_DEPTH_BUFFER; }
+-(GLuint) pixelSamples { return CC2_SAMPLES_TO_USE; }
+@end
+#endif // CC3_OGLES_1
+
+
+@interface CCGLView (TemplateMethods)
+-(unsigned int) convertPixelFormat:(NSString*) pixelFormat;
+@end
+
+#if COCOS2D_VERSION < 0x020100
+#	define CC2_REQUESTED_SAMPLES	requestedSamples_
+#	define CC2_PIXEL_FORMAT			pixelformat_
+#	define CC2_DEPTH_FORMAT			depthFormat_
+#	define CC2_CONTEXT				context_
+#	define CC2_RENDERER				renderer_
+#	define CC2_SIZE					size_
+#	define CC2_PRESERVE_BACKBUFFER	preserveBackbuffer_
+#else
+#	define CC2_REQUESTED_SAMPLES	_requestedSamples
+#	define CC2_PIXEL_FORMAT			_pixelformat
+#	define CC2_DEPTH_FORMAT			_depthFormat
+#	define CC2_CONTEXT				_context
+#	define CC2_RENDERER				_renderer
+#	define CC2_SIZE					_size
+#	define CC2_PRESERVE_BACKBUFFER	_preserveBackbuffer
+#endif
+
 @implementation CCGLView (CC3)
+
+#if CC3_IOS
+
+-(GLenum) pixelColorFormat { return [self convertPixelFormat: CC2_PIXEL_FORMAT]; }
+
+-(GLenum) pixelDepthFormat { return self.depthFormat; }
+
+-(GLuint) defaultFrameBuffer { return [CC2_RENDERER defaultFrameBuffer]; }
+
+-(GLuint) msaaFrameBuffer { return [CC2_RENDERER msaaFrameBuffer]; }
+
+-(GLuint) colorRenderBuffer { return [CC2_RENDERER colorRenderBuffer]; }
+
+-(GLuint) msaaColorBuffer { return [CC2_RENDERER msaaColorBuffer]; }
+
+-(GLuint) requestedSamples { return CC2_REQUESTED_SAMPLES; }
+
+-(GLuint) depthBuffer { return [(CCESRendererImpl*)CC2_RENDERER depthBuffer]; }
+
+-(GLuint) pixelSamples { return [(CCESRendererImpl*)CC2_RENDERER pixelSamples]; }
 
 -(id) initWithFrame: (CGRect) frame
 		pixelFormat: (NSString*) colorFormat
@@ -81,8 +174,57 @@
 						numberOfSamples: sampleCount] autorelease];
 }
 
-@end
 #endif	// CC3_IOS
+
+#if CC3_OSX
+
+-(GLenum) pixelColorFormat {
+	GLint screenIdx = 0;
+	GLint colorSize;
+	GLint alphaSize;
+	
+	NSOpenGLPixelFormat* pixFmt = self.pixelFormat;
+	[pixFmt getValues: &colorSize forAttribute:NSOpenGLPFAColorSize forVirtualScreen: screenIdx];
+	[pixFmt getValues: &alphaSize forAttribute:NSOpenGLPFAAlphaSize forVirtualScreen: screenIdx];
+	
+	return CC3GLColorFormatFromBitPlanes(colorSize, alphaSize);
+}
+									 
+-(GLenum) pixelDepthFormat {
+	GLint screenIdx = 0;
+	GLint depthSize;
+	GLint stencilSize;
+	
+	NSOpenGLPixelFormat* pixFmt = self.pixelFormat;
+	[pixFmt getValues: &depthSize forAttribute:NSOpenGLPFADepthSize forVirtualScreen: screenIdx];
+	[pixFmt getValues: &stencilSize forAttribute:NSOpenGLPFAStencilSize forVirtualScreen: screenIdx];
+	
+	return CC3GLDepthFormatFromBitPlanes(depthSize, stencilSize);
+}
+
+-(GLuint) defaultFrameBuffer { return 0; }
+
+-(GLuint) msaaFrameBuffer { return 0; }
+
+-(GLuint) colorRenderBuffer { return 0; }
+
+-(GLuint) msaaColorBuffer { return 0; }
+
+-(GLuint) depthBuffer { return 0; }
+
+-(CGSize) surfaceSize { return NSSizeToCGSize(self.bounds.size); }
+
+-(CC3GLContext*) context { return (CC3GLContext*)self.openGLContext; }
+
+-(void) addGestureRecognizer: (UIGestureRecognizer*) gestureRecognizer {}
+
+-(void) removeGestureRecognizer: (UIGestureRecognizer*) gestureRecognizer {}
+
+#endif	// CC3_OSX
+
+
+
+@end
 
 #if !CC3_IOS
 
@@ -130,7 +272,23 @@
 
 @implementation CCNode (CC3)
 
+-(CCScene*) asCCScene {
+	CCScene *scene = [CCScene node];
+	[scene addChild: self];
+	return scene;
+}
+
+#if !CC3_CC2_RENDER_QUEUE
+
+-(void) visit: (CCRenderer*) renderer parentTransform: (const GLKMatrix4*)parentTransform {
+	[self visit];
+}
+
+#endif	// !CC3_CC2_RENDER_QUEUE
+
 #if CC3_CC2_CLASSIC
+
+-(void) contentSizeChanged {}
 
 -(BOOL) isRunningInActiveScene { return self.isRunning; }
 
@@ -144,6 +302,7 @@
 	self.touchEnabled = shouldEnable;
 	self.mouseEnabled = shouldEnable;
 }
+
 
 #endif	// CC3_CC2_CLASSIC
 
@@ -296,39 +455,92 @@
 #endif	// CC3_OSX
 }
 
--(void) reshapeProjection: (CGSize) newWindowSize {
-	for (CCNode* child in self.children) [child reshapeProjection: newWindowSize];
+#if (COCOS2D_VERSION < 0x030100)
+-(void) viewDidResizeTo: (CGSize) newViewSize {
+	for (CCNode* child in self.children) [child viewDidResizeTo: newViewSize];
 }
+#endif	// (COCOS2D_VERSION < 0x030100)
 
 @end
 
-
-#if CC3_CC2_CLASSIC
 
 #pragma mark -
 #pragma mark CCLayer extension
 
 @implementation CCLayer (CC3)
 
-#if COCOS2D_VERSION < 0x020100
--(void) setTouchEnabled: (BOOL) isTouchEnabled { self.isTouchEnabled = isTouchEnabled; }
-#endif
+-(CC3ViewController*) controller {
+#if (CC3_IOS && !CC3_CC2_1)
+	CC3ViewController* vc = (CC3ViewController*)(CCDirector.sharedDirector);
+	if ( [vc isKindOfClass: [CC3ViewController class]] ) return vc;
+#endif	// (CC3_IOS && !CC3_CC2_1)
+	return nil;
+}
+
+-(CCGLView*) view { return (CCGLView*)self.controller.view; }
+
++(id) layer { return [[[self alloc] init] autorelease]; }
+
+/** Invoke callbacks when size changes. */
+-(void) setContentSize: (CGSize) aSize {
+	CGSize oldSize = self.contentSize;
+	[super setContentSize: aSize];
+	if( !CGSizeEqualToSize(aSize, oldSize) ) {
+		[self didUpdateContentSizeFrom: oldSize];	// Legacy callback support
+#if CC3_CC2_CLASSIC
+		[self contentSizeChanged];					// Invoked by super in Cocos2D v3
+#endif	// CC3_CC2_CLASSIC
+	}
+}
+
+// Deprecated
+-(void) didUpdateContentSizeFrom: (CGSize) oldSize {}
+
+#if CC3_CC2_CLASSIC
 
 #if CC3_IOS
 -(NSInteger) mousePriority { return 0; }
 -(void) setMousePriority: (NSInteger) priority {}
 #endif	// CC3_IOS
 
+#if (COCOS2D_VERSION < 0x020100)
+-(void) setTouchEnabled: (BOOL) isTouchEnabled { self.isTouchEnabled = isTouchEnabled; }
+
 #if CC3_OSX
-#if COCOS2D_VERSION < 0x020100
 -(void) setMouseEnabled: (BOOL) isMouseEnabled { self.isMouseEnabled = isMouseEnabled; }
 -(NSInteger) mousePriority { return 0; }
 -(void) setMousePriority: (NSInteger) priority {}
-#endif
 #endif	// CC3_OSX
+
+#endif	// (COCOS2D_VERSION < 0x020100)
+
+#endif	// CC3_CC2_CLASSIC
 
 @end
 
+
+#pragma mark -
+#pragma mark CCScene extension
+
+@implementation CCScene (CC3)
+
+-(CCScene*) asCCScene { return self; }
+
+/** Invoke callbacks when size changes. */
+#if CC3_CC2_CLASSIC
+-(void) setContentSize: (CGSize) aSize {
+	CGSize oldSize = self.contentSize;
+	[super setContentSize: aSize];
+	if( !CGSizeEqualToSize(aSize, oldSize) ) {
+		[self contentSizeChanged];					// Invoked by super in Cocos2D v3
+	}
+}
+#endif	// CC3_CC2_CLASSIC
+
+@end
+
+
+#if CC3_CC2_CLASSIC
 
 #pragma mark -
 #pragma mark CCSprite extension
@@ -370,66 +582,6 @@
 @end
 
 #endif	// CC3_CC2_CLASSIC
-
-
-#pragma mark -
-#pragma mark CCTexture extension
-
-@implementation CCTexture (CC3)
-
--(void) addToCacheWithName: (NSString*) texName {
-	[CCTextureCache.sharedTextureCache addTexture: self named: texName];
-}
-
-#if CC3_CC2_CLASSIC
--(NSUInteger) pixelWidth { return self.pixelsWide; }
-
-/** Legacy name for pixelHeight. */
--(NSUInteger) pixelHeight { return self.pixelsHigh; }
-
-#endif	// CC3_CC2_CLASSIC
-
-@end
-
-
-#pragma mark -
-#pragma mark CCTextureCache extension
-
-@implementation CCTextureCache (CC3)
-
-#if CC3_CC2_1
-#	define CC2_DICT_LOCK		dictLock_
-#	define CC2_TEX_DICT			textures_
-
--(void) addTexture: (CCTexture*) tex2D named: (NSString*) texName {
-	if ( !tex2D ) return;
-
-	[CC2_DICT_LOCK lock];
-	[CC2_TEX_DICT setObject: tex2D forKey: texName];
-	[CC2_DICT_LOCK unlock];
-}
-
-#else	// CC2 2 and above
-#	define CC2_DICT_QUEUE		_dictQueue
-
-#if COCOS2D_VERSION < 0x020100
-#	define CC2_TEX_DICT			textures_
-#else
-#	define CC2_TEX_DICT			_textures
-#endif	// COCOS2D_VERSION < 0x020100
-
--(void) addTexture: (CCTexture*) tex2D named: (NSString*) texName {
-	if ( !tex2D || !texName ) return;
-	
-	dispatch_sync(CC2_DICT_QUEUE, ^{
-		if ( ![CC2_TEX_DICT objectForKey: texName] )
-			[CC2_TEX_DICT setObject: tex2D forKey: texName];
-	});
-}
-
-#endif	// CC3_CC2_1
-
-@end
 
 
 #pragma mark -
@@ -499,6 +651,9 @@
 
 -(void) setContentScaleFactor: (CGFloat) contentScaleFactor {}
 
+-(CGSize) designSize { return self.winSize; }
+
+
 #endif	//CC3_CC2_CLASSIC
 
 @end
@@ -548,11 +703,13 @@
 
 @implementation CCDirectorMac (CC3)
 
--(void) reshapeProjection: (CGSize) newWindowSize {
-	[super reshapeProjection: newWindowSize];
+#if (COCOS2D_VERSION < 0x030100)
+-(void) reshapeProjection: (CGSize) newViewSize {
+	[super reshapeProjection: newViewSize];
 	if (self.resizeMode == kCCDirectorResize_NoScale)
-		[self.runningScene reshapeProjection: newWindowSize];
+		[self.runningScene viewDidResizeTo: newViewSize];
 }
+#endif	// (COCOS2D_VERSION < 0x030100)
 
 @end
 
@@ -567,6 +724,13 @@
 #if !CC3_CC2_1
 -(NSTimeInterval) displayLinkTime { return CC2_LAST_DISPLAY_TIME; }
 #endif
+
+#if (COCOS2D_VERSION < 0x030100)
+-(void) reshapeProjection: (CGSize) newViewSize {
+	[super reshapeProjection: newViewSize];
+	[self.runningScene viewDidResizeTo: newViewSize];
+}
+#endif	// (COCOS2D_VERSION < 0x030100)
 
 /** Uncomment to log a debug message whenever the frame time is unexpectedly extended. */
 //-(void) drawScene {

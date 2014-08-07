@@ -92,7 +92,7 @@
 	[_objectsByName removeObjectForKey: name];
 	[self unlock];
 	
-	LogRezIf(obj != nil, @"Removed %@ named %@ from the %@ cache.", [[obj resolveWeakReference] class], name, _typeName);
+	LogRezIf(obj != nil, @"Removed %@ named '%@' from the %@ cache.", [[obj resolveWeakReference] class], name, _typeName);
 	[obj autorelease];		// Let the object go once the loop is done
 }
 

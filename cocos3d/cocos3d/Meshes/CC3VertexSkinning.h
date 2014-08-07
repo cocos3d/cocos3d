@@ -972,7 +972,7 @@
 #pragma mark -
 #pragma mark Deprecated CC3SkeletonRestPoseBindingVisitor
 
-DEPRECATED_ATTRIBUTE
+__deprecated
 /** @deprecated No longer used. */
 @interface CC3SkeletonRestPoseBindingVisitor : CC3NodeVisitor
 @end

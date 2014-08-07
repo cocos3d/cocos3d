@@ -67,10 +67,6 @@
 #pragma mark Deprecated CC3Node extension methods
 
 
-@interface CC3Rotator (TemplateMethods)
--(void) applyRotation;
-@end
-
 @implementation CC3Node (CC3TargettingNode)
 
 -(CC3TargettingNode*) asTargettingNode {

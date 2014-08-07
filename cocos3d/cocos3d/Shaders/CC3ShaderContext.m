@@ -44,8 +44,8 @@
 -(void) dealloc {
 	[_program release];
 	[_pureColorProgram release];
-	[_uniforms release];
-	[_uniformsByName release];
+	[_uniformOverrides release];
+	[_uniformOverridesByName release];
 	
 	[super dealloc];
 }
@@ -60,7 +60,7 @@
 	
 	self.pureColorProgram = nil;
 	
-	[self removeAllOverrides];
+	[self removeAllUniformOverrides];
 }
 
 #if CC3_GLSL
@@ -83,15 +83,14 @@
 #pragma mark Variables
 
 -(CC3GLSLUniform*) uniformOverrideNamed: (NSString*) name {
-	CC3GLSLUniform* rtnVar = [_uniformsByName objectForKey: name];
-	return rtnVar ? rtnVar : [self addUniformOverrideFor: [_program uniformNamed: name]];
+	CC3GLSLUniform* rtnVar = [_uniformOverridesByName objectForKey: name];
+	return rtnVar ? rtnVar : [self addUniformOverrideFor: [self.program uniformNamed: name]];
 }
 
 -(CC3GLSLUniform*) uniformOverrideForSemantic: (GLenum) semantic at: (GLuint) semanticIndex {
-	for (CC3GLSLUniform* var in _uniforms)
-		if (var.semantic == semantic && var.semanticIndex == semanticIndex)
-			return var;
-	return [self addUniformOverrideFor: [_program uniformForSemantic: semantic at: semanticIndex]];
+	for (CC3GLSLUniform* var in _uniformOverrides)
+		if (var.semantic == semantic && var.semanticIndex == semanticIndex) return var;
+	return [self addUniformOverrideFor: [self.program uniformForSemantic: semantic at: semanticIndex]];
 }
 
 -(CC3GLSLUniform*) uniformOverrideForSemantic: (GLenum) semantic {
@@ -99,59 +98,53 @@
 }
 
 -(CC3GLSLUniform*) uniformOverrideAtLocation: (GLint) uniformLocation {
-	for (CC3GLSLUniform* var in _uniforms) if (var.location == uniformLocation) return var;
-	return [self addUniformOverrideFor: [_program uniformAtLocation: uniformLocation]];
+	for (CC3GLSLUniform* var in _uniformOverrides) if (var.location == uniformLocation) return var;
+	return [self addUniformOverrideFor: [self.program uniformAtLocation: uniformLocation]];
 }
 
 -(CC3GLSLUniform*)	addUniformOverrideFor: (CC3GLSLUniform*) uniform {
-	return [[self addUniformOverride: [uniform copyAsClass: CC3GLSLUniformOverride.class]] autorelease];
+	if( !uniform ) return nil;
+	
+	CC3GLSLUniform* pureColorUniform = [self.pureColorProgram uniformNamed: uniform.name];
+	CC3GLSLUniformOverride* override = [CC3GLSLUniformOverride uniformOverrideForProgramUniform: uniform
+																	 andPureColorProgramUniform: pureColorUniform];
+	[self addUniformOverride: override];
+	return override;
 }
 
--(CC3GLSLUniformOverride*) addUniformOverride: (CC3GLSLUniformOverride*) uniformOverride {
-	if( !uniformOverride ) return nil;
+-(void) addUniformOverride: (CC3GLSLUniformOverride*) uniformOverride {
+	if( !uniformOverride ) return;
 	
-	if ( !_uniforms ) _uniforms = [NSMutableArray new];						// retained
-	if ( !_uniformsByName ) _uniformsByName = [NSMutableDictionary new];	// retained
+	if ( !_uniformOverrides ) _uniformOverrides = [NSMutableArray new];						// retained
+	if ( !_uniformOverridesByName ) _uniformOverridesByName = [NSMutableDictionary new];	// retained
 		
-	[_uniformsByName setObject: uniformOverride forKey: uniformOverride.name];
-	[_uniforms addObject: uniformOverride];
-
-	return uniformOverride;
+	[_uniformOverridesByName setObject: uniformOverride forKey: uniformOverride.name];
+	[_uniformOverrides addObject: uniformOverride];
 }
 
 -(void)	removeUniformOverride: (CC3GLSLUniform*) uniform {
-	[_uniforms removeObjectIdenticalTo: uniform];
-	[_uniformsByName removeObjectForKey: uniform.name];
-	CC3Assert(_uniforms.count == _uniformsByName.count,
-			  @"%@ was not completely removed from %@", uniform, self);
-	if (_uniforms.count == 0) [self removeAllOverrides];	// Remove empty collections
+	[_uniformOverrides removeObjectIdenticalTo: uniform];
+	[_uniformOverridesByName removeObjectForKey: uniform.name];
+	CC3Assert(_uniformOverrides.count == _uniformOverridesByName.count, @"%@ was not completely removed from %@", uniform, self);
+	if (_uniformOverrides.count == 0) [self removeAllUniformOverrides];	// Remove empty collections
 }
 
--(void) removeAllOverrides {
-	[_uniformsByName release];
-	_uniformsByName = nil;
-	[_uniforms release];
-	_uniforms = nil;
+-(void) removeAllUniformOverrides {
+	[_uniformOverridesByName release];
+	_uniformOverridesByName = nil;
+	[_uniformOverrides release];
+	_uniformOverrides = nil;
 }
 
 
 #pragma mark Drawing
 
-// Match based on location
 -(BOOL) populateUniform: (CC3GLSLUniform*) uniform withVisitor: (CC3NodeDrawingVisitor*) visitor {
-	
-	// If the program is not the mine, don't look up the override.
-	CC3ShaderProgram* uProg = uniform.program;
-	if ( !(uProg == _program || uProg == _pureColorProgram) ) return NO;
 
-	// Find the matching uniform override by comparing locations
-	// and set the value of the incoming uniform from it
-	for (CC3GLSLUniform* var in _uniforms) {
-		if (var.location == uniform.location) {
-			[uniform setValueFromUniform: var];
-			return YES;
-		}
-	}
+	// If any of the uniform overrides are overriding the uniform, update the value of the
+	// uniform from the override, and return that we've done so.
+	for (CC3GLSLUniformOverride* var in _uniformOverrides)
+		if ( [var updateIfOverriding: uniform] ) return YES;
 
 	// If the semantic is unknown, and no override was found, return whether a default is okay
 	if (uniform.semantic == kCC3SemanticNone) return !_shouldEnforceCustomOverrides;
@@ -166,8 +159,8 @@
 	if ( (self = [super init]) ) {
 		_program = nil;
 		_pureColorProgram = nil;
-		_uniforms = nil;
-		_uniformsByName = nil;
+		_uniformOverrides = nil;
+		_uniformOverridesByName = nil;
 		_shouldEnforceCustomOverrides = YES;
 		_shouldEnforceVertexAttributes = YES;
 	}
@@ -183,7 +176,7 @@
 }
 
 // Protected properties for copying
--(NSArray*) uniforms { return _uniforms; }
+-(NSArray*) uniformOverrides { return _uniformOverrides; }
 -(CC3ShaderProgram*) rawPureColorProgram { return _pureColorProgram; }
 
 -(void) populateFrom: (CC3ShaderContext*) another {
@@ -196,7 +189,8 @@
 	_shouldEnforceCustomOverrides = another.shouldEnforceCustomOverrides;
 	_shouldEnforceVertexAttributes = another.shouldEnforceVertexAttributes;
 
-	for (CC3GLSLUniformOverride* uo in another.uniforms) [self addUniformOverride: [uo autoreleasedCopy]];
+	for (CC3GLSLUniformOverride* uo in another.uniformOverrides)
+		[self addUniformOverride: [uo autoreleasedCopy]];
 }
 
 -(NSString*) description {

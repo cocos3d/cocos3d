@@ -30,6 +30,7 @@
  */
 
 #import "CC3Backgrounder.h"
+#import "CC3OpenGL.h"
 
 /** The default backgrounder task queue name. */
 #define kCC3BackgrounderDefaultTaskQueueName	"org.cocos3d.backgrounder.default"
@@ -38,6 +39,8 @@
 #pragma mark CC3Backgrounder
 
 @implementation CC3Backgrounder
+
+@synthesize shouldRunTasksOnRequestingThread=_shouldRunTasksOnRequestingThread;
 
 -(void) dealloc {
 	[self deleteTaskQueue];
@@ -55,19 +58,9 @@
 	[self updateTaskQueuePriority];
 }
 
-/** Set the appropriate initial queue priority based on the OS version. */
+/** Set the initial queue priority. */
 -(void) initQueuePriority {
-	
-#if CC3_IOS
-	self.queuePriority = ((CCConfiguration.sharedConfiguration.OSVersion >= CCSystemVersion_iOS_5_0)
-						  ? DISPATCH_QUEUE_PRIORITY_BACKGROUND
-						  : DISPATCH_QUEUE_PRIORITY_LOW);
-#endif	// CC3_IOS
-	
-#if CC3_OSX
 	self.queuePriority = DISPATCH_QUEUE_PRIORITY_BACKGROUND;
-#endif	// CC3_OSX
-	
 }
 
 /** Initialize the serial task queue. */
@@ -90,13 +83,21 @@
 #pragma mark Backgrounding tasks
 
 -(void) runBlock: (void (^)(void))block {
-	dispatch_async(_taskQueue, ^{ [self runBlockNow: block]; });
+	if (_shouldRunTasksOnRequestingThread) {
+		[self runBlockNow: block];
+	} else {
+		dispatch_async(_taskQueue, ^{ [self runBlockNow: block]; });
+	}
 }
 
 -(void) runBlock: (void (^)(void))block after: (NSTimeInterval) seconds {
-	dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (seconds * NSEC_PER_SEC)),
-				   _taskQueue,
-				   ^{ [self runBlockNow: block]; });
+	if (_shouldRunTasksOnRequestingThread) {
+		[NSThread.currentThread runBlock: block after: seconds];
+	} else {
+		dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (seconds * NSEC_PER_SEC)),
+					   _taskQueue,
+					   ^{ [self runBlockNow: block]; });
+	}
 }
 
 -(void) runBlockNow: (void (^)(void)) block { @autoreleasepool { block(); } }
@@ -106,6 +107,12 @@
 
 -(id) init {
 	if ( (self = [super init]) ) {
+		
+		// Any OpenGL tasks that run on the background rely on the background OpenGL context,
+		// which is derived from the foreground OpenGL context. Ensure that the foreground
+		// OpenGL context exists before creating the backgrounder and running background tasks.
+		[CC3OpenGL sharedGL];
+		
 		[self initTaskQueue];
 		[self initQueuePriority];
 	}

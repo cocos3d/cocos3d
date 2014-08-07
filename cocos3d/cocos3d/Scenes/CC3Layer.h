@@ -29,8 +29,13 @@
 
 /** @file */	// Doxygen marker
 
-#import "CC3ControllableLayer.h"
 #import "CC3Scene.h"
+#import "CC3RenderSurfaces.h"
+
+#if CC3_CC2_RENDER_QUEUE
+#	import	"CCRenderer_private.h"
+#endif	// CC3_CC2_RENDER_QUEUE
+
 
 /**
  * CC3Layer is a cocos2d CCLayer that supports full 3D rendering in combination with normal
@@ -67,15 +72,6 @@
  *   - projection and unprojection between the 2D and 3D coordinate systems, including
  *     projecting touch events onto 3D nodes, will not work correctly.
  *
- * CC3Layer directly descends from CC3ControllableLayer, which means that it requires and
- * is controlled by a CC3ViewController instance. In addition to linking the 3D scene to
- * the view, the controller provides:
- *   - Automatic resizing of the scene viewport when the contentSize of this layer changes.
- *   - The CC3Layer can be overlaid on a device camera image stream so that both the 2D and
- *     3D scenes can participate in an augmented reality view perspective.
- *
- * Either or both of these features can be turned on or off.
- *
  * When compiling with versions of cocos2d prior to 3.0, to make use of the standard cocos2d
  * model updatating functionality to update and animate the 3D scene, use the scheduleUpdate
  * method of CC3Layer to invoke periodic callbacks to the update: method of the CC3Layer 
@@ -106,7 +102,7 @@
  * within a parent CCLayer like any other CCNode.
  * 
  * You can even dyanamically move your CC3Layer around within the window, by changing the
- * position property (for example, by using a CCMoveTo action).
+ * position property (for example, by using a CCActionMoveTo action).
  *
  * For most applications, you will create subclasses of both CC3Layer and CC3Scene.
  * The customized subclass of CC3Scene manages the behaviour of the 3D resources.
@@ -131,11 +127,94 @@
  *   -# When compiling with versions of cocos2d prior to 3.0, schedule regular updates in
  *      your CC3Layer instance by invoking the scheduleUpdate method.
  */
-@interface CC3Layer : CC3ControllableLayer {
+@interface CC3Layer : CCLayer {
 	CC3Scene* _cc3Scene;
+	CC3SceneDrawingSurfaceManager* _surfaceManager;
 	NSMutableArray* _cc3GestureRecognizers;
+	char* _renderStreamGroupMarker;
 	BOOL _shouldAlwaysUpdateViewport : 1;
+	BOOL _shouldTrackViewSize : 1;
 }
+
+/**
+ * The CC3Scene instance that maintains the 3D models and draws the 3D content.
+ *
+ * If your application contains multiple 3D scenes, you can swap between these scenes
+ * by simply setting the value of this property to the new scene. The old CC3Scene
+ * instance is released. So if you want to swap that old scene back into this layer
+ * at some point in the future, you should cache it somewhere, or recreated it.
+ *
+ * When the old scene is released, it will clean up after itself, including all the
+ * nodes and meshes it contains.
+ *
+ * If this layer already has a CC3Scene assigned, the wasRemoved method of the existing 
+ * CC3Scene is invoked to stop and remove any CCActions running on it and any nodes it contains.
+ *
+ * You can set the shouldStopActionsWhenRemoved of the CC3Scene to NO if you want the CCActions
+ * attached to the scene and its nodes to be paused, but not stopped and removed. Be aware that
+ * CCActions that are paused, but not stopped, will retain the CC3Scene, and could be cause for
+ * memory leaks if not managed correctly. Please see the notes of the CC3Node
+ * shouldStopActionsWhenRemoved property and the CC3Node wasRemoved method for more information.
+ *
+ * Setting this property while this layer is being displayed automatically invokes the
+ * open method on the new scene to ensure that the transforms are up to date before the
+ * next frame is rendered.
+ *
+ * In many cases, you do not need to set this property directly. If you do not set this 
+ * property directly, an instance of the Class returned by the cc3SceneClass property is 
+ * automatically instantiated the first time this property is accessed.
+ */
+@property(nonatomic, strong) CC3Scene* cc3Scene;
+
+/**
+ * Returns the Class used to automatically instantiate a value for the cc3Scene property, 
+ * if that property is not set directly. 
+ *
+ * The value returned by this method is a subclass of CC3Scene.
+ *
+ * This implementation attempts to derive the appropriate scene class from the name of the
+ * class of this instance by looking for a subclass of CC3Scene whose name is one of the 
+ * following (searched in this order):
+ *   # If the class name of this instance ends in "Layer", it is stripped and "Scene" is
+ *     appended to the stripped result (eg. HelloLayer -> HelloScene).
+ *   # If the class name of this instance ends in "Layer", it is stripped (eg. HelloLayer -> Hello).
+ *   # "Scene" is appended to the class name of this instance (eg. Hello -> HelloScene, 
+ *     including HelloLayer -> HelloLayerScene).
+ *
+ * If that is not sufficient, you can override the getter method of this property in your 
+ * custom CC3Layer subclass to return whatever you want, or you can set the cc3Scene property
+ * directly. If you override this method, remember the value returned by this method must be 
+ * a subclass of CC3Scene.
+ */
+@property(nonatomic, readonly) Class cc3SceneClass;
+
+
+#pragma mark Surfaces
+
+/**
+ * The surface manager that manages the surfaces associated with this layer, and used
+ * to render the scene from this layer.
+ *
+ * If this property is not explicitly set, it is initialized to an instance of the class
+ * returned by the surfaceManager class when this property is first accessed. At a minimum,
+ * the surface manager contains the pickingSurface used to pick nodes from touch events.
+ * If this layer will be using additional surfaces, you should consider subclassing the
+ * CC3SceneDrawingSurfaceManager class and overriding the surfaceManagerClass property.
+ *
+ * When setting this property, the surfaces in the surface manager are automatically
+ * resized to the contentSize of this layer.
+ */
+@property(nonatomic, strong) CC3SceneDrawingSurfaceManager* surfaceManager;
+
+/**
+ * The class that will be used to automatically populate the surfaceManager property when
+ * it is first accessed.
+ *
+ * By default, this property returns the CC3SceneDrawingSurfaceManager class. If this layer will 
+ * be using additional surfaces, you should consider subclassing the CC3SceneDrawingSurfaceManager
+ * class and overriding this property to return that class.
+ */
+@property(nonatomic, readonly) Class surfaceManagerClass;
 
 
 #pragma mark iOS Gesture recognizers and touch handling
@@ -210,23 +289,6 @@
 -(BOOL) handleTouchType: (uint) touchType at: (CGPoint) touchPoint;
 
 
-#pragma mark CCRGBAProtocol and CCBlendProtocol support
-
-/** 
- * The color of this layer.
- *
- * Returns and changes the value of the same property on the cc3Scene.
- */
-@property(nonatomic, assign) CCColorRef color;
-
-/**
- * The opacity of this layer.
- *
- * Returns and changes the value of the same property on the cc3Scene.
- */
-@property(nonatomic, assign) CCOpacity opacity;
-
-
 #pragma mark Allocation and initialization
 
 /**
@@ -240,6 +302,15 @@
 
 
 #pragma mark Updating layer
+
+/**
+ * Callback invoked when the contentSize property of this layer changes.
+ *
+ * This implementation updates the viewport to match the new layer dimensions, and keeps
+ * track of whether the layer covers the full view. Subclasses may override to perform
+ * activities such as adjusting the layout of buttons and controls to fit the new size.
+ */
+-(void) contentSizeChanged;
 
 /**
  * Template method that is invoked automatically immediately after this layer has
@@ -278,32 +349,6 @@
 -(void) onCloseCC3Layer;
 
 /**
- * The CC3Scene instance that maintains the 3D models and draws the 3D content.
- *
- * If your application contains multiple 3D scenes, you can swap between these scenes
- * by simply setting the value of this property to the new scene. The old CC3Scene
- * instance is released. So if you want to swap that old scene back into this layer
- * at some point in the future, you should cache it somewhere, or recreated it.
- *
- * When the old scene is released, it will clean up after itself, including all the
- * nodes and meshes it contains.
- *
- * If this layer already has a CC3Scene assigned, the wasRemoved method of the existing
- * CC3Scene to stop and remove any CCActions running on it and the nodes it contains.
- *
- * You can set the shouldStopActionsWhenRemoved of the CC3Scene to NO if you want the CCActions
- * attached to the scene and its nodes to be paused, but not stopped and removed. Be aware that
- * CCActions that are paused, but not stopped, will retain the CC3Scene, and could be cause for
- * memory leaks if not managed correctly. Please see the notes of the CC3Node
- * shouldStopActionsWhenRemoved property and the CC3Node wasRemoved method for more information.
- *
- * Setting this property while this layer is being displayed automatically invokes the
- * open method on the new scene to ensure that the transforms are up to date before the
- * next frame is rendered.
- */
-@property(nonatomic, strong) CC3Scene* cc3Scene;	
-
-/**
  * Indicates whether this layer should update the 3D viewport on each rendering frame.
  *
  * If the value of this property is YES, the 3D viewport will be updated before each
@@ -322,6 +367,22 @@
  * layer in a manner that is not automatically propagated to the CC3Scene viewport.
  */
 @property(nonatomic, assign) BOOL shouldAlwaysUpdateViewport;
+
+/**
+ * Indicates whether this layer should track the size of the underlying view.
+ *
+ * If the value of this property is YES, when the size of the underlying view changes 
+ * (eg- through a device rotation on iOS, or a window resizing on OSX), the contentSize
+ * property of this layer will be set to the new size of the view.
+ *
+ * The initial value of this property is YES. It is automatically set to NO if the contentSize
+ * property of this layer is set to a value other than the size of the underlying view. 
+ *
+ * You can directly set the value of this property if you have some other sizing management
+ * scheme, but be aware that this property will be set to NO each time the contentSize property
+ * is set to a value that is not the same size of the view.
+ */
+@property(nonatomic, assign) BOOL shouldTrackViewSize;
 
 /**
  * This method is invoked periodically when the components in the CC3Scene are to be updated.
@@ -357,4 +418,46 @@
  */
 -(void) updateViewport;
 
+
+#pragma mark Developer support
+
+/**
+ * Returns a marker string that is pushed onto the GL render stream prior to rendering
+ * this node. The group is popped from the GL render stream after this node is rendered.
+ *
+ * This property returns a NULL pointer. Subclasses that contain renderable content can
+ * override to provide a meaningful string. Subclasses should avoid dynamically generating
+ * this property on each access, since this property is accessed each time the node is rendered.
+ */
+@property(nonatomic, readonly) const char* renderStreamGroupMarker;
+
 @end
+
+
+#if CC3_CC2_RENDER_QUEUE
+
+#pragma mark -
+#pragma mark CC3LayerRenderCommand
+
+/** A CCRenderCommand specialized for rendering 3D scenes from a CC3Layer. */
+@interface CC3LayerRenderCommand : NSObject <CCRenderCommand> {
+	CC3Layer* _cc3Layer;
+	CC3NodeDrawingVisitor* _visitor;
+}
+
+/** 
+ * The drawing visitor to use when drawing the CC3Layer. 
+ *
+ * This property must be set before queing this command for rendering the CC3Layer.
+ */
+@property(nonatomic, retain) CC3NodeDrawingVisitor* visitor;
+
+/** Initializes this instance to render the specified CC3Layer. */
+-(instancetype) initForCC3Layer: (CC3Layer*) layer;
+
+/** Allocates and initializes an instance to render the specified CC3Layer. */
++(instancetype) renderCommandForCC3Layer: (CC3Layer*) layer;
+
+@end
+
+#endif	// CC3_CC2_RENDER_QUEUE

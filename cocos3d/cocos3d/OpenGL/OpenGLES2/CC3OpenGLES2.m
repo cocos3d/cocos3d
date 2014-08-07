@@ -47,11 +47,22 @@
 
 #pragma mark Textures
 
+-(void) unbindTexturesExceptTarget: (GLenum) target at: (GLuint) tuIdx {
+	GLenum otherTarget = (target == GL_TEXTURE_2D) ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D;
+	[self bindTexture: 0 toTarget: otherTarget at: tuIdx];
+}
+
 -(void) disableTexturingAt: (GLuint) tuIdx {
 	[self enableTexturing: NO inTarget: GL_TEXTURE_2D at: tuIdx];
 	[self bindTexture: 0 toTarget: GL_TEXTURE_2D at: tuIdx];
 	[self enableTexturing: NO inTarget: GL_TEXTURE_CUBE_MAP at: tuIdx];
 	[self bindTexture: 0 toTarget: GL_TEXTURE_CUBE_MAP at: tuIdx];
+}
+
+-(NSString*) dumpTextureBindingsAt: (GLuint) tuIdx {
+	return [NSString stringWithFormat: @"%@: %i, %@: %i",
+			NSStringFromGLEnum(GL_TEXTURE_2D), [self getInteger: GL_TEXTURE_BINDING_2D],
+			NSStringFromGLEnum(GL_TEXTURE_CUBE_MAP), [self getInteger: GL_TEXTURE_BINDING_CUBE_MAP]];
 }
 
 
@@ -143,12 +154,6 @@
 
 
 #pragma mark Allocation and initialization
-
--(CC3GLContext*) makeRenderingGLContext {
-	CC3GLContext* context = [[CC3GLContext alloc] initWithAPI: kEAGLRenderingAPIOpenGLES2 sharegroup: nil];
-	CC3Assert(context, @"Could not create CC3GLContext. OpenGL ES 2.0 is required.");
-	return [context autorelease];
-}
 
 -(void) initPlatformLimits {
 	[super initPlatformLimits];

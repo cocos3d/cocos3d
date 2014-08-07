@@ -35,7 +35,7 @@
 #pragma mark -
 #pragma mark Deprecated CC3VertexArrayMeshModel
 
-DEPRECATED_ATTRIBUTE
+__deprecated
 /**
  * Deprecated.
  * @deprecated Functionality moved to CC3Mesh.

@@ -257,17 +257,15 @@ static NSObject<CC3OpenGLDelegate>* _delegate = nil;
 	// interference between threads.
 	if ( !self.isRenderingContext ) return;
 
-#if COCOS2D_VERSION >= 0x020100
-	// If available, use cocos2d state management. This method can be invoked from outside
-	// the main rendering path (ie- during buffer loading), so cocos2d state must be honoured.
-	ccGLBindVAO(vaoId);
-
-#else
+#if CC3_CC2_RENDER_QUEUE || (COCOS2D_VERSION < 0x020100)
 	cc3_CheckGLPrim(vaoId, value_GL_VERTEX_ARRAY_BINDING, isKnown_GL_VERTEX_ARRAY_BINDING);
 	if ( !needsUpdate ) return;
 	glBindVertexArray(vaoId);
 	LogGLErrorTrace(@"glBindVertexArray(%u)", vaoId);
-
+#else
+	// If available, use cocos2d state management. This method can be invoked from outside
+	// the main rendering path (ie- during buffer loading), so cocos2d state must be honoured.
+	ccGLBindVAO(vaoId);
 #endif	// COCOS2D_VERSION >= 0x020100
 }
 
@@ -626,7 +624,15 @@ static NSObject<CC3OpenGLDelegate>* _delegate = nil;
 		[self activateTextureUnit: tuIdx];
 		glBindTexture(target, texID);
 		LogGLErrorTrace(@"glBindTexture(%@, %u)", NSStringFromGLEnum(target), texID);
+
+		// If a real texture was set in this target, unbind all other targets in this texture unit
+		if (texID) [self unbindTexturesExceptTarget: target at: tuIdx];
 	}
+}
+
+/** Unbind all targets in the specified texture unit except the specified target. */
+-(void) unbindTexturesExceptTarget: (GLenum) target at: (GLuint) tuIdx {
+	CC3AssertUnimplemented(@"unbindTexturesExceptTarget:at:");
 }
 
 /** Sets the specified texture parameter for the specified texture unit, without checking a cache. */
@@ -665,6 +671,21 @@ static NSObject<CC3OpenGLDelegate>* _delegate = nil;
 
 -(void) enablePointSpriteCoordReplace: (BOOL) onOff at: (GLuint) tuIdx {}
 
+-(NSString*) dumpTextureBindings {
+	NSMutableString* desc = [NSMutableString stringWithCapacity: 500];
+	[desc appendString: @"Current GL texture bindings:"];
+	for (GLuint tuIdx = 0; tuIdx < value_MaxTextureUnitsUsed; tuIdx++) {
+		[self activateTextureUnit: tuIdx];
+		[desc appendFormat: @"\n\tTexture Unit %i: %@", tuIdx, [self dumpTextureBindingsAt: tuIdx]];
+	}
+	return desc;
+}
+
+-(NSString*) dumpTextureBindingsAt: (GLuint) tuIdx {
+	CC3AssertUnimplemented(@"dumpTextureBindingsAt:");
+	return nil;
+}
+
 
 #pragma mark Matrices
 
@@ -672,11 +693,11 @@ static NSObject<CC3OpenGLDelegate>* _delegate = nil;
 
 -(void) activatePaletteMatrixStack: (GLuint) pmIdx {}
 
--(void) loadModelviewMatrix: (CC3Matrix4x3*) mtx {}
+-(void) loadModelviewMatrix: (const CC3Matrix4x3*) mtx {}
 
--(void) loadProjectionMatrix: (CC3Matrix4x4*) mtx {}
+-(void) loadProjectionMatrix: (const CC3Matrix4x4*) mtx {}
 
--(void) loadPaletteMatrix: (CC3Matrix4x3*) mtx at: (GLuint) pmIdx {}
+-(void) loadPaletteMatrix: (const CC3Matrix4x3*) mtx at: (GLuint) pmIdx {}
 
 -(void) pushModelviewMatrixStack {}
 
@@ -1045,9 +1066,77 @@ static NSObject<CC3OpenGLDelegate>* _delegate = nil;
 -(void) releaseShaderCompiler {}
 
 
+#pragma mark Debugging support
+
+-(void) pushGroupMarker: (NSString*) marker { [self pushGroupMarkerC: marker.UTF8String]; }
+
+-(void) pushGroupMarkerC: (const char*) marker {
+	glPushGroupMarkerEXT(0, marker);
+	LogGLErrorTrace(@"glPushGroupMarkerEXT(0, %@)", [NSString stringWithUTF8String: marker]);
+}
+
+-(void) popGroupMarker {
+	glPopGroupMarkerEXT();
+//	LogGLErrorTrace(@"glPopGroupMarkerEXT()");	// Log appears outside the group, which creates clutter.
+}
+
+-(void) insertEventMarker: (NSString*) marker { [self insertEventMarkerC: marker.UTF8String]; }
+
+-(void) insertEventMarkerC: (const char*) marker {
+	glInsertEventMarkerEXT(0, marker);
+	LogGLErrorTrace(@"glInsertEventMarkerEXT(0, %@)", [NSString stringWithUTF8String: marker]);
+}
+
+-(void) captureOpenGLFrame { [self insertEventMarkerC: "com.apple.GPUTools.event.debug-frame"]; }
+
+#if APPORTABLE
+-(void) setDebugLabel: (NSString*) label forObject: (GLuint) objID ofType: (GLenum) objType {}
+-(void) setDebugLabel: (NSString*) label forTexture: (GLuint) texID {}
+-(void) setDebugLabel: (NSString*) label forBuffer: (GLuint) buffID {}
+-(void) setDebugLabel: (NSString*) label forShader: (GLuint) shaderID {}
+-(void) setDebugLabel: (NSString*) label forShaderProgram: (GLuint) progID {}
+-(void) setDebugLabel: (NSString*) label forFramebuffer: (GLuint) fbID {}
+-(void) setDebugLabel: (NSString*) label forRenderbuffer: (GLuint) rbID {}
+-(void) setDebugLabel: (NSString*) label forVertexArray: (GLuint) vaID {}
+#else
+-(void) setDebugLabel: (NSString*) label forObject: (GLuint) objID ofType: (GLenum) objType {
+	glLabelObjectEXT(objType, objID, 0, label.UTF8String);
+	LogGLErrorTrace(@"glLabelObjectEXT(%@, %u, 0, %@)", NSStringFromGLEnum(objType), objID, label);
+}
+
+-(void) setDebugLabel: (NSString*) label forTexture: (GLuint) texID {
+	[self setDebugLabel: label forObject: texID ofType: GL_TEXTURE];
+}
+
+-(void) setDebugLabel: (NSString*) label forBuffer: (GLuint) buffID {
+	[self setDebugLabel: label forObject: buffID ofType: GL_BUFFER_OBJECT_EXT];
+}
+
+-(void) setDebugLabel: (NSString*) label forShader: (GLuint) shaderID {
+	[self setDebugLabel: label forObject: shaderID ofType: GL_SHADER_OBJECT_EXT];
+}
+
+-(void) setDebugLabel: (NSString*) label forShaderProgram: (GLuint) progID {
+	[self setDebugLabel: label forObject: progID ofType: GL_PROGRAM_OBJECT_EXT];
+}
+
+-(void) setDebugLabel: (NSString*) label forFramebuffer: (GLuint) fbID {
+	[self setDebugLabel: label forObject: fbID ofType: GL_FRAMEBUFFER];
+}
+
+-(void) setDebugLabel: (NSString*) label forRenderbuffer: (GLuint) rbID {
+	[self setDebugLabel: label forObject: rbID ofType: GL_RENDERBUFFER];
+}
+
+-(void) setDebugLabel: (NSString*) label forVertexArray: (GLuint) vaID {
+	[self setDebugLabel: label forObject: vaID ofType: GL_VERTEX_ARRAY_OBJECT_EXT];
+}
+#endif	// APPORTABLE
+
+
 #pragma mark Aligning 2D & 3D state
 
--(void) alignFor2DDrawing {
+-(void) alignFor2DDrawingWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	
 	// Default GL states: GL_TEXTURE_2D, GL_VERTEX_ARRAY, GL_COLOR_ARRAY, GL_TEXTURE_COORD_ARRAY
 	
@@ -1075,27 +1164,27 @@ static NSObject<CC3OpenGLDelegate>* _delegate = nil;
 	// Ensure GL_MODELVIEW matrix is active under OGLES 1.1.
 	[self activateMatrixStack: GL_MODELVIEW];
 	
-	[self align2DStateCache];		// Align the 2D GL state cache with current settings
+	[self align2DStateCacheWithVisitor: visitor];	// Align the 2D GL state cache with current settings
 }
 
--(void) align2DStateCache {}
+-(void) align2DStateCacheWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
 
--(void) alignFor3DDrawing {
+-(void) alignFor3DDrawingWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	[self bindVertexArrayObject: 0];	// Ensure that a VAO was not left in place by cocos2d
-	[self align3DStateCache];
+	[self align3DStateCacheWithVisitor: visitor];
 }
 
--(void) align3DStateCache {
+-(void) align3DStateCacheWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	isKnownCap_GL_BLEND = NO;
 	isKnownBlendFunc = NO;
 	isKnown_GL_ARRAY_BUFFER_BINDING = NO;
 	isKnown_GL_ELEMENT_ARRAY_BUFFER_BINDING = NO;
 	CC3SetBit(&isKnown_GL_TEXTURE_BINDING_2D, 0, NO);	// Unknown texture in tex unit zero
 
-	[self align3DVertexAttributeState];
+	[self align3DVertexAttributeStateWithVisitor: visitor];
 }
 
--(void) align3DVertexAttributeState {}
+-(void) align3DVertexAttributeStateWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
 
 
 #pragma mark OpenGL resources
@@ -1144,8 +1233,10 @@ static NSObject<CC3OpenGLDelegate>* _delegate = nil;
 
 /** Template method to create and return the primary rendering OpenGL context. */
 -(CC3GLContext*) makeRenderingGLContext {
-	CC3AssertUnimplemented(@"makeRenderingGLContext");
-	return nil;
+	CC3GLContext* context = CCDirector.sharedDirector.ccGLView.context;
+	CC3Assert(context, @"OpenGL context not available. Be sure to install the CCGLView in"
+			  @" the CCDirector before attempting to process any OpenGL calls.");
+	return context;
 }
 
 /**
@@ -1154,7 +1245,14 @@ static NSObject<CC3OpenGLDelegate>* _delegate = nil;
  * This implementation creates the background GL context from the primary rendering context,
  * using a sharegroup, so that the two can share GL objects.
  */
--(CC3GLContext*) makeBackgroundGLContext { return [_renderGL.context asSharedContext]; }
+-(CC3GLContext*) makeBackgroundGLContext {
+	CC3Assert(_renderGL, @"The background OpenGL context cannot be created until after the"
+			  @" rendering OpenGL context has been created on the main rendering thread."
+			  @" Ensure that you invoke [CC3OpenGL sharedContext] from the main thread,"
+			  @" prior to invoking it on a background thread.");
+	
+	return [_renderGL.context asSharedContext];
+}
 
 /** Template method to retrieve the GL platform limits. */
 -(void) initPlatformLimits {
@@ -1242,6 +1340,7 @@ static NSThread* _renderThread = nil;
 
 +(void) terminateOpenGL {
 	CC3Texture.shouldCacheAssociatedCCTextures = NO;
+	[CCDirector.sharedDirector end];
 	[_renderGL terminate];
 	[_bgGL terminate];
 }

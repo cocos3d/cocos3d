@@ -144,7 +144,7 @@ typedef enum {
 	kCC3SemanticCameraLocationModelSpace,		/**< (vec3) Location of the camera in local coordinates of model (not camera). */
 	kCC3SemanticCameraFrustum,					/**< (vec4) Dimensions of the camera frustum (FOV width (radians), FOV height (radians), near clip, far clip). */
 	kCC3SemanticCameraFrustumDepth,				/**< (vec4) The depth of the camera frustum (far clip, near clip, -(f+n)/(f-n), -2nf/(f-n)). */
-	kCC3SemanticViewport,						/**< (int4) The viewport rectangle in pixels (x, y, width, height). */
+	kCC3SemanticViewport,						/**< (vec4 or ivec4) The viewport rectangle in pixels (x, y, width, height). */
 	
 	// MATERIALS --------------
 	kCC3SemanticColor,							/**< (vec4) Color when lighting & materials are not in use. */
@@ -158,26 +158,34 @@ typedef enum {
 	kCC3SemanticMinimumDrawnAlpha,				/**< (float) Minimum alpha value to be drawn, otherwise will be discarded. */
 
 	// LIGHTING
-	kCC3SemanticIsUsingLighting,				/**< (bool) Whether any lighting is enabled. */
+	kCC3SemanticIsUsingLighting,				/**< (bool) Whether the model will interact with scene lighting (either lights or light probes). */
 	kCC3SemanticSceneLightColorAmbient,			/**< (vec4) Ambient light color of the scene. */
 
-	kCC3SemanticLightIsEnabled,					/**< (bool) Whether a light is enabled. */
-	kCC3SemanticLightPositionGlobal,			/**< (vec4) Homogeneous position (location or direction) of a light in global coordinates. */
-	kCC3SemanticLightPositionEyeSpace,			/**< (vec4) Homogeneous position (location or direction) of a light in eye space. */
-	kCC3SemanticLightPositionModelSpace,		/**< (vec4) Homogeneous position (location or direction) of a light in local coordinates of model (not light). */
-	kCC3SemanticLightInvertedPositionGlobal,	/**< (vec4) Inverted homogeneous position (from opposite direction) of a light in global coordinates. */
-	kCC3SemanticLightInvertedPositionEyeSpace,	/**< (vec4) Inverted homogeneous position (from opposite direction) of a light in eye space. */
-	kCC3SemanticLightInvertedPositionModelSpace,/**< (vec4) Inverted homogeneous position (from opposite direction) of a light in local coordinates of model (not light). */
-	kCC3SemanticLightColorAmbient,				/**< (vec4) Ambient color of a light. */
-	kCC3SemanticLightColorDiffuse,				/**< (vec4) Diffuse color of a light. */
-	kCC3SemanticLightColorSpecular,				/**< (vec4) Specular color of a light. */
-	kCC3SemanticLightAttenuation,				/**< (vec3) Distance attenuation coefficients for a light. */
-	kCC3SemanticLightSpotDirectionGlobal,		/**< (vec3) Direction of a spotlight in global coordinates. */
-	kCC3SemanticLightSpotDirectionEyeSpace,		/**< (vec3) Direction of a spotlight in eye space. */
-	kCC3SemanticLightSpotDirectionModelSpace,	/**< (vec3) Direction of a spotlight in local coordinates of the model (not light). */
-	kCC3SemanticLightSpotExponent,				/**< (float) Fade-off exponent of a spotlight. */
-	kCC3SemanticLightSpotCutoffAngle,			/**< (float) Cutoff angle of a spotlight. */
-	kCC3SemanticLightSpotCutoffAngleCosine,		/**< (float) Cosine of cutoff angle of a spotlight. */
+	kCC3SemanticLightIsEnabled,					/**< (bool[]) Whether each light is enabled. */
+	kCC3SemanticLightPositionGlobal,			/**< (vec4[]) Homogeneous position (location or direction) of each light in global coordinates. */
+	kCC3SemanticLightPositionEyeSpace,			/**< (vec4[]) Homogeneous position (location or direction) of each light in eye space. */
+	kCC3SemanticLightPositionModelSpace,		/**< (vec4[]) Homogeneous position (location or direction) of each light in local coordinates of model (not light). */
+	kCC3SemanticLightInvertedPositionGlobal,	/**< (vec4[]) Inverted homogeneous position (from opposite direction) of each light in global coordinates. */
+	kCC3SemanticLightInvertedPositionEyeSpace,	/**< (vec4[]) Inverted homogeneous position (from opposite direction) of each light in eye space. */
+	kCC3SemanticLightInvertedPositionModelSpace,/**< (vec4[]) Inverted homogeneous position (from opposite direction) of each light in local coordinates of model (not light). */
+	kCC3SemanticLightColorAmbient,				/**< (vec4[]) Ambient color of each light. */
+	kCC3SemanticLightColorDiffuse,				/**< (vec4[]) Diffuse color of each light. */
+	kCC3SemanticLightColorSpecular,				/**< (vec4[]) Specular color of each light. */
+	kCC3SemanticLightAttenuation,				/**< (vec3[]) Distance attenuation coefficients for each light. */
+	kCC3SemanticLightSpotDirectionGlobal,		/**< (vec3[]) Direction of each spotlight in global coordinates. */
+	kCC3SemanticLightSpotDirectionEyeSpace,		/**< (vec3[]) Direction of each spotlight in eye space. */
+	kCC3SemanticLightSpotDirectionModelSpace,	/**< (vec3[]) Direction of each spotlight in local coordinates of the model (not light). */
+	kCC3SemanticLightSpotExponent,				/**< (float[]) Fade-off exponent of each spotlight. */
+	kCC3SemanticLightSpotCutoffAngle,			/**< (float[]) Cutoff angle of each spotlight. */
+	kCC3SemanticLightSpotCutoffAngleCosine,		/**< (float[]) Cosine of cutoff angle of each spotlight. */
+
+	kCC3SemanticIsUsingLightProbes,				/**< (bool) Whether the model is using light probes for lighting, instead of lights. */
+	kCC3SemanticLightProbeCount,				/**< (int) Min of number of active light probes in the scene, and the number used by the shader program. */
+	kCC3SemanticLightProbeIsEnabled,			/**< (bool[]) Whether each light probe is available and enabled. */
+	kCC3SemanticLightProbeLocationGlobal,		/**< (vec3[]) Location of each light probe in global coordinates. */
+	kCC3SemanticLightProbeLocationEyeSpace,		/**< (vec3[]) Location of each light probe in eye space. */
+	kCC3SemanticLightProbeLocationModelSpace,	/**< (vec3[]) Location of each light probe in local coordinates of the model (not light probe). */
+	kCC3SemanticLightProbeColorDiffuse,			/**< (vec4) Diffuse color of each light probe. */
 
 	kCC3SemanticFogIsEnabled,					/**< (bool) Whether scene fogging is enabled. */
 	kCC3SemanticFogColor,						/**< (vec4) Fog color. */
@@ -187,13 +195,14 @@ typedef enum {
 	kCC3SemanticFogEndDistance,					/**< (float) Distance from camera at which fogging effect ends. */
 
 	// TEXTURES
-	kCC3SemanticTextureCount,					/**< (int) Number of active textures of any types. */
-	kCC3SemanticTextureSampler,					/**< (sampler2D/sampler3D) Texture sampler of any type. */
-	kCC3SemanticTexture2DCount,					/**< (int) Number of active 2D textures. */
-	kCC3SemanticTexture2DSampler,				/**< (sampler2D) 2D texture sampler. */
-	kCC3SemanticTextureCubeCount,				/**< (int) Number of active cube-map textures. */
-	kCC3SemanticTextureCubeSampler,				/**< (sampler2D) Cube-map texture sampler. */
-	
+	kCC3SemanticTextureCount,					/**< (int) Number of active textures of any types on current model. */
+	kCC3SemanticTextureSampler,					/**< (sampler2D[]/sampler3D[]) Array of texture samplers of any type. */
+	kCC3SemanticTexture2DCount,					/**< (int) Number of active 2D textures on the current model. */
+	kCC3SemanticTexture2DSampler,				/**< (sampler2D[]) Array of 2D texture samplers. */
+	kCC3SemanticTextureCubeCount,				/**< (int) Number of active cube-map textures on the current model. */
+	kCC3SemanticTextureCubeSampler,				/**< (samplerCube[]) Array of cube-map texture samplers. */
+	kCC3SemanticTextureLightProbeSampler,		/**< (samplerCube[]/sampler2D[]) Array of light probe texture samplers. */
+
 	// The semantics below mimic OpenGL ES 1.1 configuration functionality for combining texture units.
 	// In most shaders, these will be left unused in favor of customized the texture combining in code.
 	kCC3SemanticTexUnitConstantColor,			/**< (vec4) Constant color of a texture unit. */
@@ -243,10 +252,10 @@ typedef enum {
 	kCC3SemanticMax = 0xFFFF,					/**< Maximum value for an app-specific custom semantic. */
 	
 	// DEPRECATED
-	kCC3SemanticVertexWeights DEPRECATED_ATTRIBUTE = kCC3SemanticVertexBoneWeights,			/**< @deprecated Renamed to kCC3SemanticVertexBoneWeights. */
-	kCC3SemanticVertexMatrixIndices DEPRECATED_ATTRIBUTE = kCC3SemanticVertexBoneIndices,	/**< @deprecated Renamed to kCC3SemanticVertexBoneIndices. */
-	kCC3SemanticBonesPerVertex DEPRECATED_ATTRIBUTE = kCC3SemanticVertexBoneCount,			/**< @deprecated Renamed to kCC3SemanticVertexBoneCount. */
-	kCC3SemanticBoneCount DEPRECATED_ATTRIBUTE = kCC3SemanticBatchBoneCount,				/**< @deprecated Renamed to kCC3SemanticBatchBoneCount. */
+	kCC3SemanticVertexWeights __deprecated = kCC3SemanticVertexBoneWeights,			/**< @deprecated Renamed to kCC3SemanticVertexBoneWeights. */
+	kCC3SemanticVertexMatrixIndices __deprecated = kCC3SemanticVertexBoneIndices,	/**< @deprecated Renamed to kCC3SemanticVertexBoneIndices. */
+	kCC3SemanticBonesPerVertex __deprecated = kCC3SemanticVertexBoneCount,			/**< @deprecated Renamed to kCC3SemanticVertexBoneCount. */
+	kCC3SemanticBoneCount __deprecated = kCC3SemanticBatchBoneCount,				/**< @deprecated Renamed to kCC3SemanticBatchBoneCount. */
 
 } CC3Semantic;
 
@@ -521,7 +530,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
  * approach. For new iOS applications, and for all OSX applications, you should use the semantic
  * uniform name mappings defined by the populateWithDefaultVariableNameMappings method.
  */
--(void) populateWithStructuredVariableNameMappings DEPRECATED_ATTRIBUTE;
+-(void) populateWithStructuredVariableNameMappings __deprecated;
 
 /**
  * @deprecated
@@ -539,7 +548,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
  * It is provided here to provide backwards compatibility for shaders already developed
  * using these legacy mappings.
  */
--(void) populateWithLegacyVariableNameMappings DEPRECATED_ATTRIBUTE;
+-(void) populateWithLegacyVariableNameMappings __deprecated;
 
 @end
 

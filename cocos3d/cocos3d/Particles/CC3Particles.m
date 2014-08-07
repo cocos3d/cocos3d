@@ -772,9 +772,9 @@
 				[vaMesh.vertexIndices updateGLBufferStartingAt: (GLuint)_dirtyVertexIndexRange.location
 													 forLength: (GLuint)_dirtyVertexIndexRange.length];
 
-			LogTrace(@"%@ updated vertex content GL buffer (ID %i) range (%i, %i) of %i vertices (out of %i allocated as %@) and index GL buffer (ID %i) range (%i, %i) of %i indices (out of %i allocated as %@) for %i particles",
-					 self, vaMesh.vertexLocations.bufferID, _dirtyVertexRange.location, _dirtyVertexRange.length, self.vertexCount, vaMesh.allocatedVertexCapacity, NSStringFromGLEnum(vaMesh.vertexLocations.bufferUsage),
-					 vaMesh.vertexIndices.bufferID, _dirtyVertexIndexRange.location, _dirtyVertexIndexRange.length, self.vertexIndexCount, vaMesh.allocatedVertexIndexCapacity, NSStringFromGLEnum(vaMesh.vertexIndices.bufferUsage), _particleCount);
+			LogTrace(@"%@ updated vertex content GL buffer (ID %i) range (%lu, %lu) of %i vertices (out of %i allocated as %@) and index GL buffer (ID %i) range (%lu, %lu) of %i indices (out of %i allocated as %@) for %i particles",
+					 self, vaMesh.vertexLocations.bufferID, (unsigned long)_dirtyVertexRange.location, (unsigned long)_dirtyVertexRange.length, self.vertexCount, vaMesh.allocatedVertexCapacity, NSStringFromGLEnum(vaMesh.vertexLocations.bufferUsage),
+					 vaMesh.vertexIndices.bufferID, (unsigned long)_dirtyVertexIndexRange.location, (unsigned long)_dirtyVertexIndexRange.length, self.vertexIndexCount, vaMesh.allocatedVertexIndexCapacity, NSStringFromGLEnum(vaMesh.vertexIndices.bufferUsage), _particleCount);
 		}
 	} else {
 		LogTrace(@"%@ not updating GL buffers because they are not in use for this mesh.", self);

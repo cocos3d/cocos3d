@@ -136,7 +136,7 @@
  * You can retrieve and modify this list directly in order to change the file extensions that will
  * be loaded using this class. File extensions added to this list should be completely lowercase.
  *
- * The shouldUseForFileExtension: method is used to compare a specific file extension agains this list.
+ * The shouldUseForFileExtension: method is used to compare a specific file extension against this list.
  *
  * By default, special extensions are used, but you can add a primary extension, such as @"png",
  * to have ALL PNG files loaded using this library, if that suits your purposes. However, keep

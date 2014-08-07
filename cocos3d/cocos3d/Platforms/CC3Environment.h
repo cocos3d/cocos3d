@@ -55,18 +55,21 @@
 #	define APPORTABLE		0
 #endif
 
-/** Convenience tests for whether we are linking to specific cocos2d versions. */
+/** Convenience tests for whether we are linking to specific cocos2d versions or functionality. */
 #ifndef CC3_CC2_1
-#	define CC3_CC2_1		(COCOS2D_VERSION < 0x020000)
+#	define CC3_CC2_1				(COCOS2D_VERSION < 0x020000)
 #endif
 #ifndef CC3_CC2_2
-#	define CC3_CC2_2		(COCOS2D_VERSION >= 0x020000 && COCOS2D_VERSION < 0x030000)
+#	define CC3_CC2_2				(COCOS2D_VERSION >= 0x020000 && COCOS2D_VERSION < 0x030000)
 #endif
 #ifndef CC3_CC2_CLASSIC
-#	define CC3_CC2_CLASSIC	(COCOS2D_VERSION < 0x030000)
+#	define CC3_CC2_CLASSIC			(COCOS2D_VERSION < 0x030000)
 #endif
 #ifndef CC3_CC2_3
-#	define CC3_CC2_3		(COCOS2D_VERSION >= 0x030000)
+#	define CC3_CC2_3				(COCOS2D_VERSION >= 0x030000)
+#endif
+#ifndef CC3_CC2_RENDER_QUEUE
+#	define CC3_CC2_RENDER_QUEUE		(COCOS2D_VERSION >= 0x030100)
 #endif
 
 /** Running some form of OpenGL ES under iOS. */

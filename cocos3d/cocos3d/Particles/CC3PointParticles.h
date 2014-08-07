@@ -102,19 +102,19 @@ static const GLfloat kCC3ParticleSizeMinimumNone = 1.0;
 static const GLfloat kCC3ParticleSizeMaximumNone = kCC3MaxGLfloat;
 
 /** @deprecated Replaced with CC3VertexContent. */
-typedef CC3VertexContent CC3PointParticleVertexContent DEPRECATED_ATTRIBUTE;
+typedef CC3VertexContent CC3PointParticleVertexContent __deprecated;
 
 /** @deprecated Replaced with kCC3VertexContentLocation. */
-static const CC3VertexContent kCC3PointParticleContentLocation DEPRECATED_ATTRIBUTE	= kCC3VertexContentLocation;
+static const CC3VertexContent kCC3PointParticleContentLocation __deprecated	= kCC3VertexContentLocation;
 
 /** @deprecated Replaced with kCC3VertexContentNormal. */
-static const CC3VertexContent kCC3PointParticleContentNormal DEPRECATED_ATTRIBUTE = kCC3VertexContentNormal;
+static const CC3VertexContent kCC3PointParticleContentNormal __deprecated = kCC3VertexContentNormal;
 
 /** @deprecated Replaced with kCC3VertexContentColor. */
-static const CC3VertexContent kCC3PointParticleContentColor DEPRECATED_ATTRIBUTE = kCC3VertexContentColor;
+static const CC3VertexContent kCC3PointParticleContentColor __deprecated = kCC3VertexContentColor;
 
 /** @deprecated Replaced with kCC3VertexContentPointSize. */
-static const CC3VertexContent kCC3PointParticleContentSize DEPRECATED_ATTRIBUTE = kCC3VertexContentPointSize;
+static const CC3VertexContent kCC3PointParticleContentSize __deprecated = kCC3VertexContentPointSize;
 
 /**
  * CC3PointParticleEmitter emits particles that conform to the CC3PointParticleProtocol protocol.
@@ -163,13 +163,13 @@ static const CC3VertexContent kCC3PointParticleContentSize DEPRECATED_ATTRIBUTE 
 }
 
 /** @deprecated Use the mesh property. */
-@property(nonatomic, retain, readonly) CC3PointParticleMesh* particleMesh DEPRECATED_ATTRIBUTE;
+@property(nonatomic, retain, readonly) CC3PointParticleMesh* particleMesh __deprecated;
 
 /** @deprecated Replaced by the more generic vertexContentTypes. */
-@property(nonatomic, readonly) CC3VertexContent particleContentTypes DEPRECATED_ATTRIBUTE;
+@property(nonatomic, readonly) CC3VertexContent particleContentTypes __deprecated;
 
 /** @deprecated Replaced by maximumParticleCapacity. */
-@property(nonatomic, readonly) GLuint maxParticles DEPRECATED_ATTRIBUTE;
+@property(nonatomic, readonly) GLuint maxParticles __deprecated;
 
 /**
  * If the kCC3VertexContentPointSize component was not specified in the vertexContentTypes
@@ -244,7 +244,7 @@ static const CC3VertexContent kCC3PointParticleContentSize DEPRECATED_ATTRIBUTE 
 @property(nonatomic, assign) CC3AttenuationCoefficients particleSizeAttenuation;
 
 /** @deprecated Property renamed to particleSizeAttenuation. */
-@property(nonatomic, assign) CC3AttenuationCoefficients particleSizeAttenuationCoefficients DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) CC3AttenuationCoefficients particleSizeAttenuationCoefficients __deprecated;
 
 /**
  * Indicates whether the particle sizes should be adjusted so that particles appear
@@ -370,17 +370,17 @@ static const CC3VertexContent kCC3PointParticleContentSize DEPRECATED_ATTRIBUTE 
 /** @deprecated Use the particleClass, vertexContentTypes & maximumParticleCapacity properties instead. */
 -(void) populateForMaxParticles: (GLuint) numParticles
 						 ofType: (id) aParticleClass
-					 containing: (CC3VertexContent) contentTypes DEPRECATED_ATTRIBUTE;
+					 containing: (CC3VertexContent) contentTypes __deprecated;
 
 /** @deprecated Use the particleClass, vertexContentTypes & maximumParticleCapacity properties instead. */
--(void) populateForMaxParticles: (GLuint) maxParticles ofType: (id) aParticleClass DEPRECATED_ATTRIBUTE;
+-(void) populateForMaxParticles: (GLuint) maxParticles ofType: (id) aParticleClass __deprecated;
 
 /** @deprecated Use the particleClass, vertexContentTypes & maximumParticleCapacity properties instead. */
 -(void) populateForMaxParticles: (GLuint) numParticles
-					 containing: (CC3VertexContent) contentTypes DEPRECATED_ATTRIBUTE;
+					 containing: (CC3VertexContent) contentTypes __deprecated;
 
 /** @deprecated Use the particleClass, vertexContentTypes & maximumParticleCapacity properties instead. */
--(void) populateForMaxParticles: (GLuint) maxParticles DEPRECATED_ATTRIBUTE;
+-(void) populateForMaxParticles: (GLuint) maxParticles __deprecated;
 
 @end
 
@@ -450,10 +450,10 @@ static const CC3VertexContent kCC3PointParticleContentSize DEPRECATED_ATTRIBUTE 
 @property(nonatomic, readonly) BOOL hasSize;
 
 /** @deprecated Replaced by the particleIndex property. */
-@property(nonatomic, assign) GLuint index DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) GLuint index __deprecated;
 
 /** @deprecated Replaced by the updateBeforeTransform: method. */
--(void) update: (CCTime) dt DEPRECATED_ATTRIBUTE;
+-(void) update: (CCTime) dt __deprecated;
 
 /** @deprecated Use the init method instead, and set emitter property directly. */
 -(id) initFromEmitter: (CC3PointParticleEmitter*) anEmitter;
@@ -467,7 +467,7 @@ static const CC3VertexContent kCC3PointParticleContentSize DEPRECATED_ATTRIBUTE 
 #pragma mark -
 #pragma mark Deprecated CC3PointParticleMesh
 
-DEPRECATED_ATTRIBUTE
+__deprecated
 /**
  * Deprecated.
  * @deprecated Functionality moved to CC3Mesh.
@@ -475,15 +475,15 @@ DEPRECATED_ATTRIBUTE
 @interface CC3PointParticleMesh : CC3Mesh
 
 /** @deprecated Use vertexCount instead. Point particles have one vertex per particle. */
-@property(nonatomic, assign) GLuint particleCount DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) GLuint particleCount __deprecated;
 
 /** @deprecated Replaced by pointSizeAt:. */
--(GLfloat) particleSizeAt: (GLuint) vtxIndex DEPRECATED_ATTRIBUTE;
+-(GLfloat) particleSizeAt: (GLuint) vtxIndex __deprecated;
 
 /** @deprecated Replaced by setPointSize:at:. */
--(void) setParticleSize: (GLfloat) aSize at: (GLuint) vtxIndex DEPRECATED_ATTRIBUTE;
+-(void) setParticleSize: (GLfloat) aSize at: (GLuint) vtxIndex __deprecated;
 
 /** @deprecated Replaced by updatePointSizesGLBuffer. */
--(void) updateParticleSizesGLBuffer DEPRECATED_ATTRIBUTE;
+-(void) updateParticleSizesGLBuffer __deprecated;
 
 @end

@@ -173,7 +173,7 @@
 -(void) establishFrameAt: (CCTime) t inNodeAnimationState: (CC3NodeAnimationState*) animState;
 
 /** @deprecated Use establishFrameAt:inNodeAnimationState: instead. */
--(void) establishFrameAt: (CCTime) t forNode: (CC3Node*) aNode DEPRECATED_ATTRIBUTE;
+-(void) establishFrameAt: (CCTime) t forNode: (CC3Node*) aNode __deprecated;
 
 /**
  * Returns the time at which the frame at the specified index occurs. The returned time
@@ -1564,9 +1564,9 @@
 /** @deprecated Instead of accessing this property, retrieve the appropriate animation using the
  * animation property or the getAnimationOnTrack: method, and access the frameCount property.
  */
-@property(nonatomic, readonly) GLuint animationFrameCount DEPRECATED_ATTRIBUTE;
+@property(nonatomic, readonly) GLuint animationFrameCount __deprecated;
 
 /** @deprecated Replaced with establishAnimationFrameAt:onTrack:. */
--(void) establishAnimationFrameAt: (CCTime) t DEPRECATED_ATTRIBUTE;
+-(void) establishAnimationFrameAt: (CCTime) t __deprecated;
 
 @end

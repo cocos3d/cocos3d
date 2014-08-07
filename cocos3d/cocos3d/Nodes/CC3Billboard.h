@@ -533,14 +533,15 @@
 #pragma mark Drawing
 
 /**
- * If the value of the shouldDrawAs2DOverlay property is YES, and the 2D node is
- * within the given bounds, draws the 2D node at the projected 2D position calculated
- * in the alignToCamera: method.
+ * If the value of the shouldDrawAs2DOverlay property is YES, and the 2D node is within the given
+ * bounds, draws the 2D node at the projected 2D position calculated in the alignToCamera: method.
  *
  * This method is invoked automatically by CC3Scene at the end of each frame drawing
  * cycle. Usually, the application never needs to invoke this method directly.
  */
--(void) draw2dWithinBounds: (CGRect) bounds;
+-(void) draw2dWithinBounds: (CGRect) bounds
+			  withRenderer: (CCRenderer*) renderer
+			   withVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /**
  * Returns whether the local content of this node intersects the given bounding rectangle.
@@ -582,7 +583,7 @@
 }
 
 /** @deprecated Use the superclass vertices property instead. */
-@property(nonatomic, readonly) CC3Vector* globalBoundingRectVertices DEPRECATED_ATTRIBUTE;
+@property(nonatomic, readonly) CC3Vector* globalBoundingRectVertices __deprecated;
 
 @end
 
@@ -624,7 +625,7 @@
 @property(nonatomic, assign) CC3AttenuationCoefficients particleSizeAttenuation;
 
 /** @deprecated Property renamed to particleSizeAttenuation. */
-@property(nonatomic, assign) CC3AttenuationCoefficients particleSizeAttenuationCoefficients DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) CC3AttenuationCoefficients particleSizeAttenuationCoefficients __deprecated;
 
 /**
  * Indicates whether scheduled updates of the contained 2D billboard should continue when this node

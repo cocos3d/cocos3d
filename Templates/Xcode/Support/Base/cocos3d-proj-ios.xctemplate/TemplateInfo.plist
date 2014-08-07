@@ -73,6 +73,8 @@
 		<string>iphoneos</string>
 		<key>SharedSettings</key>
 		<dict>
+			<key>IPHONEOS_DEPLOYMENT_TARGET</key>
+			<string>5.0</string>
 			<key>CODE_SIGN_IDENTITY</key>
 			<string>iPhone Developer</string>
 		</dict>

@@ -43,14 +43,16 @@
 	[super dealloc];
 }
 
--(BOOL) loadFromFile: (NSString*) aFilePath {
+-(BOOL) loadFromFile: (NSString*) filePath {
 	if (_wasLoaded) {
 		LogError(@"%@ has already been loaded.", self);
 		return _wasLoaded;
 	}
 	
-	// Ensure the path is absolute, converting it if needed.
-	NSString* absFilePath = CC3EnsureAbsoluteFilePath(aFilePath);
+	// Resolve an absolute path in either the application bundle resource
+	// directory or the Cocos3D bundle resource directory.
+	NSString* absFilePath = CC3ResolveResourceFilePath(filePath);
+	LogErrorIf(!absFilePath, @"Could not locate resource file '%@' in either the application resources or the Cocos3D library resources", filePath);
 	
 	LogRez(@"--------------------------------------------------");
 	LogRez(@"Loading resources from file '%@'", absFilePath);
@@ -63,7 +65,7 @@
 	_wasLoaded = [self processFile: absFilePath];	// Main subclass loading method
 	
 	if (_wasLoaded)
-		LogRez(@"Loaded resources from file '%@' in %.3f seconds", aFilePath, GetRezActivityDuration() * 1000);
+		LogRez(@"Loaded resources from file '%@' in %.3f seconds", filePath, GetRezActivityDuration() * 1000);
 	else
 		LogError(@"Could not load resource file '%@'", absFilePath);
 	
@@ -74,7 +76,7 @@
 
 -(BOOL) processFile: (NSString*) anAbsoluteFilePath { return NO; }
 
--(BOOL) saveToFile: (NSString*) aFilePath {
+-(BOOL) saveToFile: (NSString*) filePath {
 	CC3Assert(NO, @"%@ does not support saving the resource content back to a file.", self);
 	return NO;
 }
@@ -93,23 +95,23 @@
 
 +(id) resource { return [[[self alloc] init] autorelease]; }
 
--(id) initFromFile: (NSString*) aFilePath {
+-(id) initFromFile: (NSString*) filePath {
 	if ( (self = [self init]) ) {		// Use self so subclasses will init properly
-		if ( ![self loadFromFile: aFilePath] ) return nil;
+		if ( ![self loadFromFile: filePath] ) return nil;
 	}
 	return self;
 }
 
-+(id) resourceFromFile: (NSString*) aFilePath {
-	id rez = [self getResourceNamed: [self resourceNameFromFilePath: aFilePath]];
++(id) resourceFromFile: (NSString*) filePath {
+	id rez = [self getResourceNamed: [self resourceNameFromFilePath: filePath]];
 	if (rez) return rez;
 
-	rez = [[self alloc] initFromFile: aFilePath];
+	rez = [[self alloc] initFromFile: filePath];
 	[self addResource: rez];
 	return [rez autorelease];
 }
 
-+(NSString*) resourceNameFromFilePath: (NSString*) aFilePath { return aFilePath.lastPathComponent; }
++(NSString*) resourceNameFromFilePath: (NSString*) filePath { return filePath.lastPathComponent; }
 
 -(NSString*) description { return [NSString stringWithFormat: @"%@ from file %@", self.class, self.name]; }
 

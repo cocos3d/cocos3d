@@ -36,15 +36,18 @@
 
 #if CC3_GLSL
 
-#import "kazmath/GL/matrix.h"	// Only cocos2d 2.x
 #import "CC3Shaders.h"
+
+#if !CC3_CC2_RENDER_QUEUE
+#import "kazmath/GL/matrix.h"	// Only cocos2d 2.x & 3.0
+#endif	// !CC3_CC2_RENDER_QUEUE
 
 @interface CC3OpenGL (TemplateMethods)
 -(void) initPlatformLimits;
 -(void) initVertexAttributes;
--(void) align3DVertexAttributeState;
--(void) align2DStateCache;
--(void) align3DStateCache;
+-(void) align3DVertexAttributeStateWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+-(void) align2DStateCacheWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+-(void) align3DStateCacheWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 @end
 
 @interface CC3GLSLVariable (ProgPipeline)
@@ -111,51 +114,35 @@
 }
 
 -(void) enable2DVertexAttributes {
-	for (GLuint vaIdx = 0; vaIdx < value_MaxVertexAttribsUsed; vaIdx++) {
-		switch (vaIdx) {
-			case kCCVertexAttrib_Position:
-			case kCCVertexAttrib_Color:
-			case kCCVertexAttrib_TexCoords:
-				[self enableVertexAttribute: YES at: vaIdx];
-				break;
-			default:
-				[self enableVertexAttribute: NO at: vaIdx];
-				break;
-		}
-	}
+	for (GLuint vaIdx = 0; vaIdx < value_MaxVertexAttribsUsed; vaIdx++)
+		[self enableVertexAttribute: (vaIdx < kCCVertexAttrib_MAX) at: vaIdx];
 }
 
--(void) align3DVertexAttributeState {
-	[super align3DVertexAttributeState];
+-(void) align3DVertexAttributeStateWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[super align3DVertexAttributeStateWithVisitor: visitor];
 
 	// Mark position, color & tex coords as unknown
-	for (GLuint vaIdx = 0; vaIdx < value_MaxVertexAttribsUsed; vaIdx++) {
-		switch (vaIdx) {
-			case kCCVertexAttrib_Position:
-			case kCCVertexAttrib_Color:
-			case kCCVertexAttrib_TexCoords:
-				vertexAttributes[vaIdx].isEnabledKnown = NO;
-				vertexAttributes[vaIdx].isKnown = NO;
-				break;
-			default:
-				break;
-		}
+	GLuint maxAttribs = MIN(value_MaxVertexAttribsUsed, kCCVertexAttrib_MAX);
+	for (GLuint vaIdx = 0; vaIdx < maxAttribs; vaIdx++) {
+		vertexAttributes[vaIdx].isEnabledKnown = NO;
+		vertexAttributes[vaIdx].isKnown = NO;
 	}
 }
 
+
+#if !CC3_CC2_RENDER_QUEUE
 
 #pragma mark Matrices
 
 // Don't change matrix state on background thread (which can occur during shader prewarming),
 // because it messes with the concurrent rendering of cocos2d components on the rendering thread.
-	
 -(void) activateMatrixStack: (GLenum) mode {
 	if ( !self.isRenderingContext ) return;
 	
 	kmGLMatrixMode(mode);
 }
 
--(void) loadModelviewMatrix: (CC3Matrix4x3*) mtx {
+-(void) loadModelviewMatrix: (const CC3Matrix4x3*) mtx {
 	if ( !self.isRenderingContext ) return;
 
 	[self activateMatrixStack: GL_MODELVIEW];
@@ -164,7 +151,7 @@
 	kmGLLoadMatrix((kmMat4*)&glMtx);
 }
 
--(void) loadProjectionMatrix: (CC3Matrix4x4*) mtx {
+-(void) loadProjectionMatrix: (const CC3Matrix4x4*) mtx {
 	if ( !self.isRenderingContext ) return;
 	
 	[self activateMatrixStack: GL_PROJECTION];
@@ -198,6 +185,7 @@
 	[self activateMatrixStack: GL_PROJECTION];
 	kmGLPopMatrix();
 }
+#endif	// !CC3_CC2_RENDER_QUEUE
 
 
 #pragma mark Shaders
@@ -362,8 +350,13 @@
 
 #pragma mark Aligning 2D & 3D state
 
--(void) align2DStateCache {
-	[super align2DStateCache];
+#if CC3_CC2_RENDER_QUEUE
+-(void) align2DStateCacheWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[visitor.ccRenderer invalidateState];
+}
+#else
+-(void) align2DStateCacheWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[super align2DStateCacheWithVisitor: visitor];
 	
 	ccGLBlendFunc(value_GL_BLEND_SRC_RGB, value_GL_BLEND_DST_RGB);
 	
@@ -382,9 +375,10 @@
 	else ccGLEnable(0);
 #endif
 }
+#endif	// CC3_CC2_RENDER_QUEUE
 
--(void) align3DStateCache {
-	[super align3DStateCache];
+-(void) align3DStateCacheWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[super align3DStateCacheWithVisitor: visitor];
 	
 	isKnown_GL_CURRENT_PROGRAM = NO;
 }

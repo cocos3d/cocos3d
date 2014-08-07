@@ -14,11 +14,6 @@
 	<key>Targets</key>
 	<array>
 		<dict>
-			<key>Dependencies</key>
-			<array>
-				<integer>0</integer>
-				<integer>1</integer>
-			</array>
 			<key>SharedSettings</key>
 			<dict>
 				<key>OTHER_LDFLAGS</key>

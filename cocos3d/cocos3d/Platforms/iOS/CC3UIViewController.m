@@ -30,10 +30,11 @@
  */
 
 #import "CC3UIViewController.h"
-#import "CC3ControllableLayer.h"
+#import "CC3Foundation.h"
 #import "CC3Logging.h"
 
-#if CC3_IOS
+
+#if (CC3_IOS && !CC3_CC2_RENDER_QUEUE)
 
 #pragma mark CC3UIViewController implementation
 
@@ -59,7 +60,7 @@
 
 #if !CC3_CC2_1
 // In cocos2d 2.x and above, view is tracked separately and does not lazily init. Restore that functionality.
--(CC3GLView*) view {
+-(CCGLView*) view {
 	if ( !CC2_VIEW ) {
 		[self loadView];
 		[self viewDidLoad];
@@ -69,7 +70,7 @@
 #endif	// !CC3_CC2_1
 
 /** Ensure that retina display is established if required. */
--(void) setView:(CC3GLView *)view {
+-(void) setView: (CCGLView*) view {
 	[super setView: view];
 	[self checkRetinaDisplay];
 }
@@ -108,17 +109,17 @@
 	return [self checkRetinaDisplay];
 }
 
-// Not needed for Cocos2D v3
+
 -(BOOL) checkRetinaDisplay {
-#if CC3_CC2_3
-	return YES;
-#endif	// CC3_CC2_3
 #if CC3_CC2_2
 	return [super enableRetinaDisplay: _shouldUseRetina];
 #endif	// CC3_CC2_2
+
 #if CC3_CC2_1
 	return [CCDirector.sharedDirector enableRetinaDisplay: _shouldUseRetina];
 #endif	// CC3_CC2_1
+
+	return YES;
 }
 
 #if COCOS2D_VERSION >= 0x020100
@@ -195,18 +196,6 @@ CC3_POP_NOSELECTOR
 	 return CC3UIInterfaceOrientationMaskIncludesUIOrientation(_supportedInterfaceOrientations, uiOrientation);
 }
 
--(void) didRotateFromInterfaceOrientation: (UIInterfaceOrientation) uiOrientation {
-	[super didRotateFromInterfaceOrientation: uiOrientation];
- 	[_controlledNode viewDidRotateFrom: uiOrientation to: self.interfaceOrientation];
-}
-
--(void) viewDidLayoutSubviews {
-	[super viewDidLayoutSubviews];
-	_controlledNode.contentSize = self.view.bounds.size;
-}
-
--(BOOL) isOverlayingDeviceCamera { return NO; }
-
 
 #pragma mark Instance initialization and management
 
@@ -214,11 +203,10 @@ CC3_POP_NOSELECTOR
 +(id) sharedDirector { return super.sharedDirector; }
 #endif	// !CC3_CC2_1
 
-// CCDirector must be in portrait orientation for autorotation to work
 -(id) initWithNibName: (NSString*) nibNameOrNil bundle: (NSBundle*) nibBundleOrNil {
 	if( (self = [super initWithNibName: nibNameOrNil bundle: nibBundleOrNil]) ) {
 		_shouldUseRetina = NO;
-		self.viewClass = [CC3GLView class];
+		self.viewClass = [CCGLView class];
 		self.viewBounds = UIScreen.mainScreen.bounds;
 		self.viewColorFormat = kEAGLColorFormatRGBA8;
 		self.viewDepthFormat = GL_DEPTH_COMPONENT16;
@@ -263,4 +251,4 @@ CC3_POP_NOSELECTOR
 
 @end
 
-#endif // CC3_IOS
+#endif // (CC3_IOS && !CC3_CC2_RENDER_QUEUE)

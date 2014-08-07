@@ -62,6 +62,11 @@
 #define kButtonRingFileName			@"ButtonRing48x48.png"
 
 
+@interface CC3Layer (ProtectedMethods)
+-(void) drawSceneWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+@end
+
+
 @implementation CC3PerformanceLayer
 
 /**
@@ -291,15 +296,15 @@
  * Move the location joystick to keep it in the bottom right corner of this layer
  * and the switch view button to keep it centered between the two joysticks.
  */
--(void) didUpdateContentSizeFrom: (CGSize) oldSize {
-	[super didUpdateContentSizeFrom: oldSize];
+-(void) contentSizeChanged {
+	[super contentSizeChanged];
 	[self positionButtons];
 	[self positionStatsLabels];
 }
 
 #pragma mark Drawing
 
--(void) setCc3Scene:(CC3Scene *) aCC3Scene {
+-(void) setCc3Scene:(CC3PerformanceScene *) aCC3Scene {
 	[super setCc3Scene: aCC3Scene];
 
 	// To get histograms of update and drawing rates, use
@@ -308,15 +313,16 @@
 	aCC3Scene.performanceStatistics = [CC3PerformanceStatistics statistics];
 //	aCC3Scene.performanceStatistics = [CC3PerformanceStatisticsHistogram statistics];
 
-	[_nodeNameLabel setString: self.performanceScene.templateNode.name];
+	[_nodeNameLabel setString: aCC3Scene.templateNode.name];
 }
 
 //Specifies how often stats should be updated, in seconds
 #define kStatisticsReportingInterval 0.5
 
 /** Overridden to update the performance statistics labels. */
--(void) draw {
-	[super draw];
+-(void) drawSceneWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[super drawSceneWithVisitor: visitor];
+	
 	CC3PerformanceStatistics* stats = self.cc3Scene.performanceStatistics;
 	if (stats.accumulatedFrameTime >= kStatisticsReportingInterval) {
 
@@ -325,21 +331,21 @@
 		// Drawing statistics
 		[_frameRateLabel setString: [NSString stringWithFormat: @"fps: %.0f", stats.frameRate]];
 		[_nodesVisitedForDrawingLabel setString: [NSString stringWithFormat: @"nodes: %.0f",
-												 stats.averageNodesVisitedForDrawingPerFrame]];
+												  stats.averageNodesVisitedForDrawingPerFrame]];
 		[_nodesDrawnLabel setString: [NSString stringWithFormat: @"drawn: %.0f",
-									 stats.averageNodesDrawnPerFrame]];
+									  stats.averageNodesDrawnPerFrame]];
 		[_drawCallsLabel setString: [NSString stringWithFormat: @"gl calls: %.0f",
-									stats.averageDrawingCallsMadePerFrame]];
+									 stats.averageDrawingCallsMadePerFrame]];
 		[_facesPresentedLabel setString: [NSString stringWithFormat: @"faces: %.0f",
-										 stats.averageFacesPresentedPerFrame]];
-
+										  stats.averageFacesPresentedPerFrame]];
+		
 		// Update statistics
 		[_updateRateLabel setString: [NSString stringWithFormat: @"ups: %.0f", stats.updateRate]];
 		[_nodesUpdatedLabel setString: [NSString stringWithFormat: @"nodes: %.0f",
-									   stats.averageNodesUpdatedPerUpdate]];
+										stats.averageNodesUpdatedPerUpdate]];
 		[_nodesTransformedLabel setString: [NSString stringWithFormat: @"xfmed: %.0f",
-										   stats.averageNodesTransformedPerUpdate]];
-
+											stats.averageNodesTransformedPerUpdate]];
+		
 		[stats reset];
 	}
 }

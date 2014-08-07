@@ -8,9 +8,9 @@
 
 #import <Cocoa/Cocoa.h>
 
-#import "CC3GLView-GL.h"
+#import "cocos2d.h"
 
-int main(int argc, char *argv[]) {
-	[CC3GLView load_];
-    return NSApplicationMain(argc,  (const char **) argv);
+int main(int argc, char* argv[]) {
+	[CCGLView load_];
+    return NSApplicationMain(argc, (const char**)argv);
 }

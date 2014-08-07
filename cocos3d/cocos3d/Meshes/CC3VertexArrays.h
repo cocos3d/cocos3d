@@ -203,7 +203,7 @@
 @property(nonatomic, assign) GLvoid* vertices;
 
 /** @deprecated Renamed to vertices. */
-@property(nonatomic, assign) GLvoid* elements DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) GLvoid* elements __deprecated;
 
 /**
  * The number of vertices in the underlying content referenced by the vertices property.
@@ -220,7 +220,7 @@
 @property(nonatomic, assign) GLuint vertexCount;
 
 /** @deprecated Renamed to vertexCount. */
-@property(nonatomic, assign) GLuint elementCount DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) GLuint elementCount __deprecated;
 
 /**
  * When using interleaved content, this property indicates the offset, within the content for a
@@ -300,7 +300,7 @@
 @property(nonatomic, assign) GLuint vertexStride;
 
 /** @deprecated Renamed to vertexStride. */
-@property(nonatomic, assign) GLuint elementStride DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) GLuint elementStride __deprecated;
 
 /**
  * Indicates whether the vertex content should be normalized during drawing.
@@ -461,19 +461,19 @@
 #pragma mark Binding GL artifacts
 
 /** @deprecated This functionality has been replaced by the allocatedVertexCapacity property. */
--(GLvoid*) allocateElements: (GLuint) vtxCount DEPRECATED_ATTRIBUTE;
+-(GLvoid*) allocateElements: (GLuint) vtxCount __deprecated;
 
 /** @deprecated This functionality has been replaced by the allocatedVertexCapacity property. */
--(GLvoid*) reallocateElements: (GLuint) vtxCount DEPRECATED_ATTRIBUTE;
+-(GLvoid*) reallocateElements: (GLuint) vtxCount __deprecated;
 
 /** @deprecated This functionality has been replaced by the allocatedVertexCapacity property. */
--(void) deallocateElements DEPRECATED_ATTRIBUTE;
+-(void) deallocateElements __deprecated;
 
 /** @deprecated This functionality is now managed by the mesh. */
--(BOOL) ensureCapacity: (GLuint) vtxCount DEPRECATED_ATTRIBUTE;
+-(BOOL) ensureCapacity: (GLuint) vtxCount __deprecated;
 
 /** @deprecated This property is no longer used, and is fixed at 1.25. */
-@property(nonatomic, assign) GLfloat capacityExpansionFactor DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) GLfloat capacityExpansionFactor __deprecated;
 
 /**
  * Indicates whether this instance should allow the vertex content to be copied to a vertex
@@ -567,7 +567,7 @@
 @property(nonatomic, assign) BOOL shouldReleaseRedundantContent;
 
 /** @deprecated Renamed to shouldReleaseRedundantContent. */
-@property(nonatomic, assign) BOOL shouldReleaseRedundantData DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) BOOL shouldReleaseRedundantData __deprecated;
 
 /**
  * Once the vertices content has been buffered into a GL vertex buffer object (VBO)
@@ -590,7 +590,7 @@
 -(void) releaseRedundantContent;
 
 /** @deprecated Renamed to releaseRedundantContent. */
--(void) releaseRedundantData DEPRECATED_ATTRIBUTE;
+-(void) releaseRedundantData __deprecated;
 
 /**
  * Binds the vertex content to the vertex attribute at the specified index in the GL engine.
@@ -700,13 +700,13 @@
 -(NSString*) describeVertices: (GLuint) vtxCount startingAt: (GLuint) startElem;
 
 /** @deprecated Renamed to describeVertices. */
--(NSString*) describeElements DEPRECATED_ATTRIBUTE;
+-(NSString*) describeElements __deprecated;
 
 /** @deprecated Renamed to describeVertices:. */
--(NSString*) describeElements: (GLuint) vtxCount DEPRECATED_ATTRIBUTE;
+-(NSString*) describeElements: (GLuint) vtxCount __deprecated;
 
 /** @deprecated Renamed to describeVertices:startingAt:. */
--(NSString*) describeElements: (GLuint) vtxCount startingAt: (GLuint) startElem DEPRECATED_ATTRIBUTE;
+-(NSString*) describeElements: (GLuint) vtxCount startingAt: (GLuint) startElem __deprecated;
 
 @end
 
@@ -764,7 +764,7 @@
 @property(nonatomic, assign) GLuint* stripLengths;
 
 /** @deprecated Renamed to firstVertex on CC3VertexLocations. */
-@property(nonatomic, readonly) GLuint firstElement DEPRECATED_ATTRIBUTE;
+@property(nonatomic, readonly) GLuint firstElement __deprecated;
 
 /**
  * Draws the vertices, either in strips, or in a single call, depending on the value
@@ -836,10 +836,10 @@
 -(GLuint) vertexIndexCountFromFaceCount: (GLuint) fc;
 
 /** @deprecated Renamed to faceCountFromVertexIndexCount:. */
--(GLuint) faceCountFromVertexCount: (GLuint) vc DEPRECATED_ATTRIBUTE;
+-(GLuint) faceCountFromVertexCount: (GLuint) vc __deprecated;
 
 /** @deprecated Renamed to vertexIndexCountFromFaceCount:. */
--(GLuint) vertexCountFromFaceCount: (GLuint) fc DEPRECATED_ATTRIBUTE;
+-(GLuint) vertexCountFromFaceCount: (GLuint) fc __deprecated;
 
 
 /**
@@ -897,7 +897,7 @@
 @property(nonatomic, assign) GLuint firstVertex;
 
 /** @deprecated Renamed to firstVertex. */
-@property(nonatomic, assign) GLuint firstElement DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) GLuint firstElement __deprecated;
 
 /** Returns the axially-aligned bounding box of this mesh. */
 @property(nonatomic, readonly) CC3Box boundingBox;
@@ -1042,10 +1042,10 @@
 -(void) moveMeshOriginToCenterOfGeometry;
 
 /** @deprecated Renamed to moveMeshOriginTo:. */
--(void) movePivotTo: (CC3Vector) aLocation DEPRECATED_ATTRIBUTE;
+-(void) movePivotTo: (CC3Vector) aLocation __deprecated;
 
 /** @deprecated Renamed to moveMeshOriginToCenterOfGeometry. */
--(void) movePivotToCenterOfGeometry DEPRECATED_ATTRIBUTE;
+-(void) movePivotToCenterOfGeometry __deprecated;
 
 /**
  * Returns the face from the mesh at the specified index.
@@ -1391,7 +1391,7 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
 -(void) alignWithTextureCoverage: (CGSize) texCoverage;
 
 /** @deprecated Renamed to alignWithTextureCoverage:. */
--(void) alignWithTextureMapSize: (CGSize) texCoverage DEPRECATED_ATTRIBUTE;
+-(void) alignWithTextureMapSize: (CGSize) texCoverage __deprecated;
 
 /**
  * Aligns the texture coordinate array with the specfied texture map size,
@@ -1420,7 +1420,7 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
 -(void) alignWithInvertedTextureCoverage: (CGSize) texCoverage;
 
 /** @deprecated Renamed to alignWithInvertedTextureCoverage:. */
--(void) alignWithInvertedTextureMapSize: (CGSize) texCoverage DEPRECATED_ATTRIBUTE;
+-(void) alignWithInvertedTextureMapSize: (CGSize) texCoverage __deprecated;
 
 /**
  * Aligns the texture coordinate array with the specfied texture.
@@ -1886,16 +1886,16 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
 #pragma mark Deprecated methods
 
 /** *@deprecated Renamed to weightForBoneInfluence:at:. */
--(GLfloat) weightForVertexUnit: (GLuint) vertexUnit at: (GLuint) index DEPRECATED_ATTRIBUTE;
+-(GLfloat) weightForVertexUnit: (GLuint) vertexUnit at: (GLuint) index __deprecated;
 
 /** *@deprecated Renamed to setWeight:forBoneInfluence:at:. */
--(void) setWeight: (GLfloat) aWeight forVertexUnit: (GLuint) vertexUnit at: (GLuint) index DEPRECATED_ATTRIBUTE;
+-(void) setWeight: (GLfloat) aWeight forVertexUnit: (GLuint) vertexUnit at: (GLuint) index __deprecated;
 
 /** *@deprecated Renamed to boneWeightsAt:. */
--(GLfloat*) weightsAt: (GLuint) vtxIndex DEPRECATED_ATTRIBUTE;
+-(GLfloat*) weightsAt: (GLuint) vtxIndex __deprecated;
 
 /** *@deprecated Renamed to setBoneWeights:at:. */
--(void) setWeights: (GLfloat*) weights at: (GLuint) vtxIndex DEPRECATED_ATTRIBUTE;
+-(void) setWeights: (GLfloat*) weights at: (GLuint) vtxIndex __deprecated;
 
 @end
 
@@ -2005,16 +2005,16 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
 #pragma mark Deprecated methods
 
 /** *@deprecated Renamed to boneIndexForBoneInfluence:at:. */
--(GLuint) matrixIndexForVertexUnit: (GLuint) vertexUnit at: (GLuint) index DEPRECATED_ATTRIBUTE;
+-(GLuint) matrixIndexForVertexUnit: (GLuint) vertexUnit at: (GLuint) index __deprecated;
 
 /** *@deprecated Renamed to setBoneIndex:forBoneInfluence:at:. */
--(void) setMatrixIndex: (GLuint) aMatrixIndex forVertexUnit: (GLuint) vertexUnit at: (GLuint) index DEPRECATED_ATTRIBUTE;
+-(void) setMatrixIndex: (GLuint) aMatrixIndex forVertexUnit: (GLuint) vertexUnit at: (GLuint) index __deprecated;
 
 /** *@deprecated Renamed to boneIndicesAt:. */
--(GLvoid*) matrixIndicesAt: (GLuint) index DEPRECATED_ATTRIBUTE;
+-(GLvoid*) matrixIndicesAt: (GLuint) index __deprecated;
 
 /** *@deprecated Renamed to setBoneIndices:at:. */
--(void) setMatrixIndices: (GLvoid*) mtxIndices at: (GLuint) index DEPRECATED_ATTRIBUTE;
+-(void) setMatrixIndices: (GLvoid*) mtxIndices at: (GLuint) index __deprecated;
 
 @end
 
