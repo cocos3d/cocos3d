@@ -66,6 +66,10 @@
  */
 #define COCOS3D_VERSION 0x020000
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /** Returns a string describing the cocos3d version. */
 static inline NSString* NSStringFromCC3Version() {
 	int vFull, vMajor, vMinor, vBuild;
@@ -2531,6 +2535,10 @@ static inline void CC3SetBit(GLbitfield* bits, GLuint bitIdx, BOOL val) {
  * bytes in the data block must be at least (bytesPerRow * rowCount).
  */
 void CC3FlipVertically(GLubyte* rowMajorData, GLuint rowCount, GLuint bytesPerRow);
+
+#ifdef __cplusplus
+}
+#endif
 
 /** Temporarily turn off compiler warnings for hidden variable shadowing. */
 #define CC3_PUSH_NOSHADOW	_Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wshadow\"")
