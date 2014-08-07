@@ -121,33 +121,33 @@ extern "C" {
 	[self deleteCPVRTModelPOD];
 }
 
--(BOOL) saveToFile: (NSString*) aFilePath {
+-(BOOL) saveToFile: (NSString*) filePath {
 	
 	CC3Assert(_pvrtModel, @"%@ cannot be saved because the POD file content has been built and released from memory."
 			  " Set the shouldAutoBuild property to NO before loading the POD file content in order to be able to save it back to a file.", self);
 	
 	// Ensure the path is absolute, converting it if needed.
-	NSString* absFilePath = CC3EnsureAbsoluteFilePath(aFilePath);
+	NSString* absFilePath = CC3EnsureAbsoluteFilePath(filePath);
 	
 	MarkRezActivityStart();
 	
 	BOOL wasSaved = (self.pvrtModelImpl->SavePOD(absFilePath.UTF8String) == PVR_SUCCESS);
 	
 	if (wasSaved)
-		LogRez(@"%@ saved resources to file '%@' in %.3f ms", self, aFilePath, GetRezActivityDuration() * 1000);
+		LogRez(@"%@ saved resources to file '%@' in %.3f ms", self, filePath, GetRezActivityDuration() * 1000);
 	else
 		LogError(@"%@ could not save resources to file '%@'", self, absFilePath);
 	
 	return wasSaved;
 }
 
--(BOOL) saveAnimationToFile: (NSString*) aFilePath {
+-(BOOL) saveAnimationToFile: (NSString*) filePath {
 	
 	CC3Assert(_pvrtModel, @"%@ could not save animation content because the POD file content has been built and released from memory."
 			  " Set the shouldAutoBuild property to NO before loading the POD file content in order to be able to save the animation content to a file.", self);
 	
 	// Ensure the path is absolute, converting it if needed.
-	NSString* absFilePath = CC3EnsureAbsoluteFilePath(aFilePath);
+	NSString* absFilePath = CC3EnsureAbsoluteFilePath(filePath);
 	
 	MarkRezActivityStart();
 
@@ -204,7 +204,7 @@ extern "C" {
 	delete pod;
 	
 	if (wasSaved)
-		LogRez(@"%@ saved animation content to file '%@' in %.3f ms", self, aFilePath, GetRezActivityDuration() * 1000.0);
+		LogRez(@"%@ saved animation content to file '%@' in %.3f ms", self, filePath, GetRezActivityDuration() * 1000.0);
 	else
 		LogError(@"%@ could not save animation content to file '%@'", self, absFilePath);
 	

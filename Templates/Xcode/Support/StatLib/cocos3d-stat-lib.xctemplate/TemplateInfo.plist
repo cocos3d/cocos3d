@@ -38,6 +38,11 @@
 				<key>HEADER_SEARCH_PATHS</key>
 				<array>
 					<string>cocos2d/**</string>
+					<string>../cocos2d-iphone/**</string>
+					<string>../cocos2d/**</string>
+					<string>../Chipmunk/**</string>
+					<string>../ObjectAL/**</string>
+					<string>../kazmath/**</string>
 				</array>
 				<key>SKIP_INSTALL</key>
 				<string>YES</string>

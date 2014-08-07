@@ -35,7 +35,7 @@
 #pragma mark -
 #pragma mark Deprecated classes and node extensions
 
-DEPRECATED_ATTRIBUTE
+__deprecated
 /**
  * Deprecated and functionality moved to CC3Node class.
  * @deprecated CC3TargettingNode is deprecated. Its former functionality
@@ -49,22 +49,22 @@ DEPRECATED_ATTRIBUTE
  * @deprecated CC3LightTracker is deprecated. Its former functionality has been
  * moved into the CC3Node class with the isTrackingForBumpMapping property.
  */
-DEPRECATED_ATTRIBUTE
+__deprecated
 @interface  CC3LightTracker : CC3Node
 @end
 
 @interface CC3Node (CC3TargettingNode)
 
 /** @deprecated Replaced with asOrientingWrapper. */
--(CC3TargettingNode*) asTargettingNode DEPRECATED_ATTRIBUTE;
+-(CC3TargettingNode*) asTargettingNode __deprecated;
 
 /** @deprecated Replaced with asTrackingWrapper. */
--(CC3TargettingNode*) asTracker DEPRECATED_ATTRIBUTE;
+-(CC3TargettingNode*) asTracker __deprecated;
 
 /** @deprecated Replaced with asCameraTrackingWrapper. */
--(CC3TargettingNode*) asCameraTracker DEPRECATED_ATTRIBUTE;
+-(CC3TargettingNode*) asCameraTracker __deprecated;
 
 /** @deprecated Replaced with asBumpMapLightTrackingWrapper. */
--(CC3TargettingNode*) asLightTracker DEPRECATED_ATTRIBUTE;
+-(CC3TargettingNode*) asLightTracker __deprecated;
 
 @end

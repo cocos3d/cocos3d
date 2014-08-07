@@ -38,10 +38,10 @@
  *   - attribute vec4		a_cc3Color;							// Vertex color.
  *
  *   - uniform lowp vec4	u_cc3Color;							// Color when lighting & materials are not in use.
- *   - uniform lowp vec4	u_cc3MaterialAmbientColor;			// Ambient color of the material.
  *   - uniform lowp vec4	u_cc3MaterialDiffuseColor;			// Diffuse color of the material.
- *   - uniform lowp vec4	u_cc3MaterialSpecularColor;			// Specular color of the material.
- *   - uniform lowp vec4	u_cc3MaterialEmissionColor;			// Emission color of the material.
+ *   - uniform lowp vec3	u_cc3MaterialAmbientColor;			// Ambient color of the material.
+ *   - uniform lowp vec3	u_cc3MaterialSpecularColor;			// Specular color of the material.
+ *   - uniform lowp vec3	u_cc3MaterialEmissionColor;			// Emission color of the material.
  *   - uniform float		u_cc3MaterialShininess;				// Shininess of the material.
  *   - uniform bool			u_cc3LightIsUsingLighting;			// Indicates whether any lighting is enabled
  *   - uniform lowp vec4	u_cc3LightSceneAmbientLightColor;	// Ambient light color of the scene.
@@ -54,16 +54,16 @@
  *   - uniform highp vec3	u_cc3LightSpotDirectionModel[];		// Direction of each spotlight in local coordinates of the model (not light).
  *   - uniform float		u_cc3LightSpotExponent[];			// Directional attenuation factor, if spotlight, of each light.
  *   - uniform float		u_cc3LightSpotCutoffAngleCosine[];	// Cosine of spotlight cutoff angle of each light.
+ *   - uniform bool			u_cc3LightIsUsingLightProbes;		// Whether the model is using light probes for lighting, instead of lights.
  *   - uniform bool			u_cc3VertexHasColor;				// Whether the vertex color is available.
  *   - uniform bool			u_cc3VertexShouldDrawFrontFaces;	// Whether the front side of each face is to be drawn.
  *   - uniform bool			u_cc3VertexShouldDrawBackFaces;		// Whether the back side of each face is to be drawn.
- *   - uniform highp mat4	u_cc3MatrixModel;					// Current model-to-world matrix.
  *
  * This library declares and outputs the following variables:
  *   - varying lowp vec4	v_color;							// Fragment front-face color.
  *   - varying lowp vec4	v_colorBack;						// Fragment back-face color.
+ *   - varying vec3			v_vtxNormalGlobal;					// Vertex normal in global coordinates.
  */
-
 
 #import "CC3LibConstants.vsh"
 #import "CC3LibModelMatrices.vsh"
@@ -81,7 +81,7 @@ uniform lowp vec3	u_cc3MaterialSpecularColor;						/**< Specular color of the ma
 uniform lowp vec3	u_cc3MaterialEmissionColor;						/**< Emission color of the material. */
 uniform float		u_cc3MaterialShininess;							/**< Shininess of the material. */
 
-uniform bool		u_cc3LightIsUsingLighting;						/**< Indicates whether any lighting is enabled */
+uniform bool		u_cc3LightIsUsingLighting;						/**< Whether the model will interact with scene lighting (either lights or light probes). */
 uniform lowp vec3	u_cc3LightSceneAmbientLightColor;				/**< Ambient light color of the scene. */
 uniform bool		u_cc3LightIsLightEnabled[MAX_LIGHTS];			/**< Indicates whether each light is enabled. */
 uniform highp vec4	u_cc3LightPositionModel[MAX_LIGHTS];			/**< Position or normalized direction in the local coords of the model of each light. */
@@ -92,6 +92,8 @@ uniform highp vec3	u_cc3LightAttenuation[MAX_LIGHTS];				/**< Coefficients of th
 uniform highp vec3	u_cc3LightSpotDirectionModel[MAX_LIGHTS];		/**< Direction of each spotlight in local coordinates of the model (not light). */
 uniform float		u_cc3LightSpotExponent[MAX_LIGHTS];				/**< Directional attenuation factor, if spotlight, of each light. */
 uniform float		u_cc3LightSpotCutoffAngleCosine[MAX_LIGHTS];	/**< Cosine of spotlight cutoff angle of each light. */
+
+uniform bool		u_cc3LightIsUsingLightProbes;					/**< Whether the model is using light probes for lighting, instead of lights. */
 
 uniform bool		u_cc3VertexHasColor;							/**< Whether the vertex color is available. */
 uniform bool		u_cc3VertexShouldDrawFrontFaces;				/**< Whether the front side of each face is to be drawn. */
@@ -104,6 +106,7 @@ lowp vec3			backColor;										/**< Fragment back-face color. */
 
 varying lowp vec4	v_color;										/**< Fragment front-face color. */
 varying lowp vec4	v_colorBack;									/**< Fragment back-face color. */
+varying vec3		v_vtxNormalGlobal;								/**< Vertex normal in global coordinates. */
 
 /**
  * Returns a vector the contains the direction and intensity of light from the light at the
@@ -118,7 +121,7 @@ highp vec4 illuminationFrom(int ltIdx) {
 	highp vec3 ltPos = u_cc3LightPositionModel[ltIdx].xyz;
 	
 	// Directional light. Position is expected to be a normalized direction!
-	if (u_cc3LightPositionModel[ltIdx].w == 0.0) return highp vec4(ltPos, 1.0);
+	if (u_cc3LightPositionModel[ltIdx].w == 0.0) return vec4(ltPos, 1.0);
 	
 	// Positional light. Find the directional vector from vertex to light, but don't normalize yet.
 	ltPos -= vtxPosition.xyz;
@@ -128,7 +131,7 @@ highp vec4 illuminationFrom(int ltIdx) {
 	// Light-vertex vector is transformed to global-space to take length measurement in global coords.
 	if (u_cc3LightAttenuation[ltIdx] != kAttenuationNone) {
 		highp float ltDist = length(u_cc3MatrixModel* vec4(ltPos, 0.0));
-		highp vec3 distAtten = highp vec3(1.0, ltDist, ltDist * ltDist);
+		highp vec3 distAtten = vec3(1.0, ltDist, ltDist * ltDist);
 		highp float distIntensity = 1.0 / dot(distAtten, u_cc3LightAttenuation[ltIdx]);	// needs highp
 		intensity *= min(abs(distIntensity), 1.0);
 	}
@@ -148,7 +151,7 @@ highp vec4 illuminationFrom(int ltIdx) {
 		}
 	}
 	
-	return highp vec4(ltPos, intensity);	// Return combined light direction & intensity
+	return vec4(ltPos, intensity);	// Return combined light direction & intensity
 }
 
 /**
@@ -195,27 +198,50 @@ void illuminateVertex() {
 	}
 }
 
+/** Illuminates the vertex with the individual scene lights. */
+void illuminateWithLights() {
+
+	// If vertices have individual colors, use them for ambient and diffuse material colors.
+	if (u_cc3VertexHasColor) {
+		matColorDiffuse = a_cc3Color;
+		matColorAmbient = a_cc3Color.rgb;
+	} else {
+		matColorDiffuse = u_cc3MaterialDiffuseColor;
+		matColorAmbient = u_cc3MaterialAmbientColor.rgb;
+	}
+	
+	frontColor = u_cc3MaterialEmissionColor + (matColorAmbient * u_cc3LightSceneAmbientLightColor);
+	backColor = frontColor;
+	
+	illuminateVertex();
+
+	v_color = vec4(frontColor, matColorDiffuse.a);
+	v_colorBack = vec4(backColor, matColorDiffuse.a);
+}
+
+/** 
+ * Illuminates the vertex with the individual scene lights. Illumination is performend in
+ * the fragment shader using a texture lookup based on the fragment normal.
+ */
+void illuminateWithLightProbes() {
+
+	// If vertices have individual colors, use them for diffuse material colors.
+	v_color = u_cc3VertexHasColor ? a_cc3Color : u_cc3MaterialDiffuseColor;
+	v_colorBack = matColorDiffuse;
+	
+	// Calculate the global normal and pass to fragment shader
+	v_vtxNormalGlobal = (u_cc3MatrixModel * vec4(vtxNormal, 0.0)).xyz;
+	
+}
+
 /** Sets the color of the vertex by applying material & lighting, or using a pure color. */
 void paintVertex() {
 	if (u_cc3LightIsUsingLighting) {
-
-		// If vertices have individual colors, use them for ambient and diffuse material colors.
-		if (u_cc3VertexHasColor) {
-			matColorDiffuse = a_cc3Color;
-			matColorAmbient = a_cc3Color.rgb;
+		if (u_cc3LightIsUsingLightProbes) {
+			illuminateWithLightProbes();
 		} else {
-			matColorDiffuse = u_cc3MaterialDiffuseColor;
-			matColorAmbient = u_cc3MaterialAmbientColor.rgb;
+			illuminateWithLights();
 		}
-		
-		frontColor = u_cc3MaterialEmissionColor + (matColorAmbient * u_cc3LightSceneAmbientLightColor);
-		backColor = frontColor;
-		
-		illuminateVertex();
-		
-		v_color = vec4(frontColor, matColorDiffuse.a);
-		v_colorBack = vec4(backColor, matColorDiffuse.a);
-		
 	} else {
 		v_color = (u_cc3VertexHasColor ? a_cc3Color : u_cc3Color);
 		v_colorBack = v_color;

@@ -33,7 +33,10 @@
 /* Base library of extensions to cocos2d to support cocos3d. */
 
 #import "CC3OSExtensions.h"
+#import "CC3ViewController.h"
 #import "CCTextureCache.h"
+#import "CC3EAGLView.h"
+#import <GLKit/GLKMatrix4.h>
 
 #if !CC3_CC2_CLASSIC
 #	import "CCNode_Private.h"
@@ -41,8 +44,33 @@
 #	import "CCTexture_Private.h"
 #endif	// !CC3_CC2_CLASSIC
 
-#pragma mark -
-#pragma mark CCGLView & CC3GLView
+
+#if CC3_CC2_RENDER_QUEUE
+
+#define kCCVertexAttrib_MAX			4
+#define CC_BLEND_SRC				GL_ONE
+#define CC_BLEND_DST				GL_ONE_MINUS_SRC_ALPHA
+#define ccGLUseProgram(P)
+
+#else
+
+/** Dummy protocol for backwards compatibility with Cocos2D 3.x renderer. */
+@protocol CCRenderCommand <NSObject>
+@end
+
+/** Dummy class for backwards compatibility with Cocos2D 3.x renderer. */
+@interface CCRenderer : NSObject
+
+/** Mark the renderer's cached GL state as invalid executing custom OpenGL code. */
+-(void) invalidateState;
+
+/** Render any currently queued commands. */
+-(void) flush;
+
+@end
+
+#endif	// CC3_CC2_RENDER_QUEUE
+
 
 // Backwards compatibility to renamed Cocos2D entities
 #if CC3_CC2_CLASSIC
@@ -172,16 +200,53 @@ typedef CCColor* CCColorRef;
 #endif	// CC3_CC2_CLASSIC
 
 
-#if CC3_IOS
-
-/** Under cocos2d 1.x iOS, create an alias CCGLView for EAGLView. */
-#if CC3_CC2_1
-#	define CCGLView EAGLView
-#endif	// CC3_CC2_1
-
+#pragma mark -
+#pragma mark CCGLView
 
 /** Extension to support cocos3d functionality. */
 @interface CCGLView (CC3)
+
+/** Returns the GL color format of the pixels. */
+@property(nonatomic, readonly) GLenum pixelColorFormat;
+
+/** Returns the GL depth format of the pixels. */
+@property(nonatomic, readonly) GLenum pixelDepthFormat;
+
+/** Default Renderbuffer */
+@property (nonatomic,readonly) GLuint defaultFrameBuffer;
+
+/** MSAA Framebuffer */
+@property (nonatomic,readonly) GLuint msaaFrameBuffer;
+
+/** Color Renderbuffer */
+@property (nonatomic,readonly) GLuint colorRenderBuffer;
+
+/** MSAA Color Buffer */
+@property (nonatomic,readonly) GLuint msaaColorBuffer;
+
+/** Depth Buffer */
+@property (nonatomic,readonly) GLuint depthBuffer;
+
+/** The underlying view rendering surface. */
+//@property(nonatomic, retain, readonly) CC3SurfaceManager* surfaceManager;
+
+#if CC3_IOS
+
+/**
+ * Returns the number of samples that was requested to be used to define each pixel.
+ *
+ * This may return a value that is different than the value returned by the pixelSamples
+ * property because that property is limited by the capabilities of the platform.
+ */
+@property(nonatomic, readonly) GLuint requestedSamples;
+
+/**
+ * Returns the actual number of samples used to define each pixel.
+ *
+ * This may return a value that is different than the value returned by the requestedSamples
+ * property because this property is limited by the capabilities of the platform.
+ */
+@property(nonatomic, readonly) GLuint pixelSamples;
 
 /** Initializes this instance with the specified characteristics. */
 -(id) initWithFrame: (CGRect) frame
@@ -197,8 +262,25 @@ typedef CCColor* CCColorRef;
  preserveBackbuffer: (BOOL) isRetained
 	numberOfSamples: (GLuint) sampleCount;
 
-@end
 #endif	// CC3_IOS
+
+#if CC3_OSX
+
+/** returns surface size in pixels */
+@property(nonatomic,readonly) CGSize surfaceSize;
+
+/** The OpenGL context used by this view. */
+@property(nonatomic, retain, readonly) CC3GLContext* context;
+
+/** Dummy method for compatibility with iOS. */
+-(void) addGestureRecognizer: (UIGestureRecognizer*) gestureRecognizer;
+
+/** Dummy method for compatibility with iOS. */
+-(void) removeGestureRecognizer: (UIGestureRecognizer*) gestureRecognizer;
+
+#endif	// CC3_OSX
+
+@end
 
 /** Add state caching aliases for compatiblity with 2.1 and above */
 #if CC3_CC2_2 && COCOS2D_VERSION < 0x020100
@@ -293,6 +375,20 @@ enum {
 
 /** Extension category to support cocos3d functionality. */
 @interface CCNode (CC3)
+
+/**
+ * Convenience method that wraps this node in a CCScene instance, and returns the CCScene instance.
+ *
+ * This node will be held as a child node of the returned CCScene instance.
+ */
+-(CCScene*) asCCScene;
+
+#if !CC3_CC2_RENDER_QUEUE
+
+/** Backwards compatibility with Cocos2D 3.x renderer. Simply invoks visit. */
+-(void) visit: (CCRenderer*) renderer parentTransform: (const GLKMatrix4*)parentTransform;
+
+#endif	// !CC3_CC2_RENDER_QUEUE
 
 #if CC3_CC2_CLASSIC
 
@@ -472,17 +568,18 @@ enum {
 /** Converts an NSEvent (typically a mouse event) to the local coordinates of this node. */
 -(CGPoint) cc3ConvertNSEventToNodeSpace: (NSEvent*) event;
 
+#if (COCOS2D_VERSION < 0x030100)
 /**
- * Invoked automatically when the window has been resized while running in OSX.
+ * Invoked automatically when the OS view has been resized.
+ *
  * This implementation simply propagates the same method to the children.
- * Subclasses may override to actually do something when the window resizes.
+ * Subclasses may override to actually do something when the view resizes.
  */
--(void) reshapeProjection: (CGSize) newWindowSize;
+-(void) viewDidResizeTo: (CGSize) newViewSize;
+#endif	// (COCOS2D_VERSION < 0x030100)
 
 @end
 
-
-#if CC3_CC2_CLASSIC
 
 #pragma mark -
 #pragma mark CCLayer extension
@@ -490,27 +587,46 @@ enum {
 /** Extension category to support cocos3d functionality. */
 @interface CCLayer (CC3)
 
-#if COCOS2D_VERSION < 0x020100
-/** Backwards compatibility for setter renamed in cocos2d 2.1. */
--(void) setTouchEnabled: (BOOL) isTouchEnabled;
-#endif
+/** 
+ * The controller controlling the scene.
+ *
+ * Under iOS and Cocos2D v2 & v3, returns the CCDirector singleton.
+ * Setting this property has no effect.
+ */
+@property(nonatomic, readonly) CC3ViewController* controller __deprecated;
+
+/** The view displaying this layer. */
+@property(nonatomic, readonly) CCGLView* view __deprecated;
+
+/** Allocates and initializes a layer. */
++(id) layer;
+
+#if CC3_CC2_CLASSIC
 
 #if CC3_IOS
 /** Dummy property for compatibility with apps that run both OSX and IOS. */
 @property (nonatomic, assign) NSInteger mousePriority;
 #endif	// CC3_IOS
 
+#if (COCOS2D_VERSION < 0x020100)
+/** Backwards compatibility for setter renamed in cocos2d 2.1. */
+-(void) setTouchEnabled: (BOOL) isTouchEnabled;
+
 #if CC3_OSX
-#if COCOS2D_VERSION < 0x020100
 /** Backwards compatibility for setter renamed in cocos2d 2.1. */
 -(void) setMouseEnabled: (BOOL) isMouseEnabled;
 /** Backwards compatibility for setter renamed in cocos2d 2.1. */
 @property (nonatomic, assign) NSInteger mousePriority;
-#endif
 #endif	// CC3_OSX
+
+#endif	// (COCOS2D_VERSION < 0x020100)
+
+#endif	// CC3_CC2_CLASSIC
 
 @end
 
+
+#if CC3_CC2_CLASSIC
 
 #pragma mark -
 #pragma mark CCSprite extension
@@ -559,52 +675,6 @@ enum {
 @end
 
 #endif	// CC3_CC2_CLASSIC
-
-
-#pragma mark -
-#pragma mark CCTexture extension
-
-/** Extension category to support cocos3d functionality. */
-@interface CCTexture (CC3)
-
-/**
- * If a CCTexture with the specified name does not already exist in the CCTextureCache,
- * this texture is added to the CCTextureCache under that name.
- *
- * If a texture already exists in the cache under the specified name, or if the specified
- * name is nil, this texture is not added to the cache.
- */
--(void) addToCacheWithName: (NSString*) texName;
-
-#if CC3_CC2_CLASSIC
-
-/** Legacy support for renamed pixelsWide property. */
-@property(nonatomic,readonly) NSUInteger pixelWidth;
-
-/** Legacy support for renamed pixelsHigh property. */
-@property(nonatomic,readonly) NSUInteger pixelHeight;
-
-#endif	// CC3_CC2_CLASSIC
-
-@end
-
-
-#pragma mark -
-#pragma mark CCTextureCache extension
-
-/** Extension category to support cocos3d functionality. */
-@interface CCTextureCache (CC3)
-
-/** 
- * If a texture with the specified name does not already exist in this cache, the specified
- * texture is added under the specified name.
- *
- * If a texture already exists in this cache under the specified name, or if either the 
- * specified texture or specified name is nil, the texture is not added to the cache.
- */
--(void) addTexture: (CCTexture*) tex2D named: (NSString*) texName;
-
-@end
 
 
 #pragma mark -
@@ -672,6 +742,9 @@ enum {
 
 /** Content scaling factor. Does nothing, as content scaling factor only applies to CCDirectorIOS. */
 @property(nonatomic, assign) CGFloat contentScaleFactor;
+
+/** The size of the view. */
+@property(nonatomic, readonly) CGSize designSize;
 
 #endif	//CC3_CC2_CLASSIC
 
@@ -744,6 +817,16 @@ enum {
 
 #pragma mark -
 #pragma mark Miscellaneous extensions and functions
+
+/** 
+ * Returns the size of a CCNode that will cover the specified view size, 
+ * taking into consideration whether the view is a Retina view.
+ */
+static inline CGSize CCNodeSizeFromViewSize(CGSize viewSize) {
+	GLfloat viewScaleFactor = 1.0f / CCDirector.sharedDirector.contentScaleFactor;
+	return CGSizeMake(viewSize.width * viewScaleFactor,
+					  viewSize.height * viewScaleFactor);
+}
 
 /** Returns the name of the specified touch type. */
 NSString* NSStringFromTouchType(uint tType);

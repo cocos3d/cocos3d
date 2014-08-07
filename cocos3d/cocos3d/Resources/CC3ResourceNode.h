@@ -229,40 +229,40 @@
  * @deprecated Use the populateFromResource: method instead. Setting this property invokes
  * the populateFromResource: method. Querying this property always returns nil.
  */
-@property(nonatomic, retain) CC3NodesResource* resource DEPRECATED_ATTRIBUTE;
+@property(nonatomic, retain) CC3NodesResource* resource __deprecated;
 
 /** @deprecated Setting this property has no effect. Querying this property always returns NO. */
-@property(nonatomic, assign) BOOL expectsVerticallyFlippedTextures DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) BOOL expectsVerticallyFlippedTextures __deprecated;
 
 /**
  * @deprecated Use the loadFromFile: method instead, which supports both absolute
  * file paths and file paths that are relative to the resources directory.
  */
--(void) loadFromResourceFile: (NSString*) aRezPath DEPRECATED_ATTRIBUTE;
+-(void) loadFromResourceFile: (NSString*) aRezPath __deprecated;
 
 /**
  * @deprecated Use the initFromFile: method instead, which supports both absolute
  * file paths and file paths that are relative to the resources directory.
  */
--(id) initFromResourceFile: (NSString*) aRezPath DEPRECATED_ATTRIBUTE;
+-(id) initFromResourceFile: (NSString*) aRezPath __deprecated;
 
 /**
  * @deprecated Use the nodeFromFile: method instead, which supports both absolute
  * file paths and file paths that are relative to the resources directory.
  */
-+(id) nodeFromResourceFile: (NSString*) aRezPath DEPRECATED_ATTRIBUTE;
++(id) nodeFromResourceFile: (NSString*) aRezPath __deprecated;
 
 /**
  * @deprecated Use the initWithName:FromFile: method instead, which supports both
  * absolute file paths and file paths that are relative to the resources directory.
  */
--(id) initWithName: (NSString*) aName fromResourceFile: (NSString*) aRezPath DEPRECATED_ATTRIBUTE;
+-(id) initWithName: (NSString*) aName fromResourceFile: (NSString*) aRezPath __deprecated;
 
 /**
  * @deprecated Use the nodeWithName:FromFile: method instead, which supports both
  * absolute file paths and file paths that are relative to the resources directory.
  */
-+(id) nodeWithName: (NSString*) aName fromResourceFile: (NSString*) aRezPath DEPRECATED_ATTRIBUTE;
++(id) nodeWithName: (NSString*) aName fromResourceFile: (NSString*) aRezPath __deprecated;
 
 @end
 

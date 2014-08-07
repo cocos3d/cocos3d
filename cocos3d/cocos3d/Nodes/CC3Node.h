@@ -184,6 +184,7 @@ typedef enum {
 @interface CC3Node : CC3Identifiable <CCRGBAProtocol, CCBlendProtocol, CC3NodeTransformListenerProtocol> {
 	NSMutableArray* _children;
 	CC3Node* _parent;
+	CC3Matrix* _localTransformMatrix;
 	CC3Matrix* _globalTransformMatrix;
 	CC3Matrix* _globalTransformMatrixInverted;
 	CC3Matrix* _globalRotationMatrix;
@@ -350,7 +351,18 @@ typedef enum {
  *
  * Thanks to cocos3d user nt901 for contributing to the development of this feature
  */
--(void) rotateByAngle: (GLfloat) anAngle aroundAxis: (CC3Vector) anAxis;
+-(void) rotateByAngle: (GLfloat) angle aroundAxis: (CC3Vector) axis;
+
+/**
+ * Rotates this node from its current rotational state by rotating around the specified axis
+ * by the specified angle in degrees, using the specified location as the rotational pivot point.
+ *
+ * The location is specified in the local coordinate system of this node. The incoming axis
+ * and angle specify the amount of change in rotation, not the final rotational state.
+ */
+-(void) rotateByAngle: (GLfloat) angle
+		   aroundAxis: (CC3Vector) axis
+		   atLocation: (CC3Vector) pivotLocation;
 
 /**
  * The direction in which this node is pointing.
@@ -418,10 +430,10 @@ typedef enum {
 @property(nonatomic, assign) CC3Vector referenceUpDirection;
 
 /** @deprecated Renamed to referenceUpDirection. */
-@property(nonatomic, assign) CC3Vector sceneUpDirection DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) CC3Vector sceneUpDirection __deprecated;
 
 /** @deprecated Renamed to referenceUpDirection. */
-@property(nonatomic, assign) CC3Vector worldUpDirection DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) CC3Vector worldUpDirection __deprecated;
 
 /**
  * The direction, in the node's coordinate system, that is considered to be 'up'.
@@ -539,19 +551,19 @@ typedef enum {
  * now tracked by the globalTransformMatrix itself. This property will always return zero. Setting
  * this property will have no effect.
  */
-@property(nonatomic, assign) GLfloat scaleTolerance DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) GLfloat scaleTolerance __deprecated;
 
 /**
  * @deprecated This property is no longer needed, since the rigidity of a node transform is
  * now tracked by the globalTransformMatrix itself. This property will always return zero.
  */
-+(GLfloat) defaultScaleTolerance DEPRECATED_ATTRIBUTE;
++(GLfloat) defaultScaleTolerance __deprecated;
 
 /**
  * @deprecated This property is no longer needed, since the rigidity of a node transform is
  * now tracked by the globalTransformMatrix itself. Setting this property will have no effect.
  */
-+(void) setDefaultScaleTolerance: (GLfloat) aTolerance DEPRECATED_ATTRIBUTE;
++(void) setDefaultScaleTolerance: (GLfloat) aTolerance __deprecated;
 
 /**
  * Returns the smallest axis-aligned bounding box that surrounds any local content
@@ -652,16 +664,16 @@ typedef enum {
 @property(nonatomic, assign) GLfloat cameraDistanceProduct;
 
 /**
- * The current location of this node, as projected onto the 2D viewport coordinate space.
- * For most purposes, this is where this node will appear on the screen or window.
- * The 2D position can be read from the X and Y components of the returned 3D location.
+ * The current location of this node, as projected onto a 2D position in the display coordinate
+ * space, indicating where on the CC3Layer this 3D location will be seen. 
  *
- * The initial value of this property is kCC3VectorZero. To set this property, pass this
- * node as the argument to the projectNode: method of the active camera, which can be
- * retrieved from the activeCamera property of the CC3Scene. The application should usually
- * not set this property directly. For more information, see the notes for the projectNode:
- * method of CC3Camera.
+ * The initial value of this property is kCC3VectorZero. To set the value of this property, 
+ * pass this node as the argument to the projectNode: method of a CC3Camera. For more 
+ * information, see the notes for the projectNode: method of CC3Camera.
  *
+ * The 2D position can be read from the X and Y components of the returned 3D location, 
+ * and is measured in points in the coordinate system of the CC3Layer.
+ * 
  * The Z-component of the returned location indicates the distance from the camera to this
  * node, with a positive value indicating that this node is in front of the camera, and a
  * negative value indicating that it is behind the camera. If you are only interested in
@@ -671,27 +683,21 @@ typedef enum {
  * When several nodes overlap a 2D position on the screen, you can also use the Z-component
  * of the projectedLocation property of each of the nodes to determine which node is closest
  * the camera, and is therefore "on-top" visually. This can be useful when trying to select
- * a 3D node from an iOS touch event position.
- *
- * The returned value takes into account the orientation of the device (portrait, landscape). 
+ * a 3D node from a touch event position.
  */
-@property(nonatomic, assign) CC3Vector projectedLocation;
+@property(nonatomic, readonly) CC3Vector projectedLocation;
 
 /**
- * The current position of this node, as projected onto the 2D viewport coordinate space,
- * returned as a 2D point. For most purposes, this is where this node will appear on the
- * screen or window.
+ * The current position of this node, as projected onto a 2D position in the display coordinate
+ * space, indicating where on the CC3Layer this 3D location will be seen.
  *
- * This value is derived from the X and Y coordinates of the projectedLocation property.
- * If this node is behind the camera, both the X and Y coordinates of the returned point
- * will have the value -kCC3MaxGLfloat.
+ * This is a convenience property. The value of this property is derived from the X and Y 
+ * coordinates of the projectedLocation property. If this node is behind the camera, both 
+ * the X and Y coordinates of the returned point will have the value -kCC3MaxGLfloat.
  *
- * The initial value of this property is CGPointZero. To set this property, pass this
- * node as the argument to the projectNode: method of the active camera, which can be
- * retrieved from the activeCamera property of the CC3Scene. For more information, see
- * the notes for the projectNode: method of CC3Camera.
- *
- * The returned value takes into account the orientation of the device (portrait, landscape). 
+ * The initial value of this property is (-kCC3MaxGLfloat, -kCC3MaxGLfloat). To set the value
+ * of this property, pass this node as the argument to the projectNode: method of a CC3Camera. 
+ * For more information, see the notes for the projectNode: method of CC3Camera.
  */
 @property(nonatomic, readonly) CGPoint projectedPosition;
 
@@ -881,7 +887,7 @@ typedef enum {
 @property(nonatomic, assign) CC3TargettingConstraint targettingConstraint;
 
 /** @deprecated Renamed to targettingConstraint. */
-@property(nonatomic, assign) CC3TargettingConstraint axisRestriction DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) CC3TargettingConstraint axisRestriction __deprecated;
 
 
 #pragma mark Mesh configuration
@@ -1392,9 +1398,8 @@ typedef enum {
 #pragma mark Matierial properties
 
 /**
- * If this value is set to YES, current lighting conditions will be taken into consideration
- * when drawing colors and textures, and the ambientColor, diffuseColor, specularColor,
- * emissionColor, and shininess properties will have effect.
+ * If this value is set to YES, current lighting conditions (from either lights or light probes)
+ * will be taken into consideration when drawing colors and textures.
  *
  * If this value is set to NO, lighting conditions will be ignored when drawing colors and
  * textures, and the emissionColor will be applied to the mesh surface, without regard to
@@ -1408,11 +1413,27 @@ typedef enum {
  * find your node disappears or turns black when you set this property to NO, try changing
  * the value of the emissionColor property.
  *
- * Setting the value of this property sets the same property in the materials contained in all
- * descendant nodes. Reading the value of this property returns YES if any descendant node
- * returns YES, and returns NO otherwise.
+ * Setting the value of this property sets the same property in all descendant nodes. 
+ * Reading the value of this property returns YES if any descendant node returns YES, 
+ * and returns NO otherwise.
  */
 @property(nonatomic, assign) BOOL shouldUseLighting;
+
+/**
+ * If this value is set to YES, any descendant mesh nodes will ignore the lights in the scene
+ * and will, instead, determine the lighting of the mesh node using textures held by light 
+ * probes in the scene.
+ *
+ * This property only has effect if the shouldUseLighting property is set to YES.
+ *
+ * Setting the value of this property sets the same property in all descendant nodes.
+ * Reading the value of this property returns YES if any descendant node returns YES,
+ * and returns NO otherwise.
+ *
+ * See the notes of the CC3LightProbe class to learn more about using light probes to
+ * illuminate models within the scene.
+ */
+@property(nonatomic, assign) BOOL shouldUseLightProbes;
 
 /**
  * The ambient color of the materials of this node.
@@ -1512,7 +1533,7 @@ typedef enum {
 @property(nonatomic, assign) CC3Vector4 globalLightPosition;
 
 /** @deprecated Use globalLightPosition instead. */
-@property(nonatomic, assign) CC3Vector globalLightLocation DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) CC3Vector globalLightLocation __deprecated;
 
 /**
  * The GLSL program context containing the GLSL program (vertex & fragment shaders) used to
@@ -1608,10 +1629,10 @@ typedef enum {
 -(void) removeShaders;
 
 /** @deprecated Renamed to selectShaders. */
--(void) selectShaderPrograms DEPRECATED_ATTRIBUTE;
+-(void) selectShaderPrograms __deprecated;
 
 /** @deprecated Renamed to removeShaders. */
--(void) clearShaderPrograms DEPRECATED_ATTRIBUTE;
+-(void) clearShaderPrograms __deprecated;
 
 
 #pragma mark CCRGBAProtocol and CCBlendProtocol support
@@ -1883,7 +1904,7 @@ typedef enum {
 -(void) releaseRedundantContent;
 
 /** @deprecated Renamed to releaseRedundantContent. */
--(void) releaseRedundantData DEPRECATED_ATTRIBUTE;
+-(void) releaseRedundantData __deprecated;
 
 /**
  * Convenience method to cause all vertex content to be retained in application
@@ -2198,16 +2219,16 @@ typedef enum {
 -(void) doNotBufferVertexIndices;
 
 /** *@deprecated Renamed to retainVertexBoneWeights. */
--(void) retainVertexWeights DEPRECATED_ATTRIBUTE;
+-(void) retainVertexWeights __deprecated;
 
 /** *@deprecated Renamed to retainVertexBoneIndices. */
--(void) retainVertexMatrixIndices DEPRECATED_ATTRIBUTE;
+-(void) retainVertexMatrixIndices __deprecated;
 
 /** *@deprecated Renamed to doNotBufferVertexBoneWeights. */
--(void) doNotBufferVertexWeights DEPRECATED_ATTRIBUTE;
+-(void) doNotBufferVertexWeights __deprecated;
 
 /** *@deprecated Renamed to doNotBufferVertexBoneIndices. */
--(void) doNotBufferVertexMatrixIndices DEPRECATED_ATTRIBUTE;
+-(void) doNotBufferVertexMatrixIndices __deprecated;
 
 
 #pragma mark Texture and normal alignment
@@ -2392,7 +2413,7 @@ typedef enum {
 -(void) updateAfterTransform: (CC3NodeUpdatingVisitor*) visitor;
 
 /** @deprecated No longer needed. Does nothing. */
--(void) trackTargetWithVisitor: (id) visitor DEPRECATED_ATTRIBUTE;
+-(void) trackTargetWithVisitor: (id) visitor __deprecated;
 
 /**
  * If the shouldUseFixedBoundingVolume property is set to NO, this method marks the bounding
@@ -2409,7 +2430,7 @@ typedef enum {
 -(void) markBoundingVolumeDirty;
 
 /** @deprecated Renamed to markBoundingVolumeDirty. */
--(void) rebuildBoundingVolume DEPRECATED_ATTRIBUTE;
+-(void) rebuildBoundingVolume __deprecated;
 
 
 #pragma mark Transformations
@@ -2504,10 +2525,28 @@ typedef enum {
 -(void) nodeWasDestroyed: (CC3Node*) aNode;
 
 /**
+ * The local transformation matrix derived from the location, rotation and scale transform
+ * properties of this node, relative to the parent of this node. This matrix determines the 
+ * transformation between this node and its parent.
+ *
+ * If not set directly, this property will be lazily created on first access. Thenceforth,
+ * it is updated automatically whenever any of the transform properties (location, rotation,
+ * or scale) of this node is changed.
+ *
+ * You can set this property directly as an alternative to setting the individual transform
+ * properties (location, rotation, and scale). This can sometimes be quite useful for certain
+ * complex transformation combinations, especially when sourced from animation data. However, 
+ * be aware subsequent change to any of the individual tranform properties (location, rotation,
+ * or scale) will change the composition of this matrix.
+ */
+@property(nonatomic, retain) CC3Matrix* localTransformMatrix;
+
+/**
  * The global transformation matrix derived from the location, rotation and scale transform
  * properties of this node and all ancestor nodes.
  *
- * This matrix is recalculated automatically when the node is updated.
+ * This matrix is updated automatically whenever any of the transform properties (location, 
+ * rotation, or scale) of this node, or any of its ancestors, is changed.
  *
  * This transform matrix includes the transforms of all ancestors to the node. This streamlines
  * rendering in that it allows the transform of each drawable node to be applied directly, and
@@ -2515,15 +2554,6 @@ typedef enum {
  * hierarchy.
  */
 @property(nonatomic, retain, readonly) CC3Matrix* globalTransformMatrix;
-
-/** 
- * @deprecated Renamed to globalTransformMatrix.
- *
- * This property will be redefined in a future release of cocos3d, and will result in incorrect
- * behaviour in any legacy code that depends on the older functionality provided by this property.
- * Convert your code now.
- */
-@property(nonatomic, retain, readonly) CC3Matrix* transformMatrix DEPRECATED_ATTRIBUTE;
 
 /**
  * Returns the matrix inversion of the globalTransformMatrix.
@@ -2534,25 +2564,35 @@ typedef enum {
 @property(nonatomic, retain, readonly) CC3Matrix* globalTransformMatrixInverted;
 
 /**
+ * @deprecated Renamed to globalTransformMatrix.
+ *
+ * This property will be redefined in a future release of cocos3d, and will result in incorrect
+ * behaviour in any legacy code that depends on the older functionality provided by this property.
+ * Convert your code now.
+ */
+@property(nonatomic, retain, readonly) CC3Matrix* transformMatrix __deprecated;
+
+/**
  * @deprecated Renamed to globalTransformMatrixInverted.
  *
  * This property will be redefined in a future release of cocos3d, and will result in incorrect
  * behaviour in any legacy code that depends on the older functionality provided by this property.
  * Convert your code now.
  */
-@property(nonatomic, retain, readonly) CC3Matrix* transformMatrixInverted DEPRECATED_ATTRIBUTE;
+@property(nonatomic, retain, readonly) CC3Matrix* transformMatrixInverted __deprecated;
 
 /** Returns a matrix representing all of the rotations that make up this node, including ancestor nodes. */
 -(CC3Matrix*) globalRotationMatrix;
 
 /**
- * Indicates whether any of the transform properties, location, rotation, or scale
- * have been changed, and so the globalTransformMatrix of this node needs to be recalculated.
+ * Indicates whether any of the transform properties, location, rotation, or scale have 
+ * been changed, and so the globalTransformMatrix of this node needs to be recalculated.
  *
  * This property is automatically set to YES when one of those properties have been
  * changed, and is reset to NO once the globalTransformMatrix has been recalculated.
+ * The value of this property is not affected by the state of the localTransformMatrix.
  *
- * Recalculation of the globalTransformMatrix occurs automatically when the node is updated.
+ * Recalculation of the globalTransformMatrix occurs automatically when that property is accessed.
  */
 @property(nonatomic, readonly) BOOL isTransformDirty;
 
@@ -2573,26 +2613,40 @@ typedef enum {
  */
 -(void) markTransformDirty;
 
-/** @deprecated No longer needed. */
--(void) updateTransformMatrices DEPRECATED_ATTRIBUTE;
+/**
+ * Template method that applies the local location, rotation, and scale properties to
+ * the specified matrix. Subclasses may override to enhance or modify this behaviour.
+ *
+ * This method makes no assumptions about the current contents of the specified matrix, and
+ * does not replace any of that content through population. Instead, the local tranforms of
+ * this node will be applied to the current state of the matrix to transform it accordingly.
+ *
+ * This method is invoked automatically to populate the globalTransformMatrix, which is
+ * used to transform this node for rendering. You can also invoke this method to apply 
+ * the transform properties of this node to any other matrix, for other calculations.
+ */
+-(void) applyLocalTransformsTo: (CC3Matrix*) matrix;
 
 /** @deprecated No longer needed. */
--(void) updateTransformMatrix DEPRECATED_ATTRIBUTE;
+-(void) updateTransformMatrices __deprecated;
 
 /** @deprecated No longer needed. */
-@property(nonatomic, retain, readonly) CC3Node* dirtiestAncestor DEPRECATED_ATTRIBUTE;
+-(void) updateTransformMatrix __deprecated;
 
 /** @deprecated No longer needed. */
-@property(nonatomic, retain, readonly) CC3Matrix* parentGlobalTransformMatrix DEPRECATED_ATTRIBUTE;
+@property(nonatomic, retain, readonly) CC3Node* dirtiestAncestor __deprecated;
+
+/** @deprecated No longer needed. */
+@property(nonatomic, retain, readonly) CC3Matrix* parentGlobalTransformMatrix __deprecated;
 
 /** @deprecated Renamed to parentGlobalTransformMatrix. No longer needed. */
-@property(nonatomic, retain, readonly) CC3Matrix* parentTransformMatrix DEPRECATED_ATTRIBUTE;
+@property(nonatomic, retain, readonly) CC3Matrix* parentTransformMatrix __deprecated;
 
 /** @deprecated No longer needed. Does nothing. */
 -(void) buildTransformMatrixWithVisitor: (id) visitor;
 
 /** @deprecated No longer used. Always returns nil. */
--(id) transformVisitorClass DEPRECATED_ATTRIBUTE;
+-(id) transformVisitorClass __deprecated;
 
 
 #pragma mark Bounding volumes
@@ -2831,7 +2885,7 @@ typedef enum {
 @property(nonatomic, assign, readonly) CC3Scene* scene;
 
 /** @deprecated Renamed to scene. */
-@property(nonatomic, assign, readonly) CC3Scene* world DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign, readonly) CC3Scene* world __deprecated;
 
 /**
  * If this node has been added to the 3D scene, either directly, or as part
@@ -3144,10 +3198,10 @@ typedef enum {
 @property(nonatomic, assign) BOOL shouldStopActionsWhenRemoved;
 
 /** @deprecated Renamed to shouldStopActionsWhenRemoved. */
-@property(nonatomic, assign) BOOL shouldCleanupActionsWhenRemoved DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) BOOL shouldCleanupActionsWhenRemoved __deprecated;
 
 /** @deprecated Renamed to shouldStopActionsWhenRemoved. */
-@property(nonatomic, assign) BOOL shouldCleanupWhenRemoved DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) BOOL shouldCleanupWhenRemoved __deprecated;
 
 /** Starts the specified action, and returns that action. This node becomes the action's target. */
 -(CCAction*) runAction: (CCAction*) action;
@@ -3206,7 +3260,7 @@ typedef enum {
 -(void) cleanupActions;
 
 /** @deprecated Renamed to cleanupActions. */
--(void) cleanup DEPRECATED_ATTRIBUTE;
+-(void) cleanup __deprecated;
 
 
 #pragma mark Touch handling
@@ -3234,8 +3288,7 @@ typedef enum {
 @property(nonatomic, assign, getter=isTouchEnabled) BOOL touchEnabled;
 
 /** @deprecated Property renamed to touchEnabled, with getter isTouchEnabled. */
--(void) setIsTouchEnabled: (BOOL) canTouch;
-//-(void) setIsTouchEnabled: (BOOL) canTouch DEPRECATED_ATTRIBUTE;
+//-(void) setIsTouchEnabled: (BOOL) canTouch __deprecated;
 
 /**
  * Indicates whether this node will respond to UI touch events.
@@ -3856,5 +3909,15 @@ typedef enum {
  * compiler build setting is defined and set to 1.
  */
 @property(nonatomic, assign) BOOL shouldLogIntersectionMisses;
+
+/**
+ * Returns a marker string that is pushed onto the GL render stream prior to rendering
+ * this node. The group is popped from the GL render stream after this node is rendered.
+ *
+ * This property returns a NULL pointer. Subclasses that contain renderable content can 
+ * override to provide a meaningful string. Subclasses should avoid dynamically generating 
+ * this property on each access, since this property is accessed each time the node is rendered.
+ */
+@property(nonatomic, readonly) const char* renderStreamGroupMarker;
 
 @end

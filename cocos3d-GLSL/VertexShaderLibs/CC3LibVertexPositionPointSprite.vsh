@@ -89,7 +89,7 @@ void sizePoint() {
 	if (u_cc3PointSizeAttenuation != kAttenuationNone) {
 		highp vec3 vtxPosEye = (u_cc3MatrixModelView * vtxPosition).xyz;
 		highp float vtxDistEye = length(vtxPosEye);
-		highp vec3 attenuationEquation = highp vec3(1.0, vtxDistEye, vtxDistEye * vtxDistEye);
+		highp vec3 attenuationEquation = vec3(1.0, vtxDistEye, vtxDistEye * vtxDistEye);
 		size /= sqrt(dot(attenuationEquation, u_cc3PointSizeAttenuation));
 	}
 

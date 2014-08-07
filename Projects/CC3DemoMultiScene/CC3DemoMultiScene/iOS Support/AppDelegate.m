@@ -30,51 +30,37 @@
  */
 
 #import "AppDelegate.h"
+#import "CC3OpenGL.h"
 
 @implementation AppDelegate
 
-@synthesize window=_window, mainViewController=_mainViewController;
+@synthesize window=_window;
 
-/** Set the main view controller, so that we can access it during other application events. */
 -(BOOL) application: (UIApplication*) application didFinishLaunchingWithOptions: (NSDictionary*) launchOptions {
-	_mainViewController = (MainViewController*)self.window.rootViewController;
     return YES;
 }
 							
 -(void) applicationWillResignActive: (UIApplication*) application {
-	[_mainViewController.cc3Controller pauseAnimation];
+	[CCDirector.sharedDirector pause];
 }
 
-/** Resume the cocos3d/cocos2d action. */
--(void) resumeApp { [_mainViewController.cc3Controller resumeAnimation]; }
-
 -(void) applicationDidBecomeActive: (UIApplication*) application {
-	
-	// Workaround to fix the issue of drop to 40fps on iOS4.X on app resume.
-	// Adds short delay before resuming the app.
-	[NSTimer scheduledTimerWithTimeInterval: 0.25
-									 target: self
-								   selector: @selector(resumeApp)
-								   userInfo: nil
-									repeats: NO];
-	
-	// If dropping to 40fps is not an issue, remove above, and uncomment the following to avoid delay.
-	//	[self resumeApp];
+	[CCDirector.sharedDirector resume];
 }
 
 -(void) applicationDidReceiveMemoryWarning: (UIApplication*) application {
 }
 
 -(void) applicationDidEnterBackground: (UIApplication*) application {
-	[_mainViewController.cc3Controller stopAnimation];
+	[CCDirector.sharedDirector stopAnimation];
 }
 
 -(void) applicationWillEnterForeground: (UIApplication*) application {
-	[_mainViewController.cc3Controller startAnimation];
+	[CCDirector.sharedDirector startAnimation];
 }
 
 -(void)applicationWillTerminate: (UIApplication*) application {
-	[_mainViewController.cc3Controller terminateOpenGL];
+	[CC3OpenGL terminateOpenGL];
 }
 
 -(void) applicationSignificantTimeChange: (UIApplication*) application {

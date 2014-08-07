@@ -95,7 +95,7 @@
 -(id) autoreleasedCopy;
 
 /** @deprecated Renamed to autoreleasedCopy to satisfy naming paradigm for copy... methods. */
--(id) copyAutoreleased DEPRECATED_ATTRIBUTE;
+-(id) copyAutoreleased __deprecated;
 
 @end
 
@@ -186,6 +186,40 @@
  * newline character. Each line in the returned array is terminated by the newline character.
  */
 @property(nonatomic, readonly) NSArray* terminatedLines;
+
+@end
+
+
+#pragma mark -
+#pragma mark NSBundle extensions
+
+/** Extension category to support cocos3d functionality. */
+@interface NSBundle (CC3)
+
+/**
+ * Returns a string representing the path to the Cocos3D resource bundle, 
+ * relative to the main application bundle resources directory.
+ *
+ * The initial value of this property is @"Cocos3DResources.bundle".
+ */
++(NSString*) cocos3dResourcesBundlePath;
+
+/**
+ * Sets a string representing the path to the Cocos3D resource bundle,
+ * relative to the main application bundle resources directory.
+ *
+ * The initial value of this property is @"Cocos3DResources.bundle".
+ */
++(void) setCocos3dResourcesBundlePath: (NSString*) bundlePath;
+
+/** 
+ * Returns the bundle containing the resources for the Cocos3D static library,
+ * including the default GLSL shader code files.
+ *
+ * The location of this bundle is specified by the class-side
+ * cocos3dResourceBundlePath property.
+ */
++(NSBundle*) cocos3dResourcesBundle;
 
 @end
 

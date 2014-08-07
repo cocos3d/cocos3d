@@ -39,8 +39,8 @@
 -(void) initPlatformLimits;
 -(void) initVertexAttributes;
 -(void) initTextureUnits;
--(void) align3DStateCache;
--(void) align3DVertexAttributeState;
+-(void) align3DStateCacheWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+-(void) align3DVertexAttributeStateWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 @end
 
 @implementation CC3OpenGLFixedPipeline
@@ -94,11 +94,12 @@
 		[self bindVertexArray: mesh.vertexBitangents withVisitor: visitor];
 		[self bindVertexArray: mesh.vertexColors withVisitor: visitor];
 		
+		[visitor resetTextureUnits];
 		GLuint tuCnt = visitor.textureCount;
 		for (GLuint tuIdx = 0; tuIdx < tuCnt; tuIdx++) {
-			visitor.current2DTextureUnit = tuIdx;
 			[self bindVertexArray: [mesh textureCoordinatesForTextureUnit: tuIdx]
 					  withVisitor: visitor];
+			[visitor increment2DTextureUnit];
 		}
 	}
 	
@@ -194,8 +195,8 @@
 }
 
 // Mark position, color & first tex coords as unknown
--(void) align3DVertexAttributeState {
-	[super align3DVertexAttributeState];
+-(void) align3DVertexAttributeStateWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[super align3DVertexAttributeStateWithVisitor: visitor];
 
 	for (GLuint vaIdx = 0; vaIdx < value_MaxVertexAttribsUsed; vaIdx++) {
 		CC3VertexAttr* vaPtr = &vertexAttributes[vaIdx];
@@ -530,7 +531,7 @@
 	LogGLErrorTrace(@"glMatrixMode(%@)", NSStringFromGLEnum(mode));
 }
 
--(void) loadModelviewMatrix: (CC3Matrix4x3*) mtx {
+-(void) loadModelviewMatrix: (const CC3Matrix4x3*) mtx {
 	if ( !self.isRenderingContext ) return;
 	
 	[self activateMatrixStack: GL_MODELVIEW];
@@ -540,7 +541,7 @@
 	LogGLErrorTrace(@"glLoadMatrixf(%@)", NSStringFromCC3Matrix4x4(&glMtx));
 }
 
--(void) loadProjectionMatrix: (CC3Matrix4x4*) mtx {
+-(void) loadProjectionMatrix: (const CC3Matrix4x4*) mtx {
 	if ( !self.isRenderingContext ) return;
 	
 	[self activateMatrixStack: GL_PROJECTION];
@@ -548,7 +549,7 @@
 	LogGLErrorTrace(@"glLoadMatrixf(%@)", NSStringFromCC3Matrix4x4(mtx));
 }
 
--(void) loadPaletteMatrix: (CC3Matrix4x3*) mtx at: (GLuint) pmIdx {
+-(void) loadPaletteMatrix: (const CC3Matrix4x3*) mtx at: (GLuint) pmIdx {
 	if ( !self.isRenderingContext ) return;
 	
 	[self activatePaletteMatrixStack: pmIdx];
@@ -624,8 +625,8 @@
 
 #pragma mark Aligning 2D & 3D state
 
--(void) align3DStateCache {
-	[super align3DStateCache];
+-(void) align3DStateCacheWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[super align3DStateCacheWithVisitor: visitor];
 	
 	isKnownCap_GL_LIGHT = NO;
 	isKnown_GL_CURRENT_COLOR = NO;

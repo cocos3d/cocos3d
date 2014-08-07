@@ -34,6 +34,7 @@
 #import "CC3MeshNode.h"
 #import "CC3Material.h"
 #import "CC3Light.h"
+#import "CC3EnvironmentNodes.h"
 #import "CC3Billboard.h"
 #import "CC3ShadowVolumes.h"
 #import "CC3AffineMatrix.h"
@@ -41,6 +42,9 @@
 #import "CGPointExtension.h"
 #import "ccMacros.h"
 
+#if CC3_CC2_RENDER_QUEUE
+#	import "CCRenderer_private.h"
+#endif	// CC3_CC2_RENDER_QUEUE
 
 #pragma mark -
 #pragma mark CC3Scene
@@ -52,15 +56,17 @@
 
 @implementation CC3Scene
 
-@synthesize cc3Layer=_cc3Layer, ambientLight=_ambientLight, touchedNodePicker=_touchedNodePicker;
+@synthesize ambientLight=_ambientLight, touchedNodePicker=_touchedNodePicker;
 @synthesize minUpdateInterval=_minUpdateInterval, maxUpdateInterval=_maxUpdateInterval;
 @synthesize drawingSequenceVisitor=_drawingSequenceVisitor;
 @synthesize viewDrawingVisitor=_viewDrawingVisitor, shadowVisitor=_shadowVisitor;
 @synthesize envMapDrawingVisitor=_envMapDrawingVisitor;
 @synthesize updateVisitor=_updateVisitor;
 @synthesize performanceStatistics=_performanceStatistics;
-@synthesize deltaFrameTime=_deltaFrameTime, backdrop=_backdrop, fog=_fog, lights=_lights;
+@synthesize deltaFrameTime=_deltaFrameTime, backdrop=_backdrop, fog=_fog;
+@synthesize lights=_lights, lightProbes=_lightProbes;
 @synthesize elapsedTimeSinceOpened=_elapsedTimeSinceOpened;
+@synthesize shouldDisplayPickingRender=_shouldDisplayPickingRender;
 
 /**
  * Descendant nodes will be removed by superclass. Their removal may invoke
@@ -70,7 +76,7 @@
 -(void) dealloc {
 	LogInfo(@"Deallocating %@ on thread %@", self, NSThread.currentThread);
 	
-	self.cc3Layer = nil;					// Use setter to make nil
+	self.deprecatedCC3Layer = nil;			// Use setter to make nil
 	self.backdrop = nil;					// Use setter to stop any actions
 	self.fog = nil;							// Use setter to stop any actions
 	self.activeCamera = nil;				// Use setter to release and make nil
@@ -85,6 +91,8 @@
 	
 	[_lights release];
 	_lights = nil;							// Make nil so won't be referenced during parent dealloc
+	[_lightProbes release];
+	_lightProbes = nil;						// Make nil so won't be referenced during parent dealloc
 	[_billboards release];
 	_billboards = nil;						// Make nil so won't be referenced during parent dealloc
 	
@@ -92,6 +100,11 @@
 }
 
 -(BOOL) isScene { return YES; }
+
+// Deprecated
+-(CC3Layer*) cc3Layer { return _cc3Layer; }
+-(void) setCc3Layer:(CC3Layer *)cc3Layer { self.deprecatedCC3Layer = cc3Layer; }
+-(void) setDeprecatedCC3Layer: (CC3Layer*) cc3Layer { _cc3Layer = cc3Layer; }	// Not retained
 
 -(CC3ViewController*) controller { return _cc3Layer.controller; }
 
@@ -193,9 +206,12 @@
 
 #pragma mark Allocation and initialization
 
+-(id) init { return [self initWithName: NSStringFromClass(self.class)]; }
+
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
 		_lights = [NSMutableArray new];			// retained
+		_lightProbes = [NSMutableArray new];	// retained
 		_billboards = [NSMutableArray new];		// retained
 		self.drawingSequenceVisitor = [CC3NodeSequencerVisitor visitorWithScene: self];
 		self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirst];
@@ -238,7 +254,7 @@
 -(void) populateFrom: (CC3Scene*) another {
 	[super populateFrom: another];
 	
-	// Lights, targetting nodes, billboards & drawing sequence collections,
+	// Lights, light probes, billboards & drawing sequence collections,
 	// plus activeCamera will be populated as children are added.
 	// No need to configure node picker.
 	
@@ -267,9 +283,15 @@
 -(void) open {
 	_timeAtOpen = NSDate.timeIntervalSinceReferenceDate;
 	_elapsedTimeSinceOpened = 0;
+	
 	[self play];
 	[self updateScene];
+
+	// Establish 3D environment, run scene open behaviour, then tear 3D environment down.
+	CC3NodeDrawingVisitor* visitor = self.viewDrawingVisitor;
+	[self open3DWithVisitor: visitor];
 	[self onOpen];
+	[self close3DWithVisitor: visitor];
 }
 
 -(void) onOpen {}
@@ -341,7 +363,7 @@
  */
 -(void) updateBillboards: (CCTime) dt {
 	for (CC3Billboard* bb in _billboards) [bb alignToCamera: _activeCamera];
-	LogTrace(@"%@ updated %u billboards", self, _billboards.count);
+	LogTrace(@"%@ updated %lu billboards", self, (unsigned long)_billboards.count);
 }
 
 /**
@@ -352,16 +374,10 @@
  * returns CC3NodeUpdatingVisitor. Subclasses may override the visitor class to
  * customize the behaviour during update visits.
  */
--(id) updateVisitorClass { return [CC3NodeUpdatingVisitor class]; }
+-(Class) updateVisitorClass { return [CC3NodeUpdatingVisitor class]; }
 
 
 #pragma mark Drawing
-
--(CC3GLViewSurfaceManager*) viewSurfaceManager { return self.controller.view.surfaceManager; }
-
--(id<CC3RenderSurface>) viewSurface { return self.viewSurfaceManager.renderingSurface; }
-
--(id<CC3RenderSurface>) pickingSurface { return self.viewSurfaceManager.pickingSurface; }
 
 -(void) drawScene { [self drawSceneWithVisitor: self.viewDrawingVisitor]; }
 	
@@ -376,7 +392,7 @@
 
 	[self open3DWithVisitor: visitor];
 	
-	[_touchedNodePicker pickTouchedNode];
+	[_touchedNodePicker pickTouchedNodeWithVisitor: visitor];
 	
 	if (!_shouldDisplayPickingRender) [self drawSceneContentWithVisitor: visitor];
 
@@ -405,7 +421,6 @@
 }
 
 -(void) drawBackdropWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	if (self.controller.isOverlayingDeviceCamera) return;
 	[visitor visit: self.backdrop];
 }
 
@@ -420,7 +435,7 @@
 
 -(void) open3DWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"%@ opening the 3D scene", self);
-	[visitor.gl alignFor3DDrawing];
+	[visitor.gl alignFor3DDrawingWithVisitor: visitor];
 }
 
 -(void) close3DWithVisitor: (CC3NodeDrawingVisitor*) visitor {
@@ -429,7 +444,7 @@
 	CC3OpenGL* gl = visitor.gl;
 	
 	// Setup drawing configuration for cocos2d
-	[gl alignFor2DDrawing];
+	[gl alignFor2DDrawingWithVisitor: visitor];
 
 	// Re-align culling as expected by cocos2d
 	[gl enableCullFace: NO];
@@ -437,7 +452,9 @@
 	gl.frontFace = GL_CCW;
 
 	// Make sure the drawing surface is set back to the view surface
-	[self.viewSurface activate];
+	id<CC3RenderSurface> viewSurface = CC3ViewSurfaceManager.sharedViewSurfaceManager.renderingSurface;
+	[viewSurface activate];
+	[((CC3GLRenderbuffer*)viewSurface.colorAttachment) bind];
 
 	// Set depth testing to 2D values, and close depth testing,
 	// either by turning it off, or clearing the depth buffer
@@ -450,7 +467,7 @@
 	gl.viewport = CC3ViewportMake(0, 0, viewSize.width, viewSize.height);
 	[gl enableScissorTest: NO];
 
-	// Disable lights and fog. Done outside alignFor2DDrawing: because they apply to billboards
+	// Disable lights and fog. Done outside alignFor2DDrawingWithVisitor because they apply to billboards
 	[gl enableLighting: NO];
 	[gl enableTwoSidedLighting: NO];
 	for (CC3Light* lgt in _lights) [lgt turnOffWithVisitor: visitor];
@@ -523,10 +540,19 @@
  * This is invoked after close3D, so the drawing of billboards occurs in 2D.
  */
 -(void) draw2DBillboardsWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	LogTrace(@"%@ drawing %i billboards", self, _billboards.count);
+	if (_billboards.count == 0) return;
+	
+	LogTrace(@"%@ drawing %lu billboards", self, (unsigned long)_billboards.count);
 	CC3Viewport vp = self.activeCamera.viewport;
 	CGRect localBounds = CGRectMake(0.0f, 0.0f, vp.w, vp.h);
-	for (CC3Billboard* bb in _billboards) [bb draw2dWithinBounds: localBounds];
+
+	CCRenderer* renderer = visitor.billboardCCRenderer;
+	[renderer invalidateState];
+	
+	for (CC3Billboard* bb in _billboards)
+		[bb draw2dWithinBounds: localBounds withRenderer: renderer withVisitor: visitor];
+	
+	[renderer flush];
 }
 
 -(id) viewDrawVisitorClass { return [CC3NodeDrawingVisitor class]; }
@@ -609,6 +635,9 @@
 		// If the node is a light, add it to the collection of lights
 		if (addedNode.isLight) [_lights addObject: addedNode];
 		
+		// If the node is a light probe, add it to the collection of light probes
+		if (addedNode.isLightProbe) [_lightProbes addObject: addedNode];
+		
 		// if the node is the first camera to be added, make it the active camera.
 		if (addedNode.isCamera && !_activeCamera) self.activeCamera = (CC3Camera*)addedNode;
 		
@@ -639,6 +668,9 @@
 		
 		// If the node is a light, remove it from the collection of lights
 		if (removedNode.isLight) [_lights removeObjectIdenticalTo: removedNode];
+		
+		// If the node is a light probe, remove it from the collection of light probes
+		if (removedNode.isLightProbe) [_lightProbes removeObjectIdenticalTo: removedNode];
 		
 		// If the node is a billboard, remove it from the collection of billboards
 		if (removedNode.isBillboard) [_billboards removeObjectIdenticalTo: removedNode];
@@ -687,16 +719,14 @@
 /** Default does nothing. Subclasses that handle touch events will override. */
 -(void) nodeSelected: (CC3Node*) aNode byTouchEvent: (uint) touchType at: (CGPoint) touchPoint {}
 
--(id) pickVisitorClass { return [CC3NodePickingVisitor class]; }
+-(Class) pickVisitorClass { return [CC3NodePickingVisitor class]; }
 
--(BOOL) shouldDisplayPickingRender { return _shouldDisplayPickingRender; }
 
--(void) setShouldDisplayPickingRender: (BOOL) shouldDisplayPickingRender {
-	CC3Assert( !(shouldDisplayPickingRender && self.viewSurfaceManager.shouldUseDedicatedPickingSurface),
-			  @"The node picking render surface is not visible to the view. Ensure multisampling is disabled,"
-			  @" and the shouldUseDedicatedPickingSurface property in the viewSurfaceManager is set to NO.");
-	_shouldDisplayPickingRender = shouldDisplayPickingRender;
-}
+#pragma mark Deprecated
+
+-(CC3ViewSurfaceManager*) viewSurfaceManager { return CC3ViewSurfaceManager.sharedViewSurfaceManager; }
+-(id<CC3RenderSurface>) viewSurface { return self.cc3Layer.surfaceManager.viewSurface; }
+-(id<CC3RenderSurface>) pickingSurface { return self.cc3Layer.surfaceManager.pickingSurface; }
 
 @end
 
@@ -737,13 +767,14 @@
 			 NSStringFromCGPoint(_touchPoint), _queuedTouchCount);
 }
 
--(void) pickTouchedNode {
+-(void) pickTouchedNodeWithVisitor: (CC3NodeDrawingVisitor*) visitor; {
 	if ( !(_wasTouched || _scene.shouldDisplayPickingRender) ) return;
 	
 	_wasPicked = _wasTouched;
 	_wasTouched = NO;
 	
 	// Draw the scene for node picking. Don't bother drawing the backdrop.
+	[_pickVisitor alignShotWith: visitor];
 	[_pickVisitor visit: _scene];
 	
 	self.pickedNode = _pickVisitor.pickedNode;
@@ -764,9 +795,9 @@
 	}
 
 	for (int i = 0; i < touchCount; i++) {
-		LogTrace(@"%@ dispatching %@ with picked node %@ at %@ GL %@ touched node %@",
+		LogTrace(@"%@ dispatching %@ with picked node %@ at %@ touched node %@",
 				 self, NSStringFromTouchType(_touchQueue[i]), _pickedNode.touchableNode,
-				 NSStringFromCGPoint(_touchPoint), NSStringFromCGPoint(self.glTouchPoint), _pickedNode);
+				 NSStringFromCGPoint(_touchPoint), _pickedNode);
 		[_scene nodeSelected: _pickedNode.touchableNode byTouchEvent: _touchQueue[i] at: _touchPoint];
 	}
 	

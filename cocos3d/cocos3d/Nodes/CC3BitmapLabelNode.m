@@ -674,7 +674,7 @@ typedef struct {
 		if (widthAdj) {
 			GLuint startVtxIdx = (i > 0) ? (lineSpecs[i - 1].lastVertexIndex + 1) : 0;
 			GLuint endVtxIdx = lineSpecs[i].lastVertexIndex;
-			LogTrace(@"%@ adjusting line %i by %.3f (from line width %i in layout width %i) from vertex %i to %i",
+			LogTrace(@"%@ adjusting line %i by %.3f (from line width %.3f in layout width %.3f) from vertex %i to %i",
 					 self, i, widthAdj, lineSpecs[i].lineWidth, layoutSize.width, startVtxIdx, endVtxIdx);
 			for (vIdx = startVtxIdx; vIdx <= endVtxIdx; vIdx++) {
 				CC3Vector vtxLoc = [self vertexLocationAt: vIdx];

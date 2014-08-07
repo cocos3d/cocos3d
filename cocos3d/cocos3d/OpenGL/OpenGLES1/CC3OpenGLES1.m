@@ -104,6 +104,13 @@
 	[super bindTexture: texID toTarget: target at: tuIdx];
 }
 
+-(void) unbindTexturesExceptTarget: (GLenum) target at: (GLuint) tuIdx {}
+
+-(NSString*) dumpTextureBindingsAt: (GLuint) tuIdx {
+	return [NSString stringWithFormat: @"%@: %i",
+			NSStringFromGLEnum(GL_TEXTURE_2D), [self getInteger: GL_TEXTURE_BINDING_2D]];
+}
+
 /** Ensure target is GL_TEXTURE_2D. */
 -(void) loadTexureImage: (const GLvoid*) imageData
 			 intoTarget: (GLenum) target
@@ -202,12 +209,6 @@
 
 
 #pragma mark Allocation and initialization
-
--(CC3GLContext*) makeRenderingGLContext {
-	CC3GLContext* context = [[CC3GLContext alloc] initWithAPI: kEAGLRenderingAPIOpenGLES1 sharegroup: nil];
-	CC3Assert(context, @"Could not create CC3GLContext. OpenGL ES 1.1 is required.");
-	return [context autorelease];
-}
 
 -(void) initPlatformLimits {
 	[super initPlatformLimits];

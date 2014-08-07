@@ -296,6 +296,18 @@
 	return csn;
 }
 
++(id) nodeWithName: (NSString*) name withTexture: (CC3Texture*) texture {
+	CC3MeshNode* csn = [self nodeWithName: name withColor: kCCC4FWhite];
+	csn.texture = texture;
+	return csn;
+}
+
++(id) nodeWithName: (NSString*) name withColor: (ccColor4F) color {
+	CC3MeshNode* csn = [self nodeWithName: name];
+	csn.emissionColor = color;
+	return csn;
+}
+
 /** The camera frustum has no meaning in clip-space. */
 -(CC3NodeBoundingVolume*) defaultBoundingVolume { return nil; }
 

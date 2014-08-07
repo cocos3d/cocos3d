@@ -38,10 +38,17 @@
  * CC3Backgrounder performs activity on a background thread by submitting tasks to 
  * a Grand Central Dispatch (GCD) queue. In order to ensure that the GL engine is
  * presented activity in an defined order, CC3Backgrounder is a singleton.
+ *
+ * This core behaviour can be nulified by setting the shouldRunOnRequestingThread property
+ * to YES, which forces tasks submitted to this backgrounder to be run on the same thread
+ * from which the tasks are queued. This behaviour can be useful when loading OpenGL objects
+ * that need to be subsequently deleted. It is important that OpenGL objects are deleted
+ * from the same thread on which they are loaded.
  */
 @interface CC3Backgrounder : NSObject {
 	dispatch_queue_t _taskQueue;
 	long _queuePriority;
+	BOOL _shouldRunTasksOnRequestingThread : 1;
 }
 
 /**
@@ -64,21 +71,41 @@
 #pragma mark Backgrounding tasks
 
 /** 
- * Runs the specified block of code by dispatching it to the global GCD queue identified
- * by the value of the queuePriority property.
+ * If the value of the shouldRunOnRequestingThread property is NO (the default), the specified
+ * block of code is dispatched to the global GCD queue identified by the value of the queuePriority
+ * property, and the current thread continues without waiting for the dispatched code to complete.
+ *
+ * If the value of the shouldRunOnRequestingThread property is YES, the specified block of code
+ * is run immediately on the current thread, and further thread activity waits until the specified
+ * block has completed.
  */
 -(void) runBlock: (void (^)(void))block;
 
 /**
- * Waits the specified number of seconds, then runs the specified block of code by dispatching
- * it to the global GCD queue identified by the value of the queuePriority property.
+ * Waits the specified number of seconds, then executes the specified block of code 
+ * either on a background thread, or the current thread, depending on the value of 
+ * the shouldRunOnRequestingThread property.
+ 
+ * If the value of the shouldRunOnRequestingThread property is NO (the default), the specified
+ * block of code is dispatched to the global GCD queue identified by the value of the queuePriority
+ * property. If the value of the shouldRunOnRequestingThread property is YES, the specified block
+ * of code is run on the current thread.
  */
 -(void) runBlock: (void (^)(void))block after: (NSTimeInterval) seconds;
+
+/**
+ * Indicates that tasks should be run on the same thread as the invocator of the task requests.
+ *
+ * The initial value of this property is NO, indicating that tasks will be dispatched to a 
+ * background thread for running. Set this property to YES to force tasks to run on the same
+ * thread as the request is made.
+ */
+@property(nonatomic, assign) BOOL shouldRunTasksOnRequestingThread;
 
 
 #pragma mark Allocation and initialization
 
 /** Returns the singleton backgrounder instance. */
-+(id) sharedBackgrounder;
++(CC3Backgrounder*) sharedBackgrounder;
 
 @end

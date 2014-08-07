@@ -131,10 +131,10 @@ typedef enum {
 	kCC3VertexContentBoneIndices		= 1 << 8,
 
 	/** @deprecated Renamed to kCC3VertexContentBoneWeights */
-	kCC3VertexContentWeights DEPRECATED_ATTRIBUTE		= kCC3VertexContentBoneWeights,
+	kCC3VertexContentWeights __deprecated		= kCC3VertexContentBoneWeights,
 
 	/** @deprecated Renamed to kCC3VertexContentBoneIndices */
-	kCC3VertexContentMatrixIndices DEPRECATED_ATTRIBUTE	= kCC3VertexContentBoneIndices
+	kCC3VertexContentMatrixIndices __deprecated	= kCC3VertexContentBoneIndices
 
 } CC3VertexContent;
 
@@ -722,7 +722,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
 -(BOOL) ensureVertexCapacity: (GLuint) vtxCount;
 
 /** @deprecated Renamed to ensureVertexCapacity. */
--(BOOL) ensureCapacity: (GLuint) vtxCount DEPRECATED_ATTRIBUTE;
+-(BOOL) ensureCapacity: (GLuint) vtxCount __deprecated;
 
 /**
  * A factor that is used to provide additional vertex capacity when increasing the
@@ -1376,10 +1376,10 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
 -(void) setVertexTexCoord2F: (ccTex2F) aTex2F at: (GLuint) index;
 
 /** @deprecated Use the vertexTexCoord2FForTextureUnit:at: method instead, */
--(ccTex2F) vertexTexCoord2FAt: (GLuint) index forTextureUnit: (GLuint) texUnit DEPRECATED_ATTRIBUTE;
+-(ccTex2F) vertexTexCoord2FAt: (GLuint) index forTextureUnit: (GLuint) texUnit __deprecated;
 
 /** @deprecated Use the setVertexTexCoord2F:forTextureUnit:at: method instead, */
--(void) setVertexTexCoord2F: (ccTex2F) aTex2F at: (GLuint) index forTextureUnit: (GLuint) texUnit DEPRECATED_ATTRIBUTE;
+-(void) setVertexTexCoord2F: (ccTex2F) aTex2F at: (GLuint) index forTextureUnit: (GLuint) texUnit __deprecated;
 
 /**
  * Returns the index element at the specified index from the vertex content.
@@ -1476,10 +1476,10 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
 -(GLuint) vertexIndexCountFromFaceCount: (GLuint) fc;
 
 /** @deprecated Renamed to faceCountFromVertexIndexCount:. */
--(GLuint) faceCountFromVertexCount: (GLuint) vc DEPRECATED_ATTRIBUTE;
+-(GLuint) faceCountFromVertexCount: (GLuint) vc __deprecated;
 
 /** @deprecated Renamed to vertexIndexCountFromFaceCount:. */
--(GLuint) vertexCountFromFaceCount: (GLuint) fc DEPRECATED_ATTRIBUTE;
+-(GLuint) vertexCountFromFaceCount: (GLuint) fc __deprecated;
 
 /**
  * Returns the face from the mesh at the specified index.
@@ -1658,7 +1658,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
 -(void) releaseRedundantContent;
 
 /** @deprecated Renamed to releaseRedundantContent. */
--(void) releaseRedundantData DEPRECATED_ATTRIBUTE;
+-(void) releaseRedundantData __deprecated;
 
 /**
  * Convenience method to cause all vertex content to be retained in application
@@ -2037,10 +2037,10 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
 -(void) moveMeshOriginToCenterOfGeometry;
 
 /** @deprecated Renamed to moveMeshOriginTo:. */
--(void) movePivotTo: (CC3Vector) aLocation DEPRECATED_ATTRIBUTE;
+-(void) movePivotTo: (CC3Vector) aLocation __deprecated;
 
 /** @deprecated Renamed to moveMeshOriginToCenterOfGeometry. */
--(void) movePivotToCenterOfGeometry DEPRECATED_ATTRIBUTE;
+-(void) movePivotToCenterOfGeometry __deprecated;
 
 
 #pragma mark CCRGBAProtocol and CCBlendProtocol support
@@ -2214,7 +2214,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * to indicate whether the texture  mesh is aligned with vertically-flipped textures
  * prior to setting the texture or material into your mesh node.
  */
--(void) alignWithTexturesIn: (CC3Material*) aMaterial DEPRECATED_ATTRIBUTE;
+-(void) alignWithTexturesIn: (CC3Material*) aMaterial __deprecated;
 
 /**
  * @deprecated The alignment performed by this method is now performed automatically
@@ -2223,7 +2223,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * to indicate whether the texture  mesh is aligned with vertically-flipped textures
  * prior to setting the texture or material into your mesh node.
  */
--(void) alignWithInvertedTexturesIn: (CC3Material*) aMaterial DEPRECATED_ATTRIBUTE;
+-(void) alignWithInvertedTexturesIn: (CC3Material*) aMaterial __deprecated;
 
 /**
  * Convenience method that flips the texture coordinate mapping vertically
@@ -2445,7 +2445,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
 	 withVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /** @deprecated No longer used. The bounding volume is now created in the same method in CC3MeshNode. */
--(CC3NodeBoundingVolume*) defaultBoundingVolume DEPRECATED_ATTRIBUTE;
+-(CC3NodeBoundingVolume*) defaultBoundingVolume __deprecated;
 
 
 #pragma mark Allocation and initialization
@@ -2472,66 +2472,66 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
 #pragma mark Deprecated methods
 
 /** *@deprecated Renamed to vertexBoneIndices. */
-@property(nonatomic,retain) CC3VertexBoneIndices* vertexMatrixIndices DEPRECATED_ATTRIBUTE;
+@property(nonatomic,retain) CC3VertexBoneIndices* vertexMatrixIndices __deprecated;
 
 /** *@deprecated Renamed to hasVertexBoneIndices. */
-@property(nonatomic, readonly) BOOL hasVertexMatrixIndices DEPRECATED_ATTRIBUTE;
+@property(nonatomic, readonly) BOOL hasVertexMatrixIndices __deprecated;
 
 /** *@deprecated Renamed to vertexBoneWeights. */
-@property(nonatomic,retain) CC3VertexBoneWeights* vertexWeights DEPRECATED_ATTRIBUTE;
+@property(nonatomic,retain) CC3VertexBoneWeights* vertexWeights __deprecated;
 
 /** *@deprecated Renamed to hasVertexBoneWeights. */
-@property(nonatomic, readonly) BOOL hasVertexWeights DEPRECATED_ATTRIBUTE;
+@property(nonatomic, readonly) BOOL hasVertexWeights __deprecated;
 
 /** *@deprecated Renamed to vertexBoneCount. */
-@property(nonatomic, readonly) GLuint vertexUnitCount DEPRECATED_ATTRIBUTE;
+@property(nonatomic, readonly) GLuint vertexUnitCount __deprecated;
 
 /** *@deprecated Renamed to vertexWeightForBoneInfluence:at:. */
--(GLfloat) vertexWeightForVertexUnit: (GLuint) vertexUnit at: (GLuint) index DEPRECATED_ATTRIBUTE;
+-(GLfloat) vertexWeightForVertexUnit: (GLuint) vertexUnit at: (GLuint) index __deprecated;
 
 /** *@deprecated Renamed to setVertexWeight:forBoneInfluence:at:. */
--(void) setVertexWeight: (GLfloat) aWeight forVertexUnit: (GLuint) vertexUnit at: (GLuint) index DEPRECATED_ATTRIBUTE;
+-(void) setVertexWeight: (GLfloat) aWeight forVertexUnit: (GLuint) vertexUnit at: (GLuint) index __deprecated;
 
 /** *@deprecated Renamed to vertexBoneWeightsAt:. */
--(GLfloat*) vertexWeightsAt: (GLuint) index DEPRECATED_ATTRIBUTE;
+-(GLfloat*) vertexWeightsAt: (GLuint) index __deprecated;
 
 /** *@deprecated Renamed to setVertexBoneWeights:at:. */
--(void) setVertexWeights: (GLfloat*) weights at: (GLuint) index DEPRECATED_ATTRIBUTE;
+-(void) setVertexWeights: (GLfloat*) weights at: (GLuint) index __deprecated;
 
 /** *@deprecated Renamed to vertexBoneIndexForBoneInfluence:at:. */
--(GLuint) vertexMatrixIndexForVertexUnit: (GLuint) vertexUnit at: (GLuint) index DEPRECATED_ATTRIBUTE;
+-(GLuint) vertexMatrixIndexForVertexUnit: (GLuint) vertexUnit at: (GLuint) index __deprecated;
 
 /** *@deprecated Renamed to setVertexBoneIndex:forBoneInfluence:at:. */
 -(void) setVertexMatrixIndex: (GLuint) aMatrixIndex
 			   forVertexUnit: (GLuint) vertexUnit
-						  at: (GLuint) index DEPRECATED_ATTRIBUTE;
+						  at: (GLuint) index __deprecated;
 
 /** *@deprecated Renamed to vertexBoneIndicesAt:. */
--(GLvoid*) vertexMatrixIndicesAt: (GLuint) index DEPRECATED_ATTRIBUTE;
+-(GLvoid*) vertexMatrixIndicesAt: (GLuint) index __deprecated;
 
 /** *@deprecated Renamed to setVertexBoneIndices:at:. */
--(void) setVertexMatrixIndices: (GLvoid*) mtxIndices at: (GLuint) index DEPRECATED_ATTRIBUTE;
+-(void) setVertexMatrixIndices: (GLvoid*) mtxIndices at: (GLuint) index __deprecated;
 
 /** *@deprecated Renamed to vertexBoneIndexType. */
-@property(nonatomic, readonly) GLenum matrixIndexType DEPRECATED_ATTRIBUTE;
+@property(nonatomic, readonly) GLenum matrixIndexType __deprecated;
 
 /** *@deprecated Renamed to updateVertexBoneWeightsGLBuffer. */
--(void) updateVertexWeightsGLBuffer DEPRECATED_ATTRIBUTE;
+-(void) updateVertexWeightsGLBuffer __deprecated;
 
 /** *@deprecated Renamed to updateVertexBoneIndicesGLBuffer. */
--(void) updateVertexMatrixIndicesGLBuffer DEPRECATED_ATTRIBUTE;
+-(void) updateVertexMatrixIndicesGLBuffer __deprecated;
 
 /** *@deprecated Renamed to retainVertexBoneWeights. */
--(void) retainVertexWeights DEPRECATED_ATTRIBUTE;
+-(void) retainVertexWeights __deprecated;
 
 /** *@deprecated Renamed to retainVertexBoneIndices. */
--(void) retainVertexMatrixIndices DEPRECATED_ATTRIBUTE;
+-(void) retainVertexMatrixIndices __deprecated;
 
 /** *@deprecated Renamed to doNotBufferVertexBoneWeights. */
--(void) doNotBufferVertexWeights DEPRECATED_ATTRIBUTE;
+-(void) doNotBufferVertexWeights __deprecated;
 
 /** *@deprecated Renamed to doNotBufferVertexBoneIndices. */
--(void) doNotBufferVertexMatrixIndices DEPRECATED_ATTRIBUTE;
+-(void) doNotBufferVertexMatrixIndices __deprecated;
 
 @end
 

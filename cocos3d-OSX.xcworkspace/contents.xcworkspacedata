@@ -11,7 +11,10 @@
       location = "group:Projects/cocos2d-library/cocos2d-library-OSX.xcodeproj">
    </FileRef>
    <FileRef
-      location = "group:README.md">
+      location = "group:Projects/cocos2d-library/cocos2d-chipmunk-library-OSX.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:README!.md">
    </FileRef>
    <FileRef
       location = "group:CHANGELOG">

@@ -69,7 +69,7 @@
  * Override the updateBeforeTransform: method, invoke the superclass implementation, and then
  * test the isAlive property of this particle before any further modifications.
  */
--(void) updateLife: (CCTime) dt DEPRECATED_ATTRIBUTE;
+-(void) updateLife: (CCTime) dt __deprecated;
 
 @end
 
@@ -95,7 +95,7 @@
 
 @end
 
-DEPRECATED_ATTRIBUTE
+__deprecated
 /**
  * @deprecated This functionality has been separated into several more general classes. Use a
  * CC3PointParticleEmitter configured with a CC3RandomMortalParticleNavigator to emit particles
@@ -131,7 +131,7 @@ DEPRECATED_ATTRIBUTE
 
 @end
 
-DEPRECATED_ATTRIBUTE
+__deprecated
 /**
  * Deprecated and renamed to CC3SprayPointParticle.
  * @deprecated Renamed to CC3SprayPointParticle to clarify its type.
@@ -210,7 +210,7 @@ DEPRECATED_ATTRIBUTE
 
 @end
 
-DEPRECATED_ATTRIBUTE
+__deprecated
 /** 
  * Deprecated and renamed to CC3UniformlyEvolvingPointParticle.
  * @deprecated Renamed to CC3UniformlyEvolvingPointParticle to clarify its type.
@@ -450,7 +450,7 @@ static const ccColor4F kCC3ParticleFadeOut = { kCC3ParticleConstantComponent,
 
 @end
 
-DEPRECATED_ATTRIBUTE
+__deprecated
 /**
  * Deprecated.
  * @deprecated This functionality has been separated into several more general classes.

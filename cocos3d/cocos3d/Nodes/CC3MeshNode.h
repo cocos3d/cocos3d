@@ -93,12 +93,14 @@
 	CC3Mesh* _mesh;
 	CC3Material* _material;
 	CC3ShaderContext* _shaderContext;
+	char* _renderStreamGroupMarker;
 	GLenum _depthFunction;
 	GLfloat _decalOffsetFactor;
 	GLfloat _decalOffsetUnits;
 	GLfloat _lineWidth;
 	GLenum _lineSmoothingHint;
 	CC3NormalScaling _normalScalingMethod : 4;
+	BOOL _shouldUseLightProbes : 1;
 	BOOL _shouldSmoothLines : 1;
 	BOOL _shouldDisableDepthMask : 1;
 	BOOL _shouldDisableDepthTest : 1;
@@ -124,7 +126,7 @@
 @property(nonatomic, retain) CC3Mesh* mesh;
 
 /** @deprecated CC3MeshModel renamed to CC3Mesh. Use mesh property instead. */
-@property(nonatomic, retain) CC3Mesh* meshModel DEPRECATED_ATTRIBUTE;
+@property(nonatomic, retain) CC3Mesh* meshModel __deprecated;
 
 /**
  * If a mesh does not yet exist, this method invokes the makeMesh method to create
@@ -179,12 +181,11 @@
 @property(nonatomic, retain) CC3Material* material;
 
 /** @deprecated Use the emissionColor property instead. */
-@property(nonatomic, assign) ccColor4F pureColor DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) ccColor4F pureColor __deprecated;
 
 /**
- * If this value is set to YES, current lighting conditions will be taken into consideration
- * when drawing colors and textures, and the ambientColor, diffuseColor, specularColor,
- * emissionColor, and shininess properties will have effect.
+ * If this value is set to YES, current lighting conditions (from either lights or light probes)
+ * will be taken into consideration when drawing colors and textures.
  *
  * If this value is set to NO, lighting conditions will be ignored when drawing colors and
  * textures, and the emissionColor will be applied to the mesh surface, without regard to
@@ -204,6 +205,19 @@
  * The initial value of this property is YES.
  */
 @property(nonatomic, assign) BOOL shouldUseLighting;
+
+/**
+ * If this value is set to YES, this mesh node will ignore the lights in the scene and will, instead,
+ * determine the lighting of the mesh node using textures held by light probes in the scene.
+ *
+ * This property only has effect if the shouldUseLighting property is set to YES.
+ *
+ * The initial value of this property is NO.
+ *
+ * See the notes of the CC3LightProbe class to learn more about using light probes to
+ * illuminate models within the scene.
+ */
+@property(nonatomic, assign) BOOL shouldUseLightProbes;
 
 /**
  * The ambient color of the material of this mesh node.
@@ -273,7 +287,7 @@
 @property(nonatomic, assign) GLfloat reflectivity;
 
 /** @deprecated The material property now performs this functionality lazily. */
--(CC3Material*) ensureMaterial DEPRECATED_ATTRIBUTE;
+-(CC3Material*) ensureMaterial __deprecated;
 
 /**
  * Creates and returns a suitable material for this mesh node.
@@ -384,7 +398,7 @@
 -(void) removeLocalShaders;
 
 /** @deprecated Renamed to removeLocalShaders. */
--(void) clearShaderProgram DEPRECATED_ATTRIBUTE;
+-(void) clearShaderProgram __deprecated;
 
 
 #pragma mark CCRGBAProtocol and CCBlendProtocol support
@@ -874,7 +888,7 @@
 @property(nonatomic, readonly) BOOL hasTexturePremultipliedAlpha;
 
 /** @deprecated Renamed to hasTexturePremultipliedAlpha. */
-@property(nonatomic, readonly) BOOL hasPremultipliedAlpha DEPRECATED_ATTRIBUTE;
+@property(nonatomic, readonly) BOOL hasPremultipliedAlpha __deprecated;
 
 /**
  * Returns whether the opacity of each of the material colors (ambient, diffuse, specular and emission)
@@ -1024,10 +1038,10 @@
 -(void) moveMeshOriginToCenterOfGeometry;
 
 /** @deprecated Renamed to moveMeshOriginTo:. */
--(void) movePivotTo: (CC3Vector) aLocation DEPRECATED_ATTRIBUTE;
+-(void) movePivotTo: (CC3Vector) aLocation __deprecated;
 
 /** @deprecated Renamed to moveMeshOriginToCenterOfGeometry. */
--(void) movePivotToCenterOfGeometry DEPRECATED_ATTRIBUTE;
+-(void) movePivotToCenterOfGeometry __deprecated;
 
 /**
  * Indicates the number of vertices in this mesh.
@@ -1536,10 +1550,10 @@
 -(void) setVertexTexCoord2F: (ccTex2F) aTex2F at: (GLuint) index;
 
 /** @deprecated Use the vertexTexCoord2FForTextureUnit:at: method instead, */
--(ccTex2F) vertexTexCoord2FAt: (GLuint) index forTextureUnit: (GLuint) texUnit DEPRECATED_ATTRIBUTE;
+-(ccTex2F) vertexTexCoord2FAt: (GLuint) index forTextureUnit: (GLuint) texUnit __deprecated;
 
 /** @deprecated Use the setVertexTexCoord2F:forTextureUnit:at: method instead, */
--(void) setVertexTexCoord2F: (ccTex2F) aTex2F at: (GLuint) index forTextureUnit: (GLuint) texUnit DEPRECATED_ATTRIBUTE;
+-(void) setVertexTexCoord2F: (ccTex2F) aTex2F at: (GLuint) index forTextureUnit: (GLuint) texUnit __deprecated;
 
 /**
  * Returns the index element at the specified index from the vertex content.
@@ -1664,10 +1678,10 @@
 -(GLuint) vertexIndexCountFromFaceCount: (GLuint) fc;
 
 /** @deprecated Renamed to faceCountFromVertexIndexCount:. */
--(GLuint) faceCountFromVertexCount: (GLuint) vc DEPRECATED_ATTRIBUTE;
+-(GLuint) faceCountFromVertexCount: (GLuint) vc __deprecated;
 
 /** @deprecated Renamed to vertexIndexCountFromFaceCount:. */
--(GLuint) vertexCountFromFaceCount: (GLuint) fc DEPRECATED_ATTRIBUTE;
+-(GLuint) vertexCountFromFaceCount: (GLuint) fc __deprecated;
 
 /**
  * Returns the face from the mesh at the specified index.
@@ -1846,42 +1860,42 @@ globalIntersections: (CC3MeshIntersection*) intersections
 #pragma mark Deprecated methods
 
 /** *@deprecated Renamed to vertexBoneCount. */
-@property(nonatomic, readonly) GLuint vertexUnitCount DEPRECATED_ATTRIBUTE;
+@property(nonatomic, readonly) GLuint vertexUnitCount __deprecated;
 
 /** *@deprecated Renamed to vertexWeightForBoneInfluence:at:. */
--(GLfloat) vertexWeightForVertexUnit: (GLuint) vertexUnit at: (GLuint) index DEPRECATED_ATTRIBUTE;
+-(GLfloat) vertexWeightForVertexUnit: (GLuint) vertexUnit at: (GLuint) index __deprecated;
 
 /** *@deprecated Renamed to setVertexWeight:forBoneInfluence:at:. */
--(void) setVertexWeight: (GLfloat) aWeight forVertexUnit: (GLuint) vertexUnit at: (GLuint) index DEPRECATED_ATTRIBUTE;
+-(void) setVertexWeight: (GLfloat) aWeight forVertexUnit: (GLuint) vertexUnit at: (GLuint) index __deprecated;
 
 /** *@deprecated Renamed to vertexBoneWeightsAt:. */
--(GLfloat*) vertexWeightsAt: (GLuint) index DEPRECATED_ATTRIBUTE;
+-(GLfloat*) vertexWeightsAt: (GLuint) index __deprecated;
 
 /** *@deprecated Renamed to setVertexBoneWeights:at:. */
--(void) setVertexWeights: (GLfloat*) weights at: (GLuint) index DEPRECATED_ATTRIBUTE;
+-(void) setVertexWeights: (GLfloat*) weights at: (GLuint) index __deprecated;
 
 /** *@deprecated Renamed to vertexBoneIndexForBoneInfluence:at:. */
--(GLuint) vertexMatrixIndexForVertexUnit: (GLuint) vertexUnit at: (GLuint) index DEPRECATED_ATTRIBUTE;
+-(GLuint) vertexMatrixIndexForVertexUnit: (GLuint) vertexUnit at: (GLuint) index __deprecated;
 
 /** *@deprecated Renamed to setVertexBoneIndex:forBoneInfluence:at:. */
 -(void) setVertexMatrixIndex: (GLuint) aMatrixIndex
 			   forVertexUnit: (GLuint) vertexUnit
-						  at: (GLuint) index DEPRECATED_ATTRIBUTE;
+						  at: (GLuint) index __deprecated;
 
 /** *@deprecated Renamed to vertexBoneIndicesAt:. */
--(GLvoid*) vertexMatrixIndicesAt: (GLuint) index DEPRECATED_ATTRIBUTE;
+-(GLvoid*) vertexMatrixIndicesAt: (GLuint) index __deprecated;
 
 /** *@deprecated Renamed to setVertexBoneIndices:at:. */
--(void) setVertexMatrixIndices: (GLvoid*) mtxIndices at: (GLuint) index DEPRECATED_ATTRIBUTE;
+-(void) setVertexMatrixIndices: (GLvoid*) mtxIndices at: (GLuint) index __deprecated;
 
 /** *@deprecated Renamed to vertexBoneIndexType. */
-@property(nonatomic, readonly) GLenum matrixIndexType DEPRECATED_ATTRIBUTE;
+@property(nonatomic, readonly) GLenum matrixIndexType __deprecated;
 
 /** *@deprecated Renamed to updateVertexBoneWeightsGLBuffer. */
--(void) updateVertexWeightsGLBuffer DEPRECATED_ATTRIBUTE;
+-(void) updateVertexWeightsGLBuffer __deprecated;
 
 /** *@deprecated Renamed to updateVertexBoneIndicesGLBuffer. */
--(void) updateVertexMatrixIndicesGLBuffer DEPRECATED_ATTRIBUTE;
+-(void) updateVertexMatrixIndicesGLBuffer __deprecated;
 
 @end
 

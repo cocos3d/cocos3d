@@ -118,10 +118,18 @@ static inline BOOL CC3IntPointsAreEqual(CC3IntPoint p1, CC3IntPoint p2) {
 			(p1.y == p2.y);
 }
 
+/** Returns whether the specified point is zero, as specified by kCC3IntPointZero. */
+static inline BOOL CC3IntPointIsZero(CC3IntPoint p) { return CC3IntPointsAreEqual(p, kCC3IntPointZero); }
+
+/** Returns a point representing the sum of the two specified points, by add their respective components. */
+static inline CC3IntPoint CC3IntPointAdd(CC3IntPoint p1, CC3IntPoint p2) {
+	return	CC3IntPointMake(p1.x + p2.x, p1.y + p2.y);
+}
+
 /** An integer 2D size. */
 typedef struct {
-	GLint width;			/**< The width measurement. */
-	GLint height;			/**< The height measurement. */
+	GLsizei width;			/**< The width measurement. */
+	GLsizei height;			/**< The height measurement. */
 } CC3IntSize;
 
 /** A CC3IntSize of zero extent. */
@@ -151,6 +159,9 @@ static inline BOOL CC3IntSizesAreEqual(CC3IntSize s1, CC3IntSize s2) {
 	return	(s1.width == s2.width) &&
 			(s1.height == s2.height);
 }
+
+/** Returns whether the specified size is zero, as specified by kCC3IntSizeZero. */
+static inline BOOL CC3IntSizeIsZero(CC3IntSize s) { return CC3IntSizesAreEqual(s, kCC3IntSizeZero); }
 
 /** A struct representing an integer tessellation. */
 typedef CC3IntPoint CC3Tessellation;
@@ -234,7 +245,20 @@ static inline BOOL CC3IntVector4sAreEqual(CC3IntVector4 v1, CC3IntVector4 v2) {
 #pragma mark -
 #pragma mark 3D cartesian vector structure and functions
 
-/** A vector in 3D space. */
+/** 
+ * A vector in 3D space. 
+ *
+ * Although CC3Vector has the same internal structure as GLKVector3, the structures may 
+ * have different byte alignment requirements. Avoid casting directly between GLKVector3 
+ * and CC3Vector, as this is not guaranteed to work reliably. Instead, use the functions
+ * CC3VectorFromGLKVector3 and GLKVector3FromCC3Vector to convert between the two structures.
+ *
+ * You can, however, reliably copy an array of GLKVector3s to an array of CC3Vectors, and 
+ * vice-versa, by simply using memcpy, or equivalent memory copying function. This is also 
+ * true of single CC3Vector and GLKVector3 structures. Copying is successful because the 
+ * array or pointer declarations will ensure the respective byte-alignment requirements, and
+ * since the internal structures are identical, the contents of the copy will be identical.
+ */
 typedef struct {
 	GLfloat x;			/**< The X-componenent of the vector. */
 	GLfloat y;			/**< The Y-componenent of the vector. */
@@ -296,6 +320,28 @@ static inline CC3Vector CC3VectorMake(GLfloat x, GLfloat y, GLfloat z) {
 
 /** Convenience alias macro to create CC3Vectors with less keystrokes. */
 #define cc3v(X,Y,Z) CC3VectorMake((X),(Y),(Z))
+
+/** 
+ * Returns a CC3Vector structure constructed from the specified GLKVector3 structure. 
+ *
+ * Although CC3Vector has the same internal structure as GLKVector3, the structures may 
+ * have different byte alignment requirements. Avoid casting directly between GLKVector3 
+ * and CC3Vector, as this is not guaranteed to work reliably.
+ */
+static inline CC3Vector CC3VectorFromGLKVector3(GLKVector3 glkv) {
+	return CC3VectorMake(glkv.v[0], glkv.v[1], glkv.v[2]);
+}
+
+/**
+ * Returns a GLKVector3 structure constructed from the specified CC3Vector structure.
+ *
+ * Although GLKVector3 has the same internal structure as CC3Vector, the structures may 
+ * have different byte alignment requirements. Avoid casting directly between CC3Vector 
+ * and GLKVector3, as this is not guaranteed to work reliably.
+ */
+static inline GLKVector3 GLKVector3FromCC3Vector(CC3Vector cc3v) {
+	return GLKVector3Make(cc3v.x, cc3v.y, cc3v.z);
+}
 
 /** Returns whether the two vectors are equal by comparing their respective components. */
 static inline BOOL CC3VectorsAreEqual(CC3Vector v1, CC3Vector v2) {
@@ -602,6 +648,20 @@ static inline CC3Vector CC3EnsureMinScaleVector(CC3Vector scale) {
  *
  * This structure can be referenced as containing 4 individual XYZW axes components, 
  * or containing a 3D XYZ vector, plus a W component.
+ *
+ * Although CC3Vector4 and CC3Quaternion have the same internal structure as GLKVector4 and
+ * GLKQuaternion, the structures may have different byte alignment requirements. Avoid casting
+ * directly between GLKVector4 and CC3Vector4, or GLKQuaternion and CC3Quaternion, as this is
+ * not guaranteed to work reliably. Instead, use the functions CC3Vector4FromGLKVector4,
+ * GLKVector4FromCC3Vector4, CC3QuaternionFromGLKQuaternion, and GLKQuaternionFromCC3Quaternion
+ * to convert between the two structures.
+ *
+ * You can, however, reliably copy an array of GLKVector4s or GLKQuaternions to an array of 
+ * CC3Vector4s or CC3Quaternions, and vice-versa, by simply using memcpy, or equivalent memory
+ * copying function. This is also true of single CC3Vector4, CC3Quaternion, GLKVector4 and 
+ * GLKQuaterion structures. Copying is successful because the array or pointer declarations 
+ * will ensure the respective byte-alignment requirements, and since the internal structures
+ * are identical, the contents of the copy will be identical.
  */
 typedef struct {
 	union {
@@ -668,8 +728,30 @@ static inline CC3Vector4 CC3Vector4FromDirection(CC3Vector aDirection) {
 	return CC3Vector4FromCC3Vector(aDirection, 0.0f);
 }
 
+/**
+ * Returns a CC3Vector4 structure constructed from the specified GLKVector4 structure.
+ *
+ * Although CC3Vector4 has the same internal structure as GLKVector4, the structures may
+ * have different byte alignment requirements. Avoid casting directly between GLKVector4
+ * and CC3Vector4, as this is not guaranteed to work reliably.
+ */
+static inline CC3Vector4 CC3Vector4FromGLKVector4(GLKVector4 glkv) {
+	return CC3Vector4Make(glkv.v[0], glkv.v[1], glkv.v[2], glkv.v[3]);
+}
+
+/**
+ * Returns a GLKVector4 structure constructed from the specified CC3Vector4 structure.
+ *
+ * Although GLKVector4 has the same internal structure as CC3Vector4, the structures may
+ * have different byte alignment requirements. Avoid casting directly between CC3Vector4
+ * and GLKVector4, as this is not guaranteed to work reliably.
+ */
+static inline GLKVector4 GLKVector4FromCC3Vector4(CC3Vector4 cc3v) {
+	return GLKVector4Make(cc3v.x, cc3v.y, cc3v.z, cc3v.w);
+}
+
 /** @deprecated You can now use v.v instead. See the declaration of the CC3Vector4 structure. */
-CC3Vector CC3VectorFromTruncatedCC3Vector4(CC3Vector4 v) DEPRECATED_ATTRIBUTE;
+CC3Vector CC3VectorFromTruncatedCC3Vector4(CC3Vector4 v) __deprecated;
 
 /** Returns whether the two vectors are equal by comparing their respective components. */
 static inline BOOL CC3Vector4sAreEqual(CC3Vector4 v1, CC3Vector4 v2) {
@@ -802,7 +884,7 @@ static inline CC3Vector4 CC3Vector4Difference(CC3Vector4 minuend, CC3Vector4 sub
 static const CC3Quaternion kCC3QuaternionIdentity = { { {0.0, 0.0, 0.0} }, 1.0 };
 
 /** @deprecated Replaced by kCC3QuaternionIdentity. */
-static const CC3Vector4 kCC3Vector4QuaternionIdentity DEPRECATED_ATTRIBUTE = { { {0.0, 0.0, 0.0} }, 1.0 };
+static const CC3Vector4 kCC3Vector4QuaternionIdentity __deprecated = { { {0.0, 0.0, 0.0} }, 1.0 };
 
 /** A CC3Vector4 of zero length at the origin. */
 static const CC3Quaternion kCC3QuaternionZero = { { {0.0, 0.0, 0.0} }, 0.0 };
@@ -823,6 +905,28 @@ static inline CC3Quaternion CC3QuaternionFromCC3Vector(CC3Vector v, GLfloat w) {
 	return CC3Vector4FromCC3Vector(v, w);
 }
 
+/**
+ * Returns a CC3Quaternion structure constructed from the specified GLKQuaternion structure.
+ *
+ * Although CC3Quaternion has the same internal structure as GLKQuaternion, the structures may
+ * have different byte alignment requirements. Avoid casting directly between GLKQuaternion
+ * and CC3Quaternion, as this is not guaranteed to work reliably.
+ */
+static inline CC3Quaternion CC3QuaternionFromGLKQuaternion(GLKQuaternion glkq) {
+	return CC3QuaternionMake(glkq.q[0], glkq.q[1], glkq.q[2], glkq.q[3]);
+}
+
+/**
+ * Returns a GLKQuaternion structure constructed from the specified CC3Quaternion structure.
+ *
+ * Although GLKQuaternion has the same internal structure as CC3Quaternion, the structures may
+ * have different byte alignment requirements. Avoid casting directly between CC3Quaternion
+ * and GLKQuaternion, as this is not guaranteed to work reliably.
+ */
+static inline GLKQuaternion GLKQuaternionFromCC3Quaternion(CC3Quaternion cc3q) {
+	return GLKQuaternionMake(cc3q.x, cc3q.y, cc3q.z, cc3q.w);
+}
+
 /** Returns whether the two quaterions are equal by comparing their respective components. */
 static inline BOOL CC3QuaternionsAreEqual(CC3Quaternion q1, CC3Quaternion q2) {
 	return CC3Vector4sAreEqual(q1, q2);
@@ -835,7 +939,7 @@ static inline BOOL CC3QuaternionIsZero(CC3Quaternion q) { return CC3Vector4IsZer
 static inline BOOL CC3QuaternionIsNull(CC3Quaternion q) { return CC3Vector4IsNull(q); }
 
 /** @deprecated You can now use q.v instead. See the declaration of the CC3Quaterion/CC3Vector4 structure. */
-CC3Vector CC3VectorFromQuaternion(CC3Quaternion q) DEPRECATED_ATTRIBUTE;
+CC3Vector CC3VectorFromQuaternion(CC3Quaternion q) __deprecated;
 
 /** Returns a quaternion that is the negative of the specified quaterion in all dimensions, including W. */
 static inline CC3Quaternion CC3QuaternionNegate(CC3Quaternion q) { return CC3Vector4Negate(q); }
@@ -964,7 +1068,7 @@ CC3Vector CC3RotationFromQuaternion(CC3Quaternion aQuaternion);
 CC3Quaternion CC3QuaternionSlerp(CC3Quaternion q1, CC3Quaternion q2, GLfloat blendFactor);
 
 /** @deprecated Replaced by CC3QuaternionSlerp. */
-CC3Vector4 CC3Vector4Slerp(CC3Vector4 v1, CC3Vector4 v2, GLfloat blendFactor) DEPRECATED_ATTRIBUTE;
+CC3Vector4 CC3Vector4Slerp(CC3Vector4 v1, CC3Vector4 v2, GLfloat blendFactor) __deprecated;
 
 /**
  * Returns the specified vector rotated by the specified quaternion.
@@ -1083,7 +1187,7 @@ typedef struct {
 } CC3TexturedVertex;
 
 /** @deprecated Misspelling of CC3TexturedVertex. */
-typedef CC3TexturedVertex CCTexturedVertex DEPRECATED_ATTRIBUTE;
+typedef CC3TexturedVertex CCTexturedVertex __deprecated;
 
 /** Returns a string description of the specified textured vertex. */
 static inline NSString* NSStringFromCC3TexturedVertex(CC3TexturedVertex vertex) {
@@ -1309,7 +1413,7 @@ CC3Vector4 CC3RayIntersectionWithBoxSide(CC3Ray aRay, CC3Box bb,
 										 CC3Vector sideNormal, CC3Vector4 prevHit);
 
 /** @deprecated Renamed to CC3Box. */
-typedef CC3Box CC3BoundingBox DEPRECATED_ATTRIBUTE;
+typedef CC3Box CC3BoundingBox __deprecated;
 
 /** @deprecated Renamed to kCC3BoxZero. */
 #define kCC3BoundingBoxZero		kCC3BoxZero
@@ -1318,67 +1422,67 @@ typedef CC3Box CC3BoundingBox DEPRECATED_ATTRIBUTE;
 #define kCC3BoundingBoxNull		kCC3BoxNull
 
 /** @deprecated Renamed to NSStringFromCC3Box. */
-NSString* NSStringFromCC3BoundingBox(CC3Box bb) DEPRECATED_ATTRIBUTE;
+NSString* NSStringFromCC3BoundingBox(CC3Box bb) __deprecated;
 
 /** @deprecated Renamed to CC3BoxFromMinMax. */
-CC3Box CC3BoundingBoxFromMinMax(CC3Vector minVtx, CC3Vector maxVtx) DEPRECATED_ATTRIBUTE;
+CC3Box CC3BoundingBoxFromMinMax(CC3Vector minVtx, CC3Vector maxVtx) __deprecated;
 
 /** @deprecated Renamed to CC3BoxMake. */
 CC3Box CC3BoundingBoxMake(GLfloat minX, GLfloat minY, GLfloat minZ,
-						  GLfloat maxX, GLfloat maxY, GLfloat maxZ) DEPRECATED_ATTRIBUTE;
+						  GLfloat maxX, GLfloat maxY, GLfloat maxZ) __deprecated;
 
 /** @deprecated Renamed to CC3BoxesAreEqual. */
-BOOL CC3BoundingBoxesAreEqual(CC3Box bb1, CC3Box bb2) DEPRECATED_ATTRIBUTE;
+BOOL CC3BoundingBoxesAreEqual(CC3Box bb1, CC3Box bb2) __deprecated;
 
 /** @deprecated Renamed to CC3BoxIsZero. */
-BOOL CC3BoundingBoxIsZero(CC3Box bb) DEPRECATED_ATTRIBUTE;
+BOOL CC3BoundingBoxIsZero(CC3Box bb) __deprecated;
 
 /** @deprecated Renamed to CC3BoxIsNull. */
-BOOL CC3BoundingBoxIsNull(CC3Box bb) DEPRECATED_ATTRIBUTE;
+BOOL CC3BoundingBoxIsNull(CC3Box bb) __deprecated;
 
 /** @deprecated Renamed to CC3BoxCenter. */
-CC3Vector CC3BoundingBoxCenter(CC3Box bb) DEPRECATED_ATTRIBUTE;
+CC3Vector CC3BoundingBoxCenter(CC3Box bb) __deprecated;
 
 /** @deprecated Renamed to CC3BoxSize. */
-CC3Vector CC3BoundingBoxSize(CC3Box bb) DEPRECATED_ATTRIBUTE;
+CC3Vector CC3BoundingBoxSize(CC3Box bb) __deprecated;
 
 /** @deprecated Renamed to CC3BoxContainsLocation. */
-BOOL CC3BoundingBoxContainsLocation(CC3Box bb, CC3Vector aLoc) DEPRECATED_ATTRIBUTE;
+BOOL CC3BoundingBoxContainsLocation(CC3Box bb, CC3Vector aLoc) __deprecated;
 
 /** @deprecated Renamed to CC3BoxEngulfLocation. */
-CC3Box CC3BoundingBoxEngulfLocation(CC3Box bb, CC3Vector aLoc) DEPRECATED_ATTRIBUTE;
+CC3Box CC3BoundingBoxEngulfLocation(CC3Box bb, CC3Vector aLoc) __deprecated;
 
 /** @deprecated Renamed to CC3BoxUnion. */
-CC3Box CC3BoundingBoxUnion(CC3Box bb1, CC3Box bb2) DEPRECATED_ATTRIBUTE;
+CC3Box CC3BoundingBoxUnion(CC3Box bb1, CC3Box bb2) __deprecated;
 
 /** @deprecated Renamed to CC3BoxAddPadding. */
-CC3Box CC3BoundingBoxAddPadding(CC3Box bb, CC3Vector padding) DEPRECATED_ATTRIBUTE;
+CC3Box CC3BoundingBoxAddPadding(CC3Box bb, CC3Vector padding) __deprecated;
 
 /** @deprecated Renamed to CC3BoxAddUniformPadding. */
-CC3Box CC3BoundingBoxAddUniformPadding(CC3Box bb, GLfloat padding) DEPRECATED_ATTRIBUTE;
+CC3Box CC3BoundingBoxAddUniformPadding(CC3Box bb, GLfloat padding) __deprecated;
 
 /** @deprecated Renamed to CC3BoxTranslate. */
-CC3Box CC3BoundingBoxTranslate(CC3Box bb, CC3Vector offset) DEPRECATED_ATTRIBUTE;
+CC3Box CC3BoundingBoxTranslate(CC3Box bb, CC3Vector offset) __deprecated;
 
 /** @deprecated Renamed to CC3BoxTranslateFractionally. */
 CC3Box CC3BoundingBoxTranslateFractionally(CC3Box bb,
-										   CC3Vector offsetScale) DEPRECATED_ATTRIBUTE;
+										   CC3Vector offsetScale) __deprecated;
 
 /** @deprecated Renamed to CC3BoxMoveCenterToOrigin. */
-CC3Box CC3BoundingBoxMoveCenterToOrigin(CC3Box bb) DEPRECATED_ATTRIBUTE;
+CC3Box CC3BoundingBoxMoveCenterToOrigin(CC3Box bb) __deprecated;
 
 /** @deprecated Renamed to CC3BoxScale. */
-CC3Box CC3BoundingBoxScale(CC3Box bb, CC3Vector scale) DEPRECATED_ATTRIBUTE;
+CC3Box CC3BoundingBoxScale(CC3Box bb, CC3Vector scale) __deprecated;
 
 /** @deprecated Renamed to CC3BoxScaleUniform. */
-CC3Box CC3BoundingBoxScaleUniform(CC3Box bb, GLfloat scale) DEPRECATED_ATTRIBUTE;
+CC3Box CC3BoundingBoxScaleUniform(CC3Box bb, GLfloat scale) __deprecated;
 
 /** @deprecated Renamed to CC3RayIntersectionWithBox. */
-CC3Vector CC3RayIntersectionWithBoundingBox(CC3Ray aRay, CC3Box bb) DEPRECATED_ATTRIBUTE;
+CC3Vector CC3RayIntersectionWithBoundingBox(CC3Ray aRay, CC3Box bb) __deprecated;
 
 /** @deprecated Renamed to CC3RayIntersectionWithBoxSide. */
 CC3Vector4 CC3RayIntersectionWithBoundingBoxSide(CC3Ray aRay, CC3Box bb,
-												 CC3Vector sideNormal, CC3Vector4 prevHit) DEPRECATED_ATTRIBUTE;
+												 CC3Vector sideNormal, CC3Vector4 prevHit) __deprecated;
 
 
 #pragma mark -
@@ -1771,10 +1875,10 @@ CC3Vector4 CC3RayIntersectionWithPlane(CC3Ray ray, CC3Plane plane);
 CC3Vector CC3TriplePlaneIntersection(CC3Plane p1, CC3Plane p2, CC3Plane p3);
 
 /** @deprecated Renamed to CC3PlaneFromLocations */
-CC3Plane CC3PlaneFromPoints(CC3Vector v1, CC3Vector v2, CC3Vector v3) DEPRECATED_ATTRIBUTE;
+CC3Plane CC3PlaneFromPoints(CC3Vector v1, CC3Vector v2, CC3Vector v3) __deprecated;
 
 /** @deprecated Replaced with CC3DistanceFromPlane. */
-GLfloat CC3DistanceFromNormalizedPlane(CC3Plane p, CC3Vector v) DEPRECATED_ATTRIBUTE;
+GLfloat CC3DistanceFromNormalizedPlane(CC3Plane p, CC3Vector v) __deprecated;
 
 
 #pragma mark -
@@ -1842,7 +1946,7 @@ BOOL CC3DoesRayIntersectSphere(CC3Ray aRay, CC3Sphere aSphere);
 CC3Vector CC3RayIntersectionWithSphere(CC3Ray aRay, CC3Sphere aSphere);
 
 /** @deprecated Renamed to CC3RayIntersectionWithSphere. */
-CC3Vector CC3RayIntersectionOfSphere(CC3Ray aRay, CC3Sphere aSphere) DEPRECATED_ATTRIBUTE;
+CC3Vector CC3RayIntersectionOfSphere(CC3Ray aRay, CC3Sphere aSphere) __deprecated;
 
 /**
  * Returns the coefficients of the quadratic equation that describes the points of
@@ -1884,7 +1988,7 @@ typedef struct {
 static const CC3AttenuationCoefficients kCC3AttenuationNone = {1.0, 0.0, 0.0};
 
 /** Deprecated. Use kCC3AttenuationNone instead. */
-static const CC3AttenuationCoefficients kCC3ParticleSizeAttenuationNone DEPRECATED_ATTRIBUTE = {1.0, 0.0, 0.0};
+static const CC3AttenuationCoefficients kCC3ParticleSizeAttenuationNone __deprecated = {1.0, 0.0, 0.0};
 
 /**
  * Returns a string description of the specified CC3AttenuationCoefficients struct
@@ -1930,15 +2034,21 @@ static inline CC3AttenuationCoefficients CC3AttenuationCoefficientsLegalize(CC3A
  *
  * This can also be used for any rectangular group of pixels.
  */
-typedef struct {
-	GLint x;				/**< The X-position of the bottom-left corner of the viewport. */
-	GLint y;				/**< The Y-position of the bottom-left corner of the viewport. */
-	GLsizei w;				/**< The width of the viewport. */
-	GLsizei h;				/**< The height of the viewport. */
+typedef union {
+	struct {
+		GLint x;				/**< The X-position of the bottom-left corner of the viewport. */
+		GLint y;				/**< The Y-position of the bottom-left corner of the viewport. */
+		GLsizei w;				/**< The width of the viewport. */
+		GLsizei h;				/**< The height of the viewport. */
+	};
+	struct {
+		CC3IntPoint origin;		/**< The origin of the viewport. */
+		CC3IntSize size;		/**< The size of the viewport. */
+	};
 } CC3Viewport;
 
 /** An empty or undefined viewport. */
-static const CC3Viewport kCC3ViewportZero = { 0, 0, 0, 0 };
+static const CC3Viewport kCC3ViewportZero = { {0, 0, 0, 0} };
 
 /** Returns a string description of the specified CC3Viewport struct in the form "(x, y, w, h)" */
 static inline NSString* NSStringFromCC3Viewport(CC3Viewport vp) {
@@ -1957,7 +2067,10 @@ static inline CC3Viewport CC3ViewportMake(GLint x, GLint y, GLint w, GLint h) {
 
 /** Returns a CC3Viewport constructed from the specified origin and size. */
 static inline CC3Viewport CC3ViewportFromOriginAndSize(CC3IntPoint origin, CC3IntSize size) {
-	return CC3ViewportMake(origin.x, origin.y, size.width, size.height);
+	CC3Viewport vp;
+	vp.origin = origin;
+	vp.size = size;
+	return vp;
 }
 
 /** Returns whether the two viewports are equal by comparing their respective components. */
@@ -1988,6 +2101,14 @@ static inline CC3Viewport CC3ViewportFromCGRect(CGRect rect) {
 /** Returns a CGRect constructed from the specified viewport. */
 static inline CGRect CGRectFromCC3Viewport(CC3Viewport vp) {
 	return CGRectMake(vp.x, vp.y, vp.w, vp.h);
+}
+
+/** 
+ * Returns a CC3Viewport of the same size as the specified viewport, but whose origin is 
+ * translated from the origin of the specified viewport by the by the specified amount. 
+ */
+static inline CC3Viewport CC3ViewportTranslate(CC3Viewport vp, CC3IntPoint offset) {
+	return CC3ViewportFromOriginAndSize(CC3IntPointAdd(vp.origin, offset), vp.size);
 }
 
 
@@ -2342,6 +2463,37 @@ static inline NSString* NSStringFromBoolean(BOOL value) { return value ? @"YES" 
 static inline NSString* CC3EnsureAbsoluteFilePath(NSString* filePath) {
 	if(filePath.isAbsolutePath) return filePath;
 	return [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent: filePath];
+}
+
+/**
+ * Resolves the specified file path as one of:
+ *   - An absolute path.
+ *   - A path within the application bundle resource directory.
+ *   - A path within the Cocos3D library bundle resource directory.
+ *
+ * This function checks for the existence of the file on each of the above paths, 
+ * in order, and returns an absolute path to the first file located.
+ *
+ * Since the paths are searched in the above order, the application can provide a resource
+ * file to override a standard Cocos3D library resource file by adding the file with the
+ * same name to the application bundle resource directory.
+ *
+ * Returns nil if the file could not be located in on any of the paths above.
+ */
+static inline NSString* CC3ResolveResourceFilePath(NSString* filePath) {
+	NSFileManager* fileMgr = NSFileManager.defaultManager;
+	NSString* fullPath;
+
+	fullPath = filePath;
+	if ( fullPath.isAbsolutePath && [fileMgr fileExistsAtPath: fullPath] ) return fullPath;
+	
+	fullPath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent: filePath];
+	if ( [fileMgr fileExistsAtPath: fullPath] ) return fullPath;
+	
+	fullPath = [[[NSBundle cocos3dResourcesBundle] resourcePath] stringByAppendingPathComponent: filePath];
+	if ( [fileMgr fileExistsAtPath: fullPath] ) return fullPath;
+	
+	return nil;
 }
 
 /** Returns whether the specified bit in the specified bitfield is set to one. */

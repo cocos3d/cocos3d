@@ -284,7 +284,7 @@
  * the superclass (eg- initWithName:), set properties such as the shaderPreamble, and then
  * invoke the compileFromSource: method to compile this shader from GLSL source code.
  */
--(id) initFromSourceCodeFile: (NSString*) aFilePath;
+-(id) initFromSourceCodeFile: (NSString*) filePath;
 
 /**
  * Returns an instance compiled from GLSL source code loaded from the file at the specified file path.
@@ -319,10 +319,10 @@
  * invoke the compileFromSource: method to compile this shader from GLSL source code. Once
  * compiled, you can add the shader to the cache using the addShader: method.
  */
-+(id) shaderFromSourceCodeFile: (NSString*) aFilePath;
++(id) shaderFromSourceCodeFile: (NSString*) filePath;
 
 /** @deprecated Use the CC3ShaderSourceCode shaderSourceCodeNameFromFilePath: method instead. */
-+(NSString*) shaderNameFromFilePath: (NSString*) aFilePath DEPRECATED_ATTRIBUTE;
++(NSString*) shaderNameFromFilePath: (NSString*) filePath __deprecated;
 
 /**
  * Indicates whether this shader was loaded from a file.
@@ -485,6 +485,7 @@
 	GLint _maxAttributeNameLength;
 	GLuint _texture2DCount;
 	GLuint _textureCubeCount;
+	GLuint _textureLightProbeCount;
 	BOOL _shouldAllowDefaultVariableValues : 1;
 	BOOL _isSceneScopeDirty : 1;
 }
@@ -551,12 +552,6 @@
 /** Returns the uniform at the specified location, or nil if no uniform is defined at the specified location. */
 -(CC3GLSLUniform*) uniformAtLocation: (GLint) uniformLocation;
 
-/** Returns the number of 2D textures supported by this shader program. */
-@property(nonatomic, readonly) GLuint texture2DCount;
-
-/** Returns the number of cube-map textures supported by this shader program. */
-@property(nonatomic, readonly) GLuint textureCubeCount;
-
 /** Returns the number of vertex attributes declared and in use by this program. */
 @property(nonatomic, readonly) GLuint attributeCount;
 
@@ -580,6 +575,39 @@
 
 /** Returns the vertex attribute at the specified location, or nil if no attribute is defined at the specified location. */
 -(CC3GLSLAttribute*) attributeAtLocation: (GLint) attrLocation;
+
+
+#pragma mark Textures
+
+/** 
+ * Returns the texture unit index of the first 2D texture supported by this shader program.
+ * 
+ * The 2D textures are allocated consecutive texture units beginning at the returned texture unit.
+ */
+@property(nonatomic, readonly) GLuint texture2DStart;
+
+/** Returns the number of 2D textures supported by this shader program. */
+@property(nonatomic, readonly) GLuint texture2DCount;
+
+/**
+ * Returns the texture unit index of the first cube texture supported by this shader program.
+ *
+ * The cube textures are allocated consecutive texture units beginning at the returned texture unit.
+ */
+@property(nonatomic, readonly) GLuint textureCubeStart;
+
+/** Returns the number of cube-map textures supported by this shader program. */
+@property(nonatomic, readonly) GLuint textureCubeCount;
+
+/**
+ * Returns the texture unit index of the first light probe texture supported by this shader program.
+ *
+ * The light probe textures are allocated consecutive texture units beginning at the returned texture unit.
+ */
+@property(nonatomic, readonly) GLuint textureLightProbeStart;
+
+/** Returns the number of light probe textures supported by this shader program. */
+@property(nonatomic, readonly) GLuint textureLightProbeCount;
 
 /**
  * Each uniform used by this shader program must have a valid value. This property can be used to 
@@ -1168,10 +1196,10 @@
 +(void) setShaderMatcher: (id<CC3ShaderMatcher>) shaderMatcher;
 
 /** @deprecated Renamed to shaderMatcher. */
-+(id<CC3ShaderMatcher>) programMatcher DEPRECATED_ATTRIBUTE;
++(id<CC3ShaderMatcher>) programMatcher __deprecated;
 
 /** @deprecated Renamed to setShaderMatcher:. */
-+(void) setProgramMatcher: (id<CC3ShaderMatcher>) programMatcher DEPRECATED_ATTRIBUTE;
++(void) setProgramMatcher: (id<CC3ShaderMatcher>) programMatcher __deprecated;
 
 @end
 
@@ -1327,7 +1355,7 @@
  * CC3ShaderSourceCode is the abstract head of a class cluster. The class of the object returned
  * will be a subclass of CC3ShaderSourceCode, depending on the structure of the source code.
  */
-+(id) shaderSourceCodeFromFile: (NSString*) aFilePath;
++(id) shaderSourceCodeFromFile: (NSString*) filePath;
 
 /**
  * Returns a shader source code name derived from the specified file path.
@@ -1338,7 +1366,7 @@
  *
  * This implementation returns the lastComponent of the specified file path.
  */
-+(NSString*) shaderSourceCodeNameFromFilePath: (NSString*) aFilePath;
++(NSString*) shaderSourceCodeNameFromFilePath: (NSString*) filePath;
 
 /**
  * As shader source code is parsed and assembled using #import and #include directives,

@@ -35,6 +35,7 @@
 #import "CC3MeshNode.h"
 #import "CC3Camera.h"
 #import "CC3Light.h"
+#import "CC3EnvironmentNodes.h"
 #import "CC3Scene.h"
 #import "CC3PointParticles.h"
 #import "CC3NodeAnimation.h"
@@ -95,8 +96,8 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		case kCC3SemanticModelViewProjMatrixInvTran: return @"kCC3SemanticModelViewProjMatrixInvTran";
 			
 		// CAMERA -----------------
-		case kCC3SemanticCameraLocationModelSpace: return @"kCC3SemanticCameraLocationModelSpace";
 		case kCC3SemanticCameraLocationGlobal: return @"kCC3SemanticCameraLocationGlobal";
+		case kCC3SemanticCameraLocationModelSpace: return @"kCC3SemanticCameraLocationModelSpace";
 		case kCC3SemanticCameraFrustum: return @"kCC3SemanticCameraFrustum";
 		case kCC3SemanticCameraFrustumDepth: return @"kCC3SemanticCameraFrustumDepth";
 			
@@ -132,6 +133,14 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		case kCC3SemanticLightSpotCutoffAngle: return @"kCC3SemanticLightSpotCutoffAngle";
 		case kCC3SemanticLightSpotCutoffAngleCosine: return @"kCC3SemanticLightSpotCutoffAngleCosine";
 
+		case kCC3SemanticIsUsingLightProbes: return @"kCC3SemanticIsUsingLightProbes";
+		case kCC3SemanticLightProbeCount: return @"kCC3SemanticLightProbeCount";
+		case kCC3SemanticLightProbeIsEnabled: return @"kCC3SemanticLightProbeIsEnabled";
+		case kCC3SemanticLightProbeLocationGlobal: return @"kCC3SemanticLightProbeLocationGlobal";
+		case kCC3SemanticLightProbeLocationEyeSpace: return @"kCC3SemanticLightProbeLocationEyeSpace";
+		case kCC3SemanticLightProbeLocationModelSpace: return @"kCC3SemanticLightProbeLocationModelSpace";
+		case kCC3SemanticLightProbeColorDiffuse: return @"kCC3SemanticLightProbeColorDiffuse";
+			
 		case kCC3SemanticFogIsEnabled: return @"kCC3SemanticFogIsEnabled";
 		case kCC3SemanticFogColor: return @"kCC3SemanticFogColor";
 		case kCC3SemanticFogAttenuationMode: return @"kCC3SemanticFogAttenuationMode";
@@ -146,7 +155,8 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		case kCC3SemanticTexture2DSampler: return @"kCC3SemanticTexture2DSampler";
 		case kCC3SemanticTextureCubeCount: return @"kCC3SemanticTextureCubeCount";
 		case kCC3SemanticTextureCubeSampler: return @"kCC3SemanticTextureCubeSampler";
-
+		case kCC3SemanticTextureLightProbeSampler: return @"kCC3SemanticTextureLightProbeSampler";
+			
 		case kCC3SemanticTexUnitMode: return @"kCC3SemanticTexUnitMode";
 		case kCC3SemanticTexUnitConstantColor: return @"kCC3SemanticTexUnitConstantColor";
 		case kCC3SemanticTexUnitCombineRGBFunction: return @"kCC3SemanticTexUnitCombineRGBFunction";
@@ -368,7 +378,8 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	CC3SkinSection* skin;
 	CC3PointParticleEmitter* emitter;
 	CC3Matrix4x4 m4x4;
-	CC3Matrix4x3 m4x3,  mRslt4x3, tfmMtx, *pm4x3;
+	CC3Matrix4x3 m4x3,  mRslt4x3, tfmMtx;
+	const CC3Matrix4x3 *pm4x3;
 	CC3Matrix3x3 m3x3;
 	CC3Viewport vp;
 	CCTime sceneTime;
@@ -660,13 +671,11 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			[uniform setVector: visitor.camera.globalLocation];
 			return YES;
 		case kCC3SemanticCameraLocationModelSpace:
-			// Transform the global camera location to the local model space
-			[uniform setVector: [visitor.currentMeshNode.globalTransformMatrixInverted
-								 transformLocation: visitor.camera.globalLocation]];
+			[uniform setVector: [visitor transformGlobalLocationToModelSpace: visitor.camera.globalLocation]];
 			return YES;
 		case kCC3SemanticCameraFrustum: {
 			// Applies the field of view angle to the narrower aspect.
-			vp = visitor.camera.viewport;
+			vp = visitor.renderSurface.viewport;
 			GLfloat aspect = (GLfloat) vp.w / (GLfloat) vp.h;
 			CC3Camera* cam = visitor.camera;
 			GLfloat fovWidth, fovHeight;
@@ -691,7 +700,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			return YES;
 		}
 		case kCC3SemanticViewport:
-			vp = visitor.camera.viewport;
+			vp = visitor.renderSurface.viewport;
 			[uniform setIntVector4: CC3IntVector4Make(vp.x, vp.y, vp.w, vp.h)];
 			return YES;
 			
@@ -751,6 +760,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 				[uniform setVector4: ltPos at: i];
 			}
 			return YES;
+			
 		case kCC3SemanticLightInvertedPositionEyeSpace:
 			isInverted = YES;
 		case kCC3SemanticLightPositionEyeSpace:
@@ -764,6 +774,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 				[uniform setVector4: ltPos at: i];
 			}
 			return YES;
+			
 		case kCC3SemanticLightInvertedPositionModelSpace:
 			isInverted = YES;
 		case kCC3SemanticLightPositionModelSpace:
@@ -852,6 +863,43 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			}
 			return YES;
 			
+		case kCC3SemanticIsUsingLightProbes:
+			[uniform setBoolean: visitor.currentNode.shouldUseLightProbes];
+			return YES;
+		case kCC3SemanticLightProbeCount:
+			[uniform setInteger: visitor.lightProbeCount];
+			return YES;
+		case kCC3SemanticLightProbeIsEnabled:
+			for (GLuint i = 0; i < uniformSize; i++) {
+				CC3Node* lp = [visitor lightProbeAt: (semanticIndex + i)];
+				[uniform setBoolean: lp.visible at: i];
+			}
+			return YES;
+		case kCC3SemanticLightProbeLocationGlobal:
+			for (GLuint i = 0; i < uniformSize; i++) {
+				CC3Node* lp = [visitor lightProbeAt: (semanticIndex + i)];
+				[uniform setVector: lp.globalLocation];
+			}
+			return YES;
+		case kCC3SemanticLightProbeLocationEyeSpace:
+			for (GLuint i = 0; i < uniformSize; i++) {
+				CC3Node* lp = [visitor lightProbeAt: (semanticIndex + i)];
+				[uniform setVector: [visitor transformGlobalLocationToEyeSpace: lp.globalLocation]];
+			}
+		case kCC3SemanticLightProbeLocationModelSpace:
+			for (GLuint i = 0; i < uniformSize; i++) {
+				CC3Node* lp = [visitor lightProbeAt: (semanticIndex + i)];
+				[uniform setVector: [visitor transformGlobalLocationToModelSpace: lp.globalLocation]];
+			}
+			return YES;
+		case kCC3SemanticLightProbeColorDiffuse:
+			for (GLuint i = 0; i < uniformSize; i++) {
+				CC3Node* lp = [visitor lightProbeAt: (semanticIndex + i)];
+				ccColor4F lpColor = lp.visible ? lp.diffuseColor : kCCC4FBlackTransparent;
+				[uniform setColor4F: lpColor at: i];
+			}
+			return YES;
+			
 		case kCC3SemanticFogIsEnabled:
 			[uniform setBoolean: visitor.scene.fog.visible];
 			return YES;
@@ -877,12 +925,6 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			// Count all textures of any type
 			[uniform setInteger: visitor.textureCount];
 			return YES;
-		case kCC3SemanticTextureSampler:
-			// Samplers that can be any type are simply consecutive texture unit indices
-			// starting at the semanticIndex of the uniform. Typically, semanticIndex > 0
-			// and uniformSize > 1 are mutually exclusive.
-			for (GLuint i = 0; i < uniformSize; i++) [uniform setInteger: (semanticIndex + i) at: i];
-			return YES;
 
 		case kCC3SemanticTexture2DCount:
 			mat = visitor.currentMaterial;
@@ -892,6 +934,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 				if ( [mat textureForTextureUnit: tuIdx].samplerSemantic == kCC3SemanticTexture2DSampler ) texCnt++;
 			[uniform setInteger: texCnt];
 			return YES;
+			
 		case kCC3SemanticTextureCubeCount:
 			mat = visitor.currentMaterial;
 			tuCnt = visitor.textureCount;
@@ -901,22 +944,39 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			[uniform setInteger: texCnt];
 			return YES;
 
+		case kCC3SemanticTextureSampler:
+			// Samplers that can be any type are simply consecutive texture unit indices
+			// starting at the semanticIndex of the uniform. Typically, semanticIndex > 0
+			// and uniformSize > 1 are mutually exclusive.
+			for (GLuint i = 0; i < uniformSize; i++) [uniform setInteger: (semanticIndex + i) at: i];
+			return YES;
+
 		case kCC3SemanticTexture2DSampler:
 			// 2D samplers always come first and are consecutive, so we can simply use consecutive
 			// texture unit indices starting at the semanticIndex of the uniform. Typically,
 			// semanticIndex > 0 and uniformSize > 1 are mutually exclusive.
+			semanticIndex += visitor.currentShaderProgram.texture2DStart;
 			for (GLuint i = 0; i < uniformSize; i++) [uniform setInteger: (semanticIndex + i) at: i];
 			return YES;
-
+			
 		case kCC3SemanticTextureCubeSampler:
 			// Cube samplers always come after 2D samplers, and are consecutive, so we can simply
 			// use consecutive texture unit indices starting at the semanticIndex of the uniform,
 			// plus an offset to skip any 2D textures. Typically, semanticIndex > 0 and
 			// uniformSize > 1 are mutually exclusive.
-			semanticIndex += visitor.currentShaderProgram.texture2DCount;
+			semanticIndex += visitor.currentShaderProgram.textureCubeStart;
 			for (GLuint i = 0; i < uniformSize; i++) [uniform setInteger: (semanticIndex + i) at: i];
 			return YES;
-
+			
+		case kCC3SemanticTextureLightProbeSampler:
+			// Light probe samplers always come after the model's 2D & cube samplers, and are
+			// consecutive, so we can simply use consecutive texture unit indices starting at
+			// the semanticIndex of the uniform, plus an offset to skip the model textures.
+			// Typically, semanticIndex > 0 and uniformSize > 1 are mutually exclusive.
+			semanticIndex += visitor.currentShaderProgram.textureLightProbeStart;
+			for (GLuint i = 0; i < uniformSize; i++) [uniform setInteger: (semanticIndex + i) at: i];
+			return YES;
+			
 		// The semantics below mimic OpenGL ES 1.1 configuration functionality for combining texture units.
 		// In most shaders, these will be left unused in favor of customized the texture combining in code.
 		case kCC3SemanticTexUnitMode:
@@ -1279,7 +1339,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVarName: @"u_cc3CameraPositionModel" toSemantic: kCC3SemanticCameraLocationModelSpace];	/**< (vec3) Location of the camera in local coordinates of model (not camera). */
 	[self mapVarName: @"u_cc3CameraFrustum" toSemantic: kCC3SemanticCameraFrustum];						/**< (vec4) Dimensions of the camera frustum (FOV width (radians), FOV height (radians), near clip, far clip). */
 	[self mapVarName: @"u_cc3CameraFrustumDepth" toSemantic: kCC3SemanticCameraFrustumDepth];			/**< (vec4) The depth of the camera frustum (far clip, near clip, -(f+n)/(f-n), -2nf/(f-n)). */
-	[self mapVarName: @"u_cc3CameraViewport" toSemantic: kCC3SemanticViewport];							/**< (int4) The viewport rectangle in pixels (x, y, width, height). */
+	[self mapVarName: @"u_cc3CameraViewport" toSemantic: kCC3SemanticViewport];							/**< (vec4 or ivec4) The viewport rectangle in pixels (x, y, width, height). */
 	
 	// MATERIALS --------------
 	[self mapVarName: @"u_cc3Color" toSemantic: kCC3SemanticColor];									/**< (vec4) Color when lighting & materials are not in use. */
@@ -1293,11 +1353,11 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVarName: @"u_cc3MaterialMinimumDrawnAlpha" toSemantic: kCC3SemanticMinimumDrawnAlpha];	/**< (float) Minimum alpha value to be drawn, otherwise will be rendered fully tranparent. */
 	
 	// LIGHTING --------------
-	[self mapVarName: @"u_cc3LightIsUsingLighting" toSemantic: kCC3SemanticIsUsingLighting];					/**< (bool) Whether any lighting is enabled. */
+	[self mapVarName: @"u_cc3LightIsUsingLighting" toSemantic: kCC3SemanticIsUsingLighting];					/**< (bool) Whether the model will interact with scene lighting (either lights or light probes). */
 	[self mapVarName: @"u_cc3LightSceneAmbientLightColor" toSemantic: kCC3SemanticSceneLightColorAmbient];		/**< (vec4) Ambient light color of the scene. */
 	
-	// With multiple lights, each element in the following is an array.
-	[self mapVarName: @"u_cc3LightIsLightEnabled" toSemantic: kCC3SemanticLightIsEnabled];						/**< (bool[]) Whether each light is enabled. */
+	[self mapVarName: @"u_cc3LightIsEnabled" toSemantic: kCC3SemanticLightIsEnabled];							/**< (bool[]) Whether each light is available and enabled. */
+	[self mapVarName: @"u_cc3LightIsLightEnabled" toSemantic: kCC3SemanticLightIsEnabled];						/**< (bool[]) @deprecated. Renamed to u_cc3LightIsEnabled. */
 	[self mapVarName: @"u_cc3LightPositionEyeSpace" toSemantic: kCC3SemanticLightPositionEyeSpace];				/**< (vec4[]) Location of each light in eye space. */
 	[self mapVarName: @"u_cc3LightPositionGlobal" toSemantic: kCC3SemanticLightPositionGlobal];					/**< (vec4[]) Location of each light in global coordinates. */
 	[self mapVarName: @"u_cc3LightPositionModel" toSemantic: kCC3SemanticLightPositionModelSpace];				/**< (vec4[]) Location of each light in local coordinates of model (not light). */
@@ -1312,6 +1372,14 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVarName: @"u_cc3LightSpotCutoffAngle" toSemantic: kCC3SemanticLightSpotCutoffAngle];				/**< (float[]) Cutoff angle of each spotlight (degrees). */
 	[self mapVarName: @"u_cc3LightSpotCutoffAngleCosine" toSemantic: kCC3SemanticLightSpotCutoffAngleCosine];	/**< (float[]) Cosine of cutoff angle of each spotlight. */
 
+	[self mapVarName: @"u_cc3LightIsUsingLightProbes" toSemantic: kCC3SemanticIsUsingLightProbes];					/**< (bool) Whether the model is using light probes for lighting, instead of lights. */
+	[self mapVarName: @"u_cc3LightProbeCount" toSemantic: kCC3SemanticLightProbeCount];								/**< (int) Min of number of active light probes in the scene, and the number used by the shader program. */
+	[self mapVarName: @"u_cc3LightProbeIsEnabled" toSemantic: kCC3SemanticLightProbeIsEnabled];						/**< (bool[]) Whether each light probe is available and enabled. */
+	[self mapVarName: @"u_cc3LightProbeLocationGlobal" toSemantic: kCC3SemanticLightProbeLocationGlobal];			/**< (vec3[]) Location of each light probe in global coordinates. */
+	[self mapVarName: @"u_cc3LightProbeLocationEyeSpace" toSemantic: kCC3SemanticLightProbeLocationEyeSpace];		/**< (vec3[]) Location of each light probe in eye space. */
+	[self mapVarName: @"u_cc3LightProbeLocationModelSpace" toSemantic: kCC3SemanticLightProbeLocationModelSpace];	/**< (vec3[]) Location of each light probe in local coordinates of the model (not light probe). */
+	[self mapVarName: @"u_cc3LightProbeColorDiffuse" toSemantic: kCC3SemanticLightProbeColorDiffuse];				/**< (vec4) Diffuse color of each light probe. */
+	
 	[self mapVarName: @"u_cc3FogIsEnabled" toSemantic: kCC3SemanticFogIsEnabled];				/**< (bool) Whether scene fogging is enabled. */
 	[self mapVarName: @"u_cc3FogColor" toSemantic: kCC3SemanticFogColor];						/**< (vec4) Fog color. */
 	[self mapVarName: @"u_cc3FogAttenuationMode" toSemantic: kCC3SemanticFogAttenuationMode];	/**< (int) Fog attenuation mode (one of GL_LINEAR, GL_EXP or GL_EXP2). */
@@ -1324,13 +1392,16 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVarName: @"s_cc3Texture" toSemantic: kCC3SemanticTextureSampler];				/**< (sampler2D/sampler3D) Single texture sampler of any type. */
 	[self mapVarName: @"s_cc3Textures" toSemantic: kCC3SemanticTextureSampler];				/**< (sampler2D[]/sampler3D) Array of texture samplers of any single type. */
 
-	[self mapVarName: @"u_cc3Texture2DCount" toSemantic: kCC3SemanticTexture2DCount];		/**< (int) Number of active textures of all types. */
+	[self mapVarName: @"u_cc3Texture2DCount" toSemantic: kCC3SemanticTexture2DCount];		/**< (int) Number of active 2D textures on current model. */
 	[self mapVarName: @"s_cc3Texture2D" toSemantic: kCC3SemanticTexture2DSampler];			/**< (sampler2D) Single 2D texture sampler. */
 	[self mapVarName: @"s_cc3Texture2Ds" toSemantic: kCC3SemanticTexture2DSampler];			/**< (sampler2D[]) Array of 2D texture samplers. */
 
-	[self mapVarName: @"u_cc3TextureCubeCount" toSemantic: kCC3SemanticTextureCubeCount];	/**< (int) Number of active textures of all types. */
+	[self mapVarName: @"u_cc3TextureCubeCount" toSemantic: kCC3SemanticTextureCubeCount];	/**< (int) Number of active cube textures on current model. */
 	[self mapVarName: @"s_cc3TextureCube" toSemantic: kCC3SemanticTextureCubeSampler];		/**< (samplerCube) Single cube texture sampler. */
 	[self mapVarName: @"s_cc3TextureCubes" toSemantic: kCC3SemanticTextureCubeSampler];		/**< (samplerCube[]) Array of cube texture samplers. */
+	
+	[self mapVarName: @"s_cc3LightProbeTexture" toSemantic: kCC3SemanticTextureLightProbeSampler];		/**< (samplerCube or sampler2D) Single light probe texture sampler. */
+	[self mapVarName: @"s_cc3LightProbeTextures" toSemantic: kCC3SemanticTextureLightProbeSampler];		/**< (samplerCube[] or sampler2D[]) Array of light probe texture samplers. */
 
 	// The semantics below mimic OpenGL ES 1.1 configuration functionality for combining texture units.
 	// In most shaders, these will be left unused in favor of customized the texture combining in GLSL code.
@@ -1460,7 +1531,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVarName: @"u_cc3Camera.positionGlobal" toSemantic: kCC3SemanticCameraLocationGlobal];		/**< (vec3) Location of the camera in global coordinates. */
 	[self mapVarName: @"u_cc3Camera.positionModel" toSemantic: kCC3SemanticCameraLocationModelSpace];	/**< (vec3) Location of the camera in local coordinates of model (not camera). */
 	[self mapVarName: @"u_cc3Camera.frustum" toSemantic: kCC3SemanticCameraFrustum];					/**< (vec4) Dimensions of the camera frustum (FOV width (radians), FOV height (radians), near clip, far clip). */
-	[self mapVarName: @"u_cc3Camera.viewport" toSemantic: kCC3SemanticViewport];						/**< (int4) The viewport rectangle in pixels (x, y, width, height). */
+	[self mapVarName: @"u_cc3Camera.viewport" toSemantic: kCC3SemanticViewport];						/**< (vec4 or ivec4) The viewport rectangle in pixels (x, y, width, height). */
 	
 	// MATERIALS --------------
 	[self mapVarName: @"u_cc3Color" toSemantic: kCC3SemanticColor];										/**< (vec4) Color when lighting & materials are not in use. */
@@ -1615,7 +1686,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVarName: @"u_cc3Camera.positionGlobal" toSemantic: kCC3SemanticCameraLocationGlobal];		/**< (vec3) Location of the camera in global coordinates. */
 	[self mapVarName: @"u_cc3Camera.positionModel" toSemantic: kCC3SemanticCameraLocationModelSpace];	/**< (vec3) Location of the camera in local coordinates of model (not camera). */
 	[self mapVarName: @"u_cc3Camera.frustum" toSemantic: kCC3SemanticCameraFrustum];					/**< (vec4) Dimensions of the camera frustum (FOV width (radians), FOV height (radians), near clip, far clip). */
-	[self mapVarName: @"u_cc3Camera.viewport" toSemantic: kCC3SemanticViewport];						/**< (int4) The viewport rectangle in pixels (x, y, width, height). */
+	[self mapVarName: @"u_cc3Camera.viewport" toSemantic: kCC3SemanticViewport];						/**< (vec4 or ivec4) The viewport rectangle in pixels (x, y, width, height). */
 	
 	// MATERIALS --------------
 	[self mapVarName: @"u_cc3Color" toSemantic: kCC3SemanticColor];										/**< (vec4) Color when lighting & materials are not in use. */

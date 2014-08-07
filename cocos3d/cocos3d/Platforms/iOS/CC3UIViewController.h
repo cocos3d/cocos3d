@@ -32,7 +32,8 @@
 #import "CC3ViewController.h"
 #import "CC3CC2Extensions.h"
 
-#if CC3_IOS
+
+#if (CC3_IOS && !CC3_CC2_RENDER_QUEUE)
 
 #pragma mark -
 #pragma mark CC3UIViewController interface
@@ -40,11 +41,8 @@
 /**
  * CC3UIViewController extends CC3ViewController to provide functionality specific to iOS.
  *
- * An instance of CC3UIViewController manages a single CCNode (typically a CCLayer) as changes
- * occur to the device orientation (portrait, landscape, etc).
- *
  * The loadView method of this controller will automatically create the correct type and configuration of a
- * view suitable for use with cocos3d. You can customize the creation of this view by setting the viewClass,
+ * view suitable for use with Cocos3D. You can customize the creation of this view by setting the viewClass,
  * viewBounds, viewColorFormat, viewDepthFormat, viewShouldUseStencilBuffer, and viewPixelSamples properties
  * prior to accessing the view property of this controller for the first time.
  *
@@ -87,12 +85,12 @@
 /**
  * Indicates the class of the view.
  *
- * This property is used by the loadView method as it creates the view, when the view property is first
- * accessed and the view property has not already been established.
+ * This property is used by the loadView method as it creates the view, when the view 
+ * property is first accessed and the view property has not already been established.
  *
- * The initial value of this property is CC3GLView. You can change the value returned by this property
- * prior to accessing the view property for the first time. Once the view property has been established,
- * reading this property returns the class property of the view itself.
+ * The initial value of this property is CCGLView. You can change the value returned by this
+ * property prior to accessing the view property for the first time. Once the view property 
+ * has been established, reading this property returns the class property of the view itself.
  */
 @property(nonatomic, retain) Class viewClass;
 
@@ -285,17 +283,17 @@
 #pragma mark Deprecated functionality
 
 /** @deprecated Use the supportedInterfaceOrientations property to define the allowed orientations. */
-@property(nonatomic, assign) BOOL doesAutoRotate DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) BOOL doesAutoRotate __deprecated;
 
 /** @deprecated Use the supportedInterfaceOrientations property to define the allowed orientations. */
-@property(nonatomic, assign) UIDeviceOrientation defaultCCDeviceOrientation DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) UIDeviceOrientation defaultCCDeviceOrientation __deprecated;
 
 /** @deprecated Set superclass controlledNode property and run layer in CCScene on CCDirector instead. */
--(void) runSceneOnNode: (CCNode*) aNode DEPRECATED_ATTRIBUTE;
+-(void) runSceneOnNode: (CCNode*) aNode __deprecated;
 
 @end
 
-#endif // CC3_IOS
+#endif // (CC3_IOS && !CC3_CC2_RENDER_QUEUE)
 
 
 #pragma mark Deprecated CCNodeController interface and ControlledCCNodeProtocol protocol
@@ -303,7 +301,7 @@
 /** @deprecated Replaced with CC3DeviceCameraOverlayUIViewController. */
 #define CCNodeController CC3DeviceCameraOverlayUIViewController
 
-DEPRECATED_ATTRIBUTE
+__deprecated
 /**
  * Deprecated and unused.
  * @deprecated This protocol is no longer needed, as the methods of this protocol have been

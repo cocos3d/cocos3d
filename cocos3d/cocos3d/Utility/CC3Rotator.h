@@ -63,10 +63,10 @@ typedef enum {
 	kCC3TargettingConstraintGlobalZAxis,			/**< Rotate only around the Z-axis in the global coordinate system. */
 	
 	// Deprecated
-	kCC3TargettingAxisRestrictionNone DEPRECATED_ATTRIBUTE = kCC3TargettingConstraintGlobalUnconstrained,	/**< @deprecated Renamed to kCC3TargettingConstraintGlobalUnconstrained. */
-	kCC3TargettingAxisRestrictionXAxis DEPRECATED_ATTRIBUTE = kCC3TargettingConstraintGlobalXAxis,			/**< @deprecated Renamed to kCC3TargettingConstraintGlobalXAxis. */
-	kCC3TargettingAxisRestrictionYAxis DEPRECATED_ATTRIBUTE = kCC3TargettingConstraintGlobalYAxis,			/**< @deprecated Renamed to kCC3TargettingConstraintGlobalYAxis. */
-	kCC3TargettingAxisRestrictionZAxis DEPRECATED_ATTRIBUTE = kCC3TargettingConstraintGlobalZAxis,			/**< @deprecated Renamed to kCC3TargettingConstraintGlobalZAxis. */
+	kCC3TargettingAxisRestrictionNone __deprecated = kCC3TargettingConstraintGlobalUnconstrained,	/**< @deprecated Renamed to kCC3TargettingConstraintGlobalUnconstrained. */
+	kCC3TargettingAxisRestrictionXAxis __deprecated = kCC3TargettingConstraintGlobalXAxis,			/**< @deprecated Renamed to kCC3TargettingConstraintGlobalXAxis. */
+	kCC3TargettingAxisRestrictionYAxis __deprecated = kCC3TargettingConstraintGlobalYAxis,			/**< @deprecated Renamed to kCC3TargettingConstraintGlobalYAxis. */
+	kCC3TargettingAxisRestrictionZAxis __deprecated = kCC3TargettingConstraintGlobalZAxis,			/**< @deprecated Renamed to kCC3TargettingConstraintGlobalZAxis. */
 } CC3TargettingConstraint;
 
 /** @deprecated Renamed to CC3TargettingConstraint. */
@@ -562,10 +562,10 @@ typedef enum {
 @property(nonatomic, assign) CC3Vector referenceUpDirection;
 
 /** @deprecated Renamed to referenceUpDirection. */
-@property(nonatomic, assign) CC3Vector sceneUpDirection DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) CC3Vector sceneUpDirection __deprecated;
 
 /** @deprecated Renamed to referenceUpDirection. */
-@property(nonatomic, assign) CC3Vector worldUpDirection DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) CC3Vector worldUpDirection __deprecated;
 
 /**
  * The direction, in the local coordinate system, that is considered to be 'up'. This corresponds
@@ -631,7 +631,7 @@ typedef enum {
 @property(nonatomic, assign) CC3TargettingConstraint targettingConstraint;
 
 /** @deprecated Renamed to targettingConstraint. */
-@property(nonatomic, assign) CC3TargettingConstraint axisRestriction DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) CC3TargettingConstraint axisRestriction __deprecated;
 
 /**
  * Rotates to look at the specified target location as viewed from the specified eye location,
@@ -643,7 +643,7 @@ typedef enum {
 -(void) rotateToTargetLocation: (CC3Vector) targLoc from: (CC3Vector) eyeLoc withUp: (CC3Vector) upDir;
 
 /** @deprecated Use rotateToTargetLocation:from:withUp: instead. */
--(void) rotateToTargetLocationFrom: (CC3Vector) aLocation DEPRECATED_ATTRIBUTE;
+-(void) rotateToTargetLocationFrom: (CC3Vector) aLocation __deprecated;
 
 /**
  * The target node at which this rotator is pointed. If the shouldTrackTarget property
@@ -713,7 +713,7 @@ typedef enum {
 #pragma mark -
 #pragma mark Deprecated CC3ReverseDirectionalRotator
 
-DEPRECATED_ATTRIBUTE
+__deprecated
 /**
  * Deprecated and functionality moved to CC3DirectionalRotator.
  * @deprecated Use an instance of CC3DirectionalRotator and set the shouldReverseForwardDirection

@@ -451,7 +451,7 @@ typedef enum {
 
 #pragma mark Deprecated CC3GLMatrix
 
-DEPRECATED_ATTRIBUTE
+__deprecated
 /**
  * Deprecated and replaced by the CC3Matrix family of classes.
  * @deprecated Replaced by the CC3Matrix family of classes. Full functionality provided by CC3ProjectionMatrix.

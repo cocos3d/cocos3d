@@ -46,12 +46,14 @@
 
 #import "CC3LibDefaultPrecision.fsh"
 #import "CC3LibDualSidedFragmentColor.fsh"
+#import "CC3LibLightProbeIllumination.fsh";
 #import "CC3LibEnvironmentReflection.fsh"
 #import "CC3LibSingleTexture2D.fsh"
 #import "CC3LibSetGLFragColorAlphaTest.fsh"
 
 void main() {
 	initFragmentColor();
+	illuminateWithLightProbes();
 	applyTexture2D();
 	addEnvironmentReflection();
 	setGLFragColor();

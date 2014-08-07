@@ -35,8 +35,6 @@
 #import "CC3TextureUnit.h"
 #import "CC3CC2Extensions.h"
 
-@class CC3Texture2DContent;
-
 
 #pragma mark -
 #pragma mark CC3Texture
@@ -105,7 +103,7 @@
 	GLenum _magnifyingFunction;
 	GLenum _horizontalWrappingFunction;
 	GLenum _verticalWrappingFunction;
-	CC3Texture2DContent* _ccTextureContent;
+	CCTexture* _ccTexture;
 	BOOL _texParametersAreDirty : 1;
 	BOOL _hasMipmap : 1;
 	BOOL _isUpsideDown : 1;
@@ -288,13 +286,17 @@
 #pragma mark Texture transformations
 
 /**
- * Indicates whether this instance will flip the texture vertically during loading.
+ * Indicates whether this instance will flip the texture vertically during loading, in order
+ * to ensure that the texture is oriented upside up.
  *
  * Under iOS and OSX, most textures are loaded into memory upside-down because of the
  * difference in vertical orientation between the OpenGL and CoreGraphics coordinate systems.
  *
- * If this property is set to YES during loading, the texture will be flipped in memory so
- * that it is oriented the right way up.
+ * If this property is set to YES during loading, and the texture has been loaded upside down,
+ * the texture will be flipped in memory so that it is oriented the right way up.
+ *
+ * If this property is set to NO during loading, and the texture has been loaded upside up,
+ * the texture will be flipped in memory so that it is oriented upside down.
  *
  * It is possible to compensate for an upside-down using texture coordinates. You can set
  * this property to NO prior to loading in order to leave the texture upside-down and use
@@ -425,7 +427,7 @@
  *                                then uses the weighted average of the two results.
  *
  * The last four values above require that a mipmap be available, as indicated by the hasMipmap
- * property. If one of those value is set in this property, this property will only return either
+ * property. If one of those values is set in this property, this property will only return either
  * GL_NEAREST (for all GL_NEAREST... values) or GL_LINEAR (for all GL_LINEAR... values) until a
  * mipmap has been created. See the hasMipmap property for more information about mipmaps.
  *
@@ -497,7 +499,7 @@
 
 /**
  * A convenience method to accessing the following four texture parameter properties
- * using a cocos2d ccTexParams structure:
+ * using a Cocos2D ccTexParams structure:
  *   - minifyingFunction
  *   - magnifyingFunction
  *   - horizontalWrappingFunction
@@ -597,7 +599,7 @@
 #pragma mark Associated CCTexture
 
 /** 
- * Returns a cocos2d-compatible 2D texture, that references the same GL texture.
+ * Returns a Cocos2D-compatible 2D texture, that references the same GL texture.
  *
  * The value of the class-side shouldCacheAssociatedCCTextures property determines whether
  * the CCTexture returned by this method will automatically be added to the CCTextureCache.
@@ -607,16 +609,16 @@
  * CCTextureCache addTexture:named: method.
  *
  * Although a CCTexture can be retrieved for any type of CC3Texture, including cube-maps,
- * using a cube-mapped texture as a cocos2d texture may lead to unexpected behavour.
+ * using a cube-mapped texture as a Cocos2D texture may lead to unexpected behavour.
  */
 @property(nonatomic, retain, readonly) 	CCTexture* ccTexture;
 
 /**
- * Indicates whether the associated cocos2d CCTexture, available through the ccTexture 
- * property, should be automatically added to the cocos2d CCTextureCache.
+ * Indicates whether the associated Cocos2D CCTexture, available through the ccTexture 
+ * property, should be automatically added to the Cocos2D CCTextureCache.
  *
  * The initial value of this property is NO. If you intend to share many of the same textures
- * between cocos3d and cocos2d objects, you may want to set this property to YES.
+ * between Cocos3D and Cocos2D objects, you may want to set this property to YES.
  *
  * With this property set to NO, you can still add any CCTexture retrieved from the ccTexture
  * property to the CCTextureCache using the CCTexture addToCacheWithName: method.
@@ -624,11 +626,11 @@
 +(BOOL) shouldCacheAssociatedCCTextures;
 
 /**
- * Indicates whether the associated cocos2d CCTexture, available through the ccTexture
- * property, should be automatically added to the cocos2d CCTextureCache.
+ * Indicates whether the associated Cocos2D CCTexture, available through the ccTexture
+ * property, should be automatically added to the Cocos2D CCTextureCache.
  *
  * The initial value of this property is NO. If you intend to share many of the same textures
- * between cocos3d and cocos2d objects, you may want to set this property to YES.
+ * between Cocos3D and Cocos2D objects, you may want to set this property to YES.
  *
  * With this property set to NO, you can still add any CCTexture retrieved from the ccTexture
  * property to the CCTextureCache using the CCTexture addToCacheWithName: method.
@@ -636,10 +638,10 @@
 +(void) setShouldCacheAssociatedCCTextures: (BOOL) shouldCache;
 
 /** @deprecated Renamed to ccTexture. */
-@property(nonatomic, retain, readonly) 	CCTexture* ccTexture2D DEPRECATED_ATTRIBUTE;
+@property(nonatomic, retain, readonly) 	CCTexture* ccTexture2D __deprecated;
 
 /** @deprecated Use the ccTexture property instead. */
--(CCTexture*) asCCTexture2D DEPRECATED_ATTRIBUTE;
+-(CCTexture*) asCCTexture2D __deprecated;
 
 
 #pragma mark Allocation and Initialization
@@ -682,7 +684,7 @@
  * CC3Texture is the root of a class-cluster. The object returned may be a different
  * instance of a different class than the receiver.
  */
--(id) initFromFile: (NSString*) aFilePath;
+-(id) initFromFile: (NSString*) filePath;
 
 /**
  * Returns an instance initialized by loading the single texture file at the specified file path.
@@ -725,7 +727,7 @@
  * CC3Texture is the root of a class-cluster. The object returned may be an instance of a
  * different class than the receiver.
  */
-+(id) textureFromFile: (NSString*) aFilePath;
++(id) textureFromFile: (NSString*) filePath;
 
 /**
  * Initializes this instance from the content in the specified CGImage.
@@ -782,7 +784,10 @@
  * CC3Texture is the root of a class-cluster. The object returned may be a different
  * instance of a different class than the receiver.
  */
--(id) initWithPixelFormat: (GLenum) format andPixelType: (GLenum) type;
+-(id) initWithPixelFormat: (GLenum) format withPixelType: (GLenum) type;
+
+/** @deprecated Use initWithPixelFormat:withPixelType: */
+-(id) initWithPixelFormat: (GLenum) format andPixelType: (GLenum) type __deprecated;
 
 /**
  * Allocates and initializes an autoreleased instance from the specified texture properties,
@@ -794,7 +799,7 @@
  * See the notes for the pixelFormat and pixelType properties for the range of values permitted
  * for the corresponding format and type parameters here.
  *
- * The name property of this instance will be nil.
+ * The name property of the instance will be nil.
  *
  * Since textures can consume significant resources, you should assign this instance a name
  * and add it to the texture cache by using the class-side addTexture: method. You can then
@@ -804,7 +809,10 @@
  * CC3Texture is the root of a class-cluster. The object returned may be an instance of a
  * different class than the receiver.
  */
-+(id) textureWithPixelFormat: (GLenum) format andPixelType: (GLenum) type;
++(id) textureWithPixelFormat: (GLenum) format withPixelType: (GLenum) type;
+
+/** @deprecated Use textureWithPixelFormat:withPixelType: */
++(id) textureWithPixelFormat: (GLenum) format andPixelType: (GLenum) type __deprecated;
 
 /**
  * Initializes this instance from the specified texture properties, without providing content.
@@ -826,7 +834,10 @@
  * CC3Texture is the root of a class-cluster. The object returned may be a different
  * instance of a different class than the receiver.
  */
--(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type;
+-(id) initWithSize: (CC3IntSize) size withPixelFormat: (GLenum) format withPixelType: (GLenum) type;
+
+/** @deprecated Use initWithSize:withPixelFormat:withPixelType: */
+-(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type __deprecated;
 
 /**
  * Allocates and initializes an autoreleased instance from the specified texture properties,
@@ -839,7 +850,7 @@
  * See the notes for the pixelFormat and pixelType properties for the range of values permitted
  * for the corresponding format and type parameters here.
  *
- * The name property of this instance will be nil.
+ * The name property of the instance will be nil.
  *
  * Since textures can consume significant resources, you should assign this instance a name
  * and add it to the texture cache by using the class-side addTexture: method. You can then
@@ -849,7 +860,75 @@
  * CC3Texture is the root of a class-cluster. The object returned may be an instance of a
  * different class than the receiver.
  */
-+(id) textureWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type;
++(id) textureWithSize: (CC3IntSize) size withPixelFormat: (GLenum) format withPixelType: (GLenum) type;
+
+/** @deprecated Use textureWithSize:withPixelFormat:withPixelType: */
++(id) textureWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type __deprecated;
+
+/**
+ * Initializes this instance containing pixel content of the specified size and solid, 
+ * uniform color. This method can be useful for creating a test texture.
+ *
+ * Since the texture is just a solid color, a mipmap is not created.
+ *
+ * The name property of this instance will be nil.
+ *
+ * Since textures can consume significant resources, you should assign this instance a name
+ * and add it to the texture cache by using the class-side addTexture: method. You can then
+ * retrieve the texture from the cache via the getTextureNamed: method to apply this texture
+ * to multple meshes.
+ *
+ * CC3Texture is the root of a class-cluster. The object returned may be a different
+ * instance of a different class than the receiver.
+ */
+-(id) initWithSize: (CC3IntSize) size withColor: (ccColor4B) color;
+
+/**
+ * Allocates and initializes an autoreleased instance containing pixel content of the specified
+ * size and solid, uniform color. This method can be useful for creating a test texture.
+ *
+ * Since the texture is just a solid color, a mipmap is not created.
+ *
+ * The name property of this instance will be nil.
+ *
+ * Since textures can consume significant resources, you should assign this instance a name
+ * and add it to the texture cache by using the class-side addTexture: method. You can then
+ * retrieve the texture from the cache via the getTextureNamed: method to apply this texture
+ * to multple meshes.
+ *
+ * CC3Texture is the root of a class-cluster. The object returned may be a different
+ * instance of a different class than the receiver.
+ */
++(id) textureWithSize: (CC3IntSize) size withColor: (ccColor4B) color;
+
+/**
+ * Initializes this instance from the specified Cocos2D CCTexture.
+ *
+ * This instance will use the same GL texture object as the specified CCTexture. The specified
+ * CCTexture can be retrieved from this instance using the ccTexture property.
+ *
+ * CC3Texture is the root of a class-cluster. The object returned may be a different
+ * instance of a different class than the receiver.
+ */
+-(id) initWithCCTexture: (CCTexture*) ccTexture;
+
+/**
+ * Allocates and initializes an instance from the specified Cocos2D CCTexture.
+ *
+ * The instance will use the same GL texture object as the specified CCTexture. The specified
+ * CCTexture can be retrieved from this instance using the ccTexture property.
+ *
+ * The name property of the instance will be nil.
+ *
+ * Since textures can consume significant resources, you should assign this instance a name
+ * and add it to the texture cache by using the class-side addTexture: method. You can then
+ * retrieve the texture from the cache via the getTextureNamed: method to apply this texture
+ * to multple meshes.
+ *
+ * CC3Texture is the root of a class-cluster. The object returned may be an instance of a
+ * different class than the receiver.
+ */
++(id) textureWithCCTexture: (CCTexture*) ccTexture;
 
 /**
  * Initializes this instance by loading the six cube face textures at the specified file paths,
@@ -1022,7 +1101,10 @@
  * CC3Texture is the root of a class-cluster. The object returned may be a different
  * instance of a different class than the receiver.
  */
--(id) initCubeWithPixelFormat: (GLenum) format andPixelType: (GLenum) type;
+-(id) initCubeWithPixelFormat: (GLenum) format withPixelType: (GLenum) type;
+
+/** @deprecated Use initCubeWithPixelFormat:withPixelType: */
+-(id) initCubeWithPixelFormat: (GLenum) format andPixelType: (GLenum) type __deprecated;
 
 /**
  * Allocates and initializes an autoreleased instance from the specified texture properties,
@@ -1044,10 +1126,15 @@
  * CC3Texture is the root of a class-cluster. The object returned may be an instance of a
  * different class than the receiver.
  */
-+(id) textureCubeWithPixelFormat: (GLenum) format andPixelType: (GLenum) type;
++(id) textureCubeWithPixelFormat: (GLenum) format withPixelType: (GLenum) type;
+
+/** @deprecated Use textureCubeWithPixelFormat:withPixelType: */
++(id) textureCubeWithPixelFormat: (GLenum) format andPixelType: (GLenum) type __deprecated;
 
 /**
  * Initializes this instance from the specified texture properties, without providing content.
+ *
+ * The sideLength argument indicates the length, in pixels, of each side of the texture.
  *
  * Once initialized, the texture will be bound to the GL engine, with space allocated for six
  * texture faces of the specified size and pixel content. Content can be added later by using
@@ -1066,11 +1153,16 @@
  * CC3Texture is the root of a class-cluster. The object returned may be a different
  * instance of a different class than the receiver.
  */
--(id) initCubeWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type;
+-(id) initCubeWithSideLength: (GLuint) sideLength withPixelFormat: (GLenum) format withPixelType: (GLenum) type;
+
+/** @deprecated Use initCubeWithSize:withPixelFormat:withPixelType: */
+-(id) initCubeWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type __deprecated;
 
 /**
  * Allocates and initializes an autoreleased instance from the specified texture properties,
  * without providing content.
+ *
+ * The sideLength argument indicates the length, in pixels, of each side of the texture.
  *
  * Once initialized, the texture will be bound to the GL engine, with space allocated for a
  * texture of the specified size and pixel content. Content can be added later by using this
@@ -1089,7 +1181,67 @@
  * CC3Texture is the root of a class-cluster. The object returned may be an instance of a
  * different class than the receiver.
  */
-+(id) textureCubeWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type;
++(id) textureCubeWithSideLength: (GLuint) sideLength withPixelFormat: (GLenum) format withPixelType: (GLenum) type;
+
+/** @deprecated Use textureCubeWithSize:withPixelFormat:withPixelType: */
++(id) textureCubeWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type __deprecated;
+
+/**
+ * Initializes this instance to have a unique solid color for each side of the cube.
+ *
+ * The sides of the cube are colored using an easy (RGB <=> XYZ) mnemonic as follows:
+ *   - +X-axis: Red
+ *   - -X-axis: Cyan (inverse of Red)
+ *   - +Y-axis: Green
+ *   - -Y-axis: Magenta (inverse of Green)
+ *   - +Z-axis: Blue
+ *   - -Z-axis: Yellow (inverse of Blue)
+ *
+ * Once initialized, the texture will be bound to the GL engine.
+ *
+ * The name property of this instance will be nil.
+ *
+ * Since the texture is just a solid color, a mipmap is not created.
+ *
+ * CC3Texture is the root of a class-cluster. The object returned may be a different
+ * instance of a different class than the receiver.
+ */
+-(id) initCubeColoredForAxes;
+
+/**
+ * Returns an instance initialized to have a unique solid color for each side of the cube.
+ *
+ * The sides of the cube are colored using an easy (RGB <=> XYZ) mnemonic as follows:
+ *   - +X-axis: Red
+ *   - -X-axis: Cyan (inverse of Red)
+ *   - +Y-axis: Green
+ *   - -Y-axis: Magenta (inverse of Green)
+ *   - +Z-axis: Blue
+ *   - -Z-axis: Yellow (inverse of Blue)
+ *
+ * Once initialized, the texture will be bound to the GL engine.
+ *
+ * Since the texture is just a solid color, a mipmap is not created.
+ *
+ * The name of the instance is set to @"Axes-Colored-Cube".
+ *
+ * Textures loaded through this method are cached. If the texture was already loaded and is in
+ * the cache, it is retrieved and returned. If the texture has not in the cache, it is loaded,
+ * placed into the cache, indexed by its name, and returned. It is therefore safe to invoke this
+ * method any time the texture is needed, without having to worry that the texture will be
+ * repeatedly loaded from file.
+ *
+ * To clear a texture instance from the cache, use the removeTexture: method.
+ *
+ * To create a texture directly, bypassing the cache, use the alloc and initCubeColoredForAxes
+ * methods. This technique can be used to create the same texture twice, if needed for some reason.
+ * Each distinct instance can then be given its own name, and added to the cache separately.
+ * However, when choosing to do so, be aware that textures often consume significant memory.
+ *
+ * CC3Texture is the root of a class-cluster. The object returned may be an instance of a
+ * different class than the receiver.
+ */
++(id) textureCubeColoredForAxes;
 
 /**
  * Returns a texture name derived from the specified file path.
@@ -1100,7 +1252,7 @@
  *
  * This implementation returns the lastComponent of the specified file path.
  */
-+(NSString*) textureNameFromFilePath: (NSString*) aFilePath;
++(NSString*) textureNameFromFilePath: (NSString*) filePath;
 
 /**
  * Returns a description formatted as a source-code line for loading this texture from a file.
@@ -1343,7 +1495,7 @@
  * This method does not automatically generate a mipmap. If you want a mipmap, you should
  * invoke the generateMipmap method once all six faces have been loaded.
  */
--(BOOL) loadCubeFace: (GLenum) faceTarget fromFile: (NSString*) aFilePath;
+-(BOOL) loadCubeFace: (GLenum) faceTarget fromFile: (NSString*) filePath;
 
 /**
  * Loads the six cube face textures at the specified file paths, and returns whether all
@@ -1600,51 +1752,6 @@
 	BOOL _isUpsideDown : 1;
 }
 
-/** 
- * The texture ID used to identify this texture to the GL engine.
- *
- * This implementation allows this property to be set, in order to permit an instance
- * to be created from a CC3Texture.
- */
-@property(nonatomic,readwrite) GLuint name;
-
-/** Returns a pointer to the texture image data. */
-@property(nonatomic, readonly) const GLvoid* imageData;
-
-/**
- * Returns the GL engine pixel format of the texture.
- *
- * See the pixelFormat property of CC3Texture for the range of possible values.
- */
-@property(nonatomic, readonly) GLenum pixelGLFormat;
-
-/**
- * Returns the pixel data type.
- *
- * Possible values depend on the value of the pixelFormat property. See the pixelType
- * property of CC3Texture for the range of possible values.
- */
-@property(nonatomic, readonly) GLenum pixelGLType;
-
-/** 
- * Indicates whether this texture has an alpha channel, representing opacity.
- *
- * The value of this property is derived from the value of the pixelGLFomat property.
- */
-@property(nonatomic, readonly) BOOL hasAlpha;
-
-/** Returns the number of bytes in each pixel of content. */
-@property(nonatomic, readonly) GLuint bytesPerPixel;
-
-/**
- * Indicates whether this texture is upside-down.
- *
- * The vertical axis of the coordinate system of OpenGL is inverted relative to the CoreGraphics
- * view coordinate system. As a result, any texture content created from a CGImage will be upside
- * down. This includes texture content loaded from a file by an instance of this class.
- */
-@property(nonatomic, readonly) BOOL isUpsideDown;
-
 
 #pragma mark Transforming image in memory
 
@@ -1698,7 +1805,7 @@
  *
  * The value of the isUpsideDown is set to YES.
  */
--(id) initFromFile: (NSString*) aFilePath;
+-(id) initFromFile: (NSString*) filePath;
 
 /** 
  * Initializes this instance from the content in the specified CGImage.
@@ -1715,7 +1822,27 @@
  *
  * The value of the isUpsideDown is set to NO.
  */
--(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type;
+-(id) initWithSize: (CC3IntSize) size withPixelFormat: (GLenum) format withPixelType: (GLenum) type;
+
+/** @deprecated Use initWithSize:withPixelFormat:withPixelType: */
+-(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type __deprecated;
+
+/**
+ * Initializes this instance containing pixel content of the specified size and solid, uniform color.
+ *
+ * This method is useful for creating a blank tetxure canvas of a particular size and color.
+ * By accessing the imageData property, the application can then draw pixels to this canvas.
+ */
+-(id) initWithSize: (CC3IntSize) size withColor: (ccColor4B) color;
+
+/**
+ * Allocates and initializes an autoreleased instance containing pixel content of the 
+ * specified size and solid, uniform color.
+ *
+ * This method is useful for creating a blank tetxure canvas of a particular size and color.
+ * By accessing the imageData property, the application can then draw pixels to this canvas.
+ */
++(id) textureWithSize: (CC3IntSize) size withColor: (ccColor4B) color;
 
 /** Initializes this instance to represent the same GL texture as the specified CC3Texture. */
 -(id) initFromCC3Texture: (CC3Texture*) texture;
@@ -1724,6 +1851,149 @@
 +(id) textureFromCC3Texture: (CC3Texture*) texture;
 
 @end
+
+
+#pragma mark -
+#pragma mark CCTexture extension
+
+/** Extension category to support cocos3d functionality. */
+@interface CCTexture (CC3)
+
+/** Sets the GL texture ID. */
+-(void) setName: (GLuint) name;
+
+/**
+ * Returns the GL engine pixel format of the texture.
+ *
+ * See the pixelFormat property of CC3Texture for the range of possible values.
+ */
+@property(nonatomic, readonly) GLenum pixelGLFormat;
+
+/**
+ * Returns the pixel data type.
+ *
+ * Possible values depend on the value of the pixelFormat property. See the pixelType
+ * property of CC3Texture for the range of possible values.
+ */
+@property(nonatomic, readonly) GLenum pixelGLType;
+
+/**
+ * Indicates whether this texture has an alpha channel, representing opacity.
+ *
+ * The value of this property is derived from the value of the pixelGLFomat property.
+ */
+@property(nonatomic, readonly) BOOL hasAlpha;
+
+/** Returns the number of bytes in each pixel of content. */
+@property(nonatomic, readonly) GLuint bytesPerPixel;
+
+/**
+ * Returns whether a mipmap has been generated for this texture.
+ *
+ * Mipmaps can also be generated by invoking the generateMipmap method.
+ */
+@property(nonatomic, readonly) BOOL hasMipmap;
+
+/**
+ * Indicates whether this texture is upside-down.
+ *
+ * The vertical axis of the coordinate system of OpenGL is inverted relative to the CoreGraphics
+ * view coordinate system. As a result, texture content can be initially loaded upside down.
+ * When this happens, this property will return YES, otherwise, it will return NO.
+ */
+@property(nonatomic, readonly) BOOL isUpsideDown;
+
+/**
+ * Indicates whether texture are loaded upside-down.
+ *
+ * For Cocos2D 3.0 and before, textures are loaded and applied upside-down. 
+ * For Cocos2D 3.1 and after, textures are loaded and applied right-side-up.
+ */
++(BOOL) texturesAreLoadedUpsideDown;
+
+
+#pragma mark Transforming image in memory
+
+/** Returns NULL. For compatibility with CC3Texture2DContent. */
+@property(nonatomic, readonly) const GLvoid* imageData;
+
+/** Does nothing. For compatibility with CC3Texture2DContent. */
+-(void) flipVertically;
+
+/** Does nothing. For compatibility with CC3Texture2DContent. */
+-(void) flipHorizontally;
+
+/** Does nothing. For compatibility with CC3Texture2DContent. */
+-(void) rotateHalfCircle;
+
+/**
+ * Resizes this texture to the specified dimensions.
+ *
+ * This method changes the values of the size, width, height, maxS & maxT properties, and
+ * deletes any contained image data, but does not make any changes to the texture within the
+ * GL engine. This method is invoked during the resizing of a texture that backs a surface.
+ */
+-(void) resizeTo: (CC3IntSize) size;
+
+/** Does nothing. For compatibility with CC3Texture2DContent. */
+-(void) deleteImageData;
+
+
+#pragma mark Caching
+
+/**
+ * If a CCTexture with the specified name does not already exist in the CCTextureCache,
+ * this texture is added to the CCTextureCache under that name.
+ *
+ * If a texture already exists in the cache under the specified name, or if the specified
+ * name is nil, this texture is not added to the cache.
+ */
+-(void) addToCacheWithName: (NSString*) texName;
+
+#if CC3_CC2_CLASSIC
+
+/** Legacy support for renamed pixelsWide property. */
+@property(nonatomic,readonly) NSUInteger pixelWidth;
+
+/** Legacy support for renamed pixelsHigh property. */
+@property(nonatomic,readonly) NSUInteger pixelHeight;
+
+#endif	// CC3_CC2_CLASSIC
+
+@end
+
+
+#pragma mark -
+#pragma mark CCTextureCache extension
+
+/** Extension category to support cocos3d functionality. */
+@interface CCTextureCache (CC3)
+
+/**
+ * If a texture with the specified name does not already exist in this cache, the specified
+ * texture is added under the specified name.
+ *
+ * If a texture already exists in this cache under the specified name, or if either the
+ * specified texture or specified name is nil, the texture is not added to the cache.
+ */
+-(void) addTexture: (CCTexture*) tex2D named: (NSString*) texName;
+
+@end
+
+/** Returns the OpenGL pixel format corresponding to the specfied CCTexturePixelFormat. */
+GLenum CC3PixelGLFormatFromCCTexturePixelFormat(CCTexturePixelFormat pixelFormat);
+
+/** Returns the OpenGL pixel type corresponding to the specfied CCTexturePixelFormat. */
+GLenum CC3PixelGLTypeFromCCTexturePixelFormat(CCTexturePixelFormat pixelFormat);
+
+/**
+ * Returns the CCTexturePixelFormat corresponding to the specified OpenGL pixel format and type.
+ *
+ * Not all combinations of OpenGL pixel format and type can be mapped to a corresponding
+ * CCTexturePixelFormat value. In those cases, this function returns CCTexturePixelFormat_Default.
+ */
+CCTexturePixelFormat CCTexturePixelFormatFromGLFormatAndType(GLenum pixelFormat, GLenum pixelType);
+
 
 // Macros for legacy references to removed classes and methods
 #define CC3GLTexture			CC3Texture

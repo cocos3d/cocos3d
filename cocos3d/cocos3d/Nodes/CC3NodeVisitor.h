@@ -35,7 +35,8 @@
 #import "CC3PerformanceStatistics.h"
 #import "CC3OpenGL.h"
 
-@class CC3Node, CC3MeshNode, CC3Camera, CC3Light, CC3Scene, CC3ShaderProgram;
+@class CC3Node, CC3MeshNode, CC3Camera, CC3Light, CC3LightProbe;
+@class CC3Scene, CC3ShaderProgram, CC3SceneDrawingSurfaceManager;
 @class CC3Material, CC3TextureUnit, CC3Mesh, CC3NodeSequencer, CC3SkinSection;
 @protocol CC3RenderSurface;
 
@@ -212,8 +213,8 @@
  */
 @property(nonatomic, readonly) CC3ShaderProgram* currentShaderProgram;
 
-/** The number of lights in the scene. */
-@property(nonatomic, readonly) NSUInteger lightCount;
+/** Number of lights in the scene. */
+@property(nonatomic, readonly) GLuint lightCount;
 
 /**
  * Returns the light indicated by the index, or nil if the specified index is greater than
@@ -223,6 +224,17 @@
  * the same as the lightIndex property of the CC3Light.
  */
 -(CC3Light*) lightAt: (GLuint) index;
+
+/** Min of number of light probes in the scene, and the number used by the shader program. */
+@property(nonatomic, readonly) GLuint lightProbeCount;
+
+/**
+ * Returns the light probe indicated by the index, or nil if the specified index is 
+ * greater than the number of light probes currently existing in the scene.
+ *
+ * The specified index is an index into the lightProbes array of the scene.
+ */
+-(CC3LightProbe*) lightProbeAt: (GLuint) index;
 
 /**
  * The performanceStatistics being accumulated during the visitation runs.
@@ -269,6 +281,12 @@
 @end
 
 
+/** Enumeration of drawing visitor texture modes. */
+typedef enum {
+	kCC3TextureBindingModeModel,			/**< Binding model textures. */
+	kCC3TextureBindingModeLightProbe,		/**< Binding light probe textures. */
+} CC3TextureBindingMode;
+
 #pragma mark -
 #pragma mark CC3NodeDrawingVisitor
 
@@ -290,8 +308,11 @@
 @interface CC3NodeDrawingVisitor : CC3NodeVisitor {
 	CC3NodeSequencer* _drawingSequencer;
 	CC3SkinSection* _currentSkinSection;
+	CC3SceneDrawingSurfaceManager* _surfaceManager;
 	id<CC3RenderSurface> _renderSurface;
 	CC3OpenGL* _gl;
+	CCRenderer* _ccRenderer;
+	CCRenderer* _billboardCCRenderer;
 	CC3DataArray* _boneMatricesGlobal;
 	CC3DataArray* _boneMatricesEyeSpace;
 	CC3DataArray* _boneMatricesModelSpace;
@@ -301,10 +322,13 @@
 	CC3Matrix4x4 _viewProjMatrix;
 	CC3Matrix4x3 _modelViewMatrix;
 	CC3Matrix4x4 _modelViewProjMatrix;
+	GLKMatrix4 _layerTransformMatrix;
 	ccColor4F _currentColor;
+	CC3TextureBindingMode _textureBindingMode;
 	GLuint _textureUnitCount;
 	GLuint _current2DTextureUnit;
 	GLuint _currentCubeTextureUnit;
+	GLuint _currentLightProbeTextureUnit;
 	CCTime _deltaTime;
 	BOOL _shouldDecorateNode : 1;
 	BOOL _isDrawingEnvironmentMap : 1;
@@ -312,6 +336,9 @@
 	BOOL _isMVMtxDirty : 1;
 	BOOL _isMVPMtxDirty : 1;
 }
+
+
+#pragma mark Drawing
 
 /** 
  * Returns the OpenGL engine context.
@@ -327,7 +354,7 @@
  */
 @property(nonatomic, readonly) CC3OpenGL* gl;
 
-/** 
+/**
  * Clears the reference in the gl property, so that it can be retrieved automatically on
  * the next access of the property. You can use this method before using this visitor on
  * a thread that is different  (and therefore likely a different GL engine context) than
@@ -335,13 +362,42 @@
  */
 -(void) clearGL;
 
+/** 
+ * The Cocos2D renderer. Available when using Cocos2D 3.1 and above. 
+ *
+ * If not set directly, this property will be lazily initialized on the first access to 
+ * either the renderer returned by the class-side CCRenderer currentRenderer property,
+ * if it exists, or to a new instance, if not.
+ */
+@property(nonatomic, retain) CCRenderer* ccRenderer;
+
+/** 
+ * The Cocos2D renderer for rendering 2D CCNodes embedded in the 3D scene when using
+ * Cocos2D 3.1 and above.
+ *
+ * CCNodes embedded in the 3D scene via CC3Billboard nodes must use a different renderer than
+ * the primary rendering loop, because the CC3Billboards are rendered as part of a single 
+ * rendering command for the entire 3D scene, and the CCNodes containedin the CC3Billboards
+ * cannot be added to the rendering queue, while the 3D scene is being drawn.
+ *
+ * If not set directly, this property will be lazily initialized on the first access to a 
+ * new instance, that matches the characteristics of the instance in the ccRenderer property.
+ */
+@property(nonatomic, retain) CCRenderer* billboardCCRenderer;
+
+/** Clears the ccRenderer and billboardCCRenderer properties. */
+-(void) clearCCRenderers;
+
 /**
  * The index of the current texture unit holding a 2D texture.
  *
  * This value is initialized to zero when starting to draw each material, and is incremented
  * as each 2D texture in the material is drawn.
  */
-@property(nonatomic, assign) GLuint current2DTextureUnit;
+@property(nonatomic, readonly) GLuint current2DTextureUnit;
+
+/** Increments the value fo the current2DTextureUnit property. */
+-(void) increment2DTextureUnit;
 
 /**
  * The index of the current texture unit holding a cube-map texture.
@@ -349,13 +405,14 @@
  * This value is initialized to zero when starting to draw each material, and is incremented
  * as each cube-map texture in the material is drawn.
  */
-@property(nonatomic, assign) GLuint currentCubeTextureUnit;
+@property(nonatomic, readonly) GLuint currentCubeTextureUnit;
 
-//@property(nonatomic, assign) GLuint currentTextureUnitIndex;
+/** Increments the value fo the currentCubeTextureUnit property. */
+-(void) incrementCubeTextureUnit;
 
 /** 
  * Sets the value of the current2DTextureUnit property to zero, and sets the value of the 
- * currentCubeTextureUnit property to either the value of the texture2DCount property of 
+ * currentCubeTextureUnit property to either the value of the textureCubeStart property of
  * the currentShaderProgram (OpenGL ES 2.0 & OpenGL), or to the same as the textureCount
  * property of this instance (OpenGL ES 1.1).
  *
@@ -364,10 +421,16 @@
  * consistently assigned to the shader samplers, to avoid the shaders recompiling on the
  * fly to adapt to changing texture types.
  *
+ * Additional environmental textures, such as light probes, are assigned to the texture units
+ * beyond the model's cube textures.
+ *
  * GL texture units of each type that were not used by the textures are disabled via the
  * disabledTextureUnits method.
  */
 -(void) resetTextureUnits;
+
+/** Binds environmental textures, such as light probes. */
+-(void) bindEnvironmentalTextures;
 
 /** 
  * Disables all texture units that do not have an associated texture. 
@@ -405,8 +468,8 @@
  * Indicates whether this visitor is rendering an environment map to a texture.
  *
  * Environment maps typically do not require full detail. This property can be used during
- * drawing to make optimization decisions such as to avoid drawing certain more complex
- * content when creating an environment map.
+ * drawing to make optimization decisions such as to avoid drawing more complex content 
+ * when creating an environment map.
  *
  * The initial value of this property is NO.
  */
@@ -415,7 +478,8 @@
 /**
  * Aligns this visitor to use the same camera and rendering surface as the specified visitor.
  *
- * The camera and renderSurface properties of this visitor are set to those of the specified visitor.
+ * The camera, surfaceManager, and renderSurface properties of this visitor are set to
+ * those of the specified visitor.
  *
  * You can use this method to ensure that a secondary visitor (such as a shadow visitor, 
  * or picking visitor), makes use of the same camera and surface as the primary visitor.
@@ -439,12 +503,24 @@
 #pragma mark Accessing scene content
 
 /**
+ * The surface manager that manages the surfaces to which this visitor can render.
+ *
+ * Setting this property also clears the renderSurface property, so that, if not explicitly set
+ * to another surface, it will be initialized to a surface retrieved from the new surface manager.
+ *
+ * During normal rendering, this property is set by the CC3Layer prior to rendering a CC3Scene.
+ */
+@property(nonatomic, retain) CC3SceneDrawingSurfaceManager* surfaceManager;
+
+/**
  * The rendering surface to which this visitor is rendering.
  *
  * The surface will be activated at the beginning of each visitation run.
  *
- * If not set beforehand, this property will be initialized to the value of the 
- * defaultRenderSurface property the first time it is accessed.
+ * You can set this property at any time to direct rendering to any on-screen or off-screen surface. 
+ * If not set directly, this property will be set to the value of the defaultRenderSurface property
+ * the next time it is accessed. If you have set this property to an specific surface temporarily,
+ * you can automatically revert to the defaultRenderSurface by simply setting this property to nil.
  *
  * This property is is not cleared at the end of the visitation run. It is retained so that
  * this visitor can be used to render multiple node assemblies and complete multiple drawing
@@ -453,10 +529,12 @@
 @property(nonatomic, retain) id<CC3RenderSurface> renderSurface;
 
 /**
- * Template property that returns the initial value of the renderSurface property.
+ * Template property that returns the default value used to automatically
+ * set the value of the renderSurface property.
  *
- * This implementation returns the scene's viewSurface. Since it relies on the scene property
- * haveing a value, this property will be nil unless a visitation run is in progress.
+ * This implementation returns the value of the viewSurface property of the 
+ * CC3SceneDrawingSurfaceManager held in the surfaceManager property. This
+ * is a subsection of the on-screen view surface.
  *
  * Subclasses may override to return a different surface.
  */
@@ -485,26 +563,35 @@
  */
 @property(nonatomic, assign) ccColor4B currentColor4B;
 
+/** Transforms the specified global location to the coordinate system of the camera (eye space). */
+-(CC3Vector) transformGlobalLocationToEyeSpace: (CC3Vector) globalLocation;
+
+/** Transforms the specified global location to the coordinate system of the current node. */
+-(CC3Vector) transformGlobalLocationToModelSpace: (CC3Vector) globalLocation;
+
 
 #pragma mark Environmental matrices
 
 /** Returns the current projection matrix. */
-@property(nonatomic, readonly) CC3Matrix4x4* projMatrix;
+@property(nonatomic, readonly) const CC3Matrix4x4* projMatrix;
 
 /** Returns the current view matrix. */
-@property(nonatomic, readonly) CC3Matrix4x3* viewMatrix;
+@property(nonatomic, readonly) const CC3Matrix4x3* viewMatrix;
 
 /** Returns the current model-to-global transform matrix. */
-@property(nonatomic, readonly) CC3Matrix4x3* modelMatrix;
+@property(nonatomic, readonly) const CC3Matrix4x3* modelMatrix;
 
 /** Returns the current view-projection matrix. */
-@property(nonatomic, readonly) CC3Matrix4x4* viewProjMatrix;
+@property(nonatomic, readonly) const CC3Matrix4x4* viewProjMatrix;
 
 /** Returns the current model-view matrix. */
-@property(nonatomic, readonly) CC3Matrix4x3* modelViewMatrix;
+@property(nonatomic, readonly) const CC3Matrix4x3* modelViewMatrix;
 
 /** Returns the current model-view-projection matrix. */
-@property(nonatomic, readonly) CC3Matrix4x4* modelViewProjMatrix;
+@property(nonatomic, readonly) const CC3Matrix4x4* modelViewProjMatrix;
+
+/** Returns the current CC3Layer GLKMatrix4 transform matrix. Available when using Cocos2D 3.1 and higher. */
+@property(nonatomic, readonly) const GLKMatrix4* layerTransformMatrix;
 
 /**
  * Populates the current projection matrix from the specified matrix.
@@ -523,6 +610,9 @@
 /** Populates the current model-to-global matrix from the specified matrix. */
 -(void) populateModelMatrixFrom: (CC3Matrix*) modelMtx;
 
+/** Populates the current CC3Layer transform matrix from the specified GLKMatrix4 matrix. */
+-(void) populateLayerTransformMatrixFrom: (const GLKMatrix4*) layerMtx;
+
 /**
  * Returns a pointer to the bone matrix at the specified index, from the currentSkinSection,
  * in the global coordinate system.
@@ -530,7 +620,7 @@
  * This method has meaning only during the drawing of the currentSkinSection. Attempting to
  * access this method at any other time will produced undefined results.
  */
--(CC3Matrix4x3*) globalBoneMatrixAt: (GLuint) index;
+-(const CC3Matrix4x3*) globalBoneMatrixAt: (GLuint) index;
 
 /**
  * Returns a pointer to the bone matrix at the specified index, from the currentSkinSection,
@@ -539,7 +629,7 @@
  * This method has meaning only during the drawing of the currentSkinSection. Attempting to
  * access this method at any other time will produced undefined results.
  */
--(CC3Matrix4x3*) eyeSpaceBoneMatrixAt: (GLuint) index;
+-(const CC3Matrix4x3*) eyeSpaceBoneMatrixAt: (GLuint) index;
 
 /**
  * Returns a pointer to the bone matrix at the specified index, from the currentSkinSection,
@@ -548,7 +638,7 @@
  * This method has meaning only during the drawing of the currentSkinSection. Attempting to
  * access this method at any other time will produced undefined results.
  */
--(CC3Matrix4x3*) modelSpaceBoneMatrixAt: (GLuint) index;
+-(const CC3Matrix4x3*) modelSpaceBoneMatrixAt: (GLuint) index;
 
 @end
 
@@ -598,6 +688,25 @@
  * will quadruple the tag value, etc.
  */
 @property(nonatomic, assign) GLuint tagColorShift;
+
+/**
+ * Template property that returns the default value used to automatically
+ * set the value of the renderSurface property.
+ *
+ * Overridden to return the value of the pickingSurface property of the
+ * CC3SceneDrawingSurfaceManager held in the surfaceManager property.
+ */
+@property(nonatomic, readonly) id<CC3RenderSurface> defaultRenderSurface;
+
+/**
+ * Aligns this visitor to use the same camera as the specified visitor.
+ *
+ * The camera and surfaceManager properties of this visitor are set to those of the specified visitor.
+ *
+ * The renderSurface property is left cleared, so that the defaultRenderSurface property will set
+ * it to the pickingSurface of the surfaceManager, when the renderSurface property is next accessed.
+ */
+-(void) alignShotWith: (CC3NodeDrawingVisitor*) otherVisitor;
 
 @end
 
@@ -832,7 +941,7 @@
 #pragma mark -
 #pragma mark Deprecated CC3NodeTransformingVisitor
 
-DEPRECATED_ATTRIBUTE
+__deprecated
 /** @deprecated No longer needed. CC3Node transforms are calculated lazily, without using a visitor. */
 @interface CC3NodeTransformingVisitor : CC3NodeVisitor
 
@@ -854,7 +963,7 @@ DEPRECATED_ATTRIBUTE
 #pragma mark -
 #pragma mark Deprecated CC3NodeBoundingBoxVisitor
 
-DEPRECATED_ATTRIBUTE
+__deprecated
 /** @deprecated Use boundingBox or globalBoundingBox properties of CC3Node, instead. */
 @interface CC3NodeBoundingBoxVisitor : CC3NodeVisitor {
 	BOOL _shouldLocalizeToStartingNode : 1;
@@ -862,9 +971,9 @@ DEPRECATED_ATTRIBUTE
 }
 
 /** @deprecated Use boundingBox or globalBoundingBox properties of CC3Node, instead. */
-@property(nonatomic, readonly) CC3Box boundingBox DEPRECATED_ATTRIBUTE;
+@property(nonatomic, readonly) CC3Box boundingBox __deprecated;
 
 /** @deprecated */
-@property(nonatomic, assign) BOOL shouldLocalizeToStartingNode DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) BOOL shouldLocalizeToStartingNode __deprecated;
 
 @end

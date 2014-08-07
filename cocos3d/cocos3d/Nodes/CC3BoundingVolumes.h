@@ -570,7 +570,7 @@
 -(CC3Vector) locationOfRayIntesection: (CC3Ray) localRay;
 
 /** @deprecated Replaced by the more general doesIntersect: method. */
--(BOOL) doesIntersectFrustum: (CC3Frustum*) aFrustum DEPRECATED_ATTRIBUTE;
+-(BOOL) doesIntersectFrustum: (CC3Frustum*) aFrustum __deprecated;
 
 
 #pragma mark Drawing bounding volume
@@ -884,7 +884,7 @@
 @property(nonatomic, assign) CC3Box boundingBox;
 
 /** @deprecated Use the superclass vertices property instead. */
-@property(nonatomic, readonly) CC3Vector* globalBoundingBoxVertices DEPRECATED_ATTRIBUTE;
+@property(nonatomic, readonly) CC3Vector* globalBoundingBoxVertices __deprecated;
 
 
 #pragma mark Allocation and initialization
@@ -911,7 +911,7 @@
 
 @end
 
-DEPRECATED_ATTRIBUTE
+__deprecated
 /**
  * Deprecated.
  * @deprecated Renamed to CC3NodeBoxBoundingVolume.
@@ -1151,7 +1151,7 @@ DEPRECATED_ATTRIBUTE
 +(id) boundingVolumeCircumscribingBox: (CC3Box) box;
 
 /**@deprecated Use boundingVolume instead. */
-+(id) vertexLocationsSphereandBoxBoundingVolume DEPRECATED_ATTRIBUTE;
++(id) vertexLocationsSphereandBoxBoundingVolume __deprecated;
 
 @end
 

@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A92BD9D118E127CF003D1F64 /* libcocos2d-chipmunk.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A92B421518BE3E730026B00F /* libcocos2d-chipmunk.a */; };
 		A92DA8461427C6F00051AFFA /* arial16.fnt in Resources */ = {isa = PBXBuildFile; fileRef = A92DA8211427C6F00051AFFA /* arial16.fnt */; };
 		A92DA8471427C6F00051AFFA /* arial16.png in Resources */ = {isa = PBXBuildFile; fileRef = A92DA8221427C6F00051AFFA /* arial16.png */; };
 		A92DA8491427C6F00051AFFA /* ArrowUpButton48x48.png in Resources */ = {isa = PBXBuildFile; fileRef = A92DA8241427C6F00051AFFA /* ArrowUpButton48x48.png */; };
@@ -16,7 +15,6 @@
 		A92DA84D1427C6F00051AFFA /* cocos3dMascot.pod in Resources */ = {isa = PBXBuildFile; fileRef = A92DA8281427C6F00051AFFA /* cocos3dMascot.pod */; };
 		A92DA8521427C6F00051AFFA /* fire.png in Resources */ = {isa = PBXBuildFile; fileRef = A92DA82D1427C6F00051AFFA /* fire.png */; };
 		A92DA8531427C6F00051AFFA /* fps_images.png in Resources */ = {isa = PBXBuildFile; fileRef = A92DA82E1427C6F00051AFFA /* fps_images.png */; };
-		A93C00391821B278003A0C43 /* configuration.json in Resources */ = {isa = PBXBuildFile; fileRef = A93C00381821B278003A0C43 /* configuration.json */; };
 		A946374F18898D7B0097E355 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = A946374B18898D7B0097E355 /* AppDelegate.m */; };
 		A946375218898D7B0097E355 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = A946374E18898D7B0097E355 /* main.m */; };
 		A946375618898F790097E355 /* Images-iOS.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A946375518898F780097E355 /* Images-iOS.xcassets */; };
@@ -39,6 +37,7 @@
 		A971D31C1663ECDE00769DC5 /* fps_images-ipadhd.png in Resources */ = {isa = PBXBuildFile; fileRef = A971D31A1663ECDE00769DC5 /* fps_images-ipadhd.png */; };
 		A97A31351689004C004CBAA1 /* fps_images_1.png in Resources */ = {isa = PBXBuildFile; fileRef = A97A31341689004C004CBAA1 /* fps_images_1.png */; };
 		A97DA66A1418056200D72A4B /* TileLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = A97DA6691418056100D72A4B /* TileLayer.m */; };
+		A99652371954852C0056A068 /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A99652361954852C0056A068 /* GLKit.framework */; };
 		A9A3600B17F47E5400C76E2B /* BeachBall.pod in Resources */ = {isa = PBXBuildFile; fileRef = A9A3600A17F47E5400C76E2B /* BeachBall.pod */; };
 		A9A3600D17F47E6300C76E2B /* DieCube.pod in Resources */ = {isa = PBXBuildFile; fileRef = A9A3600C17F47E6300C76E2B /* DieCube.pod */; };
 		A9A3600F17F47E7700C76E2B /* hello-world.pod in Resources */ = {isa = PBXBuildFile; fileRef = A9A3600E17F47E7700C76E2B /* hello-world.pod */; };
@@ -62,52 +61,54 @@
 		A9A3603517F47EB000C76E2B /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = A9A3603117F47EB000C76E2B /* Default.png */; };
 		A9A3603617F4810B00C76E2B /* libcocos3d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A9A35FFB17F47CE600C76E2B /* libcocos3d.a */; };
 		A9A3603717F4811500C76E2B /* libcocos2d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A9A3600117F47CF200C76E2B /* libcocos2d.a */; };
-		A9BA3E3018D21DB20077B14E /* CC3LibDefaultPrecision.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3DFF18D21DB20077B14E /* CC3LibDefaultPrecision.fsh */; };
-		A9BA3E3118D21DB20077B14E /* CC3LibDualSidedFragmentColor.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E0018D21DB20077B14E /* CC3LibDualSidedFragmentColor.fsh */; };
-		A9BA3E3218D21DB20077B14E /* CC3LibEnvironmentReflection.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E0118D21DB20077B14E /* CC3LibEnvironmentReflection.fsh */; };
-		A9BA3E3318D21DB20077B14E /* CC3LibSetGLFragColor.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E0218D21DB20077B14E /* CC3LibSetGLFragColor.fsh */; };
-		A9BA3E3418D21DB20077B14E /* CC3LibSetGLFragColorAlphaTest.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E0318D21DB20077B14E /* CC3LibSetGLFragColorAlphaTest.fsh */; };
-		A9BA3E3518D21DB20077B14E /* CC3LibSingleSidedFragmentColor.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E0418D21DB20077B14E /* CC3LibSingleSidedFragmentColor.fsh */; };
-		A9BA3E3618D21DB20077B14E /* CC3LibSingleTexture2D.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E0518D21DB20077B14E /* CC3LibSingleTexture2D.fsh */; };
-		A9BA3E3718D21DB20077B14E /* CC3LibTexturableBumpMapObjectSpace.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E0618D21DB20077B14E /* CC3LibTexturableBumpMapObjectSpace.fsh */; };
-		A9BA3E3818D21DB20077B14E /* CC3LibTexturableBumpMapTangentSpace.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E0718D21DB20077B14E /* CC3LibTexturableBumpMapTangentSpace.fsh */; };
-		A9BA3E3918D21DB20077B14E /* CC3LibTexturedPointSprite.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E0818D21DB20077B14E /* CC3LibTexturedPointSprite.fsh */; };
-		A9BA3E3A18D21DB20077B14E /* CC3BumpMapObjectSpace.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E0A18D21DB20077B14E /* CC3BumpMapObjectSpace.fsh */; };
-		A9BA3E3B18D21DB20077B14E /* CC3BumpMapObjectSpaceAlphaTest.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E0B18D21DB20077B14E /* CC3BumpMapObjectSpaceAlphaTest.fsh */; };
-		A9BA3E3C18D21DB20077B14E /* CC3BumpMapTangentSpace.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E0C18D21DB20077B14E /* CC3BumpMapTangentSpace.fsh */; };
-		A9BA3E3D18D21DB20077B14E /* CC3BumpMapTangentSpaceAlphaTest.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E0D18D21DB20077B14E /* CC3BumpMapTangentSpaceAlphaTest.fsh */; };
-		A9BA3E3E18D21DB20077B14E /* CC3ClipSpaceNoTexture.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E0E18D21DB20077B14E /* CC3ClipSpaceNoTexture.fsh */; };
-		A9BA3E3F18D21DB20077B14E /* CC3ClipSpaceSingleTexture.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E0F18D21DB20077B14E /* CC3ClipSpaceSingleTexture.fsh */; };
-		A9BA3E4018D21DB20077B14E /* CC3Fog.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E1018D21DB20077B14E /* CC3Fog.fsh */; };
-		A9BA3E4118D21DB20077B14E /* CC3NoTexture.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E1118D21DB20077B14E /* CC3NoTexture.fsh */; };
-		A9BA3E4218D21DB20077B14E /* CC3NoTextureAlphaTest.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E1218D21DB20077B14E /* CC3NoTextureAlphaTest.fsh */; };
-		A9BA3E4318D21DB20077B14E /* CC3NoTextureReflect.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E1318D21DB20077B14E /* CC3NoTextureReflect.fsh */; };
-		A9BA3E4418D21DB20077B14E /* CC3NoTextureReflectAlphaTest.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E1418D21DB20077B14E /* CC3NoTextureReflectAlphaTest.fsh */; };
-		A9BA3E4518D21DB20077B14E /* CC3PointSprites.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E1518D21DB20077B14E /* CC3PointSprites.fsh */; };
-		A9BA3E4618D21DB20077B14E /* CC3PointSpritesAlphaTest.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E1618D21DB20077B14E /* CC3PointSpritesAlphaTest.fsh */; };
-		A9BA3E4718D21DB20077B14E /* CC3PureColor.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E1718D21DB20077B14E /* CC3PureColor.fsh */; };
-		A9BA3E4818D21DB20077B14E /* CC3SingleTexture.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E1818D21DB20077B14E /* CC3SingleTexture.fsh */; };
-		A9BA3E4918D21DB20077B14E /* CC3SingleTextureAlphaTest.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E1918D21DB20077B14E /* CC3SingleTextureAlphaTest.fsh */; };
-		A9BA3E4A18D21DB20077B14E /* CC3SingleTextureReflect.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E1A18D21DB20077B14E /* CC3SingleTextureReflect.fsh */; };
-		A9BA3E4B18D21DB20077B14E /* CC3SingleTextureReflectAlphaTest.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E1B18D21DB20077B14E /* CC3SingleTextureReflectAlphaTest.fsh */; };
-		A9BA3E4C18D21DB20077B14E /* CC3LibBumpMapTangentSpaceLighting.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E1D18D21DB20077B14E /* CC3LibBumpMapTangentSpaceLighting.vsh */; };
-		A9BA3E4D18D21DB20077B14E /* CC3LibCameraPosition.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E1E18D21DB20077B14E /* CC3LibCameraPosition.vsh */; };
-		A9BA3E4E18D21DB20077B14E /* CC3LibConstants.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E1F18D21DB20077B14E /* CC3LibConstants.vsh */; };
-		A9BA3E4F18D21DB20077B14E /* CC3LibDefaultPrecision.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E2018D21DB20077B14E /* CC3LibDefaultPrecision.vsh */; };
-		A9BA3E5018D21DB20077B14E /* CC3LibDoubleTexture.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E2118D21DB20077B14E /* CC3LibDoubleTexture.vsh */; };
-		A9BA3E5118D21DB20077B14E /* CC3LibEnvironmentReflection.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E2218D21DB20077B14E /* CC3LibEnvironmentReflection.vsh */; };
-		A9BA3E5218D21DB20077B14E /* CC3LibIlluminatedMaterial.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E2318D21DB20077B14E /* CC3LibIlluminatedMaterial.vsh */; };
-		A9BA3E5318D21DB20077B14E /* CC3LibModelMatrices.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E2418D21DB20077B14E /* CC3LibModelMatrices.vsh */; };
-		A9BA3E5418D21DB20077B14E /* CC3LibSingleTexture.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E2518D21DB20077B14E /* CC3LibSingleTexture.vsh */; };
-		A9BA3E5518D21DB20077B14E /* CC3LibVertexPositionBones.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E2618D21DB20077B14E /* CC3LibVertexPositionBones.vsh */; };
-		A9BA3E5618D21DB20077B14E /* CC3LibVertexPositionNoBones.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E2718D21DB20077B14E /* CC3LibVertexPositionNoBones.vsh */; };
-		A9BA3E5718D21DB20077B14E /* CC3LibVertexPositionPointSprite.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E2818D21DB20077B14E /* CC3LibVertexPositionPointSprite.vsh */; };
-		A9BA3E5818D21DB20077B14E /* CC3LibVertexPositionRigidBones.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E2918D21DB20077B14E /* CC3LibVertexPositionRigidBones.vsh */; };
-		A9BA3E5918D21DB20077B14E /* CC3ClipSpaceTexturable.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E2B18D21DB20077B14E /* CC3ClipSpaceTexturable.vsh */; };
-		A9BA3E5A18D21DB20077B14E /* CC3PointSprites.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E2C18D21DB20077B14E /* CC3PointSprites.vsh */; };
-		A9BA3E5B18D21DB20077B14E /* CC3Texturable.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E2D18D21DB20077B14E /* CC3Texturable.vsh */; };
-		A9BA3E5C18D21DB20077B14E /* CC3TexturableBones.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E2E18D21DB20077B14E /* CC3TexturableBones.vsh */; };
-		A9BA3E5D18D21DB20077B14E /* CC3TexturableRigidBones.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9BA3E2F18D21DB20077B14E /* CC3TexturableRigidBones.vsh */; };
+		A9C581041952152000A5C7AD /* libcocos2d-chipmunk.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A9C580F5195214E300A5C7AD /* libcocos2d-chipmunk.a */; };
+		A9C581CA19531C7D00A5C7AD /* CC3LibDefaultPrecision.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C5819819531C7D00A5C7AD /* CC3LibDefaultPrecision.fsh */; };
+		A9C581CB19531C7D00A5C7AD /* CC3LibDualSidedFragmentColor.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C5819919531C7D00A5C7AD /* CC3LibDualSidedFragmentColor.fsh */; };
+		A9C581CC19531C7D00A5C7AD /* CC3LibEnvironmentReflection.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C5819A19531C7D00A5C7AD /* CC3LibEnvironmentReflection.fsh */; };
+		A9C581CD19531C7D00A5C7AD /* CC3LibLightProbeIllumination.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C5819B19531C7D00A5C7AD /* CC3LibLightProbeIllumination.fsh */; };
+		A9C581CE19531C7D00A5C7AD /* CC3LibSetGLFragColor.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C5819C19531C7D00A5C7AD /* CC3LibSetGLFragColor.fsh */; };
+		A9C581CF19531C7D00A5C7AD /* CC3LibSetGLFragColorAlphaTest.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C5819D19531C7D00A5C7AD /* CC3LibSetGLFragColorAlphaTest.fsh */; };
+		A9C581D019531C7D00A5C7AD /* CC3LibSingleSidedFragmentColor.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C5819E19531C7D00A5C7AD /* CC3LibSingleSidedFragmentColor.fsh */; };
+		A9C581D119531C7D00A5C7AD /* CC3LibSingleTexture2D.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C5819F19531C7D00A5C7AD /* CC3LibSingleTexture2D.fsh */; };
+		A9C581D219531C7D00A5C7AD /* CC3LibTexturableBumpMapObjectSpace.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C581A019531C7D00A5C7AD /* CC3LibTexturableBumpMapObjectSpace.fsh */; };
+		A9C581D319531C7D00A5C7AD /* CC3LibTexturableBumpMapTangentSpace.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C581A119531C7D00A5C7AD /* CC3LibTexturableBumpMapTangentSpace.fsh */; };
+		A9C581D419531C7D00A5C7AD /* CC3LibTexturedPointSprite.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C581A219531C7D00A5C7AD /* CC3LibTexturedPointSprite.fsh */; };
+		A9C581D519531C7D00A5C7AD /* CC3BumpMapObjectSpace.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C581A419531C7D00A5C7AD /* CC3BumpMapObjectSpace.fsh */; };
+		A9C581D619531C7D00A5C7AD /* CC3BumpMapObjectSpaceAlphaTest.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C581A519531C7D00A5C7AD /* CC3BumpMapObjectSpaceAlphaTest.fsh */; };
+		A9C581D719531C7D00A5C7AD /* CC3BumpMapTangentSpace.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C581A619531C7D00A5C7AD /* CC3BumpMapTangentSpace.fsh */; };
+		A9C581D819531C7D00A5C7AD /* CC3BumpMapTangentSpaceAlphaTest.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C581A719531C7D00A5C7AD /* CC3BumpMapTangentSpaceAlphaTest.fsh */; };
+		A9C581D919531C7D00A5C7AD /* CC3ClipSpaceNoTexture.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C581A819531C7D00A5C7AD /* CC3ClipSpaceNoTexture.fsh */; };
+		A9C581DA19531C7D00A5C7AD /* CC3ClipSpaceSingleTexture.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C581A919531C7D00A5C7AD /* CC3ClipSpaceSingleTexture.fsh */; };
+		A9C581DB19531C7D00A5C7AD /* CC3Fog.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C581AA19531C7D00A5C7AD /* CC3Fog.fsh */; };
+		A9C581DC19531C7D00A5C7AD /* CC3NoTexture.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C581AB19531C7D00A5C7AD /* CC3NoTexture.fsh */; };
+		A9C581DD19531C7D00A5C7AD /* CC3NoTextureAlphaTest.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C581AC19531C7D00A5C7AD /* CC3NoTextureAlphaTest.fsh */; };
+		A9C581DE19531C7D00A5C7AD /* CC3NoTextureReflect.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C581AD19531C7D00A5C7AD /* CC3NoTextureReflect.fsh */; };
+		A9C581DF19531C7D00A5C7AD /* CC3NoTextureReflectAlphaTest.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C581AE19531C7D00A5C7AD /* CC3NoTextureReflectAlphaTest.fsh */; };
+		A9C581E019531C7D00A5C7AD /* CC3PointSprites.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C581AF19531C7D00A5C7AD /* CC3PointSprites.fsh */; };
+		A9C581E119531C7D00A5C7AD /* CC3PointSpritesAlphaTest.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C581B019531C7D00A5C7AD /* CC3PointSpritesAlphaTest.fsh */; };
+		A9C581E219531C7D00A5C7AD /* CC3PureColor.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C581B119531C7D00A5C7AD /* CC3PureColor.fsh */; };
+		A9C581E319531C7D00A5C7AD /* CC3SingleTexture.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C581B219531C7D00A5C7AD /* CC3SingleTexture.fsh */; };
+		A9C581E419531C7D00A5C7AD /* CC3SingleTextureAlphaTest.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C581B319531C7D00A5C7AD /* CC3SingleTextureAlphaTest.fsh */; };
+		A9C581E519531C7D00A5C7AD /* CC3SingleTextureReflect.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C581B419531C7D00A5C7AD /* CC3SingleTextureReflect.fsh */; };
+		A9C581E619531C7D00A5C7AD /* CC3SingleTextureReflectAlphaTest.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C581B519531C7D00A5C7AD /* CC3SingleTextureReflectAlphaTest.fsh */; };
+		A9C581E719531C7D00A5C7AD /* CC3LibBumpMapTangentSpaceLighting.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C581B719531C7D00A5C7AD /* CC3LibBumpMapTangentSpaceLighting.vsh */; };
+		A9C581E819531C7D00A5C7AD /* CC3LibCameraPosition.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C581B819531C7D00A5C7AD /* CC3LibCameraPosition.vsh */; };
+		A9C581E919531C7D00A5C7AD /* CC3LibConstants.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C581B919531C7D00A5C7AD /* CC3LibConstants.vsh */; };
+		A9C581EA19531C7D00A5C7AD /* CC3LibDefaultPrecision.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C581BA19531C7D00A5C7AD /* CC3LibDefaultPrecision.vsh */; };
+		A9C581EB19531C7D00A5C7AD /* CC3LibDoubleTexture.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C581BB19531C7D00A5C7AD /* CC3LibDoubleTexture.vsh */; };
+		A9C581EC19531C7D00A5C7AD /* CC3LibEnvironmentReflection.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C581BC19531C7D00A5C7AD /* CC3LibEnvironmentReflection.vsh */; };
+		A9C581ED19531C7D00A5C7AD /* CC3LibIlluminatedMaterial.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C581BD19531C7D00A5C7AD /* CC3LibIlluminatedMaterial.vsh */; };
+		A9C581EE19531C7D00A5C7AD /* CC3LibModelMatrices.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C581BE19531C7D00A5C7AD /* CC3LibModelMatrices.vsh */; };
+		A9C581EF19531C7D00A5C7AD /* CC3LibSingleTexture.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C581BF19531C7D00A5C7AD /* CC3LibSingleTexture.vsh */; };
+		A9C581F019531C7D00A5C7AD /* CC3LibVertexPositionBones.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C581C019531C7D00A5C7AD /* CC3LibVertexPositionBones.vsh */; };
+		A9C581F119531C7D00A5C7AD /* CC3LibVertexPositionNoBones.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C581C119531C7D00A5C7AD /* CC3LibVertexPositionNoBones.vsh */; };
+		A9C581F219531C7D00A5C7AD /* CC3LibVertexPositionPointSprite.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C581C219531C7D00A5C7AD /* CC3LibVertexPositionPointSprite.vsh */; };
+		A9C581F319531C7D00A5C7AD /* CC3LibVertexPositionRigidBones.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C581C319531C7D00A5C7AD /* CC3LibVertexPositionRigidBones.vsh */; };
+		A9C581F419531C7D00A5C7AD /* CC3ClipSpaceTexturable.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C581C519531C7D00A5C7AD /* CC3ClipSpaceTexturable.vsh */; };
+		A9C581F519531C7D00A5C7AD /* CC3PointSprites.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C581C619531C7D00A5C7AD /* CC3PointSprites.vsh */; };
+		A9C581F619531C7D00A5C7AD /* CC3Texturable.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C581C719531C7D00A5C7AD /* CC3Texturable.vsh */; };
+		A9C581F719531C7D00A5C7AD /* CC3TexturableBones.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C581C819531C7D00A5C7AD /* CC3TexturableBones.vsh */; };
+		A9C581F819531C7D00A5C7AD /* CC3TexturableRigidBones.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C581C919531C7D00A5C7AD /* CC3TexturableRigidBones.vsh */; };
 		A9CCA39018E34F6800DDDBDC /* CCNodeAdornments.m in Sources */ = {isa = PBXBuildFile; fileRef = A9CCA38B18E34F6800DDDBDC /* CCNodeAdornments.m */; };
 		A9CCA39118E34F6800DDDBDC /* CCNodeExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = A9CCA38D18E34F6800DDDBDC /* CCNodeExtensions.m */; };
 		A9CCA39218E34F6800DDDBDC /* Joystick.m in Sources */ = {isa = PBXBuildFile; fileRef = A9CCA38F18E34F6800DDDBDC /* Joystick.m */; };
@@ -115,13 +116,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		A92B421418BE3E730026B00F /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = A9A35FFC17F47CF100C76E2B /* cocos2d-library-iOS.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = A96C044818BD338A003E8F91;
-			remoteInfo = ObjectiveChipmunk;
-		};
 		A94EE9DA17F48A5C005A43E7 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = A9A35FF617F47CE600C76E2B /* cocos3d-library-iOS.xcodeproj */;
@@ -150,9 +144,16 @@
 			remoteGlobalIDString = A9D8ED2917A6009300FB443C;
 			remoteInfo = "cocos2d-library-iOS";
 		};
-		A9B28AE018E1252A007B8EED /* PBXContainerItemProxy */ = {
+		A9C580F4195214E300A5C7AD /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = A9A35FFC17F47CF100C76E2B /* cocos2d-library-iOS.xcodeproj */;
+			containerPortal = A9C580F0195214E300A5C7AD /* cocos2d-chipmunk-library-iOS.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = A96C044818BD338A003E8F91;
+			remoteInfo = "cocos2d-chipmunk";
+		};
+		A9C581021952151000A5C7AD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A9C580F0195214E300A5C7AD /* cocos2d-chipmunk-library-iOS.xcodeproj */;
 			proxyType = 1;
 			remoteGlobalIDString = A96C044718BD338A003E8F91;
 			remoteInfo = "cocos2d-chipmunk";
@@ -168,7 +169,6 @@
 		A92DA8281427C6F00051AFFA /* cocos3dMascot.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = cocos3dMascot.pod; sourceTree = "<group>"; };
 		A92DA82D1427C6F00051AFFA /* fire.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fire.png; sourceTree = "<group>"; };
 		A92DA82E1427C6F00051AFFA /* fps_images.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fps_images.png; sourceTree = "<group>"; };
-		A93C00381821B278003A0C43 /* configuration.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = configuration.json; path = "CC3Demo3DTiles-iOS.approj/configuration.json"; sourceTree = "<group>"; };
 		A946374A18898D7B0097E355 /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		A946374B18898D7B0097E355 /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		A946374D18898D7B0097E355 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -196,6 +196,7 @@
 		A97A31341689004C004CBAA1 /* fps_images_1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fps_images_1.png; sourceTree = "<group>"; };
 		A97DA6681418056100D72A4B /* TileLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TileLayer.h; sourceTree = "<group>"; };
 		A97DA6691418056100D72A4B /* TileLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TileLayer.m; sourceTree = "<group>"; };
+		A99652361954852C0056A068 /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = System/Library/Frameworks/GLKit.framework; sourceTree = SDKROOT; };
 		A9A35FF617F47CE600C76E2B /* cocos3d-library-iOS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "cocos3d-library-iOS.xcodeproj"; path = "../cocos3d-library/cocos3d-library-iOS.xcodeproj"; sourceTree = "<group>"; };
 		A9A35FFC17F47CF100C76E2B /* cocos2d-library-iOS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "cocos2d-library-iOS.xcodeproj"; path = "../cocos2d-library/cocos2d-library-iOS.xcodeproj"; sourceTree = "<group>"; };
 		A9A3600A17F47E5400C76E2B /* BeachBall.pod */ = {isa = PBXFileReference; lastKnownFileType = file; name = BeachBall.pod; path = "../../../Models/Beach Ball/BeachBall.pod"; sourceTree = "<group>"; };
@@ -219,52 +220,54 @@
 		A9A3602F17F47EB000C76E2B /* Default-Landscape~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-Landscape~ipad.png"; sourceTree = "<group>"; };
 		A9A3603017F47EB000C76E2B /* Default-Portrait~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-Portrait~ipad.png"; sourceTree = "<group>"; };
 		A9A3603117F47EB000C76E2B /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
-		A9BA3DFF18D21DB20077B14E /* CC3LibDefaultPrecision.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibDefaultPrecision.fsh; sourceTree = "<group>"; };
-		A9BA3E0018D21DB20077B14E /* CC3LibDualSidedFragmentColor.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibDualSidedFragmentColor.fsh; sourceTree = "<group>"; };
-		A9BA3E0118D21DB20077B14E /* CC3LibEnvironmentReflection.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibEnvironmentReflection.fsh; sourceTree = "<group>"; };
-		A9BA3E0218D21DB20077B14E /* CC3LibSetGLFragColor.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibSetGLFragColor.fsh; sourceTree = "<group>"; };
-		A9BA3E0318D21DB20077B14E /* CC3LibSetGLFragColorAlphaTest.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibSetGLFragColorAlphaTest.fsh; sourceTree = "<group>"; };
-		A9BA3E0418D21DB20077B14E /* CC3LibSingleSidedFragmentColor.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibSingleSidedFragmentColor.fsh; sourceTree = "<group>"; };
-		A9BA3E0518D21DB20077B14E /* CC3LibSingleTexture2D.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibSingleTexture2D.fsh; sourceTree = "<group>"; };
-		A9BA3E0618D21DB20077B14E /* CC3LibTexturableBumpMapObjectSpace.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibTexturableBumpMapObjectSpace.fsh; sourceTree = "<group>"; };
-		A9BA3E0718D21DB20077B14E /* CC3LibTexturableBumpMapTangentSpace.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibTexturableBumpMapTangentSpace.fsh; sourceTree = "<group>"; };
-		A9BA3E0818D21DB20077B14E /* CC3LibTexturedPointSprite.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibTexturedPointSprite.fsh; sourceTree = "<group>"; };
-		A9BA3E0A18D21DB20077B14E /* CC3BumpMapObjectSpace.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3BumpMapObjectSpace.fsh; sourceTree = "<group>"; };
-		A9BA3E0B18D21DB20077B14E /* CC3BumpMapObjectSpaceAlphaTest.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3BumpMapObjectSpaceAlphaTest.fsh; sourceTree = "<group>"; };
-		A9BA3E0C18D21DB20077B14E /* CC3BumpMapTangentSpace.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3BumpMapTangentSpace.fsh; sourceTree = "<group>"; };
-		A9BA3E0D18D21DB20077B14E /* CC3BumpMapTangentSpaceAlphaTest.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3BumpMapTangentSpaceAlphaTest.fsh; sourceTree = "<group>"; };
-		A9BA3E0E18D21DB20077B14E /* CC3ClipSpaceNoTexture.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3ClipSpaceNoTexture.fsh; sourceTree = "<group>"; };
-		A9BA3E0F18D21DB20077B14E /* CC3ClipSpaceSingleTexture.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3ClipSpaceSingleTexture.fsh; sourceTree = "<group>"; };
-		A9BA3E1018D21DB20077B14E /* CC3Fog.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3Fog.fsh; sourceTree = "<group>"; };
-		A9BA3E1118D21DB20077B14E /* CC3NoTexture.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3NoTexture.fsh; sourceTree = "<group>"; };
-		A9BA3E1218D21DB20077B14E /* CC3NoTextureAlphaTest.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3NoTextureAlphaTest.fsh; sourceTree = "<group>"; };
-		A9BA3E1318D21DB20077B14E /* CC3NoTextureReflect.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3NoTextureReflect.fsh; sourceTree = "<group>"; };
-		A9BA3E1418D21DB20077B14E /* CC3NoTextureReflectAlphaTest.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3NoTextureReflectAlphaTest.fsh; sourceTree = "<group>"; };
-		A9BA3E1518D21DB20077B14E /* CC3PointSprites.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3PointSprites.fsh; sourceTree = "<group>"; };
-		A9BA3E1618D21DB20077B14E /* CC3PointSpritesAlphaTest.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3PointSpritesAlphaTest.fsh; sourceTree = "<group>"; };
-		A9BA3E1718D21DB20077B14E /* CC3PureColor.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3PureColor.fsh; sourceTree = "<group>"; };
-		A9BA3E1818D21DB20077B14E /* CC3SingleTexture.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3SingleTexture.fsh; sourceTree = "<group>"; };
-		A9BA3E1918D21DB20077B14E /* CC3SingleTextureAlphaTest.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3SingleTextureAlphaTest.fsh; sourceTree = "<group>"; };
-		A9BA3E1A18D21DB20077B14E /* CC3SingleTextureReflect.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3SingleTextureReflect.fsh; sourceTree = "<group>"; };
-		A9BA3E1B18D21DB20077B14E /* CC3SingleTextureReflectAlphaTest.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3SingleTextureReflectAlphaTest.fsh; sourceTree = "<group>"; };
-		A9BA3E1D18D21DB20077B14E /* CC3LibBumpMapTangentSpaceLighting.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibBumpMapTangentSpaceLighting.vsh; sourceTree = "<group>"; };
-		A9BA3E1E18D21DB20077B14E /* CC3LibCameraPosition.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibCameraPosition.vsh; sourceTree = "<group>"; };
-		A9BA3E1F18D21DB20077B14E /* CC3LibConstants.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibConstants.vsh; sourceTree = "<group>"; };
-		A9BA3E2018D21DB20077B14E /* CC3LibDefaultPrecision.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibDefaultPrecision.vsh; sourceTree = "<group>"; };
-		A9BA3E2118D21DB20077B14E /* CC3LibDoubleTexture.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibDoubleTexture.vsh; sourceTree = "<group>"; };
-		A9BA3E2218D21DB20077B14E /* CC3LibEnvironmentReflection.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibEnvironmentReflection.vsh; sourceTree = "<group>"; };
-		A9BA3E2318D21DB20077B14E /* CC3LibIlluminatedMaterial.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibIlluminatedMaterial.vsh; sourceTree = "<group>"; };
-		A9BA3E2418D21DB20077B14E /* CC3LibModelMatrices.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibModelMatrices.vsh; sourceTree = "<group>"; };
-		A9BA3E2518D21DB20077B14E /* CC3LibSingleTexture.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibSingleTexture.vsh; sourceTree = "<group>"; };
-		A9BA3E2618D21DB20077B14E /* CC3LibVertexPositionBones.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibVertexPositionBones.vsh; sourceTree = "<group>"; };
-		A9BA3E2718D21DB20077B14E /* CC3LibVertexPositionNoBones.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibVertexPositionNoBones.vsh; sourceTree = "<group>"; };
-		A9BA3E2818D21DB20077B14E /* CC3LibVertexPositionPointSprite.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibVertexPositionPointSprite.vsh; sourceTree = "<group>"; };
-		A9BA3E2918D21DB20077B14E /* CC3LibVertexPositionRigidBones.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibVertexPositionRigidBones.vsh; sourceTree = "<group>"; };
-		A9BA3E2B18D21DB20077B14E /* CC3ClipSpaceTexturable.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3ClipSpaceTexturable.vsh; sourceTree = "<group>"; };
-		A9BA3E2C18D21DB20077B14E /* CC3PointSprites.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3PointSprites.vsh; sourceTree = "<group>"; };
-		A9BA3E2D18D21DB20077B14E /* CC3Texturable.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3Texturable.vsh; sourceTree = "<group>"; };
-		A9BA3E2E18D21DB20077B14E /* CC3TexturableBones.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3TexturableBones.vsh; sourceTree = "<group>"; };
-		A9BA3E2F18D21DB20077B14E /* CC3TexturableRigidBones.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3TexturableRigidBones.vsh; sourceTree = "<group>"; };
+		A9C580F0195214E300A5C7AD /* cocos2d-chipmunk-library-iOS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "cocos2d-chipmunk-library-iOS.xcodeproj"; path = "../cocos2d-library/cocos2d-chipmunk-library-iOS.xcodeproj"; sourceTree = "<group>"; };
+		A9C5819819531C7D00A5C7AD /* CC3LibDefaultPrecision.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibDefaultPrecision.fsh; sourceTree = "<group>"; };
+		A9C5819919531C7D00A5C7AD /* CC3LibDualSidedFragmentColor.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibDualSidedFragmentColor.fsh; sourceTree = "<group>"; };
+		A9C5819A19531C7D00A5C7AD /* CC3LibEnvironmentReflection.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibEnvironmentReflection.fsh; sourceTree = "<group>"; };
+		A9C5819B19531C7D00A5C7AD /* CC3LibLightProbeIllumination.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibLightProbeIllumination.fsh; sourceTree = "<group>"; };
+		A9C5819C19531C7D00A5C7AD /* CC3LibSetGLFragColor.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibSetGLFragColor.fsh; sourceTree = "<group>"; };
+		A9C5819D19531C7D00A5C7AD /* CC3LibSetGLFragColorAlphaTest.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibSetGLFragColorAlphaTest.fsh; sourceTree = "<group>"; };
+		A9C5819E19531C7D00A5C7AD /* CC3LibSingleSidedFragmentColor.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibSingleSidedFragmentColor.fsh; sourceTree = "<group>"; };
+		A9C5819F19531C7D00A5C7AD /* CC3LibSingleTexture2D.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibSingleTexture2D.fsh; sourceTree = "<group>"; };
+		A9C581A019531C7D00A5C7AD /* CC3LibTexturableBumpMapObjectSpace.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibTexturableBumpMapObjectSpace.fsh; sourceTree = "<group>"; };
+		A9C581A119531C7D00A5C7AD /* CC3LibTexturableBumpMapTangentSpace.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibTexturableBumpMapTangentSpace.fsh; sourceTree = "<group>"; };
+		A9C581A219531C7D00A5C7AD /* CC3LibTexturedPointSprite.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibTexturedPointSprite.fsh; sourceTree = "<group>"; };
+		A9C581A419531C7D00A5C7AD /* CC3BumpMapObjectSpace.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3BumpMapObjectSpace.fsh; sourceTree = "<group>"; };
+		A9C581A519531C7D00A5C7AD /* CC3BumpMapObjectSpaceAlphaTest.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3BumpMapObjectSpaceAlphaTest.fsh; sourceTree = "<group>"; };
+		A9C581A619531C7D00A5C7AD /* CC3BumpMapTangentSpace.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3BumpMapTangentSpace.fsh; sourceTree = "<group>"; };
+		A9C581A719531C7D00A5C7AD /* CC3BumpMapTangentSpaceAlphaTest.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3BumpMapTangentSpaceAlphaTest.fsh; sourceTree = "<group>"; };
+		A9C581A819531C7D00A5C7AD /* CC3ClipSpaceNoTexture.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3ClipSpaceNoTexture.fsh; sourceTree = "<group>"; };
+		A9C581A919531C7D00A5C7AD /* CC3ClipSpaceSingleTexture.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3ClipSpaceSingleTexture.fsh; sourceTree = "<group>"; };
+		A9C581AA19531C7D00A5C7AD /* CC3Fog.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3Fog.fsh; sourceTree = "<group>"; };
+		A9C581AB19531C7D00A5C7AD /* CC3NoTexture.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3NoTexture.fsh; sourceTree = "<group>"; };
+		A9C581AC19531C7D00A5C7AD /* CC3NoTextureAlphaTest.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3NoTextureAlphaTest.fsh; sourceTree = "<group>"; };
+		A9C581AD19531C7D00A5C7AD /* CC3NoTextureReflect.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3NoTextureReflect.fsh; sourceTree = "<group>"; };
+		A9C581AE19531C7D00A5C7AD /* CC3NoTextureReflectAlphaTest.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3NoTextureReflectAlphaTest.fsh; sourceTree = "<group>"; };
+		A9C581AF19531C7D00A5C7AD /* CC3PointSprites.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3PointSprites.fsh; sourceTree = "<group>"; };
+		A9C581B019531C7D00A5C7AD /* CC3PointSpritesAlphaTest.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3PointSpritesAlphaTest.fsh; sourceTree = "<group>"; };
+		A9C581B119531C7D00A5C7AD /* CC3PureColor.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3PureColor.fsh; sourceTree = "<group>"; };
+		A9C581B219531C7D00A5C7AD /* CC3SingleTexture.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3SingleTexture.fsh; sourceTree = "<group>"; };
+		A9C581B319531C7D00A5C7AD /* CC3SingleTextureAlphaTest.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3SingleTextureAlphaTest.fsh; sourceTree = "<group>"; };
+		A9C581B419531C7D00A5C7AD /* CC3SingleTextureReflect.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3SingleTextureReflect.fsh; sourceTree = "<group>"; };
+		A9C581B519531C7D00A5C7AD /* CC3SingleTextureReflectAlphaTest.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3SingleTextureReflectAlphaTest.fsh; sourceTree = "<group>"; };
+		A9C581B719531C7D00A5C7AD /* CC3LibBumpMapTangentSpaceLighting.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibBumpMapTangentSpaceLighting.vsh; sourceTree = "<group>"; };
+		A9C581B819531C7D00A5C7AD /* CC3LibCameraPosition.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibCameraPosition.vsh; sourceTree = "<group>"; };
+		A9C581B919531C7D00A5C7AD /* CC3LibConstants.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibConstants.vsh; sourceTree = "<group>"; };
+		A9C581BA19531C7D00A5C7AD /* CC3LibDefaultPrecision.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibDefaultPrecision.vsh; sourceTree = "<group>"; };
+		A9C581BB19531C7D00A5C7AD /* CC3LibDoubleTexture.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibDoubleTexture.vsh; sourceTree = "<group>"; };
+		A9C581BC19531C7D00A5C7AD /* CC3LibEnvironmentReflection.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibEnvironmentReflection.vsh; sourceTree = "<group>"; };
+		A9C581BD19531C7D00A5C7AD /* CC3LibIlluminatedMaterial.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibIlluminatedMaterial.vsh; sourceTree = "<group>"; };
+		A9C581BE19531C7D00A5C7AD /* CC3LibModelMatrices.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibModelMatrices.vsh; sourceTree = "<group>"; };
+		A9C581BF19531C7D00A5C7AD /* CC3LibSingleTexture.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibSingleTexture.vsh; sourceTree = "<group>"; };
+		A9C581C019531C7D00A5C7AD /* CC3LibVertexPositionBones.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibVertexPositionBones.vsh; sourceTree = "<group>"; };
+		A9C581C119531C7D00A5C7AD /* CC3LibVertexPositionNoBones.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibVertexPositionNoBones.vsh; sourceTree = "<group>"; };
+		A9C581C219531C7D00A5C7AD /* CC3LibVertexPositionPointSprite.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibVertexPositionPointSprite.vsh; sourceTree = "<group>"; };
+		A9C581C319531C7D00A5C7AD /* CC3LibVertexPositionRigidBones.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibVertexPositionRigidBones.vsh; sourceTree = "<group>"; };
+		A9C581C519531C7D00A5C7AD /* CC3ClipSpaceTexturable.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3ClipSpaceTexturable.vsh; sourceTree = "<group>"; };
+		A9C581C619531C7D00A5C7AD /* CC3PointSprites.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3PointSprites.vsh; sourceTree = "<group>"; };
+		A9C581C719531C7D00A5C7AD /* CC3Texturable.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3Texturable.vsh; sourceTree = "<group>"; };
+		A9C581C819531C7D00A5C7AD /* CC3TexturableBones.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3TexturableBones.vsh; sourceTree = "<group>"; };
+		A9C581C919531C7D00A5C7AD /* CC3TexturableRigidBones.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3TexturableRigidBones.vsh; sourceTree = "<group>"; };
 		A9CCA38A18E34F6800DDDBDC /* CCNodeAdornments.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCNodeAdornments.h; sourceTree = "<group>"; };
 		A9CCA38B18E34F6800DDDBDC /* CCNodeAdornments.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CCNodeAdornments.m; sourceTree = "<group>"; };
 		A9CCA38C18E34F6800DDDBDC /* CCNodeExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCNodeExtensions.h; sourceTree = "<group>"; };
@@ -282,12 +285,13 @@
 			files = (
 				A9A3603617F4810B00C76E2B /* libcocos3d.a in Frameworks */,
 				A9A3603717F4811500C76E2B /* libcocos2d.a in Frameworks */,
-				A92BD9D118E127CF003D1F64 /* libcocos2d-chipmunk.a in Frameworks */,
+				A9C581041952152000A5C7AD /* libcocos2d-chipmunk.a in Frameworks */,
 				A9473C1814100DA5006F410C /* AudioToolbox.framework in Frameworks */,
 				A9473C1A14100DA5006F410C /* AVFoundation.framework in Frameworks */,
 				A9473C2014100DA5006F410C /* CoreGraphics.framework in Frameworks */,
 				A96E1FF418EB76080080FA2F /* CoreText.framework in Frameworks */,
 				A9473C1E14100DA5006F410C /* Foundation.framework in Frameworks */,
+				A99652371954852C0056A068 /* GLKit.framework in Frameworks */,
 				A9473C1614100DA5006F410C /* OpenAL.framework in Frameworks */,
 				A9473C1414100DA5006F410C /* OpenGLES.framework in Frameworks */,
 				A9473C1214100DA5006F410C /* QuartzCore.framework in Frameworks */,
@@ -323,14 +327,6 @@
 			path = ../Common/Resources;
 			sourceTree = "<group>";
 		};
-		A93C00361821B1FD003A0C43 /* Apportable */ = {
-			isa = PBXGroup;
-			children = (
-				A93C00381821B278003A0C43 /* configuration.json */,
-			);
-			name = Apportable;
-			sourceTree = "<group>";
-		};
 		A946374918898D7B0097E355 /* iOS Support */ = {
 			isa = PBXGroup;
 			children = (
@@ -350,13 +346,13 @@
 				A9CCA38918E34F6800DDDBDC /* Controls */,
 				A946374918898D7B0097E355 /* iOS Support */,
 				A92DA8201427C6F00051AFFA /* Resources */,
-				A9BA3DFD18D21DB20077B14E /* cocos3d-GLSL */,
-				A93C00361821B1FD003A0C43 /* Apportable */,
+				A9C5819619531C7D00A5C7AD /* cocos3d-GLSL */,
 				A946375518898F780097E355 /* Images-iOS.xcassets */,
 				A9473C1014100DA5006F410C /* Frameworks */,
 				A9473C0E14100DA5006F410C /* Products */,
 				A9A35FF617F47CE600C76E2B /* cocos3d-library-iOS.xcodeproj */,
 				A9A35FFC17F47CF100C76E2B /* cocos2d-library-iOS.xcodeproj */,
+				A9C580F0195214E300A5C7AD /* cocos2d-chipmunk-library-iOS.xcodeproj */,
 			);
 			sourceTree = "<group>";
 		};
@@ -371,6 +367,7 @@
 		A9473C1014100DA5006F410C /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				A99652361954852C0056A068 /* GLKit.framework */,
 				A9473C1714100DA5006F410C /* AudioToolbox.framework */,
 				A9473C1914100DA5006F410C /* AVFoundation.framework */,
 				A9473C1F14100DA5006F410C /* CoreGraphics.framework */,
@@ -423,7 +420,6 @@
 			isa = PBXGroup;
 			children = (
 				A9A3600117F47CF200C76E2B /* libcocos2d.a */,
-				A92B421518BE3E730026B00F /* libcocos2d-chipmunk.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -460,88 +456,97 @@
 			path = LaunchImages;
 			sourceTree = "<group>";
 		};
-		A9BA3DFD18D21DB20077B14E /* cocos3d-GLSL */ = {
+		A9C580F1195214E300A5C7AD /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A9BA3DFE18D21DB20077B14E /* FragShaderLibs */,
-				A9BA3E0918D21DB20077B14E /* FragShaders */,
-				A9BA3E1C18D21DB20077B14E /* VertexShaderLibs */,
-				A9BA3E2A18D21DB20077B14E /* VertexShaders */,
+				A9C580F5195214E300A5C7AD /* libcocos2d-chipmunk.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A9C5819619531C7D00A5C7AD /* cocos3d-GLSL */ = {
+			isa = PBXGroup;
+			children = (
+				A9C5819719531C7D00A5C7AD /* FragShaderLibs */,
+				A9C581A319531C7D00A5C7AD /* FragShaders */,
+				A9C581B619531C7D00A5C7AD /* VertexShaderLibs */,
+				A9C581C419531C7D00A5C7AD /* VertexShaders */,
 			);
 			name = "cocos3d-GLSL";
 			path = "../../cocos3d-GLSL";
 			sourceTree = "<group>";
 		};
-		A9BA3DFE18D21DB20077B14E /* FragShaderLibs */ = {
+		A9C5819719531C7D00A5C7AD /* FragShaderLibs */ = {
 			isa = PBXGroup;
 			children = (
-				A9BA3DFF18D21DB20077B14E /* CC3LibDefaultPrecision.fsh */,
-				A9BA3E0018D21DB20077B14E /* CC3LibDualSidedFragmentColor.fsh */,
-				A9BA3E0118D21DB20077B14E /* CC3LibEnvironmentReflection.fsh */,
-				A9BA3E0218D21DB20077B14E /* CC3LibSetGLFragColor.fsh */,
-				A9BA3E0318D21DB20077B14E /* CC3LibSetGLFragColorAlphaTest.fsh */,
-				A9BA3E0418D21DB20077B14E /* CC3LibSingleSidedFragmentColor.fsh */,
-				A9BA3E0518D21DB20077B14E /* CC3LibSingleTexture2D.fsh */,
-				A9BA3E0618D21DB20077B14E /* CC3LibTexturableBumpMapObjectSpace.fsh */,
-				A9BA3E0718D21DB20077B14E /* CC3LibTexturableBumpMapTangentSpace.fsh */,
-				A9BA3E0818D21DB20077B14E /* CC3LibTexturedPointSprite.fsh */,
+				A9C5819819531C7D00A5C7AD /* CC3LibDefaultPrecision.fsh */,
+				A9C5819919531C7D00A5C7AD /* CC3LibDualSidedFragmentColor.fsh */,
+				A9C5819A19531C7D00A5C7AD /* CC3LibEnvironmentReflection.fsh */,
+				A9C5819B19531C7D00A5C7AD /* CC3LibLightProbeIllumination.fsh */,
+				A9C5819C19531C7D00A5C7AD /* CC3LibSetGLFragColor.fsh */,
+				A9C5819D19531C7D00A5C7AD /* CC3LibSetGLFragColorAlphaTest.fsh */,
+				A9C5819E19531C7D00A5C7AD /* CC3LibSingleSidedFragmentColor.fsh */,
+				A9C5819F19531C7D00A5C7AD /* CC3LibSingleTexture2D.fsh */,
+				A9C581A019531C7D00A5C7AD /* CC3LibTexturableBumpMapObjectSpace.fsh */,
+				A9C581A119531C7D00A5C7AD /* CC3LibTexturableBumpMapTangentSpace.fsh */,
+				A9C581A219531C7D00A5C7AD /* CC3LibTexturedPointSprite.fsh */,
 			);
 			path = FragShaderLibs;
 			sourceTree = "<group>";
 		};
-		A9BA3E0918D21DB20077B14E /* FragShaders */ = {
+		A9C581A319531C7D00A5C7AD /* FragShaders */ = {
 			isa = PBXGroup;
 			children = (
-				A9BA3E0A18D21DB20077B14E /* CC3BumpMapObjectSpace.fsh */,
-				A9BA3E0B18D21DB20077B14E /* CC3BumpMapObjectSpaceAlphaTest.fsh */,
-				A9BA3E0C18D21DB20077B14E /* CC3BumpMapTangentSpace.fsh */,
-				A9BA3E0D18D21DB20077B14E /* CC3BumpMapTangentSpaceAlphaTest.fsh */,
-				A9BA3E0E18D21DB20077B14E /* CC3ClipSpaceNoTexture.fsh */,
-				A9BA3E0F18D21DB20077B14E /* CC3ClipSpaceSingleTexture.fsh */,
-				A9BA3E1018D21DB20077B14E /* CC3Fog.fsh */,
-				A9BA3E1118D21DB20077B14E /* CC3NoTexture.fsh */,
-				A9BA3E1218D21DB20077B14E /* CC3NoTextureAlphaTest.fsh */,
-				A9BA3E1318D21DB20077B14E /* CC3NoTextureReflect.fsh */,
-				A9BA3E1418D21DB20077B14E /* CC3NoTextureReflectAlphaTest.fsh */,
-				A9BA3E1518D21DB20077B14E /* CC3PointSprites.fsh */,
-				A9BA3E1618D21DB20077B14E /* CC3PointSpritesAlphaTest.fsh */,
-				A9BA3E1718D21DB20077B14E /* CC3PureColor.fsh */,
-				A9BA3E1818D21DB20077B14E /* CC3SingleTexture.fsh */,
-				A9BA3E1918D21DB20077B14E /* CC3SingleTextureAlphaTest.fsh */,
-				A9BA3E1A18D21DB20077B14E /* CC3SingleTextureReflect.fsh */,
-				A9BA3E1B18D21DB20077B14E /* CC3SingleTextureReflectAlphaTest.fsh */,
+				A9C581A419531C7D00A5C7AD /* CC3BumpMapObjectSpace.fsh */,
+				A9C581A519531C7D00A5C7AD /* CC3BumpMapObjectSpaceAlphaTest.fsh */,
+				A9C581A619531C7D00A5C7AD /* CC3BumpMapTangentSpace.fsh */,
+				A9C581A719531C7D00A5C7AD /* CC3BumpMapTangentSpaceAlphaTest.fsh */,
+				A9C581A819531C7D00A5C7AD /* CC3ClipSpaceNoTexture.fsh */,
+				A9C581A919531C7D00A5C7AD /* CC3ClipSpaceSingleTexture.fsh */,
+				A9C581AA19531C7D00A5C7AD /* CC3Fog.fsh */,
+				A9C581AB19531C7D00A5C7AD /* CC3NoTexture.fsh */,
+				A9C581AC19531C7D00A5C7AD /* CC3NoTextureAlphaTest.fsh */,
+				A9C581AD19531C7D00A5C7AD /* CC3NoTextureReflect.fsh */,
+				A9C581AE19531C7D00A5C7AD /* CC3NoTextureReflectAlphaTest.fsh */,
+				A9C581AF19531C7D00A5C7AD /* CC3PointSprites.fsh */,
+				A9C581B019531C7D00A5C7AD /* CC3PointSpritesAlphaTest.fsh */,
+				A9C581B119531C7D00A5C7AD /* CC3PureColor.fsh */,
+				A9C581B219531C7D00A5C7AD /* CC3SingleTexture.fsh */,
+				A9C581B319531C7D00A5C7AD /* CC3SingleTextureAlphaTest.fsh */,
+				A9C581B419531C7D00A5C7AD /* CC3SingleTextureReflect.fsh */,
+				A9C581B519531C7D00A5C7AD /* CC3SingleTextureReflectAlphaTest.fsh */,
 			);
 			path = FragShaders;
 			sourceTree = "<group>";
 		};
-		A9BA3E1C18D21DB20077B14E /* VertexShaderLibs */ = {
+		A9C581B619531C7D00A5C7AD /* VertexShaderLibs */ = {
 			isa = PBXGroup;
 			children = (
-				A9BA3E1D18D21DB20077B14E /* CC3LibBumpMapTangentSpaceLighting.vsh */,
-				A9BA3E1E18D21DB20077B14E /* CC3LibCameraPosition.vsh */,
-				A9BA3E1F18D21DB20077B14E /* CC3LibConstants.vsh */,
-				A9BA3E2018D21DB20077B14E /* CC3LibDefaultPrecision.vsh */,
-				A9BA3E2118D21DB20077B14E /* CC3LibDoubleTexture.vsh */,
-				A9BA3E2218D21DB20077B14E /* CC3LibEnvironmentReflection.vsh */,
-				A9BA3E2318D21DB20077B14E /* CC3LibIlluminatedMaterial.vsh */,
-				A9BA3E2418D21DB20077B14E /* CC3LibModelMatrices.vsh */,
-				A9BA3E2518D21DB20077B14E /* CC3LibSingleTexture.vsh */,
-				A9BA3E2618D21DB20077B14E /* CC3LibVertexPositionBones.vsh */,
-				A9BA3E2718D21DB20077B14E /* CC3LibVertexPositionNoBones.vsh */,
-				A9BA3E2818D21DB20077B14E /* CC3LibVertexPositionPointSprite.vsh */,
-				A9BA3E2918D21DB20077B14E /* CC3LibVertexPositionRigidBones.vsh */,
+				A9C581B719531C7D00A5C7AD /* CC3LibBumpMapTangentSpaceLighting.vsh */,
+				A9C581B819531C7D00A5C7AD /* CC3LibCameraPosition.vsh */,
+				A9C581B919531C7D00A5C7AD /* CC3LibConstants.vsh */,
+				A9C581BA19531C7D00A5C7AD /* CC3LibDefaultPrecision.vsh */,
+				A9C581BB19531C7D00A5C7AD /* CC3LibDoubleTexture.vsh */,
+				A9C581BC19531C7D00A5C7AD /* CC3LibEnvironmentReflection.vsh */,
+				A9C581BD19531C7D00A5C7AD /* CC3LibIlluminatedMaterial.vsh */,
+				A9C581BE19531C7D00A5C7AD /* CC3LibModelMatrices.vsh */,
+				A9C581BF19531C7D00A5C7AD /* CC3LibSingleTexture.vsh */,
+				A9C581C019531C7D00A5C7AD /* CC3LibVertexPositionBones.vsh */,
+				A9C581C119531C7D00A5C7AD /* CC3LibVertexPositionNoBones.vsh */,
+				A9C581C219531C7D00A5C7AD /* CC3LibVertexPositionPointSprite.vsh */,
+				A9C581C319531C7D00A5C7AD /* CC3LibVertexPositionRigidBones.vsh */,
 			);
 			path = VertexShaderLibs;
 			sourceTree = "<group>";
 		};
-		A9BA3E2A18D21DB20077B14E /* VertexShaders */ = {
+		A9C581C419531C7D00A5C7AD /* VertexShaders */ = {
 			isa = PBXGroup;
 			children = (
-				A9BA3E2B18D21DB20077B14E /* CC3ClipSpaceTexturable.vsh */,
-				A9BA3E2C18D21DB20077B14E /* CC3PointSprites.vsh */,
-				A9BA3E2D18D21DB20077B14E /* CC3Texturable.vsh */,
-				A9BA3E2E18D21DB20077B14E /* CC3TexturableBones.vsh */,
-				A9BA3E2F18D21DB20077B14E /* CC3TexturableRigidBones.vsh */,
+				A9C581C519531C7D00A5C7AD /* CC3ClipSpaceTexturable.vsh */,
+				A9C581C619531C7D00A5C7AD /* CC3PointSprites.vsh */,
+				A9C581C719531C7D00A5C7AD /* CC3Texturable.vsh */,
+				A9C581C819531C7D00A5C7AD /* CC3TexturableBones.vsh */,
+				A9C581C919531C7D00A5C7AD /* CC3TexturableRigidBones.vsh */,
 			);
 			path = VertexShaders;
 			sourceTree = "<group>";
@@ -576,7 +581,7 @@
 			dependencies = (
 				A94EE9DB17F48A5C005A43E7 /* PBXTargetDependency */,
 				A94EE9DD17F48A61005A43E7 /* PBXTargetDependency */,
-				A9B28AE118E1252A007B8EED /* PBXTargetDependency */,
+				A9C581031952151000A5C7AD /* PBXTargetDependency */,
 			);
 			name = CC3Demo3DTiles;
 			productName = CC3Demo3DTiles;
@@ -589,7 +594,7 @@
 		A9473C0414100DA5006F410C /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0510;
+				LastUpgradeCheck = 0600;
 			};
 			buildConfigurationList = A9473C0714100DA5006F410C /* Build configuration list for PBXProject "CC3Demo3DTiles-iOS" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -602,6 +607,10 @@
 			productRefGroup = A9473C0E14100DA5006F410C /* Products */;
 			projectDirPath = "";
 			projectReferences = (
+				{
+					ProductGroup = A9C580F1195214E300A5C7AD /* Products */;
+					ProjectRef = A9C580F0195214E300A5C7AD /* cocos2d-chipmunk-library-iOS.xcodeproj */;
+				},
 				{
 					ProductGroup = A9A35FFD17F47CF100C76E2B /* Products */;
 					ProjectRef = A9A35FFC17F47CF100C76E2B /* cocos2d-library-iOS.xcodeproj */;
@@ -619,13 +628,6 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		A92B421518BE3E730026B00F /* libcocos2d-chipmunk.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = "libcocos2d-chipmunk.a";
-			remoteRef = A92B421418BE3E730026B00F /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
 		A9A35FFB17F47CE600C76E2B /* libcocos3d.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -640,6 +642,13 @@
 			remoteRef = A9A3600017F47CF200C76E2B /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		A9C580F5195214E300A5C7AD /* libcocos2d-chipmunk.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libcocos2d-chipmunk.a";
+			remoteRef = A9C580F4195214E300A5C7AD /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 /* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
@@ -647,91 +656,91 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A9C581F719531C7D00A5C7AD /* CC3TexturableBones.vsh in Resources */,
 				A9A3603317F47EB000C76E2B /* Default-Landscape~ipad.png in Resources */,
-				A9BA3E3B18D21DB20077B14E /* CC3BumpMapObjectSpaceAlphaTest.fsh in Resources */,
-				A9BA3E5818D21DB20077B14E /* CC3LibVertexPositionRigidBones.vsh in Resources */,
-				A9BA3E5A18D21DB20077B14E /* CC3PointSprites.vsh in Resources */,
-				A9BA3E5018D21DB20077B14E /* CC3LibDoubleTexture.vsh in Resources */,
+				A9C581CA19531C7D00A5C7AD /* CC3LibDefaultPrecision.fsh in Resources */,
 				A9A3602217F47EA800C76E2B /* Icon-40@2x.png in Resources */,
-				A9BA3E5518D21DB20077B14E /* CC3LibVertexPositionBones.vsh in Resources */,
-				A9BA3E4718D21DB20077B14E /* CC3PureColor.fsh in Resources */,
-				A9BA3E3A18D21DB20077B14E /* CC3BumpMapObjectSpace.fsh in Resources */,
+				A9C581F019531C7D00A5C7AD /* CC3LibVertexPositionBones.vsh in Resources */,
 				A94EE9E517F4CED3005A43E7 /* Dragon-diffuse.jpg in Resources */,
 				A9A3602317F47EA800C76E2B /* Icon-50.png in Resources */,
 				A9A3602C17F47EA800C76E2B /* Icon-76@2x.png in Resources */,
-				A93C00391821B278003A0C43 /* configuration.json in Resources */,
+				A9C581E319531C7D00A5C7AD /* CC3SingleTexture.fsh in Resources */,
+				A9C581CE19531C7D00A5C7AD /* CC3LibSetGLFragColor.fsh in Resources */,
+				A9C581CD19531C7D00A5C7AD /* CC3LibLightProbeIllumination.fsh in Resources */,
 				A9A3600F17F47E7700C76E2B /* hello-world.pod in Resources */,
+				A9C581E819531C7D00A5C7AD /* CC3LibCameraPosition.vsh in Resources */,
 				A92DA8461427C6F00051AFFA /* arial16.fnt in Resources */,
+				A9C581E719531C7D00A5C7AD /* CC3LibBumpMapTangentSpaceLighting.vsh in Resources */,
 				A92DA8471427C6F00051AFFA /* arial16.png in Resources */,
+				A9C581D219531C7D00A5C7AD /* CC3LibTexturableBumpMapObjectSpace.fsh in Resources */,
 				A9A3603217F47EB000C76E2B /* Default-568h@2x.png in Resources */,
-				A9BA3E3D18D21DB20077B14E /* CC3BumpMapTangentSpaceAlphaTest.fsh in Resources */,
-				A9BA3E3018D21DB20077B14E /* CC3LibDefaultPrecision.fsh in Resources */,
-				A9BA3E4818D21DB20077B14E /* CC3SingleTexture.fsh in Resources */,
-				A9BA3E5218D21DB20077B14E /* CC3LibIlluminatedMaterial.vsh in Resources */,
-				A9BA3E3C18D21DB20077B14E /* CC3BumpMapTangentSpace.fsh in Resources */,
+				A9C581CC19531C7D00A5C7AD /* CC3LibEnvironmentReflection.fsh in Resources */,
 				A92DA8491427C6F00051AFFA /* ArrowUpButton48x48.png in Resources */,
+				A9C581D719531C7D00A5C7AD /* CC3BumpMapTangentSpace.fsh in Resources */,
+				A9C581DF19531C7D00A5C7AD /* CC3NoTextureReflectAlphaTest.fsh in Resources */,
 				A9A3602B17F47EA800C76E2B /* Icon-76.png in Resources */,
-				A9BA3E5418D21DB20077B14E /* CC3LibSingleTexture.vsh in Resources */,
-				A9BA3E5C18D21DB20077B14E /* CC3TexturableBones.vsh in Resources */,
-				A9BA3E5118D21DB20077B14E /* CC3LibEnvironmentReflection.vsh in Resources */,
+				A9C581D919531C7D00A5C7AD /* CC3ClipSpaceNoTexture.fsh in Resources */,
+				A9C581D019531C7D00A5C7AD /* CC3LibSingleSidedFragmentColor.fsh in Resources */,
 				A9A3602817F47EA800C76E2B /* Icon-60@2x.png in Resources */,
-				A9BA3E3F18D21DB20077B14E /* CC3ClipSpaceSingleTexture.fsh in Resources */,
-				A9BA3E4B18D21DB20077B14E /* CC3SingleTextureReflectAlphaTest.fsh in Resources */,
-				A9BA3E3218D21DB20077B14E /* CC3LibEnvironmentReflection.fsh in Resources */,
+				A9C581EE19531C7D00A5C7AD /* CC3LibModelMatrices.vsh in Resources */,
 				A92DA84B1427C6F00051AFFA /* ButtonRing48x48.png in Resources */,
-				A9BA3E3318D21DB20077B14E /* CC3LibSetGLFragColor.fsh in Resources */,
-				A9BA3E5918D21DB20077B14E /* CC3ClipSpaceTexturable.vsh in Resources */,
-				A9BA3E4C18D21DB20077B14E /* CC3LibBumpMapTangentSpaceLighting.vsh in Resources */,
-				A9BA3E4018D21DB20077B14E /* CC3Fog.fsh in Resources */,
+				A9C581E219531C7D00A5C7AD /* CC3PureColor.fsh in Resources */,
+				A9C581EA19531C7D00A5C7AD /* CC3LibDefaultPrecision.vsh in Resources */,
 				A92DA84C1427C6F00051AFFA /* cocos3dMascot.png in Resources */,
+				A9C581F219531C7D00A5C7AD /* CC3LibVertexPositionPointSprite.vsh in Resources */,
+				A9C581D519531C7D00A5C7AD /* CC3BumpMapObjectSpace.fsh in Resources */,
+				A9C581D619531C7D00A5C7AD /* CC3BumpMapObjectSpaceAlphaTest.fsh in Resources */,
+				A9C581EB19531C7D00A5C7AD /* CC3LibDoubleTexture.vsh in Resources */,
+				A9C581DE19531C7D00A5C7AD /* CC3NoTextureReflect.fsh in Resources */,
 				A92DA84D1427C6F00051AFFA /* cocos3dMascot.pod in Resources */,
-				A9BA3E4A18D21DB20077B14E /* CC3SingleTextureReflect.fsh in Resources */,
-				A9BA3E4218D21DB20077B14E /* CC3NoTextureAlphaTest.fsh in Resources */,
-				A9BA3E4618D21DB20077B14E /* CC3PointSpritesAlphaTest.fsh in Resources */,
+				A9C581F619531C7D00A5C7AD /* CC3Texturable.vsh in Resources */,
+				A9C581F119531C7D00A5C7AD /* CC3LibVertexPositionNoBones.vsh in Resources */,
+				A9C581EC19531C7D00A5C7AD /* CC3LibEnvironmentReflection.vsh in Resources */,
+				A9C581F419531C7D00A5C7AD /* CC3ClipSpaceTexturable.vsh in Resources */,
 				A94EE9E717F4CED3005A43E7 /* Dragon-normals.jpg in Resources */,
-				A9BA3E5318D21DB20077B14E /* CC3LibModelMatrices.vsh in Resources */,
 				A9A3602017F47EA800C76E2B /* Icon-29@2x.png in Resources */,
-				A9BA3E3918D21DB20077B14E /* CC3LibTexturedPointSprite.fsh in Resources */,
+				A9C581F319531C7D00A5C7AD /* CC3LibVertexPositionRigidBones.vsh in Resources */,
+				A9C581E019531C7D00A5C7AD /* CC3PointSprites.fsh in Resources */,
 				A9A3602417F47EA800C76E2B /* Icon-50@2x.png in Resources */,
+				A9C581DC19531C7D00A5C7AD /* CC3NoTexture.fsh in Resources */,
 				A9A3602717F47EA800C76E2B /* Icon-60.png in Resources */,
-				A9BA3E3618D21DB20077B14E /* CC3LibSingleTexture2D.fsh in Resources */,
-				A9BA3E3718D21DB20077B14E /* CC3LibTexturableBumpMapObjectSpace.fsh in Resources */,
+				A9C581D319531C7D00A5C7AD /* CC3LibTexturableBumpMapTangentSpace.fsh in Resources */,
+				A9C581DD19531C7D00A5C7AD /* CC3NoTextureAlphaTest.fsh in Resources */,
 				A92DA8521427C6F00051AFFA /* fire.png in Resources */,
 				A9A3602117F47EA800C76E2B /* Icon-40.png in Resources */,
-				A9BA3E4D18D21DB20077B14E /* CC3LibCameraPosition.vsh in Resources */,
-				A9BA3E4518D21DB20077B14E /* CC3PointSprites.fsh in Resources */,
 				A946375618898F790097E355 /* Images-iOS.xcassets in Resources */,
-				A9BA3E5D18D21DB20077B14E /* CC3TexturableRigidBones.vsh in Resources */,
+				A9C581E619531C7D00A5C7AD /* CC3SingleTextureReflectAlphaTest.fsh in Resources */,
 				A92DA8531427C6F00051AFFA /* fps_images.png in Resources */,
-				A9BA3E4918D21DB20077B14E /* CC3SingleTextureAlphaTest.fsh in Resources */,
+				A9C581F519531C7D00A5C7AD /* CC3PointSprites.vsh in Resources */,
+				A9C581DB19531C7D00A5C7AD /* CC3Fog.fsh in Resources */,
+				A9C581E919531C7D00A5C7AD /* CC3LibConstants.vsh in Resources */,
 				A94EE9EA17F4CED3005A43E7 /* DRAGON_LICENSE.txt in Resources */,
+				A9C581EF19531C7D00A5C7AD /* CC3LibSingleTexture.vsh in Resources */,
 				A9A3600B17F47E5400C76E2B /* BeachBall.pod in Resources */,
 				A9A3602A17F47EA800C76E2B /* Icon-72@2x.png in Resources */,
+				A9C581D119531C7D00A5C7AD /* CC3LibSingleTexture2D.fsh in Resources */,
 				A94EE9E617F4CED3005A43E7 /* Dragon-eye.jpg in Resources */,
+				A9C581E419531C7D00A5C7AD /* CC3SingleTextureAlphaTest.fsh in Resources */,
 				A9A3603417F47EB000C76E2B /* Default-Portrait~ipad.png in Resources */,
-				A9BA3E4418D21DB20077B14E /* CC3NoTextureReflectAlphaTest.fsh in Resources */,
-				A9BA3E4318D21DB20077B14E /* CC3NoTextureReflect.fsh in Resources */,
-				A9BA3E3418D21DB20077B14E /* CC3LibSetGLFragColorAlphaTest.fsh in Resources */,
+				A9C581E519531C7D00A5C7AD /* CC3SingleTextureReflect.fsh in Resources */,
 				A94EE9E917F4CED3005A43E7 /* Dragon.pod in Resources */,
+				A9C581F819531C7D00A5C7AD /* CC3TexturableRigidBones.vsh in Resources */,
 				A9A3602917F47EA800C76E2B /* Icon-72.png in Resources */,
-				A9BA3E3818D21DB20077B14E /* CC3LibTexturableBumpMapTangentSpace.fsh in Resources */,
 				A9A3602517F47EA800C76E2B /* Icon-57.png in Resources */,
-				A9BA3E4118D21DB20077B14E /* CC3NoTexture.fsh in Resources */,
-				A9BA3E4E18D21DB20077B14E /* CC3LibConstants.vsh in Resources */,
-				A9BA3E5B18D21DB20077B14E /* CC3Texturable.vsh in Resources */,
+				A9C581DA19531C7D00A5C7AD /* CC3ClipSpaceSingleTexture.fsh in Resources */,
+				A9C581D819531C7D00A5C7AD /* CC3BumpMapTangentSpaceAlphaTest.fsh in Resources */,
 				A9A3602617F47EA800C76E2B /* Icon-57@2x.png in Resources */,
-				A9BA3E5618D21DB20077B14E /* CC3LibVertexPositionNoBones.vsh in Resources */,
 				A971D31B1663ECDE00769DC5 /* fps_images-hd.png in Resources */,
 				A9A3603517F47EB000C76E2B /* Default.png in Resources */,
 				A971D31C1663ECDE00769DC5 /* fps_images-ipadhd.png in Resources */,
+				A9C581CB19531C7D00A5C7AD /* CC3LibDualSidedFragmentColor.fsh in Resources */,
 				A9A3600D17F47E6300C76E2B /* DieCube.pod in Resources */,
+				A9C581D419531C7D00A5C7AD /* CC3LibTexturedPointSprite.fsh in Resources */,
 				A97A31351689004C004CBAA1 /* fps_images_1.png in Resources */,
-				A9BA3E4F18D21DB20077B14E /* CC3LibDefaultPrecision.vsh in Resources */,
-				A9BA3E5718D21DB20077B14E /* CC3LibVertexPositionPointSprite.vsh in Resources */,
-				A9BA3E3518D21DB20077B14E /* CC3LibSingleSidedFragmentColor.fsh in Resources */,
+				A9C581CF19531C7D00A5C7AD /* CC3LibSetGLFragColorAlphaTest.fsh in Resources */,
+				A9C581E119531C7D00A5C7AD /* CC3PointSpritesAlphaTest.fsh in Resources */,
 				A9A3601F17F47EA800C76E2B /* Icon-29.png in Resources */,
-				A9BA3E3118D21DB20077B14E /* CC3LibDualSidedFragmentColor.fsh in Resources */,
-				A9BA3E3E18D21DB20077B14E /* CC3ClipSpaceNoTexture.fsh in Resources */,
+				A9C581ED19531C7D00A5C7AD /* CC3LibIlluminatedMaterial.vsh in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -766,10 +775,10 @@
 			name = "cocos2d-library-iOS";
 			targetProxy = A94EE9DC17F48A61005A43E7 /* PBXContainerItemProxy */;
 		};
-		A9B28AE118E1252A007B8EED /* PBXTargetDependency */ = {
+		A9C581031952151000A5C7AD /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = "cocos2d-chipmunk";
-			targetProxy = A9B28AE018E1252A007B8EED /* PBXContainerItemProxy */;
+			targetProxy = A9C581021952151000A5C7AD /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -779,6 +788,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_SECURITY_FLOATLOOPCOUNTER = YES;
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
@@ -797,7 +807,6 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"LOGGING_ENABLED=1",
-					"LOGGING_LEVEL_TRACE=0",
 					"LOGGING_REZLOAD=1",
 				);
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -834,6 +843,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_SECURITY_FLOATLOOPCOUNTER = YES;
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;

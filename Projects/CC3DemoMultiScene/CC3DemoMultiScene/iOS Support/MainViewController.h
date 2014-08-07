@@ -28,28 +28,35 @@
  */
 
 #import <UIKit/UIKit.h>
-#import "CC3UIViewController.h"
 
 /**
  * Identifies the types of scenes that can be selected by the scene selector control.
- * The values must correspond to the indices of the scene selector UISegmentedControl.
+ * The values correspond to the indices of the scene selector UISegmentedControl.
  */
 typedef enum {
 	kSelectedSceneMashUp,			/**< The MashUp scene was selected. */
 	kSelectedSceneTiles,			/**< The Tiles scene was selected. */
 	kSelectedScenePerformance,		/**< The Performance scene was selected. */
-	kSelectedSceneNone,				/**< The Tiles scene was selected. */
+	kSelectedSceneNone,				/**< No scene was selected. */
 } SelectedScene;
 
 /**
  * The main application view controller.
  *
- * An instance of this controller is instantiated in the main app Storyboard.
- * This controller loads and manages different CC3UIViewControllers, through
- * user interaction with standard UI controls.
+ * An instance of this controller is instantiated in the main app Storyboard. This controller 
+ * loads and manages different Cocos3D scenes, through user interaction with standard UI controls.
+ * This controller supports user selection of several separate 3D scenes, and coordinates
+ * the transition between them. When the user selects a different 3D scene, the new 3D scene
+ * is created and loaded, an animated transition is run from the old 3D scene to the new,
+ * and the old scene is released and deallocated.
+ *
+ * Since the user interface allows the same 3D scene to be repeatedly loaded and removed,
+ * background resource loading cannot be used, because GL objects must be deleted using the
+ * same GL context on which they were loaded. To ensure we don't run into trouble when 3D
+ * scenes are removed, this controller turns background loading off so that each 3D scene
+ * is loaded in the foreground.
  */
-@interface MainViewController : UIViewController <CC3OpenGLDelegate> {
-    CC3UIViewController* _cc3Controller;
+@interface MainViewController : UIViewController {
 	UIView* _cc3FrameView;
 	UISegmentedControl* _sceneSelectorControl;
 	UIActivityIndicatorView* _progressView;
@@ -57,28 +64,20 @@ typedef enum {
 }
 
 /** 
- * The current CC3UIViewController that is controlling the OpenGL view, and managing
- * the 3D scene content.
- *
- * Different controllers are created and destroyed through user interaction with the
- * UI controls on this controller.
- */
-@property (nonatomic, strong, readonly) IBOutlet CC3UIViewController* cc3Controller;
-
-/** 
- * The UIView that is used as a container for the OpenGL view that is manage by the
- * CC3ViewController in the cc3Controller property. This allows different OpenGL views
- * to be installed as needed, while defining consistent bounds for those OpenGL views.
- *
- * When a CC3UIViewController is loaded, its view is added as a subview of this view,
- * and the bounds of the OpenGL view are set to those of this view.
+ * This generic UIView is used as a container for the CCGLView view that displays the Cocos3D
+ * (and Cocos2D) scene. Since the CCGLView is created programmatically, this view is used within
+ * the Storyboard to define the size and position of the CCGLView. Once created programmatically,
+ * the CCGLView is added as a subview of this view, and made the same size as this view.
  */
 @property (strong, nonatomic) IBOutlet UIView* cc3FrameView;
 
 /** The UI control for selecting the 3D scene to display. */
 @property (strong, nonatomic) IBOutlet UISegmentedControl* sceneSelectorControl;
 
-/** A standard activity progress view, displayed while the 3D scene is loading, or being removed. */
+/** 
+ * A standard activity progress view, displayed during the transition between 3D scenes,
+ * while a 3D scene is loading, or being removed.
+ */
 @property (strong, nonatomic) IBOutlet UIActivityIndicatorView* progressView;
 
 

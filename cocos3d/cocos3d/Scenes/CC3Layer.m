@@ -33,38 +33,94 @@
 #import "CC3OpenGLFoundation.h"
 #import "CC3Environment.h"
 #import "CC3CC2Extensions.h"
-#import "CC3GLView.h"
+
+@interface CC3Scene (ProtectedMethods)
+-(void) setDeprecatedCC3Layer: (CC3Layer*) cc3Layer;
+@end
+
+@interface CCNode (ProtectedMethods)
+-(void) contentSizeChanged;
+@end
 
 
 @implementation CC3Layer
 
-@synthesize cc3Scene=_cc3Scene, shouldAlwaysUpdateViewport=_shouldAlwaysUpdateViewport;
+@synthesize shouldAlwaysUpdateViewport=_shouldAlwaysUpdateViewport;
+@synthesize shouldTrackViewSize=_shouldTrackViewSize;
 
-- (void)dealloc {
+-(void) dealloc {
 	self.cc3Scene = nil;			// Close, remove & release the scene
+	[_surfaceManager release];
+	
 	[self cc3RemoveAllGestureRecognizers];
 	[_cc3GestureRecognizers release];
+
+	[self deleteRenderStreamGroupMarker];
+
 	[super dealloc];
 }
 
- -(void) setCc3Scene: (CC3Scene*) aScene {
+-(CC3Scene*) cc3Scene {
+	if (!_cc3Scene) self.cc3Scene = [self.cc3SceneClass scene];
+	return _cc3Scene;
+}
+
+-(void) setCc3Scene: (CC3Scene*) aScene {
 	 if (aScene == _cc3Scene) return;
 
 	 [self closeCC3Scene];						// Close the old scene.
 	 [_cc3Scene wasRemoved];					// Stop actions in old scene (if shouldStopActionsWhenRemoved set).
-	 _cc3Scene.cc3Layer = nil;					// Detach this layer from old scene.
+	 _cc3Scene.deprecatedCC3Layer = nil;		// Detach this layer from old scene.
 
 	 [_cc3Scene release];
 	 _cc3Scene = [aScene retain];
 
-	 _cc3Scene.cc3Layer = self;								// Point the scene back here
+	 _cc3Scene.deprecatedCC3Layer = self;					// Point the scene back here
 	 if (self.isRunningInActiveScene) [self openCC3Scene];	// If already running, open the new scene right away
+	 
+	 [self deleteRenderStreamGroupMarker];
+}
+
+-(Class) cc3SceneClass {
+	Class sceneClass = nil;
+	NSString* baseName = nil;
+	NSString* layerClassName = NSStringFromClass(self.class);
+	
+	// If layer class name ends in "Layer", strip it and try some combinations
+	if ( [layerClassName hasSuffix: @"Layer"] ) {
+		baseName = [layerClassName substringToIndex: (layerClassName.length - @"Layer".length)];
+
+		// Try HelloLayer -> HelloScene
+		sceneClass = NSClassFromString([NSString stringWithFormat: @"%@Scene", baseName]);
+		if (sceneClass && [sceneClass isSubclassOfClass: CC3Scene.class]) return sceneClass;
+		
+		// Try HelloLayer -> Hello
+		sceneClass = NSClassFromString(baseName);
+		if (sceneClass && [sceneClass isSubclassOfClass: CC3Scene.class]) return sceneClass;
+	}
+
+	// Try Hello -> HelloScene (including HelloLayer -> HelloLayerScene)
+	sceneClass = NSClassFromString([NSString stringWithFormat: @"%@Scene", layerClassName]);
+	if (sceneClass && [sceneClass isSubclassOfClass: CC3Scene.class]) return sceneClass;
+	
+	CC3Assert(NO, @"%@ could not determine the appropriate class to instantiate to automatically populate the cc3Scene property.", self);
+	return nil;
+}
+
+/** 
+ * Override to set the shouldAlwaysUpdateViewport to YES if the parent is not the root CCScene,
+ * so that the viewport will be updated as ancestor nodes are moved around.
+ */
+-(void) setParent:(CCNode *)parent {
+	[super setParent:parent];
+	self.shouldAlwaysUpdateViewport = (parent && ![parent isKindOfClass: CCScene.class]);
 }
 
 
 #pragma mark Allocation and initialization
 
--(id) init {
+-(instancetype) init {
+	_shouldTrackViewSize = YES;		// Could be overridden during init if contentSize set to something other than view size
 	if( (self = [super init]) ) {
 		_shouldAlwaysUpdateViewport = NO;
 		[self initializeControls];
@@ -73,6 +129,8 @@
 }
 
 -(void) initializeControls {}
+
+-(NSString*) description { return [NSString stringWithFormat: @"%@ on %@", self.class, _cc3Scene]; }
 
 
 #pragma mark Transforming
@@ -104,15 +162,38 @@
 	[self updateViewport];
 }
 
+
 #pragma mark CCRGBAProtocol and CCBlendProtocol support
 
--(CCColorRef) color { return _cc3Scene.color; }
+-(CCColorRef) color { return self.cc3Scene.color; }
 
--(void)	setColor: (CCColorRef) color { _cc3Scene.color = color; }
+-(void)	setColor: (CCColorRef) color { self.cc3Scene.color = color; }
 
--(CCOpacity) opacity { return _cc3Scene.opacity; }
+-(CCOpacity) opacity { return self.cc3Scene.opacity; }
 
--(void) setOpacity: (CCOpacity) opacity { _cc3Scene.opacity = opacity; }
+-(void) setOpacity: (CCOpacity) opacity { self.cc3Scene.opacity = opacity; }
+
+
+#pragma mark Surfaces
+
+-(CC3SceneDrawingSurfaceManager*) surfaceManager {
+	if (!_surfaceManager) self.surfaceManager = [self.surfaceManagerClass surfaceManager];
+	return _surfaceManager;
+}
+
+-(void) setSurfaceManager: (CC3SceneDrawingSurfaceManager*) surfaceManager {
+	CC3Assert([surfaceManager isKindOfClass: self.surfaceManagerClass],
+			  @"The surface manager must be a type of %@", self.surfaceManagerClass);
+
+	if (surfaceManager == _surfaceManager) return;
+
+	[_surfaceManager release];
+	
+	_surfaceManager = [surfaceManager retain];
+	[self updateViewport];
+}
+
+-(Class) surfaceManagerClass { return CC3SceneDrawingSurfaceManager.class; }
 
 
 #pragma mark Updating layer
@@ -129,7 +210,7 @@
 /** Invoked automatically either from onEnter, or if new scene attached and layer is running. */
 -(void) openCC3Scene {
 	[self updateViewport];			// Set the camera viewport
-	[_cc3Scene open];				// Open the scene
+	[self.cc3Scene open];			// Open the scene
 }
 
 /** Invoked from cocos2d when this layer is removed. Closes the 3D scene.  */
@@ -143,9 +224,9 @@
 -(void) onCloseCC3Layer {}
 
 /** Invoked automatically either from onExit, or if old scene removed and layer is running. */
--(void) closeCC3Scene { [_cc3Scene close]; }
+-(void) closeCC3Scene { [_cc3Scene close]; }	// Must not use property accessor!
 
--(void) update: (CCTime)dt { [_cc3Scene updateScene: dt]; }
+-(void) update: (CCTime)dt { [self.cc3Scene updateScene: dt]; }
 
 // Lazily initialized
 -(NSArray*) cc3GestureRecognizers {
@@ -155,11 +236,11 @@
 
 -(void) cc3AddGestureRecognizer: (UIGestureRecognizer*) gesture {
 	[((NSMutableArray*)self.cc3GestureRecognizers) addObject: gesture];
-	[self.controller.view addGestureRecognizer: gesture];
+	[CCDirector.sharedDirector.view addGestureRecognizer: gesture];
 }
 
 -(void) cc3RemoveGestureRecognizer: (UIGestureRecognizer*) gesture {
-	[self.controller.view removeGestureRecognizer: gesture];
+	[CCDirector.sharedDirector.view removeGestureRecognizer: gesture];
 	[_cc3GestureRecognizers removeObjectIdenticalTo: gesture];
 }
 
@@ -172,21 +253,53 @@
 
 #pragma mark Drawing
 
--(void) draw {
+/** Draw the 3D scene with the specified drawing visitor. */
+-(void) drawSceneWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+
+	// Ensure the visitor uses the surface manager of this layer
+	visitor.surfaceManager = self.surfaceManager;
+	
 	if (_shouldAlwaysUpdateViewport) [self updateViewport];
-	[_cc3Scene drawScene];
+	
+	[self.cc3Scene drawSceneWithVisitor: visitor];
 }
 
+/** Drawing under Cocos2D 3.0 and before. */
+-(void) draw { [self drawSceneWithVisitor: self.cc3Scene.viewDrawingVisitor]; }
 
-#pragma mark CC3ControllableLayer support
+#if CC3_CC2_RENDER_QUEUE
 
-/**
- * Invoked automatically when the content size has changed.
- * Updates the viewport to match the new layer dimensions.
- */
--(void) didUpdateContentSizeFrom: (CGSize) oldSize {
-	[super didUpdateContentSizeFrom: oldSize];
+/** Drawing under Cocos2D 3.1 and after. */
+-(void) draw: (CCRenderer*) renderer transform: (const GLKMatrix4*) transform {
+	
+	// Let the drawing visitor know about the renderer and transform
+	CC3NodeDrawingVisitor* visitor = self.cc3Scene.viewDrawingVisitor;
+	visitor.ccRenderer = renderer;
+	[visitor populateLayerTransformMatrixFrom: transform];
+	
+	// Get a render command for this layer, tell it the visitor to use, and queue it
+	CC3LayerRenderCommand* renderCmd = self.renderCommand;
+	renderCmd.visitor = visitor;
+	[renderer enqueueRenderCommand: renderCmd];
+}
+
+/** Returns a CCRenderer render command to render this layer.  */
+-(CC3LayerRenderCommand*) renderCommand {
+	return [CC3LayerRenderCommand renderCommandForCC3Layer: self];
+}
+
+#endif	// CC3_CC2_RENDER_QUEUE
+
+
+#pragma mark Resizing support
+
+-(void) contentSizeChanged {
+	[super contentSizeChanged];
+	
 	[self updateViewport];
+	
+	if ( !CGSizeEqualToSize(self.contentSize, CCDirector.sharedDirector.viewSize) )
+		self.shouldTrackViewSize = NO;
 }
 
 -(void) updateViewport {
@@ -197,18 +310,34 @@
 	BOOL isFullView = (CGPointEqualToPoint(gbb.origin, CGPointZero) &&
 					   CGSizeEqualToSize(gbb.size, viewSize));
 
+	// Convert the bounds of this layer to a viewport
+	CC3Viewport vp = CC3ViewportFromCGRect(gbb);
+	
+	// Set the viewport into the view surface and the camera
+	_surfaceManager.viewSurfaceOrigin = vp.origin;
+	_surfaceManager.size = vp.size;
+	
 	CC3Camera* cam = self.cc3Scene.activeCamera;
-	cam.viewport = CC3ViewportFromCGRect(gbb);
+	cam.viewport = vp;
 	cam.shouldClipToViewport = !isFullView;
 
 	[super updateViewport];
 }
 
 /**
- * Invoked automatically when the window has been resized while running in OSX.
- * Resize this layer to fill the window.
+ * Invoked automatically when the OS view has been resized.
+ * Ensure view surfaces are resized, and if appropriate, resize this layer.
  */
--(void) reshapeProjection: (CGSize) newWindowSize { self.contentSize = newWindowSize; }
+-(void) viewDidResizeTo: (CGSize) newViewSize {
+
+	// Ensure the size of all view surfaces is updated to match new view size.
+	CC3ViewSurfaceManager.sharedViewSurfaceManager.size = CC3IntSizeFromCGSize(newViewSize);
+	
+	// If this layer should track the size of the view, update the size of this layer.
+	if (self.shouldTrackViewSize) self.contentSize = CCNodeSizeFromViewSize(newViewSize);
+
+	[super viewDidResizeTo: newViewSize];	// Propagate to descendants
+}
 
 
 #pragma mark Touch handling
@@ -407,10 +536,79 @@
 }
 
 -(BOOL) handleTouchType: (uint) touchType at: (CGPoint) touchPoint {
-	[_cc3Scene touchEvent: touchType at: touchPoint];
+	[self.cc3Scene touchEvent: touchType at: touchPoint];
 	return YES;
+}
+
+
+#pragma mark Developer support
+
+/** Lazily allocate and populate a char string built from the description property. */
+-(const char*) renderStreamGroupMarker {
+	if ( !_renderStreamGroupMarker ) {
+		NSString* desc = self.description;
+		NSUInteger buffLen = desc.length + 1;		// Plus null-term char
+		_renderStreamGroupMarker = calloc(buffLen, sizeof(char));
+		[desc getCString: _renderStreamGroupMarker maxLength: buffLen encoding: NSUTF8StringEncoding];
+	}
+	return _renderStreamGroupMarker;
+}
+
+/** Delete the memory used by the render stream group marker string. */
+-(void) deleteRenderStreamGroupMarker {
+	free(_renderStreamGroupMarker);
+	_renderStreamGroupMarker = NULL;
 }
 
 @end
 
 
+#if CC3_CC2_RENDER_QUEUE
+
+#pragma mark -
+#pragma mark CC3LayerRenderCommand
+
+@interface CCRenderer (TemplateMethods)
+-(void) bindVAO: (BOOL) bind;
+@end
+
+@implementation CC3LayerRenderCommand
+
+@synthesize visitor=_visitor;
+
+-(void) dealloc {
+	[_cc3Layer release];
+	[_visitor release];
+	[super dealloc];
+}
+
+-(NSInteger) globalSortOrder { return 0; }
+
+-(void) invokeOnRenderer: (CCRenderer*) renderer {
+	CC3OpenGL* gl = CC3OpenGL.sharedGL;
+	[gl pushGroupMarkerC: _cc3Layer.renderStreamGroupMarker];
+	
+	[renderer bindVAO: NO];
+	[_cc3Layer drawSceneWithVisitor: _visitor];
+	
+	[gl popGroupMarker];
+}
+
+
+#pragma mark Allocation and initialization
+
+-(instancetype) initForCC3Layer: (CC3Layer*) layer {
+	if((self = [super init])){
+		_cc3Layer = [layer retain];		// retained
+	}
+	
+	return self;
+}
+
++(instancetype) renderCommandForCC3Layer: (CC3Layer*) layer {
+	return [[[self alloc] initForCC3Layer: layer] autorelease];
+}
+
+@end
+
+#endif	// CC3_CC2_RENDER_QUEUE

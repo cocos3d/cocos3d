@@ -119,13 +119,13 @@
  * @deprecated Use the addContentFromPODFile: method instead, which supports both
  * absolute file paths and file paths that are relative to the resources directory.
  */
--(void) addContentFromPODResourceFile: (NSString*) aRezPath DEPRECATED_ATTRIBUTE;
+-(void) addContentFromPODResourceFile: (NSString*) aRezPath __deprecated;
 
 /**
  * @deprecated Use the addContentFromPODFile:withName: method instead, which supports
  * both absolute file paths and file paths that are relative to the resources directory.
  */
--(void) addContentFromPODResourceFile: (NSString*) aRezPath withName: (NSString*) aName DEPRECATED_ATTRIBUTE;
+-(void) addContentFromPODResourceFile: (NSString*) aRezPath withName: (NSString*) aName __deprecated;
 
 @end
 

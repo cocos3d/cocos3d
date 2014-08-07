@@ -583,31 +583,31 @@
 @interface CC3MeshNode (DeprecatedParametricShapes)
 
 /** @deprecated Renamed to populateAsRectangleWithSize:andRelativeOrigin:. */
--(void) populateAsRectangleWithSize: (CGSize) rectSize andPivot: (CGPoint) pivot DEPRECATED_ATTRIBUTE;
+-(void) populateAsRectangleWithSize: (CGSize) rectSize andPivot: (CGPoint) pivot __deprecated;
 
 /** @deprecated Renamed to populateAsRectangleWithSize:andRelativeOrigin:andTessellation. */
 -(void) populateAsRectangleWithSize: (CGSize) rectSize
 						   andPivot: (CGPoint) pivot
-					andTessellation: (CC3Tessellation) divsPerAxis DEPRECATED_ATTRIBUTE;
+					andTessellation: (CC3Tessellation) divsPerAxis __deprecated;
 
 /**
  * @deprecated Use populateAsCenteredRectangleWithSize:, as it creates a
  * rectangular mesh that can be covered with either a texture or a solid color.
  */
--(void) populateAsCenteredTexturedRectangleWithSize: (CGSize) rectSize DEPRECATED_ATTRIBUTE;
+-(void) populateAsCenteredTexturedRectangleWithSize: (CGSize) rectSize __deprecated;
 
 /**
  * @deprecated Use populateAsCenteredRectangleWithSize:andTessellation:, as it creates
  * a rectangular mesh that can be covered with either a texture or a solid color.
  */
 -(void) populateAsCenteredTexturedRectangleWithSize: (CGSize) rectSize
-									andTessellation: (CC3Tessellation) divsPerAxis DEPRECATED_ATTRIBUTE;
+									andTessellation: (CC3Tessellation) divsPerAxis __deprecated;
 
 /**
  * @deprecated Use populateAsRectangleWithSize:andRelativeOrigin:, as it creates a
  * rectangular mesh that can be covered with either a texture or a solid color.
  */
--(void) populateAsTexturedRectangleWithSize: (CGSize) rectSize andPivot: (CGPoint) pivot DEPRECATED_ATTRIBUTE;
+-(void) populateAsTexturedRectangleWithSize: (CGSize) rectSize andPivot: (CGPoint) pivot __deprecated;
 
 /**
  * @deprecated Use populateAsRectangleWithSize:andRelativeOrigin:andTessellation:, as it creates
@@ -615,7 +615,7 @@
  */
 -(void) populateAsTexturedRectangleWithSize: (CGSize) rectSize
 								   andPivot: (CGPoint) pivot
-							andTessellation: (CC3Tessellation) divsPerAxis DEPRECATED_ATTRIBUTE;
+							andTessellation: (CC3Tessellation) divsPerAxis __deprecated;
 
 /**
  * @deprecated Use the populateAsCenteredRectangleWithSize: method instead,
@@ -623,7 +623,7 @@
  */
 -(void) populateAsCenteredRectangleWithSize: (CGSize) rectSize
 								withTexture: (CC3Texture*) texture
-							  invertTexture: (BOOL) shouldInvert DEPRECATED_ATTRIBUTE;
+							  invertTexture: (BOOL) shouldInvert __deprecated;
 
 /**
  * @deprecated Use the populateAsCenteredRectangleWithSize:andTessellation:
@@ -632,7 +632,7 @@
 -(void) populateAsCenteredRectangleWithSize: (CGSize) rectSize
 							andTessellation: (CC3Tessellation) divsPerAxis
 								withTexture: (CC3Texture*) texture
-							  invertTexture: (BOOL) shouldInvert DEPRECATED_ATTRIBUTE;
+							  invertTexture: (BOOL) shouldInvert __deprecated;
 
 /**
  * @deprecated Use the populateAsRectangleWithSize:andRelativeOrigin: method instead,
@@ -641,7 +641,7 @@
 -(void) populateAsRectangleWithSize: (CGSize) rectSize
 						   andPivot: (CGPoint) pivot
 						withTexture: (CC3Texture*) texture
-					  invertTexture: (BOOL) shouldInvert DEPRECATED_ATTRIBUTE;
+					  invertTexture: (BOOL) shouldInvert __deprecated;
 
 /**
  * @deprecated Use the populateAsCenteredRectangleWithSize:andRelativeOrigin:andTessellation:
@@ -651,16 +651,16 @@
 						   andPivot: (CGPoint) pivot
 					andTessellation: (CC3Tessellation) divsPerAxis
 						withTexture: (CC3Texture*) texture
-					  invertTexture: (BOOL) shouldInvert DEPRECATED_ATTRIBUTE;
+					  invertTexture: (BOOL) shouldInvert __deprecated;
 
 /**
  * @deprecated Use populateAsSolidBox:, as it creates a box mesh
  * that can be covered with either a texture or a solid color.
  */
--(void) populateAsTexturedBox: (CC3Box) box DEPRECATED_ATTRIBUTE;
+-(void) populateAsTexturedBox: (CC3Box) box __deprecated;
 
 /** @deprecated Renamed to populateAsSolidBox:withCorner:. */
--(void) populateAsTexturedBox: (CC3Box) box withCorner: (CGPoint) corner DEPRECATED_ATTRIBUTE;
+-(void) populateAsTexturedBox: (CC3Box) box withCorner: (CGPoint) corner __deprecated;
 
 @end
 

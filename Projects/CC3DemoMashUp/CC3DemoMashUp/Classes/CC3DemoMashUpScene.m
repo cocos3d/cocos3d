@@ -26,7 +26,7 @@
  *
  * http://en.wikipedia.org/wiki/MIT_License
  *
- * The cocos3d mascot model was created by Alexandru Barbulescu, and used here
+ * The Cocos3D mascot model was created by Alexandru Barbulescu, and used here
  * by permission. Further rights may be claimed for that model.
  * 
  * See header file CC3DemoMashUpScene.h for full API documentation.
@@ -54,6 +54,8 @@
 #import "CC3ProjectionMatrix.h"
 #import "CC3PFXResource.h"
 #import "CC3BitmapLabelNode.h"
+#import "CC3EnvironmentNodes.h"
+#import "CCTextureCache.h"
 
 
 // File names
@@ -168,6 +170,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 
 @implementation CC3DemoMashUpScene
 
+@synthesize primaryCC3DemoMashUpLayer=_primaryCC3DemoMashUpLayer;
 @synthesize playerDirectionControl=_playerDirectionControl;
 @synthesize playerLocationControl=_playerLocationControl;
 @synthesize isManagingShadows=_isManagingShadows;
@@ -210,10 +213,13 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	[self addMeshHose];				// Attach a point particle hose to the hand of the animated robot.
 									// The hose is turned on and off when the robot arm is touched.
 	
-	[self addSun];					// Add a cocos2d particle emitter as the sun in the sky.
+	[self addSun];					// Add a Cocos2D particle emitter as the sun in the sky.
 	
 	[self addSpotlight];			// Add a spotlight to the camera.
 									// This spotlight will be turned on when the sun is turned off.
+	
+	[self addLightProbes];			// Adds light probes to the scene, as an alternate to using lights.
+									// Using the light probes can be turned on and off.
 	
 	[self configureLighting];		// Set up the lighting
 	[self configureCamera];			// Check out some interesting camera options.
@@ -228,10 +234,6 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// The existing node structure of the scene is logged using the following line.
 	LogInfo(@"The structure of this scene is: %@", [self structureDescription]);
 }
-
-/** Define a thread-pausing macro. */
-#define kDramaticPauseDuration	0.25f
-#define DramaticPause()			[NSThread sleepForTimeInterval: kDramaticPauseDuration]
 
 /**
  * Adds additional scene content dynamically and asynchronously.
@@ -252,71 +254,71 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
  */
 -(void) addSceneContentAsynchronously {
 
-	DramaticPause();				// Pause dramatically
+	[self pauseDramatically];
 	[self addAxisMarkers];			// Add colored teapots to mark each coordinate axis
 
-	DramaticPause();				// Pause dramatically
+	[self pauseDramatically];
 	[self addLightMarker];			// Add a small white teapot to show the direction toward the light
 
-	DramaticPause();				// Pause dramatically
+	[self pauseDramatically];
 	[self addBitmapLabel];			// Add a bitmapped string label
 
-	DramaticPause();				// Pause dramatically
+	[self pauseDramatically];
 	[self addSkinnedMallet];		// Adds a flexible mallet to the scene, showing bone skinning.
 
-	DramaticPause();				// Pause dramatically
+	[self pauseDramatically];
 	[self addSkinnedRunners];		// Adds two running figures to the scene, showing bone skinning.
 
-	DramaticPause();				// Pause dramatically
+	[self pauseDramatically];
 	[self addDieCube];				// Add a game die whose rotation is controlled by touch-swipe user action
 
-	DramaticPause();				// Pause dramatically
+	[self pauseDramatically];
 	[self addTexturedCube];			// Add another cube, this one textured, below the die cube.
 
-	DramaticPause();				// Pause dramatically
+	[self pauseDramatically];
 	[self addGlobe];				// Add a rotating globe from a parametric sphere covered by a texture
 
-	DramaticPause();				// Pause dramatically
+	[self pauseDramatically];
 	[self addFloatingRing];			// Add a large yellow band floating above the ground, using a texture
 									// containing transparency. The band as a whole fades in and out
 									// periodically. This demonstrates managing opacity and translucency
 									// at both the texture and material level.
 
-	DramaticPause();				// Pause dramatically
+	[self pauseDramatically];
 	[self addBeachBall];			// Add a transparent bouncing beach ball...exported from Blender
 
-	DramaticPause();				// Pause dramatically
+	[self pauseDramatically];
 	[self addTelevision];			// Add a television showing the view from the runner camera
 									// This demonstrates dynamic rendering-to-texture capabilities.
 									// Must be added after the skinned runners.
 
-	DramaticPause();				// Pause dramatically
+	[self pauseDramatically];
 	[self addTeapotAndSatellite];	// Add a large textured teapot with a smaller satellite teapot
 
-	DramaticPause();				// Pause dramatically
+	[self pauseDramatically];
 	[self addBrickWall];			// Add a brick wall that can block the path of the satellite teapot
 									// This must happen after camera is loaded (in addRobot).
 
-	DramaticPause();
+	[self pauseDramatically];
 	[self addWoodenSign];			// Add the multi-texture wooden sign.
 									// This must happen after camera is loaded (in addRobot).
 
-	DramaticPause();				// Pause dramatically
+	[self pauseDramatically];
 	[self addFloatingHead];			// Add the bump-mapped floating head.
 									// This must happen after camera is loaded (in addRobot).
 
-	DramaticPause();				// Pause dramatically
+	[self pauseDramatically];
 	[self addReflectiveMask];		// Adds a floating mask that uses GLSL shaders loaded via a PowerVR
 									// PFX file. Under OpenGL ES 1.1, mask appears with a default texture.
 
-	DramaticPause();				// Pause dramatically
+	[self pauseDramatically];
 	[self addEtchedMask];			// Adds a floating mask that uses GLSL shaders loaded via a PowerVR
 									// PFX file. Under OpenGL ES 1.1, mask appears with a default texture.
 
-	DramaticPause();				// Pause dramatically
-	[self addMascots];				// Add the cocos3d mascot.
+	[self pauseDramatically];
+	[self addMascots];				// Add the Cocos3D mascot.
 
-	DramaticPause();				// Pause dramatically
+	[self pauseDramatically];
 	[self addDragon];				// Add a flying dragon that demos blending between animation tracks
 
 	// Log a list of the shader programs that are being used by the scene. During development,
@@ -342,37 +344,47 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	LogRez(@"Finished loading on background thread!");
 }
 
+
+/** 
+ * When loading in the background, periodically pause the loading to phase the scene in over time.
+ * We put an explicit test here, because if the CC3Backgrounder shouldRunTasksOnRequestingThread
+ * property is set to YES, the addSceneContentAsynchronously method will be run in the foreground, 
+ * and we don't want to add any unncessary delays in that case.
+ */
+-(void) pauseDramatically {
+	if (!CC3OpenGL.sharedGL.isRenderingContext) {
+		NSTimeInterval pauseDuration = 0.25f;
+		LogRez(@"Pausing for %i milliseconds before loading next resource", (int)(pauseDuration * 1000));
+		[NSThread sleepForTimeInterval: pauseDuration];
+	}
+}
+
 /**
  * Invoked by the customized initializeScene to set up any initial state for
  * this customized scene. This is broken into a separate method so that the
  * initializeScene method can focus on loading the artifacts of the 3D scene.
  */
 -(void) initCustomState {
-	
 	_isManagingShadows = NO;
 	_playerDirectionControl = CGPointZero;
 	_playerLocationControl = CGPointZero;
 	
 	// The order in which meshes are drawn to the GL engine can be tailored to your needs.
-	// The default is to draw opaque objects first, then alpha-blended objects in reverse
-	// Z-order. Since this example has lots of similar teapots and robots to draw in this
-	// example, we choose to also group objects by meshes here, while also drawing opaque
-	// objects first, and translucent objects in reverse Z-order.
+	// The default is to draw opaque objects first, then alpha-blended objects in reverse Z-order.
+	// ([CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirst]).
 	//
 	// To experiment with an alternate drawing order, set a different node sequence sorter
-	// by uncommenting one of the lines here and commenting out the others. The third option
-	// performs no grouping and draws the objects in the order they are added to the scene below.
-	// The fourth option does not use a drawing sequencer, and draws the objects hierarchically
-	// instead. With this, notice that the transparent beach ball now appears opaque, because
-	// it  was added first, and is traversed ahead of other objects in the hierarchical assembly,
-	// resulting it in being drawn first, and so it cannot blend with the background.
+	// by uncommenting one of the lines here and commenting out the others. The last option
+	// does not use a drawing sequencer, and draws the objects hierarchically instead.
+	// With this, notice that the transparent beach ball now appears opaque, because it
+	// was added first, and is traversed ahead of other objects in the hierarchical assembly,
+	// resulting it in being drawn first, and so it cannot blend with the background objects.
 	//
 	// You can of course write your own node sequencers to customize to your specific
 	// app needs. Best to change the node sequencer before any model objects are added.
-	self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirst];
-	//	self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirstGroupMeshes];
-	//	self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirstGroupTextures];
-	//	self.drawingSequencer = nil;
+//	self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirstGroupMeshes];
+//	self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirstGroupTextures];
+//	self.drawingSequencer = nil;
 }
 
 /**
@@ -629,18 +641,19 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	
 	// Use a standard CCActionFadeIn to fade the node in over the specified duration
 	if (duration > 0.0f) {
-		aNode.opacity = 0;	// Needed for cocos2d 1.x, which doesn't start fade-in from zero opacity
+		aNode.opacity = 0;	// Needed for Cocos2D 1.x, which doesn't start fade-in from zero opacity
 		[aNode runAction: [CCActionFadeIn actionWithDuration: duration]];
 	}
 }
 
 /** 
  * Creates a clear-blue-sky backdrop. Or install a textured backdrop by uncommenting the 
- * second line of this method. See the notes for the backdrop property for more info.
+ * 2nd & 3rd lines of this method. See the notes for the backdrop property for more info.
  */
 -(void) addBackdrop {
-	self.backdrop = [CC3Backdrop nodeWithColor: kSkyColor];
-//	self.backdrop = [CC3Backdrop nodeWithTexture: [CC3Texture textureFromFile: kBrickTextureFile]];
+	self.backdrop = [CC3Backdrop nodeWithName: @"Backdrop" withColor: kSkyColor];
+//	self.backdrop = [CC3Backdrop nodeWithName: @"Backdrop"
+//								  withTexture: [CC3Texture textureFromFile: kBrickTextureFile]];
 }
 
 /**
@@ -650,11 +663,23 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 -(void) addGround {
 	_ground = [CC3PlaneNode nodeWithName: kGroundName];
 	[_ground populateAsDiskWithRadius: 1500 andTessellation: CC3TessellationMake(8, 32)];
-	_ground.texture = [CC3Texture textureFromFile: kGroundTextureFile];
 
-	// To experiment with repeating textures, uncomment the following line
-	[_ground repeatTexture: (ccTex2F){10, 10}];	// Grass
-//	[_ground repeatTexture: (ccTex2F){3, 3}];	// MountainGrass
+	// To demonstrate that a Cocos3D CC3Texture can be created from an existing Cocos2D CCTexture,
+	// we first load a CCTexture, and create the CC3Texture from it. We then assign the CC3Texture
+	// a unique name and add it to the texture cache it so it will be available for later use.
+	CCTexture* tex2D = [CCTextureCache.sharedTextureCache  addImage: kGroundTextureFile];
+	CC3Texture* tex3D = [CC3Texture textureWithCCTexture: tex2D];
+	tex3D.name = kGroundTextureFile;
+	[CC3Texture addTexture: tex3D];
+	_ground.texture = tex3D;
+
+	// To simply load a Cocos3D texture directly, without first loading a Cocos2D texture,
+	// comment out the lines above, and uncomment the following line.
+//	_ground.texture = [CC3Texture textureFromFile: kGroundTextureFile];
+
+	// The ground uses a repeating texture
+	[_ground repeatTexture: (ccTex2F){10, 10}];		// Grass
+//	[_ground repeatTexture: (ccTex2F){3, 3}];		// MountainGrass
 	
 	_ground.location = cc3v(0.0, -100.0, 0.0);
 	_ground.rotation = cc3v(-90.0, 180.0, 0.0);
@@ -987,17 +1012,16 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// move around the scene. A second texture is added to provide an optional surface material
 	// (eg- brushed metal). The material reflectivity property adjusts how reflective the surface
 	// is, by adjusting the blend between the two textures. Lower the reflectivity towards zero to
-	// show some of the underlying material. Since the enviornment map texture renders the scene,
-	// it requires a depth buffer, so we create a depth buffer of the same size, and attach it here.
-	// If you had multiple reflective objects, you could use the same depth buffer for all of them
-	// if the textures are the same size. Since generating an environment map texture requires
-	// rendering the scene from each of the six axis directions, it can be quite costly. You can use the
-	// numberOfFacesPerSnapshot property to adjust how often the reflective faces are updated, to
-	// trade off real-time accuracy and performance. See the notes of that property for more info.
-	GLint envMapDim = 256;
-	CC3GLRenderbuffer* depthBuff = [CC3GLRenderbuffer renderbufferWithSize: CC3IntSizeMake(envMapDim, envMapDim)
-															andPixelFormat: GL_DEPTH_COMPONENT16];
-	_envMapTex = [CC3EnvironmentMapTexture textureCubeWithDepthAttachment: depthBuff];
+	// show some of the underlying material. Since the environment map texture renders the scene,
+	// it requires a depth buffer. This is created automatically during the initialization of the
+	// environment texture. However, if we had multiple reflective objects, we could use the same
+	// depth buffer for all of them if the textures are the same size, by using a different
+	// creation method for the environment texture. Since generating an environment map texture
+	// requires rendering the scene from each of the six axis directions, it can be quite costly.
+	// You can use the numberOfFacesPerSnapshot property to adjust how often the reflective faces
+	// are updated, to trade off real-time accuracy and performance.
+	_envMapTex = [CC3EnvironmentMapTexture textureCubeWithSideLength: 256];
+	_envMapTex.name = @"TeapotMirror";				// Give it a name to help with troubleshooting
 	_envMapTex.numberOfFacesPerSnapshot = 1.0f;		// Update only one side of the cube in each frame
 	
 	[_teapotTextured addTexture: _envMapTex];
@@ -1218,15 +1242,15 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 }
 
 /**
- * Add a label attached to the robot arm. This is created using a cocos2d label object wrapped
+ * Add a label attached to the robot arm. This is created using a Cocos2D label object wrapped
  * in a CC3Billboard to turn it into a 3D object.
  *
  * Unfortunately, this label will not play nicely with the fog, because it contains transparent parts
  * that should be discarded by the fragment shader so that the deptth component is not written to the
  * depth buffer. This would allow the fog to show through (see the cylindrical text example in this 
- * demo for an example of how that works. But since this is a cocos2d component, it would require
- * changing the cocos2d shaders to get it to work. There's no point in doing that, because it would
- * be better to simply use 3D text instead of a cocos2d text component.
+ * demo for an example of how that works. But since this is a Cocos2D component, it would require
+ * changing the Cocos2D shaders to get it to work. There's no point in doing that, because it would
+ * be better to simply use 3D text instead of a Cocos2D text component.
  */
 -(void) addProjectedLabel {
 	CCLabelTTF* bbLabel = [CCLabelTTF labelWithString: @"Whoa...I'm dizzy!"
@@ -1476,12 +1500,12 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 }
 
 /**
- * Loads a POD file containing the cocos3d mascot, and creates a copy of it so that we have
+ * Loads a POD file containing the Cocos3D mascot, and creates a copy of it so that we have
  * two mascots. One mascot always stares back at the camera, regardless of where the camera
  * moves to. The other is distracted by the rainbow teapot and its gaze follows the teapot
  * as the rainbow teapot moves.
  *
- * The cocos2d/cocos3d mascot model was created by Alexandru Barbulescu, and used by permission.
+ * The Cocos2D/Cocos3D mascot model was created by Alexandru Barbulescu, and used by permission.
  */
 -(void) addMascots {
 
@@ -1545,12 +1569,12 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 }
 
 /**
- * Adds a sun in the sky, in the form of a standard cocos2d particle emitter,
+ * Adds a sun in the sky, in the form of a standard Cocos2D particle emitter,
  * held in the 3D scene by a CC3Billboard. The sun is a very large particle
  * emitter, and you should notice a drop in frame rate when it is visible.
  */
 -(void) addSun {
-	// Create the cocos2d 2D particle emitter.
+	// Create the Cocos2D 2D particle emitter.
 	CCParticleSystem* emitter = [CCParticleSun node];
 	emitter.position = ccp(0.0, 0.0);
 	
@@ -1619,6 +1643,32 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	spotLight.attenuation = CC3AttenuationCoefficientsMake(0.0, 0.002, 0.000001);
 	spotLight.isDirectionalOnly = NO;
 	[self.activeCamera addChild: spotLight];
+}
+
+/** 
+ * Adds light probes to the scene.
+ *
+ * Illuminating models with light probes is an alternate to using individual lights. Light probes 
+ * contain a texture (usually a cube-map texture) that defines the lighting characteristics of an
+ * area of the scene. Within a GLSL shader, the vertex or fragment normal is used to pick a light 
+ * intensity from the texture. Light probes often capture lighting nuances and detail that can be 
+ * difficult to replicate with individual lights, and can improve performance, as they require 
+ * substantially less calculation within a shader.
+ * 
+ * Light probes are not available when using OpenGL ES 1.1.
+ */
+-(void) addLightProbes {
+#if !CC3_OGLES_1
+	// Load the cube texture that contains the lighting incident from all directions.
+	// Alternately, for an interesting effect, you can comment out the first line and
+	// uncomment the second line, to load a cube-texture that contains a different
+	// solid color per side. This color-coded clearly demonstrates how the cube texture
+	// is being mapped to the normals of the model.
+	CC3Texture* lpTex = [CC3Texture textureCubeFromFilePattern: @"cubelight_%@.png"];
+//	CC3Texture* lpTex = [CC3Texture textureCubeColoredForAxes];
+
+	[self addChild: [CC3LightProbe nodeWithTexture: lpTex]];
+#endif	// !CC3_OGLES_1
 }
 
 /**
@@ -1750,6 +1800,10 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	_runnerLamp = (CC3Light*)[runner getNodeNamed: kRunnerLampName];
 	_runnerLamp.visible = NO;
 
+	// Make the runner a little more visible underl lighting
+	runner.diffuseColor = kCCC4FWhite;
+	runner.ambientColor = kCCC4FWhite;
+
 	runner.touchEnabled = YES;		// make the runner touchable
 	
 	// Create a running track at the scene's center.
@@ -1852,23 +1906,22 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * at http://www.blendswap.com/blends/view/63306 under a CreativeCommons Zero license.
  */
 -(void) addTelevision {
-	
-	// Create an off-screen framebuffer surface of a size and aspect (16x9) useful in an
-	// HDTV model, attach an empty texture and depth buffer, and validate the surface.
-	// Alpha is not required for this texture, so choose a more memory-efficient 16-bit RGB format.
-	// Similarly, since stencils will not be used, choose a more efficient 16-bit depth buffer.
-	CC3GLFramebuffer*  tvSurface = [[CC3GLFramebuffer alloc] initWithSize: kTVTexSize];	// retained
-	tvSurface.colorTexture = [CC3Texture textureWithPixelFormat: GL_RGB andPixelType: GL_UNSIGNED_SHORT_5_6_5];
-	tvSurface.depthAttachment = [CC3GLRenderbuffer renderbufferWithPixelFormat: GL_DEPTH_COMPONENT16];
-	[tvSurface validate];
-	
+	// Create an off-screen framebuffer surface, of a size and aspect (16x9) useful in an
+	// HDTV model, backed by a blank color texture to which we can render. Alpha is not
+	// required for the underlying texture, so we indicate the texture is opaque, which
+	// uses a more memory-efficient 16-bit RGB format. Similarly, since stencils will not
+	// be used, we allow a default 16-bit depth buffer to be used for this surface.
+	CC3GLFramebuffer*  tvSurface = [CC3GLFramebuffer colorTextureSurfaceIsOpaque: YES];
+	tvSurface.name = @"Television";
+	tvSurface.size = kTVTexSize;
+
 	// Now create a drawing visitor that will coordinate the drawing of the the TV screen
 	// Since the aspect of the TV screen surface is different than the main display, we don't
 	// want to reuse either the main camera, or the runner's camera. Instead, we create a
 	// dedicated drawing visitor, with it's own camera, which we copy from the runner's camera.
 	// and add it beside the runner's camera. We clear the new camera's existing viewport
 	// so that it will be set to match the aspect of the TV screen.
-	_tvDrawingVisitor = [[[self viewDrawVisitorClass] alloc] init];		// retained
+	_tvDrawingVisitor = [[[self viewDrawVisitorClass] alloc] init];
 	_tvDrawingVisitor.renderSurface = tvSurface;
 	CC3Camera* tvCam = [_runnerCam copy];
 	[_runnerCam.parent addChild: tvCam];
@@ -1904,8 +1957,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	_isTVOn = NO;		// Indicate TV is displaying test card
 	
 	// Demonstrate the ability to extract a CCTexture from a CC3Texture.
-	// For some interesting fun, extract a cocos2d CCTexture instance from the texture
-	// underpinning the TV surface, and replace the cocos2d label node in the billboard held
+	// For some interesting fun, extract a Cocos2D CCTexture instance from the texture
+	// underpinning the TV surface, and replace the Cocos2D label node in the billboard held
 	// by the robot arm with a CCSprite holding the CCTexture. The robot arm ends up holding
 	// a smaller version of the TV screen. You have to touch the TV screen to activate it.
 	// Because the TV screen is only updated with new rendered content when the big-screen
@@ -1916,7 +1969,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// also change the optimization line in the drawSceneContentWithVisitor: method, and invoke
 	// the drawToTVScreen method on each loop, to have both TV's show live video at all times.
 //	CCSprite* portableTV = [CCSprite spriteWithTexture: [tvSurface.colorTexture ccTexture]];
-//	portableTV.flipY = YES;
+//	portableTV.flipY = CCTexture.texturesAreLoadedUpsideDown;		// Cocos2D 3.1 & above takes care of flipping
 //	CC3Billboard* bb = (CC3Billboard*)[self getNodeNamed: kBillboardName];
 //	bb.uniformScale = 0.1;
 //	bb.billboard = portableTV;
@@ -1941,9 +1994,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * We want the surface that we create to match the dimensions and characteristics of the view,
  * and we want it to automatically adjust if the view dimensions change. To do that, we construct
  * the surface with the same size as the view's surface, and format the textures to be compatible
- * with the format of the view's surface. And then we register this new surface with the
- * viewSurfaceManager to have it automatically update the dimensions of the textures whenever
- * the dimensions of the view change.
+ * with the format of the view's surface. And then we register this new surface with the surface
+ * manager of the CC3Layer to have it automatically update the dimensions of the textures whenever
+ * the dimensions of the CC3Layer change.
  *
  * Since this method accesses the view's surface manager, it must be invoked after the
  * view has been created. This method is invoked from the onOpen method of this class,
@@ -1952,29 +2005,32 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 -(void) addPostProcessing {
 #if !CC3_OGLES_1	// Depth-texture not supported in OpenGL ES 1
 
-	// Create the offscreen framebuffer with the same size and characteristics as the view's
-	// rendering surface, add color and depth texture attachments, and register the surface
-	// with the view's surface manager, so that this surface will be resized automatically
-	// whenever the view is resized.
-	CC3GLViewSurfaceManager* surfMgr = self.viewSurfaceManager;
-	_postProcSurface = [[CC3GLFramebuffer alloc] initWithSize: surfMgr.size];	// retained
-	_postProcSurface.colorTexture = [CC3Texture textureWithPixelFormat: surfMgr.colorTexelFormat
-														 andPixelType: surfMgr.colorTexelType];
-	_postProcSurface.depthTexture = [CC3Texture textureWithPixelFormat: surfMgr.depthTexelFormat
-														 andPixelType: surfMgr.depthTexelType];
-	[_postProcSurface validate];
+	// Create the off-screen framebuffer surface to render the scene to for post-processing effects.
+	// We create the off-screen surface with the same size and format characteristics as the view's
+	// rendering surface. We specifically use a renderable texture as the depth buffer, so that we
+	// can use it to display the contents of the depth buffer as one post-processing option.
+	// Otherwise, we could have just used the simpler renderbuffer option for the depth buffer.
+	// Finally, we register the off-screen surface with the view's surface manager, so that the
+	// off-screen surface will be resized automatically whenever the view is resized.
+	CC3ViewSurfaceManager* surfMgr = CC3ViewSurfaceManager.sharedViewSurfaceManager;
+	CC3Texture* depthTexture = [CC3Texture textureWithPixelFormat: surfMgr.depthTexelFormat
+													withPixelType: surfMgr.depthTexelType];
+	_postProcSurface = [CC3GLFramebuffer colorTextureSurfaceWithPixelFormat: surfMgr.colorTexelFormat
+															  withPixelType: surfMgr.colorTexelType
+														withDepthAttachment: [CC3TextureFramebufferAttachment attachmentWithTexture: depthTexture]];
+	_postProcSurface.name = @"Post-proc surface";
 	[surfMgr addSurface: _postProcSurface];
 	
 	// Create a clip-space node that will render the off-screen color texture to the screen.
 	// Load the node with shaders that convert the image into greyscale, making the scene
 	// appear as if it was filmed with black & white film.
-	_grayscaleNode = [CC3ClipSpaceNode nodeWithTexture: _postProcSurface.colorTexture];
+	_grayscaleNode = [CC3ClipSpaceNode nodeWithName: @"Grayscale post-processor" withTexture: _postProcSurface.colorTexture];
 	[_grayscaleNode applyEffectNamed: @"Grayscale" inPFXResourceFile: kPostProcPFXFile];
 	
 	// Create a clip-space node that will render the off-screen depth texture to the screen.
 	// Load the node with shaders that convert the depth values into greyscale, visualizing
 	// the depth of field as a grayscale gradient.
-	_depthImageNode = [CC3ClipSpaceNode nodeWithTexture: _postProcSurface.depthTexture];
+	_depthImageNode = [CC3ClipSpaceNode nodeWithName: @"Depth-map post-processor" withTexture: _postProcSurface.depthTexture];
 	[_depthImageNode applyEffectNamed: @"Depth" inPFXResourceFile: kPostProcPFXFile];
 
 #endif	// !CC3_OGLES_1
@@ -2413,7 +2469,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 //	mask.shaderContext.pureColorProgram.shouldAllowDefaultVariableValues = YES;
 
 	// Make the mask touchable and animate it.
-	mask.isTouchEnabled = YES;
+	mask.touchEnabled = YES;
 	[mask runAction: [[CC3ActionAnimate actionWithDuration: 10.0] repeatForever]];
 }
 
@@ -2458,7 +2514,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	[self addChild: mask];
 	
 	// Make the mask touchable and animate it.
-	mask.isTouchEnabled = YES;
+	mask.touchEnabled = YES;
 	[mask runAction: [CC3ActionRotateForever actionWithRotationRate: cc3v(0.0, 30.0, 0.0)]];
 }
 
@@ -2480,7 +2536,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * Blend Swap at http://www.blendswap.com/blends/view/67196. It is used here under a
  * Creative Commons Attribution 3.0 CC-BY license, requiring attribution to the author.
  * All animation was added to the model after acquisition. The animated and modified
- * Blender model is available in the Models folder of the cocos3d distribution.
+ * Blender model is available in the Models folder of the Cocos3D distribution.
  * The dragon POD file was created by exporting directly to POD from within Blender.
  */
 -(void) addDragon {
@@ -2557,7 +2613,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 }
 
 /**
- * Adds a temporary fiery explosion on top of the specified node, using a cocos2d
+ * Adds a temporary fiery explosion on top of the specified node, using a Cocos2D
  * CCParticleSystem. The explosion is set to a short duration, and when the particle
  * system has exhausted, the CC3ParticleSystem node along with the CCParticleSystem
  * billboard it contains are automatically removed from the 3D scene.
@@ -2663,15 +2719,19 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// environment-map cube-map texture for it by taking snapshots of the scene in all
 	// six axis directions from its position.
 	[self generateTeapotEnvironmentMapWithVisitor: visitor];
+
+	// When post-processing, we render to a temporary off-screen surface.
+	// We remember the original surface in this variable.
+	id<CC3RenderSurface> origSurface;
 	
 	// If we are post-processing the rendered scene image, draw to an off-screen surface,
-	// clearing if first. Otherwise, draw to view surface directly, without clearing because
+	// clearing it first. Otherwise, draw to view surface directly, without clearing because
 	// it was done at the beginning of the rendering cycle.
 	if (self.isPostProcessing) {
+		origSurface = visitor.renderSurface;
 		visitor.renderSurface = _postProcSurface;
 		[_postProcSurface clearColorAndDepthContent];
-	} else
-		visitor.renderSurface = self.viewSurface;
+	}
 	
 	[self drawBackdropWithVisitor: visitor];	// Draw the backdrop if it exists
 	[visitor visit: self];						// Draw the scene components
@@ -2690,7 +2750,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 		CC3Viewport vvp = visitor.camera.viewport;
 		visitor.camera.viewport = kCC3ViewportZero;
 		
-		visitor.renderSurface = self.viewSurface;		// Ensure drawing to the view
+		visitor.renderSurface = origSurface;		// Ensure drawing to the original surface
 		[visitor visit: self.postProcessingNode];
 
 		visitor.camera.viewport = vvp;		// Now set the viewport back to the layer's size.
@@ -2718,14 +2778,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 -(void) drawToTVScreen {
 	LogTrace(@"Drawing to TV");
 
-	BOOL lampOnCurr = _runnerLamp.visible;
-	_runnerLamp.visible = YES;					// Temporarily turn the runner-cam's light on
-
 	[_tvDrawingVisitor.renderSurface clearColorAndDepthContent];	// Clear color & depth of TV surface.
 	[self drawBackdropWithVisitor: _tvDrawingVisitor];				// Draw the backdrop if it exists
 	[_tvDrawingVisitor visit: self];								// Draw the scene components
-
-	_runnerLamp.visible = lampOnCurr;
 	
 	[self pictureInPicture];		// Add a small PiP image in the bottom right of the TV screen
 }
@@ -2849,10 +2904,16 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// the off-screen surfaces created in addPostProcessing.
 	[self addFog];
 	
-	// Add additional scene content dynamically and asynchronously, on a background thread
-	// after rendering has begun on the rendering thread, using the CC3Backgrounder singleton.
-	// Asynchronous loading must be initiated after the scene has been attached to the view.
-	// It cannot be started in the initializeScene method.
+	// Here, we add additional scene content dynamically and asynchronously on a background thread
+	// using the CC3Backgrounder singleton. Asynchronous loading must be initiated after the scene
+	// has been attached to the view, and should not be started in the initializeScene method.
+	// When running on Android, background loading can cause threading conflicts within the GL engine,
+	// depending on the device, and must be handled with extreme care. Because of this, if running
+	// under Android, we turn background loading off here and the addSceneContentAsynchronously
+	// method will run immediately on this thread, before further processing is performed.
+#if APPORTABLE
+	CC3Backgrounder.sharedBackgrounder.shouldRunTasksOnRequestingThread = YES;
+#endif
 	[CC3Backgrounder.sharedBackgrounder runBlock: ^{ [self addSceneContentAsynchronously]; }];
 
 	// Uncomment the first line to have the camera move to show the entire scene.
@@ -2860,7 +2921,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 //	[self.activeCamera moveWithDuration: kCameraMoveDuration toShowAllOf: self];
 //	self.shouldDrawWireframeBox = YES;
 
-	// Or uncomment this line to have the camera pan and zoom to focus on the cocos3d mascot.
+	// Or uncomment this line to have the camera pan and zoom to focus on the Cocos3D mascot.
 //	[self.activeCamera moveWithDuration: kCameraMoveDuration toShowAllOf: mascot];
 }
 
@@ -3069,6 +3130,13 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 			_lightingType = kLightingFlashlight;
 			break;
 		case kLightingFlashlight:
+#if CC3_OGLES_1
+			_lightingType = kLightingFog;	// Light probes not supported in OpenGL ES 1
+#else
+			_lightingType = kLightingLightProbe;
+#endif	// CC3_OGLES_1
+			break;
+		case kLightingLightProbe:
 			_lightingType = kLightingFog;
 			break;
 		case kLightingFog:
@@ -3095,14 +3163,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 			flashLight.visible = NO;
 			_bumpMapLightTracker.target = _robotLamp;
 			_backdrop.emissionColor = kSkyColor;
-			break;
-		case kLightingFog:
-			sun.visible = YES;
-			_fog.visible = YES;
-			_robotLamp.visible = YES;
-			flashLight.visible = NO;
-			_bumpMapLightTracker.target = _robotLamp;
-			_backdrop.emissionColor = kSkyColor;
+			self.shouldUseLightProbes = NO;
 			break;
 		case kLightingFlashlight:
 			sun.visible = NO;
@@ -3111,6 +3172,25 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 			flashLight.visible = YES;
 			_bumpMapLightTracker.target = flashLight;
 			_backdrop.emissionColor = kCCC4FBlack;
+			self.shouldUseLightProbes = NO;
+			break;
+		case kLightingLightProbe:
+			sun.visible = NO;
+			_fog.visible = NO;
+			_robotLamp.visible = YES;
+			flashLight.visible = NO;
+			_bumpMapLightTracker.target = _robotLamp;
+			_backdrop.emissionColor = kSkyColor;
+			self.shouldUseLightProbes = YES;
+			break;
+		case kLightingFog:
+			sun.visible = YES;
+			_fog.visible = YES;
+			_robotLamp.visible = YES;
+			flashLight.visible = NO;
+			_bumpMapLightTracker.target = _robotLamp;
+			_backdrop.emissionColor = kSkyColor;
+			self.shouldUseLightProbes = NO;
 			break;
 		case kLightingGrayscale:
 			sun.visible = YES;
@@ -3119,6 +3199,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 			flashLight.visible = NO;
 			_bumpMapLightTracker.target = _robotLamp;
 			_backdrop.emissionColor = kSkyColor;
+			self.shouldUseLightProbes = NO;
 			break;
 		case kLightingDepth:
 			sun.visible = YES;
@@ -3127,6 +3208,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 			flashLight.visible = NO;
 			_bumpMapLightTracker.target = _robotLamp;
 			_backdrop.emissionColor = kSkyColor;
+			self.shouldUseLightProbes = NO;
 			break;
 	}
 }
@@ -3347,7 +3429,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * various shadowing options for the touched node. If not in "managing shadows" mode,
  * the actions described here occur.
  *
- * Most nodes are simply temporarily highlighted by running a cocos2d tinting action on
+ * Most nodes are simply temporarily highlighted by running a Cocos2D tinting action on
  * the emission color property of the node (which affects the emission color property of
  * the materials underlying the node).
  *
@@ -3376,12 +3458,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	if (aNode == _ground) {
 		[self touchGroundAt: touchPoint];
 	} else if (aNode == _beachBall) {
-		// If the beach ball is touched toggle its opacity.
 		[self touchBeachBallAt: touchPoint];
-		
-		// For fun, uncomment the following line to draw wireframe boxes around the beachball
-//	aNode.shouldDrawWireframeBox = !aNode.shouldDrawWireframeBox;
-		
 	} else if (aNode == _brickWall) {
 		[self touchBrickWallAt: touchPoint];
 	} else if (aNode == _woodenSign) {
@@ -3431,7 +3508,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 
 	// If the globe was touched, toggle the opening of a HUD window displaying it up close.
 	} else if (aNode == _globe ) {
-		[((CC3DemoMashUpLayer*)self.cc3Layer) toggleGlobeHUDFromTouchAt: touchPoint];
+		CC3DemoMashUpLayer* layer = self.primaryCC3DemoMashUpLayer;		// Create strong reference to weak property
+		[layer toggleGlobeHUDFromTouchAt: touchPoint];
 	}
 }
 
@@ -3505,7 +3583,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * on the ground corresponding to the touch-point. As the teapot is placed, we set off
  * a fiery explosion using a 2D particle system for dramatic effect. This demonstrates
  * the ability to drop objects into the 3D scene using touch events, along with the
- * ability to add cocos2d CCParticleSystems into the 3D scene.
+ * ability to add Cocos2D CCParticleSystems into the 3D scene.
  */
 -(void) touchGroundAt: (CGPoint) touchPoint {
 	CC3Plane groundPlane = _ground.plane;
@@ -3540,6 +3618,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// need to dig into one of its mesh node segments to determine its opacity.
 	CCOpacity bbOpacity = [_beachBall getNodeNamed: kBeachBallWhiteSegment].opacity;
 	_beachBall.opacity = (bbOpacity == kCCOpacityFull) ? (kCCOpacityFull * 0.75) : kCCOpacityFull;
+
+	// For fun, uncomment the following line to draw wireframe boxes around the beachball component meshes
+//	_beachBall.shouldDrawAllLocalContentWireframeBoxes = !_beachBall.shouldDrawAllLocalContentWireframeBoxes;
 }
 
 /** When the brick wall is touched, slide it back and forth to open or close it. */
@@ -3697,18 +3778,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	LogInfo(@"TV image saved to file: %@", imgPath);
 }
 
-/**
- * Toggle between the main scene camera and the camera running along with the runner.
- * When the runner's camera is active, turn on a local light to illuminate him.
- */
+/** Toggle between the main scene camera and the camera running along with the runner. */
 -(void) toggleActiveCamera {
-	if (self.activeCamera == _robotCam) {
-		self.activeCamera = _runnerCam;
-		_runnerLamp.visible = YES;
-	} else {
-		self.activeCamera = _robotCam;
-		_runnerLamp.visible = NO;
-	}
+	self.activeCamera = (self.activeCamera == _robotCam) ? _runnerCam : _robotCam;
 }
 
 /** Cycles the specified bitmapped label node through a selection of label strings. */

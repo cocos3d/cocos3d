@@ -314,9 +314,9 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 
 -(void) setQuaternion: (CC3Quaternion) value at: (GLuint) index { [self setVector4: value at: index]; }
 
--(void) setMatrix3x3: (CC3Matrix3x3*) value { [self setMatrix3x3: value at: 0]; }
+-(void) setMatrix3x3: (const CC3Matrix3x3*) value { [self setMatrix3x3: value at: 0]; }
 
--(void) setMatrix3x3: (CC3Matrix3x3*) value at: (GLuint) index {
+-(void) setMatrix3x3: (const CC3Matrix3x3*) value at: (GLuint) index {
 	CC3Matrix3x3* varMtx = (CC3Matrix3x3*)_varValue;
 	switch (_type) {
 		case GL_FLOAT_MAT3:
@@ -329,9 +329,9 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 	}
 }
 
--(void) setMatrix4x3: (CC3Matrix4x3*) value { [self setMatrix4x3: value at: 0]; }
+-(void) setMatrix4x3: (const CC3Matrix4x3*) value { [self setMatrix4x3: value at: 0]; }
 
--(void) setMatrix4x3: (CC3Matrix4x3*) value at: (GLuint) index {
+-(void) setMatrix4x3: (const CC3Matrix4x3*) value at: (GLuint) index {
 	CC3Matrix4x4* varMtx = (CC3Matrix4x4*)_varValue;
 	switch (_type) {
 		case GL_FLOAT_MAT4:
@@ -344,9 +344,9 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 	}
 }
 
--(void) setMatrix4x4: (CC3Matrix4x4*) value { [self setMatrix4x4: value at: 0]; }
+-(void) setMatrix4x4: (const CC3Matrix4x4*) value { [self setMatrix4x4: value at: 0]; }
 
--(void) setMatrix4x4: (CC3Matrix4x4*) value at: (GLuint) index {
+-(void) setMatrix4x4: (const CC3Matrix4x4*) value at: (GLuint) index {
 	CC3Matrix4x4* varMtx = (CC3Matrix4x4*)_varValue;
 	switch (_type) {
 		case GL_FLOAT_MAT4:
@@ -706,6 +706,43 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 #pragma mark CC3GLSLUniformOverride
 
 @implementation CC3GLSLUniformOverride
+
+-(void) dealloc {
+	[_programUniform release];
+	[_pureColorProgramUniform release];
+	[super dealloc];
+}
+
+-(BOOL) updateIfOverriding: (CC3GLSLUniform*) uniform {
+	if (uniform == _programUniform || uniform == _pureColorProgramUniform) {
+		[uniform setValueFromUniform: self];
+		return YES;
+	}
+	return NO;
+}
+
 -(BOOL) updateGLValueWithVisitor: (CC3NodeDrawingVisitor*) visitor { return NO; }
+
+
+#pragma mark Allocation and initialization
+
+-(id) initForProgramUniform: (CC3GLSLUniform*) uniform
+ andPureColorProgramUniform: (CC3GLSLUniform*) pureColorUniform {
+	CC3Assert(uniform, @"The overridden uniform must not be nil.");
+	if ( (self = [super init]) ) {
+		[self populateFrom: uniform];
+		_programUniform = [uniform retain];						// retained
+		_pureColorProgramUniform = [pureColorUniform retain];	// retained
+	}
+	return self;
+	
+}
+
++(id) uniformOverrideForProgramUniform: (CC3GLSLUniform*) uniform
+			andPureColorProgramUniform: (CC3GLSLUniform*) pureColorUniform {
+	return [[[self alloc] initForProgramUniform: uniform
+					 andPureColorProgramUniform: pureColorUniform] autorelease];
+}
+
 @end
 

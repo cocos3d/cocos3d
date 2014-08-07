@@ -50,6 +50,7 @@ static const ccColor4F kCC3DefaultLightColorSpecular = { 1.0, 1.0, 1.0, 1.0 };
 /** Default light attenuation coefficients */
 static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients = {1.0, 0.0, 0.0};
 
+
 #pragma mark -
 #pragma mark CC3Light
 
@@ -188,7 +189,7 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
 @property(nonatomic, assign) CC3AttenuationCoefficients attenuation;
 
 /** @deprecated Property renamed to attenuation */
-@property(nonatomic, assign) CC3AttenuationCoefficients attenuationCoefficients DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) CC3AttenuationCoefficients attenuationCoefficients __deprecated;
 
 /**
  * When a copy is made of this node, indicates whether this node should copy the value
@@ -773,9 +774,10 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
 #pragma mark -
 #pragma mark CC3Node extension for lights
 
-@interface CC3Node (Lighting)
+@interface CC3Node (CC3Light)
 
-/** Returns whether this node is a light.
+/** 
+ * Returns whether this node is a light.
  *
  * This implementation returns NO. Subclasses that are lights will override to return YES.
  */

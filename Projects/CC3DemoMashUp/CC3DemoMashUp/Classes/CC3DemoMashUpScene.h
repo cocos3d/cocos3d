@@ -39,6 +39,8 @@
 #import "CC3RenderSurfaces.h"
 #import "Models.h"
 
+@class CC3DemoMashUpLayer;
+
 
 #pragma mark -
 #pragma mark CC3DemoMashUpScene
@@ -53,8 +55,9 @@ typedef enum {
 /** Enumeration of lighting options. */
 typedef enum {
 	kLightingSun,				/**< Sunshine. */
-	kLightingFog,				/**< Sunshine with fog. */
 	kLightingFlashlight,		/**< Nightime with flashlight. */
+	kLightingLightProbe,		/**< Light probe uses cube texture instead of light calcs. */
+	kLightingFog,				/**< Sunshine with fog. */
 	kLightingGrayscale,			/**< Sunshine with grayscale post-processing filter. */
 	kLightingDepth,				/**< Display the depth buffer using a post-processing filter. */
 } LightingType;
@@ -140,6 +143,7 @@ typedef enum {
  *   - apply multiple animation tracks to a model, blend them together, and smoothly transition between
  *     animation tracks using a cross-fade action.
  *   - bypassing Xcode/iOS automatic pre-multiplying of texture color content with alpha content
+ *   - scene lighting using light probes containing cube-map textures, instead of discrete lights
  *
  * In addition, there are a number of interesting options for you to play with by uncommenting
  * certain lines of code in the methods of this class that build objects in the 3D scene,
@@ -526,6 +530,14 @@ typedef enum {
  * illumination outside the beam of the spotlight. This is something to keep in mind when
  * combining the techniques of spotlights and bump-mapping.
  *
+ * If the device is running OpenGL ES 2.0 or OpenGL OSX, touching the illumination button 
+ * again turns the spotlight and main sun light off, and turns on a light probe. A light 
+ * probe contains a cube-map texture that is used to determine the light that hits each 
+ * node from all directions. This can be used to create realistic lighting in a 3D editor, 
+ * and then apply it to the scene. If you touch one of the runners to view them up-close,
+ * you can follow how the lighting on the runners changes as they face different directions,
+ * as they run around the track. The light probe was added in the addLightProbe method.
+ *
  * Touching the illumination button again turns the sun back on, but envelopes the scene in
  * a fog. The farther away an object is, the less visible it is through the fog. The effect
  * of the fog is best appreciated with the scene is full of the invading robot arms.
@@ -592,6 +604,7 @@ typedef enum {
  * teapot mesh instance, but can be transformed separately, and covered with different materials.
  */
 @interface CC3DemoMashUpScene : CC3Scene {
+	CC3DemoMashUpLayer* __weak _primaryCC3DemoMashUpLayer;
 	CGPoint _playerDirectionControl;
 	CGPoint _playerLocationControl;
 	CC3Vector _cameraMoveStartLocation;
@@ -641,6 +654,21 @@ typedef enum {
 	BOOL _isManagingShadows : 1;
 	BOOL _isTVOn : 1;
 }
+
+/**
+ * A weak reference back to the primary CC3DemoMashUpLayer that is displaying this scene.
+ *
+ * This back-reference allows activities within the scene to modify user interface interactions, 
+ * such as enabling/disabling controls ro opening other view/layers.
+ *
+ * This property has been fomally deprecated to better support multiple CC3Layers displaying
+ * a single CC3Scene from different perspectives (different cameras). If you want to dedicate
+ * a single CC3Layer to a single CC3Scene, and hold a back reference to that layer within the
+ * scene, you should create and manage that reference in your custom CC3Scene class.
+ *
+ * This property is set automatically when this scene is assigned to the CC3DemoMashUpLayer.
+ */
+@property(nonatomic, weak) CC3DemoMashUpLayer* primaryCC3DemoMashUpLayer;
 
 /**
  * This property controls the velocity of the change in direction of the 3D camera

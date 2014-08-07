@@ -42,7 +42,7 @@
 
 @implementation CC3Texture
 
-@synthesize textureID=_textureID, size=_size, coverage=_coverage, hasMipmap=_hasMipmap;
+@synthesize size=_size, coverage=_coverage, hasMipmap=_hasMipmap;
 @synthesize pixelFormat=_pixelFormat, pixelType=_pixelType;
 @synthesize hasAlpha=_hasAlpha, hasPremultipliedAlpha=_hasPremultipliedAlpha;
 @synthesize isUpsideDown=_isUpsideDown;
@@ -52,9 +52,14 @@
 -(void) dealloc {
 	[self remove];				// remove this instance from the cache
 	[self deleteGLTexture];
-	[_ccTextureContent release];
+	[_ccTexture release];
 
 	[super dealloc];
+}
+
+-(GLuint) textureID {
+	[self ensureGLTexture];
+	return _textureID;
 }
 
 -(void) ensureGLTexture { if (!_textureID) _textureID = CC3OpenGL.sharedGL.generateTexture; }
@@ -65,12 +70,23 @@
  * Otherwise, if no CCTexture is tracking the GL texture, delete it from the GL engine now.
  */
 -(void) deleteGLTexture {
-	if (_ccTextureContent)
+	if (_ccTexture)
 		[CC3OpenGL.sharedGL clearTextureBinding: _textureID];
     else
 		[CC3OpenGL.sharedGL deleteTexture: _textureID];
 	
 	_textureID = 0;
+}
+
+/** If the texture has been created, set its debug label as well. */
+-(void) setName: (NSString*) name {
+	[super setName: name];
+	[self checkGLDebugLabel];
+}
+
+/** Sets the GL debug label, if required. */
+-(void) checkGLDebugLabel {
+	if (_textureID) [CC3OpenGL.sharedGL setDebugLabel: self.name forTexture: _textureID];
 }
 
 -(BOOL) isPOTWidth { return (_size.width == CCNextPOT(_size.width)); }
@@ -124,11 +140,9 @@
 
 #pragma mark Binding content
 
--(void) bindTextureContent: (CC3Texture2DContent*) texContent toTarget: (GLenum) target {
+-(void) bindTextureContent: (CCTexture*) texContent toTarget: (GLenum) target {
 	
 	[self checkTextureOrientation: texContent];
-	
-	[self ensureGLTexture];
 	
 	_size = CC3IntSizeMake((GLint)texContent.pixelWidth, (GLint)texContent.pixelHeight);
 	_coverage = CGSizeMake(texContent.maxS, texContent.maxT);
@@ -141,7 +155,7 @@
 	CC3OpenGL* gl = CC3OpenGL.sharedGL;
 	GLuint tuIdx = 0;		// Choose the texture unit in which to work
 	
-	[gl bindTexture: _textureID toTarget: self.textureTarget at: tuIdx];
+	[gl bindTexture: self.textureID toTarget: self.textureTarget at: tuIdx];
 	[gl loadTexureImage: texContent.imageData
 			 intoTarget: target
 		  onMipmapLevel: 0
@@ -180,15 +194,21 @@
 	return CC3IntIsEven(_size.width) ? (CC3IntIsEven(_size.width / 2) ? 4 : 2) : 1;
 }
 
+-(void) bindTextureOfColor: (ccColor4B) color andSize: (CC3IntSize) size toTarget: (GLenum) target {
+	id texContent = [[self.textureContentClass alloc] initWithSize: size withColor: color];
+	[self bindTextureContent: texContent toTarget: target];
+	[texContent release];
+}
+
 /**
  * Returns an empty content of the same size as this texture. If this texture already has a
  * content object already, it is resized and returned. Otherwise, a new content object, of
  * the size, pixel format and type of this texture is created an returned.
  */
--(CC3Texture2DContent*) getSizedContent {
-	if (_ccTextureContent) {
-		[_ccTextureContent resizeTo: self.size];
-		return _ccTextureContent;
+-(CCTexture*) getSizedContent {
+	if (_ccTexture) {
+		[_ccTexture resizeTo: self.size];
+		return _ccTexture;
 	} else {
 		return [[[self.textureContentClass alloc] initWithSize: self.size
 												andPixelFormat: self.pixelFormat
@@ -207,9 +227,11 @@
 	CC3OpenGL* gl = CC3OpenGL.sharedGL;
 	GLuint tuIdx = 0;	// Choose the texture unit in which to work
 	GLenum target = self.textureTarget;
-	[gl bindTexture: _textureID toTarget: target at: tuIdx];
+	[gl bindTexture: self.textureID toTarget: target at: tuIdx];
 	[gl generateMipmapForTarget: target at: tuIdx];
 	_hasMipmap = YES;
+
+	[self markTextureParametersDirty];
 
 	LogRez(@"%@ generated mipmap in %.3f ms", self, GetRezActivityDuration() * 1000);
 }
@@ -361,28 +383,29 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 
 #pragma mark Texture content and sizing
 
--(BOOL) loadTarget: (GLenum) target fromFile: (NSString*) aFilePath {
+-(BOOL) loadTarget: (GLenum) target fromFile: (NSString*) filePath {
 	
-	if (!_name) self.name = [self.class textureNameFromFilePath: aFilePath];
+	if (!_name) self.name = [self.class textureNameFromFilePath: filePath];
 	
 	MarkRezActivityStart();
 	
-	id content = [[self.textureContentClass alloc] initFromFile: aFilePath];
+	id content = [[self.textureContentClass alloc] initFromFile: filePath];
 	if ( !content ) {
-		LogError(@"%@ could not load texture from file %@", self, CC3EnsureAbsoluteFilePath(aFilePath));
+		LogError(@"%@ could not load texture from file %@", self, filePath);
 		return NO;
 	}
 	
 	[self bindTextureContent: content toTarget: target];
 	[content release];		// Could be big, so get rid of it immediately
 	
-	LogRez(@"%@ loaded from file %@ in %.3f ms", self, aFilePath, GetRezActivityDuration() * 1000);
+	LogRez(@"%@ loaded from file %@ in %.3f ms", self, filePath, GetRezActivityDuration() * 1000);
 	return YES;
 }
 
--(BOOL) loadFromFile: (NSString*) aFilePath {
-	BOOL wasLoaded = [self loadTarget: self.textureTarget fromFile: aFilePath];
+-(BOOL) loadFromFile: (NSString*) filePath {
+	BOOL wasLoaded = [self loadTarget: self.textureTarget fromFile: filePath];
 	if (wasLoaded && self.class.shouldGenerateMipmaps) [self generateMipmap];
+	[self checkGLDebugLabel];
 	return wasLoaded;
 }
 
@@ -391,9 +414,9 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 	return nil;
 }
 
--(void) checkTextureOrientation: (CC3Texture2DContent*) texContent {
+-(void) checkTextureOrientation: (CCTexture*) texContent {
 	BOOL flipHorz = self.shouldFlipHorizontallyOnLoad;
-	BOOL flipVert = texContent.isUpsideDown && self.shouldFlipVerticallyOnLoad;
+	BOOL flipVert = !XOR(texContent.isUpsideDown, self.shouldFlipVerticallyOnLoad);
 	
 	if (flipHorz && flipVert)
 		[texContent rotateHalfCircle];		// Do both in one pass
@@ -412,7 +435,7 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 	
 	CC3OpenGL* gl = CC3OpenGL.sharedGL;
 	GLuint tuIdx = 0;		// Choose the texture unit in which to work
-	[gl bindTexture: _textureID toTarget: self.textureTarget at: tuIdx];
+	[gl bindTexture: self.textureID toTarget: self.textureTarget at: tuIdx];
 	[gl loadTexureSubImage: (const GLvoid*) colorArray
 				intoTarget: target
 			 onMipmapLevel: 0
@@ -520,16 +543,16 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 #pragma mark Associated CCTexture
 
 -(CCTexture*) ccTexture {
-	if (!_ccTextureContent) self.ccTexture = [CC3Texture2DContent textureFromCC3Texture: self];
-	return _ccTextureContent;
+	if (!_ccTexture) self.ccTexture = [CC3Texture2DContent textureFromCC3Texture: self];
+	return _ccTexture;
 }
 
 /** Sets the CCTexture content. */
--(void) setCcTexture: (CC3Texture2DContent*) texContent {
-	if (texContent == _ccTextureContent) return;
+-(void) setCcTexture: (CCTexture*) texContent {
+	if (texContent == _ccTexture) return;
 	
-	[_ccTextureContent release];
-	_ccTextureContent = [texContent retain];
+	[_ccTexture release];
+	_ccTexture = [texContent retain];
 	[self cacheCCTexture2D];
 }
 
@@ -540,7 +563,7 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
  * CCTexture returned by the ccTexture property to the CCTextureCache.
  */
 -(void) cacheCCTexture2D {
-	if (self.class.shouldCacheAssociatedCCTextures) [_ccTextureContent addToCacheWithName: self.name];
+	if (self.class.shouldCacheAssociatedCCTextures) [_ccTexture addToCacheWithName: self.name];
 }
 
 static BOOL _shouldCacheAssociatedCCTextures = NO;
@@ -560,11 +583,12 @@ static BOOL _shouldCacheAssociatedCCTextures = NO;
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		_ccTextureContent = nil;
+		_ccTexture = nil;
 		_textureID = 0;
 		_size = CC3IntSizeMake(0, 0);
 		_coverage = CGSizeZero;
 		_pixelFormat = GL_RGBA;
+		_pixelType = GL_UNSIGNED_BYTE;
 		_hasMipmap = NO;
 		_hasAlpha = NO;
 		_hasPremultipliedAlpha = NO;
@@ -578,8 +602,8 @@ static BOOL _shouldCacheAssociatedCCTextures = NO;
 
 -(void) populateFrom: (CC3Texture*) another { CC3Assert(NO, @"%@ should not be copied.", self.class); }
 
-+(Class) textureClassForFile: (NSString*) aFilePath {
-	NSString* lcPath = aFilePath.lowercaseString;
++(Class) textureClassForFile: (NSString*) filePath {
+	NSString* lcPath = filePath.lowercaseString;
 	if ([lcPath hasSuffix: @".pvr"] ||
 		[lcPath hasSuffix: @".pvr.gz"] ||
 		[lcPath hasSuffix: @".pvr.ccz"] ) {
@@ -593,15 +617,15 @@ static BOOL _shouldCacheAssociatedCCTextures = NO;
  * the correct class, release this instance and instantiate and return an instance of the correct
  * class. If this IS the correct class, perform normal init and load the specified file.
  */
--(id) initFromFile: (NSString*) aFilePath {
-	Class texClz = [self.class textureClassForFile: aFilePath];
+-(id) initFromFile: (NSString*) filePath {
+	Class texClz = [self.class textureClassForFile: filePath];
 	if (self.class != texClz) {
 		[self release];
-		return [[texClz alloc] initFromFile: aFilePath];
+		return [[texClz alloc] initFromFile: filePath];
 	}
 	
 	if ( (self = [self init]) ) {
-		if ( ![self loadFromFile: aFilePath] ) {
+		if ( ![self loadFromFile: filePath] ) {
 			[self release];
 			return nil;
 		}
@@ -609,16 +633,16 @@ static BOOL _shouldCacheAssociatedCCTextures = NO;
 	return self;
 }
 
-+(id) textureFromFile: (NSString*) aFilePath {
-	id tex = [self getTextureNamed: [self textureNameFromFilePath: aFilePath]];
++(id) textureFromFile: (NSString*) filePath {
+	id tex = [self getTextureNamed: [self textureNameFromFilePath: filePath]];
 	if (tex) return tex;
 	
-	tex = [[[self textureClassForFile: aFilePath] alloc] initFromFile: aFilePath];
+	tex = [[[self textureClassForFile: filePath] alloc] initFromFile: filePath];
 	[self addTexture: tex];
 	return [tex autorelease];
 }
 
-+(NSString*) textureNameFromFilePath: (NSString*) aFilePath { return aFilePath.lastPathComponent; }
++(NSString*) textureNameFromFilePath: (NSString*) filePath { return filePath.lastPathComponent; }
 
 +(Class) textureClassForCGImage { return CC3Texture2D.class; }
 
@@ -633,22 +657,60 @@ static BOOL _shouldCacheAssociatedCCTextures = NO;
 
 +(Class) textureClassForEmpty2D { return CC3Texture2D.class; }
 
+-(id) initWithPixelFormat: (GLenum) format withPixelType: (GLenum) type {
+	[self release];
+	return [[[self.class textureClassForEmpty2D] alloc] initWithPixelFormat: format withPixelType: type];
+}
+
+// Deprecated
 -(id) initWithPixelFormat: (GLenum) format andPixelType: (GLenum) type {
-	[self release];
-	return [[[self.class textureClassForEmpty2D] alloc] initWithPixelFormat: format andPixelType: type];
+	return [self initWithPixelFormat: format withPixelType: type];
 }
 
++(id) textureWithPixelFormat: (GLenum) format withPixelType: (GLenum) type {
+	return [[[[self textureClassForEmpty2D] alloc] initWithPixelFormat: format withPixelType: type] autorelease];
+}
+
+// Deprecated
 +(id) textureWithPixelFormat: (GLenum) format andPixelType: (GLenum) type {
-	return [[[[self textureClassForEmpty2D] alloc] initWithPixelFormat: format andPixelType: type] autorelease];
+	return [self textureWithPixelFormat: format withPixelType: type];
 }
 
--(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
+-(id) initWithSize: (CC3IntSize) size withPixelFormat: (GLenum) format withPixelType: (GLenum) type {
 	[self release];
-	return [[[self.class textureClassForEmpty2D] alloc] initWithSize: size andPixelFormat: format andPixelType: type];
+	return [[[self.class textureClassForEmpty2D] alloc] initWithSize: size withPixelFormat: format withPixelType: type];
 }
 
+// Deprecated
+-(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
+	return [self initWithSize: size withPixelFormat: format withPixelType: type];
+}
+
++(id) textureWithSize: (CC3IntSize) size withPixelFormat: (GLenum) format withPixelType: (GLenum) type {
+	return [[[[self textureClassForEmpty2D] alloc] initWithSize: size withPixelFormat: format withPixelType: type] autorelease];
+}
+
+// Deprecated
 +(id) textureWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
-	return [[[[self textureClassForEmpty2D] alloc] initWithSize: size andPixelFormat: format andPixelType: type] autorelease];
+	return [self textureWithSize: size withPixelFormat: format withPixelType: type];
+}
+
+-(id) initWithSize: (CC3IntSize) size withColor: (ccColor4B) color {
+	[self release];
+	return [[[self.class textureClassForEmpty2D] alloc] initWithSize: size withColor: color];
+}
+
++(id) textureWithSize: (CC3IntSize) size withColor: (ccColor4B) color {
+	return [[[[self textureClassForEmpty2D] alloc] initWithSize: size withColor: color] autorelease];
+}
+
+-(id) initWithCCTexture: (CCTexture*) ccTexture {
+	[self release];
+	return [[[self.class textureClassForEmpty2D] alloc] initWithCCTexture: ccTexture];
+}
+
++(id) textureWithCCTexture: (CCTexture*) ccTexture {
+	return [[[[self textureClassForEmpty2D] alloc] initWithCCTexture: ccTexture] autorelease];
 }
 
 +(Class) textureClassForCube { return CC3TextureCube.class; }
@@ -692,28 +754,65 @@ static BOOL _shouldCacheAssociatedCCTextures = NO;
 	return [tex autorelease];
 }
 
+-(id) initCubeWithPixelFormat: (GLenum) format withPixelType: (GLenum) type {
+	[self release];
+	return [[[self.class textureClassForCube] alloc] initCubeWithPixelFormat: format withPixelType: type];
+}
+
+// Deprecated
 -(id) initCubeWithPixelFormat: (GLenum) format andPixelType: (GLenum) type {
-	[self release];
-	return [[[self.class textureClassForCube] alloc] initCubeWithPixelFormat: format andPixelType: type];
+	return [self initCubeWithPixelFormat: format withPixelType: type];
 }
 
++(id) textureCubeWithPixelFormat: (GLenum) format withPixelType: (GLenum) type {
+	return [[[[self textureClassForCube] alloc] initCubeWithPixelFormat: format withPixelType: type] autorelease];
+}
+
+// Deprecated
 +(id) textureCubeWithPixelFormat: (GLenum) format andPixelType: (GLenum) type {
-	return [[[[self textureClassForCube] alloc] initCubeWithPixelFormat: format andPixelType: type] autorelease];
+	return [self textureCubeWithPixelFormat: format withPixelType: type];
 }
 
--(id) initCubeWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
+-(id) initCubeWithSideLength: (GLuint) sideLength withPixelFormat: (GLenum) format withPixelType: (GLenum) type {
 	[self release];
-	return [[[self.class textureClassForCube] alloc] initCubeWithSize: size andPixelFormat: format andPixelType: type];
+	return [[[self.class textureClassForCube] alloc] initCubeWithSideLength: sideLength withPixelFormat: format withPixelType: type];
 }
 
-+(id) textureCubeWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
-	return [[[[self textureClassForCube] alloc] initCubeWithSize: size andPixelFormat: format andPixelType: type] autorelease];
+// Deprecated
+-(id) initCubeWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
+	return [self initCubeWithSideLength: size.width withPixelFormat: format withPixelType: type];
 }
+
++(id) textureCubeWithSideLength: (GLuint) sideLength withPixelFormat: (GLenum) format withPixelType: (GLenum) type {
+	return [[[[self textureClassForCube] alloc] initCubeWithSideLength: sideLength withPixelFormat: format withPixelType: type] autorelease];
+}
+
+// Deprecated
++(id) textureCubeWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
+	return [self textureCubeWithSideLength: size.width withPixelFormat: format withPixelType: type];
+}
+
+-(id) initCubeColoredForAxes {
+	[self release];
+	return [[[self.class textureClassForCube] alloc] initCubeColoredForAxes];
+}
+
++(id) textureCubeColoredForAxes {
+	NSString* texName = @"Axes-Colored-Cube";
+	CC3Texture* tex = [self getTextureNamed: texName];
+	if (tex) return tex;
+	
+	tex = [[[self textureClassForCube] alloc] initCubeColoredForAxes];
+	tex.name = texName;
+	[self addTexture: tex];
+	return [tex autorelease];
+}
+
+-(NSString*) description { return [NSString stringWithFormat: @"%@ (GLID: %u)", super.description, self.textureID]; }
 
 -(NSString*) fullDescription {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 100];
 	[desc appendFormat: @"%@", self.description];
-	[desc appendFormat: @" (ID: %u)", self.textureID];
 	[desc appendFormat: @" of type %@", (self.isTextureCube ? @"cube" : @"2D")];
 	[desc appendFormat: @", size: %@", NSStringFromCC3IntSize(self.size)];
 	[desc appendFormat: @", coverage: %@", NSStringFromCGSize(self.coverage)];
@@ -801,14 +900,16 @@ static CC3Cache* _textureCache = nil;
 -(Class) textureContentClass { return CC3Texture2DContent.class; }
 
 /** If the specified texture content is new to this texture, the contained content is updated. */
--(void) bindTextureContent: (CC3Texture2DContent*) texContent toTarget: (GLenum) target {
+-(void) bindTextureContent: (CCTexture*) texContent toTarget: (GLenum) target {
 	[super bindTextureContent: texContent toTarget: target];
 
-	if (texContent == _ccTextureContent) return;
+	if (texContent == _ccTexture) return;
 
+	_ccTexture.name = 0;			// Clear ID of existing so it won't delete GL texture when deallocated
+
+	// Align texture ID's and delete the texture data from main memory
 	texContent.name = self.textureID;
 	[texContent deleteImageData];
-	_ccTextureContent.name = 0;			// Clear ID of existing so it won't delete GL texture when deallocated
 	
 	self.ccTexture = texContent;		// Keep track of the 2D texture content
 }
@@ -827,7 +928,7 @@ static CC3Cache* _textureCache = nil;
 }
 
 -(void) incrementTextureUnitInVisitor: (CC3NodeDrawingVisitor*) visitor {
-	visitor.current2DTextureUnit += 1;
+	[visitor increment2DTextureUnit];
 }
 
 
@@ -870,7 +971,7 @@ static BOOL _defaultShouldFlip2DHorizontallyOnLoad = NO;
 	return self;
 }
 
--(id) initWithPixelFormat: (GLenum) format andPixelType: (GLenum) type {
+-(id) initWithPixelFormat: (GLenum) format withPixelType: (GLenum) type {
 	if ( (self = [self init]) ) {
 		self.shouldFlipVerticallyOnLoad = NO;	// Nothing to flip
 		_pixelFormat = format;
@@ -879,9 +980,35 @@ static BOOL _defaultShouldFlip2DHorizontallyOnLoad = NO;
 	return self;
 }
 
--(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
-	if ( (self = [self initWithPixelFormat: format andPixelType: type]) ) {
+-(id) initWithSize: (CC3IntSize) size withPixelFormat: (GLenum) format withPixelType: (GLenum) type {
+	if ( (self = [self initWithPixelFormat: format withPixelType: type]) ) {
 		[self resizeTo: size];
+	}
+	return self;
+}
+
+-(id) initWithSize: (CC3IntSize) size withColor: (ccColor4B) color {
+	if ( (self = [self init]) ) {
+		[self bindTextureOfColor: color andSize: size toTarget: self.textureTarget];
+	}
+	return self;
+}
+
+-(id) initWithCCTexture: (CCTexture*) ccTexture {
+	if ( (self = [self init]) ) {
+		_ccTexture = [ccTexture retain];
+		_textureID = ccTexture.name;
+		_size = CC3IntSizeMake((GLint)ccTexture.pixelWidth, (GLint)ccTexture.pixelHeight);
+		_coverage = CGSizeMake(ccTexture.maxS, ccTexture.maxT);
+		_pixelFormat = ccTexture.pixelGLFormat;
+		_pixelType = ccTexture.pixelGLType;
+		_hasMipmap = ccTexture.hasMipmap;
+		_hasAlpha = ccTexture.hasAlpha;
+		_hasPremultipliedAlpha = ccTexture.hasPremultipliedAlpha;
+		_isUpsideDown = ccTexture.isUpsideDown;
+		_shouldFlipVerticallyOnLoad = NO;
+		_shouldFlipHorizontallyOnLoad = NO;
+		self.textureParameters = self.class.defaultTextureParameters;	// Marks params dirty
 	}
 	return self;
 }
@@ -914,7 +1041,7 @@ static ccTexParams _defaultCubeMapTextureParameters = { GL_LINEAR_MIPMAP_NEAREST
 -(void) resizeTo: (CC3IntSize) size {
 	if ( CC3IntSizesAreEqual(size, _size) ) return;
 	[super resizeTo: size];
-	CC3Texture2DContent* texContent = self.getSizedContent;
+	CCTexture* texContent = self.getSizedContent;
 	[self bindTextureContent: texContent toTarget: GL_TEXTURE_CUBE_MAP_POSITIVE_X];
 	[self bindTextureContent: texContent toTarget: GL_TEXTURE_CUBE_MAP_NEGATIVE_X];
 	[self bindTextureContent: texContent toTarget: GL_TEXTURE_CUBE_MAP_POSITIVE_Y];
@@ -926,7 +1053,7 @@ static ccTexParams _defaultCubeMapTextureParameters = { GL_LINEAR_MIPMAP_NEAREST
 
 #pragma mark Texture file loading
 
--(BOOL) loadFromFile: (NSString*) aFilePath {
+-(BOOL) loadFromFile: (NSString*) filePath {
 	CC3Assert(NO, @"%@ is used to load six cube textures. It cannot load a single texture.", self);
 	return NO;
 }
@@ -937,8 +1064,8 @@ static ccTexParams _defaultCubeMapTextureParameters = { GL_LINEAR_MIPMAP_NEAREST
 	[texContent release];		// Could be big, so get rid of it immediately
 }
 
--(BOOL) loadCubeFace: (GLenum) faceTarget fromFile: (NSString*) aFilePath {
-	return [self loadTarget: faceTarget fromFile: aFilePath];
+-(BOOL) loadCubeFace: (GLenum) faceTarget fromFile: (NSString*) filePath {
+	return [self loadTarget: faceTarget fromFile: filePath];
 }
 
 -(BOOL) loadFromFilesPosX: (NSString*) posXFilePath negX: (NSString*) negXFilePath
@@ -954,6 +1081,7 @@ static ccTexParams _defaultCubeMapTextureParameters = { GL_LINEAR_MIPMAP_NEAREST
 	success &= [self loadCubeFace: GL_TEXTURE_CUBE_MAP_NEGATIVE_Z fromFile: negZFilePath];
 
 	if (success && self.class.shouldGenerateMipmaps) [self generateMipmap];
+	[self checkGLDebugLabel];
 	return success;
 }
 
@@ -977,7 +1105,7 @@ static ccTexParams _defaultCubeMapTextureParameters = { GL_LINEAR_MIPMAP_NEAREST
 }
 
 -(void) incrementTextureUnitInVisitor: (CC3NodeDrawingVisitor*) visitor {
-	visitor.currentCubeTextureUnit += 1;
+	[visitor incrementCubeTextureUnit];
 }
 
 
@@ -1034,7 +1162,7 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 	return self;
 }
 
--(id) initCubeWithPixelFormat: (GLenum) format andPixelType: (GLenum) type {
+-(id) initCubeWithPixelFormat: (GLenum) format withPixelType: (GLenum) type {
 	if ( (self = [self init]) ) {
 		self.shouldFlipVerticallyOnLoad = NO;	// Nothing to flip
 		_pixelFormat = format;
@@ -1043,9 +1171,22 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 	return self;
 }
 
--(id) initCubeWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
-	if ( (self = [self initCubeWithPixelFormat: format andPixelType: type]) ) {
-		[self resizeTo: size];
+-(id) initCubeWithSideLength: (GLuint) sideLength withPixelFormat: (GLenum) format withPixelType: (GLenum) type {
+	if ( (self = [self initCubeWithPixelFormat: format withPixelType: type]) ) {
+		[self resizeTo: CC3IntSizeMake(sideLength, sideLength)];
+	}
+	return self;
+}
+
+-(id) initCubeColoredForAxes {
+	if ( (self = [self init]) ) {
+		CC3IntSize texSize = CC3IntSizeMake(1, 1);
+		[self bindTextureOfColor: CCC4BFromCCC4F(kCCC4FRed) andSize: texSize toTarget: GL_TEXTURE_CUBE_MAP_POSITIVE_X];
+		[self bindTextureOfColor: CCC4BFromCCC4F(kCCC4FCyan) andSize: texSize toTarget: GL_TEXTURE_CUBE_MAP_NEGATIVE_X];
+		[self bindTextureOfColor: CCC4BFromCCC4F(kCCC4FGreen) andSize: texSize toTarget: GL_TEXTURE_CUBE_MAP_POSITIVE_Y];
+		[self bindTextureOfColor: CCC4BFromCCC4F(kCCC4FMagenta) andSize: texSize toTarget: GL_TEXTURE_CUBE_MAP_NEGATIVE_Y];
+		[self bindTextureOfColor: CCC4BFromCCC4F(kCCC4FBlue) andSize: texSize toTarget: GL_TEXTURE_CUBE_MAP_POSITIVE_Z];
+		[self bindTextureOfColor: CCC4BFromCCC4F(kCCC4FYellow) andSize: texSize toTarget: GL_TEXTURE_CUBE_MAP_NEGATIVE_Z];
 	}
 	return self;
 }
@@ -1230,12 +1371,12 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 	return [[((CC3TextureUnitTexture*)[self alloc]) initWithTexture: texture] autorelease];
 }
 
--(id) initFromFile: (NSString*) aFilePath {
-	return [self initWithTexture: [CC3Texture textureFromFile: aFilePath]];
+-(id) initFromFile: (NSString*) filePath {
+	return [self initWithTexture: [CC3Texture textureFromFile: filePath]];
 }
 
-+(id) textureFromFile: (NSString*) aFilePath {
-	return [[[self alloc] initFromFile: aFilePath] autorelease];
++(id) textureFromFile: (NSString*) filePath {
+	return [[[self alloc] initFromFile: filePath] autorelease];
 }
 
 -(id) initWithCGImage: (CGImageRef) cgImg {
@@ -1321,6 +1462,11 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 #pragma mark -
 #pragma mark CC3Texture2DContent
 
+#if CC3_CC2_CLASSIC
+static BOOL _dummyAntiAliased;
+static CGFloat _dummyContentScale;
+#endif	// CC3_CC2_CLASSIC
+
 #if COCOS2D_VERSION >= 0x030000
 #	define CC2_TEX_NAME _name
 #	define CC2_TEX_SIZE _sizeInPixels
@@ -1343,6 +1489,8 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 #	define CC2_TEX_MAXT _maxT
 #	define CC2_TEX_HAS_PREMULT_ALPHA _hasPremultipliedAlpha
 #	define CC2_TEX_HAS_MIPMAP _hasMipmaps
+#	define CC2_TEX_ANTIALIASED _dummyAntiAliased
+#	define CC2_TEX_CONTENT_SCALE _dummyContentScale
 #else
 #	define CC2_TEX_NAME name_
 #	define CC2_TEX_SIZE size_
@@ -1353,12 +1501,11 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 #	define CC2_TEX_MAXT maxT_
 #	define CC2_TEX_HAS_PREMULT_ALPHA hasPremultipliedAlpha_
 #	define CC2_TEX_HAS_MIPMAP hasMipmaps_
-#endif
+#	define CC2_TEX_ANTIALIASED _dummyAntiAliased
+#	define CC2_TEX_CONTENT_SCALE _dummyContentScale
+#endif	// COCOS2D_VERSION >= 0x030000
 
 @implementation CC3Texture2DContent
-
-@synthesize imageData=_imageData, isUpsideDown=_isUpsideDown;
-@synthesize pixelGLFormat=_pixelGLFormat, pixelGLType=_pixelGLType;
 
 -(void) dealloc {
 	[self deleteImageData];
@@ -1378,73 +1525,13 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 /** Overridden to do nothing so that texture data is retained until bound to the GL engine. */
 -(void) releaseData: (void*) data {}
 
--(BOOL) hasAlpha {
-	switch (_pixelGLFormat) {
-		case GL_RGBA:
-		case GL_LUMINANCE_ALPHA:
-		case GL_ALPHA:
-			return YES;
-		default:
-			return NO;
-	}
-}
+-(const GLvoid*) imageData { return _imageData; }
 
--(GLuint) bytesPerPixel {
-	switch (_pixelGLFormat) {
-		case GL_RGBA: {
-			switch (_pixelGLType) {
-				case GL_UNSIGNED_BYTE:
-					return 4;
-				case GL_UNSIGNED_SHORT_4_4_4_4:
-				case GL_UNSIGNED_SHORT_5_5_5_1:
-					return 2;
-				default:
-					break;
-			}
-			break;
-		}
+-(GLenum) pixelGLFormat { return _pixelGLFormat; }
 
-		case GL_RGB: {
-			switch (_pixelGLType) {
-				case GL_UNSIGNED_BYTE:
-					return 3;
-				case GL_UNSIGNED_SHORT_5_6_5:
-					return 2;
-				default:
-					break;
-			}
-			break;
-		}
+-(GLenum) pixelGLType { return _pixelGLType; }
 
-		case GL_LUMINANCE_ALPHA:
-			return 2;
-		
-		case GL_LUMINANCE:
-		case GL_ALPHA:
-			return 1;
-			
-		case GL_DEPTH_COMPONENT: {
-			switch (_pixelGLType) {
-				case GL_UNSIGNED_INT:
-					return 4;
-				case GL_UNSIGNED_SHORT:
-					return 2;
-				default:
-					break;
-			}
-			break;
-		}
-			
-		case GL_DEPTH_STENCIL:
-			return 4;
-			
-		default:
-			break;
-	}
-	CC3Assert(NO, @"%@ encountered unexpected combination of pixel format %@ and type %@",
-			  self, NSStringFromGLEnum(_pixelGLFormat), NSStringFromGLEnum(_pixelGLType));
-	return 0;
-}
+-(BOOL) isUpsideDown { return _isUpsideDown; }
 
 -(void) flipVertically {
 	if ( !_imageData ) return;		// If no data, nothing to flip!
@@ -1510,31 +1597,13 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 	_isUpsideDown = !_isUpsideDown;		// Orientation has changed
 }
 
+// Keep compiler happy
 -(void) resizeTo: (CC3IntSize) size {
-	CC2_TEX_SIZE = CGSizeFromCC3IntSize(size);
-	CC2_TEX_WIDTH = size.width;
-	CC2_TEX_HEIGHT = size.height;
-	CC2_TEX_MAXS = 1.0f;
-	CC2_TEX_MAXT = 1.0f;
+	[super resizeTo: size];
 }
 
 
 #pragma mark Allocation and Initialization
-
--(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
-	LogTrace(@"Creating empty texture width %u height %u content size %@ format %i data %p",
-			 size.width, size.height, NSStringFromCGSize(size), pixelFormat, data);
-	if( (self = [super init]) ) {
-		[self resizeTo: size];
-		CC2_TEX_HAS_PREMULT_ALPHA = NO;
-		_imageData = NULL;
-		_isUpsideDown = NO;		// Empty texture is not upside down!
-		_pixelGLFormat = format;
-		_pixelGLType = type;
-		[self updatePixelFormat];
-	}
-	return self;
-}
 
 #if CC3_CC2_CLASSIC
 /** Overridden to set content parameters, but postpone loading the content into the GL engine. */
@@ -1544,8 +1613,8 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 		pixelsHigh: (NSUInteger) height
 	   contentSize: (CGSize) size {
 	
-	LogTrace(@"Loading texture width %u height %u content size %@ format %i data %p",
-			 width, height, NSStringFromCGSize(size), pixelFormat, data);
+	LogTrace(@"Loading texture width %lu height %lu content size %@ format %i data %p",
+			 (unsigned long)width, (unsigned long)height, NSStringFromCGSize(size), pixelFormat, data);
 	if( (self = [super init]) ) {
 		CC2_TEX_SIZE = size;
 		CC2_TEX_WIDTH = width;
@@ -1556,8 +1625,9 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 		CC2_TEX_HAS_PREMULT_ALPHA = NO;
 		
 		_imageData = data;
-		_isUpsideDown = YES;			// Assume upside down
-		[self updateFromPixelFormat];
+		_pixelGLFormat = super.pixelGLFormat;
+		_pixelGLType = super.pixelGLType;
+		_isUpsideDown = super.isUpsideDown;
 	}
 	return self;
 }
@@ -1571,9 +1641,6 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 		pixelsHigh: (NSUInteger) height
 contentSizeInPixels: (CGSize) sizeInPixels
 	  contentScale: (CGFloat) contentScale {
-
-	LogTrace(@"Loading texture width %u height %u content size %@ format %i data %p",
-			 width, height, NSStringFromCGSize(size), pixelFormat, data);
 	if( (self = [super init]) ) {
 		CC2_TEX_SIZE = sizeInPixels;
 		CC2_TEX_WIDTH = width;
@@ -1587,98 +1654,13 @@ contentSizeInPixels: (CGSize) sizeInPixels
 		CC2_TEX_CONTENT_SCALE = contentScale;
 		
 		_imageData = data;
-		_isUpsideDown = YES;			// Assume upside down
-		[self updateFromPixelFormat];
+		_pixelGLFormat = super.pixelGLFormat;
+		_pixelGLType = super.pixelGLType;
+		_isUpsideDown = super.isUpsideDown;
 	}
 	return self;
 }
 #endif	// CC3_CC2_CLASSIC
-
--(void) updateFromPixelFormat {
-	GLuint pixFmt = self.pixelFormat;	// Not all versions of cocos2d contain all enum values.
-	switch(pixFmt) {
-		case CCTexturePixelFormat_RGBA8888:
-			_pixelGLFormat = GL_RGBA;
-			_pixelGLType = GL_UNSIGNED_BYTE;
-			break;
-		case CCTexturePixelFormat_RGBA4444:
-			_pixelGLFormat = GL_RGBA;
-			_pixelGLType = GL_UNSIGNED_SHORT_4_4_4_4;
-			break;
-		case CCTexturePixelFormat_RGB5A1:
-			_pixelGLFormat = GL_RGBA;
-			_pixelGLType = GL_UNSIGNED_SHORT_5_5_5_1;
-			break;
-		case CCTexturePixelFormat_RGB565:
-			_pixelGLFormat = GL_RGB;
-			_pixelGLType = GL_UNSIGNED_SHORT_5_6_5;
-			break;
-		case CCTexturePixelFormat_RGB888:
-			_pixelGLFormat = GL_RGB;
-			_pixelGLType = GL_UNSIGNED_BYTE;
-			break;
-		case CCTexturePixelFormat_AI88:
-			_pixelGLFormat = GL_LUMINANCE_ALPHA;
-			_pixelGLType = GL_UNSIGNED_BYTE;
-			break;
-		case CCTexturePixelFormat_A8:
-			_pixelGLFormat = GL_ALPHA;
-			_pixelGLType = GL_UNSIGNED_BYTE;
-			break;
-		default:
-			_pixelGLFormat = GL_ZERO;
-			_pixelGLType = GL_ZERO;
-			CC3Assert(NO, @"Couldn't bind texture data in unexpected format %u", pixFmt);
-	}
-}
-
--(void) updatePixelFormat {
-	switch (_pixelGLFormat) {
-		case GL_RGBA: {
-			switch (_pixelGLType) {
-				case GL_UNSIGNED_BYTE:
-					CC2_TEX_FORMAT = CCTexturePixelFormat_RGBA8888;
-					return;
-				case GL_UNSIGNED_SHORT_4_4_4_4:
-					CC2_TEX_FORMAT = CCTexturePixelFormat_RGBA4444;
-					return;
-				case GL_UNSIGNED_SHORT_5_5_5_1:
-					CC2_TEX_FORMAT = CCTexturePixelFormat_RGB5A1;
-					return;
-				default:
-					break;
-			}
-			break;
-		}
-			
-		case GL_RGB: {
-			switch (_pixelGLType) {
-				case GL_UNSIGNED_BYTE:
-					CC2_TEX_FORMAT = CCTexturePixelFormat_RGB888;
-					return;
-				case GL_UNSIGNED_SHORT_5_6_5:
-					CC2_TEX_FORMAT = CCTexturePixelFormat_RGB565;
-					return;
-				default:
-					break;
-			}
-			break;
-		}
-			
-		case GL_LUMINANCE_ALPHA:
-			CC2_TEX_FORMAT = CCTexturePixelFormat_AI88;
-			return;
-			
-		case GL_LUMINANCE:
-		case GL_ALPHA:
-			CC2_TEX_FORMAT = CCTexturePixelFormat_A8;
-			return;
-			
-		default:
-			break;
-	}
-	CC2_TEX_FORMAT = CCTexturePixelFormat_Default;
-}
 
 #if !CC3_CC2_CLASSIC
 -(id) initWithCGImage: (CGImageRef) cgImg {
@@ -1723,25 +1705,29 @@ contentSizeInPixels: (CGSize) sizeInPixels
 }
 #endif	// CC3_CC2_CLASSIC
 
--(id) initFromFile: (NSString*) aFilePath {
-	if ( [CC3STBImage shouldUseForFileExtension: aFilePath.pathExtension] )
-		return [self initFromSTBIFile: aFilePath];
+-(id) initFromFile: (NSString*) filePath {
+	if ( [CC3STBImage shouldUseForFileExtension: filePath.pathExtension] )
+		return [self initFromSTBIFile: filePath];
 	else
-		return [self initFromOSFile: aFilePath];
+		return [self initFromOSFile: filePath];
 }
 
--(id) initFromSTBIFile: (NSString*) aFilePath {
+-(id) initFromSTBIFile: (NSString*) filePath {
 	if( (self = [super init]) ) {
-		CC3STBImage* stbImage = [CC3STBImage imageFromFile: aFilePath];
+		CC3STBImage* stbImage = [CC3STBImage imageFromFile: filePath];
 		if (!stbImage) return nil;
 		
 		_imageData = stbImage.extractImageData;
+		
 		CC2_TEX_SIZE = CGSizeFromCC3IntSize(stbImage.size);
 		CC2_TEX_WIDTH = stbImage.size.width;
 		CC2_TEX_HEIGHT = stbImage.size.height;
 		CC2_TEX_MAXS = 1.0f;
 		CC2_TEX_MAXT = 1.0f;
 		CC2_TEX_HAS_PREMULT_ALPHA = NO;
+		CC2_TEX_ANTIALIASED = YES;
+		CC2_TEX_CONTENT_SCALE = 1.0;
+
 		_isUpsideDown = YES;			// Loaded upside-down
 		_pixelGLFormat = stbImage.pixelFormat;
 		_pixelGLType = stbImage.pixelType;
@@ -1750,9 +1736,13 @@ contentSizeInPixels: (CGSize) sizeInPixels
 	return self;
 }
 
--(id) initFromOSFile: (NSString*) aFilePath {
+-(id) initFromOSFile: (NSString*) filePath {
 #if CC3_IOS
-	UIImage* uiImg = [UIImage imageWithContentsOfFile: CC3EnsureAbsoluteFilePath(aFilePath)];
+	// Resolve an absolute path in either the application bundle resource
+	// directory or the Cocos3D bundle resource directory.
+	NSString* absFilePath = CC3ResolveResourceFilePath(filePath);
+	LogErrorIf(!absFilePath, @"Could not locate texture file '%@' in either the application resources or the Cocos3D library resources", filePath);
+	UIImage* uiImg = [UIImage imageWithContentsOfFile: absFilePath];
 
 #if CC3_CC2_1
 #if COCOS2D_VERSION < 0x010100
@@ -1768,10 +1758,50 @@ contentSizeInPixels: (CGSize) sizeInPixels
 #endif	// CC_IOS
 	
 #if CC3_OSX
-	NSData* imgData = [NSData dataWithContentsOfFile: CC3EnsureAbsoluteFilePath(aFilePath)];
+	// Resolve an absolute path in either the application bundle resource
+	// directory or the Cocos3D bundle resource directory.
+	NSString* absFilePath = CC3ResolveResourceFilePath(filePath);
+	LogErrorIf(!absFilePath, @"Could not locate texture file '%@' in either the application resources or the Cocos3D library resources", filePath);
+	NSData* imgData = [NSData dataWithContentsOfFile: absFilePath];
 	NSBitmapImageRep* image = [NSBitmapImageRep imageRepWithData: imgData];
 	return [self initWithCGImage: image.CGImage];
 #endif	// CC_OSX
+}
+
+-(id) initWithSize: (CC3IntSize) size withPixelFormat: (GLenum) format withPixelType: (GLenum) type {
+	if( (self = [super init]) ) {
+		[self resizeTo: size];
+		
+		CC2_TEX_HAS_PREMULT_ALPHA = NO;
+		CC2_TEX_ANTIALIASED = YES;
+		CC2_TEX_CONTENT_SCALE = 1.0;
+		
+		_imageData = NULL;
+		_isUpsideDown = NO;		// Empty texture is not upside down!
+		_pixelGLFormat = format;
+		_pixelGLType = type;
+		[self updatePixelFormat];
+	}
+	return self;
+}
+
+// Deprecated
+-(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
+	return [self initWithSize: size withPixelFormat: format withPixelType: type];
+}
+
+-(id) initWithSize: (CC3IntSize) size withColor: (ccColor4B) color {
+	if( (self = [self initWithSize: size withPixelFormat: GL_RGBA withPixelType: GL_UNSIGNED_BYTE]) ) {
+		GLuint pxCnt = size.width * size.height;
+		ccColor4B* pixels = malloc(pxCnt * sizeof(color));
+		for (GLuint pxIdx = 0; pxIdx < pxCnt; pxIdx++) pixels[pxIdx] = color;
+		_imageData = pixels;
+	}
+	return self;
+}
+
++(id) textureWithSize: (CC3IntSize) size withColor: (ccColor4B) color {
+	return [[[self alloc] initWithSize: size withColor: color] autorelease];
 }
 
 -(id) initFromCC3Texture: (CC3Texture*) texture {
@@ -1783,6 +1813,8 @@ contentSizeInPixels: (CGSize) sizeInPixels
 		CC2_TEX_MAXT = texture.coverage.height;
 		CC2_TEX_SIZE = CGSizeMake((CGFloat)CC2_TEX_WIDTH * CC2_TEX_MAXS, (CGFloat)CC2_TEX_HEIGHT * CC2_TEX_MAXT);
 		CC2_TEX_HAS_PREMULT_ALPHA = texture.hasPremultipliedAlpha;
+		CC2_TEX_ANTIALIASED = YES;
+		CC2_TEX_CONTENT_SCALE = 1.0;
 #if !CC3_CC2_1
 		CC2_TEX_HAS_MIPMAP = texture.hasMipmap;
 #endif
@@ -1797,5 +1829,248 @@ contentSizeInPixels: (CGSize) sizeInPixels
 +(id) textureFromCC3Texture: (CC3Texture*) texture {
 	return [[[self alloc] initFromCC3Texture: texture] autorelease];
 }
+
+-(void) updatePixelFormat {
+	CC2_TEX_FORMAT = CCTexturePixelFormatFromGLFormatAndType(_pixelGLFormat, _pixelGLType);
+}
+
+@end
+
+
+#pragma mark -
+#pragma mark CCTexture extension
+
+@implementation CCTexture (CC3)
+
+-(void) setName: (GLuint) name { CC2_TEX_NAME = name; }
+
+-(GLenum) pixelGLFormat { return CC3PixelGLFormatFromCCTexturePixelFormat(self.pixelFormat); }
+
+-(GLenum) pixelGLType { return CC3PixelGLTypeFromCCTexturePixelFormat(self.pixelFormat); }
+
+-(BOOL) hasAlpha {
+	switch (self.pixelGLFormat) {
+		case GL_RGBA:
+		case GL_LUMINANCE_ALPHA:
+		case GL_ALPHA:
+			return YES;
+		default:
+			return NO;
+	}
+}
+
+-(GLuint) bytesPerPixel {
+	switch (self.pixelGLFormat) {
+		case GL_RGBA: {
+			switch (self.pixelGLType) {
+				case GL_UNSIGNED_BYTE:
+					return 4;
+				case GL_UNSIGNED_SHORT_4_4_4_4:
+				case GL_UNSIGNED_SHORT_5_5_5_1:
+					return 2;
+				default:
+					break;
+			}
+			break;
+		}
+			
+		case GL_RGB: {
+			switch (self.pixelGLType) {
+				case GL_UNSIGNED_BYTE:
+					return 3;
+				case GL_UNSIGNED_SHORT_5_6_5:
+					return 2;
+				default:
+					break;
+			}
+			break;
+		}
+			
+		case GL_LUMINANCE_ALPHA:
+			return 2;
+			
+		case GL_LUMINANCE:
+		case GL_ALPHA:
+			return 1;
+			
+		case GL_DEPTH_COMPONENT: {
+			switch (self.pixelGLType) {
+				case GL_UNSIGNED_INT:
+					return 4;
+				case GL_UNSIGNED_SHORT:
+					return 2;
+				default:
+					break;
+			}
+			break;
+		}
+			
+		case GL_DEPTH_STENCIL:
+			return 4;
+			
+		default:
+			break;
+	}
+	CC3Assert(NO, @"%@ encountered unexpected combination of pixel format %@ and type %@",
+			  self, NSStringFromGLEnum(self.pixelGLFormat), NSStringFromGLEnum(self.pixelGLType));
+	return 0;
+}
+
+#if CC3_CC2_1
+-(BOOL) hasMipmap { return NO; }
+#else
+-(BOOL) hasMipmap { return CC2_TEX_HAS_MIPMAP; }
+#endif	// CC3_CC2_1
+
+-(BOOL) isUpsideDown { return self.class.texturesAreLoadedUpsideDown; }
+
+// Cocos2D 3.1 & above takes care of flipping
++(BOOL) texturesAreLoadedUpsideDown { return (COCOS2D_VERSION < 0x030100); }
+
+
+#pragma mark Transforming image in memory
+
+-(const GLvoid*) imageData { return NULL; }
+
+-(void) flipVertically {}
+
+-(void) flipHorizontally {}
+
+-(void) rotateHalfCircle {}
+
+-(void) resizeTo: (CC3IntSize) size {
+	[self deleteImageData];
+	
+	CC2_TEX_SIZE = CGSizeFromCC3IntSize(size);
+	CC2_TEX_WIDTH = size.width;
+	CC2_TEX_HEIGHT = size.height;
+	CC2_TEX_MAXS = 1.0f;
+	CC2_TEX_MAXT = 1.0f;
+}
+
+-(void) deleteImageData {}
+
+
+#pragma mark Caching
+
+-(void) addToCacheWithName: (NSString*) texName {
+	[CCTextureCache.sharedTextureCache addTexture: self named: texName];
+}
+
+#if CC3_CC2_CLASSIC
+-(NSUInteger) pixelWidth { return self.pixelsWide; }
+
+/** Legacy name for pixelHeight. */
+-(NSUInteger) pixelHeight { return self.pixelsHigh; }
+
+#endif	// CC3_CC2_CLASSIC
+
+@end
+
+GLenum CC3PixelGLFormatFromCCTexturePixelFormat(CCTexturePixelFormat pixelFormat) {
+	switch(pixelFormat) {
+		case CCTexturePixelFormat_RGBA8888: return GL_RGBA;
+		case CCTexturePixelFormat_RGBA4444:	return GL_RGBA;
+		case CCTexturePixelFormat_RGB5A1:	return GL_RGBA;
+		case CCTexturePixelFormat_RGB565:	return GL_RGB;
+		case CCTexturePixelFormat_RGB888:	return GL_RGB;
+		case CCTexturePixelFormat_AI88:		return GL_LUMINANCE_ALPHA;
+		case CCTexturePixelFormat_A8:		return GL_ALPHA;
+		default:
+			CC3AssertC(NO, @"Could not map OpenGL texel format from unexpected CCTexturePixelFormat %lu", (unsigned long)pixelFormat);
+			return GL_ZERO;
+	}
+}
+
+GLenum CC3PixelGLTypeFromCCTexturePixelFormat(CCTexturePixelFormat pixelFormat) {
+	switch(pixelFormat) {
+		case CCTexturePixelFormat_RGBA8888: return GL_UNSIGNED_BYTE;
+		case CCTexturePixelFormat_RGBA4444:	return GL_UNSIGNED_SHORT_4_4_4_4;
+		case CCTexturePixelFormat_RGB5A1:	return GL_UNSIGNED_SHORT_5_5_5_1;
+		case CCTexturePixelFormat_RGB565:	return GL_UNSIGNED_SHORT_5_6_5;
+		case CCTexturePixelFormat_RGB888:	return GL_UNSIGNED_BYTE;
+		case CCTexturePixelFormat_AI88:		return GL_UNSIGNED_BYTE;
+		case CCTexturePixelFormat_A8:		return GL_UNSIGNED_BYTE;
+		default:
+			CC3AssertC(NO, @"Could not map OpenGL texel type from unexpected CCTexturePixelFormat %lu", (unsigned long)pixelFormat);
+			return GL_ZERO;
+	}
+}
+
+CCTexturePixelFormat CCTexturePixelFormatFromGLFormatAndType(GLenum pixelFormat, GLenum pixelType) {
+	switch (pixelFormat) {
+		case GL_RGBA: {
+			switch (pixelType) {
+				case GL_UNSIGNED_BYTE:
+					return CCTexturePixelFormat_RGBA8888;
+				case GL_UNSIGNED_SHORT_4_4_4_4:
+					return CCTexturePixelFormat_RGBA4444;
+				case GL_UNSIGNED_SHORT_5_5_5_1:
+					return CCTexturePixelFormat_RGB5A1;
+				default:
+					return CCTexturePixelFormat_Default;
+			}
+		}
+			
+		case GL_RGB: {
+			switch (pixelType) {
+				case GL_UNSIGNED_BYTE:
+					return CCTexturePixelFormat_RGB888;
+				case GL_UNSIGNED_SHORT_5_6_5:
+					return CCTexturePixelFormat_RGB565;
+				default:
+					return CCTexturePixelFormat_Default;
+			}
+		}
+			
+		case GL_LUMINANCE_ALPHA:
+			return CCTexturePixelFormat_AI88;
+			
+		case GL_LUMINANCE:
+		case GL_ALPHA:
+			return CCTexturePixelFormat_A8;
+			
+		default:
+			return CCTexturePixelFormat_Default;
+	}
+}
+
+
+#pragma mark -
+#pragma mark CCTextureCache extension
+
+@implementation CCTextureCache (CC3)
+
+#if CC3_CC2_1
+#	define CC2_DICT_LOCK		dictLock_
+#	define CC2_TEX_DICT			textures_
+
+-(void) addTexture: (CCTexture*) tex2D named: (NSString*) texName {
+	if ( !tex2D ) return;
+	
+	[CC2_DICT_LOCK lock];
+	[CC2_TEX_DICT setObject: tex2D forKey: texName];
+	[CC2_DICT_LOCK unlock];
+}
+
+#else	// CC2 2 and above
+#	define CC2_DICT_QUEUE		_dictQueue
+
+#if COCOS2D_VERSION < 0x020100
+#	define CC2_TEX_DICT			textures_
+#else
+#	define CC2_TEX_DICT			_textures
+#endif	// COCOS2D_VERSION < 0x020100
+
+-(void) addTexture: (CCTexture*) tex2D named: (NSString*) texName {
+	if ( !tex2D || !texName ) return;
+	
+	dispatch_sync(CC2_DICT_QUEUE, ^{
+		if ( ![CC2_TEX_DICT objectForKey: texName] )
+			[CC2_TEX_DICT setObject: tex2D forKey: texName];
+	});
+}
+
+#endif	// CC3_CC2_1
 
 @end

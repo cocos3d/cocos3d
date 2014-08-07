@@ -69,7 +69,7 @@
 	CC3VertexArray* va = [super vertexArrayForAttribute: attribute withVisitor: visitor];
 	return va ? va : visitor.currentMesh.vertexLocations;
 }
-#endif	// CC3_OGL
+#endif	// CC3_GLSL
 
 
 #pragma mark Textures
@@ -102,11 +102,22 @@
 	[super enableTexturing: onOff inTarget: target at: tuIdx];
 }
 
+-(void) unbindTexturesExceptTarget: (GLenum) target at: (GLuint) tuIdx {
+	GLenum otherTarget = (target == GL_TEXTURE_2D) ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D;
+	[self bindTexture: 0 toTarget: otherTarget at: tuIdx];
+}
+
 -(void) disableTexturingAt: (GLuint) tuIdx {
 	[self enableTexturing: NO inTarget: GL_TEXTURE_2D at: tuIdx];
 	[self bindTexture: 0 toTarget: GL_TEXTURE_2D at: tuIdx];
 	[self enableTexturing: NO inTarget: GL_TEXTURE_CUBE_MAP at: tuIdx];
 	[self bindTexture: 0 toTarget: GL_TEXTURE_CUBE_MAP at: tuIdx];
+}
+
+-(NSString*) dumpTextureBindingsAt: (GLuint) tuIdx {
+	return [NSString stringWithFormat: @"%@: %i, %@: %i",
+			NSStringFromGLEnum(GL_TEXTURE_2D), [self getInteger: GL_TEXTURE_BINDING_2D],
+			NSStringFromGLEnum(GL_TEXTURE_CUBE_MAP), [self getInteger: GL_TEXTURE_BINDING_CUBE_MAP]];
 }
 
 
@@ -126,9 +137,6 @@
 
 
 #pragma mark Allocation and initialization
-
-/** The primary rendering context is set by the CC3GLView when it is loaded. */
--(CC3GLContext*) makeRenderingGLContext { return nil; }
 
 -(void) initPlatformLimits {
 	[super initPlatformLimits];
