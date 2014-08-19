@@ -13,15 +13,15 @@
 	</array>
 	<key>Definitions</key>
 	<dict>
-		<key>../README!.md</key>
+		<key>../README.md</key>
 		<dict>
 			<key>Path</key>
-			<string>README!.md</string>
+			<string>README.md</string>
 		</dict>
 	</dict>
 	<key>Nodes</key>
 	<array>
-		<string>../README!.md</string>
+		<string>../README.md</string>
 	</array>
 </dict>
 </plist>

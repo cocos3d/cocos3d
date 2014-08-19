@@ -1,6 +1,6 @@
 <img src="http://www.brenwill.com/docs/cocos3d/Logos/cocos3d-Banner-150h.png">
 
-README!
+README
 ----------------------
 
 Cocos3D 2.0.0
