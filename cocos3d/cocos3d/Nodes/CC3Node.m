@@ -63,6 +63,7 @@
 @synthesize shouldUseFixedBoundingVolume=_shouldUseFixedBoundingVolume;
 @synthesize shouldStopActionsWhenRemoved=_shouldStopActionsWhenRemoved;
 @synthesize cameraDistanceProduct=_cameraDistanceProduct;
+@synthesize touchEnabled=_touchEnabled;
 
 -(void) dealloc {
 	self.target = nil;							// Removes myself as listener
@@ -2029,10 +2030,6 @@ static GLuint lastAssignedNodeTag;
 
 
 #pragma mark Touch handling
-
--(BOOL) isTouchEnabled { return _touchEnabled; }
-
--(void) setTouchEnabled: (BOOL) canTouch { _touchEnabled = canTouch; }
 
 // Deprecated
 -(void) setIsTouchEnabled: (BOOL) canTouch { self.touchEnabled = canTouch; }

@@ -61,6 +61,11 @@
 @synthesize particleSizeAttenuation=_particleSizeAttenuation;
 @synthesize shouldNormalizeParticleSizesToDevice=_shouldNormalizeParticleSizesToDevice;
 
+-(void) dealloc {
+	[self.activeCamera removeTransformListener: self];
+	[super dealloc];
+}
+
 -(GLfloat) normalizedParticleSize {
 	return [self normalizeParticleSizeToDevice: self.particleSize];
 }
