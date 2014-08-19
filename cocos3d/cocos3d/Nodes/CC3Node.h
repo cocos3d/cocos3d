@@ -1,7 +1,7 @@
 /*
  * CC3Node.h
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -124,10 +124,10 @@ typedef enum {
  * the next frame are being handled by the CPU, and on some systems, permits frame drawing
  * and model updating to be perfomed on separate threads.
  *
- * CC3Nodes support the cocos2d CCAction class hierarchy. Nodes can be translated, rotated,
+ * CC3Nodes support the Cocos2D CCAction class hierarchy. Nodes can be translated, rotated,
  * and scaled in three dimensions, or made to point towards a direction (for cameras and
- * lights), all under control of cocos2d CCActions. As with other CCActions, these actions
- * can be combined into action sequences or repeating actions, or modified with cocos2d ease
+ * lights), all under control of Cocos2D CCActions. As with other CCActions, these actions
+ * can be combined into action sequences or repeating actions, or modified with Cocos2D ease
  * actions. See the class CC3ActionTransformTo and its subclasses for actions that operate on CC3Nodes.
  *
  * When populating your scene, you can easily create hordes of similar nodes using the copy
@@ -349,7 +349,7 @@ typedef enum {
  * The incoming axis and angle specify the amount of change in rotation,
  * not the final rotational state.
  *
- * Thanks to cocos3d user nt901 for contributing to the development of this feature
+ * Thanks to Cocos3D user nt901 for contributing to the development of this feature
  */
 -(void) rotateByAngle: (GLfloat) angle aroundAxis: (CC3Vector) axis;
 
@@ -2566,7 +2566,7 @@ typedef enum {
 /**
  * @deprecated Renamed to globalTransformMatrix.
  *
- * This property will be redefined in a future release of cocos3d, and will result in incorrect
+ * This property will be redefined in a future release of Cocos3D, and will result in incorrect
  * behaviour in any legacy code that depends on the older functionality provided by this property.
  * Convert your code now.
  */
@@ -2575,7 +2575,7 @@ typedef enum {
 /**
  * @deprecated Renamed to globalTransformMatrixInverted.
  *
- * This property will be redefined in a future release of cocos3d, and will result in incorrect
+ * This property will be redefined in a future release of Cocos3D, and will result in incorrect
  * behaviour in any legacy code that depends on the older functionality provided by this property.
  * Convert your code now.
  */

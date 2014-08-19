@@ -1,7 +1,7 @@
 /*
  * CC3OpenGL.m
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -227,7 +227,7 @@ static NSObject<CC3OpenGLDelegate>* _delegate = nil;
 		cc3_CheckGLPrim(buffId, value_GL_ARRAY_BUFFER_BINDING, isKnown_GL_ARRAY_BUFFER_BINDING);
 		if ( !needsUpdate ) return;
 	}
-	[self bindVertexArrayObject: 0];	// Ensure that a VAO was not left in place by cocos2d
+	[self bindVertexArrayObject: 0];	// Ensure that a VAO was not left in place by Cocos2D
 	glBindBuffer(target, buffId);
 	LogGLErrorTrace(@"glBindBuffer(%@, %u)", NSStringFromGLEnum(target), buffId);
 }
@@ -263,8 +263,8 @@ static NSObject<CC3OpenGLDelegate>* _delegate = nil;
 	glBindVertexArray(vaoId);
 	LogGLErrorTrace(@"glBindVertexArray(%u)", vaoId);
 #else
-	// If available, use cocos2d state management. This method can be invoked from outside
-	// the main rendering path (ie- during buffer loading), so cocos2d state must be honoured.
+	// If available, use Cocos2D state management. This method can be invoked from outside
+	// the main rendering path (ie- during buffer loading), so Cocos2D state must be honoured.
 	ccGLBindVAO(vaoId);
 #endif	// COCOS2D_VERSION >= 0x020100
 }
@@ -1170,7 +1170,7 @@ static NSObject<CC3OpenGLDelegate>* _delegate = nil;
 -(void) align2DStateCacheWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
 
 -(void) alignFor3DDrawingWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[self bindVertexArrayObject: 0];	// Ensure that a VAO was not left in place by cocos2d
+	[self bindVertexArrayObject: 0];	// Ensure that a VAO was not left in place by Cocos2D
 	[self align3DStateCacheWithVisitor: visitor];
 }
 

@@ -1,7 +1,7 @@
 /*
  * CC3OSXExtensions.h
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -30,7 +30,7 @@
 /** @file */	// Doxygen marker
 
 
-/* Base library of extensions to iOS frameworks to support cocos3d. */
+/* Base library of extensions to iOS frameworks to support Cocos3D. */
 
 #import "CC3Environment.h"
 
@@ -93,7 +93,7 @@ typedef enum {
 /** GL context under iOS */
 #define CC3GLContext	NSOpenGLContext
 
-/** Extension category to support cocos3d functionality. */
+/** Extension category to support Cocos3D functionality. */
 @interface NSOpenGLContext (CC3)
 
 /** Ensures this GL context is the GL context for the currently running thread. */

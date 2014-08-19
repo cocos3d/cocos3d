@@ -10,9 +10,9 @@
 #ifndef _PVRTGLES2EXT_H_
 #define _PVRTGLES2EXT_H_
 
-#include "CC3PVROpenGLFoundation.h"		// patched for cocos3d by Bill Hollings
+#include "CC3PVROpenGLFoundation.h"		// patched for Cocos3D by Bill Hollings
 
-#if CC3_OGLES_2							// patched for cocos3d by Bill Hollings
+#if CC3_OGLES_2							// patched for Cocos3D by Bill Hollings
 
 #ifdef __APPLE__
 #if defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE==1
@@ -21,7 +21,7 @@
 // No binary shaders are allowed on the iphone and so this value is not defined
 // Defining here allows for a more graceful fail of binary shader loading at runtime
 // which can be recovered from instead of fail at compile time
-// #define GL_SGX_BINARY_IMG 0			// patched for cocos3d by Bill Hollings
+// #define GL_SGX_BINARY_IMG 0			// patched for Cocos3D by Bill Hollings
 #else
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>
@@ -217,7 +217,7 @@ public:
 	@param[in]		extension extension to query for
 	@return			True if the extension is supported
 	*************************************************************************/
-	static bool IsGLExtensionSupported(const char* extension);	// patched for cocos3d by Bill Hollings
+	static bool IsGLExtensionSupported(const char* extension);	// patched for Cocos3D by Bill Hollings
 };
 
 /*! @} */
@@ -228,5 +228,5 @@ public:
  End of file (PVRTgles2Ext.h)
 *****************************************************************************/
 
-#endif	// CC3_OGLES_2					// patched for cocos3d by Bill Hollings
+#endif	// CC3_OGLES_2					// patched for Cocos3D by Bill Hollings
 

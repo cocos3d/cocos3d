@@ -28,7 +28,7 @@
 #define PVRTABS(a)		((a) <= 0 ? -(a) : (a) )
 
 /* Define trig table macros */
-//#include "PVRTMathTable.h"				// patched for cocos3d by Bill Hollings
+//#include "PVRTMathTable.h"				// patched for Cocos3D by Bill Hollings
 
 /* Useful values */
 #define PVRT_PI_OVER_TWOf	(3.1415926535f / 2.0f)

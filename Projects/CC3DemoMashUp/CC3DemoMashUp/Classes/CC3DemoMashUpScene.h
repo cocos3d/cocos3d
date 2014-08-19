@@ -1,7 +1,7 @@
 /*
  * CC3DemoMashUpScene.h
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -26,7 +26,7 @@
  *
  * http://en.wikipedia.org/wiki/MIT_License
  *
- * The cocos3d mascot model was created by Alexandru Barbulescu, and used here
+ * The Cocos3D mascot model was created by Alexandru Barbulescu, and used here
  * by permission. Further rights may be claimed for that model.
  */
 
@@ -87,10 +87,10 @@ typedef enum {
  *   - Vertex skinning with a soft-body mesh bending and flexing based on the movement of skeleton bone nodes.
  *   - Copying soft-body nodes to create a completely separate character, with its own skeleton, that can be
  *     manipulated independently of the skeleton of the original.
- *   - animating 3D models using a variety of standard cocos2d CCActionIntervals
- *   - overlaying the 3D scene with 2D cocos2d controls such as joysticks and buttons
- *   - embedding 2D cocos2d text labels into the 3D scene
- *   - incorporating 2D cocos2d CCParticleEmitters into the 3D scene (as a sun and explosion fire)
+ *   - animating 3D models using a variety of standard Cocos2D CCActionIntervals
+ *   - overlaying the 3D scene with 2D Cocos2D controls such as joysticks and buttons
+ *   - embedding 2D Cocos2D text labels into the 3D scene
+ *   - incorporating 2D Cocos2D CCParticleEmitters into the 3D scene (as a sun and explosion fire)
  *   - emitting 3D point particles from a moving nozzle, with realistic distance attenuation
  *   - emitting two different types of 3D mesh particles, with distinct textures, from a moving nozzle,
  *     with each particle moving, rotating, and fading independently
@@ -168,7 +168,7 @@ typedef enum {
  *   - making use of a fixed bounding volume for the 3D particle emitter to improve performance.
  *   - permitting a node to cast a shadow even when the node itself is invisible by using the shouldCastShadowsWhenInvisible property
  *   - Skybox using a cube mapped texture.
- *   - cocos2d CCSprite displaying the television screen rendered texture
+ *   - Cocos2D CCSprite displaying the television screen rendered texture
  *
  * The camera initially opens on a scene of an animated robot arm with a 2D label attached to the
  * end of the rotating arm, demonstrating the technique of embedding a 2D CCNode into the 3D scene.
@@ -188,7 +188,7 @@ typedef enum {
  * If the ground plane is touched, a little orange teapot will be placed on the ground at the
  * location of the touch point, demonstrating the ability to integrate touch events with object
  * positioning in 3D (sometimes known as unprojecting). For dramatic effect, as the teapot is
- * placed, a fiery explosion is set off using a cocos2d CCParticleSystem, demonstrating the
+ * placed, a fiery explosion is set off using a Cocos2D CCParticleSystem, demonstrating the
  * ability to embed dynamic 2D particle systems into a 3D scene. Once the explosion particle
  * system has exhausted, it is automatically removed as a child of the teapot.
  *
@@ -216,7 +216,7 @@ typedef enum {
  * rotating around the center of that circular arc, as if it was pasted to an invisible cylinder.
  * Touching this text label will set a new text string into the label and change its color. This
  * curved label is different than the label held by the robot arm, in that it is actually constructed
- * as a 3D mesh (whereas the label held by the robot arm is a 2D cocos2d artifact). Since this rotating
+ * as a 3D mesh (whereas the label held by the robot arm is a 2D Cocos2D artifact). Since this rotating
  * label is a 3D mesh, its vertex content can be manipulated programmatically. This is demonstrated here
  * by moving the individual vertices so that they appear to be wrapped around an imaginary cylinder.
  *
@@ -264,11 +264,11 @@ typedef enum {
  * Using the left joystick, you can redirect the camera to look far away in the direction
  * of the light source by extrapolating a line from the base of the robot arm through the
  * white teapot. There you will find the sun hanging in the sky, as a dynamic particle
- * emitter. This demonstrates the ability to embed standard cocos2d particle emitters
+ * emitter. This demonstrates the ability to embed standard Cocos2D particle emitters
  * into a 3D scene. The sun is quite a large particle emitter, and you should notice a
  * drop in frame rate when it is visible.
  *
- * The scene is given perspective by a ground plane constructed from the cocos2d logo. This ground
+ * The scene is given perspective by a ground plane constructed from the Cocos2D logo. This ground
  * plane is configured so that, in addition to its front face, its backface will also be drawn.
  * You can verify this by moving the camera down below the ground plane, and looking up.
  *
@@ -370,7 +370,7 @@ typedef enum {
  * See the checkForCollisions method of this class for an example of how to use this feature.
  *
  * Touching the switch-view button again will point the camera at two copies of Alexandru Barbulescu's
- * 3D cocos3d mascot. The mascot on the left stares back at the camera, regardless of where you move
+ * 3D Cocos3D mascot. The mascot on the left stares back at the camera, regardless of where you move
  * the camera in the 3D scene (which you do using the right joystick). This kind of object is also
  * known as a halo object, and can be useful when you always want an object to face the camera.
  *
@@ -392,7 +392,7 @@ typedef enum {
  * PFX file contains "effects" each of which describes a combination of GLSL shaders and textures
  * that should be applied to the material of a mesh node to accomplish a particular visual effect
  * or look. The PFX file also includes declarations of semantics for the GLSL variables, allowing
- * cocos3d to automatically populate the uniforms from the shaders with active content from the scene.
+ * Cocos3D to automatically populate the uniforms from the shaders with active content from the scene.
  *
  * For the upper mask, the PFX file and effect are referenced from the POD file for the mask model,
  * and the effect is loaded and attached to the model automatically when the POD file is loaded.
@@ -467,7 +467,7 @@ typedef enum {
  * this die cube by touching it and swiping your finger in any direction. The die will
  * spin in the direction of the swipe. The faster and longer you swipe, the faster the
  * die will spin. The spinning die will slow down over time, eventually stopping. This
- * spinning die cube demonstrates a number of useful features in cocos3d:
+ * spinning die cube demonstrates a number of useful features in Cocos3D:
  *   - The ability to rotate a 3D object around any axis.
  *   - The ability to convert touch-move events into swipe gestures to interact with a 3D object.
  *   - The separation of touch-event handling for control, and touch-event handling for node selection.
@@ -502,7 +502,7 @@ typedef enum {
  *
  * This dragon example also demonstrates the ability to concatenate many discrete animated
  * movements into a single long animation within a 3D editor, and single POD file, and then 
- * to extract each distinct movement into its own animation track within cocos3d, so that 
+ * to extract each distinct movement into its own animation track within Cocos3D, so that
  * each can be applied by itself to the model, repeated in a loop, or blended with other
  * animated movements.
  *
@@ -587,7 +587,7 @@ typedef enum {
  * As the objects, light or camera moves, the shadow volumes are updated automatically.
  * To turn "shadow-mode" off, touch the shadow button a second time.
  *
- * Most of the dynamic motion in this scene is handled by standard cocos2d CCActionIntervals.
+ * Most of the dynamic motion in this scene is handled by standard Cocos2D CCActionIntervals.
  * User interaction is through buttons, which are 2D child layers on the main CC3DemoMashUpLayer,
  * and either gestures or touch and mouse event handling.
  *

@@ -10,9 +10,9 @@
 #ifndef _PVRTGLESEXT_H_
 #define _PVRTGLESEXT_H_
 
-#include "CC3PVROpenGLFoundation.h"		// patched for cocos3d by Bill Hollings
+#include "CC3PVROpenGLFoundation.h"		// patched for Cocos3D by Bill Hollings
 
-#if CC3_OGLES_1							// patched for cocos3d by Bill Hollings
+#if CC3_OGLES_1							// patched for Cocos3D by Bill Hollings
 
 /*!
  @addtogroup   API_OGLES
@@ -403,7 +403,7 @@ public:
 	@param[in]			extension extension to query for
 	@return 			True if the extension is supported
 	*************************************************************************/
-	static bool IsGLExtensionSupported(const char* extension);	// patched for cocos3d by Bill Hollings
+	static bool IsGLExtensionSupported(const char* extension);	// patched for Cocos3D by Bill Hollings
 	// The recommended technique for querying OpenGL extensions;
 	// from http://opengl.org/resources/features/OGLextensions/
 };
@@ -421,5 +421,5 @@ public:
 End of file (PVRTglesExt.h)
 *****************************************************************************/
 
-#endif	// CC3_OGLES_1					// patched for cocos3d by Bill Hollings
+#endif	// CC3_OGLES_1					// patched for Cocos3D by Bill Hollings
 

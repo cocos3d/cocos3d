@@ -1,7 +1,7 @@
 /*
  * CC3PODCamera.mm
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -81,7 +81,7 @@
 }
 
 /**
- * In cocos3d, scaling a camera affects the effective field of view. In a POD file, scale
+ * In Cocos3D, scaling a camera affects the effective field of view. In a POD file, scale
  * info is meaningless and should be ignored. This is handled here by clearing the scale
  * animation flag, and clearing the scale animation content before building the camera node.
  */
@@ -97,7 +97,7 @@
 }
 
 /**
- * Cameras in cocos3d are oriented to the OpenGL standard of pointing down the -Z axis, with
+ * Cameras in Cocos3D are oriented to the OpenGL standard of pointing down the -Z axis, with
  * the UP direction pointing up the +Y axis. However, the camera is a POD file is oriented
  * so that it points down the -Y axis, with the up direction pointing down the -Z axis.
  *

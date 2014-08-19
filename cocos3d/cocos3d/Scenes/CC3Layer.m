@@ -1,7 +1,7 @@
 /*
  * CC3Layer.m
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -198,7 +198,7 @@
 
 #pragma mark Updating layer
 
-/** Invoked from cocos2d when this layer is first displayed. Opens the 3D scene. */
+/** Invoked from Cocos2D when this layer is first displayed. Opens the 3D scene. */
 -(void) onEnter {
 	[super onEnter];
 	[self onOpenCC3Layer];
@@ -213,7 +213,7 @@
 	[self.cc3Scene open];			// Open the scene
 }
 
-/** Invoked from cocos2d when this layer is removed. Closes the 3D scene.  */
+/** Invoked from Cocos2D when this layer is removed. Closes the 3D scene.  */
 -(void) onExit {
 	[self closeCC3Scene];
 	[self onCloseCC3Layer];

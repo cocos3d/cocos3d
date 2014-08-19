@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLProgPipeline.h
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -37,7 +37,7 @@
  * Maximum number of lights under when using GLSL.
  *
  * Although under GLSL, there is no explicit maximum number of lights available, this setting
- * defines the number of possible lights that will be allocated and tracked within cocos3d, and can
+ * defines the number of possible lights that will be allocated and tracked within Cocos3D, and can
  * be set by the application to confirm the maximum number of lights programmed into the shaders.
  *
  * The default value is 32. This can be changed by either setting the value of this compiler
@@ -53,7 +53,7 @@
  *
  * Although under GLSL, there is no explicit maximum number of clip planes available, this
  * setting defines the number of possible user clip planes that will be allocated and tracked
- * within cocos3d, and can be set by the application to confirm the maximum number of user clip
+ * within Cocos3D, and can be set by the application to confirm the maximum number of user clip
  * planes programmed into the shaders.
  *
  * The default value is 0, indicating that under a programmable rendering pipeline, the platform
@@ -70,7 +70,7 @@
  *
  * Although under GLSL, there is no explicit maximum number of palette matrices available, this
  * setting defines the number of possible matrices that will be allocated and tracked within
- * cocos3d, and can be set by the application to confirm the maximum number of palettes programmed
+ * Cocos3D, and can be set by the application to confirm the maximum number of palettes programmed
  * into the shaders.
  *
  * The default value is 0, indicating that under a programmable rendering pipeline, the platform

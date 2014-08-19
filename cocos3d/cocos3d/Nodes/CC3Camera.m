@@ -1,7 +1,7 @@
 /*
  * CC3Camera.m
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -814,7 +814,7 @@
 		// this point on the near clipping plane forms a directional vector from the
 		// camera's origin. Rotate this directional vector with the camera's rotation
 		// matrix to convert it to a global direction vector in global coordinates.
-		// Thanks to cocos3d forum user Rogs for suggesting the use of the globalRotationMatrix.
+		// Thanks to Cocos3D forum user Rogs for suggesting the use of the globalRotationMatrix.
 		ray.startLocation = self.globalLocation;
 		ray.direction = [self.globalRotationMatrix transformDirection: pointLocNear];
 	}

@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLProgPipeline.m
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -39,7 +39,7 @@
 #import "CC3Shaders.h"
 
 #if !CC3_CC2_RENDER_QUEUE
-#import "kazmath/GL/matrix.h"	// Only cocos2d 2.x & 3.0
+#import "kazmath/GL/matrix.h"	// Only Cocos2D 2.x & 3.0
 #endif	// !CC3_CC2_RENDER_QUEUE
 
 @interface CC3OpenGL (TemplateMethods)
@@ -79,7 +79,7 @@
 	CC3Assert(attribute.semantic != kCC3SemanticNone || !visitor.currentMeshNode.shaderContext.shouldEnforceVertexAttributes,
 			  @"Cannot bind the attribute named %@ to the GL engine because its semantic meaning"
 			  @" is unknown. Check the attribute name. If the attribute name is correct, but is"
-			  @" not a standard cocos3d attribute name, assign a semantic value to the attribute"
+			  @" not a standard Cocos3D attribute name, assign a semantic value to the attribute"
 			  @" in the configureVariable: method of your semantic delegate implementation, or use"
 			  @" a PFX file to define the semantic for the attribute name.", attribute.name);
 	CC3VertexArray* va = [self vertexArrayForAttribute: attribute withVisitor: visitor];
@@ -135,7 +135,7 @@
 #pragma mark Matrices
 
 // Don't change matrix state on background thread (which can occur during shader prewarming),
-// because it messes with the concurrent rendering of cocos2d components on the rendering thread.
+// because it messes with the concurrent rendering of Cocos2D components on the rendering thread.
 -(void) activateMatrixStack: (GLenum) mode {
 	if ( !self.isRenderingContext ) return;
 	
@@ -360,7 +360,7 @@
 	
 	ccGLBlendFunc(value_GL_BLEND_SRC_RGB, value_GL_BLEND_DST_RGB);
 	
-	#define kCCMaxActiveTexture 16		// Max cocos2d texture units, as defined in ccGLStateCache.m
+	#define kCCMaxActiveTexture 16		// Max Cocos2D texture units, as defined in ccGLStateCache.m
 	GLuint tuCnt = MIN(value_MaxTextureUnitsUsed, kCCMaxActiveTexture);
 	for (GLuint tuIdx = 0; tuIdx < tuCnt; tuIdx++)
 		ccGLBindTexture2DN(tuIdx, value_GL_TEXTURE_BINDING_2D[tuIdx]);
@@ -416,7 +416,7 @@
 	valueMaxBoneInfluencesPerVertex = kCC3MaxGLSLBoneInfluencesPerVertex;
 }
 
-// Start with at least the cocos2d attributes so they can be enabled and disabled
+// Start with at least the Cocos2D attributes so they can be enabled and disabled
 -(void) initVertexAttributes {
 	[super initVertexAttributes];
 	value_MaxVertexAttribsUsed = kCCVertexAttrib_MAX;

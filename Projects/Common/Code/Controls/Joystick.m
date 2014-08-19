@@ -1,7 +1,7 @@
 /*
  * Joystick.m
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -26,8 +26,8 @@
  *
  * http://en.wikipedia.org/wiki/MIT_License
  * 
- * This code was inspired by code donated to the cocos2d user community
- * by cocos2d user "adunsmoor". The original code can be found here:
+ * This code was inspired by code donated to the Cocos2D user community
+ * by Cocos2D user "adunsmoor". The original code can be found here:
  *     http://www.cocos2d-iphone.org/forum/topic/1418
  *
  * See header file Joystick.h for full API documentation of this code.

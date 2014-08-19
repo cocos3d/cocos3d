@@ -1,7 +1,7 @@
 /*
  * AppDelegate.m
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2011-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -123,7 +123,7 @@
 	[CCDirector.sharedDirector pause];
 }
 
-/** Resume the cocos3d/cocos2d action. */
+/** Resume the Cocos3D/Cocos2D action. */
 -(void) resumeApp { [CCDirector.sharedDirector resume]; }
 
 -(void) applicationDidBecomeActive: (UIApplication*) application {

@@ -1,7 +1,7 @@
 /*
  * CC3Actions.h
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -65,7 +65,7 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 #pragma mark -
 #pragma mark CCAction
 
-/** Extension category to support cocos3d functionality. */
+/** Extension category to support Cocos3D functionality. */
 @interface CCAction (CC3)
 
 /** The action target cast as a CC3Node. */
@@ -77,7 +77,7 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 #pragma mark -
 #pragma mark CCActionInterval extension
 
-/** Extension category to support cocos3d functionality. */
+/** Extension category to support Cocos3D functionality. */
 @interface CCActionInterval (CC3)
 
 /** Returns a CCAction that repeats this action forever. */

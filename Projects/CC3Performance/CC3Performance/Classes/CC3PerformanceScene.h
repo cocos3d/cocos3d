@@ -1,7 +1,7 @@
 /*
  * CC3PerformanceScene.h
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -34,7 +34,7 @@
 
 /**
  * This application-specific CC3Scene provides a platform for testing and displaying
- * various performance-related aspects of cocos3d.
+ * various performance-related aspects of Cocos3D.
  *
  * The user can select one of various node types, and determine how many copies of
  * that node should be added to the 3D scene. Those copies are laid out in a square
@@ -46,13 +46,13 @@
  * Animating the nodes adds load because the globalTransformMatrix of each node
  * must be updated during each update.
  *
- * The statistics that are collected are available automatically in any cocos3d
+ * The statistics that are collected are available automatically in any Cocos3D
  * application. You can collect performance statistics on your own application
  * by setting and managing an instance of CC3PerformanceStatistics or one of its
  * subclasses.
  *
  * Interestingly, you can easily compare the performance cost of the GL drawing
- * activity, relative to the overhead of the cocos3d framework. To do so, uncomment
+ * activity, relative to the overhead of the Cocos3D framework. To do so, uncomment
  * the first line in the implementation of the initializeScene method of this class.
  * See the inline comments above that first line within the initializeScene method
  * to understand how this works.

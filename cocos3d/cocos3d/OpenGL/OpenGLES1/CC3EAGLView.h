@@ -1,7 +1,7 @@
 /*
  * CC3EAGLView.h
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -37,7 +37,7 @@
 #import "EAGLView.h"
 #import "ES1Renderer.h"
 
-/** Under cocos2d 1.x iOS, create an alias CCGLView for EAGLView. */
+/** Under Cocos2D 1.x iOS, create an alias CCGLView for EAGLView. */
 #define CCGLView CC3EAGLView
 
 

@@ -3,7 +3,7 @@
 README
 ----------------------
 
-Cocos3D 2.0.0
+Cocos3D 2.0.1
 
 Copyright (c) 2010-2014 [The Brenwill Workshop Ltd.](http://www.brenwill.com) All rights reserved.
 
@@ -53,7 +53,7 @@ Learning Cocos3D
 Wondering how to get started? View Harry Dart-O’Flynn’s wonderful [Starting Cocos3D](http://www.youtube.com/playlist?list=PLU4bmVOOYXK-fV0Wt-ES5n3k8qTTyqgYu) collection of video tutorials!
 
 To learn more about Cocos3D, please refer to the [Cocos3D Programming Guide](http://brenwill.com/2011/cocos3d-programming-guide/)
-and the latest [API documentation](http://brenwill.com/docs/cocos3d/2.0.0/api/).
+and the latest [API documentation](http://brenwill.com/docs/cocos3d/2.0.1/api/).
 
 You can create a local copy of the API documentation using `Doxygen` to extract the documentation
 from the source files. There is a `Doxygen` configuration file to output the API documents in the

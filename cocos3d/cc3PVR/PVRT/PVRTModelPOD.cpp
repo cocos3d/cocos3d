@@ -20,7 +20,7 @@
 
 #include "PVRTGlobal.h"
 #if defined(BUILD_DX11)
-//#include "PVRTContext.h"			// patched for cocos3d by Bill Hollings
+//#include "PVRTContext.h"			// patched for Cocos3D by Bill Hollings
 #endif
 #include "PVRTFixedPoint.h"
 #include "PVRTMatrix.h"
@@ -28,7 +28,7 @@
 #include "PVRTVertex.h"
 #include "PVRTBoneBatch.h"
 #include "PVRTModelPOD.h"
-//#include "PVRTMisc.h"				// patched for cocos3d by Bill Hollings
+//#include "PVRTMisc.h"				// patched for Cocos3D by Bill Hollings
 #include "PVRTResourceFile.h"
 #include "PVRTTrans.h"
 
@@ -3412,7 +3412,7 @@ static void InterleaveArray(
 		memcpy(pInterleaved + i * nStride + nOffset, (char*)data.pData + i * data.nStride, data.nStride);
 
 	FREE(data.pData);
-	data.pData		= ((unsigned char*)0 + nOffset);	// patched for cocos3d by Bill Hollings
+	data.pData		= ((unsigned char*)0 + nOffset);	// patched for Cocos3D by Bill Hollings
 	data.nStride	= nStride;
 	nOffset			+= PVRTModelPODDataStride(data) + nPadding;
 }

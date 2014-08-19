@@ -191,7 +191,7 @@
 	[_viewController pauseAnimation];
 }
 
-/** Resume the cocos3d/cocos2d action. */
+/** Resume the Cocos3D/Cocos2D action. */
 -(void) resumeApp { [_viewController resumeAnimation]; }
 
 -(void) applicationDidBecomeActive: (UIApplication*) application {

@@ -1,7 +1,7 @@
 /*
  * CC3Particles.h
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -298,10 +298,10 @@ static const GLuint kCC3ParticlesNoMax = kCC3MaxGLuint;
  * texture assigned to the emitter, effectivly allowing each particle to be textured differently.
  *
  * Particles managed by a CC3ParticleEmitter live in the 3D scene, as distinct from the 2D
- * particles available through the cocos2d CCParticleSystem class.
+ * particles available through the Cocos2D CCParticleSystem class.
  * 
- * For many particle effects, 2D is sufficient, and can be quite effective. You can use a cocos2d
- * CCParticleSystem instance with a CC3Billboard, to embed 2D particle systems within a 3D cocos3d scene.
+ * For many particle effects, 2D is sufficient, and can be quite effective. You can use a Cocos2D
+ * CCParticleSystem instance with a CC3Billboard, to embed 2D particle systems within a 3D Cocos3D scene.
  *
  * However, for applications that need particles to move in three dimensions, you can use this class,
  * or one of its specialized subclasses. Each particle emitted by this emitter has a 3D location,

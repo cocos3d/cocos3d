@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLFoundation.h
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2011-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -155,7 +155,7 @@ void DoLogGLErrorState(NSString* fmt, ...);
 
 /**
  * If the GL_ERROR_TRACING_ENABLED compiler build setting is enabled, calling this function
- * will enable the logging of all subsequent GL calls made by the cocos3d framework, including
+ * will enable the logging of all subsequent GL calls made by the Cocos3D framework, including
  * GL calls that do not result in a GL error. Logging of GL calls will continute until
  * CC3StopLoggingGLCalls() is called.
  *
@@ -166,7 +166,7 @@ void CC3StartLoggingGLCalls(void);
 
 /**
  * If the GL_ERROR_TRACING_ENABLED compiler build setting is enabled, and the CC3StartLoggingGLCalls()
- * function has previously been called to begin logging all GL calls made by the cocos3d framework,
+ * function has previously been called to begin logging all GL calls made by the Cocos3D framework,
  * calling this function will stop any logging of subsequent GL calls. Logging of GL calls can be
  * restarted by calling CC3StartLoggingGLCalls() again.
  */

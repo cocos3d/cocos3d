@@ -1,7 +1,7 @@
 /*
  * CC3Scene.m
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -443,10 +443,10 @@
 
 	CC3OpenGL* gl = visitor.gl;
 	
-	// Setup drawing configuration for cocos2d
+	// Setup drawing configuration for Cocos2D
 	[gl alignFor2DDrawingWithVisitor: visitor];
 
-	// Re-align culling as expected by cocos2d
+	// Re-align culling as expected by Cocos2D
 	[gl enableCullFace: NO];
 	gl.cullFace = GL_BACK;
 	gl.frontFace = GL_CCW;

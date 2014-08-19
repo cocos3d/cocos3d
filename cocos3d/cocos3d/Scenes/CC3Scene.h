@@ -1,7 +1,7 @@
 /*
  * CC3Scene.h
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -164,8 +164,8 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * more efficient drawing operations through node drawing sequencing.
  *
  * An instance of CC3Scene is held by an instance of CC3Layer, which is a subclass of
- * the cocos2d CCLayer class, and can participate with other cocos2d layers and CCNodes
- * in an overall cocos2d scene. During drawing, the CC3Layer delegates all 3D operations
+ * the Cocos2D CCLayer class, and can participate with other Cocos2D layers and CCNodes
+ * in an overall Cocos2D scene. During drawing, the CC3Layer delegates all 3D operations
  * to its CC3Scene instance. You will also typically create a subclass of CC3Layer that
  * is customized for your application. In most cases, you will add methods and state to
  * both your CC3Scene and CC3Layer subclasses to facilitate user interaction.
@@ -222,7 +222,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * calls directly if there is a corresponding method defined on the CC3OpenGL class.
  * Instead, route the state change request through the appropriate CC3OpenGL method.
  *
- * You can collect statistics about the performance of your cocos3d application by setting
+ * You can collect statistics about the performance of your Cocos3D application by setting
  * the performanceStatistics property to an appropriate instance of a statistics collector.
  * By default, no statistics are collected. See the notes of the performanceStatistics
  * property for more information.
@@ -806,7 +806,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  *
  * This method is invoked automatically during the transition back to 2D drawing, incluing
  * between the CC3Scene and the CC3Layer, and when drawing a CC3Billboard containing a 2D
- * cocos2d CCNode. Normally the application never needs to invoke this method directly.
+ * Cocos2D CCNode. Normally the application never needs to invoke this method directly.
  */
 -(void) closeDepthTestWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
@@ -998,7 +998,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * touch-move and touch-up events in the touchEvent:at: method, or via gesture feedback.
  *
  * To support multi-touch events or gestures, add event-handing behaviour to your
- * customized CC3Layer, as you would for any cocos2d application, and invoke this
+ * customized CC3Layer, as you would for any Cocos2D application, and invoke this
  * method from your customized CC3Layer when interaction with 3D objects, such as
  * node-picking, is required.
  */
@@ -1206,7 +1206,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  */
 @property(nonatomic, retain) CC3NodePickingVisitor* pickVisitor;
 
-/** The most recent touch point in cocos2d coordinates. */
+/** The most recent touch point in Cocos2D coordinates. */
 @property(nonatomic, readonly) CGPoint touchPoint;
 
 /**

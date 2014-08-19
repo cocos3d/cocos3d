@@ -14,15 +14,15 @@
 
 ******************************************************************************/
 
-#pragma GCC diagnostic ignored "-Wshadow"	// patched for cocos3d by Bill Hollings
+#pragma GCC diagnostic ignored "-Wshadow"	// patched for Cocos3D by Bill Hollings
 
 #include <string.h>
 #include <stdlib.h>
 
-//#include "PVRTContext.h"					// patched for cocos3d by Bill Hollings
+//#include "PVRTContext.h"					// patched for Cocos3D by Bill Hollings
 #include "PVRTgles2Ext.h"
 
-#if CC3_OGLES_2								// patched for cocos3d by Bill Hollings
+#if CC3_OGLES_2								// patched for Cocos3D by Bill Hollings
 
 #include "PVRTTexture.h"
 #include "PVRTTextureAPI.h"
@@ -30,7 +30,7 @@
 #include "PVRTFixedPoint.h"
 #include "PVRTMap.h"
 #include "PVRTMatrix.h"
-//#include "PVRTMisc.h"						// patched for cocos3d by Bill Hollings
+//#include "PVRTMisc.h"						// patched for Cocos3D by Bill Hollings
 #include "PVRTResourceFile.h"
 
 /*****************************************************************************
@@ -439,7 +439,7 @@ EPVRTError PVRTTextureLoadFromPointer(	const void* pointer,
 	PVRTGetOGLES2TextureFormat(sTextureHeader,eTextureInternalFormat,eTextureFormat,eTextureType);
 
 	//Check supported texture formats.
-#if APPORTABLE									// patched for cocos3d by Bill Hollings
+#if APPORTABLE									// patched for Cocos3D by Bill Hollings
 
 	bool bIsPVRTCSupported = false;
 //	bool bIsPVRTC2Supported = false;
@@ -457,7 +457,7 @@ EPVRTError PVRTTextureLoadFromPointer(	const void* pointer,
 #else	// APPORTABLE
 
 	bool bIsPVRTCSupported = CPVRTgles2Ext::IsGLExtensionSupported("GL_IMG_texture_compression_pvrtc");
-//	bool bIsPVRTC2Supported = CPVRTgles2Ext::IsGLExtensionSupported("GL_IMG_texture_compression_pvrtc2");	// patched for cocos3d by Bill Hollings
+//	bool bIsPVRTC2Supported = CPVRTgles2Ext::IsGLExtensionSupported("GL_IMG_texture_compression_pvrtc2");	// patched for Cocos3D by Bill Hollings
 #ifndef TARGET_OS_IPHONE
 	bool bIsBGRA8888Supported  = CPVRTgles2Ext::IsGLExtensionSupported("GL_IMG_texture_format_BGRA8888");
 #else
@@ -1150,7 +1150,7 @@ unsigned int PVRTTextureFormatGetBPP(const GLuint nFormat, const GLuint nType)
 		switch(nType)
 		{
 		case GL_RGBA:
-#if !(APPORTABLE)						// patched for cocos3d by Bill Hollings
+#if !(APPORTABLE)						// patched for Cocos3D by Bill Hollings
 		case GL_BGRA:
 #endif	//!APPORTABLE
 			return 32;
@@ -1170,5 +1170,5 @@ unsigned int PVRTTextureFormatGetBPP(const GLuint nFormat, const GLuint nType)
  End of file (PVRTTextureAPI.cpp)
 *****************************************************************************/
 
-#endif	// CC3_OGLES_2					// patched for cocos3d by Bill Hollings
+#endif	// CC3_OGLES_2					// patched for Cocos3D by Bill Hollings
 

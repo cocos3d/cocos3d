@@ -1,7 +1,7 @@
 /*
  * CC3ParametricMeshNodes.h
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -334,7 +334,7 @@
  * For higher fidelity in applying textures to non-cube boxes, so that the texture
  * will not be stretched to fit, use the populateAsSolidBox:withCorner: method.
  *
- * Thanks to cocos3d user andyman for contributing the prototype code and texture
+ * Thanks to Cocos3D user andyman for contributing the prototype code and texture
  * template file for this method.
  */
 -(void) populateAsSolidBox: (CC3Box) box;
@@ -376,7 +376,7 @@
  * populateAsSolidBox:withCorner: methods, with a texture whose layout is compatible
  * with the aspect ratio of the box.
  *
- * Thanks to cocos3d user andyman for contributing the prototype code and texture
+ * Thanks to Cocos3D user andyman for contributing the prototype code and texture
  * template file for this method.
  */
 -(void) populateAsCubeMappedSolidBox: (CC3Box) box;
@@ -435,7 +435,7 @@
  * depth of the box, the texture will appear stretched on one or two sides relative
  * to the others.
  *
- * Thanks to cocos3d user andyman for contributing the prototype code and texture
+ * Thanks to Cocos3D user andyman for contributing the prototype code and texture
  * template file for this method.
  */
 -(void) populateAsSolidBox: (CC3Box) box withCorner: (CGPoint) corner;

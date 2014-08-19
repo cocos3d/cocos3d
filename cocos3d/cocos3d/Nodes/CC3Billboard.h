@@ -1,7 +1,7 @@
 /*
  * CC3Billboard.h
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -36,7 +36,7 @@
 
 
 /**
- * This CC3Node displays a 2D cocos2d CCNode as part of the 3D scene.
+ * This CC3Node displays a 2D Cocos2D CCNode as part of the 3D scene.
  *
  * The 2D node can be displayed in one of two ways, as determined by the value of
  * the shouldDrawAs2DOverlay property:
@@ -147,7 +147,7 @@
 
 /**
  * The rectangle, in pixels, bounding the 2D CCNode, in the local coordinate system
- * of the 2D node. This property is used by cocos3d when each frame is drawn, to test
+ * of the 2D node. This property is used by Cocos3D when each frame is drawn, to test
  * whether this node is within the field of view of the camera and should be drawn.
  * It is accessed on each rendering frame. The value of this property is also used
  * when picking nodes from touch events.
@@ -420,7 +420,7 @@
 /**
  * The index of the GL texture unit to use when drawing the 2D CCNode.
  *
- * The initial value of this property is zero. cocos2d uses texture unit zero by
+ * The initial value of this property is zero. Cocos2D uses texture unit zero by
  * default, and in most cases it is recommended that you use this initial value.
  *
  * The value of this property must be between zero and one less than the maximum number
@@ -592,7 +592,7 @@
 #pragma mark CC3ParticleSystemBillboard
 
 /**
- * A CC3Billboard node customized to display and manage a cocos2d 2D CCParticleSystem.
+ * A CC3Billboard node customized to display and manage a Cocos2D 2D CCParticleSystem.
  *
  * This specialized subclass adds some specific features to aid with drawing particle
  * systems, including:
@@ -600,7 +600,7 @@
  *   - If the CCParticleSystem has a finite duration and its autoRemoveOnFinish property
  *     is set to YES, the CC3ParticleSystemBillboard node is automatically removed from
  *     its parent once the particle system has finished emitting.
- *   - In cocos2d, particle systems draw all particles at the same Z-distance.
+ *   - In Cocos2D, particle systems draw all particles at the same Z-distance.
  *     When undergoing transforms in the 3D scene, the result is that the Z-distances
  *     are very close but not equal, resulting in Z-fighting between the particles.
  *     To avoid this, if the shouldDisableDepthMask property is set to YES, the GL depth
@@ -698,10 +698,10 @@
  * Returns a scaling factor to be applied to this node when it is set as the
  * 2D billboard in a CC3Billboard.
  *
- * The value returned depends on the version of cocos2d that is linked and whether
+ * The value returned depends on the version of Cocos2D that is linked and whether
  * the app is rendering in high-resolution for a Retina display on iOS.
  *
- * If the app is using cocos2d 1.x and is rendering in high-resolution to a Retina
+ * If the app is using Cocos2D 1.x and is rendering in high-resolution to a Retina
  * display on an iOS device, this property returns 0.5. Otherwise it returns 1.0.
  *
  * Subclasses may override.

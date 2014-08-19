@@ -1,7 +1,7 @@
 /*
  * CC3MatrixMath.h
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -10,7 +10,7 @@
  *
  * http://www.kazade.co.uk/kazmath/
  *
- * Augmented and modified for use with Objective-C in cocos3d by Bill Hollings.
+ * Augmented and modified for use with Objective-C in Cocos3D by Bill Hollings.
  * Additions and modifications copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,

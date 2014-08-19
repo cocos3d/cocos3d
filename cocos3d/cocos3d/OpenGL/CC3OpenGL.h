@@ -1,7 +1,7 @@
 /*
  * CC3OpenGL.h
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -44,7 +44,7 @@
 
 /** GL state tracking for vertex attributes. */
 typedef struct {
-	GLenum semantic;			/**< The cocos3d semantic of this content array, under OGLES 1.1. */
+	GLenum semantic;			/**< The Cocos3D semantic of this content array, under OGLES 1.1. */
 	GLenum glName;				/**< The GL content name, used to enable a vertex array under OGLES 1.1. */
 	GLenum elementType;			/**< The data type of each element. */
 	GLint elementSize;			/**< The number of elements in each vertex. */
@@ -355,7 +355,7 @@ typedef struct {
 /** Enables the vertex attributes that have been bound and disables the rest. */
 -(void) enableBoundVertexAttributes;
 
-/** Enables the vertex attribute needed for drawing cocos2d 2D artifacts, and disables all the rest. */
+/** Enables the vertex attribute needed for drawing Cocos2D 2D artifacts, and disables all the rest. */
 -(void) enable2DVertexAttributes;
 
 /**
@@ -618,7 +618,7 @@ typedef struct {
  * to ensure that the state tracking no longer expects to be bound to that texture.
  *
  * This method is invoked automatically whenever a GL texture is deleted, or whenever a 
- * GL texture is removed from cocos3d, but may still be in use by cocos2d.
+ * GL texture is removed from Cocos3D, but may still be in use by Cocos2D.
  */
 -(void) clearTextureBinding: (GLuint) texID;
 
@@ -1310,17 +1310,17 @@ typedef struct {
 #pragma mark Aligning 2D & 3D state
 
 /**
- * Aligns the state within the GL engine to be suitable for 2D drawing by cocos2d.
+ * Aligns the state within the GL engine to be suitable for 2D drawing by Cocos2D.
  *
  * This is invoked automatically during the transition from 3D to 2D drawing. You can also  invoke
  * this method if you perform 3D activities outside of the normal drawing loop, and you find that
- * it interferes with subsequent 2D rendering by cocos2d. However, such occurrances should be rare,
+ * it interferes with subsequent 2D rendering by Cocos2D. However, such occurrances should be rare,
  * and in most circumstances you should never need to invoke this method.
  */
 -(void) alignFor2DDrawingWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /**
- * Aligns the state within the GL engine to be suitable for 3D drawing by cocos3d.
+ * Aligns the state within the GL engine to be suitable for 3D drawing by Cocos3D.
  *
  * This is invoked automatically during the transition from 2D to 3D drawing.
  */

@@ -1,7 +1,7 @@
 /*
  * CC3BitmapLabelNode.h
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -68,7 +68,7 @@ typedef struct {
 #pragma mark -
 #pragma mark CC3BitmapFontConfiguration
 
-/** Extends CC3BitmapFontConfiguration to support cocos3d functionality. */
+/** Extends CC3BitmapFontConfiguration to support Cocos3D functionality. */
 @interface CC3BitmapFontConfiguration : NSObject {
 	CC3BitmapCharDefHashElement* _charDefDictionary;
 	CC3KerningHashElement* _kerningDictionary;

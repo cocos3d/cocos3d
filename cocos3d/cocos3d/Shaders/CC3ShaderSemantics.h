@@ -1,7 +1,7 @@
 /*
  * CC3ShaderSemantics.h
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2011-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -494,7 +494,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
 #pragma mark CC3ShaderSemanticsByVarName default mappings extension
 
 /**
- * This extension to CC3ShaderSemanticsByVarName establishes a cocos3d default
+ * This extension to CC3ShaderSemanticsByVarName establishes a Cocos3D default
  * mappings between variable names and semantics.
  *
  * An application can use the mappings defined in this extension as the basis for its own mappings
@@ -504,7 +504,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
 @interface CC3ShaderSemanticsByVarName (DefaultMappings)
 
 /**
- * Populates this instance with the default cocos3d mappings between variable names and semantics.
+ * Populates this instance with the default Cocos3D mappings between variable names and semantics.
  *
  * An application wishing to add additional semantic mappings, or override any of the default
  * mappings can invoke this method, and then invoke the mapVarName:toSemantic: or
@@ -518,7 +518,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
 
 /**
  * @deprecated
- * Populates this instance with the default cocos3d mappings between variable names and
+ * Populates this instance with the default Cocos3D mappings between variable names and
  * semantics that are based on uniforms collected together into structures.
  *
  * Structure-based mapping provides an organized approach to managing uniform names, but are
@@ -534,8 +534,8 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
 
 /**
  * @deprecated
- * Populates this instance with the default cocos3d mappings initially included with early
- * versions of cocos3d 2.0.
+ * Populates this instance with the default Cocos3D mappings initially included with early
+ * versions of Cocos3D 2.0.
  *
  * These legacy mappings use less efficient uniform mappings, including use of the
  * array-of-structures paradigm. For GLSL under OpenGL ES, each element of each structure in

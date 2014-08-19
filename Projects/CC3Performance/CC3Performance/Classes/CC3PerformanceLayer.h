@@ -1,7 +1,7 @@
 /*
  * CC3PerformanceLayer.h
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -41,7 +41,7 @@
 
 /**
  * This application-specific CC3Scene provides a platform for testing and displaying
- * various performance-related aspects of cocos3d.
+ * various performance-related aspects of Cocos3D.
  *
  * Using buttons, the user can select one of various node types, and determine how
  * many copies of that node should be added to the 3D scene. Those copies are laid

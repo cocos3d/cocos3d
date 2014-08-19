@@ -50,7 +50,7 @@ character animation library version @VERSION@
 
 
 o------------------------------------------------------------------------------o
-| 2 cal3d skeleton file (.csf) - read by cocos3d                               |
+| 2 cal3d skeleton file (.csf) - read by Cocos3D                               |
 o------------------------------------------------------------------------------o
 
 Stored in this file is the hierarchy of bones that composes the skeleton.
@@ -101,7 +101,7 @@ description                length  type      comments
 
 
 o------------------------------------------------------------------------------o
-| 3 cal3d animation file (.caf) - read by cocos3d                              |
+| 3 cal3d animation file (.caf) - read by Cocos3D                              |
 o------------------------------------------------------------------------------o
 
 All the keyframes of an animation are stored in this file. They are grouped by
@@ -141,7 +141,7 @@ description                length  type      comments
 
 
 o------------------------------------------------------------------------------o
-| 4 cal3d mesh file (.cmf) - not read by cocos3d                               |
+| 4 cal3d mesh file (.cmf) - not read by Cocos3D                               |
 o------------------------------------------------------------------------------o
 
 This file contains all the mesh data, such as the weighted influences of the
@@ -220,7 +220,7 @@ description                length  type      comments
 
 
 o------------------------------------------------------------------------------o
-| 5 cal3d material file (.crf) - not read by cocos3d                           |
+| 5 cal3d material file (.crf) - not read by Cocos3D                           |
 o------------------------------------------------------------------------------o
 
 Material properties like ambient, diffuse and specular color and the shininess
@@ -256,7 +256,7 @@ description                length  type      comments
     ...
 
 o-----------------------------------------------------------------------------o
-| 6 skeleton Xml file (.xsf) - not read by cocos3d                            |
+| 6 skeleton Xml file (.xsf) - not read by Cocos3D                            |
 o-----------------------------------------------------------------------------o
 
 this is the text/Xml file format of cal3d skeleton file, 
@@ -278,7 +278,7 @@ see cal3d skeleton file (.csf) for more information
 
 
 o-----------------------------------------------------------------------------o
-| 7 cal3d xml animation file (.xaf) - not read by cocos3d                     |
+| 7 cal3d xml animation file (.xaf) - not read by Cocos3D                     |
 o-----------------------------------------------------------------------------o
 
 this is the text/Xml file format of cal3d animation file, 
@@ -296,7 +296,7 @@ see cal3d skeleton file (.csf) for more information
 </ANIMATION>
 
 o-----------------------------------------------------------------------------o
-| 8 cal3d xml mesh file (.xmf) - not read by cocos3d                          |
+| 8 cal3d xml mesh file (.xmf) - not read by Cocos3D                          |
 o-----------------------------------------------------------------------------o
 
 this is the text/Xml file format of cal3d mesh file, 
@@ -325,7 +325,7 @@ see cal3d mesh file (.cmf) for more information
 </MESH>
 
 o-----------------------------------------------------------------------------o
-| 9 cal3d xml material file (.xrf) - not read by cocos3d                      |
+| 9 cal3d xml material file (.xrf) - not read by Cocos3D                      |
 o-----------------------------------------------------------------------------o
 
 this is the text/Xml file format of cal3d material file, 
@@ -353,7 +353,7 @@ o-----------------------------------------------------------------------------o
 
   This document was written by Bruno 'Beosil' Heidelberger.
   The XML format has been added by Laurent Desmecht.
-  Formats updated, and additional notes relevant to cocos3d added, by Bill Hollings.
+  Formats updated, and additional notes relevant to Cocos3D added, by Bill Hollings.
 
 
 o-----------------------------------------------------------------------------o

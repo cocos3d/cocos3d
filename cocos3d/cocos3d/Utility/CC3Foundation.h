@@ -1,7 +1,7 @@
 /*
  * CC3Foundation.h
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -29,14 +29,14 @@
 
 /** @file */	// Doxygen marker
 
-/** @mainpage cocos3d API reference
+/** @mainpage Cocos3D API reference
  *
- * @section intro About cocos3d
+ * @section intro About Cocos3D
  *
- * cocos3d extends cocos2d to add support for full 3D rendering, in combination with
- * normal cocos2d 2D rendering.
+ * Cocos3D extends Cocos2D to add support for full 3D rendering, in combination with
+ * normal Cocos2D 2D rendering.
  *
- * Rendering of 3D objects is performed within a CC3Layer, which is a specialized cocos2d
+ * Rendering of 3D objects is performed within a CC3Layer, which is a specialized Cocos2D
  * layer. In your application, you will usually create a customized subclass of CC3Layer,
  * which you add to a CCScene, or other CCLayer, to act as a bridge between the 2D and
  * 3D rendering.
@@ -57,23 +57,23 @@
 #import <CoreGraphics/CGColor.h>
 
 /**
- * The version of cocos3d, derived from the version format, where each of the HI.ME.LO
+ * The version of Cocos3D, derived from the version format, where each of the HI.ME.LO
  * components of the version is allocated two digits in this value, in the format HIMELO.
  *
  * Examples:
  *   - 0.7		-> 0x000700
  *   - 2.7.3	-> 0x020703
  */
-#define COCOS3D_VERSION 0x020000
+#define COCOS3D_VERSION 0x020001
 
-/** Returns a string describing the cocos3d version. */
+/** Returns a string describing the Cocos3D version. */
 static inline NSString* NSStringFromCC3Version() {
-	int vFull, vMajor, vMinor, vBuild;
+	int vFull, vMajor, vMinor, vPatch;
 	vFull = COCOS3D_VERSION;
 	vMajor = (vFull >> 16) & 0xFF;
 	vMinor = (vFull >> 8) & 0xFF;
-	vBuild = vFull & 0xFF;
-	return [NSString stringWithFormat: @"Cocos3D v%i.%i.%i", vMajor, vMinor, vBuild];
+	vPatch = vFull & 0xFF;
+	return [NSString stringWithFormat: @"Cocos3D v%i.%i.%i", vMajor, vMinor, vPatch];
 }
 
 
@@ -2196,7 +2196,7 @@ static inline NSString* NSStringFromCCC4F(ccColor4F rgba) {
 	return [NSString stringWithFormat: @"(%.3f, %.3f, %.3f, %.3f)", rgba.r, rgba.g, rgba.b, rgba.a];
 }
 
-#if COCOS2D_VERSION < 0x010100		// cocos2d 1.0 - exists in cocos2d versions above
+#if COCOS2D_VERSION < 0x010100		// Cocos2D 1.0 - exists in Cocos2D versions above
 /** Convenience alias macro to create ccColor4F with less keystrokes. */
 #define ccc4f(R,G,B,A) CCC4FMake((R),(G),(B),(A))
 #endif

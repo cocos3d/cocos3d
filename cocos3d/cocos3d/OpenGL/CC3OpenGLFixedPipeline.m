@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLFixedPipeline.m
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -520,7 +520,7 @@
 #pragma mark Matrices
 	
 // Don't change matrix state on background thread (which only occurs during shader prewarming, and so should
-// not occur here), because it messes with the concurrent rendering of cocos2d components on the rendering thread.
+// not occur here), because it messes with the concurrent rendering of Cocos2D components on the rendering thread.
 
 -(void) activateMatrixStack: (GLenum) mode {
 	if ( !self.isRenderingContext ) return;
@@ -676,7 +676,7 @@
 
 	[self initTextureVertexAttributes];
 	
-	// Assume that only the single texture unit used by cocos2d will be used by cocos3d.
+	// Assume that only the single texture unit used by Cocos2D will be used by Cocos3D.
 	// This will be increased automatically as needed.
 	value_MaxVertexAttribsUsed = value_NumNonTexVertexAttribs + 1;
 }

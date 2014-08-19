@@ -27,7 +27,10 @@
  * of this method, and add your own to construct your 3D model scene.
  *
  * You can also load scene content asynchronously while the scene is being displayed by
- * loading on a background thread. The
+ * loading on a background thread. You can add code that loads content to the 
+ * addSceneContentAsynchronously method, and it will automatically be loaded immediately
+ * after the scene is opened, and smoothly inserted into the scene, as the existing scene
+ * content is being displayed.
  *
  * NOTES:
  *

@@ -1,7 +1,7 @@
 /*
  * CC3Billboard.m
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -131,7 +131,7 @@
 }
 
 /**
- * If we're drawning in 2D, simply get the 2D node's cocos2d bounding box.
+ * If we're drawning in 2D, simply get the 2D node's Cocos2D bounding box.
  * If we're drawing in 3D, measure the 2D nodes bounding box using an extension method.
  */
 -(CGRect) measureBillboardBoundingRect {
@@ -163,7 +163,7 @@
 /** Only touchable if drawing in 3D. */
 -(BOOL) isTouchable { return (!_shouldDrawAs2DOverlay) && [super isTouchable]; }
 
-/** Overridden to ignore lighting, since cocos2d nodes have no normals. */
+/** Overridden to ignore lighting, since Cocos2D nodes have no normals. */
 -(void) setMaterial: (CC3Material*) aMaterial {
 	[super setMaterial: aMaterial];
 	aMaterial.shouldUseLighting = NO;
@@ -545,14 +545,14 @@ static GLfloat deviceScaleFactor = 0.0f;
 	}
 }
 
-/** The cocos2d CCNode will supply its own shaders, but still need shader during node picking. */
+/** The Cocos2D CCNode will supply its own shaders, but still need shader during node picking. */
 -(void) applyShaderProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	if (visitor.shouldDecorateNode) return;
 	[super applyShaderProgramWithVisitor: visitor];
 }
 
 /**
- * During normal drawing, draw the cocos2d node.
+ * During normal drawing, draw the Cocos2D node.
  * When painting for node picking, update the bounding box mesh vertices and draw it.
  */
 -(void) drawMeshWithVisitor: (CC3NodeDrawingVisitor*) visitor {
@@ -967,8 +967,8 @@ static GLfloat deviceScaleFactor = 0.0f;
 #	define CC2_PARTICLE_IDX particleIdx
 #endif
 
-// cocos2d 1.0 and below use 2D structures for particle quad vertices
-// cocos2d 1.1 and above use 3D structures for particle quad vertices
+// Cocos2D 1.0 and below use 2D structures for particle quad vertices
+// Cocos2D 1.1 and above use 3D structures for particle quad vertices
 #if COCOS2D_VERSION >= 0x010100
 #	define CC_PARTICLE_QUAD_TYPE ccV3F_C4B_T2F_Quad
 #else

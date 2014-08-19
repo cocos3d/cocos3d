@@ -14,11 +14,11 @@
 
 ******************************************************************************/
 #include <string.h>
-//#include "PVRTContext.h"				// patched for cocos3d by Bill Hollings
+//#include "PVRTContext.h"				// patched for Cocos3D by Bill Hollings
 
 #include "PVRTglesExt.h"
 
-#if CC3_OGLES_1							// patched for cocos3d by Bill Hollings
+#if CC3_OGLES_1							// patched for Cocos3D by Bill Hollings
 
 /****************************************************************************
 ** Macros
@@ -274,7 +274,7 @@ void CPVRTglesExt::LoadExtensions()
 @Returns			True if the extension is supported
 @Description		Queries for support of an extension
 *************************************************************************/
-bool CPVRTglesExt::IsGLExtensionSupported(const char* extension)	// patched for cocos3d by Bill Hollings
+bool CPVRTglesExt::IsGLExtensionSupported(const char* extension)	// patched for Cocos3D by Bill Hollings
 {
 	// The recommended technique for querying OpenGL extensions;
 	// from http://opengl.org/resources/features/OGLextensions/
@@ -309,6 +309,6 @@ bool CPVRTglesExt::IsGLExtensionSupported(const char* extension)	// patched for 
  End of file (PVRTglesExt.cpp)
 *****************************************************************************/
 
-#endif	// CC3_OGLES_1					// patched for cocos3d by Bill Hollings
+#endif	// CC3_OGLES_1					// patched for Cocos3D by Bill Hollings
 
 

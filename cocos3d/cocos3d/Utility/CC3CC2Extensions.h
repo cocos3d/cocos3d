@@ -1,7 +1,7 @@
 /*
  * CC3CC2Extensions.h
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -30,7 +30,7 @@
 /** @file */	// Doxygen marker
 
 
-/* Base library of extensions to cocos2d to support cocos3d. */
+/* Base library of extensions to Cocos2D to support Cocos3D. */
 
 #import "CC3OSExtensions.h"
 #import "CC3ViewController.h"
@@ -203,7 +203,7 @@ typedef CCColor* CCColorRef;
 #pragma mark -
 #pragma mark CCGLView
 
-/** Extension to support cocos3d functionality. */
+/** Extension to support Cocos3D functionality. */
 @interface CCGLView (CC3)
 
 /** Returns the GL color format of the pixels. */
@@ -289,7 +289,7 @@ typedef CCColor* CCColorRef;
 	ccGLBindTexture2D(texID);
 #endif
 
-/** Draw calls per frame are tracked as of cocos2d 2.x. */
+/** Draw calls per frame are tracked as of Cocos2D 2.x. */
 #if CC3_CC2_1
 #	define CC3GLDraws()		0
 #	define CC_INCREMENT_GL_DRAWS(__n__)
@@ -340,7 +340,7 @@ enum {
 #pragma mark -
 #pragma mark CCActionTintTo extension
 
-/** Extension category to support cocos3d functionality. */
+/** Extension category to support Cocos3D functionality. */
 @interface CCActionTintTo (CC2_CLASSIC)
 
 /**
@@ -373,7 +373,7 @@ enum {
 #pragma mark -
 #pragma mark CCNode extension
 
-/** Extension category to support cocos3d functionality. */
+/** Extension category to support Cocos3D functionality. */
 @interface CCNode (CC3)
 
 /**
@@ -423,10 +423,10 @@ enum {
 #endif	// !CC3_CC2_CLASSIC
 
 #if !CC3_CC2_1
-/** cocos2d 2.x compatibility with pixel-based sizing. */
+/** Cocos2D 2.x compatibility with pixel-based sizing. */
 @property (nonatomic, readonly) CGSize contentSizeInPixels;
 
-/** cocos2d 2.x compatibility with pixel-based sizing. */
+/** Cocos2D 2.x compatibility with pixel-based sizing. */
 @property (nonatomic, readonly) CGRect boundingBoxInPixels;
 #endif	// !CC3_CC2_1
 
@@ -530,7 +530,7 @@ enum {
  * by a descendant node instead of a gesture recognizer. The result of this
  * method can be used to cancel the gesture recognizer.
  *
- * Based on cocos2d Gesture Recognizer ideas by Krzysztof Zabłocki at:
+ * Based on Cocos2D Gesture Recognizer ideas by Krzysztof Zabłocki at:
  * http://www.merowing.info/2012/03/using-gesturerecognizers-in-cocos2d/
  */
 -(BOOL) cc3WillConsumeTouchEventAt: (CGPoint) viewPoint;
@@ -584,7 +584,7 @@ enum {
 #pragma mark -
 #pragma mark CCLayer extension
 
-/** Extension category to support cocos3d functionality. */
+/** Extension category to support Cocos3D functionality. */
 @interface CCLayer (CC3)
 
 /** 
@@ -609,13 +609,13 @@ enum {
 #endif	// CC3_IOS
 
 #if (COCOS2D_VERSION < 0x020100)
-/** Backwards compatibility for setter renamed in cocos2d 2.1. */
+/** Backwards compatibility for setter renamed in Cocos2D 2.1. */
 -(void) setTouchEnabled: (BOOL) isTouchEnabled;
 
 #if CC3_OSX
-/** Backwards compatibility for setter renamed in cocos2d 2.1. */
+/** Backwards compatibility for setter renamed in Cocos2D 2.1. */
 -(void) setMouseEnabled: (BOOL) isMouseEnabled;
-/** Backwards compatibility for setter renamed in cocos2d 2.1. */
+/** Backwards compatibility for setter renamed in Cocos2D 2.1. */
 @property (nonatomic, assign) NSInteger mousePriority;
 #endif	// CC3_OSX
 
@@ -631,7 +631,7 @@ enum {
 #pragma mark -
 #pragma mark CCSprite extension
 
-/** Extension category to support cocos3d functionality. */
+/** Extension category to support Cocos3D functionality. */
 @interface CCSprite (CC3)
 
 /** 
@@ -646,7 +646,7 @@ enum {
 #pragma mark -
 #pragma mark CCMenu extension
 
-/** Extension category to support cocos3d functionality. */
+/** Extension category to support Cocos3D functionality. */
 @interface CCMenu (CC3)
 
 /** 
@@ -663,13 +663,13 @@ enum {
 #pragma mark -
 #pragma mark CCMenu extension
 
-/** Extension category to support cocos3d functionality. */
+/** Extension category to support Cocos3D functionality. */
 @interface CCMenuItemImage (CC3)
 #if CC3_CC2_1
-/** Backwards compatibility for constructor renamed in cocos2d 2.x. */
+/** Backwards compatibility for constructor renamed in Cocos2D 2.x. */
 +(id) itemWithNormalImage: (NSString*)value selectedImage:(NSString*) value2;
 
-/** Backwards compatibility for constructor renamed in cocos2d 2.x. */
+/** Backwards compatibility for constructor renamed in Cocos2D 2.x. */
 +(id) itemWithNormalImage: (NSString*)value selectedImage:(NSString*) value2 target:(id) r selector:(SEL) s;
 #endif
 @end
@@ -680,7 +680,7 @@ enum {
 #pragma mark -
 #pragma mark CCDirector extension
 
-/** Extension category to support cocos3d functionality. */
+/** Extension category to support Cocos3D functionality. */
 @interface CCDirector (CC3)
 
 /** The OpenGL ES view, cast as the correct class. */
@@ -720,9 +720,9 @@ enum {
 
 #if COCOS2D_VERSION < 0x010100
 /**
- * Added for runtime compatibility with cocos2d version 1.1 features.
+ * Added for runtime compatibility with Cocos2D version 1.1 features.
  *
- * In cocos2d versions prior to 1.1, this method does nothing.
+ * In Cocos2D versions prior to 1.1, this method does nothing.
  */
 -(void) setRunLoopCommon: (BOOL) common;
 #endif
@@ -731,7 +731,7 @@ enum {
 
 #if !CC3_CC2_1
 /**
- * Adds support above cocos2d 1.x for legacy code that looks for device orientation under cocos2d 1.x.
+ * Adds support above Cocos2D 1.x for legacy code that looks for device orientation under Cocos2D 1.x.
  *
  * Always returns UIDeviceOrientationPortrait.
  */
@@ -755,7 +755,7 @@ enum {
 #pragma mark -
 #pragma mark CCDirectorIOS extension
 
-/** Extension category to support cocos3d functionality. */
+/** Extension category to support Cocos3D functionality. */
 @interface CCDirectorIOS (CC3)
 @end
 
@@ -767,7 +767,7 @@ enum {
 #pragma mark -
 #pragma mark CCDirectorMac extension
 
-/** Extension category to support cocos3d functionality. */
+/** Extension category to support Cocos3D functionality. */
 @interface CCDirectorMac (CC3)
 @end
 
@@ -777,7 +777,7 @@ enum {
 #pragma mark -
 #pragma mark CCDirectorDisplayLink extension
 
-/** Extension category to support cocos3d functionality. */
+/** Extension category to support Cocos3D functionality. */
 @interface CCDirectorDisplayLink (CC3)
 @end
 
@@ -801,13 +801,13 @@ enum {
 #pragma mark -
 #pragma mark CCFileUtils extension
 
-/** Extension category to support cocos3d functionality. */
+/** Extension category to support Cocos3D functionality. */
 @interface CCFileUtils (CC3)
 
 #if CC3_CC2_1
 /**
- * As of cocos2d 2.x, CCFileUtils changed from static class methods to a singleton instance.
- * For cocos2d 1.x, this method mimics the access to the singleton and simply returns this class itself.
+ * As of Cocos2D 2.x, CCFileUtils changed from static class methods to a singleton instance.
+ * For Cocos2D 1.x, this method mimics the access to the singleton and simply returns this class itself.
  */
 +(Class) sharedFileUtils;
 #endif
@@ -832,14 +832,14 @@ static inline CGSize CCNodeSizeFromViewSize(CGSize viewSize) {
 NSString* NSStringFromTouchType(uint tType);
 
 #if CC3_CC2_1
-/** Extend the iOS version enumerations for cocos2d 1.x. */
+/** Extend the iOS version enumerations for Cocos2D 1.x. */
 enum {
     kCCiOSVersion_5_0 = 0x05000000,
 };
 #endif // CC3_CC2_1
 
 #if COCOS2D_VERSION < 0x010100
-/** Extend the iOS version enumerations for cocos2d 1.0.1. */
+/** Extend the iOS version enumerations for Cocos2D 1.0.1. */
 enum {
     kCCiOSVersion_6_0_0 = 0x06000000
 };

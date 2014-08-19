@@ -1,7 +1,7 @@
 /*
  * CC3ShadowVolumes.m
  *
- * cocos3d 0.6.3
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2011-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com

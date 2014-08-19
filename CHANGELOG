@@ -1,7 +1,7 @@
 CHANGELOG
 ---------
 
-Cocos3D 2.0.0
+Cocos3D 2.0.1
 
 Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
 http://www.brenwill.com
@@ -9,7 +9,15 @@ http://www.brenwill.com
 +++++++++++++++++++++++++++++++++++++
 
 
-Cocos3D 2.0.0 - 2014/04/30
+
+Cocos3D 2.0.1 - 2014/08/31
+-------------------------------------
+
+- Remove ! from README!.md filename for GitHub compatibility
+
+
+
+Cocos3D 2.0.1 - 2014/04/30
 -------------------------------------
 
 - Added support for OpenGL ES 2.0, Cocos2D 2.1, and Cocos2D 3.0.

@@ -1,7 +1,7 @@
 /*
  * CC3CC2Extensions.m
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -359,7 +359,7 @@
 	return CC_RECT_POINTS_TO_PIXELS(rect);
 }
 #endif	// CC3_CC2_2
-#if CC3_CC2_1	// Under cocos2d 1.x, don't Retina-scale rect origin!
+#if CC3_CC2_1	// Under Cocos2D 1.x, don't Retina-scale rect origin!
 -(CGRect) globalBoundingBoxInPixels {
 	CGSize cs = self.contentSize;
 	CGRect rect = CGRectMake(0, 0, cs.width, cs.height);
@@ -403,7 +403,7 @@
 }
 
 /**
- * Based on cocos2d Gesture Recognizer ideas by Krzysztof Zabłocki at:
+ * Based on Cocos2D Gesture Recognizer ideas by Krzysztof Zabłocki at:
  * http://www.merowing.info/2012/03/using-gesturerecognizers-in-cocos2d/
  */
 -(BOOL) cc3WillConsumeTouchEventAt: (CGPoint) viewPoint {
@@ -667,11 +667,11 @@
 @implementation CCDirectorIOS (CC3)
 
 /**
- * Overridden to use a different font file (fps_images_1.png) when using cocos2d 1.x.
+ * Overridden to use a different font file (fps_images_1.png) when using Cocos2D 1.x.
  *
- * Both cocos2d 1.x & 2.x use a font file named fps_images.png, which are different and
+ * Both Cocos2D 1.x & 2.x use a font file named fps_images.png, which are different and
  * incompatible with each other. This allows a project to include both versions of the file,
- * and use the font file version that is appropriate for the cocos2d version.
+ * and use the font file version that is appropriate for the Cocos2D version.
  */
 -(void) setGLDefaultValues {
 
@@ -763,7 +763,7 @@
 #pragma mark -
 #pragma mark CCFileUtils extension
 
-/** Extension category to support cocos3d functionality. */
+/** Extension category to support Cocos3D functionality. */
 @implementation CCFileUtils (CC3)
 
 #if CC3_CC2_1

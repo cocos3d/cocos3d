@@ -18,21 +18,21 @@
 ** Includes
 ******************************************************************************/
 
-#pragma GCC diagnostic ignored "-Wshadow"	// patched for cocos3d by Bill Hollings
+#pragma GCC diagnostic ignored "-Wshadow"	// patched for Cocos3D by Bill Hollings
 
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "PVRTGlobal.h"
-//#include "PVRTContext.h"				// patched for cocos3d by Bill Hollings
+//#include "PVRTContext.h"				// patched for Cocos3D by Bill Hollings
 #include "PVRTMatrix.h"
 #include "PVRTFixedPoint.h"
-//#include "PVRTMisc.h"					// patched for cocos3d by Bill Hollings
+//#include "PVRTMisc.h"					// patched for Cocos3D by Bill Hollings
 #include "PVRTPFXParser.h"
 #include "PVRTResourceFile.h"
 #include "PVRTString.h"
-//#include "PVRTMisc.h"		// Used for POT functions	// patched for cocos3d by Bill Hollings
+//#include "PVRTMisc.h"		// Used for POT functions	// patched for Cocos3D by Bill Hollings
 
 /****************************************************************************
 ** Constants
@@ -2182,7 +2182,7 @@ bool CPVRTPFXParser::ParseShader(int nStartLine, int nEndLine, CPVRTString * con
 				shader.pszGLSLfile = (char*)malloc((strlen(str)+1) * sizeof(char));
 				strcpy(shader.pszGLSLfile, str);
 
-// patched for cocos3d by Bill Hollings
+// patched for Cocos3D by Bill Hollings
 //				CPVRTResourceFile GLSLFile(str);
 //
 //				if(!GLSLFile.IsOpen())
@@ -2193,7 +2193,7 @@ bool CPVRTPFXParser::ParseShader(int nStartLine, int nEndLine, CPVRTString * con
 //				shader.pszGLSLcode = (char*)malloc((GLSLFile.Size()+1) * sizeof(char));
 //				memcpy(shader.pszGLSLcode, (const char*) GLSLFile.DataPtr(), GLSLFile.Size());
 //				shader.pszGLSLcode[GLSLFile.Size()] = '\0';
-// patched for cocos3d by Bill Hollings
+// patched for Cocos3D by Bill Hollings
 
 				shader.nFirstLineNumber = m_psContext->pnFileLineNumber[i];		// Mark position where GLSL file is defined.
 

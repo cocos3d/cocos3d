@@ -1,7 +1,7 @@
 /*
  * CC3PVRShamanShaderSemantics.m
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -106,7 +106,7 @@ NSString* NSStringFromCC3PVRShamanSemantic(CC3PVRShamanSemantic semantic) {
 }
 
 
-#pragma mark Mapping between PVRShaman semantics and cocos3d semantics
+#pragma mark Mapping between PVRShaman semantics and Cocos3D semantics
 
 static NSMutableDictionary* _semanticsByPVRShamanSemanticName = nil;
 

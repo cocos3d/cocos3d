@@ -1,7 +1,7 @@
 /*
  * CC3CAFResource.h
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -70,7 +70,7 @@
  * from the negated Y value of the loaded quaternion, and the Y value will be set from the Z value.
  *
  * This setting can be used to correct possible coordinate system orientation discrepancies
- * between the CAF exporters and cocos3d.
+ * between the CAF exporters and Cocos3D.
  *
  * The initial value of this property is set from the value of the class-side
  * defaultShouldSwapYZ property.

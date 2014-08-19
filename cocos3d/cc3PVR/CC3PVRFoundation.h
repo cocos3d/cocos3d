@@ -1,7 +1,7 @@
 /*
  * CC3PVRFoundation.h
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -66,7 +66,7 @@ NSString* NSStringFromCPVRTBoneBatches(PODClassPtr aCPVRTBoneBatches);
 /**
  * Maps the specified ePVRTDataType to a valid GL data type, and returns the GL value.
  *
- * Thanks to cocos3d user esmrg who contributed additional type mappings.
+ * Thanks to Cocos3D user esmrg who contributed additional type mappings.
  */
 GLenum GLElementTypeFromEPVRTDataType(uint ePVRTDataType);
 
@@ -80,7 +80,7 @@ BOOL CC3ShouldNormalizeEPVRTDataType(uint ePVRTDataType);
 /**
  * Returns the name of the specified ePVRTDataType enumeration.
  *
- * Thanks to cocos3d user esmrg who contributed additional type mappings.
+ * Thanks to Cocos3D user esmrg who contributed additional type mappings.
  */
 NSString* NSStringFromEPVRTDataType(uint ePVRTDataType);
 

@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES1Compatibility.h
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -31,7 +31,7 @@
 
 /**
  * When compiling against OpenGL ES 1, this file adds some compatibility with declarations
- * and functionality provided by OpenGL or OpenGL ES 2 under cocos3d.
+ * and functionality provided by OpenGL or OpenGL ES 2 under Cocos3D.
  */
 
 #import "CC3Environment.h"

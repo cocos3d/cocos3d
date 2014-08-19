@@ -1,7 +1,7 @@
 /*
  * CC3IOSExtensions.h
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -30,7 +30,7 @@
 /** @file */	// Doxygen marker
 
 
-/* Base library of extensions to iOS frameworks to support cocos3d. */
+/* Base library of extensions to iOS frameworks to support Cocos3D. */
 
 #import "CC3Environment.h"
 
@@ -58,7 +58,7 @@
 #pragma mark -
 #pragma mark Gesture Recognizer extensions
 
-/** Extension category to support cocos3d functionality. */
+/** Extension category to support Cocos3D functionality. */
 @interface UIGestureRecognizer (CC3)
 
 /** Cancels this gesture recognizer. */
@@ -77,7 +77,7 @@
 
 @end
 
-/** Extension category to support cocos3d functionality. */
+/** Extension category to support Cocos3D functionality. */
 @interface UIPanGestureRecognizer (CC3)
 
 /**
@@ -184,7 +184,7 @@ static inline UIDeviceOrientation CC3UIDeviceOrientationFromUIInterfaceOrientati
 #pragma mark -
 #pragma mark UIColor extensions
 
-/** Extension category to support cocos3d functionality. */
+/** Extension category to support Cocos3D functionality. */
 @interface UIColor(CC3)
 
 /** Returns a transparent ccColor4F struct containing the RGBA values for this color. */
@@ -202,7 +202,7 @@ static inline UIDeviceOrientation CC3UIDeviceOrientationFromUIInterfaceOrientati
 /** GL context under iOS */
 #define CC3GLContext	EAGLContext
 
-/** Extension category to support cocos3d functionality. */
+/** Extension category to support Cocos3D functionality. */
 @interface EAGLContext (CC3)
 
 /** Ensures this GL context is the GL context for the currently running thread. */

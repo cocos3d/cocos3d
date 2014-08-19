@@ -61,7 +61,7 @@
 
 */
 
-/* cocos3d patches Copyright (c) 2014 The Brenwill Workshop Ltd. All rights reserved. */
+/* Cocos3D patches Copyright (c) 2014 The Brenwill Workshop Ltd. All rights reserved. */
 
 
 #ifndef STBI_INCLUDE_STB_IMAGE_H
@@ -300,7 +300,7 @@ extern void stbi_convert_iphone_png_to_rgb(int flag_true_if_should_convert);
 extern char *stbi_zlib_decode_malloc_guesssize(const char *buffer, int len, int initial_size, int *outlen);
 extern char *stbi_zlib_decode_malloc(const char *buffer, int len, int *outlen);
 extern int   stbi_zlib_decode_buffer(char *obuffer, int olen, const char *ibuffer, int ilen);
-extern char *stbi_zlib_decode_malloc_guesssize_headerflag(const char *buffer, int len, int initial_size, int *outlen, int parse_header);	// patched for cocos3d by Bill Hollings
+extern char *stbi_zlib_decode_malloc_guesssize_headerflag(const char *buffer, int len, int initial_size, int *outlen, int parse_header);	// patched for Cocos3D by Bill Hollings
 
 extern char *stbi_zlib_decode_noheader_malloc(const char *buffer, int len, int *outlen);
 extern int   stbi_zlib_decode_noheader_buffer(char *obuffer, int olen, const char *ibuffer, int ilen);
@@ -514,7 +514,7 @@ static int e(const char *str)
 // epf - error returning pointer to float
 // epuc - error returning pointer to unsigned char
 
-#define STBI_FAILURE_USERMSG				// patched for cocos3d by Bill Hollings
+#define STBI_FAILURE_USERMSG				// patched for Cocos3D by Bill Hollings
 
 #ifdef STBI_NO_FAILURE_STRINGS
    #define e(x,y)  0
@@ -593,7 +593,7 @@ unsigned char *stbi_load_from_callbacks(stbi_io_callbacks const *clbk, void *use
 }
 
 #ifndef STBI_NO_HDR
-extern float *stbi_loadf_main(stbi *s, int *x, int *y, int *comp, int req_comp);			// patched for cocos3d by Bill Hollings
+extern float *stbi_loadf_main(stbi *s, int *x, int *y, int *comp, int req_comp);			// patched for Cocos3D by Bill Hollings
 
 float *stbi_loadf_main(stbi *s, int *x, int *y, int *comp, int req_comp)
 {
@@ -764,7 +764,7 @@ stbi_inline static uint8 get8u(stbi *s)
 static void skip(stbi *s, int n)
 {
    if (s->io.read) {
-      int blen = (int)(s->img_buffer_end - s->img_buffer);		// patched for cocos3d by Bill Hollings
+      int blen = (int)(s->img_buffer_end - s->img_buffer);		// patched for Cocos3D by Bill Hollings
       if (blen < n) {
          s->img_buffer = s->img_buffer_end;
          (s->io.skip)(s->io_user_data, n - blen);
@@ -777,7 +777,7 @@ static void skip(stbi *s, int n)
 static int getn(stbi *s, stbi_uc *buffer, int n)
 {
    if (s->io.read) {
-      int blen = (int)(s->img_buffer_end - s->img_buffer);		// patched for cocos3d by Bill Hollings
+      int blen = (int)(s->img_buffer_end - s->img_buffer);		// patched for Cocos3D by Bill Hollings
       if (blen < n) {
          int res, count;
 
@@ -1468,14 +1468,14 @@ static int process_marker(jpeg *z, int m)
          L = get16(z->s)-2;
          while (L > 0) {
             uint8 *v;
-            int sizes[16],i,m1=0;						// patched for cocos3d by Bill Hollings
+            int sizes[16],i,m1=0;						// patched for Cocos3D by Bill Hollings
             int q = get8(z->s);
             int tc = q >> 4;
             int th = q & 15;
             if (tc > 1 || th > 3) return e("bad DHT header","Corrupt JPEG");
             for (i=0; i < 16; ++i) {
                sizes[i] = get8(z->s);
-               m1 += sizes[i];							// patched for cocos3d by Bill Hollings
+               m1 += sizes[i];							// patched for Cocos3D by Bill Hollings
             }
             L -= 17;
             if (tc == 0) {
@@ -1485,9 +1485,9 @@ static int process_marker(jpeg *z, int m)
                if (!build_huffman(z->huff_ac+th, sizes)) return 0;
                v = z->huff_ac[th].values;
             }
-            for (i=0; i < m1; ++i)						// patched for cocos3d by Bill Hollings
+            for (i=0; i < m1; ++i)						// patched for Cocos3D by Bill Hollings
                v[i] = get8u(z->s);
-            L -= m1;									// patched for cocos3d by Bill Hollings
+            L -= m1;									// patched for Cocos3D by Bill Hollings
          }
          return L==0;
    }
@@ -2021,10 +2021,10 @@ static int zbuild_huffman(zhuffman *z, uint8 *sizelist, int num)
          z->size[c] = (uint8)s;
          z->value[c] = (uint16)i;
          if (s <= ZFAST_BITS) {
-            int k1 = bit_reverse(next_code[s],s);				// patched for cocos3d by Bill Hollings
-            while (k1 < (1 << ZFAST_BITS)) {					// patched for cocos3d by Bill Hollings
-               z->fast[k1] = (uint16) c;						// patched for cocos3d by Bill Hollings
-               k1 += (1 << s);									// patched for cocos3d by Bill Hollings
+            int k1 = bit_reverse(next_code[s],s);				// patched for Cocos3D by Bill Hollings
+            while (k1 < (1 << ZFAST_BITS)) {					// patched for Cocos3D by Bill Hollings
+               z->fast[k1] = (uint16) c;						// patched for Cocos3D by Bill Hollings
+               k1 += (1 << s);									// patched for Cocos3D by Bill Hollings
             }
          }
          ++next_code[s];
@@ -3778,7 +3778,7 @@ static stbi_uc *pic_load2(stbi *s,int width,int height,int *comp, stbi_uc *resul
 
                   if (count >= 128) { // Repeated
                      stbi_uc value[4];
-                     int i1;										// patched for cocos3d by Bill Hollings
+                     int i1;										// patched for Cocos3D by Bill Hollings
 
                      if (count==128)
                         count = get16(s);
@@ -3790,7 +3790,7 @@ static stbi_uc *pic_load2(stbi *s,int width,int height,int *comp, stbi_uc *resul
                      if (!pic_readval(s,packet->channel,value))
                         return 0;
 
-                     for(i1=0;i1<count;++i1, dest += 4)				// patched for cocos3d by Bill Hollings
+                     for(i1=0;i1<count;++i1, dest += 4)				// patched for Cocos3D by Bill Hollings
                         pic_copyval(packet->channel,dest,value);
                   } else { // Raw
                      ++count;
@@ -4020,22 +4020,22 @@ static uint8 *stbi_process_gif_raster(stbi *s, stbi_gif *g)
          bits |= (int32) get8(s) << valid_bits;
          valid_bits += 8;
       } else {
-         int32 code1 = bits & codemask;												// patched for cocos3d by Bill Hollings
+         int32 code1 = bits & codemask;												// patched for Cocos3D by Bill Hollings
          bits >>= codesize;
          valid_bits -= codesize;
          // @OPTIMIZE: is there some way we can accelerate the non-clear path?
-         if (code1 == clear) {  // clear code										// patched for cocos3d by Bill Hollings
+         if (code1 == clear) {  // clear code										// patched for Cocos3D by Bill Hollings
             codesize = lzw_cs + 1;
             codemask = (1 << codesize) - 1;
             avail = clear + 2;
             oldcode = -1;
             first = 0;
-         } else if (code1 == clear + 1) { // end of stream code						// patched for cocos3d by Bill Hollings
+         } else if (code1 == clear + 1) { // end of stream code						// patched for Cocos3D by Bill Hollings
             skip(s, len);
             while ((len = get8(s)) > 0)
                skip(s,len);
             return g->out;
-         } else if (code1 <= avail) {												// patched for cocos3d by Bill Hollings
+         } else if (code1 <= avail) {												// patched for Cocos3D by Bill Hollings
             if (first) return epuc("no clear code", "Corrupt GIF");
 
             if (oldcode >= 0) {
@@ -4043,18 +4043,18 @@ static uint8 *stbi_process_gif_raster(stbi *s, stbi_gif *g)
                if (avail > 4096)        return epuc("too many codes", "Corrupt GIF");
                p->prefix = (int16) oldcode;
                p->first = g->codes[oldcode].first;
-               p->suffix = (code1 == avail) ? p->first : g->codes[code1].first;		// patched for cocos3d by Bill Hollings
-            } else if (code1 == avail)												// patched for cocos3d by Bill Hollings
+               p->suffix = (code1 == avail) ? p->first : g->codes[code1].first;		// patched for Cocos3D by Bill Hollings
+            } else if (code1 == avail)												// patched for Cocos3D by Bill Hollings
                return epuc("illegal code in raster", "Corrupt GIF");
 
-            stbi_out_gif_code(g, (uint16) code1);									// patched for cocos3d by Bill Hollings
+            stbi_out_gif_code(g, (uint16) code1);									// patched for Cocos3D by Bill Hollings
 
             if ((avail & codemask) == 0 && avail <= 0x0FFF) {
                codesize++;
                codemask = (1 << codesize) - 1;
             }
 
-            oldcode = code1;														// patched for cocos3d by Bill Hollings
+            oldcode = code1;														// patched for Cocos3D by Bill Hollings
          } else {
             return epuc("illegal code in raster", "Corrupt GIF");
          }
@@ -4180,7 +4180,7 @@ static uint8 *stbi_gif_load_next(stbi *s, stbi_gif *g, int *comp, int req_comp)
 static stbi_uc *stbi_gif_load(stbi *s, int *x, int *y, int *comp, int req_comp)
 {
    uint8 *u = 0;
-	stbi_gif g={0, 0, NULL, 0, 0, 0, 0, 0, {{0}}, {{0}}, {{0, 0, 0}}, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};		// patched for cocos3d by Bill Hollings
+	stbi_gif g={0, 0, NULL, 0, 0, 0, 0, 0, {{0}}, {{0}}, {{0, 0, 0}}, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};		// patched for Cocos3D by Bill Hollings
 
    u = stbi_gif_load_next(s, &g, comp, req_comp);
    if (u == (void *) 1) u = 0;  // end of animated gif marker
@@ -4300,11 +4300,11 @@ static float *hdr_load(stbi *s, int *x, int *y, int *comp, int req_comp)
    token = hdr_gettoken(s,buffer);
    if (strncmp(token, "-Y ", 3))  return epf("unsupported data layout", "Unsupported HDR format");
    token += 3;
-   height = (int)strtol(token, &token, 10);				// patched for cocos3d by Bill Hollings
+   height = (int)strtol(token, &token, 10);				// patched for Cocos3D by Bill Hollings
    while (*token == ' ') ++token;
    if (strncmp(token, "+X ", 3))  return epf("unsupported data layout", "Unsupported HDR format");
    token += 3;
-   width = (int)strtol(token, NULL, 10);				// patched for cocos3d by Bill Hollings
+   width = (int)strtol(token, NULL, 10);				// patched for Cocos3D by Bill Hollings
 
    *x = width;
    *y = height;
@@ -4412,14 +4412,14 @@ static int stbi_hdr_info(stbi *s, int *x, int *y, int *comp)
        return 0;
    }
    token += 3;
-   *y = (int)strtol(token, &token, 10);					// patched for cocos3d by Bill Hollings
+   *y = (int)strtol(token, &token, 10);					// patched for Cocos3D by Bill Hollings
    while (*token == ' ') ++token;
    if (strncmp(token, "+X ", 3)) {
        stbi_rewind( s );
        return 0;
    }
    token += 3;
-   *x = (int)strtol(token, NULL, 10);					// patched for cocos3d by Bill Hollings
+   *x = (int)strtol(token, NULL, 10);					// patched for Cocos3D by Bill Hollings
    *comp = 3;
    return 1;
 }

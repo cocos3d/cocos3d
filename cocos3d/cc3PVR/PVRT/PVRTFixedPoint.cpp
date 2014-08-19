@@ -16,7 +16,7 @@
 ******************************************************************************/
 #include <math.h>
 #include <string.h>
-//#include "PVRTContext.h"				// patched for cocos3d by Bill Hollings
+//#include "PVRTContext.h"				// patched for Cocos3D by Bill Hollings
 #include "PVRTFixedPoint.h"
 
 /********************************************************

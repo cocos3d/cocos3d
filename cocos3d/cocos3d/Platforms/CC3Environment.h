@@ -1,7 +1,7 @@
 /*
  * CC3Environment.h
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -55,7 +55,7 @@
 #	define APPORTABLE		0
 #endif
 
-/** Convenience tests for whether we are linking to specific cocos2d versions or functionality. */
+/** Convenience tests for whether we are linking to specific Cocos2D versions or functionality. */
 #ifndef CC3_CC2_1
 #	define CC3_CC2_1				(COCOS2D_VERSION < 0x020000)
 #endif

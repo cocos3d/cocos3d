@@ -1,7 +1,7 @@
 /*
  * CC3UIViewController.m
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -59,7 +59,7 @@
 #endif
 
 #if !CC3_CC2_1
-// In cocos2d 2.x and above, view is tracked separately and does not lazily init. Restore that functionality.
+// In Cocos2D 2.x and above, view is tracked separately and does not lazily init. Restore that functionality.
 -(CCGLView*) view {
 	if ( !CC2_VIEW ) {
 		[self loadView];

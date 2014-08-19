@@ -18,10 +18,10 @@
 ** Includes
 ****************************************************************************/
 
-#pragma GCC diagnostic ignored "-Wshadow"	// patched for cocos3d by Bill Hollings
+#pragma GCC diagnostic ignored "-Wshadow"	// patched for Cocos3D by Bill Hollings
 
 #include "PVRTGlobal.h"
-//#include "PVRTContext.h"					// patched for cocos3d by Bill Hollings
+//#include "PVRTContext.h"					// patched for Cocos3D by Bill Hollings
 
 #include <vector>
 #include <list>

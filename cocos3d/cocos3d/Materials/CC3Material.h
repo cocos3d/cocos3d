@@ -1,7 +1,7 @@
 /*
  * CC3Material.h
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -78,7 +78,7 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
  *     blending combinations, and can be used to simplify your management of blending opaque
  *     or transparent materials, while still providing fine control of the ambient, diffuse
  *     and specular coloring.
- *   - At a simpler level, CC3Material also supports the cocos2d <CCRGBAProtocol> protocol.
+ *   - At a simpler level, CC3Material also supports the Cocos2D <CCRGBAProtocol> protocol.
  *     You can use the color and opacity properties of this protocol to set the most commonly
  *     used coloring and blending characteristics simply and easily. Setting the color property
  *     changes both the ambient and diffuse colors of the material in tandem. Setting the
@@ -87,7 +87,7 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
  *     you will not be able to achieve the complexity and realism that you can by using the
  *     more detailed properties, but you can achieve good effect with much less effort.
  *     And by supporting the <CCRGBAProtocol> protocol, the coloring and translucency of nodes
- *     with materials can be changed using standard cocos2d CCTint and CCFade actions, making
+ *     with materials can be changed using standard Cocos2D CCTint and CCFade actions, making
  *     it easier for you to add dynamic coloring effects to your nodes.
  * 
  * CC3Material also supports alpha testing, where the alpha value of each pixel can be

@@ -1,7 +1,7 @@
 /*
  * CC3OSExtensions.h
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -30,7 +30,7 @@
 /** @file */	// Doxygen marker
 
 
-/* Base library of extensions to operating system frameworks to support cocos3d. */
+/* Base library of extensions to operating system frameworks to support Cocos3D. */
 
 #import <Foundation/Foundation.h>
 
@@ -41,7 +41,7 @@
 #pragma mark -
 #pragma mark NSObject protocol extensions
 
-/** Extension to support cocos3d functionality. */
+/** Extension to support Cocos3D functionality. */
 @protocol CC3Object <NSObject>
 
 /**
@@ -77,7 +77,7 @@
 #pragma mark -
 #pragma mark NSObject class extensions
 
-/** Extension category to support cocos3d functionality. */
+/** Extension category to support Cocos3D functionality. */
 @interface NSObject (CC3) <CC3Object>
 
 /** 
@@ -103,7 +103,7 @@
 #pragma mark -
 #pragma mark NSThread extensions
 
-/** Extension category to support cocos3d functionality. */
+/** Extension category to support Cocos3D functionality. */
 @interface NSThread (CC3)
 
 /** 
@@ -145,7 +145,7 @@
 #pragma mark -
 #pragma mark NSRunLoop extensions
 
-/** Extension category to support cocos3d functionality. */
+/** Extension category to support Cocos3D functionality. */
 @interface NSRunLoop (CC3)
 
 /**
@@ -169,7 +169,7 @@
 #pragma mark -
 #pragma mark NSString extensions
 
-/** Extension category to support cocos3d functionality. */
+/** Extension category to support Cocos3D functionality. */
 @interface NSString (CC3)
 
 /** Returns the number of lines in this string. */
@@ -193,7 +193,7 @@
 #pragma mark -
 #pragma mark NSBundle extensions
 
-/** Extension category to support cocos3d functionality. */
+/** Extension category to support Cocos3D functionality. */
 @interface NSBundle (CC3)
 
 /**

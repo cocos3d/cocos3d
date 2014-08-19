@@ -1,7 +1,7 @@
 /*
  * CC3MeshParticles.h
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -520,7 +520,7 @@
  *
  * The incoming axis and angle specify the amount of change in rotation, not the final rotational state.
  *
- * Thanks to cocos3d user nt901 for contributing to the development of this feature
+ * Thanks to Cocos3D user nt901 for contributing to the development of this feature
  */
 -(void) rotateByAngle: (GLfloat) anAngle aroundAxis: (CC3Vector) anAxis;
 

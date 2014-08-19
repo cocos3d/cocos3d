@@ -1,7 +1,7 @@
 /*
  * CC3Texture.h
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2011-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -1856,7 +1856,7 @@
 #pragma mark -
 #pragma mark CCTexture extension
 
-/** Extension category to support cocos3d functionality. */
+/** Extension category to support Cocos3D functionality. */
 @interface CCTexture (CC3)
 
 /** Sets the GL texture ID. */
@@ -1966,7 +1966,7 @@
 #pragma mark -
 #pragma mark CCTextureCache extension
 
-/** Extension category to support cocos3d functionality. */
+/** Extension category to support Cocos3D functionality. */
 @interface CCTextureCache (CC3)
 
 /**

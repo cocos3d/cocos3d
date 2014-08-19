@@ -1,7 +1,7 @@
 /*
  * CC3PerformanceAppDelegate.m
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2011-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -81,7 +81,7 @@
 
 #if !CC3_CC2_1
 /**
- * In cocos2d 2.x, the view controller and CCDirector are one and the same, and we create the
+ * In Cocos2D 2.x, the view controller and CCDirector are one and the same, and we create the
  * controller using the singleton mechanism. To establish the correct CCDirector/UIViewController
  * class, this MUST be performed before any other references to the CCDirector singleton!!
  *
@@ -106,7 +106,7 @@
 #else
 
 /**
- * In cocos2d 1.x, the view controller and CCDirector are different objects.
+ * In Cocos2D 1.x, the view controller and CCDirector are different objects.
  *
  * NOTE: As of iOS6, supported device orientations are an intersection of the mask established for the
  * UIViewController (as set in this method here), and the values specified in the project 'Info.plist'
@@ -142,7 +142,7 @@
 
 -(BOOL) application: (UIApplication*) application didFinishLaunchingWithOptions: (NSDictionary*) launchOptions {
 	
-	// Establish the view controller and CCDirector (in cocos2d 2.x, these are one and the same)
+	// Establish the view controller and CCDirector (in Cocos2D 2.x, these are one and the same)
 	[self establishDirectorController];
 	
 	// Create the window, make the controller (and its view) the root of the window, and present the window
@@ -168,7 +168,7 @@
 	[_viewController pauseAnimation];
 }
 
-/** Resume the cocos3d/cocos2d action. */
+/** Resume the Cocos3D/Cocos2D action. */
 -(void) resumeApp { [_viewController resumeAnimation]; }
 
 -(void) applicationDidBecomeActive: (UIApplication*) application {

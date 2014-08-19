@@ -326,7 +326,7 @@ void PVRTMatrixInverseExF(
 	PVRTMATRIXf			&mOut,
 	const PVRTMATRIXf	&mIn)
 {
-	PVRTMATRIXf		mTmp = {{0}};						// patched for cocos3d by Bill Hollings
+	PVRTMATRIXf		mTmp = {{0}};						// patched for Cocos3D by Bill Hollings
 	float 			*ppfRows[4];
 	float 			pfRes[4];
 	float 			pfIn[20];

@@ -1,7 +1,7 @@
 /*
  * CC3Layer.h
  *
- * cocos3d 2.0.0
+ * Cocos3D 2.0.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -38,13 +38,13 @@
 
 
 /**
- * CC3Layer is a cocos2d CCLayer that supports full 3D rendering in combination with normal
- * cocos2d 2D rendering. It forms the bridge between the 2D and 3D drawing environments.
+ * CC3Layer is a Cocos2D CCLayer that supports full 3D rendering in combination with normal
+ * Cocos2D 2D rendering. It forms the bridge between the 2D and 3D drawing environments.
  *
  * The CC3Layer contains an instance of CC3Scene, and delegates all 3D operations, for both
  * updating and drawing 3D models, to the CC3Scene instance.
  *
- * In addition, like any cocos2d CCLayer, 2D child CCNodes can be added to this layer and
+ * In addition, like any Cocos2D CCLayer, 2D child CCNodes can be added to this layer and
  * will be rendered either over or under the 3D scene, based on their individual Z-order.
  * In particular, 2D controls such as menus, sprites, labels, health bars, joysticks, etc,
  * can be overlayed on the 3D scene simply by adding them as children of this layer.
@@ -72,11 +72,11 @@
  *   - projection and unprojection between the 2D and 3D coordinate systems, including
  *     projecting touch events onto 3D nodes, will not work correctly.
  *
- * When compiling with versions of cocos2d prior to 3.0, to make use of the standard cocos2d
+ * When compiling with versions of Cocos2D prior to 3.0, to make use of the standard Cocos2D
  * model updatating functionality to update and animate the 3D scene, use the scheduleUpdate
  * method of CC3Layer to invoke periodic callbacks to the update: method of the CC3Layer 
  * instance. The update: method forwards these callbacks to the CC3Scene instance held by 
- * the CC3Layer. When compiling with versions of cocos2d 3.0 or higher, these callbacks will
+ * the CC3Layer. When compiling with versions of Cocos2D 3.0 or higher, these callbacks will
  * happen automatically, and you do not need to invoke the scheduleUpdate method.
  *
  * To enable simple single-touch event handling for this layer, set the userInteractionEnabled
@@ -92,7 +92,7 @@
  * CC3Layer subclass.
  *
  * For more sophisticated touch interfaces, such as multi-touch events or gestures, add
- * event-handing behaviour to your customized CC3Layer, as you would for any cocos2d
+ * event-handing behaviour to your customized CC3Layer, as you would for any Cocos2D
  * application and, when required, invoke the touchEvent:at: method on your customized
  * CC3Scene to initiate node selection.
  *
@@ -124,7 +124,7 @@
  *   -# Instantiate your CC3Scene class, including creating or loading 3D file resources
  *      in the initializeScene method.
  *   -# Attach your CC3Scene to the cc3Scene property of your CC3Layer.
- *   -# When compiling with versions of cocos2d prior to 3.0, schedule regular updates in
+ *   -# When compiling with versions of Cocos2D prior to 3.0, schedule regular updates in
  *      your CC3Layer instance by invoking the scheduleUpdate method.
  */
 @interface CC3Layer : CCLayer {
@@ -395,8 +395,8 @@
  * updateScene: on the CC3Scene directly.
  *
  * Typcially this method is scheduled to be invoked automatically at a periodic interval.
- * When compiling with versions of cocos2d 3.0 or higher, this will happen automatically.
- * When compiling with versions of cocos2d prior to 3.0, you can do so by invoking the
+ * When compiling with versions of Cocos2D 3.0 or higher, this will happen automatically.
+ * When compiling with versions of Cocos2D prior to 3.0, you can do so by invoking the
  * scheduleUpdate method on this instance from the initializeControls method.
  *
  * This method is invoked asynchronously to the frame rendering animation loop, to keep the

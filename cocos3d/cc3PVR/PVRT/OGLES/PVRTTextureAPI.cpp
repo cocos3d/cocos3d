@@ -17,10 +17,10 @@
 #include <string.h>
 #include <stdlib.h>
 
-//#include "PVRTContext.h"				// patched for cocos3d by Bill Hollings
+//#include "PVRTContext.h"				// patched for Cocos3D by Bill Hollings
 #include "PVRTglesExt.h"
 
-#if CC3_OGLES_1							// patched for cocos3d by Bill Hollings
+#if CC3_OGLES_1							// patched for Cocos3D by Bill Hollings
 
 #include "PVRTTexture.h"
 #include "PVRTTextureAPI.h"
@@ -28,7 +28,7 @@
 #include "PVRTFixedPoint.h"
 #include "PVRTMap.h"
 #include "PVRTMatrix.h"
-//#include "PVRTMisc.h"					// patched for cocos3d by Bill Hollings
+//#include "PVRTMisc.h"					// patched for Cocos3D by Bill Hollings
 #include "PVRTResourceFile.h"
 
 /*****************************************************************************
@@ -339,7 +339,7 @@ EPVRTError PVRTTextureLoadFromPointer(	const void* pointer,
 	PVRTGetOGLESTextureFormat(sTextureHeader,eTextureInternalFormat,eTextureFormat,eTextureType);
 
 	//Check supported texture formats.
-#if APPORTABLE								// patched for cocos3d by Bill Hollings
+#if APPORTABLE								// patched for Cocos3D by Bill Hollings
 	
 	bool bIsPVRTCSupported = false;
 #ifndef TARGET_OS_IPHONE
@@ -827,5 +827,5 @@ unsigned int PVRTTextureFormatGetBPP(const GLuint nFormat, const GLuint nType)
  End of file (PVRTTextureAPI.cpp)
 *****************************************************************************/
 
-#endif	// CC3_OGLES_1					// patched for cocos3d by Bill Hollings
+#endif	// CC3_OGLES_1					// patched for Cocos3D by Bill Hollings
 
