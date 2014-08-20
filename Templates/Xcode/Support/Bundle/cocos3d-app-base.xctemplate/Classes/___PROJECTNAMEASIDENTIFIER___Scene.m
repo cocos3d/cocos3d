@@ -167,6 +167,10 @@
 	CCActionInterval* tintDown = [CCActionTintTo actionWithDuration: tintTime color: endColor];
 	CCActionInterval* tintUp   = [CCActionTintTo actionWithDuration: tintTime color: startColor];
 	[helloTxt runAction: [[CCActionSequence actionOne: tintDown two: tintUp] repeatForever]];
+
+	// And let's make this interactive, by allowing the hello text to be touched.
+	// When the node is touched, it will be passed to the nodeSelected:byTouchEvent:at: method below.
+	helloTxt.touchEnabled = YES;
 }
 
 /**
@@ -307,29 +311,47 @@
 
 /**
  * This method is invoked from the CC3Layer whenever a touch event occurs, if that layer
- * has indicated that it is interested in receiving touch events, and is handling them.
+ * has indicated that it is interested in user interaction.
  *
- * Override this method to handle touch events, or remove this method to make use of
- * the superclass behaviour of selecting 3D nodes on each touch-down event.
+ * This default implementation simply delegates to the superclass behaviour, which selects a 3D node
+ * on each touch-down event. You can modify this method to perform more sophisticated touch handling.
  *
- * This method is not invoked when gestures are used for user interaction. Your custom
- * CC3Layer processes gestures and invokes higher-level application-defined behaviour
+ * This method is not invoked when gestures are used for user interaction. When gestures are used,
+ * your custom CC3Layer should process them and invoke higher-level application-defined behaviour
  * on this customized CC3Scene subclass.
  *
  * For more info, read the notes of this method on CC3Scene.
  */
--(void) touchEvent: (uint) touchType at: (CGPoint) touchPoint {}
+-(void) touchEvent: (uint) touchType at: (CGPoint) touchPoint {
+	[super touchEvent: touchType at: touchPoint];
+}
 
 /**
  * This callback template method is invoked automatically when a node has been picked
  * by the invocation of the pickNodeFromTapAt: or pickNodeFromTouchEvent:at: methods,
  * as a result of a touch event or tap gesture.
  *
- * Override this method to perform activities on 3D nodes that have been picked by the user.
+ * Modify this method to perform activities on 3D nodes that have been selected by the user.
  *
  * For more info, read the notes of this method on CC3Scene.
  */
--(void) nodeSelected: (CC3Node*) aNode byTouchEvent: (uint) touchType at: (CGPoint) touchPoint {}
+-(void) nodeSelected: (CC3Node*) aNode byTouchEvent: (uint) touchType at: (CGPoint) touchPoint {
+	
+	// Provide some user feedback by "pulsing" the touched node. We do this by temporarily making
+	// it grow larger and then shrink down again. Because the user might touch the node again while
+	// it is in the middle of a pulse, we stop the previous pulse action before creating a new one.
+	// At this point the hello text node has several actions running on it simultaneously. We can
+	// locate the pulse action we want to stop by giving it a unique tag when it is added to the node.
+	
+	NSInteger pulseActionTag = 19;				// Can be any integer that will be unique among actions on this node.
+	[aNode stopActionByTag: pulseActionTag];	// Remove any existing pulse action first.
+	
+	// Now, create a new pulse action and run it with the same tag so we can find it later if we want to stop it.
+	CCActionInterval* grow = [CC3ActionScaleTo actionWithDuration: 0.25 scaleUniformlyTo: 1.1];
+	CCActionInterval* shrink = [CC3ActionScaleTo actionWithDuration: 0.25 scaleUniformlyTo: 1.0];
+	CCAction* pulse = [CCActionSequence actionOne: grow two: shrink];
+	[aNode runAction: pulse withTag: pulseActionTag];
+}
 
 @end
 

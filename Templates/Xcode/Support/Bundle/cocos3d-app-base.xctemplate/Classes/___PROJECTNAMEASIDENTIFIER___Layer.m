@@ -19,14 +19,16 @@
  */
 -(void) initializeControls {
 	[self scheduleUpdate];
+	self.userInteractionEnabled = YES;		// Set to NO if using Gesture Recognizers.
 }
 
 
 #pragma mark Updating layer
 
 /**
- * Override to perform set-up activity prior to the scene being opened
- * on the view, such as adding gesture recognizers.
+ * Override to perform set-up activity prior to the scene being opened on the view, such as 
+ * adding Gesture Recognizers. If you add Gesture Recognizers, set the userInteractionEnabled
+ * property to NO (it is set to YES in the initializeControls method above).
  *
  * For more info, read the notes of this method on CC3Layer.
  */

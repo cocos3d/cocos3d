@@ -1690,7 +1690,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	_fog.visible = NO;
 	_fog.color = CCColorRefFromCCC4F(ccc4f(0.5, 0.5, 0.75, 1.0));	// A slightly bluish fog.
 
-	// Choose one of GL_LINEAR, GL_EXP and GL_EXP2
+	// Choose one of GL_LINEAR, GL_EXP or GL_EXP2
 	_fog.attenuationMode = GL_EXP2;
 
 	// If using GL_EXP or GL_EXP2, the density property will have effect.
