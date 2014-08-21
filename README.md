@@ -139,7 +139,7 @@ Installation
 	An example of each format is as follows:
 
 		./install-cocos3d.sh -2 v3
-		./install-cocos3d.sh -2 "../cocos2d-iphone-release-3.0-RC4"
+		./install-cocos3d.sh -2 "../cocos2d-swift-3.2.0"
 
 	The first format will link the Cocos3D demo apps to the `Cocos2D 3.x` template libraries 
 	that you have most recently installed. When using this format, you must have previously 
@@ -148,10 +148,10 @@ Installation
 
 	The second format will link the Cocos3D demo apps to the specific Cocos2D distribution 
 	that was downloaded into the specified directory. This format can be useful when testing 
-	against specific Cocos2D versions downloaded from GitHub. You may use either a relative 
-	path (as above), or an absolute path. If for some reason the relative path cannot be 
-	correctly resolved on your system, or the resulting links to the Cocos2D library are 
-	not accurate, try again using the full absolute path.
+	against specific Cocos2D versions downloaded from GitHub or the Cocos2D website. You may 
+	use either a relative path (as above), or an absolute path. If for some reason the relative
+	path cannot be correctly resolved on your system, or the resulting links to the Cocos2D
+	library are not accurate, try again using the full absolute path.
 
 	If you encounter errors during installation, it's typically because you are trying
 	to run the installer without first navigating to the Cocos3D distribution directory.
@@ -234,7 +234,7 @@ For convenience, to access all of the demos together, open either the `cocos3d-i
 or `cocos3d-OSX.xcworkspace` Xcode workspace. You can also open each demo project individually
 in the Projects folder.
 
-At the time of this release, the current version of Cocos2D is `3.1`, and by default, the demo
+At the time of this release, the current version of Cocos2D is `3.2`, and by default, the demo
 apps within the Cocos3D distribution are pre-configured to use that version. To build and run
 the demo apps with a different version of Cocos2D, follow the steps described below in the 
 section titled *Cocos2D Version Compatibility*.
@@ -552,7 +552,7 @@ using fixed-pipeline OpenGL ES 1.1.
 Cocos3D under OSX is compatible with `Cocos2D` `3.x` and `Cocos2D` `2.1`, for using
 programmable-pipeline OpenGL. Cocos3D is not compatible with `Cocos2D` `1.1` under OSX.
 
-At the time of this release, the current version of Cocos2D is `3.1`, and by default, the demo
+At the time of this release, the current version of Cocos2D is `3.2`, and by default, the demo
 apps within the Cocos3D distribution are pre-configured to use that version. To build and run
 the demo apps with a different version of Cocos2D, follow the steps described here:
 

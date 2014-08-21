@@ -71,7 +71,7 @@ previously installed the corresponding version of Cocos2D.
 The arg ${BOLD}"cocos2d-location"${COLOREND} may also be a relative or absolute path
 to a specific Cocos2D distribution retrieved from GitHub. For example:
 
-    $0 -2 "../cocos2d-iphone-release-3.0"
+    $0 -2 "../cocos2d-iphone-release-3.2"
 
 If the ${BOLD}"cocos2d-location"${COLOREND} arg is omitted, the installer will link to the
 latest installed version of Cocos2D.
@@ -123,14 +123,28 @@ get_cc2_location() {
 	# Resolve the Cocos2D distribution directory to an absolute path
 	if [[ $CC2_DIST_DIR != /* ]]; then
 		CC2_DIST_DIR="$PWD/$CC2_DIST_DIR"
-		echo "${BOLD}Please see the README.md file for instructions on ensuring the Cocos3D demo apps are configured to use the version of Cocos2D you are using.${COLOREND}"
+		print_version_warning
 	fi
 
 	# Make sure Cocos2D distribution directory exists
 	if [[ ! -d "$CC2_DIST_DIR" ]];  then
-		echo
-		echo "${RED}✖︎${COLOREND}  The Cocos2D distribution directory '$CC2_DIST_DIR' could not be found! Make sure you have installed this version of Cocos2D before installing Cocos3D."
-		echo
+		if [[ $CC2_SRC == "v3" ]]; then
+			echo
+			echo "${RED}✖︎${COLOREND}  The Cocos2D v3 Xcode project template directory could not be found. Starting with ${BOLD}Cocos2D 3.2${COLOREND}, Cocos2D does not install Xcode project templates. If you are using ${BOLD}Cocos2D 3.2${COLOREND} or later, you cannot use the v3 option shortcut, and must specify the path (relative or absolute) to the Cocos2D installation directory."
+			echo
+		elif [[ $CC2_SRC == "v2" ]]; then
+			echo
+			echo "${RED}✖︎${COLOREND}  The Cocos2D v2 Xcode project template directory could not be found. Make sure you have installed this version of Cocos2D before installing Cocos3D."
+			echo
+		elif [[ $CC2_SRC == "v1" ]]; then
+			echo
+			echo "${RED}✖︎${COLOREND}  The Cocos2D v1 Xcode project template directory could not be found. Make sure you have installed this version of Cocos2D before installing Cocos3D."
+			echo
+		else
+			echo
+			echo "${RED}✖︎${COLOREND}  The Cocos2D distribution directory '$CC2_DIST_DIR' could not be found! Make sure you have specified the correct path to the Cocos2D installation directory using the -2 option."
+			echo
+		fi
 		exit 1
 	fi
 
@@ -138,8 +152,7 @@ get_cc2_location() {
 
 print_version_warning() {
 	echo
-	echo "${BOLD}You are linking the Cocos3D demo apps to Cocos2D $CC2_SRC."
-	echo "Please see the README.md file for instructions on configuring the Cocos3D demo apps to use this version of Cocos2D.${COLOREND}"
+	echo "${BOLD}You are linking the Cocos3D demo apps to Cocos2D $CC2_SRC. Please see the README.md file for instructions on configuring the Cocos3D demo apps to use this version of Cocos2D.${COLOREND}"
 }
 
 # Outputs a banner header
@@ -211,13 +224,13 @@ copy_project_templates() {
 # Copy new Cocos3D support template files
 	copy_files "$TEMPLATE_SRC_DIR/$SUPPORT_DIR" "$CC3_TEMPLATE_DIR" "Cocos3D template support files"
 
-# Copy app templates for Cocos2D v3
-	if [[ -d "$XCODE_TEMPLATE_DIR/cocos2d v3.x" ]]; then
+# Copy app templates for Cocos2D v3...even if Cocos2D v3 templates are not there!
+#	if [[ -d "$XCODE_TEMPLATE_DIR/cocos2d v3.x" ]]; then
 		SRC_DIR="$TEMPLATE_SRC_DIR/cocos3d-app-proj-cocos2d-v3-ios.xctemplate"
 		copy_files "$SRC_DIR" "$CC3_TEMPLATE_DIR" "Cocos3D iOS App with Cocos2D-v3 template"
 		SRC_DIR="$TEMPLATE_SRC_DIR/cocos3d-app-proj-cocos2d-v3-osx.xctemplate"
 		copy_files "$SRC_DIR" "$CC3_TEMPLATE_DIR" "Cocos3D OSX App with Cocos2D-v3 template"
-	fi
+#	fi
 
 # Copy app templates for Cocos2D v2
 	if [[ -d "$XCODE_TEMPLATE_DIR/cocos2d v2.x" ]]; then

@@ -1188,6 +1188,7 @@
 				OTHER_CFLAGS = "-U__STRICT_ANSI__";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				WARNING_CFLAGS = "-Wno-objc-property-no-attribute";
 			};
 			name = Debug;
 		};
@@ -1197,6 +1198,7 @@
 				OTHER_CFLAGS = "-U__STRICT_ANSI__";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				WARNING_CFLAGS = "-Wno-objc-property-no-attribute";
 			};
 			name = Release;
 		};

@@ -46,6 +46,8 @@
 				</array>
 				<key>SKIP_INSTALL</key>
 				<string>YES</string>
+				<key>WARNING_CFLAGS</key>
+				<string>-Wno-objc-property-no-attribute</string>
 			</dict>
 		</dict>
 	</array>
