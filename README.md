@@ -109,8 +109,8 @@ sophisticated, dynamic 3D games and applications using Objective-C.
 Installation
 ------------
 
-1. The Cocos3D framework works with [Cocos2D](http://www.cocos2d-iphone.org). Before installing
-   Cocos3D, you must [download](http://www.cocos2d-iphone.org/download) and install Cocos2D.<br/><br/>
+1. The Cocos3D framework works with [Cocos2D](http://www.cocos2d-swift.org). Before installing
+   Cocos3D, you must [download](http://www.cocos2d-swift.org/download) and install Cocos2D.<br/>
 
 	The same Cocos3D distribution can be used with `Cocos2D 3.x`, `Cocos2D 2.1` or `Cocos2D 1.1`.
 	Link to `Cocos2D 3.x` or `Cocos2D 2.1` to make use of the more advanced shader-based 
@@ -118,40 +118,32 @@ Installation
 	`Cocos2D 1.1` to use the simpler configurable fixed-pipeline of OpenGL ES 1.1 (iOS), 
 	and avoid the need to write GLSL shaders.
 
-2. Get the latest Cocos3D release from the [Cocos3D GitHub repository](http://github.com/cocos3d/cocos3d).
+2. Download the [latest Cocos3D release](https://github.com/cocos3d/cocos3d/releases).
 
 3. Unzip the Cocos3D distribution file.
 
 4. Open a Terminal session, navigate to the unzipped Cocos3D distribution directory, and run 
-   the `install-cocos3d` script using one of the following formats:
+   the `install-cocos3d` script as follows:
 
-		./install-cocos3d.sh
-		./install-cocos3d.sh -2 cocos2d-version
+		./install-cocos3d.sh -2 path-to-cocos2d
 
-	A Cocos2D distribution must be installed. In the first format, the Cocos3D demo apps 
-	will be linked to the latest major version of Cocos2D that is installed.</br></br>
-	
-	By using the -2 option, you can specify the version of Cocos2D to which the Cocos3D demo
-	apps should be linked. The ***cocos2d-verison*** argument can be either an installed 
-	Cocos2D version number (`v3`, `v2`, or `v1`), or a path to a specific Cocos2D distribution 
-	retrieved from GitHub.
+	A Cocos2D distribution must be installed. With the -2 option, you specify the version
+	of Cocos2D to which the Cocos3D demo apps should be linked.
 
-	An example of each format is as follows:
+	As the name implies, the ***path-to-cocos2d*** parameter is the path to the Cocos2D
+	distribution that was downloaded into the specified folder. You may use either a 
+	relative path, or an absolute path. If for some reason the relative path 
+	cannot be correctly resolved on your system, or the resulting links to the Cocos2D 
+	library are not accurate, try again using the full absolute path. An example of using
+	a relative path is:
 
-		./install-cocos3d.sh -2 v3
-		./install-cocos3d.sh -2 "../cocos2d-swift-3.2.0"
+		./install-cocos3d.sh -2 "../cocos2d-swift-3.2"
 
-	The first format will link the Cocos3D demo apps to the `Cocos2D 3.x` template libraries 
-	that you have most recently installed. When using this format, you must have previously 
-	installed the corresponding version of Cocos2D. This installation format is suitable for 
-	most Cocos3D development activities.</br></br>
-
-	The second format will link the Cocos3D demo apps to the specific Cocos2D distribution 
-	that was downloaded into the specified directory. This format can be useful when testing 
-	against specific Cocos2D versions downloaded from GitHub or the Cocos2D website. You may 
-	use either a relative path (as above), or an absolute path. If for some reason the relative
-	path cannot be correctly resolved on your system, or the resulting links to the Cocos2D
-	library are not accurate, try again using the full absolute path.
+	When using Cocos2D 3.1 or earlier, you also have the option of setting ***path-to-cocos2d***
+	to one of (`v3`, `v2`, or `v1`), which will link the Cocos3D demo apps to the Cocos2D Xcode template libraries that were most recently installed. When using this format, you 
+	must have previously installed the corresponding version of Cocos2D. This option is not
+	available with Cocos2D 3.2 and later because, as of Cocos2D 3.2, Xcode template projects
+	are no longer available.
 
 	If you encounter errors during installation, it's typically because you are trying
 	to run the installer without first navigating to the Cocos3D distribution directory.
@@ -178,11 +170,43 @@ The same Cocos3D distribution can be used with `Cocos2D 3.x`, `Cocos2D 2.1` or `
 Choose the Cocos3D template that corresponds to the version of Cocos2D that you want to
 work with, and which you previously downloaded and installed.
 
-The template project is complete, but Xcode does not automatically create the dependencies 
-between the targets within the project. You can do this as follows:
+You can now add Cocos2D to your project.<br/><br/>
+###Adding Cocos2D 3.2 or Later to Your New Project
 
-1. Once the template project opens, select your project (eg. `MyCocos2DApp`) in the Xcode 
-   *Project Navigator* panel.
+If you are using Cocos2D 3.2 or later, you must copy the Cocos2D project folders to your new Cocos3D Xcode project, as follows:
+
+1. Copy the two folders `cocos2d` and `cocos2d-chipmunk` from the Cocos3D distribution folder into the `cocos2d` folder of your new project (eg. `MyCocos2DApp`). You should now have the following folders in your project:
+
+		MyCocos2DApp/cocos2d/cocos2d
+		MyCocos2DApp/cocos2d/cocos2d-chipmunk
+		
+2. Add these Cocos2D files to the project by dragging the `MyCocos2DApp/cocos2d/cocos2d` folder into the `cocos2d` group in the Xcode *Project Navigator* panel. When prompted for the target to add the source
+code to, select the `cocos2d` target.
+
+3. Add the new Cocos2D Chipmunk files to the project by dragging the `MyCocos2DApp/cocos2d/cocos2d-chipmunk` folder into the `cocos2d` group in the Xcode *Project Navigator* panel. When prompted for the target to add the source
+code to, select the `cocos2d-chipmunk` target.
+
+4. Cocos2D uses automatic reference counting (ARC). However, a small amount of critical code uses manual reference counting, to improve performance. You must now mark that code as such:
+
+	1. Select your project  in the Xcode *Project Navigator* panel.
+
+	2. Select the `cocos2d` target.
+
+	3. Select the *Build Phases* tab of the `cocos2d` target.
+
+	4. Open the *Compile Sources* list and locate the entry for the `CCNoARC.m` file.
+
+	5. On the `CCNoARC.m` entry, double-click the *Compiler Flags* column and enter the `-fno-objc-arc` compiler flag. As the name implies, the  `CCNoARC.m` file uses manual refernce counting instead of automatic reference counting, to improve performance.<br/><br/>
+
+###Adding Cocos2D 3.1 or Earlier to Your New Project
+
+If you are using Cocos2D 3.1 or prior, the Cocos3D Xcode project will already contain the appropriate Cocos2D files, and the steps just discussed are not required.
+<br/><br/>
+###Link the Project Dependencies
+
+The template project is now complete, but Xcode does not automatically create the dependencies between the targets within the project. You can do this as follows:
+
+1. Select your project  in the Xcode *Project Navigator* panel.
 
 2. Select the `MyCocos2DApp` target.
 
@@ -568,11 +592,21 @@ the demo apps with a different version of Cocos2D, follow the steps described he
    Cocos3D distribution folder into the `cocos2d-library-iOS` or `cocos2d-library-OSX` 
    project in the Xcode *Project Navigator* panel. When prompted for the target to add the source
    code to, select the `cocos2d` target.
-5. Add the newly linked Cocos2D Chipmunk files to the project by dragging the `cocos2d-chipmunk`
+
+5. If you are using Cocos2D 3.2 or later, configure the `CCNoARC.m` file to use manual refernce counting:
+
+	1. Select the *Build Phases* tab of the `cocos2d` target.
+
+	2. Open the *Compile Sources* list and locate the entry for the `CCNoARC.m` file.
+
+	3. On the `CCNoARC.m` entry, double-click the *Compiler Flags* column and enter the `-fno-objc-arc` compiler flag. As the name implies, the  `CCNoARC.m` file uses manual refernce counting instead of automatic reference counting, to improve performance.
+
+6. Add the newly linked Cocos2D Chipmunk files to the project by dragging the `cocos2d-chipmunk`
    folder from the Cocos3D distribution folder into the `cocos2d-chipmunk-library-iOS` or 
    `cocos2d-chipmunk-library-OSX` project in the Xcode *Project Navigator* panel. When prompted
    for the target to add the source code to, select the `cocos2d-chipmunk` target.
-6. `Cocos2D` `3.x` uses Automatic Reference Counting (ARC). `Cocos2D` `2.1` and `Cocos2D` `1.1`
+
+7. `Cocos2D` `3.x` uses Automatic Reference Counting (ARC). `Cocos2D` `2.1` and `Cocos2D` `1.1`
    do not. You must set the appropriate compiler build setting to ensure the compiler will use
    the correct technique.
 	1. In the `cocos2d-library-iOS` or `cocos2d-library-OSX` project, select the `cocos2d` 
@@ -587,7 +621,7 @@ the demo apps with a different version of Cocos2D, follow the steps described he
 	4. The `cocos2d-chipmunk` part of the `Cocos2D` `3.x` library does *not* use ARC. Ensure
 	   the **Objective-C Automatic Reference Counting** (aka `CLANG_ENABLE_OBJC_ARC`) setting
 	   of the `cocos2d-chipmunk` target is always set to NO.
-7. `Cocos2D` `3.x` supports compiling to the ARM64 architecture. `Cocos2D` `2.1` and
+8. `Cocos2D` `3.x` supports compiling to the ARM64 architecture. `Cocos2D` `2.1` and
    `Cocos2D` `1.1` do *not* support compiling to the ARM64 architecture. Because of this,
    by default, the **Valid Architectures** (aka `VALID_ARCHS`) build setting for all demo 
    Xcode Projects in the Cocos3D distribution is set to `$(ARCHS_STANDARD_32_BIT)` (which 
@@ -595,12 +629,12 @@ the demo apps with a different version of Cocos2D, follow the steps described he
    of `Cocos2D`. If you are now linking to `Cocos2D` `3.x`, you can set this property to
    `$(ARCHS_STANDARD)` (or simply remove this setting from the Project), in all demo Projects,
    to allow compilation to include the ARM64 architecture.
-8. As a development optimization, if you are now linking to `Cocos2D` `3.x`, you can set the 
+9. As a development optimization, if you are now linking to `Cocos2D` `3.x`, you can set the 
    value of the **Build Active Architecture Only** (aka `ONLY_ACTIVE_ARCH`) build setting in 
    the *Debug* configuration in all demo projects to `YES`. You should not do this if you are
    linking to `Cocos2D` `2.1` or `Cocos2D` `1.1`, as this will prohibit you from building
    the demo apps on devices that use the ARM64 processor.
-9. If you have already built the demo app using the old version of `Cocos2D`, delete the 
+10. If you have already built the demo app using the old version of `Cocos2D`, delete the 
    contents of your `~/Library/Developer/Xcode/DerivedData` folder, and restart Xcode.
 
 
