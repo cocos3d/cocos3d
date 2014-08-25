@@ -7,111 +7,111 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A9A7FD6A19A6949100734484 /* chipmunk.c in Sources */ = {isa = PBXBuildFile; fileRef = A9A7FD3B19A6949100734484 /* chipmunk.c */; };
-		A9A7FD6B19A6949100734484 /* cpArbiter.c in Sources */ = {isa = PBXBuildFile; fileRef = A9A7FD3D19A6949100734484 /* cpArbiter.c */; };
-		A9A7FD6C19A6949100734484 /* cpArray.c in Sources */ = {isa = PBXBuildFile; fileRef = A9A7FD3E19A6949100734484 /* cpArray.c */; };
-		A9A7FD6D19A6949100734484 /* cpBBTree.c in Sources */ = {isa = PBXBuildFile; fileRef = A9A7FD3F19A6949100734484 /* cpBBTree.c */; };
-		A9A7FD6E19A6949100734484 /* cpBody.c in Sources */ = {isa = PBXBuildFile; fileRef = A9A7FD4019A6949100734484 /* cpBody.c */; };
-		A9A7FD6F19A6949100734484 /* cpCollision.c in Sources */ = {isa = PBXBuildFile; fileRef = A9A7FD4119A6949100734484 /* cpCollision.c */; };
-		A9A7FD7019A6949100734484 /* cpConstraint.c in Sources */ = {isa = PBXBuildFile; fileRef = A9A7FD4219A6949100734484 /* cpConstraint.c */; };
-		A9A7FD7119A6949100734484 /* cpDampedRotarySpring.c in Sources */ = {isa = PBXBuildFile; fileRef = A9A7FD4319A6949100734484 /* cpDampedRotarySpring.c */; };
-		A9A7FD7219A6949100734484 /* cpDampedSpring.c in Sources */ = {isa = PBXBuildFile; fileRef = A9A7FD4419A6949100734484 /* cpDampedSpring.c */; };
-		A9A7FD7319A6949100734484 /* cpGearJoint.c in Sources */ = {isa = PBXBuildFile; fileRef = A9A7FD4519A6949100734484 /* cpGearJoint.c */; };
-		A9A7FD7419A6949100734484 /* cpGrooveJoint.c in Sources */ = {isa = PBXBuildFile; fileRef = A9A7FD4619A6949100734484 /* cpGrooveJoint.c */; };
-		A9A7FD7519A6949100734484 /* cpHashSet.c in Sources */ = {isa = PBXBuildFile; fileRef = A9A7FD4719A6949100734484 /* cpHashSet.c */; };
-		A9A7FD7619A6949100734484 /* cpPinJoint.c in Sources */ = {isa = PBXBuildFile; fileRef = A9A7FD4819A6949100734484 /* cpPinJoint.c */; };
-		A9A7FD7719A6949100734484 /* cpPivotJoint.c in Sources */ = {isa = PBXBuildFile; fileRef = A9A7FD4919A6949100734484 /* cpPivotJoint.c */; };
-		A9A7FD7819A6949100734484 /* cpPolyShape.c in Sources */ = {isa = PBXBuildFile; fileRef = A9A7FD4A19A6949100734484 /* cpPolyShape.c */; };
-		A9A7FD7919A6949100734484 /* cpRatchetJoint.c in Sources */ = {isa = PBXBuildFile; fileRef = A9A7FD4B19A6949100734484 /* cpRatchetJoint.c */; };
-		A9A7FD7A19A6949100734484 /* cpRotaryLimitJoint.c in Sources */ = {isa = PBXBuildFile; fileRef = A9A7FD4C19A6949100734484 /* cpRotaryLimitJoint.c */; };
-		A9A7FD7B19A6949100734484 /* cpShape.c in Sources */ = {isa = PBXBuildFile; fileRef = A9A7FD4D19A6949100734484 /* cpShape.c */; };
-		A9A7FD7C19A6949100734484 /* cpSimpleMotor.c in Sources */ = {isa = PBXBuildFile; fileRef = A9A7FD4E19A6949100734484 /* cpSimpleMotor.c */; };
-		A9A7FD7D19A6949100734484 /* cpSlideJoint.c in Sources */ = {isa = PBXBuildFile; fileRef = A9A7FD4F19A6949100734484 /* cpSlideJoint.c */; };
-		A9A7FD7E19A6949100734484 /* cpSpace.c in Sources */ = {isa = PBXBuildFile; fileRef = A9A7FD5019A6949100734484 /* cpSpace.c */; };
-		A9A7FD7F19A6949100734484 /* cpSpaceComponent.c in Sources */ = {isa = PBXBuildFile; fileRef = A9A7FD5119A6949100734484 /* cpSpaceComponent.c */; };
-		A9A7FD8019A6949100734484 /* cpSpaceDebug.c in Sources */ = {isa = PBXBuildFile; fileRef = A9A7FD5219A6949100734484 /* cpSpaceDebug.c */; };
-		A9A7FD8119A6949100734484 /* cpSpaceHash.c in Sources */ = {isa = PBXBuildFile; fileRef = A9A7FD5319A6949100734484 /* cpSpaceHash.c */; };
-		A9A7FD8219A6949100734484 /* cpSpaceQuery.c in Sources */ = {isa = PBXBuildFile; fileRef = A9A7FD5419A6949100734484 /* cpSpaceQuery.c */; };
-		A9A7FD8319A6949100734484 /* cpSpaceStep.c in Sources */ = {isa = PBXBuildFile; fileRef = A9A7FD5519A6949100734484 /* cpSpaceStep.c */; };
-		A9A7FD8419A6949100734484 /* cpSpatialIndex.c in Sources */ = {isa = PBXBuildFile; fileRef = A9A7FD5619A6949100734484 /* cpSpatialIndex.c */; };
-		A9A7FD8519A6949100734484 /* cpSweep1D.c in Sources */ = {isa = PBXBuildFile; fileRef = A9A7FD5719A6949100734484 /* cpSweep1D.c */; };
-		A9A7FD8619A6949100734484 /* ChipmunkBody.m in Sources */ = {isa = PBXBuildFile; fileRef = A9A7FD6519A6949100734484 /* ChipmunkBody.m */; };
-		A9A7FD8719A6949100734484 /* ChipmunkConstraint.m in Sources */ = {isa = PBXBuildFile; fileRef = A9A7FD6619A6949100734484 /* ChipmunkConstraint.m */; };
-		A9A7FD8819A6949100734484 /* ChipmunkMultiGrab.m in Sources */ = {isa = PBXBuildFile; fileRef = A9A7FD6719A6949100734484 /* ChipmunkMultiGrab.m */; };
-		A9A7FD8919A6949100734484 /* ChipmunkShape.m in Sources */ = {isa = PBXBuildFile; fileRef = A9A7FD6819A6949100734484 /* ChipmunkShape.m */; };
-		A9A7FD8A19A6949100734484 /* ChipmunkSpace.m in Sources */ = {isa = PBXBuildFile; fileRef = A9A7FD6919A6949100734484 /* ChipmunkSpace.m */; };
+		A981F64719ABB2DE0096C67A /* chipmunk.c in Sources */ = {isa = PBXBuildFile; fileRef = A981F61819ABB2DE0096C67A /* chipmunk.c */; };
+		A981F64819ABB2DE0096C67A /* cpArbiter.c in Sources */ = {isa = PBXBuildFile; fileRef = A981F61A19ABB2DE0096C67A /* cpArbiter.c */; };
+		A981F64919ABB2DE0096C67A /* cpArray.c in Sources */ = {isa = PBXBuildFile; fileRef = A981F61B19ABB2DE0096C67A /* cpArray.c */; };
+		A981F64A19ABB2DE0096C67A /* cpBBTree.c in Sources */ = {isa = PBXBuildFile; fileRef = A981F61C19ABB2DE0096C67A /* cpBBTree.c */; };
+		A981F64B19ABB2DE0096C67A /* cpBody.c in Sources */ = {isa = PBXBuildFile; fileRef = A981F61D19ABB2DE0096C67A /* cpBody.c */; };
+		A981F64C19ABB2DE0096C67A /* cpCollision.c in Sources */ = {isa = PBXBuildFile; fileRef = A981F61E19ABB2DE0096C67A /* cpCollision.c */; };
+		A981F64D19ABB2DE0096C67A /* cpConstraint.c in Sources */ = {isa = PBXBuildFile; fileRef = A981F61F19ABB2DE0096C67A /* cpConstraint.c */; };
+		A981F64E19ABB2DE0096C67A /* cpDampedRotarySpring.c in Sources */ = {isa = PBXBuildFile; fileRef = A981F62019ABB2DE0096C67A /* cpDampedRotarySpring.c */; };
+		A981F64F19ABB2DE0096C67A /* cpDampedSpring.c in Sources */ = {isa = PBXBuildFile; fileRef = A981F62119ABB2DE0096C67A /* cpDampedSpring.c */; };
+		A981F65019ABB2DE0096C67A /* cpGearJoint.c in Sources */ = {isa = PBXBuildFile; fileRef = A981F62219ABB2DE0096C67A /* cpGearJoint.c */; };
+		A981F65119ABB2DE0096C67A /* cpGrooveJoint.c in Sources */ = {isa = PBXBuildFile; fileRef = A981F62319ABB2DE0096C67A /* cpGrooveJoint.c */; };
+		A981F65219ABB2DE0096C67A /* cpHashSet.c in Sources */ = {isa = PBXBuildFile; fileRef = A981F62419ABB2DE0096C67A /* cpHashSet.c */; };
+		A981F65319ABB2DE0096C67A /* cpPinJoint.c in Sources */ = {isa = PBXBuildFile; fileRef = A981F62519ABB2DE0096C67A /* cpPinJoint.c */; };
+		A981F65419ABB2DE0096C67A /* cpPivotJoint.c in Sources */ = {isa = PBXBuildFile; fileRef = A981F62619ABB2DE0096C67A /* cpPivotJoint.c */; };
+		A981F65519ABB2DE0096C67A /* cpPolyShape.c in Sources */ = {isa = PBXBuildFile; fileRef = A981F62719ABB2DE0096C67A /* cpPolyShape.c */; };
+		A981F65619ABB2DE0096C67A /* cpRatchetJoint.c in Sources */ = {isa = PBXBuildFile; fileRef = A981F62819ABB2DE0096C67A /* cpRatchetJoint.c */; };
+		A981F65719ABB2DE0096C67A /* cpRotaryLimitJoint.c in Sources */ = {isa = PBXBuildFile; fileRef = A981F62919ABB2DE0096C67A /* cpRotaryLimitJoint.c */; };
+		A981F65819ABB2DE0096C67A /* cpShape.c in Sources */ = {isa = PBXBuildFile; fileRef = A981F62A19ABB2DE0096C67A /* cpShape.c */; };
+		A981F65919ABB2DE0096C67A /* cpSimpleMotor.c in Sources */ = {isa = PBXBuildFile; fileRef = A981F62B19ABB2DE0096C67A /* cpSimpleMotor.c */; };
+		A981F65A19ABB2DE0096C67A /* cpSlideJoint.c in Sources */ = {isa = PBXBuildFile; fileRef = A981F62C19ABB2DE0096C67A /* cpSlideJoint.c */; };
+		A981F65B19ABB2DE0096C67A /* cpSpace.c in Sources */ = {isa = PBXBuildFile; fileRef = A981F62D19ABB2DE0096C67A /* cpSpace.c */; };
+		A981F65C19ABB2DE0096C67A /* cpSpaceComponent.c in Sources */ = {isa = PBXBuildFile; fileRef = A981F62E19ABB2DE0096C67A /* cpSpaceComponent.c */; };
+		A981F65D19ABB2DE0096C67A /* cpSpaceDebug.c in Sources */ = {isa = PBXBuildFile; fileRef = A981F62F19ABB2DE0096C67A /* cpSpaceDebug.c */; };
+		A981F65E19ABB2DE0096C67A /* cpSpaceHash.c in Sources */ = {isa = PBXBuildFile; fileRef = A981F63019ABB2DE0096C67A /* cpSpaceHash.c */; };
+		A981F65F19ABB2DE0096C67A /* cpSpaceQuery.c in Sources */ = {isa = PBXBuildFile; fileRef = A981F63119ABB2DE0096C67A /* cpSpaceQuery.c */; };
+		A981F66019ABB2DE0096C67A /* cpSpaceStep.c in Sources */ = {isa = PBXBuildFile; fileRef = A981F63219ABB2DE0096C67A /* cpSpaceStep.c */; };
+		A981F66119ABB2DE0096C67A /* cpSpatialIndex.c in Sources */ = {isa = PBXBuildFile; fileRef = A981F63319ABB2DE0096C67A /* cpSpatialIndex.c */; };
+		A981F66219ABB2DE0096C67A /* cpSweep1D.c in Sources */ = {isa = PBXBuildFile; fileRef = A981F63419ABB2DE0096C67A /* cpSweep1D.c */; };
+		A981F66319ABB2DE0096C67A /* ChipmunkBody.m in Sources */ = {isa = PBXBuildFile; fileRef = A981F64219ABB2DE0096C67A /* ChipmunkBody.m */; };
+		A981F66419ABB2DE0096C67A /* ChipmunkConstraint.m in Sources */ = {isa = PBXBuildFile; fileRef = A981F64319ABB2DE0096C67A /* ChipmunkConstraint.m */; };
+		A981F66519ABB2DE0096C67A /* ChipmunkMultiGrab.m in Sources */ = {isa = PBXBuildFile; fileRef = A981F64419ABB2DE0096C67A /* ChipmunkMultiGrab.m */; };
+		A981F66619ABB2DE0096C67A /* ChipmunkShape.m in Sources */ = {isa = PBXBuildFile; fileRef = A981F64519ABB2DE0096C67A /* ChipmunkShape.m */; };
+		A981F66719ABB2DE0096C67A /* ChipmunkSpace.m in Sources */ = {isa = PBXBuildFile; fileRef = A981F64619ABB2DE0096C67A /* ChipmunkSpace.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		A92BD9CA18E12720003D1F64 /* libcocos2d-chipmunk.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libcocos2d-chipmunk.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		A9A7FD2119A6949100734484 /* chipmunk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chipmunk.h; sourceTree = "<group>"; };
-		A9A7FD2219A6949100734484 /* chipmunk_ffi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chipmunk_ffi.h; sourceTree = "<group>"; };
-		A9A7FD2319A6949100734484 /* chipmunk_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chipmunk_private.h; sourceTree = "<group>"; };
-		A9A7FD2419A6949100734484 /* chipmunk_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chipmunk_types.h; sourceTree = "<group>"; };
-		A9A7FD2519A6949100734484 /* chipmunk_unsafe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chipmunk_unsafe.h; sourceTree = "<group>"; };
-		A9A7FD2619A6949100734484 /* cpArbiter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpArbiter.h; sourceTree = "<group>"; };
-		A9A7FD2719A6949100734484 /* cpBB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpBB.h; sourceTree = "<group>"; };
-		A9A7FD2819A6949100734484 /* cpBody.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpBody.h; sourceTree = "<group>"; };
-		A9A7FD2919A6949100734484 /* cpConstraint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpConstraint.h; sourceTree = "<group>"; };
-		A9A7FD2A19A6949100734484 /* cpDampedRotarySpring.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpDampedRotarySpring.h; sourceTree = "<group>"; };
-		A9A7FD2B19A6949100734484 /* cpDampedSpring.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpDampedSpring.h; sourceTree = "<group>"; };
-		A9A7FD2C19A6949100734484 /* cpGearJoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpGearJoint.h; sourceTree = "<group>"; };
-		A9A7FD2D19A6949100734484 /* cpGrooveJoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpGrooveJoint.h; sourceTree = "<group>"; };
-		A9A7FD2E19A6949100734484 /* cpPinJoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpPinJoint.h; sourceTree = "<group>"; };
-		A9A7FD2F19A6949100734484 /* cpPivotJoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpPivotJoint.h; sourceTree = "<group>"; };
-		A9A7FD3019A6949100734484 /* cpPolyShape.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpPolyShape.h; sourceTree = "<group>"; };
-		A9A7FD3119A6949100734484 /* cpRatchetJoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpRatchetJoint.h; sourceTree = "<group>"; };
-		A9A7FD3219A6949100734484 /* cpRotaryLimitJoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpRotaryLimitJoint.h; sourceTree = "<group>"; };
-		A9A7FD3319A6949100734484 /* cpShape.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpShape.h; sourceTree = "<group>"; };
-		A9A7FD3419A6949100734484 /* cpSimpleMotor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpSimpleMotor.h; sourceTree = "<group>"; };
-		A9A7FD3519A6949100734484 /* cpSlideJoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpSlideJoint.h; sourceTree = "<group>"; };
-		A9A7FD3619A6949100734484 /* cpSpace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpSpace.h; sourceTree = "<group>"; };
-		A9A7FD3719A6949100734484 /* cpSpatialIndex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpSpatialIndex.h; sourceTree = "<group>"; };
-		A9A7FD3819A6949100734484 /* cpTransform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpTransform.h; sourceTree = "<group>"; };
-		A9A7FD3919A6949100734484 /* cpVect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpVect.h; sourceTree = "<group>"; };
-		A9A7FD3B19A6949100734484 /* chipmunk.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = chipmunk.c; sourceTree = "<group>"; };
-		A9A7FD3C19A6949100734484 /* CMakeLists.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = "<group>"; };
-		A9A7FD3D19A6949100734484 /* cpArbiter.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpArbiter.c; sourceTree = "<group>"; };
-		A9A7FD3E19A6949100734484 /* cpArray.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpArray.c; sourceTree = "<group>"; };
-		A9A7FD3F19A6949100734484 /* cpBBTree.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpBBTree.c; sourceTree = "<group>"; };
-		A9A7FD4019A6949100734484 /* cpBody.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpBody.c; sourceTree = "<group>"; };
-		A9A7FD4119A6949100734484 /* cpCollision.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpCollision.c; sourceTree = "<group>"; };
-		A9A7FD4219A6949100734484 /* cpConstraint.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpConstraint.c; sourceTree = "<group>"; };
-		A9A7FD4319A6949100734484 /* cpDampedRotarySpring.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpDampedRotarySpring.c; sourceTree = "<group>"; };
-		A9A7FD4419A6949100734484 /* cpDampedSpring.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpDampedSpring.c; sourceTree = "<group>"; };
-		A9A7FD4519A6949100734484 /* cpGearJoint.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpGearJoint.c; sourceTree = "<group>"; };
-		A9A7FD4619A6949100734484 /* cpGrooveJoint.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpGrooveJoint.c; sourceTree = "<group>"; };
-		A9A7FD4719A6949100734484 /* cpHashSet.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpHashSet.c; sourceTree = "<group>"; };
-		A9A7FD4819A6949100734484 /* cpPinJoint.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpPinJoint.c; sourceTree = "<group>"; };
-		A9A7FD4919A6949100734484 /* cpPivotJoint.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpPivotJoint.c; sourceTree = "<group>"; };
-		A9A7FD4A19A6949100734484 /* cpPolyShape.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpPolyShape.c; sourceTree = "<group>"; };
-		A9A7FD4B19A6949100734484 /* cpRatchetJoint.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpRatchetJoint.c; sourceTree = "<group>"; };
-		A9A7FD4C19A6949100734484 /* cpRotaryLimitJoint.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpRotaryLimitJoint.c; sourceTree = "<group>"; };
-		A9A7FD4D19A6949100734484 /* cpShape.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpShape.c; sourceTree = "<group>"; };
-		A9A7FD4E19A6949100734484 /* cpSimpleMotor.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpSimpleMotor.c; sourceTree = "<group>"; };
-		A9A7FD4F19A6949100734484 /* cpSlideJoint.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpSlideJoint.c; sourceTree = "<group>"; };
-		A9A7FD5019A6949100734484 /* cpSpace.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpSpace.c; sourceTree = "<group>"; };
-		A9A7FD5119A6949100734484 /* cpSpaceComponent.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpSpaceComponent.c; sourceTree = "<group>"; };
-		A9A7FD5219A6949100734484 /* cpSpaceDebug.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpSpaceDebug.c; sourceTree = "<group>"; };
-		A9A7FD5319A6949100734484 /* cpSpaceHash.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpSpaceHash.c; sourceTree = "<group>"; };
-		A9A7FD5419A6949100734484 /* cpSpaceQuery.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpSpaceQuery.c; sourceTree = "<group>"; };
-		A9A7FD5519A6949100734484 /* cpSpaceStep.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpSpaceStep.c; sourceTree = "<group>"; };
-		A9A7FD5619A6949100734484 /* cpSpatialIndex.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpSpatialIndex.c; sourceTree = "<group>"; };
-		A9A7FD5719A6949100734484 /* cpSweep1D.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpSweep1D.c; sourceTree = "<group>"; };
-		A9A7FD5819A6949100734484 /* prime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = prime.h; sourceTree = "<group>"; };
-		A9A7FD5919A6949100734484 /* LICENSE_Chipmunk.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE_Chipmunk.txt; sourceTree = "<group>"; };
-		A9A7FD5D19A6949100734484 /* ChipmunkBody.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChipmunkBody.h; sourceTree = "<group>"; };
-		A9A7FD5E19A6949100734484 /* ChipmunkConstraint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChipmunkConstraint.h; sourceTree = "<group>"; };
-		A9A7FD5F19A6949100734484 /* ChipmunkExtras.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChipmunkExtras.h; sourceTree = "<group>"; };
-		A9A7FD6019A6949100734484 /* ChipmunkMultiGrab.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChipmunkMultiGrab.h; sourceTree = "<group>"; };
-		A9A7FD6119A6949100734484 /* ChipmunkShape.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChipmunkShape.h; sourceTree = "<group>"; };
-		A9A7FD6219A6949100734484 /* ChipmunkSpace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChipmunkSpace.h; sourceTree = "<group>"; };
-		A9A7FD6319A6949100734484 /* ObjectiveChipmunk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ObjectiveChipmunk.h; sourceTree = "<group>"; };
-		A9A7FD6519A6949100734484 /* ChipmunkBody.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChipmunkBody.m; sourceTree = "<group>"; };
-		A9A7FD6619A6949100734484 /* ChipmunkConstraint.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChipmunkConstraint.m; sourceTree = "<group>"; };
-		A9A7FD6719A6949100734484 /* ChipmunkMultiGrab.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChipmunkMultiGrab.m; sourceTree = "<group>"; };
-		A9A7FD6819A6949100734484 /* ChipmunkShape.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChipmunkShape.m; sourceTree = "<group>"; };
-		A9A7FD6919A6949100734484 /* ChipmunkSpace.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChipmunkSpace.m; sourceTree = "<group>"; };
+		A981F5FE19ABB2DE0096C67A /* chipmunk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chipmunk.h; sourceTree = "<group>"; };
+		A981F5FF19ABB2DE0096C67A /* chipmunk_ffi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chipmunk_ffi.h; sourceTree = "<group>"; };
+		A981F60019ABB2DE0096C67A /* chipmunk_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chipmunk_private.h; sourceTree = "<group>"; };
+		A981F60119ABB2DE0096C67A /* chipmunk_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chipmunk_types.h; sourceTree = "<group>"; };
+		A981F60219ABB2DE0096C67A /* chipmunk_unsafe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chipmunk_unsafe.h; sourceTree = "<group>"; };
+		A981F60319ABB2DE0096C67A /* cpArbiter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpArbiter.h; sourceTree = "<group>"; };
+		A981F60419ABB2DE0096C67A /* cpBB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpBB.h; sourceTree = "<group>"; };
+		A981F60519ABB2DE0096C67A /* cpBody.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpBody.h; sourceTree = "<group>"; };
+		A981F60619ABB2DE0096C67A /* cpConstraint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpConstraint.h; sourceTree = "<group>"; };
+		A981F60719ABB2DE0096C67A /* cpDampedRotarySpring.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpDampedRotarySpring.h; sourceTree = "<group>"; };
+		A981F60819ABB2DE0096C67A /* cpDampedSpring.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpDampedSpring.h; sourceTree = "<group>"; };
+		A981F60919ABB2DE0096C67A /* cpGearJoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpGearJoint.h; sourceTree = "<group>"; };
+		A981F60A19ABB2DE0096C67A /* cpGrooveJoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpGrooveJoint.h; sourceTree = "<group>"; };
+		A981F60B19ABB2DE0096C67A /* cpPinJoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpPinJoint.h; sourceTree = "<group>"; };
+		A981F60C19ABB2DE0096C67A /* cpPivotJoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpPivotJoint.h; sourceTree = "<group>"; };
+		A981F60D19ABB2DE0096C67A /* cpPolyShape.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpPolyShape.h; sourceTree = "<group>"; };
+		A981F60E19ABB2DE0096C67A /* cpRatchetJoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpRatchetJoint.h; sourceTree = "<group>"; };
+		A981F60F19ABB2DE0096C67A /* cpRotaryLimitJoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpRotaryLimitJoint.h; sourceTree = "<group>"; };
+		A981F61019ABB2DE0096C67A /* cpShape.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpShape.h; sourceTree = "<group>"; };
+		A981F61119ABB2DE0096C67A /* cpSimpleMotor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpSimpleMotor.h; sourceTree = "<group>"; };
+		A981F61219ABB2DE0096C67A /* cpSlideJoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpSlideJoint.h; sourceTree = "<group>"; };
+		A981F61319ABB2DE0096C67A /* cpSpace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpSpace.h; sourceTree = "<group>"; };
+		A981F61419ABB2DE0096C67A /* cpSpatialIndex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpSpatialIndex.h; sourceTree = "<group>"; };
+		A981F61519ABB2DE0096C67A /* cpTransform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpTransform.h; sourceTree = "<group>"; };
+		A981F61619ABB2DE0096C67A /* cpVect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpVect.h; sourceTree = "<group>"; };
+		A981F61819ABB2DE0096C67A /* chipmunk.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = chipmunk.c; sourceTree = "<group>"; };
+		A981F61919ABB2DE0096C67A /* CMakeLists.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = "<group>"; };
+		A981F61A19ABB2DE0096C67A /* cpArbiter.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpArbiter.c; sourceTree = "<group>"; };
+		A981F61B19ABB2DE0096C67A /* cpArray.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpArray.c; sourceTree = "<group>"; };
+		A981F61C19ABB2DE0096C67A /* cpBBTree.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpBBTree.c; sourceTree = "<group>"; };
+		A981F61D19ABB2DE0096C67A /* cpBody.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpBody.c; sourceTree = "<group>"; };
+		A981F61E19ABB2DE0096C67A /* cpCollision.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpCollision.c; sourceTree = "<group>"; };
+		A981F61F19ABB2DE0096C67A /* cpConstraint.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpConstraint.c; sourceTree = "<group>"; };
+		A981F62019ABB2DE0096C67A /* cpDampedRotarySpring.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpDampedRotarySpring.c; sourceTree = "<group>"; };
+		A981F62119ABB2DE0096C67A /* cpDampedSpring.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpDampedSpring.c; sourceTree = "<group>"; };
+		A981F62219ABB2DE0096C67A /* cpGearJoint.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpGearJoint.c; sourceTree = "<group>"; };
+		A981F62319ABB2DE0096C67A /* cpGrooveJoint.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpGrooveJoint.c; sourceTree = "<group>"; };
+		A981F62419ABB2DE0096C67A /* cpHashSet.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpHashSet.c; sourceTree = "<group>"; };
+		A981F62519ABB2DE0096C67A /* cpPinJoint.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpPinJoint.c; sourceTree = "<group>"; };
+		A981F62619ABB2DE0096C67A /* cpPivotJoint.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpPivotJoint.c; sourceTree = "<group>"; };
+		A981F62719ABB2DE0096C67A /* cpPolyShape.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpPolyShape.c; sourceTree = "<group>"; };
+		A981F62819ABB2DE0096C67A /* cpRatchetJoint.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpRatchetJoint.c; sourceTree = "<group>"; };
+		A981F62919ABB2DE0096C67A /* cpRotaryLimitJoint.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpRotaryLimitJoint.c; sourceTree = "<group>"; };
+		A981F62A19ABB2DE0096C67A /* cpShape.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpShape.c; sourceTree = "<group>"; };
+		A981F62B19ABB2DE0096C67A /* cpSimpleMotor.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpSimpleMotor.c; sourceTree = "<group>"; };
+		A981F62C19ABB2DE0096C67A /* cpSlideJoint.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpSlideJoint.c; sourceTree = "<group>"; };
+		A981F62D19ABB2DE0096C67A /* cpSpace.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpSpace.c; sourceTree = "<group>"; };
+		A981F62E19ABB2DE0096C67A /* cpSpaceComponent.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpSpaceComponent.c; sourceTree = "<group>"; };
+		A981F62F19ABB2DE0096C67A /* cpSpaceDebug.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpSpaceDebug.c; sourceTree = "<group>"; };
+		A981F63019ABB2DE0096C67A /* cpSpaceHash.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpSpaceHash.c; sourceTree = "<group>"; };
+		A981F63119ABB2DE0096C67A /* cpSpaceQuery.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpSpaceQuery.c; sourceTree = "<group>"; };
+		A981F63219ABB2DE0096C67A /* cpSpaceStep.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpSpaceStep.c; sourceTree = "<group>"; };
+		A981F63319ABB2DE0096C67A /* cpSpatialIndex.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpSpatialIndex.c; sourceTree = "<group>"; };
+		A981F63419ABB2DE0096C67A /* cpSweep1D.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpSweep1D.c; sourceTree = "<group>"; };
+		A981F63519ABB2DE0096C67A /* prime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = prime.h; sourceTree = "<group>"; };
+		A981F63619ABB2DE0096C67A /* LICENSE_Chipmunk.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE_Chipmunk.txt; sourceTree = "<group>"; };
+		A981F63A19ABB2DE0096C67A /* ChipmunkBody.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChipmunkBody.h; sourceTree = "<group>"; };
+		A981F63B19ABB2DE0096C67A /* ChipmunkConstraint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChipmunkConstraint.h; sourceTree = "<group>"; };
+		A981F63C19ABB2DE0096C67A /* ChipmunkExtras.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChipmunkExtras.h; sourceTree = "<group>"; };
+		A981F63D19ABB2DE0096C67A /* ChipmunkMultiGrab.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChipmunkMultiGrab.h; sourceTree = "<group>"; };
+		A981F63E19ABB2DE0096C67A /* ChipmunkShape.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChipmunkShape.h; sourceTree = "<group>"; };
+		A981F63F19ABB2DE0096C67A /* ChipmunkSpace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChipmunkSpace.h; sourceTree = "<group>"; };
+		A981F64019ABB2DE0096C67A /* ObjectiveChipmunk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ObjectiveChipmunk.h; sourceTree = "<group>"; };
+		A981F64219ABB2DE0096C67A /* ChipmunkBody.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChipmunkBody.m; sourceTree = "<group>"; };
+		A981F64319ABB2DE0096C67A /* ChipmunkConstraint.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChipmunkConstraint.m; sourceTree = "<group>"; };
+		A981F64419ABB2DE0096C67A /* ChipmunkMultiGrab.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChipmunkMultiGrab.m; sourceTree = "<group>"; };
+		A981F64519ABB2DE0096C67A /* ChipmunkShape.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChipmunkShape.m; sourceTree = "<group>"; };
+		A981F64619ABB2DE0096C67A /* ChipmunkSpace.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChipmunkSpace.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -128,7 +128,7 @@
 		A968781E17A70491007FA5F0 = {
 			isa = PBXGroup;
 			children = (
-				A9A7FD1D19A6949100734484 /* cocos2d-chipmunk */,
+				A981F5FA19ABB2DE0096C67A /* cocos2d-chipmunk */,
 				A968782817A70491007FA5F0 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -141,142 +141,142 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		A9A7FD1D19A6949100734484 /* cocos2d-chipmunk */ = {
+		A981F5FA19ABB2DE0096C67A /* cocos2d-chipmunk */ = {
 			isa = PBXGroup;
 			children = (
-				A9A7FD1E19A6949100734484 /* chipmunk */,
-				A9A7FD5919A6949100734484 /* LICENSE_Chipmunk.txt */,
-				A9A7FD5A19A6949100734484 /* objectivec */,
+				A981F5FB19ABB2DE0096C67A /* chipmunk */,
+				A981F63619ABB2DE0096C67A /* LICENSE_Chipmunk.txt */,
+				A981F63719ABB2DE0096C67A /* objectivec */,
 			);
 			name = "cocos2d-chipmunk";
 			path = "../../cocos2d-chipmunk";
 			sourceTree = "<group>";
 		};
-		A9A7FD1E19A6949100734484 /* chipmunk */ = {
+		A981F5FB19ABB2DE0096C67A /* chipmunk */ = {
 			isa = PBXGroup;
 			children = (
-				A9A7FD1F19A6949100734484 /* include */,
-				A9A7FD3A19A6949100734484 /* src */,
+				A981F5FC19ABB2DE0096C67A /* include */,
+				A981F61719ABB2DE0096C67A /* src */,
 			);
 			path = chipmunk;
 			sourceTree = "<group>";
 		};
-		A9A7FD1F19A6949100734484 /* include */ = {
+		A981F5FC19ABB2DE0096C67A /* include */ = {
 			isa = PBXGroup;
 			children = (
-				A9A7FD2019A6949100734484 /* chipmunk */,
+				A981F5FD19ABB2DE0096C67A /* chipmunk */,
 			);
 			path = include;
 			sourceTree = "<group>";
 		};
-		A9A7FD2019A6949100734484 /* chipmunk */ = {
+		A981F5FD19ABB2DE0096C67A /* chipmunk */ = {
 			isa = PBXGroup;
 			children = (
-				A9A7FD2119A6949100734484 /* chipmunk.h */,
-				A9A7FD2219A6949100734484 /* chipmunk_ffi.h */,
-				A9A7FD2319A6949100734484 /* chipmunk_private.h */,
-				A9A7FD2419A6949100734484 /* chipmunk_types.h */,
-				A9A7FD2519A6949100734484 /* chipmunk_unsafe.h */,
-				A9A7FD2619A6949100734484 /* cpArbiter.h */,
-				A9A7FD2719A6949100734484 /* cpBB.h */,
-				A9A7FD2819A6949100734484 /* cpBody.h */,
-				A9A7FD2919A6949100734484 /* cpConstraint.h */,
-				A9A7FD2A19A6949100734484 /* cpDampedRotarySpring.h */,
-				A9A7FD2B19A6949100734484 /* cpDampedSpring.h */,
-				A9A7FD2C19A6949100734484 /* cpGearJoint.h */,
-				A9A7FD2D19A6949100734484 /* cpGrooveJoint.h */,
-				A9A7FD2E19A6949100734484 /* cpPinJoint.h */,
-				A9A7FD2F19A6949100734484 /* cpPivotJoint.h */,
-				A9A7FD3019A6949100734484 /* cpPolyShape.h */,
-				A9A7FD3119A6949100734484 /* cpRatchetJoint.h */,
-				A9A7FD3219A6949100734484 /* cpRotaryLimitJoint.h */,
-				A9A7FD3319A6949100734484 /* cpShape.h */,
-				A9A7FD3419A6949100734484 /* cpSimpleMotor.h */,
-				A9A7FD3519A6949100734484 /* cpSlideJoint.h */,
-				A9A7FD3619A6949100734484 /* cpSpace.h */,
-				A9A7FD3719A6949100734484 /* cpSpatialIndex.h */,
-				A9A7FD3819A6949100734484 /* cpTransform.h */,
-				A9A7FD3919A6949100734484 /* cpVect.h */,
+				A981F5FE19ABB2DE0096C67A /* chipmunk.h */,
+				A981F5FF19ABB2DE0096C67A /* chipmunk_ffi.h */,
+				A981F60019ABB2DE0096C67A /* chipmunk_private.h */,
+				A981F60119ABB2DE0096C67A /* chipmunk_types.h */,
+				A981F60219ABB2DE0096C67A /* chipmunk_unsafe.h */,
+				A981F60319ABB2DE0096C67A /* cpArbiter.h */,
+				A981F60419ABB2DE0096C67A /* cpBB.h */,
+				A981F60519ABB2DE0096C67A /* cpBody.h */,
+				A981F60619ABB2DE0096C67A /* cpConstraint.h */,
+				A981F60719ABB2DE0096C67A /* cpDampedRotarySpring.h */,
+				A981F60819ABB2DE0096C67A /* cpDampedSpring.h */,
+				A981F60919ABB2DE0096C67A /* cpGearJoint.h */,
+				A981F60A19ABB2DE0096C67A /* cpGrooveJoint.h */,
+				A981F60B19ABB2DE0096C67A /* cpPinJoint.h */,
+				A981F60C19ABB2DE0096C67A /* cpPivotJoint.h */,
+				A981F60D19ABB2DE0096C67A /* cpPolyShape.h */,
+				A981F60E19ABB2DE0096C67A /* cpRatchetJoint.h */,
+				A981F60F19ABB2DE0096C67A /* cpRotaryLimitJoint.h */,
+				A981F61019ABB2DE0096C67A /* cpShape.h */,
+				A981F61119ABB2DE0096C67A /* cpSimpleMotor.h */,
+				A981F61219ABB2DE0096C67A /* cpSlideJoint.h */,
+				A981F61319ABB2DE0096C67A /* cpSpace.h */,
+				A981F61419ABB2DE0096C67A /* cpSpatialIndex.h */,
+				A981F61519ABB2DE0096C67A /* cpTransform.h */,
+				A981F61619ABB2DE0096C67A /* cpVect.h */,
 			);
 			path = chipmunk;
 			sourceTree = "<group>";
 		};
-		A9A7FD3A19A6949100734484 /* src */ = {
+		A981F61719ABB2DE0096C67A /* src */ = {
 			isa = PBXGroup;
 			children = (
-				A9A7FD3B19A6949100734484 /* chipmunk.c */,
-				A9A7FD3C19A6949100734484 /* CMakeLists.txt */,
-				A9A7FD3D19A6949100734484 /* cpArbiter.c */,
-				A9A7FD3E19A6949100734484 /* cpArray.c */,
-				A9A7FD3F19A6949100734484 /* cpBBTree.c */,
-				A9A7FD4019A6949100734484 /* cpBody.c */,
-				A9A7FD4119A6949100734484 /* cpCollision.c */,
-				A9A7FD4219A6949100734484 /* cpConstraint.c */,
-				A9A7FD4319A6949100734484 /* cpDampedRotarySpring.c */,
-				A9A7FD4419A6949100734484 /* cpDampedSpring.c */,
-				A9A7FD4519A6949100734484 /* cpGearJoint.c */,
-				A9A7FD4619A6949100734484 /* cpGrooveJoint.c */,
-				A9A7FD4719A6949100734484 /* cpHashSet.c */,
-				A9A7FD4819A6949100734484 /* cpPinJoint.c */,
-				A9A7FD4919A6949100734484 /* cpPivotJoint.c */,
-				A9A7FD4A19A6949100734484 /* cpPolyShape.c */,
-				A9A7FD4B19A6949100734484 /* cpRatchetJoint.c */,
-				A9A7FD4C19A6949100734484 /* cpRotaryLimitJoint.c */,
-				A9A7FD4D19A6949100734484 /* cpShape.c */,
-				A9A7FD4E19A6949100734484 /* cpSimpleMotor.c */,
-				A9A7FD4F19A6949100734484 /* cpSlideJoint.c */,
-				A9A7FD5019A6949100734484 /* cpSpace.c */,
-				A9A7FD5119A6949100734484 /* cpSpaceComponent.c */,
-				A9A7FD5219A6949100734484 /* cpSpaceDebug.c */,
-				A9A7FD5319A6949100734484 /* cpSpaceHash.c */,
-				A9A7FD5419A6949100734484 /* cpSpaceQuery.c */,
-				A9A7FD5519A6949100734484 /* cpSpaceStep.c */,
-				A9A7FD5619A6949100734484 /* cpSpatialIndex.c */,
-				A9A7FD5719A6949100734484 /* cpSweep1D.c */,
-				A9A7FD5819A6949100734484 /* prime.h */,
+				A981F61819ABB2DE0096C67A /* chipmunk.c */,
+				A981F61919ABB2DE0096C67A /* CMakeLists.txt */,
+				A981F61A19ABB2DE0096C67A /* cpArbiter.c */,
+				A981F61B19ABB2DE0096C67A /* cpArray.c */,
+				A981F61C19ABB2DE0096C67A /* cpBBTree.c */,
+				A981F61D19ABB2DE0096C67A /* cpBody.c */,
+				A981F61E19ABB2DE0096C67A /* cpCollision.c */,
+				A981F61F19ABB2DE0096C67A /* cpConstraint.c */,
+				A981F62019ABB2DE0096C67A /* cpDampedRotarySpring.c */,
+				A981F62119ABB2DE0096C67A /* cpDampedSpring.c */,
+				A981F62219ABB2DE0096C67A /* cpGearJoint.c */,
+				A981F62319ABB2DE0096C67A /* cpGrooveJoint.c */,
+				A981F62419ABB2DE0096C67A /* cpHashSet.c */,
+				A981F62519ABB2DE0096C67A /* cpPinJoint.c */,
+				A981F62619ABB2DE0096C67A /* cpPivotJoint.c */,
+				A981F62719ABB2DE0096C67A /* cpPolyShape.c */,
+				A981F62819ABB2DE0096C67A /* cpRatchetJoint.c */,
+				A981F62919ABB2DE0096C67A /* cpRotaryLimitJoint.c */,
+				A981F62A19ABB2DE0096C67A /* cpShape.c */,
+				A981F62B19ABB2DE0096C67A /* cpSimpleMotor.c */,
+				A981F62C19ABB2DE0096C67A /* cpSlideJoint.c */,
+				A981F62D19ABB2DE0096C67A /* cpSpace.c */,
+				A981F62E19ABB2DE0096C67A /* cpSpaceComponent.c */,
+				A981F62F19ABB2DE0096C67A /* cpSpaceDebug.c */,
+				A981F63019ABB2DE0096C67A /* cpSpaceHash.c */,
+				A981F63119ABB2DE0096C67A /* cpSpaceQuery.c */,
+				A981F63219ABB2DE0096C67A /* cpSpaceStep.c */,
+				A981F63319ABB2DE0096C67A /* cpSpatialIndex.c */,
+				A981F63419ABB2DE0096C67A /* cpSweep1D.c */,
+				A981F63519ABB2DE0096C67A /* prime.h */,
 			);
 			path = src;
 			sourceTree = "<group>";
 		};
-		A9A7FD5A19A6949100734484 /* objectivec */ = {
+		A981F63719ABB2DE0096C67A /* objectivec */ = {
 			isa = PBXGroup;
 			children = (
-				A9A7FD5B19A6949100734484 /* include */,
-				A9A7FD6419A6949100734484 /* src */,
+				A981F63819ABB2DE0096C67A /* include */,
+				A981F64119ABB2DE0096C67A /* src */,
 			);
 			path = objectivec;
 			sourceTree = "<group>";
 		};
-		A9A7FD5B19A6949100734484 /* include */ = {
+		A981F63819ABB2DE0096C67A /* include */ = {
 			isa = PBXGroup;
 			children = (
-				A9A7FD5C19A6949100734484 /* ObjectiveChipmunk */,
+				A981F63919ABB2DE0096C67A /* ObjectiveChipmunk */,
 			);
 			path = include;
 			sourceTree = "<group>";
 		};
-		A9A7FD5C19A6949100734484 /* ObjectiveChipmunk */ = {
+		A981F63919ABB2DE0096C67A /* ObjectiveChipmunk */ = {
 			isa = PBXGroup;
 			children = (
-				A9A7FD5D19A6949100734484 /* ChipmunkBody.h */,
-				A9A7FD5E19A6949100734484 /* ChipmunkConstraint.h */,
-				A9A7FD5F19A6949100734484 /* ChipmunkExtras.h */,
-				A9A7FD6019A6949100734484 /* ChipmunkMultiGrab.h */,
-				A9A7FD6119A6949100734484 /* ChipmunkShape.h */,
-				A9A7FD6219A6949100734484 /* ChipmunkSpace.h */,
-				A9A7FD6319A6949100734484 /* ObjectiveChipmunk.h */,
+				A981F63A19ABB2DE0096C67A /* ChipmunkBody.h */,
+				A981F63B19ABB2DE0096C67A /* ChipmunkConstraint.h */,
+				A981F63C19ABB2DE0096C67A /* ChipmunkExtras.h */,
+				A981F63D19ABB2DE0096C67A /* ChipmunkMultiGrab.h */,
+				A981F63E19ABB2DE0096C67A /* ChipmunkShape.h */,
+				A981F63F19ABB2DE0096C67A /* ChipmunkSpace.h */,
+				A981F64019ABB2DE0096C67A /* ObjectiveChipmunk.h */,
 			);
 			path = ObjectiveChipmunk;
 			sourceTree = "<group>";
 		};
-		A9A7FD6419A6949100734484 /* src */ = {
+		A981F64119ABB2DE0096C67A /* src */ = {
 			isa = PBXGroup;
 			children = (
-				A9A7FD6519A6949100734484 /* ChipmunkBody.m */,
-				A9A7FD6619A6949100734484 /* ChipmunkConstraint.m */,
-				A9A7FD6719A6949100734484 /* ChipmunkMultiGrab.m */,
-				A9A7FD6819A6949100734484 /* ChipmunkShape.m */,
-				A9A7FD6919A6949100734484 /* ChipmunkSpace.m */,
+				A981F64219ABB2DE0096C67A /* ChipmunkBody.m */,
+				A981F64319ABB2DE0096C67A /* ChipmunkConstraint.m */,
+				A981F64419ABB2DE0096C67A /* ChipmunkMultiGrab.m */,
+				A981F64519ABB2DE0096C67A /* ChipmunkShape.m */,
+				A981F64619ABB2DE0096C67A /* ChipmunkSpace.m */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -331,39 +331,39 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A9A7FD8219A6949100734484 /* cpSpaceQuery.c in Sources */,
-				A9A7FD7B19A6949100734484 /* cpShape.c in Sources */,
-				A9A7FD7819A6949100734484 /* cpPolyShape.c in Sources */,
-				A9A7FD7C19A6949100734484 /* cpSimpleMotor.c in Sources */,
-				A9A7FD7619A6949100734484 /* cpPinJoint.c in Sources */,
-				A9A7FD6C19A6949100734484 /* cpArray.c in Sources */,
-				A9A7FD7919A6949100734484 /* cpRatchetJoint.c in Sources */,
-				A9A7FD7E19A6949100734484 /* cpSpace.c in Sources */,
-				A9A7FD7119A6949100734484 /* cpDampedRotarySpring.c in Sources */,
-				A9A7FD7219A6949100734484 /* cpDampedSpring.c in Sources */,
-				A9A7FD8119A6949100734484 /* cpSpaceHash.c in Sources */,
-				A9A7FD7F19A6949100734484 /* cpSpaceComponent.c in Sources */,
-				A9A7FD8519A6949100734484 /* cpSweep1D.c in Sources */,
-				A9A7FD7519A6949100734484 /* cpHashSet.c in Sources */,
-				A9A7FD8319A6949100734484 /* cpSpaceStep.c in Sources */,
-				A9A7FD6B19A6949100734484 /* cpArbiter.c in Sources */,
-				A9A7FD8019A6949100734484 /* cpSpaceDebug.c in Sources */,
-				A9A7FD7019A6949100734484 /* cpConstraint.c in Sources */,
-				A9A7FD6D19A6949100734484 /* cpBBTree.c in Sources */,
-				A9A7FD7A19A6949100734484 /* cpRotaryLimitJoint.c in Sources */,
-				A9A7FD8A19A6949100734484 /* ChipmunkSpace.m in Sources */,
-				A9A7FD7719A6949100734484 /* cpPivotJoint.c in Sources */,
-				A9A7FD6F19A6949100734484 /* cpCollision.c in Sources */,
-				A9A7FD8619A6949100734484 /* ChipmunkBody.m in Sources */,
-				A9A7FD6E19A6949100734484 /* cpBody.c in Sources */,
-				A9A7FD8819A6949100734484 /* ChipmunkMultiGrab.m in Sources */,
-				A9A7FD7319A6949100734484 /* cpGearJoint.c in Sources */,
-				A9A7FD8919A6949100734484 /* ChipmunkShape.m in Sources */,
-				A9A7FD7419A6949100734484 /* cpGrooveJoint.c in Sources */,
-				A9A7FD6A19A6949100734484 /* chipmunk.c in Sources */,
-				A9A7FD7D19A6949100734484 /* cpSlideJoint.c in Sources */,
-				A9A7FD8419A6949100734484 /* cpSpatialIndex.c in Sources */,
-				A9A7FD8719A6949100734484 /* ChipmunkConstraint.m in Sources */,
+				A981F65F19ABB2DE0096C67A /* cpSpaceQuery.c in Sources */,
+				A981F65819ABB2DE0096C67A /* cpShape.c in Sources */,
+				A981F65519ABB2DE0096C67A /* cpPolyShape.c in Sources */,
+				A981F65919ABB2DE0096C67A /* cpSimpleMotor.c in Sources */,
+				A981F65319ABB2DE0096C67A /* cpPinJoint.c in Sources */,
+				A981F64919ABB2DE0096C67A /* cpArray.c in Sources */,
+				A981F65619ABB2DE0096C67A /* cpRatchetJoint.c in Sources */,
+				A981F65B19ABB2DE0096C67A /* cpSpace.c in Sources */,
+				A981F64E19ABB2DE0096C67A /* cpDampedRotarySpring.c in Sources */,
+				A981F64F19ABB2DE0096C67A /* cpDampedSpring.c in Sources */,
+				A981F65E19ABB2DE0096C67A /* cpSpaceHash.c in Sources */,
+				A981F65C19ABB2DE0096C67A /* cpSpaceComponent.c in Sources */,
+				A981F66219ABB2DE0096C67A /* cpSweep1D.c in Sources */,
+				A981F65219ABB2DE0096C67A /* cpHashSet.c in Sources */,
+				A981F66019ABB2DE0096C67A /* cpSpaceStep.c in Sources */,
+				A981F64819ABB2DE0096C67A /* cpArbiter.c in Sources */,
+				A981F65D19ABB2DE0096C67A /* cpSpaceDebug.c in Sources */,
+				A981F64D19ABB2DE0096C67A /* cpConstraint.c in Sources */,
+				A981F64A19ABB2DE0096C67A /* cpBBTree.c in Sources */,
+				A981F65719ABB2DE0096C67A /* cpRotaryLimitJoint.c in Sources */,
+				A981F66719ABB2DE0096C67A /* ChipmunkSpace.m in Sources */,
+				A981F65419ABB2DE0096C67A /* cpPivotJoint.c in Sources */,
+				A981F64C19ABB2DE0096C67A /* cpCollision.c in Sources */,
+				A981F66319ABB2DE0096C67A /* ChipmunkBody.m in Sources */,
+				A981F64B19ABB2DE0096C67A /* cpBody.c in Sources */,
+				A981F66519ABB2DE0096C67A /* ChipmunkMultiGrab.m in Sources */,
+				A981F65019ABB2DE0096C67A /* cpGearJoint.c in Sources */,
+				A981F66619ABB2DE0096C67A /* ChipmunkShape.m in Sources */,
+				A981F65119ABB2DE0096C67A /* cpGrooveJoint.c in Sources */,
+				A981F64719ABB2DE0096C67A /* chipmunk.c in Sources */,
+				A981F65A19ABB2DE0096C67A /* cpSlideJoint.c in Sources */,
+				A981F66119ABB2DE0096C67A /* cpSpatialIndex.c in Sources */,
+				A981F66419ABB2DE0096C67A /* ChipmunkConstraint.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

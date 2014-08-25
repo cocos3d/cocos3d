@@ -2,6 +2,9 @@
 <Workspace
    version = "1.0">
    <FileRef
+      location = "group:Projects/CC3HelloWorld/CC3HelloWorld-iOS.xcodeproj">
+   </FileRef>
+   <FileRef
       location = "group:Projects/CC3DemoMashUp/CC3DemoMashUp-iOS.xcodeproj">
    </FileRef>
    <FileRef

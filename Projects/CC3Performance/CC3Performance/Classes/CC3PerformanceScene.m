@@ -50,7 +50,7 @@
 #define kMascotName				@"cocos2d_3dmodel_unsubdivided"
 
 // File names
-#define kLogoFileName			@"Default.png"
+#define kLogoFileName			@"Cocos3D.png"
 #define kHelloWorldFileName		@"hello-world.pod"
 #define kBeachBallFileName		@"BeachBall.pod"
 #define kGlobeTextureFile		@"Earth_1024.jpg"

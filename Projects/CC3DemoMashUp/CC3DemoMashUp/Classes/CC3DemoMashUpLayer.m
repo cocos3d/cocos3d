@@ -125,7 +125,7 @@
 	// If you want to see the size of the Joystick backdrop, comment out the line above and uncomment the
 	// following line, which include a simple backdrop image. The thumb and backdrop can be any CCNode.
 //	_directionJoystick = [Joystick joystickWithThumb: jsThumb
-//										 andBackdrop: [CCSprite spriteWithImageNamed: @"Icon-76.png"]];
+//										 andBackdrop: [CCSprite spriteWithImageNamed: @"BrushedSteel.png"]];
 	
 	CGPoint jsMiddle = _directionJoystick.anchorPointInPoints;
 	_directionJoystick.position = ccp(jsMiddle.x + kJoystickPadding, jsMiddle.y + kJoystickPadding);

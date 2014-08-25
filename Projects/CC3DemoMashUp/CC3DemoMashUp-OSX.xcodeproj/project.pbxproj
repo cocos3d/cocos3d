@@ -76,6 +76,7 @@
 		A9742E01170DD72B001FD5A2 /* Stamp.png in Resources */ = {isa = PBXBuildFile; fileRef = A9742DCB170DD72B001FD5A2 /* Stamp.png */; };
 		A9742E03170DD72B001FD5A2 /* SunlightButton48x48.png in Resources */ = {isa = PBXBuildFile; fileRef = A9742DCD170DD72B001FD5A2 /* SunlightButton48x48.png */; };
 		A9742E07170DD72B001FD5A2 /* ZoomButton48x48.png in Resources */ = {isa = PBXBuildFile; fileRef = A9742DD1170DD72B001FD5A2 /* ZoomButton48x48.png */; };
+		A981F43019ABAF980096C67A /* Images-OSX.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A981F42F19ABAF980096C67A /* Images-OSX.xcassets */; };
 		A987334718E9D50B0029EAF6 /* CC3DemoMashUpLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = A987333E18E9D50B0029EAF6 /* CC3DemoMashUpLayer.m */; };
 		A987334818E9D50B0029EAF6 /* CC3DemoMashUpScene.m in Sources */ = {isa = PBXBuildFile; fileRef = A987334018E9D50B0029EAF6 /* CC3DemoMashUpScene.m */; };
 		A987334918E9D50B0029EAF6 /* HUDLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = A987334218E9D50B0029EAF6 /* HUDLayer.m */; };
@@ -93,7 +94,6 @@
 		A9CCA3D918E3519000DDDBDC /* CCNodeExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = A9CCA3D518E3519000DDDBDC /* CCNodeExtensions.m */; };
 		A9CCA3DA18E3519000DDDBDC /* Joystick.m in Sources */ = {isa = PBXBuildFile; fileRef = A9CCA3D718E3519000DDDBDC /* Joystick.m */; };
 		A9DDA35F17C8EF2E00F36657 /* Skybox.pvr in Resources */ = {isa = PBXBuildFile; fileRef = A9DDA35E17C8EF2E00F36657 /* Skybox.pvr */; };
-		A9DDA36317C8F4DB00F36657 /* icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = A9DDA36217C8F4DB00F36657 /* icon.icns */; };
 		A9F78F4C189EA32E001AE65E /* OrangeRing.png in Resources */ = {isa = PBXBuildFile; fileRef = A9F78F4A189EA32E001AE65E /* OrangeRing.png */; };
 		A9F78F4D189EA32E001AE65E /* OrangeRing.ppng in Resources */ = {isa = PBXBuildFile; fileRef = A9F78F4B189EA32E001AE65E /* OrangeRing.ppng */; };
 		A9F7924418A18DE5001AE65E /* fire.ppng in Resources */ = {isa = PBXBuildFile; fileRef = A9F7924318A18DE5001AE65E /* fire.ppng */; };
@@ -274,6 +274,7 @@
 		A9742DCB170DD72B001FD5A2 /* Stamp.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Stamp.png; path = ../Common/Resources/Stamp.png; sourceTree = "<group>"; };
 		A9742DCD170DD72B001FD5A2 /* SunlightButton48x48.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = SunlightButton48x48.png; path = ../Common/Resources/SunlightButton48x48.png; sourceTree = "<group>"; };
 		A9742DD1170DD72B001FD5A2 /* ZoomButton48x48.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = ZoomButton48x48.png; path = ../Common/Resources/ZoomButton48x48.png; sourceTree = "<group>"; };
+		A981F42F19ABAF980096C67A /* Images-OSX.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = "Images-OSX.xcassets"; path = "../../../Common/Images-OSX.xcassets"; sourceTree = "<group>"; };
 		A987333D18E9D50B0029EAF6 /* CC3DemoMashUpLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3DemoMashUpLayer.h; sourceTree = "<group>"; };
 		A987333E18E9D50B0029EAF6 /* CC3DemoMashUpLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3DemoMashUpLayer.m; sourceTree = "<group>"; };
 		A987333F18E9D50B0029EAF6 /* CC3DemoMashUpScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3DemoMashUpScene.h; sourceTree = "<group>"; };
@@ -299,7 +300,6 @@
 		A9CCA3D618E3519000DDDBDC /* Joystick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Joystick.h; sourceTree = "<group>"; };
 		A9CCA3D718E3519000DDDBDC /* Joystick.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Joystick.m; sourceTree = "<group>"; };
 		A9DDA35E17C8EF2E00F36657 /* Skybox.pvr */ = {isa = PBXFileReference; lastKnownFileType = file; name = Skybox.pvr; path = ../Common/Resources/Skybox.pvr; sourceTree = "<group>"; };
-		A9DDA36217C8F4DB00F36657 /* icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = icon.icns; sourceTree = "<group>"; };
 		A9F78F4A189EA32E001AE65E /* OrangeRing.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = OrangeRing.png; path = ../Common/Resources/OrangeRing.png; sourceTree = "<group>"; };
 		A9F78F4B189EA32E001AE65E /* OrangeRing.ppng */ = {isa = PBXFileReference; lastKnownFileType = file; name = OrangeRing.ppng; path = ../Common/Resources/OrangeRing.ppng; sourceTree = "<group>"; };
 		A9F7924318A18DE5001AE65E /* fire.ppng */ = {isa = PBXFileReference; lastKnownFileType = file; name = fire.ppng; path = ../Common/Resources/fire.ppng; sourceTree = "<group>"; };
@@ -483,10 +483,10 @@
 			children = (
 				A9742D8B170DD6A8001FD5A2 /* CC3DemoMashUpAppDelegate.h */,
 				A9742D8C170DD6A8001FD5A2 /* CC3DemoMashUpAppDelegate.m */,
-				A9742D8D170DD6A8001FD5A2 /* InfoPlist.strings */,
 				A9742D8F170DD6A8001FD5A2 /* MainMenu.xib */,
+				A981F42F19ABAF980096C67A /* Images-OSX.xcassets */,
 				A9742D92170DD6A8001FD5A2 /* Info.plist */,
-				A9DDA36217C8F4DB00F36657 /* icon.icns */,
+				A9742D8D170DD6A8001FD5A2 /* InfoPlist.strings */,
 				A9742D93170DD6A8001FD5A2 /* main.m */,
 			);
 			name = "OSX Support";
@@ -804,6 +804,7 @@
 				A97398F317C2CA6F00C17D89 /* BeachBall.pod in Resources */,
 				A9FA7F5619531D5700A80484 /* CC3LibDefaultPrecision.fsh in Resources */,
 				A901CF8F187073C900A26A40 /* Reflection.png in Resources */,
+				A981F43019ABAF980096C67A /* Images-OSX.xcassets in Resources */,
 				A9FA7F7419531D5700A80484 /* CC3LibCameraPosition.vsh in Resources */,
 				A9742D96170DD6A8001FD5A2 /* InfoPlist.strings in Resources */,
 				A9742D97170DD6A8001FD5A2 /* MainMenu.xib in Resources */,
@@ -909,7 +910,6 @@
 				A9FA7F6019531D5700A80484 /* CC3LibTexturedPointSprite.fsh in Resources */,
 				A924D161171307500061DDA0 /* tex_base.bmp in Resources */,
 				A924D162171307500061DDA0 /* tex_base.pvr in Resources */,
-				A9DDA36317C8F4DB00F36657 /* icon.icns in Resources */,
 				A901CF89187073C900A26A40 /* BrushedSteel.png in Resources */,
 				A9FA7F6619531D5700A80484 /* CC3ClipSpaceSingleTexture.fsh in Resources */,
 				A901CF8C187073C900A26A40 /* EtchedEffects.pfx in Resources */,
@@ -1092,6 +1092,7 @@
 		A96E0FE9170DC8100044CA2A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = "CC3DemoMashUp/OSX Support/Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1101,6 +1102,7 @@
 		A96E0FEA170DC8100044CA2A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = "CC3DemoMashUp/OSX Support/Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";

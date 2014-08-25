@@ -34,6 +34,7 @@ XCODE_TEMPLATE_DIR="$HOME/Library/Developer/Xcode/Templates"
 CC2_DIR=cocos2d
 CC2_CHPMK_DIR=cocos2d-chipmunk
 CC2_SRC=
+REZ_SRC_DIR="Projects/Common/Resources"
 
 COLOREND=$(tput sgr0)
 GREEN=$(tput setaf 2)
@@ -185,6 +186,17 @@ copy_files(){
 	print_ok
 }
 
+# Copies files in directory $1 to $2, deleting and recreating the directory in the process.
+# Symbolic links are resolved and the underlying files copied.
+# Arg $3 is used to output user feedback about what is being copied.
+replace_dir_resolve_simlinks(){
+	echo -n "...copying $3..."
+	rm -rf "$2"
+	mkdir -p "$2"
+	cp -pRL "$1" "$2"
+	print_ok
+}
+
 check_dir(){
 	if [[ ! -d "$1" ]];  then
 		mkdir -p "$1"
@@ -208,7 +220,6 @@ copy_project_templates() {
 
 	CC3_TEMPLATE_DIR="$XCODE_TEMPLATE_DIR/Cocos3D"
 	TEMPLATE_SRC_DIR="Templates/Xcode"
-	REZ_SRC_DIR="Projects/Common/Resources"
 	SUPPORT_DIR="Support"
 	BASE_DIR="$SUPPORT_DIR/Base"
 	BUNDLE_DIR="$SUPPORT_DIR/Bundle"
@@ -224,13 +235,13 @@ copy_project_templates() {
 # Copy new Cocos3D support template files
 	copy_files "$TEMPLATE_SRC_DIR/$SUPPORT_DIR" "$CC3_TEMPLATE_DIR" "Cocos3D template support files"
 
-# Copy app templates for Cocos2D v3...even if Cocos2D v3 templates are not there!
-#	if [[ -d "$XCODE_TEMPLATE_DIR/cocos2d v3.x" ]]; then
+# Copy app templates for Cocos2D v3
+	if [[ -d "$XCODE_TEMPLATE_DIR/cocos2d v3.x" ]]; then
 		SRC_DIR="$TEMPLATE_SRC_DIR/cocos3d-app-proj-cocos2d-v3-ios.xctemplate"
 		copy_files "$SRC_DIR" "$CC3_TEMPLATE_DIR" "Cocos3D iOS App with Cocos2D-v3 template"
 		SRC_DIR="$TEMPLATE_SRC_DIR/cocos3d-app-proj-cocos2d-v3-osx.xctemplate"
 		copy_files "$SRC_DIR" "$CC3_TEMPLATE_DIR" "Cocos3D OSX App with Cocos2D-v3 template"
-#	fi
+	fi
 
 # Copy app templates for Cocos2D v2
 	if [[ -d "$XCODE_TEMPLATE_DIR/cocos2d v2.x" ]]; then
@@ -465,6 +476,33 @@ link_cocos2d_libs() {
 	echo Finished linking Cocos2D.
 }
 
+# Copies the library directories and resources to the hello, world template project
+copy_to_template() {
+	CC3_HW_DIR="Projects/CC3HelloWorld"
+	CC3_HW_REZ_DIR="$CC3_HW_DIR/CC3HelloWorld/Resources"
+	CC3_HW_NAME="Hello World' template project"
+
+	# Copy Cocos2D & Cocos3D library folders to project
+	replace_dir_resolve_simlinks "$CC2_DIR/" "$CC3_HW_DIR/cocos2d" "Cocos2D to the $CC3_HW_NAME"
+	replace_dir_resolve_simlinks "$CC2_CHPMK_DIR/" "$CC3_HW_DIR/cocos2d-chipmunk" "Cocos2D Chipmunk to the $CC3_HW_NAME"
+	replace_dir_resolve_simlinks "cocos3d/" "$CC3_HW_DIR/cocos3d" "Cocos3D to the $CC3_HW_NAME"
+
+	# Copy default shaders, resources and images to project
+	replace_dir_resolve_simlinks "cocos3d-glsl/" "$CC3_HW_DIR/CC3HelloWorld/cocos3d-glsl" "Cocos3D default shaders to the $CC3_HW_NAME"
+	replace_dir_resolve_simlinks "Projects/Common/Images-iOS.xcassets/" "$CC3_HW_DIR/CC3HelloWorld/iOS Support/Images-iOS.xcassets" "iOS app icons to the $CC3_HW_NAME"
+	replace_dir_resolve_simlinks "Projects/Common/Images-OSX.xcassets/" "$CC3_HW_DIR/CC3HelloWorld/OSX Support/Images-OSX.xcassets" "OSX app icons to the $CC3_HW_NAME"
+
+	echo -n "...copying resources to the $CC3_HW_NAME..."
+	check_dir "$CC3_HW_REZ_DIR"
+	copy_file "hello-world.pod" "Models/Hello World" "$CC3_HW_REZ_DIR"
+	copy_file "BrushedSteel.png" "$REZ_SRC_DIR/Masks" "$CC3_HW_REZ_DIR"
+	copy_file "fps_images.png" "$REZ_SRC_DIR" "$CC3_HW_REZ_DIR"
+	copy_file "fps_images_1.png" "$REZ_SRC_DIR" "$CC3_HW_REZ_DIR"
+	copy_file "fps_images-hd.png" "$REZ_SRC_DIR" "$CC3_HW_REZ_DIR"
+	copy_file "fps_images-ipadhd.png" "$REZ_SRC_DIR" "$CC3_HW_REZ_DIR"
+	print_ok
+}
+
 
 
 # ----------------------------MAIN ENTRY POINT ----------------------------------
@@ -494,6 +532,8 @@ get_cc2_location
 copy_project_templates
 
 link_cocos2d_libs
+
+copy_to_template
 
 echo
 printf "${GREEN}✔${COLOREND} ${BOLD}Done!${COLOREND}\n"

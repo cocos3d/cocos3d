@@ -24,6 +24,15 @@ project.xcworkspace/
 # cocos2d - use trailing star for symlinks
 cocos2d*/*
 
+# hello world copied files
+CC3HelloWorld/cocos2d/
+CC3HelloWorld/cocos2d-chipmunk/
+CC3HelloWorld/cocos3d/
+CC3HelloWorld/cocos3d-glsl/
+CC3HelloWorld/Resources/
+CC3HelloWorld/iOS Support/Images-iOS.xcassets/
+CC3HelloWorld/OSX Support/Images-OSX.xcassets/
+
 # Apportable
 .scons*
 **/*.approj/assets/
