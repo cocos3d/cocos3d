@@ -479,18 +479,19 @@ link_cocos2d_libs() {
 # Copies the library directories and resources to the hello, world template project
 copy_to_template() {
 	CC3_HW_DIR="Projects/CC3HelloWorld"
-	CC3_HW_REZ_DIR="$CC3_HW_DIR/CC3HelloWorld/Resources"
-	CC3_HW_NAME="Hello World' template project"
+	CC3_HW_REZ_DIR="$CC3_HW_DIR/ProjectFiles/Resources"
+	CC3_HW_NAME="Hello World template project"
 
 	# Copy Cocos2D & Cocos3D library folders to project
 	replace_dir_resolve_simlinks "$CC2_DIR/" "$CC3_HW_DIR/cocos2d" "Cocos2D to the $CC3_HW_NAME"
 	replace_dir_resolve_simlinks "$CC2_CHPMK_DIR/" "$CC3_HW_DIR/cocos2d-chipmunk" "Cocos2D Chipmunk to the $CC3_HW_NAME"
 	replace_dir_resolve_simlinks "cocos3d/" "$CC3_HW_DIR/cocos3d" "Cocos3D to the $CC3_HW_NAME"
+	copy_file "LICENSE_cocos3d.txt" "." "$CC3_HW_DIR"
 
 	# Copy default shaders, resources and images to project
-	replace_dir_resolve_simlinks "cocos3d-glsl/" "$CC3_HW_DIR/CC3HelloWorld/cocos3d-glsl" "Cocos3D default shaders to the $CC3_HW_NAME"
-	replace_dir_resolve_simlinks "Projects/Common/Images-iOS.xcassets/" "$CC3_HW_DIR/CC3HelloWorld/iOS Support/Images-iOS.xcassets" "iOS app icons to the $CC3_HW_NAME"
-	replace_dir_resolve_simlinks "Projects/Common/Images-OSX.xcassets/" "$CC3_HW_DIR/CC3HelloWorld/OSX Support/Images-OSX.xcassets" "OSX app icons to the $CC3_HW_NAME"
+	replace_dir_resolve_simlinks "cocos3d-GLSL/" "$CC3_HW_DIR/ProjectFiles/cocos3d-GLSL" "Cocos3D default shaders to the $CC3_HW_NAME"
+	replace_dir_resolve_simlinks "Projects/Common/Images-iOS.xcassets/" "$CC3_HW_DIR/ProjectFiles/iOS Support/Images-iOS.xcassets" "iOS app icons to the $CC3_HW_NAME"
+	replace_dir_resolve_simlinks "Projects/Common/Images-OSX.xcassets/" "$CC3_HW_DIR/ProjectFiles/OSX Support/Images-OSX.xcassets" "OSX app icons to the $CC3_HW_NAME"
 
 	echo -n "...copying resources to the $CC3_HW_NAME..."
 	check_dir "$CC3_HW_REZ_DIR"
@@ -503,6 +504,15 @@ copy_to_template() {
 	print_ok
 }
 
+# Copies the library directories to the static library template project
+copy_to_statlib() {
+	CC3_SL_DIR="Projects/CC3StatLib"
+	CC3_SL_NAME="Cocos3D static library template project"
+
+	replace_dir_resolve_simlinks "cocos3d/" "$CC3_SL_DIR/cocos3d" "Cocos3D to the $CC3_SL_NAME"
+	replace_dir_resolve_simlinks "cocos3d-GLSL/" "$CC3_SL_DIR/cocos3d-GLSL" "Cocos3D default shaders to the $CC3_SL_NAME"
+	copy_file "LICENSE_cocos3d.txt" "." "$CC3_SL_DIR"
+}
 
 
 # ----------------------------MAIN ENTRY POINT ----------------------------------
@@ -534,6 +544,8 @@ copy_project_templates
 link_cocos2d_libs
 
 copy_to_template
+
+copy_to_statlib
 
 echo
 printf "${GREEN}✔${COLOREND} ${BOLD}Done!${COLOREND}\n"

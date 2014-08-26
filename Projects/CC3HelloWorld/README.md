@@ -7,50 +7,42 @@ Cocos3D 2.0.1
 
 Copyright (c) 2010-2014 [The Brenwill Workshop Ltd.](http://www.brenwill.com) All rights reserved.
 
-*This document is written in [Markdown](http://en.wikipedia.org/wiki/Markdown) format. For best results, use a Markdown reader.*
+*This document is written in [Markdown](http://en.wikipedia.org/wiki/Markdown) format. 
+For best results, use a Markdown reader.*
 
 
 Getting Started
 ---------------
 
-This starter application presents a 3D take on the ubiquitous ***hello, world*** application,
-and can be compiled to run on any iOS devices.
+You can use this Xcode project as a starting point for developing your own app, by simply 
+copying the `Projects/CC3HelloWorld` folder from the  Cocos3D distribution folder to the 
+location where you want to develop your application. Once copied, you can rename the Xcode
+project to the name of your own app.
 
-This project is complete, but Xcode does not automatically create the dependencies 
-between the targets within this project. You can do this as follows:
+This starter application presents a 3D take on the ubiquitous ***hello, world*** application. 
+In addition to demonstrating how to load and display a 3D model, this application animates 
+the model, and includes simple user interaction by having the 3D object visibly respond to
+finger touches.
 
-1. Once this template project opens, select your `CC3HelloWorld` project in the 
-   Xcode *Project Navigator* panel.
+The `CC3HelloWorldScene.m` file is where all the interesting action happens. To add your 
+own 3D content, or to change the activty and interactivity of the 3D content, edit the 
+methods in that file.
 
-2. Select the `CC3HelloWorld` target.
+You can also edit the `application:didFinishLaunchingWithOptions:` method in the `AppDelegate.m` 
+file to tweak the basic setup of your Cocos3D application. This method is where the Cocos3D 
+framework is hooked into the Cocos2D framework, and Apple's OpenGL ES framework.
 
-3. Select the *Build Phases* tab of the `CC3HelloWorld` target.
-
-4. Open the *Target Dependencies* list and add the `cocos3d`, `cocos2d`, and `cocos2d-chipmunk` 
-   (if it exists) targets to the list. The `cocos2d-chipmunk` target will only exist if you
-   are using `Cocos2D 3.x`.
-
-The content of the scene is constructed in the `initializeScene` method in the
-`CC3HelloWorldScene.m` file. To add your own 3D content, edit that method.
-
-The `CC3HelloWorldScene.m` file is also where you add interactive behaviour,
-typically in the `updateBeforeTransform:` method.
-
-You can also edit the `application:didFinishLaunchingWithOptions:` method in the
-`AppDelegate.m` file to tweak the basic setup of your
-Cocos3D application. This method is where the Cocos3D framework is hooked into the
-Cocos2D framework, and Apple's OpenGL ES framework.
-
-NOTE: The `hello-world.pod` 3D model data file used for the ***hello, world*** message model
-is fairly large, because converting a font to a mesh results in a LOT of triangles.
-When adapting this template project for your own application, don't forget to remove the
-'hello-world.pod' from the Resources folder of your project!
+NOTE: The `hello-world.pod` 3D model data file used for the ***hello, world*** message 
+model is fairly large, because converting a font to a mesh results in a lot of triangles.
+When adapting this project for your own application, don't forget to remove the
+`hello-world.pod` file from the `Resources` folder of your project!
 
 
 Learning Cocos3D
 ----------------
 
-Wondering how to get started? View Harry Dart-O’Flynn’s wonderful [Starting Cocos3D](http://www.youtube.com/playlist?list=PLU4bmVOOYXK-fV0Wt-ES5n3k8qTTyqgYu) collection of video tutorials!
+Wondering how to get started? View Harry Dart-O’Flynn’s wonderful [Starting Cocos3D](http://www.youtube.com/playlist?list=PLU4bmVOOYXK-fV0Wt-ES5n3k8qTTyqgYu) 
+collection of video tutorials!
 
 To learn more about Cocos3D, please refer to the [Cocos3D Programming Guide](http://brenwill.com/2011/cocos3d-programming-guide/)
 and the latest [API documentation](http://brenwill.com/docs/cocos3d/2.0.1/api/).
@@ -64,19 +56,83 @@ For a complete demonstration of almost all Cocos3D capabilities, see the fully-d
 and how to work within the framework.
 
 
-Cocos2D & OpenGL ES Version Compatibility
------------------------------------------
 
-Cocos3D under iOS and Android is compatible with `Cocos2D` `3.0` and `Cocos2D` `2.1`, for 
-using programmable-pipeline OpenGL ES 2.0, and is compatible with `Cocos2D` `1.1`, for using
-fixed-pipeline OpenGL ES 1.1.
+Cocos2D Version Compatibility
+-----------------------------
 
-Cocos3D under OSX is compatible with `Cocos2D` `3.0` and `Cocos2D` `2.1`, for using 
-programmable-pipeline OpenGL (OSX). Cocos3D is not compatible with `Cocos2D` `1.1` under OSX.
+Cocos3D under iOS and Android is compatible with `Cocos2D` `3.x` and `Cocos2D` `2.1`, for 
+using programmable-pipeline OpenGL ES 2.0, and is compatible with `Cocos2D` `1.1`, for 
+using fixed-pipeline OpenGL ES 1.1.
 
-Choosing the appropriate Cocos3D template will automatically link to the corresponding version
-of the `Cocos2D` library, if it exists in your template environment. You must ensure that you 
-have downloaded the appropriate version of `Cocos2D`, and have installed its templates.
+Cocos3D under OSX is compatible with `Cocos2D` `3.x` and `Cocos2D` `2.1`, for using
+programmable-pipeline OpenGL. Cocos3D is not compatible with `Cocos2D` `1.1` under OSX.
+
+At the time of this release, the current version of Cocos2D is `3.2`, and by default, this 
+starter app is pre-configured to use that version. To build and run this app with a different
+version of Cocos2D, follow the steps described here:
+
+1. Run the `install-cocos3d.sh` script again and identify the new version of `Cocos2D` to be linked.
+   Keep in mind that you must link `Cocos2D` `3.x` or `Cocos2D 2.1` if you want to use OpenGL ES 2.0 
+   (iOS & Android) or OpenGL (OSX) with a programmable rendering pipeline, and you must link 
+   `Cocos2D 1.1` if you want to use OpenGL ES 1.1 (iOS & Android) with a fixed rendering pipeline.
+
+2. Add the updated Cocos2D files to this project:
+
+	1. Replace the `cocos2d` folder in this project with the updated `Projects/CC3HelloWorld/cocos2d` 
+	   folder from the Cocos3D distribution.
+
+	2. In the Xcode *Project Navigator* panel, delete the reference to the *cocos2d* group. 
+
+	3. Drag the updated `cocos2d` folder in this project into the Xcode *Project Navigator* panel. 
+	   When prompted for the target to add the source code to, select the `cocos2d` target.
+
+	4. In the Xcode *Project Navigator* panel, delete the reference to the *cocos2d-chipmunk* group.
+
+	5. Replace the `cocos2d-chipmunk` folder in this project with the updated 
+	   `Projects/CC3HelloWorld/cocos2d-chipmunk` folder from the Cocos3D distribution.
+
+	6. Drag the updated `cocos2d-chipmunk` folder in this project into the Xcode *Project Navigator* panel. 
+	   When prompted for the target to add the source code to, select the `cocos2d-chipmunk` target.
+
+6. If you are using Cocos2D 3.2 or later, configure the `CCNoARC.m` file to use Manual Refernce Counting:
+
+	1. Select the *Build Phases* tab of the `cocos2d` target.
+
+	2. Open the *Compile Sources* list and locate the entry for the `CCNoARC.m` file.
+
+	3. On the `CCNoARC.m` entry, double-click the *Compiler Flags* column and enter the `-fno-objc-arc` 
+	   compiler flag. As the name implies, the  `CCNoARC.m` file uses Manual Refernce Counting (MRC)
+	   instead of Automatic Reference Counting (ARC), to improve performance.
+
+7. `Cocos2D` `3.x` uses Automatic Reference Counting (ARC). `Cocos2D` `2.1` and `Cocos2D` `1.1`
+   do not. You must set the appropriate compiler build setting to ensure the compiler will use
+   the correct technique.
+	1. Select the `cocos2d` target.
+	2. Select the *Build Settings* tab.
+	3. Locate the **Objective-C Automatic Reference Counting** (aka `CLANG_ENABLE_OBJC_ARC`)
+	   setting for the `cocos2d` target. If you are now linking to `Cocos2D` `3.x`, set this
+	   property to `YES`. If you are now linking to `Cocos2D` `2.1` or `Cocos2D` `1.1`, set 
+	   this property to NO. Make sure you change only the setting for the `cocos2d` target 
+	   within your project. Do not change the setting for the `cocos2d-library-iOS` or 
+	   `cocos2d-library-OSX` project itself.
+	4. The `cocos2d-chipmunk` part of the `Cocos2D` `3.x` library does *not* use ARC. Ensure
+	   the **Objective-C Automatic Reference Counting** (aka `CLANG_ENABLE_OBJC_ARC`) setting
+	   of the `cocos2d-chipmunk` target is always set to NO.
+8. `Cocos2D` `3.x` supports compiling to the ARM64 architecture. `Cocos2D` `2.1` and
+   `Cocos2D` `1.1` do *not* support compiling to the ARM64 architecture. Because of this,
+   by default, the **Valid Architectures** (aka `VALID_ARCHS`) build setting for all demo 
+   Xcode Projects in the Cocos3D distribution is set to `$(ARCHS_STANDARD_32_BIT)` (which 
+   resolves to **armv7 armv7s**), so that the demo projects will compile with all versions
+   of `Cocos2D`. If you are now linking to `Cocos2D` `3.x`, you can set this property to
+   `$(ARCHS_STANDARD)` (or simply remove this setting from the Project), in all demo Projects,
+   to allow compilation to include the ARM64 architecture.
+9. As a development optimization, if you are now linking to `Cocos2D` `3.x`, you can set the 
+   value of the **Build Active Architecture Only** (aka `ONLY_ACTIVE_ARCH`) build setting in 
+   the *Debug* configuration in all demo projects to `YES`. You should not do this if you are
+   linking to `Cocos2D` `2.1` or `Cocos2D` `1.1`, as this will prohibit you from building
+   the demo apps on devices that use the ARM64 processor.
+10. If you have already built the demo app using the old version of `Cocos2D`, delete the 
+   contents of your `~/Library/Developer/Xcode/DerivedData` folder before attempting to compile again.
 
 
 Compiling for Android
