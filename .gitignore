@@ -25,17 +25,17 @@ project.xcworkspace/
 cocos2d*/*
 
 # hello world project copied files
-CC3HelloWorld/cocos2d*/
-CC3HelloWorld/cocos3d/
-CC3HelloWorld/LICENSE_cocos3d.txt
-CC3HelloWorld/ProjectFiles/cocos3d-glsl/
-CC3HelloWorld/ProjectFiles/Resources/
-CC3HelloWorld/ProjectFiles/iOS Support/Images-iOS.xcassets/
-CC3HelloWorld/ProjectFiles/OSX Support/Images-OSX.xcassets/
+**/CC3HelloWorld/cocos2d*/
+**/CC3HelloWorld/cocos3d/
+**/CC3HelloWorld/LICENSE_cocos3d.txt
+**/CC3HelloWorld/ProjectFiles/cocos3d-glsl/
+**/CC3HelloWorld/ProjectFiles/Resources/
+**/CC3HelloWorld/ProjectFiles/iOS Support/Images-iOS.xcassets/
+**/CC3HelloWorld/ProjectFiles/OSX Support/Images-OSX.xcassets/
 
 # stat lib project copied files
-CC3StatLib/cocos3d*/
-CC3StatLib/LICENSE_cocos3d.txt
+**/CC3StatLib/cocos3d*/
+**/CC3StatLib/LICENSE_cocos3d.txt
 
 # Apportable
 .scons*

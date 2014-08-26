@@ -13,11 +13,17 @@ http://www.brenwill.com
 Cocos3D 2.0.1 - 2014/08/31
 -------------------------------------
 
+- Add support for Cocos2D 3.2.
+	- Add CC3HelloWorld starter project as replacement for Xcode templates which are unsupported from Cocos2D 3.2.
+	- Add CC3StatLib static library project as replacement for Xcode templates which are unsupported from Cocos2D 3.2.
+- Add user interaction to "hello, world" starter app.
+- CC3PointParticleEmitter removes itself as camera listener during dealloc.
+- Removed short delay built into AppDelegate applicationDidBecomeActive:.
 - Remove ! from README!.md filename for GitHub compatibility
 
 
 
-Cocos3D 2.0.1 - 2014/04/30
+Cocos3D 2.0.0 - 2014/07/31
 -------------------------------------
 
 - Added support for OpenGL ES 2.0, Cocos2D 2.1, and Cocos2D 3.0.

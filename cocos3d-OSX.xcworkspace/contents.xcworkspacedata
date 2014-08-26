@@ -2,6 +2,15 @@
 <Workspace
    version = "1.0">
    <FileRef
+      location = "group:README.md">
+   </FileRef>
+   <FileRef
+      location = "group:LICENSE_cocos3d.txt">
+   </FileRef>
+   <FileRef
+      location = "group:CHANGELOG">
+   </FileRef>
+   <FileRef
       location = "group:Projects/CC3HelloWorld/CC3HelloWorld-OSX.xcodeproj">
    </FileRef>
    <FileRef
@@ -15,14 +24,5 @@
    </FileRef>
    <FileRef
       location = "group:Projects/cocos2d-library/cocos2d-chipmunk-library-OSX.xcodeproj">
-   </FileRef>
-   <FileRef
-      location = "group:README.md">
-   </FileRef>
-   <FileRef
-      location = "group:CHANGELOG">
-   </FileRef>
-   <FileRef
-      location = "group:LICENSE_cocos3d.txt">
    </FileRef>
 </Workspace>

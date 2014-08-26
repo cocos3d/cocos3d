@@ -2,6 +2,15 @@
 <Workspace
    version = "1.0">
    <FileRef
+      location = "group:README.md">
+   </FileRef>
+   <FileRef
+      location = "group:LICENSE_cocos3d.txt">
+   </FileRef>
+   <FileRef
+      location = "group:CHANGELOG">
+   </FileRef>
+   <FileRef
       location = "group:Projects/CC3HelloWorld/CC3HelloWorld-iOS.xcodeproj">
    </FileRef>
    <FileRef
@@ -25,56 +34,4 @@
    <FileRef
       location = "group:Projects/cocos2d-library/cocos2d-chipmunk-library-iOS.xcodeproj">
    </FileRef>
-   <FileRef
-      location = "group:README.md">
-   </FileRef>
-   <FileRef
-      location = "group:CHANGELOG">
-   </FileRef>
-   <FileRef
-      location = "group:LICENSE_cocos3d.txt">
-   </FileRef>
-   <Group
-      location = "group:../WorkspaceDocs"
-      name = "WorkspaceDocs">
-      <FileRef
-         location = "group:Apple GL extensions.txt">
-      </FileRef>
-      <FileRef
-         location = "group:Apportable porting restrictions.txt">
-      </FileRef>
-      <FileRef
-         location = "group:Cal3D File Formats - orig.txt">
-      </FileRef>
-      <FileRef
-         location = "group:Cocos2D v3 Integration.txt">
-      </FileRef>
-      <FileRef
-         location = "group:cocos3d Enhancements.txt">
-      </FileRef>
-      <FileRef
-         location = "group:Convert to MRC.txt">
-      </FileRef>
-      <FileRef
-         location = "group:Git Commit Message.txt">
-      </FileRef>
-      <FileRef
-         location = "group:MyPlayground.playground">
-      </FileRef>
-      <FileRef
-         location = "group:SceneKit Assessment.txt">
-      </FileRef>
-      <FileRef
-         location = "group:ScratchPad.txt">
-      </FileRef>
-      <FileRef
-         location = "group:ScratchPad2.txt">
-      </FileRef>
-      <FileRef
-         location = "group:WWDC14 Notes.txt">
-      </FileRef>
-      <FileRef
-         location = "group:Xcode Standard File Types mods.txt">
-      </FileRef>
-   </Group>
 </Workspace>
