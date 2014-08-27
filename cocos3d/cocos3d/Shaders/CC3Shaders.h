@@ -681,6 +681,10 @@
  * fragment shaders are provided. If you create this instance without shaders and add them
  * later, you can invoke this method once the vertexShader and fragmentShader properties
  * have been set, and the link method has been invoked.
+ *
+ * Prewarming is always performed on shader programs loaded on the background thread, but is
+ * only performed on shader programs loaded on the foreground thread during the preloading phase.
+ * This is to avoid prewarming activity during lazy loading of shader programs during rendering.
  */
 -(void) prewarm;
 

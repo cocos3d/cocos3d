@@ -661,9 +661,10 @@ static BOOL _defaultShouldAllowDefaultVariableValues = NO;
 -(void) addAttribute: (CC3GLSLAttribute*) var { [_attributes addObject: var]; }
 
 -(void) prewarm {
-	MarkRezActivityStart();
-	[CC3OpenGL.sharedGL.shaderProgramPrewarmer prewarmShaderProgram: self];
-	LogRez(@"%@ pre-warmed in %.3f ms", self, GetRezActivityDuration() * 1000);
+	CC3OpenGL* gl = CC3OpenGL.sharedGL;
+	if ( !gl.isRenderingContext || self.class.isPreloading) {
+		[gl.shaderProgramPrewarmer prewarmShaderProgram: self];
+	}
 }
 
 
@@ -1535,6 +1536,8 @@ static CC3Cache* _shaderSourceCodeCache = nil;
 
 -(void) prewarmShaderProgram: (CC3ShaderProgram*) program {
 	LogRez(@"Prewarming %@", program);
+	MarkRezActivityStart();
+
 	CC3MeshNode* pwNode = self.prewarmingMeshNode;
 	id<CC3RenderSurface> pwSurface = self.prewarmingSurface;
 	CC3NodeDrawingVisitor* pwVisitor = self.drawingVisitor;
@@ -1550,6 +1553,8 @@ static CC3Cache* _shaderSourceCodeCache = nil;
 	pwNode.shaderProgram = nil;	// Release the program immediately, since it is only used once.
 	[program resetGLState];		// Reset GL state. Needed if pre-warming in background context...
 								// ...since state is different between contexts.
+
+	LogRez(@"%@ pre-warmed in %.3f ms", program, GetRezActivityDuration() * 1000);
 }
 
 

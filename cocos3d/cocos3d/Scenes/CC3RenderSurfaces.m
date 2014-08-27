@@ -1239,7 +1239,7 @@
 		
 		// Don't need stencil for picking, but otherwise match the rendering depth format
 		if (viewDepthFormat) {
-			if ( CC3DepthFormatIncludesStencil(viewDepthFormat) ) viewDepthFormat = GL_DEPTH_COMPONENT16;
+			if ( CC3DepthFormatIncludesStencil(viewDepthFormat) ) viewDepthFormat = GL_DEPTH_COMPONENT24;
 			pickSurf.depthAttachment = [CC3GLRenderbuffer renderbufferWithPixelFormat: viewDepthFormat];
 		}
 		

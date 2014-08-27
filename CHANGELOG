@@ -19,6 +19,9 @@ Cocos3D 2.0.1 - 2014/08/31
 - Add user interaction to "hello, world" starter app.
 - CC3PointParticleEmitter removes itself as camera listener during dealloc.
 - Removed short delay built into AppDelegate applicationDidBecomeActive:.
+- Only prewarm shaders on rendering thread during preloading.
+	- Fixes issue where first node selection from touch was ignored.
+- Change picking surface depth to GL_DEPTH_COMPONENT24 when using stencil.
 - Remove ! from README!.md filename for GitHub compatibility
 
 
