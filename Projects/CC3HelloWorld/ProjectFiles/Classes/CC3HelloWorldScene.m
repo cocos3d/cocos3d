@@ -44,9 +44,9 @@
  */
 -(void) initializeScene {
 
-	// Optionally add a static solid-color, or textured, backdrop, by uncommenting one of these lines.
+	// Optionally add a static textured, or solid-color, backdrop, by uncommenting one of these lines.
+	self.backdrop = [CC3Backdrop nodeWithTexture: [CC3Texture textureFromFile: @"BrushedSteel.png"]];
 //	self.backdrop = [CC3Backdrop nodeWithColor: ccc4f(0.4, 0.5, 0.9, 1.0)];
-//	self.backdrop = [CC3Backdrop nodeWithTexture: [CC3Texture textureFromFile: @"BrushedSteel.png"]];
 
 	// Create the camera, place it back a bit, and add it to the scene
 	CC3Camera* cam = [CC3Camera nodeWithName: @"Camera"];

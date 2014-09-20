@@ -138,7 +138,7 @@ Installation
 	library are not accurate, try again using the full absolute path. An example of using
 	a relative path is:
 
-		./install-cocos3d.sh -2 "../cocos2d-swift-3.2"
+		./install-cocos3d.sh -2 "../cocos2d-swift-3.2.1"
 
 	When using Cocos2D 3.1 or earlier, you also have the option of setting ***path-to-cocos2d***
 	to one of (`v3`, `v2`, or `v1`), which will link the Cocos3D demo apps to the Cocos2D Xcode
@@ -216,7 +216,7 @@ For convenience, to access all of the demos together, open either the `cocos3d-i
 or `cocos3d-OSX.xcworkspace` Xcode workspace. You can also open each demo project individually
 in the Projects folder.
 
-At the time of this release, the current version of Cocos2D is `3.2`, and by default, the demo
+At the time of this release, the current version of Cocos2D is `3.2.1`, and by default, the demo
 apps within the Cocos3D distribution are pre-configured to use that version. To build and run
 the demo apps with a different version of Cocos2D, follow the steps described below in the 
 section titled [Cocos2D Version Compatibility][].
@@ -428,7 +428,7 @@ to your existing 2D application or game.
 
 	3. Select the *Build Settings* tab
 		1. In the **Header Search Paths** (aka `HEADER_SEARCH_PATHS`) entry, add an entry to
-		   `"$(SRCROOT)/$(PROJECT_NAME)/Libraries/CC3StatLib/cocos3d"` (including the quote marks),
+		   `"$(SRCROOT)/$(PROJECT_NAME)/Libraries/CC3StatLib/cocos3d"` (including the double-quote marks),
 		   and mark it as `recursive`.
 		2. In the **Other Linker Flags** (aka `OTHER_LDFLAGS`) entry, add an entry for `-lstdc++`.
 
@@ -501,7 +501,7 @@ instructions to add Cocos3D to it:
 
 	3. Select the *Build Settings* tab
 		1. In the **Header Search Paths** (aka `HEADER_SEARCH_PATHS`) entry, add an entry to
-		   `"Source/libs/CC3StatLib/cocos3d"` (including the quote marks), and mark it as `recursive`.
+		   `"Source/libs/CC3StatLib/cocos3d"` (including the double-quote marks), and mark it as `recursive`.
 		2. In the **Other Linker Flags** (aka `OTHER_LD_FLAGS`) entry, add an entry for `-lstdc++`.
 
 3. Cocos3D requires a depth buffer to provide 3D depth realism. You can add a depth buffer in your
@@ -545,7 +545,7 @@ using fixed-pipeline OpenGL ES 1.1.
 Cocos3D under OSX is compatible with `Cocos2D` `3.x` and `Cocos2D` `2.1`, for using
 programmable-pipeline OpenGL. Cocos3D is not compatible with `Cocos2D` `1.1` under OSX.
 
-At the time of this release, the current version of Cocos2D is `3.2`, and by default, the demo
+At the time of this release, the current version of Cocos2D is `3.2.1`, and by default, the demo
 apps within the Cocos3D distribution are pre-configured to use that version. To build and run
 the demo apps with a different version of Cocos2D, follow the steps described here:
 

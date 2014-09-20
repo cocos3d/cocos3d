@@ -174,6 +174,7 @@
 	[_window addSubview: _viewController.view];
 	_window.rootViewController = _viewController;
 	[_window makeKeyAndVisible];
+	[_viewController.view layoutSubviews];		// iOS8 does not invoke layoutSubviews from makeKeyAndVisible
 	
 	// For an Augmented Reality 3D overlay on the device camera, uncomment the following line.
 	// This must be done after the window is made visible. The 3D scene contains a solid backdrop.

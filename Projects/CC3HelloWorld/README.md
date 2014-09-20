@@ -67,7 +67,7 @@ using fixed-pipeline OpenGL ES 1.1.
 Cocos3D under OSX is compatible with `Cocos2D` `3.x` and `Cocos2D` `2.1`, for using
 programmable-pipeline OpenGL. Cocos3D is not compatible with `Cocos2D` `1.1` under OSX.
 
-At the time of this release, the current version of Cocos2D is `3.2`, and by default, this 
+At the time of this release, the current version of Cocos2D is `3.2.1`, and by default, this 
 starter app is pre-configured to use that version. To build and run this app with a different
 version of Cocos2D, follow the steps described here:
 

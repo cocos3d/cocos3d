@@ -66,7 +66,7 @@ You can add this Cocos3D static library project to an existing Cocos2D applicati
 	3. Select the *Build Settings* tab
 		1. In the **Header Search Paths** (aka `HEADER_SEARCH_PATHS`) entry, add an entry to
 		   `"$(SRCROOT)/$(PROJECT_NAME)/Libraries/CC3StatLib/cocos3d"` 
-		   (including the quote marks), and mark it as `recursive`.
+		   (including the double-quote marks), and mark it as `recursive`.
 		2. In the **Other Linker Flags** (aka `OTHER_LD_FLAGS`) entry, add an entry for `-lstdc++`.
 
 3. Cocos3D requires a depth buffer to provide 3D depth realism. You can add a depth buffer in your
@@ -134,7 +134,7 @@ app (for example `MySpriteBuilderApp.spritebuilder`) as follows:
 
 	3. Select the *Build Settings* tab
 		1. In the **Header Search Paths** (aka `HEADER_SEARCH_PATHS`) entry, add an entry to
-		   `"Source/libs/CC3StatLib/cocos3d"` (including the quote marks),
+		   `"Source/libs/CC3StatLib/cocos3d"` (including the double-quote marks),
 		   and mark it as `recursive`.
 		2. In the **Other Linker Flags** (aka `OTHER_LD_FLAGS`) entry, add an entry for `-lstdc++`.
 

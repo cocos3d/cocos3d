@@ -109,6 +109,7 @@
 #endif	// CC3_CC2_1
 
 	[_window makeKeyAndVisible];
+	[director.view layoutSubviews];		// iOS8 does not invoke layoutSubviews from makeKeyAndVisible
 	
 	
 	// ******** START OF COCOS3D SETUP CODE... ********

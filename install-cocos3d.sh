@@ -341,6 +341,11 @@ link_cocos2d_templates_v1() {
 	SRC_DIR="$CC2_DIST_DIR/lib_cocosdenshionextras.xctemplate/libs"
 	link_dir "$SRC_DIR/CocosDenshionExtras" "$CC2_DIR" "CocosDenshion Extras"
 
+	# FontLabel
+	SRC_DIR="$CC2_DIST_DIR/lib_fontlabel.xctemplate/libs"
+	link_dir "$SRC_DIR/FontLabel" "$CC2_DIR" "FontLabel"
+	copy_file "LICENSE_FontLabel.txt" "$SRC_DIR" "$CC2_DIR"
+
 	# Chipmunk library
 	SRC_DIR="$CC2_DIST_DIR/lib_chipmunk.xctemplate/libs"
 	link_dir "$SRC_DIR/Chipmunk/include" "$CC2_CHPMK_DIR/chipmunk" "Chipmunk includes"
