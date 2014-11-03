@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="Cocos3d : Cocos3D is a sophisticated, yet intuitive and easy-to-use, 3D application development framework for the iOS platform. With Cocos3D, you can build sophisticated, dynamic 3D games and applications using Objective-C.">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Cocos3d</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/cocos3d/cocos3d">View on GitHub</a>
+
+          <h1 id="project_title">Cocos3d</h1>
+          <h2 id="project_tagline">Cocos3D is a sophisticated, yet intuitive and easy-to-use, 3D application development framework for the iOS platform. With Cocos3D, you can build sophisticated, dynamic 3D games and applications using Objective-C.</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/cocos3d/cocos3d/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/cocos3d/cocos3d/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <p><img src="https://github.com/cocos3d/cocos3d/wiki/images/cocos3d-Banner-150h.png" alt="Cocos3D Logo"></p>
+
+<h1>
+<a name="cocos3d" class="anchor" href="#cocos3d"><span class="octicon octicon-link"></span></a>Cocos3D</h1>
+
+<h2>
+<a name="table-of-contents" class="anchor" href="#table-of-contents"><span class="octicon octicon-link"></span></a>Table of Contents</h2>
+
+<ul>
+<li><a href="#about">About Cocos3D</a></li>
+<li><a href="#install">Installation</a></li>
+<li><a href="#project1">Your First Cocos3D Project</a></li>
+<li><a href="#learning">Learning Cocos3D</a></li>
+<li>
+<a href="#demos">Demo Applications</a>
+
+<ul>
+<li>
+<a href="#cc3helloworld">CC3HelloWorld</a> - a basic, easy to understand, starter app</li>
+<li>
+<a href="#cc3demomashup">CC3DemoMashUp</a> - demos all key Cocos3D features</li>
+<li>
+<a href="#cc3demo3dtiles">CC3Demo3DTiles</a> - demos adding running many concurrent layers and scenes</li>
+<li>
+<a href="#cc3performance">CC3Performance</a> - demos performance capabilities and testing</li>
+<li>
+<a href="#cc3demomultiscene">CC3DemoMultiScene</a> - demos using Cocos3D with Xcode Storyboards</li>
+</ul>
+</li>
+<li><a href="#cocos2d">Adding Cocos3D to an existing Cocos2D Project</a></li>
+<li><a href="#spritebuilder">Using Cocos3D with SpriteBuilder</a></li>
+<li><a href="#cocos2dversions">Cocos2D Version Compatibility</a></li>
+<li><a href="#android">Compiling for Android</a></li>
+<li><a href="#pod">Creating POD 3D Model Files</a></li>
+<li><a href="#models">Demo Models</a></li>
+</ul>
+
+<p><a name="about"></a></p>
+
+<h2>
+<a name="about-cocos3d" class="anchor" href="#about-cocos3d"><span class="octicon octicon-link"></span></a>About Cocos3D</h2>
+
+<p>Cocos3D is a sophisticated, yet intuitive. and easy-to-use, 3D application development
+framework for the iOS, Android, and Mac OSX platforms. With Cocos3D, you can build
+sophisticated, dynamic 3D games and applications using Objective-C.</p>
+
+<ul>
+<li>Build 3D apps for iOS devices, Android devices, or Mac computers running OSX. The same 3D
+content and game logic will run unchanged under iOS, Android, or Mac OSX.</li>
+<li>Use OpenGL programmable pipelines for sophisticated GLSL shader rendering, or use OpenGL 
+fixed pipelines for simpler configurable rendering.</li>
+<li>Supports OpenGL ES 2.0 or OpenGL ES 1.1 on iOS and Android devices, and OpenGL on Mac OSX.</li>
+<li>Seamless integration with Cocos2D. Rendering of all 3D model objects occurs within a special 
+Cocos2D layer, which fits seamlessly into the Cocos2D node hierarchy, allowing 2D nodes such 
+as controls, labels, and health bars to be drawn under, over, or beside 3D model objects. 
+With this design, 2D objects, 3D objects, and sound can interact with each other to create 
+a rich, synchronized audio-visual experience.</li>
+<li>Seamless integration with the iOS UIViewController framework.</li>
+<li>Pluggable loading framework for 3D models exported from familiar 3D editors such as Blender, 
+3ds Max or Cheetah3D, or through industry standard 3D object files such as Collada or PowerVR POD,
+or even from your own customized object file formats.</li>
+<li>Loading 3D models, textures and GLSL shaders can be performed on a background thread while the
+scene is being displayed, and automatically added to the scene when loading is complete.</li>
+<li>3D models can be selected and positioned by touch events and gestures, allowing intuitive user
+interaction with the objects in the 3D world.</li>
+<li>3D models can include animation sequences, with full or fractional animation, in multiple tracks. 
+Animation tracks can be blended together, and cross-fading actions can be used to smoothly 
+transition between tracks.</li>
+<li>3D model objects can be arranged in sophisticated structural assemblies, allowing child objects
+to be moved and oriented relative to their parent structure.</li>
+<li>3D models and assemblies can be easily duplicated. Each duplicated model can be independently
+controlled, animated, colored, or textured. But fear not, underlying mesh data is shared between
+models. You can quickly and easily create swarming hoards to populate your 3D world, without
+worrying about device memory limitations.</li>
+<li>3D models, cameras, and lighting can be manipulated and animated using familiar Cocos2D Actions,
+allowing you to quickly and easily control the dynamics of your 3D world, in a familiar, and
+easy-to-use programming paradigm.</li>
+<li>3D objects can be covered with dynamic materials and textures to create rich, realistic imagery.</li>
+<li>Multi-texturing and bump-mapped textures are available, allowing you to create sophisticated surface effects.</li>
+<li>Vertex skinning, also often referred to as bone rigging, allowing soft-body meshes to be 
+realistically deformed based on the movement of an underlying skeleton constructed of bones and joints.</li>
+<li>Automatic shadowing of models using shadow volumes.</li>
+<li>Collision detection between nodes.</li>
+<li>Ray-casting for nodes intersected by a ray, and the local location of intersection on a node
+or mesh, right down to the exact mesh intersection location and face.</li>
+<li>The 3D camera supports both perspective and orthographic projection options.</li>
+<li>Objects can dynamically track other objects as they move around the world. The 3D camera 
+can dynamically point towards an object as it moves, and other objects can dynamically point
+towards the camera as it moves.</li>
+<li>Lighting effects include multiple lights, attenuation with distance, spotlights, and fog effects.</li>
+<li>Mesh data can be shared between 3D objects, thereby saving precious device memory.</li>
+<li>Mesh data can freely, and automatically, use OpenGL vertex buffer objects to improve performance
+and memory management.</li>
+<li>Culling of 3D objects outside of the camera frustum is automatic, based on pluggable, 
+customizable object bounding volumes.</li>
+<li>Automatic ordering and grouping of 3D objects minimizes OpenGL state changes and improves
+rendering performance. Pluggable sorters allow easy customization of object sorting, ordering,
+and grouping for optimal application performance.</li>
+<li>Rendering to texture for dynamic textures within a scene, or to create sophisticated post-processing effects.</li>
+<li>Automatic rendering of the scene to an environment map texture, to create automatic environment
+reflections and refractions.</li>
+<li>Integrated particle systems:
+
+<ul>
+<li>3D point particles provide efficient but sophisticated particle effects.</li>
+<li>3D mesh particles allow particles to be created from any 3D mesh template (eg- spheres,
+cones, boxes, POD models, etc).</li>
+</ul>
+</li>
+<li>Automatic OpenGL state machine shadowing means that the OpenGL functions are invoked only when a
+state really has changed, thereby reducing OpenGL engine calls, and increasing OpenGL throughput.</li>
+<li>Sophisticated performance metrics API and tools collect real-time application drawing and updating
+performance statistics, for logging or real-time display.</li>
+<li>Sophisticated math library eliminates the need to use OpenGL ES function calls for matrix mathematics.</li>
+<li>Fully documented API written entirely in familiar Objective-C. No need to switch to C or C++ to work with 3D artifacts.</li>
+<li>Extensive logging framework to trace program execution, including all OpenGL ES function calls.</li>
+<li>Includes demo applications and Xcode templates to get you up and running quickly.</li>
+</ul>
+
+<p><a name="install"></a></p>
+
+<h2>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<ol>
+<li>
+<p>The Cocos3D framework works with <a href="http://www.cocos2d-swift.org">Cocos2D</a>. Before installing
+Cocos3D, you must <a href="http://www.cocos2d-swift.org/download">download</a> and install Cocos2D.<br></p>
+
+<p>The same Cocos3D distribution can be used with <code>Cocos2D 3.x</code>, <code>Cocos2D 2.1</code> or <code>Cocos2D 1.1</code>.
+Link to <code>Cocos2D 3.x</code> or <code>Cocos2D 2.1</code> to make use of the more advanced shader-based 
+programmable-pipeline available with OpenGL ES 2.0 (iOS) or OpenGL (OSX). Or link to 
+<code>Cocos2D 1.1</code> to use the simpler configurable fixed-pipeline of OpenGL ES 1.1 (iOS), 
+and avoid the need to write GLSL shaders.</p>
+</li>
+<li><p>Download the <a href="https://github.com/cocos3d/cocos3d/releases">latest Cocos3D release</a>.</p></li>
+<li><p>Unzip the Cocos3D distribution file.</p></li>
+<li>
+<p>Open a Terminal session, navigate to the unzipped Cocos3D distribution directory, and run 
+the <code>install-cocos3d</code> script as follows:</p>
+
+<pre><code>./install-cocos3d.sh -2 path-to-cocos2d
+</code></pre>
+
+<p>A Cocos2D distribution must be installed. With the -2 option, you specify the version
+of Cocos2D to which the Cocos3D demo apps and starter projects should be linked.</p>
+
+<p>As the name implies, the <strong><em>path-to-cocos2d</em></strong> parameter is the path to the Cocos2D
+distribution that was downloaded into the specified folder. You may use either a 
+relative path, or an absolute path. If for some reason the relative path 
+cannot be correctly resolved on your system, or the resulting links to the Cocos2D 
+library are not accurate, try again using the full absolute path. An example of using
+a relative path is:</p>
+
+<pre><code>./install-cocos3d.sh -2 "../cocos2d-swift-3.2.1"
+</code></pre>
+
+<p>When using Cocos2D 3.1 or earlier, you also have the option of setting <strong><em>path-to-cocos2d</em></strong>
+to one of (<code>v3</code>, <code>v2</code>, or <code>v1</code>), which will link the Cocos3D demo apps to the Cocos2D Xcode
+template libraries that were most recently installed. When using this format, you must have 
+previously installed the corresponding version of Cocos2D. <strong>This option is not available with 
+Cocos2D 3.2 and later because, as of Cocos2D 3.2, Xcode template projects are no longer available.</strong></p>
+
+<p>If you encounter errors during installation, it's typically because you are trying
+to run the installer without first navigating to the Cocos3D distribution directory.
+Be sure to run the installer from the Cocos3D distribution directory.</p>
+</li>
+<li><p>That's it!</p></li>
+</ol>
+
+<p>Keep in mind that Cocos3D does not "patch" your Cocos2D installation. Instead, you install
+Cocos3D alongside Cocos2D, and link to it using the installation script.</p>
+
+<p><a name="project1"></a></p>
+
+<h2>
+<a name="your-first-cocos3d-project" class="anchor" href="#your-first-cocos3d-project"><span class="octicon octicon-link"></span></a>Your First Cocos3D Project</h2>
+
+<p>The Cocos3D distribution includes a starter app Xcode project that you can use as a starting 
+point for developing your own app. Copy the <code>Projects/CC3HelloWorld</code> folder from the Cocos3D 
+distribution folder to the location where you want to develop your application. Once copied, 
+you can rename the Xcode project to the name of your own app.</p>
+
+<p>The starter app presents a 3D take on the ubiquitous <strong><em>hello, world</em></strong> application. 
+In addition to demonstrating how to load and display a 3D model, this application animates the 
+model, and includes simple user interaction by having the 3D object visibly respond to finger touches.</p>
+
+<p>The <code>CC3HelloWorldScene.m</code> file is where all the interesting action happens. To add your own 3D
+content, or to change the activty and interactivity of the 3D content, edit the methods in that file.</p>
+
+<p>You can also edit the <code>application:didFinishLaunchingWithOptions:</code> method in the <code>AppDelegate.m</code> 
+file to tweak the basic setup of your Cocos3D application. This method is where the Cocos3D 
+framework is hooked into the Cocos2D framework, and Apple's OpenGL ES framework.</p>
+
+<p>NOTE: The <code>hello-world.pod</code> 3D model data file used for the <strong><em>hello, world</em></strong> message model
+is fairly large, because converting a font to a mesh results in a LOT of triangles.
+When adapting this template project for your own application, don't forget to remove the
+'hello-world.pod' from the Resources folder of your project!</p>
+
+<p><a name="learning"></a></p>
+
+<h2>
+<a name="learning-cocos3d" class="anchor" href="#learning-cocos3d"><span class="octicon octicon-link"></span></a>Learning Cocos3D</h2>
+
+<p>Wondering how to get started? View Harry Dart-O’Flynn’s wonderful <a href="http://www.youtube.com/playlist?list=PLU4bmVOOYXK-fV0Wt-ES5n3k8qTTyqgYu">Starting Cocos3D</a> 
+collection of video tutorials!</p>
+
+<p>To learn more about Cocos3D, please refer to the <a href="http://brenwill.com/2011/cocos3d-programming-guide/">Cocos3D Programming Guide</a>
+and the latest <a href="http://brenwill.com/docs/cocos3d/2.0.1/api/">API documentation</a>.</p>
+
+<p>You can create a local copy of the API documentation using <code>Doxygen</code> to extract the documentation
+from the source files. There is a <code>Doxygen</code> configuration file to output the API documents in the
+same format as appears online in the folder Docs/API within the Cocos3D distribution.</p>
+
+<p>The best way to understand what Cocos3D can do is to look at the examples and code in the demo
+applications that are included in the Cocos3D distribution, as described in the <a href="#demos">next section</a>.</p>
+
+<p><a name="demos"></a></p>
+
+<h2>
+<a name="demo-applications" class="anchor" href="#demo-applications"><span class="octicon octicon-link"></span></a>Demo Applications</h2>
+
+<p>The best way to understand what Cocos3D can do is to look at the examples and code in the demo
+applications that are included in the Cocos3D distribution. These demos, particularly the 
+<code>CC3HelloWorld</code> and <code>CC3DemoMashUp</code> apps, will help you understand how to use Cocos3D, and 
+demonstrate many of the key features and capabilities of Cocos3D.</p>
+
+<p>For convenience, to access all of the demos together, open either the <code>cocos3d-iOS.xcworkspace</code>
+or <code>cocos3d-OSX.xcworkspace</code> Xcode workspace. You can also open each demo project individually
+in the Projects folder.</p>
+
+<p>At the time of this release, the current version of Cocos2D is <code>3.2.1</code>, and by default, the demo
+apps within the Cocos3D distribution are pre-configured to use that version. To build and run
+the demo apps with a different version of Cocos2D, follow the steps described below in the 
+section titled <a href="#cocos2dversions">Cocos2D Version Compatibility</a>.</p>
+
+<p>The following demo apps are included in the Cocos3D distribution:</p>
+
+<p><a name="cc3helloworld"></a></p>
+
+<h3>
+<a name="cc3helloworld" class="anchor" href="#cc3helloworld"><span class="octicon octicon-link"></span></a>CC3HelloWorld</h3>
+
+<p>This basic, easy-to-understand, starter app presents a 3D take on the ubiquitous <strong><em>hello, world</em></strong>
+application. In addition to demonstrating how to load and display a 3D model, this application
+animates the model, and includes simple user interaction by having the 3D object visibly respond
+to finger touches.</p>
+
+<p>The <code>CC3HelloWorld</code> Xcode project is also designed to be used as the starting point for developing
+your own app. To do so, copy the <code>Projects/CC3HelloWorld</code> folder from the  Cocos3D distribution
+folder to the location where you want to develop your application. Once copied you can rename the
+Xcode project to the name of your own app. For more info, see the section titled
+<a href="#project1">Your First Cocos3D Project</a>, and read the <code>README.md</code> file within the <code>CC3HelloWorld</code> Xcode project.</p>
+
+<p><a name="cc3demomashup"></a></p>
+
+<h3>
+<a name="cc3demomashup" class="anchor" href="#cc3demomashup"><span class="octicon octicon-link"></span></a>CC3DemoMashUp</h3>
+
+<p>Please read the class notes of the <code>CC3DemoMashUpScene</code> class for a full description of how to
+run and interact with this demo, and what features it covers.</p>
+
+<p>Your camera hovers over a scene that includes animated robots, bouncing beach-balls,
+spinning globes, and a selection of animated teapots. This is a sophisticated demo that
+showcases many interesting features of Cocos3D, including:</p>
+
+<ul>
+<li>loading mesh models, cameras and lights from 3D model files stored in the PowerVR POD format</li>
+<li>creating mesh models from static header file data</li>
+<li>sharing mesh data across several nodes with different materials</li>
+<li>loading 3D models from a POD file converted from a Collada file created in a 3D editor (Blender)</li>
+<li>assembling nodes into a hierarchical parent-child structual assembly.</li>
+<li>programatic creation of spherical, box and plane meshes using parametric definitions.</li>
+<li>texturing a 3D mesh from a CCTexture image</li>
+<li>transparency and alpha-blending</li>
+<li>translucent and transparent textures</li>
+<li>coloring a mesh with a per-vertex color blend</li>
+<li>multi-texturing an object using texture units by combining several individual textures into overlays</li>
+<li>DOT3 bump-map texturing of an object to provide high-resolution surface detail on a model
+with few actual vertices</li>
+<li>Vertex skinning with a soft-body mesh bending and flexing based on the movement of skeleton bone nodes.</li>
+<li>Copying soft-body nodes to create a completely separate character, with its own skeleton, that can be
+manipulated independently of the skeleton of the original.</li>
+<li>animating 3D models using a variety of standard Cocos2D CCActionIntervals</li>
+<li>overlaying the 3D scene with 2D Cocos2D controls such as joysticks and buttons</li>
+<li>embedding 2D Cocos2D text labels into the 3D scene</li>
+<li>incorporating 2D Cocos2D CCParticleEmitters into the 3D scene (as a sun and explosion fire)</li>
+<li>emitting 3D point particles from a moving nozzle, with realistic distance attenuation</li>
+<li>emitting two different types of 3D mesh particles, with distinct textures, from a moving nozzle,
+with each particle moving, rotating, and fading independently</li>
+<li>creating a tightly focused spotlight whose intensity attenuates with distance</li>
+<li>directing the 3D camera to track a particular target object</li>
+<li>directing an object to track the camera, always facing (looking at) the camera (aka halo objects)</li>
+<li>directing an object to track another object, always facing (looking at) that object</li>
+<li>selecting a 3D object by touching the object on the screen with a finger</li>
+<li>placing a 3D object on another at a point that was touched with a finger</li>
+<li>adding a small CC3Layer/CC3Scene pair as a child window to a larger CC3Layer/CC3Scene pair.</li>
+<li>moving, scaling and fading a CC3Layer and its CC3Scene</li>
+<li>creating parametric boxes and texturing all six sides of the box with a single texture.</li>
+<li>adding an object as a child of another, but keeping the original orientation of the child
+(addAndLocalizeChild:)</li>
+<li>handling touch-move events to create swipe gestures to spin a 3D object using rotation
+around an arbitrary axis</li>
+<li>toggling between opacity and translucency using the isOpaque property</li>
+<li>choosing to cull or display backfaces (shouldCullBackFaces)</li>
+<li>creating and deploying many independent copies of a node, while sharing the underlying mesh data</li>
+<li>drawing a descriptive text label on a node using CC3Node shouldDrawDescriptor property.</li>
+<li>drawing a wireframe bounding box around a node using CC3Node shouldDrawWireframeBox property.</li>
+<li>automatically zooming the camera out to view all objects in the scene</li>
+<li>constructing and drawing a highly tessellated rectangular plane mesh using CC3PlaneNode</li>
+<li>caching mesh data into GL vertex buffer objects and releasing vertex data from application memory</li>
+<li>retaining vertex location data in application memory (retainVertexLocations) for subsequent calculations</li>
+<li>moving the pivot location (origin) of a mesh to the center of geometry of the mesh.</li>
+<li>attaching application-specific userData to any node</li>
+<li>applying a texture to all six sides of a parametric box</li>
+<li>displaying direction marker lines on a node to clarify its orientation during development.</li>
+<li>displaying a repeating texture pattern across a mesh</li>
+<li>creating and displaying shadow volumes to render shadows for selected nodes</li>
+<li>detecting the local location of where a node was touched using ray tracing</li>
+<li>collision detection between nodes</li>
+<li>texturing a node with only a small section of single texture</li>
+<li>using the CC3Scene onOpen method to initiate activity when a scene opens</li>
+<li>using pinch and pan gestures to control the movement of the 3D camera</li>
+<li>using tap gestures to select 3D objects, and pan gestures to spin 3D objects</li>
+<li>bitmapped font text labels</li>
+<li>moving individual vertex location programmatically</li>
+<li>using OpenGL ES 2.0 shaders.</li>
+<li>loading PowerVR PFX effects files and applying them to materials</li>
+<li>environmental reflections using a cube mapped texture.</li>
+<li>render-to-texture the scene for display within the scene.</li>
+<li>render-to-texture to create additional visual effects using post-rendering image processing.</li>
+<li>render depth-to-texture to visualize the contents of the depth buffer.</li>
+<li>read pixels from a rendered framebuffer</li>
+<li>replace framebuffer and texture pixels with programmatic content</li>
+<li>create CGImageRef from a rendered framebuffer</li>
+<li>dynamically generate an environmental cube-map for creating a real-time dynamic reflective surfaces.</li>
+<li>apply multiple animation tracks to a model, blend them together, and smoothly transition between
+animation tracks using a cross-fade action.</li>
+</ul>
+
+<p>In addition, there are a number of interesting options for you to play with by uncommenting
+certain lines of code in the methods of this class that build objects in the 3D scene,
+including experimenting with:</p>
+
+<ul>
+<li>simple particle generator with multi-colored, light-interactive, particles</li>
+<li>simple particle generator with meshes updated less frequently to conserve performance </li>
+<li>different options for ordering nodes when drawing, including ordering by mesh or texture</li>
+<li>configuring the camera for parallel/isometric/orthographic projection instead of the default
+perpective projection</li>
+<li>mounting the camera on a moving object, in this case a bouncing ball</li>
+<li>mounting the camera on a moving object, in this case a bouncing ball, and having the
+camera stay focused on the rainbow teapot as both beach ball and teapot move and rotate</li>
+<li>directing an object to track another object, always facing that object, but only
+rotating in one direction (eg- side-to-side, but not up and down).</li>
+<li>displaying 2D labels (eg- health-bars) overlayed on top of the 3D scene at locations 
+projected from the position of 3D objects</li>
+<li>disabling animation for a particular node, in this case the camera and light</li>
+<li>invading with an army of teapots instead of robots</li>
+<li>ignore lighting conditions when drawing a node to draw in pure colors and textures</li>
+<li>displaying descriptive text and wireframe bounding boxes on every node</li>
+<li>displaying a dynamic bounding box on a 3D particle emitter.</li>
+<li>making use of a fixed bounding volume for the 3D particle emitter to improve performance.</li>
+<li>permitting a node to cast a shadow even when the node itself is invisible by using the 
+shouldCastShadowsWhenInvisible property</li>
+<li>Skybox using a cube mapped texture.</li>
+<li>Cocos2D CCSprite displaying the television screen rendered texture</li>
+</ul>
+
+<p><a name="cc3demo3dtiles"></a></p>
+
+<h3>
+<a name="cc3demo3dtiles" class="anchor" href="#cc3demo3dtiles"><span class="octicon octicon-link"></span></a>CC3Demo3DTiles</h3>
+
+<p>A simple demo that lays out multiple small Cocos3D scenes as layers in a larger controllable
+Cocos2D layer. The effect is a grid of tiles, with each tile displaying a separate 3D scene,
+each containing its own camera and lighting. The main node in each 3D tile can be rotated
+under touch control.</p>
+
+<p>This demonstrates the ability to simply include 3D objects in an otherwise 2D game, and 
+techniques for optimizing under those conditions. It also demonstrates touch control when
+many 3D scene are visible concurrently.</p>
+
+<p><a name="cc3performance"></a></p>
+
+<h3>
+<a name="cc3performance" class="anchor" href="#cc3performance"><span class="octicon octicon-link"></span></a>CC3Performance</h3>
+
+<p>This is a simple demo of the performance characteristics of Cocos3D. It demonstrates how to
+collect detailed statistics about your application's performance. In doing so, it presents
+a number of models, and, through the user interface, allows you to control the type of model
+loaded, and how many copies to render.</p>
+
+<p>You can dynamically experiment with how different model types, sizes and quantities affect
+the performance of Cocos3D. You can also use this performance demo app to compare performance
+across different devices.</p>
+
+<p><a name="cc3demomultiscene"></a></p>
+
+<h3>
+<a name="cc3demomultiscene" class="anchor" href="#cc3demomultiscene"><span class="octicon octicon-link"></span></a>CC3DemoMultiScene</h3>
+
+<p>This demo app is a sophisticated combination of the three demo apps listed above. It 
+demonstrates how to include Cocos3D in a UIView using Xcode Storyboards. Using standard
+UIKit controls, you can load any of the Cocos3D demos listed above, then shut down the 
+running demo, and load a different Cocos3D demo.</p>
+
+<p><a name="cocos2d"></a></p>
+
+<h2>
+<a name="adding-cocos3d-to-an-existing-cocos2d-project" class="anchor" href="#adding-cocos3d-to-an-existing-cocos2d-project"><span class="octicon octicon-link"></span></a>Adding Cocos3D to an existing Cocos2D Project</h2>
+
+<p>Instead of starting with the <code>CC3HelloWorld</code> starter application project, you can add Cocos3D 
+to an existing Cocos2D application (for example <code>MyCocos2DApp</code>), to allow you to add 3D content
+to your existing 2D application or game.</p>
+
+<ol>
+<li>
+<p>The first step is to add the Cocos3D Static Library project as a subproject to your Cocos2D
+Xcode project, as follows:</p>
+
+<ol>
+<li><p>Copy the <code>Projects/CC3StatLib</code> folder from the Cocos3D distribution to the
+<code>MyCocos2DApp/MyCocos2DApp/Libraries</code> folder within your Cocos2D app.</p></li>
+<li><p>Open your <code>MyCocos2DApp.xcodeproj</code> Xcode project.</p></li>
+<li><p>Drag the Cocos3D static library Xcode subproject at 
+<code>MyCocos2DApp/MyCocos2DApp/Libraries/CC3StatLib/cocos3d-iOS.xcodeproj</code> to the <code>Libraries</code>
+group in the <em>Project Navigator</em> panel of your <code>MyCocos2DApp</code> Xcode project (if you are 
+building an OSX app, drag the <code>cocos3d-OSX.xcodeproj</code> subproject instead).</p></li>
+<li><p>Drag the Cocos3D GLSL shader folder at <code>MyCocos2DApp/MyCocos2DApp/Libraries/CC3StatLib/cocos3d-GLSL</code>
+to the <code>MyCocos2DApp</code> group in the <em>Project Navigator</em> panel of your <code>MyCocos2DApp</code> Xcode project.
+When prompted for the target to add the source code to, select the <code>MyCocos2DApp</code> target. 
+Once added, these files will appear in the <em>Copy Bundle Resources</em> list on the <em>Build Phases</em> 
+tab of the <code>MyCocos2DApp</code> target.</p></li>
+</ol>
+</li>
+<li>
+<p>Next, within Xcode, you need to tell your Cocos2D app project how to link to the code 
+and components of the Cocos3D subproject:</p>
+
+<ol>
+<li><p>Select your <code>MyCocos2DApp</code> project in the Xcode <em>Project Navigator</em> panel.</p></li>
+<li>
+<p>Select the <em>Build Phases</em> tab of the <code>MyCocos2DApp</code> target</p>
+
+<ol>
+<li>Open the <em>Target Dependencies</em> list and add the <code>cocos3d</code> target to the list.</li>
+<li>Open the <em>Link Binary with Libraries</em> list, and add the <code>libcocos3d.a</code> library to the list.</li>
+</ol>
+</li>
+<li>
+<p>Select the <em>Build Settings</em> tab</p>
+
+<ol>
+<li>In the <strong>Header Search Paths</strong> (aka <code>HEADER_SEARCH_PATHS</code>) entry, add an entry to
+<code>"$(SRCROOT)/$(PROJECT_NAME)/Libraries/CC3StatLib/cocos3d"</code> (including the double-quote marks),
+and mark it as <code>recursive</code>.</li>
+<li>In the <strong>Other Linker Flags</strong> (aka <code>OTHER_LDFLAGS</code>) entry, add an entry for <code>-lstdc++</code>.</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>
+<p>Cocos3D requires a depth buffer to provide 3D depth realism. You can add a depth buffer 
+in your application code in the <code>AppDelegate.m</code> file. For Cocos2D 3.x, in the 
+<code>application:didFinishLaunchingWithOptions:</code> method, add the following line in the 
+constructor for the config dictionary passed to the <code>setupCocos2dWithOptions:</code> method:</p>
+
+<pre><code>CCSetupDepthFormat: @GL_DEPTH_COMPONENT16,         // Cocos3D requires a depth buffer
+</code></pre>
+
+<p>This will create a basic 16-bit depth buffer, which covers most needs. If you want higher depth
+accuracy, you can use @GL_DEPTH_COMPONENT24_OES. And if you will be using shadow volume effects, 
+use @GL_DEPTH24_STENCIL8_OES to create a combined depth and stencil buffer.</p>
+</li>
+<li><p>Add your custom <code>CC3Layer</code> and <code>CC3Scene</code> source files (<code>MyCC3Layer.h</code>, <code>MyCC3Layer.m</code>, 
+<code>MyCC3Scene.h</code>, and <code>MyCC3Scene.m</code>), and any 3D resources your app requires, to the 
+<code>MyCocos2DApp</code> target of your <code>MyCocos2DApp.xcodeproj</code> Xcode project.</p></li>
+<li>
+<p>You can add a 3D component by adding code similar to the following within one of your 
+customized 2D scene layouts (eg - <code>MyCocos2DScene.m</code>):</p>
+
+<pre><code>#import "MyCC3Layer.h"
+
+...
+
+CC3Layer* cc3Layer = [[MyCC3Layer alloc] init];
+cc3Layer.contentSize = CGSizeMake(300.0, 200.0);
+cc3Layer.position = CGPointMake(100.0, 100.0);
+[self addChild: cc3Layer];
+</code></pre>
+</li>
+</ol>
+
+<p><a name="spritebuilder"></a></p>
+
+<h2>
+<a name="using-cocos3d-with-spritebuilder" class="anchor" href="#using-cocos3d-with-spritebuilder"><span class="octicon octicon-link"></span></a>Using Cocos3D with SpriteBuilder</h2>
+
+<p>You can use Cocos3D to add 3D content to games created with <a href="http://www.spritebuilder.com">SpriteBuilder</a>.
+Adding Cocos3D to SpriteBuilder is similar to adding Cocos3D to an existing Cocos2D app, as described above
+in <a href="#cocos2d">Adding Cocos3D to an existing Cocos2D Project</a>. To add Cocos3D your SpriteBuilder project, create your 
+SpriteBuilder app (for example <code>MySpriteBuilderApp.spritebuilder</code>) as you normally would, then follow these
+instructions to add Cocos3D to it:</p>
+
+<ol>
+<li>
+<p>The first step is to add the Cocos3D Static Library project as a subproject to your SpriteBuilder Xcode 
+project, as follows:</p>
+
+<ol>
+<li><p>Copy the <code>Projects/CC3StatLib</code> folder from the Cocos3D distribution to the 
+<code>MySpriteBuilderApp.spritebuilder/Source/libs</code> folder within your SpriteBuilder app.</p></li>
+<li><p>Open your <code>MySpriteBuilderApp.xcodeproj</code> Xcode project.</p></li>
+<li><p>Drag the Cocos3D static library Xcode subproject at 
+<code>MySpriteBuilderApp.spritebuilder/Source/libs/CC3StatLib/cocos3d-iOS.xcodeproj</code> to the
+<code>libs</code> group in the <em>Project Navigator</em> panel of your <code>MySpriteBuilderApp</code> Xcode project
+(if you are building an OSX app, drag the <code>cocos3d-OSX.xcodeproj</code> subproject instead).</p></li>
+<li><p>Drag the Cocos3D GLSL shader folder at <code>MySpriteBuilderApp.spritebuilder/Source/libs/CC3StatLib/cocos3d-GLSL</code>
+to the <em>Project Navigator</em> panel of your <code>MySpriteBuilderApp</code> Xcode project.
+When prompted for the target to add the source code to, select the <code>MySpriteBuilderApp</code> 
+target. Once added, these files will appear in the <em>Copy Bundle Resources</em> list on the
+<em>Build Phases</em> tab of the <code>MySpriteBuilderApp</code> target.</p></li>
+</ol>
+</li>
+<li>
+<p>Next, within Xcode, you need to tell your SpriteBuilder app project how to link to the code 
+and components of the Cocos3D subproject:</p>
+
+<ol>
+<li><p>Select your <code>MySpriteBuilderApp</code> project in the Xcode <em>Project Navigator</em> panel.</p></li>
+<li>
+<p>Select the <em>Build Phases</em> tab of the <code>MySpriteBuilderApp</code> target</p>
+
+<ol>
+<li>Open the <em>Target Dependencies</em> list and add the <code>cocos3d</code> target to the list.</li>
+<li>Open the <em>Link Binary with Libraries</em> list, and add the <code>libcocos3d.a</code> library to the list.</li>
+</ol>
+</li>
+<li>
+<p>Select the <em>Build Settings</em> tab</p>
+
+<ol>
+<li>In the <strong>Header Search Paths</strong> (aka <code>HEADER_SEARCH_PATHS</code>) entry, add an entry to
+<code>"Source/libs/CC3StatLib/cocos3d"</code> (including the double-quote marks), and mark it as <code>recursive</code>.</li>
+<li>In the <strong>Other Linker Flags</strong> (aka <code>OTHER_LD_FLAGS</code>) entry, add an entry for <code>-lstdc++</code>.</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>
+<p>Cocos3D requires a depth buffer to provide 3D depth realism. You can add a depth buffer in your
+application code in the <code>AppDelegate.m</code> file. In the <code>AppContoller application:didFinishLaunchingWithOptions:</code>
+method, add the following line somewhere <strong><em>before</em></strong> the call to <code>setupCocos2dWithOptions:</code></p>
+
+<pre><code>cocos2dSetup[CCSetupDepthFormat] = @GL_DEPTH_COMPONENT16;        // Cocos3D requires a depth buffer
+</code></pre>
+
+<p>This will create a basic 16-bit depth buffer, which covers most needs. If you want higher depth
+accuracy, you can use @GL_DEPTH_COMPONENT24_OES. And if you will be using shadow volume effects,
+use @GL_DEPTH24_STENCIL8_OES to create a combined depth and stencil buffer.</p>
+</li>
+<li><p>Add your custom <code>CC3Layer</code> and <code>CC3Scene</code> source files (<code>MyCC3Layer.h</code>, <code>MyCC3Layer.m</code>, 
+<code>MyCC3Scene.h</code>, and <code>MyCC3Scene.m</code>), and any 3D resources your app requires, to the 
+<code>MySpriteBuilderApp</code> target of your <code>MySpriteBuilderApp.xcodeproj</code> Xcode project.</p></li>
+<li>
+<p>You're now ready to add 3D content to your SpriteBuilder interface. As with any Cocos3D
+application, you provide 3D content by creating a custom subclass of <code>CC3Layer</code>. Open your
+<code>MySpriteBuilderApp.spritebuilder</code> project, and add your custom <code>CC3Layer</code> to your SpriteBuilder 
+layout as follows:</p>
+
+<ol>
+<li>Drag a <em>Node</em> from the SpriteBuilder component palette to your layout.</li>
+<li>Set the <em>Custom class</em> property of the new component to the name of your custom <code>MyCC3Layer</code> class.</li>
+<li>Set the <em>Content size</em> property to the size at which you want your want your 3D scene to be displayed.</li>
+<li>When first placed, the <code>MyCC3Layer</code> component will be added as a child of the root node of the 
+SpriteBuilder scene. If you want the <code>MyCC3Layer</code> node to move as part of another node, you can use 
+the SpriteBuilder timeline hierarchy to reposition the node to be a child of a different parent.</li>
+<li>
+<em>Save</em> and <em>Publish</em> your new SpriteBuilder layout.</li>
+<li>Build and run your app from Xcode to see your new 3D content.</li>
+<li>Repeat for all 3D sprites that you want to add to your SpriteBuilder scene.</li>
+</ol>
+</li>
+</ol>
+
+<p><a name="cocos2dversions"></a></p>
+
+<h2>
+<a name="cocos2d-version-compatibility" class="anchor" href="#cocos2d-version-compatibility"><span class="octicon octicon-link"></span></a>Cocos2D Version Compatibility</h2>
+
+<p>Cocos3D under iOS and Android is compatible with <code>Cocos2D</code> <code>3.x</code> and <code>Cocos2D</code> <code>2.1</code>, for 
+using programmable-pipeline OpenGL ES 2.0, and is compatible with <code>Cocos2D</code> <code>1.1</code>, for 
+using fixed-pipeline OpenGL ES 1.1.</p>
+
+<p>Cocos3D under OSX is compatible with <code>Cocos2D</code> <code>3.x</code> and <code>Cocos2D</code> <code>2.1</code>, for using
+programmable-pipeline OpenGL. Cocos3D is not compatible with <code>Cocos2D</code> <code>1.1</code> under OSX.</p>
+
+<p>At the time of this release, the current version of Cocos2D is <code>3.2.1</code>, and by default, the demo
+apps within the Cocos3D distribution are pre-configured to use that version. To build and run
+the demo apps with a different version of Cocos2D, follow the steps described here:</p>
+
+<ol>
+<li><p>Run the <code>install-cocos3d.sh</code> script again and identify the new version of <code>Cocos2D</code> to be linked.
+Keep in mind that you must link <code>Cocos2D</code> <code>3.x</code> or <code>Cocos2D 2.1</code> if you want to use OpenGL ES 2.0
+(iOS &amp; Android) or OpenGL (OSX) with a programmable rendering pipeline, and you must link
+<code>Cocos2D 1.1</code> if you want to use OpenGL ES 1.1 (iOS &amp; Android) with a fixed rendering pipeline.</p></li>
+<li><p>In the Xcode <em>Project Navigator</em> panel, delete the reference to the <em>cocos2d</em> group in the
+<code>cocos2d-library-iOS</code> or <code>cocos2d-library-OSX</code> project.</p></li>
+<li><p>Add the newly linked Cocos2D files to the project by dragging the <code>cocos2d</code> folder from the 
+Cocos3D distribution folder into the <code>cocos2d-library-iOS</code> or <code>cocos2d-library-OSX</code> 
+project in the Xcode <em>Project Navigator</em> panel. When prompted for the target to add the source
+code to, select the <code>cocos2d</code> target.</p></li>
+<li><p>In the Xcode <em>Project Navigator</em> panel, delete the reference to the <em>cocos2d-chipmunk</em> group
+in the <code>cocos2d-chipmunk-library-iOS</code> or <code>cocos2d-chipmunk-library-OSX</code> project.</p></li>
+<li><p>Add the newly linked Cocos2D Chipmunk files to the project by dragging the <code>cocos2d-chipmunk</code>
+folder from the Cocos3D distribution folder into the <code>cocos2d-chipmunk-library-iOS</code> or 
+<code>cocos2d-chipmunk-library-OSX</code> project in the Xcode <em>Project Navigator</em> panel. When prompted
+for the target to add the source code to, select the <code>cocos2d-chipmunk</code> target.</p></li>
+<li>
+<p>If you are using Cocos2D 3.2 or later, configure the <code>CCNoARC.m</code> file to use Manual Refernce Counting:</p>
+
+<ol>
+<li><p>Select the <code>cocos2d-library-iOS</code> or <code>cocos2d-library-OSX</code> project.</p></li>
+<li><p>Select the <em>Build Phases</em> tab of the <code>cocos2d</code> target.</p></li>
+<li><p>Open the <em>Compile Sources</em> list and locate the entry for the <code>CCNoARC.m</code> file.</p></li>
+<li><p>On the <code>CCNoARC.m</code> entry, double-click the <em>Compiler Flags</em> column and enter the 
+<code>-fno-objc-arc</code> compiler flag. As the name implies, the  <code>CCNoARC.m</code> file uses Manual
+Refernce Counting (MRC) instead of Automatic Reference Counting (ARC), to improve performance.</p></li>
+</ol>
+</li>
+<li>
+<p><code>Cocos2D</code> <code>3.x</code> uses Automatic Reference Counting (ARC). <code>Cocos2D</code> <code>2.1</code> and <code>Cocos2D</code> <code>1.1</code>
+do not. You must set the appropriate compiler build setting to ensure the compiler will use
+the correct technique.</p>
+
+<ol>
+<li>In the <code>cocos2d-library-iOS</code> or <code>cocos2d-library-OSX</code> project, select the <code>cocos2d</code> 
+target in your project settings.</li>
+<li>Select the <em>Build Settings</em> tab.</li>
+<li>Locate the <strong>Objective-C Automatic Reference Counting</strong> (aka <code>CLANG_ENABLE_OBJC_ARC</code>)
+setting for the <code>cocos2d</code> target. If you are now linking to <code>Cocos2D</code> <code>3.x</code>, set this
+property to <code>YES</code>. If you are now linking to <code>Cocos2D</code> <code>2.1</code> or <code>Cocos2D</code> <code>1.1</code>, set 
+this property to NO. Make sure you change only the setting for the <code>cocos2d</code> target 
+within your project. Do not change the setting for the <code>cocos2d-library-iOS</code> or 
+<code>cocos2d-library-OSX</code> project itself.</li>
+<li>The <code>cocos2d-chipmunk</code> part of the <code>Cocos2D</code> <code>3.x</code> library does <em>not</em> use ARC. Ensure
+the <strong>Objective-C Automatic Reference Counting</strong> (aka <code>CLANG_ENABLE_OBJC_ARC</code>) setting
+of the <code>cocos2d-chipmunk</code> target is always set to NO.</li>
+</ol>
+</li>
+<li>
+<code>Cocos2D</code> <code>3.x</code> supports compiling to the ARM64 architecture. <code>Cocos2D</code> <code>2.1</code> and
+<code>Cocos2D</code> <code>1.1</code> do <em>not</em> support compiling to the ARM64 architecture. Because of this,
+by default, the <strong>Valid Architectures</strong> (aka <code>VALID_ARCHS</code>) build setting for all demo 
+Xcode Projects in the Cocos3D distribution is set to <code>$(ARCHS_STANDARD_32_BIT)</code> (which 
+resolves to <strong>armv7 armv7s</strong>), so that the demo projects will compile with all versions
+of <code>Cocos2D</code>. If you are now linking to <code>Cocos2D</code> <code>3.x</code>, you can set this property to
+<code>$(ARCHS_STANDARD)</code> (or simply remove this setting from the Project), in all demo Projects,
+to allow compilation to include the ARM64 architecture.</li>
+<li>As a development optimization, if you are now linking to <code>Cocos2D</code> <code>3.x</code>, you can set the 
+value of the <strong>Build Active Architecture Only</strong> (aka <code>ONLY_ACTIVE_ARCH</code>) build setting in 
+the <em>Debug</em> configuration in all demo projects to <code>YES</code>. You should not do this if you are
+linking to <code>Cocos2D</code> <code>2.1</code> or <code>Cocos2D</code> <code>1.1</code>, as this will prohibit you from building
+the demo apps on devices that use the ARM64 processor.</li>
+<li>If you have already built the demo app using the old version of <code>Cocos2D</code>, delete the 
+contents of your <code>~/Library/Developer/Xcode/DerivedData</code> folder before attempting to compile again.</li>
+</ol>
+
+<p><a name="android"></a></p>
+
+<h2>
+<a name="compiling-for-android" class="anchor" href="#compiling-for-android"><span class="octicon octicon-link"></span></a>Compiling for Android</h2>
+
+<p>Cocos3D (along with Cocos2D) is written in Objective-C. Cocos3D has partnered with 
+<a href="http://www.apportable.com">Apportable</a> to bring your 3D apps and games to the Android
+platform. The Apportable SDK is a free SDK for porting Objective-C applications to Android.</p>
+
+<p>To build and install your app or game project for the Android platform:</p>
+
+<ol>
+<li>Download and install the Apportable SDK.</li>
+<li>Open a <code>Terminal</code> window and navigate to the Xcode project folder of your Cocos3D app.</li>
+<li>Run the command: <code>apportable install</code> to build and install your Cocos3D app on an
+Android device connected to your computer.</li>
+</ol>
+
+<p>Please refer to the Apportable SDK documentation for more information about building,
+installing, and debugging your app on Android. If you are building an OpenGL ES 1.1 app, 
+you will need to modify the <code>configuration.json</code> file in your Xcode project, as indicated
+in that file.</p>
+
+<p><a name="pod"></a></p>
+
+<h2>
+<a name="creating-pod-3d-model-files" class="anchor" href="#creating-pod-3d-model-files"><span class="octicon octicon-link"></span></a>Creating POD 3D Model Files</h2>
+
+<p>Cocos3D reads 3D model content from POD files.</p>
+
+<p>If you are using <em>Blender</em>, <em>Maya</em>, or <em>3DS Max</em> as your 3D editor, you can install the <em>PVRGeoPOD</em>
+plugin from Imagination Technologies to export directly from your editor to the POD file format.</p>
+
+<p>For other editors, you can export your 3D model to a file in <code>COLLADA 1.4</code> format, and then use
+the standalone <em>PVRGeoPOD</em> app to convert the COLLADA file to the POD format.</p>
+
+<p>Both the standalone and plugin versions of <em>PVRGeoPOD</em> are available free of charge from
+Imagination Technologies, the supplier of the GPU's used in iOS devices.</p>
+
+<p>Read the <a href="http://brenwill.com/2011/cocos3d-importing-converting-collada-to-pod/">full instructions</a>
+for more info on where to get the <em>PVRGeoPOD</em> converter, and how to use it to generate POD files.</p>
+
+<p>If you are using <em>Blender</em> as your 3D editor, and have many <code>.blend</code> files to export to POD format,
+you can use the command-line batch tool available in the <code>Tools/Blender-POD Batch Converter</code>
+folder in the Cocos3D distribution. See the <code>README.txt</code> file in that folder for instructions.
+The <code>Blender-POD Batch Converter</code> tool was created by Cocos3D user Nikita Medvedev.</p>
+
+<p><a name="models"></a></p>
+
+<h2>
+<a name="demo-models" class="anchor" href="#demo-models"><span class="octicon octicon-link"></span></a>Demo Models</h2>
+
+<p>Some of the POD models that appear in the demo and template apps were designed in Blender and
+exported to POD files using the PowerVR <em>PVRGeoPOD</em> converter.</p>
+
+<p>As a reference for the creation of your own 3D models for use in Cocos3D, you can find the original
+<em>Blender</em> files for these POD models in the <code>Models</code> folder in the Cocos3D distribution.</p>
+
+<p>[Cocos3D and Cocos2D Static Libraries]:</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Cocos3d maintained by <a href="https://github.com/cocos3d">cocos3d</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
