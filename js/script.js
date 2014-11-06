@@ -128,7 +128,7 @@ $(document).ready(function () {
         camera.camera(
             {
                 autoAdvance: true,
-				time: 3000,
+				time: 2500,
                 height: '40%',
                 /* height: '31.25%',*/
                 minHeight: '200px',
