@@ -1,0 +1,5 @@
+<map id="CC3ReverseDirectionalRotator" name="CC3ReverseDirectionalRotator">
+<area shape="rect" id="node2" href="$interface_c_c3_directional_rotator.html" title="CC3DirectionalRotator is a subclass of CC3MutableRotator that adds the ability to set rotation based ..." alt="" coords="30,229,185,256"/>
+<area shape="rect" id="node3" href="$interface_c_c3_mutable_rotator.html" title="CC3MutableRotator encapsulates the various mechanisms for specifiying rotation, and converts between ..." alt="" coords="38,155,177,181"/>
+<area shape="rect" id="node4" href="$interface_c_c3_rotator.html" title="CC3otator encapsulates the various mechanisms of rotating a node, and converts between them..." alt="" coords="62,80,153,107"/>
+</map>

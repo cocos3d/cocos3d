@@ -1,0 +1,6 @@
+<map id="CC3VertexBoneWeights" name="CC3VertexBoneWeights">
+<area shape="rect" id="node2" href="$interface_c_c3_vertex_array.html" title="CC3VertexArray manages the content associated with an aspect of a vertex. " alt="" coords="113,304,231,331"/>
+<area shape="rect" id="node3" href="$interface_c_c3_identifiable.html" title="This is a base subclass for any class that uses tags or names to identify individual instances..." alt="" coords="115,229,228,256"/>
+<area shape="rect" id="node5" href="$protocol_c_c3_cacheable-p.html" title="Defines the behaviour required for an object that can be held in a cache. " alt="" coords="108,155,236,181"/>
+<area shape="rect" id="node6" href="$protocol_c_c3_object-p.html" title="Extension to support Cocos3D functionality. " alt="" coords="121,80,223,107"/>
+</map>

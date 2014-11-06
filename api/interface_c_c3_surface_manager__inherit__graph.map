@@ -1,0 +1,4 @@
+<map id="CC3SurfaceManager" name="CC3SurfaceManager">
+<area shape="rect" id="node3" href="$interface_c_c3_scene_drawing_surface_manager.html" title="Manages the render surfaces that are tied to the size of a CC3Layer. " alt="" coords="5,155,237,181"/>
+<area shape="rect" id="node4" href="$interface_c_c3_view_surface_manager.html" title="Manages the render surfaces used to render content to the OS view on the screen. " alt="" coords="263,155,439,181"/>
+</map>

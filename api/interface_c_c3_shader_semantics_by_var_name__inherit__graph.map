@@ -1,0 +1,7 @@
+<map id="CC3ShaderSemanticsByVarName" name="CC3ShaderSemanticsByVarName">
+<area shape="rect" id="node7" href="$interface_c_c3_p_f_x_shader_semantics.html" title="CC3PFXShaderSemantics provides a mapping from the PFX semantic names declared in a PFX effect within ..." alt="" coords="41,379,220,405"/>
+<area shape="rect" id="node2" href="$interface_c_c3_shader_semantics_base.html" title="CC3ShaderSemanticsBase is an abstract implementation of the CC3ShaderSemanticsDelegate protocol..." alt="" coords="39,229,223,256"/>
+<area shape="rect" id="node4" href="$protocol_c_c3_shader_semantics_delegate-p.html" title="Defines the behaviour required for an object that manages the semantics for a CC3ShaderProgram. " alt="" coords="107,155,329,181"/>
+<area shape="rect" id="node5" href="$protocol_c_c3_object-p.html" title="Extension to support Cocos3D functionality. " alt="" coords="167,80,269,107"/>
+<area shape="rect" id="node8" href="$interface_c_c3_p_v_r_shaman_shader_semantics.html" title="CC3PVRShamanShaderSemantics provides a mapping from the PVRShaman names declared in a PFX effect with..." alt="" coords="15,453,245,480"/>
+</map>

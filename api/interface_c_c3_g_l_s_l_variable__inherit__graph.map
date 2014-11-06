@@ -1,0 +1,5 @@
+<map id="CC3GLSLVariable" name="CC3GLSLVariable">
+<area shape="rect" id="node4" href="$interface_c_c3_g_l_s_l_attribute.html" title="Represents an attribute variable used in a GLSL shader program. " alt="" coords="5,155,136,181"/>
+<area shape="rect" id="node5" href="$interface_c_c3_g_l_s_l_uniform.html" title="Represents a uniform variable used in a GLSL shader program. " alt="" coords="161,155,289,181"/>
+<area shape="rect" id="node6" href="$interface_c_c3_g_l_s_l_uniform_override.html" title="Instances of this class are held in the CC3ShaderContext to allow the value of a uniform to be set di..." alt="" coords="135,229,315,256"/>
+</map>

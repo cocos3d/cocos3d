@@ -1,0 +1,5 @@
+<map id="CC3ActionMoveDirectionallyBy" name="CC3ActionMoveDirectionallyBy">
+<area shape="rect" id="node4" href="$interface_c_c3_action_move_forward_by.html" title="CC3ActionMoveForwardBy moves a target CC3Node forward by a specific distance. " alt="" coords="5,155,187,181"/>
+<area shape="rect" id="node5" href="$interface_c_c3_action_move_right_by.html" title="CC3ActionMoveRightBy moves a target CC3Node to the right by a specific distance. " alt="" coords="212,155,377,181"/>
+<area shape="rect" id="node6" href="$interface_c_c3_action_move_up_by.html" title="CC3ActionMoveUpBy moves a target CC3Node up by a specific distance. " alt="" coords="402,155,552,181"/>
+</map>

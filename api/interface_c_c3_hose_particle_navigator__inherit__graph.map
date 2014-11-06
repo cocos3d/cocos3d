@@ -1,0 +1,7 @@
+<map id="CC3HoseParticleNavigator" name="CC3HoseParticleNavigator">
+<area shape="rect" id="node2" href="$interface_c_c3_random_mortal_particle_navigator.html" title="CC3RandomMortalParticleNavigator confgures the lifeSpan property of particles that conform to the CC3..." alt="" coords="5,237,243,264"/>
+<area shape="rect" id="node3" href="$interface_c_c3_particle_navigator.html" title="A particle navigator is assigned to a single particle emitter, and is responsible for configuring the..." alt="" coords="49,155,199,181"/>
+<area shape="rect" id="node6" href="$protocol_c_c3_node_transform_listener_protocol-p.html" title="This protocol defines the behaviour requirements for objects that wish to be notified whenever the tr..." alt="" coords="267,230,463,271"/>
+<area shape="rect" id="node7" href="$protocol_c_c3_node_listener_protocol-p.html" title="This protocol defines the behaviour requirements for objects that wish to be notified about the basic..." alt="" coords="269,155,461,181"/>
+<area shape="rect" id="node8" href="$protocol_c_c3_object-p.html" title="Extension to support Cocos3D functionality. " alt="" coords="314,80,416,107"/>
+</map>

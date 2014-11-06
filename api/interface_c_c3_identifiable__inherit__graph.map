@@ -1,0 +1,47 @@
+<map id="CC3Identifiable" name="CC3Identifiable">
+<area shape="rect" id="node7" href="$interface_c_c3_face_array.html" title="CC3FaceArray holds additional cached calculated information about mesh faces, such as the centers..." alt="" coords="667,31,778,57"/>
+<area shape="rect" id="node9" href="$interface_c_c3_g_l_framebuffer.html" title="Represents an OpenGL framebuffer. " alt="" coords="653,132,792,159"/>
+<area shape="rect" id="node10" href="$interface_c_c3_g_l_renderbuffer.html" title="Represents an OpenGL renderbuffer. " alt="" coords="651,183,795,209"/>
+<area shape="rect" id="node11" href="$interface_c_c3_material.html" title="CC3Material manages information about a material that is used to cover one or more meshes..." alt="" coords="675,233,771,260"/>
+<area shape="rect" id="node13" href="$interface_c_c3_mesh.html" title="A CC3Mesh holds the 3D mesh for a CC3MeshNode. " alt="" coords="682,284,763,311"/>
+<area shape="rect" id="node19" href="$interface_c_c3_node.html" title="CC3Node and its subclasses form the basis of all 3D artifacts in the 3D scene, including visible mesh..." alt="" coords="683,664,763,691"/>
+<area shape="rect" id="node32" href="$interface_c_c3_open_g_l.html" title="CC3OpenGL manages the OpenGL or OpenGL ES state for a single GL context. " alt="" coords="673,968,772,995"/>
+<area shape="rect" id="node34" href="$interface_c_c3_resource.html" title="CC3Resource is an abstract wrapper class around content loaded from a file containing 3D resource con..." alt="" coords="670,1019,775,1045"/>
+<area shape="rect" id="node37" href="$interface_c_c3_shader.html" title="CC3Shader represents an OpenGL shader, compiled from GLSL source code. " alt="" coords="677,1069,769,1096"/>
+<area shape="rect" id="node40" href="$interface_c_c3_shader_prewarmer.html" title="Utility class that pre&#45;warms shader programs by using them to render a small mesh node to an off&#45;scre..." alt="" coords="644,1120,801,1147"/>
+<area shape="rect" id="node41" href="$interface_c_c3_shader_program.html" title="CC3ShaderProgram represents an OpenGL shader program, containing one vertex shader and one fragment s..." alt="" coords="651,1171,794,1197"/>
+<area shape="rect" id="node42" href="$interface_c_c3_shader_source_code.html" title="A CC3ShaderSourceCode instance contains shader source code. " alt="" coords="640,1221,805,1248"/>
+<area shape="rect" id="node46" href="$interface_c_c3_surface_section.html" title="CC3SurfaceSection is a surface that is a section of another underlying base surface. " alt="" coords="653,1272,792,1299"/>
+<area shape="rect" id="node47" href="$interface_c_c3_texture.html" title="The root class of a class cluster representing textures. " alt="" coords="676,1323,769,1349"/>
+<area shape="rect" id="node49" href="$interface_c_c3_vertex_array.html" title="CC3VertexArray manages the content associated with an aspect of a vertex. " alt="" coords="663,1373,782,1400"/>
+<area shape="rect" id="node3" href="$protocol_c_c3_cacheable-p.html" title="Defines the behaviour required for an object that can be held in a cache. " alt="" coords="301,1019,429,1045"/>
+<area shape="rect" id="node4" href="$protocol_c_c3_object-p.html" title="Extension to support Cocos3D functionality. " alt="" coords="150,1019,253,1045"/>
+<area shape="rect" id="node8" href="$interface_c_c3_deformed_face_array.html" title="CC3DeformedFaceArray extends CC3FaceArray to hold the deformed positions of each vertex. " alt="" coords="870,5,1039,32"/>
+<area shape="rect" id="node12" href="$interface_c_c3_p_o_d_material.html" title="A CC3Material whose content originates from POD resource data. " alt="" coords="892,56,1017,83"/>
+<area shape="rect" id="node14" href="$interface_c_c3_mesh_model.html" title="CC3MeshModel" alt="" coords="896,107,1013,133"/>
+<area shape="rect" id="node15" href="$interface_c_c3_p_o_d_mesh.html" title="A CC3Mesh whose content originates from POD resource data. " alt="" coords="899,157,1010,184"/>
+<area shape="rect" id="node16" href="$interface_c_c3_point_particle_mesh.html" title="Deprecated. " alt="" coords="877,208,1033,235"/>
+<area shape="rect" id="node17" href="$interface_c_c3_vertex_array_mesh.html" title="Deprecated. " alt="" coords="879,259,1031,285"/>
+<area shape="rect" id="node18" href="$interface_c_c3_vertex_array_mesh_model.html" title="Deprecated. " alt="" coords="861,309,1049,336"/>
+<area shape="rect" id="node20" href="$interface_c_c3_bone.html" title="CC3Bone is the building block of skeletons that control the deformation of a skin mesh..." alt="" coords="915,360,995,387"/>
+<area shape="rect" id="node21" href="$interface_c_c3_c_a_l_node.html" title="A CC3CALNode extracted from a file. " alt="" coords="901,411,1008,437"/>
+<area shape="rect" id="node22" href="$interface_c_c3_camera.html" title="CC3Camera represents the camera viewing the 3D scene. " alt="" coords="907,461,1003,488"/>
+<area shape="rect" id="node23" href="$interface_c_c3_environment_node.html" title="CC3EnvironmentNode is an abstract superclass of a family of node classes that hold a texture that can..." alt="" coords="877,512,1033,539"/>
+<area shape="rect" id="node24" href="$interface_c_c3_light.html" title="CC3Light represents the light in the 3D scene. " alt="" coords="916,563,993,589"/>
+<area shape="rect" id="node25" href="$interface_c_c3_light_tracker.html" title="Deprecated and functionality moved to CC3Node class. " alt="" coords="893,613,1016,640"/>
+<area shape="rect" id="node26" href="$interface_c_c3_local_content_node.html" title="CC3LocalContentNode is an abstract class that forms the basis for nodes that have local content to dr..." alt="" coords="875,664,1034,691"/>
+<area shape="rect" id="node27" href="$interface_c_c3_p_o_d_node.html" title="A CC3Node extracted from a POD file. " alt="" coords="900,715,1009,741"/>
+<area shape="rect" id="node28" href="$interface_c_c3_resource_node.html" title="A CC3ResourceNode is a CC3Node that that can be populated from a CC3NodesResource, and forms the root of the node structural assembly loaded from a resource file. " alt="" coords="886,765,1023,792"/>
+<area shape="rect" id="node29" href="$interface_c_c3_scene.html" title="CC3Scene is a CC3Node that manages a 3D scene. " alt="" coords="911,816,998,843"/>
+<area shape="rect" id="node30" href="$interface_c_c3_soft_body_node.html" title="CC3SoftBodyNode is the primary structural component for a soft&#45;body object that uses vertex skinning ..." alt="" coords="887,867,1022,893"/>
+<area shape="rect" id="node31" href="$interface_c_c3_targetting_node.html" title="Deprecated and functionality moved to CC3Node class. " alt="" coords="885,917,1025,944"/>
+<area shape="rect" id="node33" href="$interface_c_c3_open_g_l_fixed_pipeline.html" title="CC3OpenGLFixedPipeline manages the OpenGLES 1.1 state for a single GL context. " alt="" coords="865,968,1044,995"/>
+<area shape="rect" id="node35" href="$interface_c_c3_nodes_resource.html" title="CC3NodesResource is a wrapper class around a resource structure loaded from a data file containing 3D..." alt="" coords="883,1019,1027,1045"/>
+<area shape="rect" id="node36" href="$interface_c_c3_p_f_x_resource.html" title="CC3PFXResource is a CC3Resource that wraps a PVR PFX data structure loaded from a file..." alt="" coords="889,1069,1021,1096"/>
+<area shape="rect" id="node38" href="$interface_c_c3_fragment_shader.html" title="A CC3Shader used as a fragment shader within a shader program. " alt="" coords="880,1120,1029,1147"/>
+<area shape="rect" id="node39" href="$interface_c_c3_vertex_shader.html" title="A CC3Shader used as a vertex shader within a shader program. " alt="" coords="889,1171,1020,1197"/>
+<area shape="rect" id="node43" href="$interface_c_c3_shader_source_code_group.html" title="A member of the CC3ShaderSourceCode class cluster that contains instances of CC3ShaderSource class&#45;cl..." alt="" coords="853,1221,1056,1248"/>
+<area shape="rect" id="node44" href="$interface_c_c3_shader_source_code_lines.html" title="A member of the CC3ShaderSourceCode class cluster that contains source code as a collection of indivi..." alt="" coords="856,1272,1053,1299"/>
+<area shape="rect" id="node45" href="$interface_c_c3_shader_source_code_string.html" title="A member of the CC3ShaderSourceCode class cluster that contains a single string of source code..." alt="" coords="855,1323,1055,1349"/>
+<area shape="rect" id="node48" href="$interface_c_c3_p_v_r_texture.html" title="The representation of a PVR texture that has been loaded into the GL engine. " alt="" coords="894,1373,1015,1400"/>
+</map>

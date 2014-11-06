@@ -1,0 +1,5 @@
+<map id="CC3TextureFramebufferAttachment" name="CC3TextureFramebufferAttachment">
+<area shape="rect" id="node3" href="$protocol_c_c3_framebuffer_attachment-p.html" title="An implementation of CC3FramebufferAttachment can be attached to a CC3GLFramebuffer to provide a buff..." alt="" coords="107,229,311,256"/>
+<area shape="rect" id="node4" href="$protocol_c_c3_render_surface_attachment-p.html" title="An implementation of CC3RenderSurfaceAttachment can be attached to a CC3RenderSurface to provide a bu..." alt="" coords="99,155,320,181"/>
+<area shape="rect" id="node5" href="$protocol_c_c3_object-p.html" title="Extension to support Cocos3D functionality. " alt="" coords="158,80,260,107"/>
+</map>

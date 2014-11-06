@@ -1,0 +1,4 @@
+<map id="&lt;CC3ShadowProtocol&gt;" name="&lt;CC3ShadowProtocol&gt;">
+<area shape="rect" id="node3" href="$interface_c_c3_shadow_volume_mesh_node.html" title="The mesh node used to build a shadow volume. " alt="" coords="5,171,211,197"/>
+<area shape="rect" id="node4" href="$interface_c_c3_stencilled_shadow_painter_node.html" title="The mesh node used to paint the shadows cast by shadow volumes. " alt="" coords="236,171,465,197"/>
+</map>

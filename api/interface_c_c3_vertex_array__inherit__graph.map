@@ -1,0 +1,15 @@
+<map id="CC3VertexArray" name="CC3VertexArray">
+<area shape="rect" id="node8" href="$interface_c_c3_drawable_vertex_array.html" title="This abstract subclass of CC3VertexArray adds the functionality to draw the vertex content to the dis..." alt="" coords="823,31,999,57"/>
+<area shape="rect" id="node11" href="$interface_c_c3_vertex_bone_indices.html" title="A CC3VertexArray that manages a collection of bone indices for each vertex. " alt="" coords="831,81,991,108"/>
+<area shape="rect" id="node12" href="$interface_c_c3_vertex_bone_weights.html" title="A CC3VertexArray that manages a collection of bone weights for each vertex. " alt="" coords="827,132,994,159"/>
+<area shape="rect" id="node13" href="$interface_c_c3_vertex_colors.html" title="A CC3VertexArray that manages the per&#45;vertex color aspect of an array of vertices. " alt="" coords="848,183,973,209"/>
+<area shape="rect" id="node14" href="$interface_c_c3_vertex_normals.html" title="A CC3VertexArray that manages the normal aspect of an array of vertices. " alt="" coords="842,233,979,260"/>
+<area shape="rect" id="node15" href="$interface_c_c3_vertex_point_sizes.html" title="A CC3VertexArray that manages the point sizes aspect of an array of point sprite vertices. " alt="" coords="835,284,986,311"/>
+<area shape="rect" id="node16" href="$interface_c_c3_vertex_tangents.html" title="A CC3VertexArray that manages the tangent or bitangent aspect of an array of vertices. " alt="" coords="839,335,982,361"/>
+<area shape="rect" id="node17" href="$interface_c_c3_vertex_texture_coordinates.html" title="A CC3VertexArray that manages the texture coordinates aspect of an array of vertices. " alt="" coords="809,385,1013,412"/>
+<area shape="rect" id="node2" href="$interface_c_c3_identifiable.html" title="This is a base subclass for any class that uses tags or names to identify individual instances..." alt="" coords="478,208,591,235"/>
+<area shape="rect" id="node4" href="$protocol_c_c3_cacheable-p.html" title="Defines the behaviour required for an object that can be held in a cache. " alt="" coords="301,208,429,235"/>
+<area shape="rect" id="node5" href="$protocol_c_c3_object-p.html" title="Extension to support Cocos3D functionality. " alt="" coords="150,208,253,235"/>
+<area shape="rect" id="node9" href="$interface_c_c3_vertex_indices.html" title="A CC3VertexArray that manages the drawing indices of an array of vertices. " alt="" coords="1069,5,1198,32"/>
+<area shape="rect" id="node10" href="$interface_c_c3_vertex_locations.html" title="A CC3VertexArray that manages the location aspect of an array of vertices. " alt="" coords="1061,56,1205,83"/>
+</map>

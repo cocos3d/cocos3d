@@ -1,0 +1,6 @@
+<map id="CC3DirectionalRotator" name="CC3DirectionalRotator">
+<area shape="rect" id="node6" href="$interface_c_c3_reverse_directional_rotator.html" title="Deprecated and functionality moved to CC3DirectionalRotator. " alt="" coords="5,304,211,331"/>
+<area shape="rect" id="node7" href="$interface_c_c3_targetting_rotator.html" title="CC3TargettingRotator is a subclass of CC3DirectionalRotator that can automatically track the location..." alt="" coords="235,304,387,331"/>
+<area shape="rect" id="node2" href="$interface_c_c3_mutable_rotator.html" title="CC3MutableRotator encapsulates the various mechanisms for specifiying rotation, and converts between ..." alt="" coords="139,155,279,181"/>
+<area shape="rect" id="node3" href="$interface_c_c3_rotator.html" title="CC3otator encapsulates the various mechanisms of rotating a node, and converts between them..." alt="" coords="163,80,255,107"/>
+</map>

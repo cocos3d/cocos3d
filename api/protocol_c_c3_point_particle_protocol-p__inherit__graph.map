@@ -1,0 +1,11 @@
+<map id="&lt;CC3PointParticleProtocol&gt;" name="&lt;CC3PointParticleProtocol&gt;">
+<area shape="rect" id="node4" href="$interface_c_c3_point_particle.html" title="CC3PointParticle is a standard base implementation of the CC3PointParticleProtocol. " alt="" coords="251,245,375,272"/>
+<area shape="rect" id="node2" href="$protocol_c_c3_common_vertex_array_particle_protocol-p.html" title="CC3CommonVertexArrayParticleProtocol defines the requirements for particles that are emitted and mana..." alt="" coords="201,81,425,122"/>
+<area shape="rect" id="node3" href="$protocol_c_c3_particle_protocol-p.html" title="CC3ParticleProtocol represents a single particle emitted by a CC3ParticleEmitter particle emitter..." alt="" coords="235,5,392,32"/>
+<area shape="rect" id="node5" href="$interface_c_c3_mortal_point_particle.html" title="CC3MortalPointParticle is a point particle implementation of the CC3MortalParticleProtocol that has a..." alt="" coords="233,320,393,347"/>
+<area shape="rect" id="node6" href="$interface_c_c3_spray_point_particle.html" title="CC3SprayPointParticle is a type of CC3MortalPointParticle that implements the CC3SprayParticleProtoco..." alt="" coords="234,395,392,421"/>
+<area shape="rect" id="node7" href="$interface_c_c3_uniformly_evolving_point_particle.html" title="CC3UniformlyEvolvingPointParticle is a type of CC3SprayPointParticle that implements the CC3Uniformly..." alt="" coords="118,470,303,511"/>
+<area shape="rect" id="node10" href="$interface_c_c3_uniform_motion_particle.html" title="Deprecated and renamed to CC3SprayPointParticle. " alt="" coords="327,477,507,504"/>
+<area shape="rect" id="node8" href="$interface_c_c3_uniform_evolution_particle.html" title="Deprecated and renamed to CC3UniformlyEvolvingPointParticle. " alt="" coords="5,560,200,587"/>
+<area shape="rect" id="node9" href="$interface_c_c3_variegated_point_particle.html" title="CC3VariegatedPointParticle is the type of particle emitted by a CC3VariegatedPointParticleHoseEmitter..." alt="" coords="225,560,412,587"/>
+</map>

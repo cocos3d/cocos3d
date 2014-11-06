@@ -1,0 +1,5 @@
+<map id="CC3TextureUnit" name="CC3TextureUnit">
+<area shape="rect" id="node6" href="$interface_c_c3_bump_map_texture_unit.html" title="A texture unit configured for DOT3 bump&#45;mapping. " alt="" coords="5,229,184,256"/>
+<area shape="rect" id="node7" href="$interface_c_c3_configurable_texture_unit.html" title="A texture unit that provides complete flexibility in defining the way the texture will be combined wi..." alt="" coords="209,229,401,256"/>
+<area shape="rect" id="node4" href="$protocol_c_c_r_g_b_a_protocol-p.html" title="\&lt;CCRGBAProtocol\&gt;" alt="" coords="277,80,421,107"/>
+</map>

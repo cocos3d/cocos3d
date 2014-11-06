@@ -1,0 +1,17 @@
+<map id="&lt;CC3CommonVertexArrayParticleProtocol&gt;" name="&lt;CC3CommonVertexArrayParticleProtocol&gt;">
+<area shape="rect" id="node3" href="$protocol_c_c3_mesh_particle_protocol-p.html" title="CC3MeshParticleProtocol defines the requirements for mesh particles that are emitted and managed by t..." alt="" coords="486,17,677,44"/>
+<area shape="rect" id="node9" href="$protocol_c_c3_point_particle_protocol-p.html" title="CC3PointParticleProtocol defines the requirements for point particles that are emitted and managed by..." alt="" coords="487,68,675,95"/>
+<area shape="rect" id="node2" href="$protocol_c_c3_particle_protocol-p.html" title="CC3ParticleProtocol represents a single particle emitted by a CC3ParticleEmitter particle emitter..." alt="" coords="5,43,163,69"/>
+<area shape="rect" id="node4" href="$interface_c_c3_mesh_particle.html" title="CC3MeshParticle is a standard base implementation of the CC3MeshParticleProtocol. ..." alt="" coords="725,17,851,44"/>
+<area shape="rect" id="node5" href="$interface_c_c3_scalable_mesh_particle.html" title="CC3ScalableMeshParticle is a type of CC3MeshParticle that can be scaled. " alt="" coords="899,17,1077,44"/>
+<area shape="rect" id="node6" href="$interface_c_c3_mortal_mesh_particle.html" title="CC3MortalMeshParticle is a mesh particle implementation of the CC3MortalParticleProtocol, as a particle that has a finite life. " alt="" coords="1125,17,1288,44"/>
+<area shape="rect" id="node7" href="$interface_c_c3_spray_mesh_particle.html" title="CC3SprayMeshParticle is a type of CC3MortalMeshParticle that implements the CC3SprayParticleProtocol ..." alt="" coords="1349,13,1509,40"/>
+<area shape="rect" id="node8" href="$interface_c_c3_uniformly_evolving_mesh_particle.html" title="CC3UniformlyEvolvingMeshParticle is a CC3SprayMeshParticle whose rotation and color can also be confi..." alt="" coords="1574,6,1762,47"/>
+<area shape="rect" id="node10" href="$interface_c_c3_point_particle.html" title="CC3PointParticle is a standard base implementation of the CC3PointParticleProtocol. " alt="" coords="726,68,850,95"/>
+<area shape="rect" id="node11" href="$interface_c_c3_mortal_point_particle.html" title="CC3MortalPointParticle is a point particle implementation of the CC3MortalParticleProtocol that has a..." alt="" coords="908,68,1068,95"/>
+<area shape="rect" id="node12" href="$interface_c_c3_spray_point_particle.html" title="CC3SprayPointParticle is a type of CC3MortalPointParticle that implements the CC3SprayParticleProtoco..." alt="" coords="1127,72,1286,99"/>
+<area shape="rect" id="node13" href="$interface_c_c3_uniformly_evolving_point_particle.html" title="CC3UniformlyEvolvingPointParticle is a type of CC3SprayPointParticle that implements the CC3Uniformly..." alt="" coords="1337,65,1522,106"/>
+<area shape="rect" id="node16" href="$interface_c_c3_uniform_motion_particle.html" title="Deprecated and renamed to CC3SprayPointParticle. " alt="" coords="1339,131,1519,157"/>
+<area shape="rect" id="node14" href="$interface_c_c3_uniform_evolution_particle.html" title="Deprecated and renamed to CC3UniformlyEvolvingPointParticle. " alt="" coords="1571,72,1765,99"/>
+<area shape="rect" id="node15" href="$interface_c_c3_variegated_point_particle.html" title="CC3VariegatedPointParticle is the type of particle emitted by a CC3VariegatedPointParticleHoseEmitter..." alt="" coords="1574,123,1762,149"/>
+</map>

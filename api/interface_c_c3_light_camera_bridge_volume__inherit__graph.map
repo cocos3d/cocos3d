@@ -1,0 +1,8 @@
+<map id="CC3LightCameraBridgeVolume" name="CC3LightCameraBridgeVolume">
+<area shape="rect" id="node9" href="$interface_c_c3_camera_shadow_volume.html" title="A bounding volume that encloses a pyramidal volume between the view plane (near clipping plane) of th..." alt="" coords="47,395,236,421"/>
+<area shape="rect" id="node10" href="$interface_c_c3_shadow_casting_volume.html" title="A bounding volume that encloses a volume that includes the camera frustum plus the space between the ..." alt="" coords="260,395,447,421"/>
+<area shape="rect" id="node2" href="$interface_c_c3_bounding_volume.html" title="Bounding volumes define a volume of space. " alt="" coords="73,237,223,264"/>
+<area shape="rect" id="node5" href="$protocol_c_c3_node_transform_listener_protocol-p.html" title="This protocol defines the behaviour requirements for objects that wish to be notified whenever the tr..." alt="" coords="247,230,443,271"/>
+<area shape="rect" id="node6" href="$protocol_c_c3_node_listener_protocol-p.html" title="This protocol defines the behaviour requirements for objects that wish to be notified about the basic..." alt="" coords="249,155,441,181"/>
+<area shape="rect" id="node7" href="$protocol_c_c3_object-p.html" title="Extension to support Cocos3D functionality. " alt="" coords="294,80,396,107"/>
+</map>

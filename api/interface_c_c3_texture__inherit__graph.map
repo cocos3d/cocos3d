@@ -1,0 +1,10 @@
+<map id="CC3Texture" name="CC3Texture">
+<area shape="rect" id="node8" href="$interface_c_c3_p_v_r_texture.html" title="The representation of a PVR texture that has been loaded into the GL engine. " alt="" coords="5,379,125,405"/>
+<area shape="rect" id="node9" href="$interface_c_c3_texture2_d.html" title="The representation of a 2D texture loaded into the GL engine. " alt="" coords="150,379,260,405"/>
+<area shape="rect" id="node10" href="$interface_c_c3_texture_cube.html" title="The representation of a 3D cube&#45;map texture loaded into the GL engine. " alt="" coords="285,379,411,405"/>
+<area shape="rect" id="node12" href="$interface_c_c3_texture_unit_texture.html" title="CC3TextureUnitTexture is a specialized CC3Texture subclass that actually wraps another texture instan..." alt="" coords="435,379,597,405"/>
+<area shape="rect" id="node2" href="$interface_c_c3_identifiable.html" title="This is a base subclass for any class that uses tags or names to identify individual instances..." alt="" coords="219,229,332,256"/>
+<area shape="rect" id="node4" href="$protocol_c_c3_cacheable-p.html" title="Defines the behaviour required for an object that can be held in a cache. " alt="" coords="212,155,340,181"/>
+<area shape="rect" id="node5" href="$protocol_c_c3_object-p.html" title="Extension to support Cocos3D functionality. " alt="" coords="225,80,327,107"/>
+<area shape="rect" id="node11" href="$interface_c_c3_environment_map_texture.html" title="A texture that supports an environment map created by rendering the scene from the node&#39;s perspective..." alt="" coords="251,453,445,480"/>
+</map>

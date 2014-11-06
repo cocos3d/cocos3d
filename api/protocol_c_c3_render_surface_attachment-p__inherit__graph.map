@@ -1,0 +1,6 @@
+<map id="&lt;CC3RenderSurfaceAttachment&gt;" name="&lt;CC3RenderSurfaceAttachment&gt;">
+<area shape="rect" id="node4" href="$protocol_c_c3_framebuffer_attachment-p.html" title="An implementation of CC3FramebufferAttachment can be attached to a CC3GLFramebuffer to provide a buff..." alt="" coords="82,229,285,256"/>
+<area shape="rect" id="node2" href="$protocol_c_c3_object-p.html" title="Extension to support Cocos3D functionality. " alt="" coords="133,80,235,107"/>
+<area shape="rect" id="node5" href="$interface_c_c3_g_l_renderbuffer.html" title="Represents an OpenGL renderbuffer. " alt="" coords="5,304,149,331"/>
+<area shape="rect" id="node6" href="$interface_c_c3_texture_framebuffer_attachment.html" title="CC3TextureFramebufferAttachment is a framebuffer attachment that uses a texture as the rendering buff..." alt="" coords="174,304,407,331"/>
+</map>

@@ -1,0 +1,10 @@
+<map id="CC3Mesh" name="CC3Mesh">
+<area shape="rect" id="node8" href="$interface_c_c3_mesh_model.html" title="CC3MeshModel" alt="" coords="807,5,924,32"/>
+<area shape="rect" id="node9" href="$interface_c_c3_p_o_d_mesh.html" title="A CC3Mesh whose content originates from POD resource data. " alt="" coords="810,56,921,83"/>
+<area shape="rect" id="node10" href="$interface_c_c3_point_particle_mesh.html" title="Deprecated. " alt="" coords="787,107,943,133"/>
+<area shape="rect" id="node11" href="$interface_c_c3_vertex_array_mesh.html" title="Deprecated. " alt="" coords="789,157,941,184"/>
+<area shape="rect" id="node12" href="$interface_c_c3_vertex_array_mesh_model.html" title="Deprecated. " alt="" coords="771,208,959,235"/>
+<area shape="rect" id="node2" href="$interface_c_c3_identifiable.html" title="This is a base subclass for any class that uses tags or names to identify individual instances..." alt="" coords="478,107,591,133"/>
+<area shape="rect" id="node4" href="$protocol_c_c3_cacheable-p.html" title="Defines the behaviour required for an object that can be held in a cache. " alt="" coords="301,107,429,133"/>
+<area shape="rect" id="node5" href="$protocol_c_c3_object-p.html" title="Extension to support Cocos3D functionality. " alt="" coords="150,107,253,133"/>
+</map>

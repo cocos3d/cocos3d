@@ -1,0 +1,6 @@
+<map id="&lt;CC3VariegatedPointParticleProtocol&gt;" name="&lt;CC3VariegatedPointParticleProtocol&gt;">
+<area shape="rect" id="node6" href="$interface_c_c3_variegated_point_particle.html" title="CC3VariegatedPointParticle is the type of particle emitted by a CC3VariegatedPointParticleHoseEmitter..." alt="" coords="734,93,922,120"/>
+<area shape="rect" id="node3" href="$protocol_c_c3_uniformly_fading_particle_protocol-p.html" title="CC3UniformlyFadingParticleProtocol defines behaviour required for particles that can fade uniformly f..." alt="" coords="227,86,424,127"/>
+<area shape="rect" id="node4" href="$protocol_c_c3_particle_protocol-p.html" title="CC3ParticleProtocol represents a single particle emitted by a CC3ParticleEmitter particle emitter..." alt="" coords="5,123,163,149"/>
+<area shape="rect" id="node5" href="$protocol_c_c3_mortal_particle_protocol-p.html" title="CC3MortalParticleProtocol extends CC3ParticleProtocol to allow a particle to be configured with a fin..." alt="" coords="228,152,423,179"/>
+</map>

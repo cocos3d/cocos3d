@@ -1,0 +1,12 @@
+<map id="&lt;CC3SprayParticleProtocol&gt;" name="&lt;CC3SprayParticleProtocol&gt;">
+<area shape="rect" id="node6" href="$interface_c_c3_spray_mesh_particle.html" title="CC3SprayMeshParticle is a type of CC3MortalMeshParticle that implements the CC3SprayParticleProtocol ..." alt="" coords="725,20,885,47"/>
+<area shape="rect" id="node8" href="$interface_c_c3_spray_point_particle.html" title="CC3SprayPointParticle is a type of CC3MortalPointParticle that implements the CC3SprayParticleProtoco..." alt="" coords="726,77,885,104"/>
+<area shape="rect" id="node2" href="$protocol_c_c3_uniformly_moving_particle_protocol-p.html" title="CC3UniformlyMovingParticleProtocol is a particle that moves in a straight line in a single direction ..." alt="" coords="237,15,437,57"/>
+<area shape="rect" id="node4" href="$protocol_c_c3_mortal_particle_protocol-p.html" title="CC3MortalParticleProtocol extends CC3ParticleProtocol to allow a particle to be configured with a fin..." alt="" coords="240,81,435,108"/>
+<area shape="rect" id="node5" href="$protocol_c_c3_particle_protocol-p.html" title="CC3ParticleProtocol represents a single particle emitted by a CC3ParticleEmitter particle emitter..." alt="" coords="19,81,176,108"/>
+<area shape="rect" id="node7" href="$interface_c_c3_uniformly_evolving_mesh_particle.html" title="CC3UniformlyEvolvingMeshParticle is a CC3SprayMeshParticle whose rotation and color can also be confi..." alt="" coords="934,5,1122,46"/>
+<area shape="rect" id="node9" href="$interface_c_c3_uniformly_evolving_point_particle.html" title="CC3UniformlyEvolvingPointParticle is a type of CC3SprayPointParticle that implements the CC3Uniformly..." alt="" coords="935,70,1121,111"/>
+<area shape="rect" id="node12" href="$interface_c_c3_uniform_motion_particle.html" title="Deprecated and renamed to CC3SprayPointParticle. " alt="" coords="938,136,1118,163"/>
+<area shape="rect" id="node10" href="$interface_c_c3_uniform_evolution_particle.html" title="Deprecated and renamed to CC3UniformlyEvolvingPointParticle. " alt="" coords="1171,52,1365,79"/>
+<area shape="rect" id="node11" href="$interface_c_c3_variegated_point_particle.html" title="CC3VariegatedPointParticle is the type of particle emitted by a CC3VariegatedPointParticleHoseEmitter..." alt="" coords="1174,103,1362,129"/>
+</map>

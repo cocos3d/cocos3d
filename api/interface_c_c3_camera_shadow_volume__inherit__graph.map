@@ -1,0 +1,7 @@
+<map id="CC3CameraShadowVolume" name="CC3CameraShadowVolume">
+<area shape="rect" id="node2" href="$interface_c_c3_light_camera_bridge_volume.html" title="A bounding volume that encloses a volume between a light and all or part of the frustum of the camera..." alt="" coords="142,320,351,347"/>
+<area shape="rect" id="node3" href="$interface_c_c3_bounding_volume.html" title="Bounding volumes define a volume of space. " alt="" coords="73,237,223,264"/>
+<area shape="rect" id="node6" href="$protocol_c_c3_node_transform_listener_protocol-p.html" title="This protocol defines the behaviour requirements for objects that wish to be notified whenever the tr..." alt="" coords="247,230,443,271"/>
+<area shape="rect" id="node7" href="$protocol_c_c3_node_listener_protocol-p.html" title="This protocol defines the behaviour requirements for objects that wish to be notified about the basic..." alt="" coords="249,155,441,181"/>
+<area shape="rect" id="node8" href="$protocol_c_c3_object-p.html" title="Extension to support Cocos3D functionality. " alt="" coords="294,80,396,107"/>
+</map>

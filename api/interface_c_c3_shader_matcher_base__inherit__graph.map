@@ -1,0 +1,4 @@
+<map id="CC3ShaderMatcherBase" name="CC3ShaderMatcherBase">
+<area shape="rect" id="node3" href="$protocol_c_c3_shader_matcher-p.html" title="CC3ShaderMatcher describes the behaviour required to match nodes and materials to an appropriate GL p..." alt="" coords="107,155,263,181"/>
+<area shape="rect" id="node4" href="$protocol_c_c3_object-p.html" title="Extension to support Cocos3D functionality. " alt="" coords="134,80,236,107"/>
+</map>

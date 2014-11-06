@@ -1,0 +1,146 @@
+/*
+ * 	Core Owl Carousel CSS File
+ *	v1.3.3
+ */
+.owl-carousel .owl-wrapper:after {
+  content: ".";
+  display: block;
+  clear: both;
+  visibility: hidden;
+  line-height: 0;
+  height: 0;
+}
+.owl-carousel {
+  display: none;
+  position: relative;
+  width: 100%;
+  -ms-touch-action: pan-y;
+}
+.owl-carousel .owl-wrapper {
+  display: none;
+  position: relative;
+  -webkit-transform: translate3d(0px, 0px, 0px);
+}
+.owl-carousel .owl-wrapper-outer {
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+  z-index: 2;
+}
+.owl-carousel .owl-wrapper-outer.autoHeight {
+  -webkit-transition: height 500ms ease-in-out;
+  -moz-transition: height 500ms ease-in-out;
+  -ms-transition: height 500ms ease-in-out;
+  -o-transition: height 500ms ease-in-out;
+  transition: height 500ms ease-in-out;
+}
+.owl-carousel .owl-item {
+  float: left;
+}
+.owl-controls .owl-page,
+.owl-controls .owl-buttons div {
+  cursor: pointer;
+}
+.owl-controls {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+.owl-controls .owl-buttons {
+  display: inline-block;
+}
+.owl-controls .owl-buttons .owl-prev,
+.owl-controls .owl-buttons .owl-next {
+  position: absolute;
+  top: 50%;
+  margin-top: -18px;
+  -webkit-transition: 0.3s all ease;
+  transition: 0.3s all ease;
+  z-index: 3;
+}
+.owl-controls .owl-buttons .owl-prev {
+  left: -129px;
+}
+.owl-controls .owl-buttons .owl-next {
+  right: -129px;
+}
+@media (max-width: 1199px) {
+  .owl-controls .owl-buttons {
+    position: absolute;
+    bottom: -70px;
+    right: 0;
+  }
+  .owl-controls .owl-buttons .owl-prev,
+  .owl-controls .owl-buttons .owl-next {
+    position: relative;
+    display: inline-block;
+    margin-left: 10px;
+    left: auto;
+    right: auto;
+    top: auto;
+  }
+}
+@media (max-width: 767px) {
+  .owl-controls .owl-buttons {
+    bottom: -55px;
+  }
+}
+/* mouse grab icon */
+.grabbing {
+  cursor: url(../images/grabbing.png) 8 8, move;
+}
+/* fix */
+.owl-carousel .owl-wrapper,
+.owl-carousel .owl-item {
+  -webkit-backface-visibility: hidden;
+  -moz-backface-visibility: hidden;
+  -ms-backface-visibility: hidden;
+  -webkit-transform: translate3d(0, 0, 0);
+  -moz-transform: translate3d(0, 0, 0);
+  -ms-transform: translate3d(0, 0, 0);
+}
+.owl-controls .owl-buttons .owl-prev,
+.owl-controls .owl-buttons .owl-next {
+  color: #129894;
+  height: 42px;
+  overflow: hidden;
+  font: 400 72px/42px 'FontAwesome';
+}
+.owl-controls .owl-buttons .owl-prev:hover,
+.owl-controls .owl-buttons .owl-next:hover {
+  color: #000000;
+}
+.owl-controls .owl-buttons .owl-prev:before {
+  content: '\f104';
+}
+.owl-controls .owl-buttons .owl-next:before {
+  content: '\f105';
+}
+.item {
+  text-align: center;
+}
+#owl_2 .owl-buttons .owl-prev,
+#owl_2 .owl-buttons .owl-next {
+  margin-top: -64px;
+}
+@media (min-width: 768px) and (max-width: 1199px) {
+  #owl_2 .owl-buttons .owl-prev,
+  #owl_2 .owl-buttons .owl-next {
+    margin-top: -35px;
+  }
+}
+@media (max-width: 767px) {
+  #owl_2 .owl-buttons {
+    position: absolute;
+    bottom: -95px;
+    right: 0;
+  }
+}

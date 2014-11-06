@@ -1,0 +1,6 @@
+<map id="CC3NodeAnimation" name="CC3NodeAnimation">
+<area shape="rect" id="node3" href="$interface_c_c3_array_node_animation.html" title="A concrete CC3NodeAnimation that holds animation data in simple arrays. " alt="" coords="334,5,506,32"/>
+<area shape="rect" id="node4" href="$interface_c_c3_frozen_node_animation.html" title="A concrete CC3NodeAnimation that holds animation a single, frozen animation frame. " alt="" coords="329,56,511,83"/>
+<area shape="rect" id="node5" href="$interface_c_c3_node_animation_segment.html" title="A CC3NodeAnimationSegment plays a segment of the animation data contained within another CC3NodeAnima..." alt="" coords="323,107,517,133"/>
+<area shape="rect" id="node6" href="$interface_c_c3_p_o_d_node_animation.html" title="POD files can contain information to animate the nodes. " alt="" coords="335,157,505,184"/>
+</map>

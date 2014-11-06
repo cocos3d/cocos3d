@@ -1,0 +1,8 @@
+<map id="CC3ActionTransformTo" name="CC3ActionTransformTo">
+<area shape="rect" id="node5" href="$interface_c_c3_action_move_to.html" title="CC3ActionMoveTo moves a target CC3Node to a specific location. " alt="" coords="5,229,139,256"/>
+<area shape="rect" id="node6" href="$interface_c_c3_action_rotate_to.html" title="CC3ActionRotateTo rotates a target CC3Node to a specific orientation. " alt="" coords="163,229,303,256"/>
+<area shape="rect" id="node7" href="$interface_c_c3_action_rotate_to_look_towards.html" title="CC3ActionRotateToLookTowards rotates a target CC3Node to look towards a specific direction. " alt="" coords="327,229,547,256"/>
+<area shape="rect" id="node9" href="$interface_c_c3_action_scale_to.html" title="CC3ActionScaleTo scales a target CC3Node to a specific scale. " alt="" coords="571,229,705,256"/>
+<area shape="rect" id="node2" href="$interface_c_c3_action_transform_vector.html" title="CC3ActionTransformVector is an abstract subclass of CCActionInterval that is the parent of subclasses..." alt="" coords="242,80,427,107"/>
+<area shape="rect" id="node8" href="$interface_c_c3_action_rotate_to_look_at.html" title="CC3ActionRotateToLookAt rotates a target CC3Node to look at a specific location. " alt="" coords="346,304,528,331"/>
+</map>

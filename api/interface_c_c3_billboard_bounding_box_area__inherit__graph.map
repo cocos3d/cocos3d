@@ -1,0 +1,5 @@
+<map id="CC3BillboardBoundingBoxArea" name="CC3BillboardBoundingBoxArea">
+<area shape="rect" id="node2" href="$interface_c_c3_node_bounding_area.html" title="A bounding volume that defines a 2D bounding area for a node, and checks that bounding area against a..." alt="" coords="27,229,192,256"/>
+<area shape="rect" id="node3" href="$interface_c_c3_node_bounding_volume.html" title="CC3NodeBoundingVolumes are used by CC3Nodes to determine whether a node intersets another bounding vo..." alt="" coords="18,155,200,181"/>
+<area shape="rect" id="node4" href="$interface_c_c3_bounding_volume.html" title="Bounding volumes define a volume of space. " alt="" coords="34,80,184,107"/>
+</map>

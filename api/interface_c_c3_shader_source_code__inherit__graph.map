@@ -1,0 +1,8 @@
+<map id="CC3ShaderSourceCode" name="CC3ShaderSourceCode">
+<area shape="rect" id="node8" href="$interface_c_c3_shader_source_code_group.html" title="A member of the CC3ShaderSourceCode class cluster that contains instances of CC3ShaderSource class&#45;cl..." alt="" coords="5,379,208,405"/>
+<area shape="rect" id="node9" href="$interface_c_c3_shader_source_code_lines.html" title="A member of the CC3ShaderSourceCode class cluster that contains source code as a collection of indivi..." alt="" coords="232,379,429,405"/>
+<area shape="rect" id="node10" href="$interface_c_c3_shader_source_code_string.html" title="A member of the CC3ShaderSourceCode class cluster that contains a single string of source code..." alt="" coords="453,379,653,405"/>
+<area shape="rect" id="node2" href="$interface_c_c3_identifiable.html" title="This is a base subclass for any class that uses tags or names to identify individual instances..." alt="" coords="274,229,387,256"/>
+<area shape="rect" id="node4" href="$protocol_c_c3_cacheable-p.html" title="Defines the behaviour required for an object that can be held in a cache. " alt="" coords="267,155,395,181"/>
+<area shape="rect" id="node5" href="$protocol_c_c3_object-p.html" title="Extension to support Cocos3D functionality. " alt="" coords="279,80,381,107"/>
+</map>

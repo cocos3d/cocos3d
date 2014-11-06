@@ -1,0 +1,7 @@
+<map id="CC3Material" name="CC3Material">
+<area shape="rect" id="node11" href="$interface_c_c3_p_o_d_material.html" title="A CC3Material whose content originates from POD resource data. " alt="" coords="368,379,493,405"/>
+<area shape="rect" id="node2" href="$interface_c_c3_identifiable.html" title="This is a base subclass for any class that uses tags or names to identify individual instances..." alt="" coords="150,229,263,256"/>
+<area shape="rect" id="node4" href="$protocol_c_c3_cacheable-p.html" title="Defines the behaviour required for an object that can be held in a cache. " alt="" coords="108,155,236,181"/>
+<area shape="rect" id="node5" href="$protocol_c_c3_object-p.html" title="Extension to support Cocos3D functionality. " alt="" coords="121,80,223,107"/>
+<area shape="rect" id="node8" href="$protocol_c_c_r_g_b_a_protocol-p.html" title="\&lt;CCRGBAProtocol\&gt;" alt="" coords="359,229,503,256"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="&lt;CC3UniformlyFadingParticleProtocol&gt;" name="&lt;CC3UniformlyFadingParticleProtocol&gt;">
+<area shape="rect" id="node3" href="$protocol_c_c3_variegated_point_particle_protocol-p.html" title="CC3VariegatedPointParticleProtocol is used by the CC3VariegatedPointParticleHoseEmitter, and combines the CC3UniformlyGrowingPointParticleProtocol and CC3UniformlyFadingParticleProtocol protocols, and is a particle that steadily changes size and color. " alt="" coords="6,171,201,213"/>
+<area shape="rect" id="node2" href="$protocol_c_c3_particle_protocol-p.html" title="CC3ParticleProtocol represents a single particle emitted by a CC3ParticleEmitter particle emitter..." alt="" coords="25,5,183,32"/>
+<area shape="rect" id="node4" href="$interface_c_c3_variegated_point_particle.html" title="CC3VariegatedPointParticle is the type of particle emitted by a CC3VariegatedPointParticleHoseEmitter..." alt="" coords="10,261,197,288"/>
+</map>

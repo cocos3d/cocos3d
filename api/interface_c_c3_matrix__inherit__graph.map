@@ -1,0 +1,5 @@
+<map id="CC3Matrix" name="CC3Matrix">
+<area shape="rect" id="node4" href="$interface_c_c3_affine_matrix.html" title="CC3AffineMatrix is a 4x3 matrix that can represent affine transforms such as rotation, scaling, reflection, shearing, and translation. " alt="" coords="5,155,123,181"/>
+<area shape="rect" id="node5" href="$interface_c_c3_linear_matrix.html" title="CC3LinearMatrix is a 3x3 matrix that can represent 3D linear transforms such as rotation, scaling, reflection and shearing. " alt="" coords="148,155,271,181"/>
+<area shape="rect" id="node6" href="$interface_c_c3_projection_matrix.html" title="CC3ProjectionMatrix is a 4x4 matrix that can represent many non&#45;linear 3D transforms, including perspective projection and orthographic projection. " alt="" coords="295,155,439,181"/>
+</map>

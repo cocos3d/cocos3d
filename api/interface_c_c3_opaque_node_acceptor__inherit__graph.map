@@ -1,0 +1,4 @@
+<map id="CC3OpaqueNodeAcceptor" name="CC3OpaqueNodeAcceptor">
+<area shape="rect" id="node2" href="$interface_c_c3_local_content_node_evaluator.html" title="A type of CC3NodeEvaluator that specializes in evaluating only CC3Nodes with local content..." alt="" coords="5,155,221,181"/>
+<area shape="rect" id="node3" href="$interface_c_c3_node_evaluator.html" title="A CC3NodeEvaluator performs some type of accept/reject evaluation on a CC3Node instance. " alt="" coords="45,80,181,107"/>
+</map>

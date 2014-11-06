@@ -1,0 +1,1 @@
+#filters{display:inline-block}#filters li{display:inline-block}#filters li:before{content:'|';color:#7ec7c5}@media (max-width:767px){#filters{display:block;padding-top:10px}}@media (max-width:479px){#filters{display:block}#filters li{padding-top:10px;display:block}}

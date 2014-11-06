@@ -1,0 +1,49 @@
+<map id="&lt;CC3NodeTransformListenerProtocol&gt;" name="&lt;CC3NodeTransformListenerProtocol&gt;">
+<area shape="rect" id="node5" href="$interface_c_c3_hose_particle_navigator.html" title="CC3HoseParticleNavigator confgures particles that support the CC3SprayParticleProtocol to be emitted ..." alt="" coords="801,107,983,133"/>
+<area shape="rect" id="node6" href="$interface_c_c3_light_camera_bridge_volume.html" title="A bounding volume that encloses a volume between a light and all or part of the frustum of the camera..." alt="" coords="787,157,997,184"/>
+<area shape="rect" id="node9" href="$interface_c_c3_node.html" title="CC3Node and its subclasses form the basis of all 3D artifacts in the 3D scene, including visible mesh..." alt="" coords="852,335,932,361"/>
+<area shape="rect" id="node49" href="$interface_c_c3_skinned_bone.html" title="CC3SkinnedBone combines the transforms of a bone and a skin mesh node, and applies these transforms t..." alt="" coords="828,385,956,412"/>
+<area shape="rect" id="node2" href="$protocol_c_c3_node_listener_protocol-p.html" title="This protocol defines the behaviour requirements for objects that wish to be notified about the basic..." alt="" coords="301,309,493,336"/>
+<area shape="rect" id="node3" href="$protocol_c_c3_object-p.html" title="Extension to support Cocos3D functionality. " alt="" coords="150,309,253,336"/>
+<area shape="rect" id="node7" href="$interface_c_c3_camera_shadow_volume.html" title="A bounding volume that encloses a pyramidal volume between the view plane (near clipping plane) of th..." alt="" coords="1045,5,1235,32"/>
+<area shape="rect" id="node8" href="$interface_c_c3_shadow_casting_volume.html" title="A bounding volume that encloses a volume that includes the camera frustum plus the space between the ..." alt="" coords="1047,56,1233,83"/>
+<area shape="rect" id="node10" href="$interface_c_c3_bone.html" title="CC3Bone is the building block of skeletons that control the deformation of a skin mesh..." alt="" coords="1100,107,1180,133"/>
+<area shape="rect" id="node12" href="$interface_c_c3_c_a_l_node.html" title="A CC3CALNode extracted from a file. " alt="" coords="1087,157,1193,184"/>
+<area shape="rect" id="node13" href="$interface_c_c3_camera.html" title="CC3Camera represents the camera viewing the 3D scene. " alt="" coords="1092,208,1188,235"/>
+<area shape="rect" id="node15" href="$interface_c_c3_environment_node.html" title="CC3EnvironmentNode is an abstract superclass of a family of node classes that hold a texture that can..." alt="" coords="1062,259,1218,285"/>
+<area shape="rect" id="node17" href="$interface_c_c3_light.html" title="CC3Light represents the light in the 3D scene. " alt="" coords="1101,309,1179,336"/>
+<area shape="rect" id="node19" href="$interface_c_c3_light_tracker.html" title="Deprecated and functionality moved to CC3Node class. " alt="" coords="1079,360,1201,387"/>
+<area shape="rect" id="node20" href="$interface_c_c3_local_content_node.html" title="CC3LocalContentNode is an abstract class that forms the basis for nodes that have local content to dr..." alt="" coords="1061,411,1219,437"/>
+<area shape="rect" id="node42" href="$interface_c_c3_p_o_d_node.html" title="A CC3Node extracted from a POD file. " alt="" coords="1085,461,1195,488"/>
+<area shape="rect" id="node43" href="$interface_c_c3_resource_node.html" title="A CC3ResourceNode is a CC3Node that that can be populated from a CC3NodesResource, and forms the root of the node structural assembly loaded from a resource file. " alt="" coords="1071,512,1209,539"/>
+<area shape="rect" id="node45" href="$interface_c_c3_scene.html" title="CC3Scene is a CC3Node that manages a 3D scene. " alt="" coords="1097,563,1183,589"/>
+<area shape="rect" id="node47" href="$interface_c_c3_soft_body_node.html" title="CC3SoftBodyNode is the primary structural component for a soft&#45;body object that uses vertex skinning ..." alt="" coords="1073,613,1207,640"/>
+<area shape="rect" id="node48" href="$interface_c_c3_targetting_node.html" title="Deprecated and functionality moved to CC3Node class. " alt="" coords="1070,664,1210,691"/>
+<area shape="rect" id="node11" href="$interface_c_c3_p_o_d_bone.html" title="A CC3Bone extracted from a POD file. " alt="" coords="1312,107,1421,133"/>
+<area shape="rect" id="node14" href="$interface_c_c3_p_o_d_camera.html" title="A CC3Camera whose content originates from POD resource data. " alt="" coords="1304,208,1429,235"/>
+<area shape="rect" id="node16" href="$interface_c_c3_light_probe.html" title="CC3LightProbe is a type of light that uses a texture to define the light intensity in any direction a..." alt="" coords="1310,259,1423,285"/>
+<area shape="rect" id="node18" href="$interface_c_c3_p_o_d_light.html" title="A CC3Light whose content originates from POD resource data. " alt="" coords="1313,309,1420,336"/>
+<area shape="rect" id="node21" href="$interface_c_c3_mesh_node.html" title="A CC3Node that draws a 3D mesh. " alt="" coords="1310,411,1423,437"/>
+<area shape="rect" id="node22" href="$interface_c_c3_billboard.html" title="This CC3Node displays a 2D Cocos2D CCNode as part of the 3D scene. " alt="" coords="1562,107,1662,133"/>
+<area shape="rect" id="node25" href="$interface_c_c3_bitmap_label_node.html" title="CC3BitmapLabelNode displays a rectangular mesh displaying the text of a specified string..." alt="" coords="1535,157,1689,184"/>
+<area shape="rect" id="node26" href="$interface_c_c3_bounding_volume_display_node.html" title="CC3BoundingVolumeDisplayNode is a type of CC3MeshNode specialized for displaying the bounding volume ..." alt="" coords="1499,208,1725,235"/>
+<area shape="rect" id="node27" href="$interface_c_c3_box_node.html" title="CC3BoxNode is a type of CC3MeshNode that is specialized to display simple box or cube meshes..." alt="" coords="1560,259,1664,285"/>
+<area shape="rect" id="node29" href="$interface_c_c3_clip_space_node.html" title="CC3ClipSpaceNode simplifies the creation of a simple rectangular node that can be used in the clip&#45;sp..." alt="" coords="1541,309,1683,336"/>
+<area shape="rect" id="node32" href="$interface_c_c3_fog.html" title="CC3Fog is a mesh node that can render fog in the 3D scene. " alt="" coords="1576,360,1648,387"/>
+<area shape="rect" id="node33" href="$interface_c_c3_line_node.html" title="CC3LineNode is a type of CC3MeshNode that is specialized to display lines. " alt="" coords="1559,411,1665,437"/>
+<area shape="rect" id="node36" href="$interface_c_c3_particle_emitter.html" title="A CC3MeshNode that emits 3D particles. " alt="" coords="1544,461,1680,488"/>
+<area shape="rect" id="node37" href="$interface_c_c3_plane_node.html" title="CC3PlaneNode is a type of CC3MeshNode that is specialized to display planes and simple rectanglular m..." alt="" coords="1555,512,1669,539"/>
+<area shape="rect" id="node38" href="$interface_c_c3_p_o_d_mesh_node.html" title="A CC3MeshNode whose content originates from POD resource data. " alt="" coords="1541,563,1683,589"/>
+<area shape="rect" id="node39" href="$interface_c_c3_shadow_volume_mesh_node.html" title="The mesh node used to build a shadow volume. " alt="" coords="1509,613,1715,640"/>
+<area shape="rect" id="node40" href="$interface_c_c3_skin_mesh_node.html" title="CC3SkinMeshNode is a CC3MeshNode specialized to use vertex skinning to draw the contents of its mesh..." alt="" coords="1543,664,1681,691"/>
+<area shape="rect" id="node41" href="$interface_c_c3_sphere_node.html" title="CC3SphereNode is a type of CC3MeshNode that is specialized to display a simple sphere mesh..." alt="" coords="1550,715,1674,741"/>
+<area shape="rect" id="node23" href="$interface_c_c3_node_descriptor.html" title="CC3NodeDescriptor is a type of CC3Billboard specialized for attaching a descriptive text label to ano..." alt="" coords="1817,81,1959,108"/>
+<area shape="rect" id="node24" href="$interface_c_c3_particle_system_billboard.html" title="A CC3Billboard node customized to display and manage a Cocos2D 2D CCParticleSystem. " alt="" coords="1793,132,1983,159"/>
+<area shape="rect" id="node28" href="$interface_c_c3_touch_box.html" title="CC3TouchBox is a specialized node that creates an invisible box mesh that can be used to define a 3D ..." alt="" coords="1833,259,1943,285"/>
+<area shape="rect" id="node30" href="$interface_c_c3_backdrop.html" title="CC3Backdrop represents a simple full&#45;view static backdrop that is rendered in clip&#45;space. " alt="" coords="1835,309,1941,336"/>
+<area shape="rect" id="node31" href="$interface_c_c3_stencilled_shadow_painter_node.html" title="The mesh node used to paint the shadows cast by shadow volumes. " alt="" coords="1773,360,2003,387"/>
+<area shape="rect" id="node34" href="$interface_c_c3_simple_line_node.html" title="CC3SimpleLineNode simplifies the creation of a simple two&#45;point straight line. " alt="" coords="1815,411,1961,437"/>
+<area shape="rect" id="node35" href="$interface_c_c3_wireframe_bounding_box_node.html" title="CC3WireframeBoundingBoxNode is a type of CC3LineNode specialized for drawing a wireframe bounding box..." alt="" coords="1777,461,1999,488"/>
+<area shape="rect" id="node44" href="$interface_c_c3_p_o_d_resource_node.html" title="A CC3ResourceNode that can be loaded from a PVR POD resource file. " alt="" coords="1283,512,1450,539"/>
+<area shape="rect" id="node46" href="$interface_c_c3_world.html" title="CC3World" alt="" coords="1325,563,1409,589"/>
+</map>

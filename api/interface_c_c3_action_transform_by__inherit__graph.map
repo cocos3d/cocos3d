@@ -1,0 +1,6 @@
+<map id="CC3ActionTransformBy" name="CC3ActionTransformBy">
+<area shape="rect" id="node5" href="$interface_c_c3_action_move_by.html" title="CC3ActionMoveBy moves a target CC3Node by a specific translation amount. " alt="" coords="5,229,139,256"/>
+<area shape="rect" id="node6" href="$interface_c_c3_action_rotate_by.html" title="CC3ActionRotateBy rotates a target CC3Node by a specific rotation amount. " alt="" coords="163,229,303,256"/>
+<area shape="rect" id="node7" href="$interface_c_c3_action_scale_by.html" title="CC3ActionScaleBy scales a target CC3Node by a specific scale factor. " alt="" coords="327,229,461,256"/>
+<area shape="rect" id="node2" href="$interface_c_c3_action_transform_vector.html" title="CC3ActionTransformVector is an abstract subclass of CCActionInterval that is the parent of subclasses..." alt="" coords="141,80,325,107"/>
+</map>

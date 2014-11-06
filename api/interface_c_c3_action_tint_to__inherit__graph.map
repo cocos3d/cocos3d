@@ -1,0 +1,6 @@
+<map id="CC3ActionTintTo" name="CC3ActionTintTo">
+<area shape="rect" id="node4" href="$interface_c_c3_action_tint_ambient_to.html" title="CC3ActionTintAmbientTo changes only the ambientColor property of the target CC3Node. " alt="" coords="353,5,525,32"/>
+<area shape="rect" id="node5" href="$interface_c_c3_action_tint_diffuse_to.html" title="CC3ActionTintDiffuseTo changes only the diffuseColor property of the target CC3Node. " alt="" coords="356,56,521,83"/>
+<area shape="rect" id="node6" href="$interface_c_c3_action_tint_emission_to.html" title="CC3ActionTintEmissionTo changes only the emissionColor property of the target CC3Node. " alt="" coords="350,107,527,133"/>
+<area shape="rect" id="node7" href="$interface_c_c3_action_tint_specular_to.html" title="CC3ActionTintSpecularTo changes only the specularColor property of the target CC3Node. " alt="" coords="351,157,527,184"/>
+</map>
