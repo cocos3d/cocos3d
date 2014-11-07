@@ -421,12 +421,12 @@ Properties</h2></td></tr>
 
 <p>Returns the Class used to automatically instantiate a value for the cc3Scene property, if that property is not set directly. </p>
 <p>The value returned by this method is a subclass of <a class="el" href="interface_c_c3_scene.html" title="CC3Scene is a CC3Node that manages a 3D scene. ">CC3Scene</a>.</p>
-<p>This implementation attempts to derive the appropriate scene class from the name of the class of this instance by looking for a subclass of <a class="el" href="interface_c_c3_scene.html" title="CC3Scene is a CC3Node that manages a 3D scene. ">CC3Scene</a> whose name is one of the following (searched in this order): </p>
-<h1>If the class name of this instance ends in "Layer", it is stripped and "Scene" is</h1>
-<p>appended to the stripped result (eg. HelloLayer -&gt; HelloScene). </p>
-<h1>If the class name of this instance ends in "Layer", it is stripped (eg. HelloLayer -&gt; Hello).</h1>
-<h1>"Scene" is appended to the class name of this instance (eg. Hello -&gt; HelloScene,</h1>
-<p>including HelloLayer -&gt; HelloLayerScene).</p>
+<p>This implementation attempts to derive the appropriate scene class from the name of the class of this instance by looking for a subclass of <a class="el" href="interface_c_c3_scene.html" title="CC3Scene is a CC3Node that manages a 3D scene. ">CC3Scene</a> whose name is one of the following (searched in this order):</p>
+<ol type="1">
+<li>If the class name of this instance ends in "Layer", it is stripped and "Scene" is appended to the stripped result (eg. HelloLayer -&gt; HelloScene).</li>
+<li>If the class name of this instance ends in "Layer", it is stripped (eg. HelloLayer -&gt; Hello).</li>
+<li>"Scene" is appended to the class name of this instance (eg. Hello -&gt; HelloScene, including HelloLayer -&gt; HelloLayerScene).</li>
+</ol>
 <p>If that is not sufficient, you can override the getter method of this property in your custom <a class="el" href="interface_c_c3_layer.html" title="CC3Layer is a Cocos2D CCLayer that supports full 3D rendering in combination with normal Cocos2D 2D r...">CC3Layer</a> subclass to return whatever you want, or you can set the cc3Scene property directly. If you override this method, remember the value returned by this method must be a subclass of <a class="el" href="interface_c_c3_scene.html" title="CC3Scene is a CC3Node that manages a 3D scene. ">CC3Scene</a>. </p>
 
 </div>
