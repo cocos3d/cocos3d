@@ -1,0 +1,27 @@
+/** Remove colored background on alternating rows in class lists. */
+.directory tr.even {
+	background-color: inherit;
+}
+
+a {
+	color: #346b00;
+}
+
+a:visited {
+	color: #6ba600;
+}
+
+.tablist a {
+	color: #346b00;
+}
+
+address.footer {
+	text-align: left;
+	background-color: #6ba600;
+}
+
+p.footer {
+	color: white;
+	vertical-align: middle;
+	padding: 20px 20px 20px 40px;
+}

@@ -175,11 +175,11 @@
  * This implementation attempts to derive the appropriate scene class from the name of the
  * class of this instance by looking for a subclass of CC3Scene whose name is one of the 
  * following (searched in this order):
- *   # If the class name of this instance ends in "Layer", it is stripped and "Scene" is
- *     appended to the stripped result (eg. HelloLayer -> HelloScene).
- *   # If the class name of this instance ends in "Layer", it is stripped (eg. HelloLayer -> Hello).
- *   # "Scene" is appended to the class name of this instance (eg. Hello -> HelloScene, 
- *     including HelloLayer -> HelloLayerScene).
+ *   -# If the class name of this instance ends in "Layer", it is stripped and "Scene" is
+ *      appended to the stripped result (eg. HelloLayer -> HelloScene).
+ *   -# If the class name of this instance ends in "Layer", it is stripped (eg. HelloLayer -> Hello).
+ *   -# "Scene" is appended to the class name of this instance (eg. Hello -> HelloScene,
+ *      including HelloLayer -> HelloLayerScene).
  *
  * If that is not sufficient, you can override the getter method of this property in your 
  * custom CC3Layer subclass to return whatever you want, or you can set the cc3Scene property

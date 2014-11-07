@@ -1,9 +1,10 @@
-<img src="http://www.brenwill.com/docs/cocos3d/Logos/cocos3d-Banner-150h.png">
+<a href="http://cocos3d.org"><img src="http://cocos3d.org/images/cocos3d-Banner-150h.png" /></a>
 
-Copyright (c) 2010-2014 [The Brenwill Workshop Ltd.](http://www.brenwill.com) All rights reserved.
 
 Cocos3D
 =======
+
+Copyright (c) 2010-2014 [The Brenwill Workshop Ltd.](http://www.brenwill.com) All rights reserved.
 
 *This document is written in [Markdown](http://en.wikipedia.org/wiki/Markdown) format. For best results, use a Markdown reader.*
 
