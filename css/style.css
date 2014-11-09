@@ -129,6 +129,9 @@ img {
 .bg_2 {
 	background: #6ba600;
 }
+.bg_3 {
+	text-shadow: 0px 0px 8px #000000;
+}
 /*============  Floats  =============*/
 .put-left {
   float: left;

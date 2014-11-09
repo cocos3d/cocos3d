@@ -128,13 +128,13 @@ $(document).ready(function () {
         camera.camera(
             {
                 autoAdvance: true,
-				time: 2500,
+				time: 2000,
                 height: '40%',
-                /* height: '31.25%',*/
-                minHeight: '200px',
+				minHeight: '200px',
                 pagination: false,
                 thumbnails: false,
                 playPause: false,
+				overlayer: false,
                 hover: true,
                 loader: 'none',
                 navigation: true,
