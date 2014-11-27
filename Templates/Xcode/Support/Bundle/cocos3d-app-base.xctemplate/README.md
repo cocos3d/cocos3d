@@ -1,4 +1,4 @@
-<img src="http://www.brenwill.com/docs/cocos3d/Logos/cocos3d-Banner-150h.png">
+<a href="http://cocos3d.org"><img src="http://cocos3d.org/images/cocos3d-Banner-150h.png" /></a>
 
 README
 ----------------------
