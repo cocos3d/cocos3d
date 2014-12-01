@@ -10,6 +10,10 @@
 #import "CC3HelloWorldScene.h"
 
 
+@interface CC3Layer (TemplateMethods)
+-(BOOL) handleTouch: (UITouch*) touch ofType: (uint) touchType;
+@end
+
 @implementation CC3HelloWorldLayer
 
 /**

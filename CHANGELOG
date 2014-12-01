@@ -17,6 +17,7 @@ Cocos3D 2.0.2 - 2014/12/07
 - Update README.md files to use logo from cocos3d.org website.
 - Update Doxygen formatting for compatibility with new Cocos3D website.
 - Fixed HEADER_SEARCH_PATHS in CC3StatLib project to handle both Cocos2D & SpriteBuilder projects.
+- Expose handleTouch:ofType: in CC3HelloWorldLayer.m.
 
 
 
