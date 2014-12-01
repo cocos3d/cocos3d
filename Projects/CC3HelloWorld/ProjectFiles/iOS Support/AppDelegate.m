@@ -36,14 +36,7 @@
 //	   CCSetupMultiSampling: @(YES),							// Use multisampling on the main view
 //	   CCSetupNumberOfSamples: @(4),							// Number of samples to use per pixel (max 4)
 	   }];
-	
-	// For an Augmented Reality 3D overlay on the device camera, uncomment the following lines.
-	// This must be done after the window is made visible. The 3D scene contains a solid backdrop.
-	// To see the device camera behind the 3D scene, remove this backdrop, by commenting out the
-	// addBackdrop invocation in the initializeScene method of CC3DemoMashUpScene.
-//	CC3DeviceCameraOverlayUIViewController* viewController = [[CC3DeviceCameraOverlayUIViewController alloc] init];
-//	viewController.isOverlayingDeviceCamera = YES;
-	
+
 	return YES;
 }
 
@@ -68,7 +61,17 @@
 //	[cc3Layer runAction: [CCActionMoveTo actionWithDuration: 15.0 position: ccp(500.0, 250.0)]];
 
 	// Wrap the 3D layer in a 2D scene and return it
-	return [cc3Layer asCCScene];
+	CCScene* scene2D = [cc3Layer asCCScene];
+
+	// For an Augmented Reality 3D overlay on the device camera, uncomment the following lines.
+	// This must be done after the window is made visible. The 3D scene contains a solid backdrop.
+	// To see the device camera behind the 3D scene, remove this backdrop, by commenting out the
+	// backdrop property assignment in the initializeScene method of CC3HelloWorldScene.
+//	CC3DeviceCameraOverlayUIViewController* viewController = [[CC3DeviceCameraOverlayUIViewController alloc] init];
+//	viewController.isOverlayingDeviceCamera = YES;
+//	scene2D.colorRGBA = [CCColor colorWithCcColor4f: kCCC4FBlackTransparent];
+
+	return scene2D;
 }
 
 @end

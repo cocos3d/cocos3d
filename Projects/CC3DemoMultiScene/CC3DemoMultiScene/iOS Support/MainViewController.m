@@ -107,6 +107,15 @@
 
 /** Opens the specified 2D scene (containing the 3D scene), using a randomly-selected transition. */
 -(void) openScene: (CCScene*) ccScene {
+
+	// For an Augmented Reality 3D overlay on the device camera, uncomment the following line.
+	// This must be done after the window is made visible. If the 3D scene contains a backdrop
+	// (eg. DemoMashUpScene), comment out setting the backdrop property. For the 2D IntroScene,
+	// comment out setting the background property. Since this app uses Storyboards, the Background
+	// color of the background UIViews in the Storyboards (BaseView & FrameView) must be set to
+	// Clear Color, and their Opaque properties must be turned off.
+//	[self showDeviceCameraWith2DScene: ccScene];
+
 	[CCDirector.sharedDirector replaceScene: ccScene withTransition: [self getRandomTransition]];
 }
 
@@ -145,6 +154,16 @@
 		case 4:
 		default:
 			return [CCTransition transitionPushWithDirection: direction duration: duration];
+	}
+}
+
+/** To create an Augmented Reality display, set the specified CCScene as transparent, and engage a controller for the device camera. */
+-(void) showDeviceCameraWith2DScene: (CCScene*) scene2D {
+	scene2D.colorRGBA = [CCColor colorWithCcColor4f: kCCC4FBlackTransparent];
+
+	if (!_deviceCameraController) {
+		_deviceCameraController = [[CC3DeviceCameraOverlayUIViewController alloc] init];
+		_deviceCameraController.isOverlayingDeviceCamera = YES;
 	}
 }
 
