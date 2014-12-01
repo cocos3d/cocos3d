@@ -4,7 +4,7 @@
 README
 ------
 
-Cocos3D 2.0.1
+Cocos3D 2.0.2
 
 Copyright (c) 2010-2014 [The Brenwill Workshop Ltd.](http://www.brenwill.com) All rights reserved.
 
@@ -15,11 +15,12 @@ For best results, use a Markdown reader.*
 Learning Cocos3D
 ----------------
 
-Wondering how to get started? View Harry Dart-O’Flynn’s wonderful [Starting Cocos3D](http://www.youtube.com/playlist?list=PLU4bmVOOYXK-fV0Wt-ES5n3k8qTTyqgYu) 
+Wondering how to get started? View Harry Dart-O’Flynn’s wonderful 
+[Starting Cocos3D](http://www.youtube.com/playlist?list=PLU4bmVOOYXK-fV0Wt-ES5n3k8qTTyqgYu) 
 collection of video tutorials!
 
-To learn more about Cocos3D, please refer to the [Cocos3D Programming Guide](http://brenwill.com/2011/cocos3d-programming-guide/)
-and the latest [API documentation](http://brenwill.com/docs/cocos3d/2.0.1/api/).
+To learn more about Cocos3D, please refer to the [Cocos3D Wiki](https://github.com/cocos3d/cocos3d/wiki)
+and the latest [API documentation](http://cocos3d.org/api).
 
 You can create a local copy of the API documentation using `Doxygen` to extract the documentation
 from the source files. There is a `Doxygen` configuration file to output the API documents in the
@@ -202,8 +203,8 @@ the standalone *PVRGeoPOD* app to convert the COLLADA file to the POD format.
 Both the standalone and plugin versions of *PVRGeoPOD* are available free of charge from
 Imagination Technologies, the supplier of the GPU's used in iOS devices.
 
-Read the [full instructions](http://brenwill.com/2011/cocos3d-importing-converting-collada-to-pod/)
-for more info on where to get the *PVRGeoPOD* converter, and how to use it to generate POD files.
+Read the [full instructions](https://github.com/cocos3d/cocos3d/wiki/Creating-POD-Files)
+for more info on where to get the PVRGeoPOD converter, and how to use it to generate POD files.
 
 If you are using *Blender* as your 3D editor, and have many `.blend` files to export to POD format,
 you can use the command-line batch tool available in the `Tools/Blender-POD Batch Converter`

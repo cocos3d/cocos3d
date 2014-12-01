@@ -4,7 +4,7 @@
 README
 ------
 
-Cocos3D 2.0.1
+Cocos3D 2.0.2
 
 Copyright (c) 2010-2014 [The Brenwill Workshop Ltd.](http://www.brenwill.com) All rights reserved.
 
@@ -42,11 +42,12 @@ When adapting this project for your own application, don't forget to remove the
 Learning Cocos3D
 ----------------
 
-Wondering how to get started? View Harry Dart-O’Flynn’s wonderful [Starting Cocos3D](http://www.youtube.com/playlist?list=PLU4bmVOOYXK-fV0Wt-ES5n3k8qTTyqgYu) 
+Wondering how to get started? View Harry Dart-O’Flynn’s wonderful 
+[Starting Cocos3D](http://www.youtube.com/playlist?list=PLU4bmVOOYXK-fV0Wt-ES5n3k8qTTyqgYu) 
 collection of video tutorials!
 
-To learn more about Cocos3D, please refer to the [Cocos3D Programming Guide](http://brenwill.com/2011/cocos3d-programming-guide/)
-and the latest [API documentation](http://brenwill.com/docs/cocos3d/2.0.1/api/).
+To learn more about Cocos3D, please refer to the [Cocos3D Wiki](https://github.com/cocos3d/cocos3d/wiki)
+and the latest [API documentation](http://cocos3d.org/api).
 
 You can create a local copy of the API documentation using `Doxygen` to extract the documentation
 from the source files. There is a `Doxygen` configuration file to output the API documents in the
@@ -61,20 +62,22 @@ and how to work within the framework.
 Cocos2D Version Compatibility
 -----------------------------
 
-Cocos3D under iOS and Android is compatible with `Cocos2D` `3.x` and `Cocos2D` `2.1`, for 
-using programmable-pipeline OpenGL ES 2.0, and is compatible with `Cocos2D` `1.1`, for 
-using fixed-pipeline OpenGL ES 1.1.
+Cocos3D is compatible with `Cocos2D 3.2, 3.1, 3.0, 2.2` and `2.1`, when using programmable-pipeline
+OpenGL ES 2.0 under iOS and Android, or OpenGL under OSX, and is compatible with `Cocos2D 1.1`, 
+when using fixed-pipeline OpenGL ES 1.1 under iOS and Android.
 
-Cocos3D under OSX is compatible with `Cocos2D` `3.x` and `Cocos2D` `2.1`, for using
-programmable-pipeline OpenGL. Cocos3D is not compatible with `Cocos2D` `1.1` under OSX.
+> **Note:** `Cocos3D 2.0` is not compatible with `Cocos2D 3.3` and above, as substantial changes
+> to integration design were made in `Cocos2D 3.3`. Development of `Cocos3D 3.0` is underway, 
+> which will provide exciting new features, and compatibility with future versions of Cocos2D.
+> `Cocos3D 3.0` will not retain compatibility with versions of Cocos2D earlier than `Cocos2D 3.3`, 
+> and will not support OpenGLES 1.1.
 
-At the time of this release, the current version of Cocos2D is `3.2.1`, and by default, this 
-starter app is pre-configured to use that version. To build and run this app with a different
+The starter app is pre-configured to use `Cocos2D 3.2.1`. To build and run this app with a different
 version of Cocos2D, follow the steps described here:
 
-1. Run the `install-cocos3d.sh` script again and identify the new version of `Cocos2D` to be linked.
-   Keep in mind that you must link `Cocos2D` `3.x` or `Cocos2D 2.1` if you want to use OpenGL ES 2.0 
-   (iOS & Android) or OpenGL (OSX) with a programmable rendering pipeline, and you must link 
+1. Run the `install-cocos3d.sh` script again and identify the new version of Cocos2D to be linked.
+   Keep in mind that you must link `Cocos2D 2.1` or above if you want to use OpenGL ES 2.0
+   (iOS & Android) or OpenGL (OSX) with a programmable rendering pipeline, and you must link
    `Cocos2D 1.1` if you want to use OpenGL ES 1.1 (iOS & Android) with a fixed rendering pipeline.
 
 2. Add the updated Cocos2D files to this project:
@@ -95,7 +98,7 @@ version of Cocos2D, follow the steps described here:
 	6. Drag the updated `cocos2d-chipmunk` folder in this project into the Xcode *Project Navigator* panel. 
 	   When prompted for the target to add the source code to, select the `cocos2d-chipmunk` target.
 
-6. If you are using Cocos2D 3.2 or later, configure the `CCNoARC.m` file to use Manual Refernce Counting:
+6. If you are using Cocos2D 3.2, configure the `CCNoARC.m` file to use Manual Refernce Counting:
 
 	1. Select the *Build Phases* tab of the `cocos2d` target.
 
@@ -105,33 +108,33 @@ version of Cocos2D, follow the steps described here:
 	   compiler flag. As the name implies, the  `CCNoARC.m` file uses Manual Refernce Counting (MRC)
 	   instead of Automatic Reference Counting (ARC), to improve performance.
 
-7. `Cocos2D` `3.x` uses Automatic Reference Counting (ARC). `Cocos2D` `2.1` and `Cocos2D` `1.1`
+7. `Cocos2D 3.0` and above, uses Automatic Reference Counting (ARC). `Cocos2D 2.2` and below
    do not. You must set the appropriate compiler build setting to ensure the compiler will use
    the correct technique.
 	1. Select the `cocos2d` target.
 	2. Select the *Build Settings* tab.
 	3. Locate the **Objective-C Automatic Reference Counting** (aka `CLANG_ENABLE_OBJC_ARC`)
-	   setting for the `cocos2d` target. If you are now linking to `Cocos2D` `3.x`, set this
-	   property to `YES`. If you are now linking to `Cocos2D` `2.1` or `Cocos2D` `1.1`, set 
+	   setting for the `cocos2d` target. If you are now linking to `Cocos2D 3.0` or above, 
+	   set this property to `YES`. If you are now linking to `Cocos2D 2.2` or below, set 
 	   this property to NO. Make sure you change only the setting for the `cocos2d` target 
 	   within your project. Do not change the setting for the `cocos2d-library-iOS` or 
 	   `cocos2d-library-OSX` project itself.
-	4. The `cocos2d-chipmunk` part of the `Cocos2D` `3.x` library does *not* use ARC. Ensure
-	   the **Objective-C Automatic Reference Counting** (aka `CLANG_ENABLE_OBJC_ARC`) setting
+	4. The `cocos2d-chipmunk` part of the Cocos2D library does *not* use ARC. Ensure the
+	   **Objective-C Automatic Reference Counting** (aka `CLANG_ENABLE_OBJC_ARC`) setting
 	   of the `cocos2d-chipmunk` target is always set to NO.
-8. `Cocos2D` `3.x` supports compiling to the ARM64 architecture. `Cocos2D` `2.1` and
-   `Cocos2D` `1.1` do *not* support compiling to the ARM64 architecture. Because of this,
-   by default, the **Valid Architectures** (aka `VALID_ARCHS`) build setting for all demo 
-   Xcode Projects in the Cocos3D distribution is set to `$(ARCHS_STANDARD_32_BIT)` (which 
-   resolves to **armv7 armv7s**), so that the demo projects will compile with all versions
-   of `Cocos2D`. If you are now linking to `Cocos2D` `3.x`, you can set this property to
+8. `Cocos2D 2.2` and above supports compiling to the ARM64 architecture. `Cocos2D` `2.1` and
+   below do *not* support compiling to the ARM64 architecture. Because of this, by default, 
+   the **Valid Architectures** (aka `VALID_ARCHS`) build setting for all demo Xcode Projects
+   in the Cocos3D distribution is set to `$(ARCHS_STANDARD_32_BIT)` (which resolves to 
+   **armv7 armv7s**), so that the demo projects will compile with all versions of `Cocos2D`. 
+   If you are now linking to `Cocos2D 2.2` or above, you can set this property to
    `$(ARCHS_STANDARD)` (or simply remove this setting from the Project), in all demo Projects,
    to allow compilation to include the ARM64 architecture.
-9. As a development optimization, if you are now linking to `Cocos2D` `3.x`, you can set the 
-   value of the **Build Active Architecture Only** (aka `ONLY_ACTIVE_ARCH`) build setting in 
+9. As a development optimization, if you are now linking to `Cocos2D 2.2` or above, you can set 
+   the value of the **Build Active Architecture Only** (aka `ONLY_ACTIVE_ARCH`) build setting in 
    the *Debug* configuration in all demo projects to `YES`. You should not do this if you are
-   linking to `Cocos2D` `2.1` or `Cocos2D` `1.1`, as this will prohibit you from building
-   the demo apps on devices that use the ARM64 processor.
+   linking to `Cocos2D 2.1` or below, as this will prohibit you from building the demo apps on
+   devices that use the ARM64 processor.
 10. If you have already built the demo app using the old version of `Cocos2D`, delete the 
    contents of your `~/Library/Developer/Xcode/DerivedData` folder before attempting to compile again.
 
@@ -161,16 +164,16 @@ Creating POD 3D Model Files
 
 Cocos3D reads 3D model content from POD files.
 
-If you are using Blender, Maya, or 3DS Max as your 3D editor, you can install the PVRGeoPOD
+If you are using *Blender*, *Maya*, or *3DS Max* as your 3D editor, you can install the *PVRGeoPOD*
 plugin from Imagination Technologies to export directly from your editor to the POD file format.
 
-For other editors, you can export your 3D model to a file in COLLADA 1.4 format, and then use
-the standalone PVRGeoPOD app to convert the COLLADA file to the POD format.
+For other editors, you can export your 3D model to a file in `COLLADA 1.4` format, and then use
+the standalone *PVRGeoPOD* app to convert the COLLADA file to the POD format.
 
-Both the standalone and plugin versions of PVRGeoPOD are available free of charge from
+Both the standalone and plugin versions of *PVRGeoPOD* are available free of charge from
 Imagination Technologies, the supplier of the GPU's used in iOS devices.
 
-Read the [full instructions](http://brenwill.com/2011/cocos3d-importing-converting-collada-to-pod/)
+Read the [full instructions](https://github.com/cocos3d/cocos3d/wiki/Creating-POD-Files)
 for more info on where to get the PVRGeoPOD converter, and how to use it to generate POD files.
 
 If you are using *Blender* as your 3D editor, and have many `.blend` files to export to POD format,

@@ -4,6 +4,8 @@
 Cocos3D
 =======
 
+Cocos3D 2.0.2
+
 Copyright (c) 2010-2014 [The Brenwill Workshop Ltd.](http://www.brenwill.com) All rights reserved.
 
 *This document is written in [Markdown](http://en.wikipedia.org/wiki/Markdown) format. 
@@ -118,13 +120,13 @@ Installation
 	The same Cocos3D distribution can be used with `Cocos2D 3.2, 3.1, 3.0, 2.2, 2.1` and `1.1`.
 	Link to `Cocos2D 2.1` or above to make use of the more advanced shader-based  programmable-pipeline
 	available with OpenGL ES 2.0 (iOS) or OpenGL (OSX). Or link to `Cocos2D 1.1` to use the simpler
-	configurable fixed-pipeline of OpenGL ES 1.1 (iOS), and avoid the need to write GLSL shaders.
+	configurable fixed-pipeline of OpenGL ES 1.1 (iOS), and avoid the need to work with GLSL shaders.
 	
 	> **Note:** `Cocos3D 2.0` is not compatible with `Cocos2D 3.3` and above, as substantial changes
 	> to integration design were made in `Cocos2D 3.3`. Development of `Cocos3D 3.0` is underway, 
 	> which will provide exciting new features, and compatibility with future versions of Cocos2D.
 	> `Cocos3D 3.0` will not retain compatibility with versions of Cocos2D earlier than `Cocos2D 3.3`, 
-	> and will no longer support OpenGLES 1.1.
+	> and will not support OpenGLES 1.1.
 
 2. Download the [latest Cocos3D release](https://github.com/cocos3d/cocos3d/releases).
 
@@ -200,9 +202,8 @@ Wondering how to get started? View Harry Dart-O’Flynn’s wonderful
 [Starting Cocos3D](http://www.youtube.com/playlist?list=PLU4bmVOOYXK-fV0Wt-ES5n3k8qTTyqgYu) 
 collection of video tutorials!
 
-To learn more about Cocos3D, please refer to the 
-[Cocos3D Programming Guide](http://brenwill.com/2011/cocos3d-programming-guide/)
-and the latest [API documentation](http://brenwill.com/docs/cocos3d/2.0.1/api/).
+To learn more about Cocos3D, please refer to the [Cocos3D Wiki](https://github.com/cocos3d/cocos3d/wiki)
+and the latest [API documentation](http://cocos3d.org/api).
 
 You can create a local copy of the API documentation using `Doxygen` to extract the documentation
 from the source files. There is a `Doxygen` configuration file to output the API documents in the
@@ -392,10 +393,10 @@ across different devices.
 
 ###CC3DemoMultiScene
 
-This demo app is a sophisticated combination of the three demo apps listed above. It 
-demonstrates how to include Cocos3D in a UIView using Xcode Storyboards. Using standard
-UIKit controls, you can load any of the Cocos3D demos listed above, then shut down the 
-running demo, and load a different Cocos3D demo.
+This demo app is a sophisticated combination of several of the demo apps listed above. It demonstrates
+how to include Cocos3D in a UIView using Xcode Storyboards, and how to transition between different 
+3D scenes within an app. Using standard UIKit controls, you can load and transition between several 
+of the Cocos3D demos listed above.
 
 
 <a name="cocos2d"></a>
@@ -412,7 +413,7 @@ to your existing 2D application or game.
 > integration design were made in `Cocos2D 3.3`. Development of `Cocos3D 3.0` is underway, 
 > which will provide exciting new features, and compatibility with future versions of Cocos2D.
 > `Cocos3D 3.0` will not retain compatibility with versions of Cocos2D earlier than `Cocos2D 3.3`, 
-> and will no longer support OpenGLES 1.1.
+> and will not support OpenGLES 1.1.
 
 1. The first step is to add the Cocos3D Static Library project as a subproject to your Cocos2D
    Xcode project, as follows:
@@ -562,15 +563,14 @@ Cocos2D Version Compatibility
 -----------------------------
 
 Cocos3D is compatible with `Cocos2D 3.2, 3.1, 3.0, 2.2` and `2.1`, when using programmable-pipeline
-OpenGL ES 2.0 under iOS and Android, or OpenGL under OSX.
-
-Cocos3D is compatible with `Cocos2D 1.1`, when using fixed-pipeline OpenGL ES 1.1 under iOS and Android.
+OpenGL ES 2.0 under iOS and Android, or OpenGL under OSX, and is compatible with `Cocos2D 1.1`, 
+when using fixed-pipeline OpenGL ES 1.1 under iOS and Android.
 
 > **Note:** `Cocos3D 2.0` is not compatible with `Cocos2D 3.3` and above, as substantial changes
 > to integration design were made in `Cocos2D 3.3`. Development of `Cocos3D 3.0` is underway, 
 > which will provide exciting new features, and compatibility with future versions of Cocos2D.
 > `Cocos3D 3.0` will not retain compatibility with versions of Cocos2D earlier than `Cocos2D 3.3`, 
-> and will no longer support OpenGLES 1.1.
+> and will not support OpenGLES 1.1.
 
 The demo apps within the Cocos3D distribution are pre-configured to use `Cocos2D 3.2.1`. 
 To build and run the demo apps with a different version of Cocos2D, follow the steps described here:
@@ -596,7 +596,7 @@ To build and run the demo apps with a different version of Cocos2D, follow the s
    `cocos2d-chipmunk-library-OSX` project in the Xcode *Project Navigator* panel. When prompted
    for the target to add the source code to, select the `cocos2d-chipmunk` target.
 
-6. If you are using Cocos2D 3.2 or later, configure the `CCNoARC.m` file to use Manual Refernce Counting:
+6. If you are using Cocos2D 3.2, configure the `CCNoARC.m` file to use Manual Refernce Counting:
 
 	1. Select the `cocos2d-library-iOS` or `cocos2d-library-OSX` project.
 	
@@ -678,8 +678,8 @@ the standalone *PVRGeoPOD* app to convert the COLLADA file to the POD format.
 Both the standalone and plugin versions of *PVRGeoPOD* are available free of charge from
 Imagination Technologies, the supplier of the GPU's used in iOS devices.
 
-Read the [full instructions](http://brenwill.com/2011/cocos3d-importing-converting-collada-to-pod/)
-for more info on where to get the *PVRGeoPOD* converter, and how to use it to generate POD files.
+Read the [full instructions](https://github.com/cocos3d/cocos3d/wiki/Creating-POD-Files)
+for more info on where to get the PVRGeoPOD converter, and how to use it to generate POD files.
 
 If you are using *Blender* as your 3D editor, and have many `.blend` files to export to POD format,
 you can use the command-line batch tool available in the `Tools/Blender-POD Batch Converter`
