@@ -19,6 +19,7 @@ Cocos3D 2.0.2 - 2014/12/07
 - Fixed HEADER_SEARCH_PATHS in CC3StatLib project to handle both Cocos2D & SpriteBuilder projects.
 - Expose handleTouch:ofType: in CC3HelloWorldLayer.m.
 - Update use of augmented reality device camera in CC3HelloWorld, CC3DemoMashUp & CC3DemoMultiScene.
+- CC3DemoMultiScene uses universal Storyboard suitable for both iPad & iPhone under iOS8.
 
 
 Cocos3D 2.0.1 - 2014/09/19

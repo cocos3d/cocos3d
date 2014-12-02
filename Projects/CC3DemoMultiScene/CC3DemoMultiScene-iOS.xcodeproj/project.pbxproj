@@ -37,6 +37,7 @@
 		A9AC657E189175FC00EC5462 /* MainLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = A9AC6576189175FC00EC5462 /* MainLayer.m */; };
 		A9AC657F189175FC00EC5462 /* TileLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = A9AC6578189175FC00EC5462 /* TileLayer.m */; };
 		A9AC6580189175FC00EC5462 /* TileScene.m in Sources */ = {isa = PBXBuildFile; fileRef = A9AC657A189175FC00EC5462 /* TileScene.m */; };
+		A9BC4CDE1A2E171200B202B5 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A9BC4CDC1A2E171200B202B5 /* Main.storyboard */; };
 		A9C5810A1952156200A5C7AD /* libcocos2d-chipmunk.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A9C58101195214F700A5C7AD /* libcocos2d-chipmunk.a */; };
 		A9C5829019531CCC00A5C7AD /* CC3LibDefaultPrecision.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C5825E19531CCC00A5C7AD /* CC3LibDefaultPrecision.fsh */; };
 		A9C5829119531CCC00A5C7AD /* CC3LibDualSidedFragmentColor.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9C5825F19531CCC00A5C7AD /* CC3LibDualSidedFragmentColor.fsh */; };
@@ -270,6 +271,7 @@
 		A9AC6578189175FC00EC5462 /* TileLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TileLayer.m; sourceTree = "<group>"; };
 		A9AC6579189175FC00EC5462 /* TileScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TileScene.h; sourceTree = "<group>"; };
 		A9AC657A189175FC00EC5462 /* TileScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TileScene.m; sourceTree = "<group>"; };
+		A9BC4CDD1A2E171200B202B5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		A9C580FC195214F700A5C7AD /* cocos2d-chipmunk-library-iOS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "cocos2d-chipmunk-library-iOS.xcodeproj"; path = "../cocos2d-library/cocos2d-chipmunk-library-iOS.xcodeproj"; sourceTree = "<group>"; };
 		A9C5825E19531CCC00A5C7AD /* CC3LibDefaultPrecision.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibDefaultPrecision.fsh; sourceTree = "<group>"; };
 		A9C5825F19531CCC00A5C7AD /* CC3LibDualSidedFragmentColor.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3LibDualSidedFragmentColor.fsh; sourceTree = "<group>"; };
@@ -807,6 +809,7 @@
 				A9D4F6991889741900382DDC /* MainViewController.m */,
 				A928D0DC196348A000195782 /* IntroScene.h */,
 				A928D0DD196348A000195782 /* IntroScene.m */,
+				A9BC4CDC1A2E171200B202B5 /* Main.storyboard */,
 				A9D4F68F1889741900382DDC /* Main_iPad.storyboard */,
 				A946375918898F9D0097E355 /* Images-iOS.xcassets */,
 				A9D4F6931889741900382DDC /* Info.plist */,
@@ -1006,6 +1009,7 @@
 				A96513E7196B34A10021F61B /* cubelight_NegZ.png in Resources */,
 				A9CCA87718E35EBD00DDDBDC /* fps_images.png in Resources */,
 				A9C5829019531CCC00A5C7AD /* CC3LibDefaultPrecision.fsh in Resources */,
+				A9BC4CDE1A2E171200B202B5 /* Main.storyboard in Resources */,
 				A9CCA8B418E35EBD00DDDBDC /* tex_base.pvr in Resources */,
 				A9CCA8AF18E35EBD00DDDBDC /* SunlightButton48x48.png in Resources */,
 				A9CCA8BB18E35EEB00DDDBDC /* DieCube.pod in Resources */,
@@ -1106,6 +1110,14 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
+		A9BC4CDC1A2E171200B202B5 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				A9BC4CDD1A2E171200B202B5 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
 		A9D4F68F1889741900382DDC /* Main_iPad.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -1241,7 +1253,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = "$(SRCROOT)/CC3DemoMultiScene/iOS Support/Info.plist";
 				PRODUCT_NAME = CC3DemoMultiScene;
-				TARGETED_DEVICE_FAMILY = 2;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -1254,7 +1266,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = "$(SRCROOT)/CC3DemoMultiScene/iOS Support/Info.plist";
 				PRODUCT_NAME = CC3DemoMultiScene;
-				TARGETED_DEVICE_FAMILY = 2;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};

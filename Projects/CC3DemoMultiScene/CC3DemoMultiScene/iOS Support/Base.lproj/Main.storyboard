@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6250" systemVersion="14B25" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6244"/>
+        <capability name="Constraints with non-1.0 multipliers" minToolsVersion="5.1"/>
+    </dependencies>
+    <scenes>
+        <!--Main View Controller-->
+        <scene sceneID="tne-QT-ifu">
+            <objects>
+                <viewController id="BYZ-38-t0r" customClass="MainViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="hrd-Sc-VOe"/>
+                        <viewControllerLayoutGuide type="bottom" id="Evu-J6-47n"/>
+                    </layoutGuides>
+                    <view key="view" opaque="NO" contentMode="scaleToFill" id="8bC-Xf-vdC" userLabel="BaseView">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" segmentControlStyle="plain" selectedSegmentIndex="3" translatesAutoresizingMaskIntoConstraints="NO" id="5cu-Oh-UO1">
+                                <rect key="frame" x="117" y="567" width="367" height="29"/>
+                                <segments>
+                                    <segment title="Mash Up"/>
+                                    <segment title="Tiles"/>
+                                    <segment title="Performance"/>
+                                    <segment title="None"/>
+                                </segments>
+                                <connections>
+                                    <action selector="requestChange3DSceneFromSegmentControl:" destination="BYZ-38-t0r" eventType="valueChanged" id="eyh-2Y-5uI"/>
+                                </connections>
+                            </segmentedControl>
+                            <view opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="cA2-Gk-cNF" userLabel="FrameView">
+                                <rect key="frame" x="10" y="30" width="580" height="532"/>
+                                <subviews>
+                                    <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="CVd-E5-TPi">
+                                        <rect key="frame" x="272" y="248" width="37" height="37"/>
+                                    </activityIndicatorView>
+                                </subviews>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="centerX" secondItem="CVd-E5-TPi" secondAttribute="centerX" id="094-xX-qyM"/>
+                                    <constraint firstAttribute="centerY" secondItem="CVd-E5-TPi" secondAttribute="centerY" id="2Fz-82-6VR"/>
+                                </constraints>
+                            </view>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="5cu-Oh-UO1" firstAttribute="width" relation="lessThanOrEqual" secondItem="8bC-Xf-vdC" secondAttribute="width" multiplier="0.9" id="5EN-dY-hmW"/>
+                            <constraint firstAttribute="trailing" secondItem="cA2-Gk-cNF" secondAttribute="trailing" constant="10" id="Gfk-ED-Bh3"/>
+                            <constraint firstAttribute="centerX" secondItem="5cu-Oh-UO1" secondAttribute="centerX" id="UgZ-zc-jnP"/>
+                            <constraint firstItem="Evu-J6-47n" firstAttribute="top" secondItem="5cu-Oh-UO1" secondAttribute="bottom" constant="5" id="Vap-WN-F5z"/>
+                            <constraint firstAttribute="centerX" secondItem="5cu-Oh-UO1" secondAttribute="centerX" id="Vne-8P-ez7"/>
+                            <constraint firstItem="cA2-Gk-cNF" firstAttribute="top" secondItem="hrd-Sc-VOe" secondAttribute="bottom" constant="10" id="biG-iL-dwR"/>
+                            <constraint firstItem="cA2-Gk-cNF" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="10" id="d2R-y6-M1w"/>
+                            <constraint firstItem="5cu-Oh-UO1" firstAttribute="top" secondItem="cA2-Gk-cNF" secondAttribute="bottom" constant="5" id="e2u-g2-Qn7"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="cc3FrameView" destination="cA2-Gk-cNF" id="Opb-Pf-Svg"/>
+                        <outlet property="progressView" destination="CVd-E5-TPi" id="fsF-kZ-Yeh"/>
+                        <outlet property="sceneSelectorControl" destination="5cu-Oh-UO1" id="Xy8-Yv-3vI"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="280.46875" y="379.1015625"/>
+        </scene>
+    </scenes>
+</document>

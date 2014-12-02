@@ -398,6 +398,12 @@ how to include Cocos3D in a UIView using Xcode Storyboards, and how to transitio
 3D scenes within an app. Using standard UIKit controls, you can load and transition between several 
 of the Cocos3D demos listed above.
 
+By default, this demo app uses `Main.storyboard`, which is a Universal Storyboard suitable for use 
+with either iPad or iPhone layouts. However, Univeral Storyboards require iOS8. If you encounter 
+issues with previous iOS versions, the project also includes `Main_iPad.storyboard`,  which can be
+used with previous versions of iOS on an iPad. You can set the app to use this alternate Storyboard
+in the *General* tab of the `CC3DemoMultiScene` Target build settings, within Xcode. 
+
 
 <a name="cocos2d"></a>
 

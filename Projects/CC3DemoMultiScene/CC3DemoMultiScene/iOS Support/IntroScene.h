@@ -43,6 +43,7 @@
 @interface IntroScene : CCScene {
 	CCLabelTTF* _label;
 	CCBackgroundClass* _background;
+	CGSize _nominalLabelSize;
 }
 
 @end
