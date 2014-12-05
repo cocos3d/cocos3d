@@ -44,6 +44,9 @@
 
 @implementation CC3OpenGL2
 
+/** glFinish can crash with EXC_BAD_ACCESS on OpenGL under OSX. */
+-(void) finish { }
+
 
 #pragma mark Capabilities
 

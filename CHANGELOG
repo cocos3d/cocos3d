@@ -10,7 +10,7 @@ http://www.brenwill.com
 
 
 
-Cocos3D 2.0.2 - 2014/12/07
+Cocos3D 2.0.2 - 2014/12/15
 -------------------------------------
 
 - Update README.md files to explain incompatibility with Cocos2D 3.3 and above and SpriteBuider 1.3 and above.
@@ -20,6 +20,8 @@ Cocos3D 2.0.2 - 2014/12/07
 - Expose handleTouch:ofType: in CC3HelloWorldLayer.m.
 - Update use of augmented reality device camera in CC3HelloWorld, CC3DemoMashUp & CC3DemoMultiScene.
 - CC3DemoMultiScene uses universal Storyboard suitable for both iPad & iPhone under iOS8.
+- Fix projection and content sizing issues under Mac Retina.
+- Remove glFinish from OpenGL under OSX due to unpredictable EXC_BAD_ACCESS crashes.
 
 
 Cocos3D 2.0.1 - 2014/09/19
