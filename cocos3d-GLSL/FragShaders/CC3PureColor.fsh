@@ -1,7 +1,7 @@
 /*
  * CC3PureColor.fsh
  *
- * Cocos3D 2.0.1
+ * Cocos3D 2.0.2
  * Author: Bill Hollings
  * Copyright (c) 2011-2014 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
