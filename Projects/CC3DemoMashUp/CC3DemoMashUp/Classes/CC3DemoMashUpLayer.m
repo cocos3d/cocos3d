@@ -457,6 +457,8 @@
 		[self openGlobeHUDFromTouchAt: touchPoint];
 }
 
+-(BOOL) isShowingHUD { return (_hudLayer != nil); }
+
 
 #pragma mark Touch handling
 

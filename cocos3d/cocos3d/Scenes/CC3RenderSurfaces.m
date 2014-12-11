@@ -1222,6 +1222,13 @@
 	((CC3SurfaceSection*)self.viewSurface).origin = viewSurfaceOrigin;
 }
 
+/** After setting the size of each surface, ensure we leave the view surface active for Cocos2D. */
+-(void) setSize: (CC3IntSize) size {
+	if ( CC3IntSizesAreEqual(size, self.size) ) return;
+	[super setSize: size];
+	[self.viewSurface activate];
+}
+
 /**
  * Lazily create a surface, using the color format of the view's color surface,
  * and with a new non-multisampling and non-stencilling depth buffer.
@@ -1339,7 +1346,7 @@
 									 NSStringFromCC3IntSize(self.multisamplingSize)]
 			 : @"with no multisampling"));
 	
-	// After validating each surface, ensure we leave the rendering surface active for Cocos2D
+	// After setting the size of each surface, ensure we leave the rendering surface active for Cocos2D
 	[self.renderingSurface activate];
 }
 

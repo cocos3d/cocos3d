@@ -2699,6 +2699,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 /**
  * This scene has custom drawing requirements, perfoming multiple passes, based on user interaction.
  *
+ * The depth buffer is optionally cleared before rendering, based on whether a secondary
+ * CC3Layer and CC3Scene is being displayed on top of this scene.
+ *
  * If the user has turned on the TV in the scene, we render one pass of the scene from the
  * point of view of the camera that travels with the runners into a texture that is then
  * displayed on the TV screen during the main scene rendering pass.
@@ -2708,7 +2711,13 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * as a quad via a single-node rendering pass.
  */
 -(void) drawSceneContentWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	
+
+	// If the main CC3DemoMashUpLayer is currently displaying the secondary HUD view,
+	// we need to clear the depth buffer before rendering the scene. If the HUD is not
+	// currently displayed, we won't bother, because clearing the depth buffer is expensive.
+	CC3DemoMashUpLayer* layer = self.primaryCC3DemoMashUpLayer;		// Create strong reference to weak property
+	if (layer.isShowingHUD) { [visitor.renderSurface clearDepthContent]; }
+
 	[self illuminateWithVisitor: visitor];			// Light up your world!
 	
 	// If the TV is on and the TV is in the field of view of the primary camera viewing

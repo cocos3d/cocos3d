@@ -89,4 +89,7 @@
  */
 -(void) removeGlobeHUD;
 
+/** Returns whether this layer is currently displaying the HUD. */
+@property(nonatomic, readonly) BOOL isShowingHUD;
+
 @end

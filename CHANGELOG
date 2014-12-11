@@ -20,6 +20,9 @@ Cocos3D 2.0.2 - 2014/12/15
 - Update use of augmented reality device camera in CC3HelloWorld, CC3DemoMashUp & CC3DemoMultiScene.
 - CC3DemoMultiScene uses universal Storyboard suitable for both iPad & iPhone under iOS8.
 - Fix projection and content sizing issues under Mac Retina.
+- Fix flicker on device rotation after node picking for touch handling.
+- Fix flicker on touch handling under newer devices under iOS8.
+- Fix depth buffer clash between CC3DemoMashUpScene and HUDScene in CC3DemoMashUp demo app.
 - Remove glFinish from OpenGL under OSX due to unpredictable EXC_BAD_ACCESS crashes.
 
 
