@@ -64,7 +64,7 @@
  *   - 0.7		-> 0x000700
  *   - 2.7.3	-> 0x020703
  */
-#define COCOS3D_VERSION 0x020001
+#define COCOS3D_VERSION 0x020002
 
 /** Returns a string describing the Cocos3D version. */
 static inline NSString* NSStringFromCC3Version() {
