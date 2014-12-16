@@ -76,7 +76,10 @@
 	_background.contentSize = cs;
 	_label.position = ccp(cs.width / 2.0f, cs.height / 2.0f);
 
+#if !CC3_CC2_1
 	_label.fontSize = (_nominalLabelSize.width > cs.width * 0.9) ? 18.0f : 36.0f;
+#endif	// !CC3_CC2_1
+
 }
 
 #if CC3_CC2_1

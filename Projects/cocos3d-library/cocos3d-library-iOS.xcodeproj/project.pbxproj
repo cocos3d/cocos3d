@@ -934,7 +934,7 @@
 		A92E837817A6D0A1003B859E /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0600;
+				LastUpgradeCheck = 0610;
 				ORGANIZATIONNAME = "The Brenwill Workshop Ltd.";
 			};
 			buildConfigurationList = A92E837B17A6D0A1003B859E /* Build configuration list for PBXProject "cocos3d-library-iOS" */;
