@@ -717,7 +717,6 @@ As a reference for the creation of your own 3D models for use in Cocos3D, you ca
 [CC3DemoMultiScene]: #cc3demomultiscene
 [Adding Cocos3D to an existing Cocos2D Project]: #cocos2d
 [Using Cocos3D with SpriteBuilder]: #spritebuilder
-[Cocos3D and Cocos2D Static Libraries]:
 [Cocos2D Version Compatibility]: #cocos2dversions
 [Compiling for Android]: #android
 [Learning Cocos3D]: #learning
