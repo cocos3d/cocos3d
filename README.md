@@ -236,7 +236,7 @@ The following demo apps are included in the Cocos3D distribution:
 
 <a name="cc3helloworld"></a>
 
-###CC3HelloWorld
+### CC3HelloWorld
 
 This basic, easy-to-understand, starter app presents a 3D take on the ubiquitous ***hello, world***
 application. In addition to demonstrating how to load and display a 3D model, this application
@@ -252,7 +252,7 @@ Xcode project to the name of your own app. For more info, see the section titled
 
 <a name="cc3demomashup"></a>
 
-###CC3DemoMashUp
+### CC3DemoMashUp
 
 Please read the class notes of the `CC3DemoMashUpScene` class for a full description of how to
 run and interact with this demo, and what features it covers.
@@ -363,7 +363,7 @@ including experimenting with:
 
 <a name="cc3demo3dtiles"></a>
 
-###CC3Demo3DTiles
+### CC3Demo3DTiles
 
 A simple demo that lays out multiple small Cocos3D scenes as layers in a larger controllable
 Cocos2D layer. The effect is a grid of tiles, with each tile displaying a separate 3D scene,
@@ -377,7 +377,7 @@ many 3D scene are visible concurrently.
 
 <a name="cc3performance"></a>
 
-###CC3Performance
+### CC3Performance
 
 This is a simple demo of the performance characteristics of Cocos3D. It demonstrates how to
 collect detailed statistics about your application's performance. In doing so, it presents
@@ -391,7 +391,7 @@ across different devices.
 
 <a name="cc3demomultiscene"></a>
 
-###CC3DemoMultiScene
+### CC3DemoMultiScene
 
 This demo app is a sophisticated combination of several of the demo apps listed above. It demonstrates
 how to include Cocos3D in a UIView using Xcode Storyboards, and how to transition between different 
